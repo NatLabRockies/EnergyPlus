@@ -55,6 +55,7 @@
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
+#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataWater.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
@@ -167,7 +168,7 @@ namespace ZoneDehumidifier {
 
         QZnDehumidReq = state.dataZoneEnergyDemand->ZoneSysMoistureDemand(ZoneNum).RemainingOutputReqToDehumidSP; // Negative means dehumidify
 
-        InitZoneDehumidifier(state, ZoneDehumidNum);
+        InitZoneDehumidifier(state, ZoneDehumidNum, ZoneNum);
 
         CalcZoneDehumidifier(state, ZoneDehumidNum, QZnDehumidReq, QSensOut, QLatOut);
 
@@ -513,7 +514,8 @@ namespace ZoneDehumidifier {
         }
     }
 
-    void InitZoneDehumidifier(EnergyPlusData &state, int const ZoneDehumNum) // Number of the current zone dehumidifier being simulated
+    void
+    InitZoneDehumidifier(EnergyPlusData &state, int const ZoneDehumNum, int const ZoneNum) // Number of the current zone dehumidifier and serving zone
     {
 
         // SUBROUTINE INFORMATION:
@@ -578,6 +580,22 @@ namespace ZoneDehumidifier {
 
         if (!state.dataGlobal->BeginEnvrnFlag) {
             dehumid.MyEnvrnFlag = true;
+        }
+
+        // Unlike desiccant dehumidifiers, which can control to a process-air outlet or control-node HumRatMax setpoint,
+        // ZoneHVAC:Dehumidifier:DX is driven by the served zone's remaining dehumidification load. Its inlet node
+        // conditions affect performance curves and operating limits, but its outlet node RH setpoint is not part of the
+        // control path. Actuating the outlet node setpoint would not change this missing-humidistat validation, so checking
+        // the ZoneControl:Humidistat requirement from InitZoneDehumidifier is sufficient.
+        if (dehumid.MySetPointCheckFlag && !state.dataGlobal->SysSizingCalc && state.dataHVACGlobal->DoSetPointTest) {
+            auto const &zone = state.dataHeatBal->Zone(ZoneNum);
+            if (zone.humidityControlZoneIndex == 0) {
+                ShowSevereError(state, "Missing ZoneControl:Humidistat for ");
+                ShowContinueError(state, std::format("ZoneHVAC:Dehumidifier:DX: {}", dehumid.Name));
+                ShowContinueError(state, std::format("Zone: {}", zone.Name));
+                state.dataHVACGlobal->SetPointErrorFlag = true;
+            }
+            dehumid.MySetPointCheckFlag = false;
         }
 
         // These initializations are done every iteration

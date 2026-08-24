@@ -3852,3 +3852,3128 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_SpaceAllocation)
     // 2+1+1+3+3 = 10
     EXPECT_EQ(state->dataHeatBal->TotLights, 10);
 }
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular ElectricEquipment object, which must coexist untouched with the new pair
+        "ElectricEquipment,",
+        "  Zone2 Legacy ElecEq,     !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Instance,",
+        "  Zone2 ElecEq,            !- Name",
+        "  ElecEQUIPDef,            !- Electric Equipment Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  ,                        !- Multiplier",
+        "  Zone2Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1056,                    !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotElecEquip, 3);
+
+    for (const auto &equip : state->dataHeatBal->ZoneElectric) {
+        std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+        std::string const &schedName = equip.sched->Name;
+        if (equip.Name == "ZONE2 LEGACY ELECEQ") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            EXPECT_NEAR(equip.FractionLatent, 0.0, 1e-6);
+            EXPECT_NEAR(equip.FractionRadiant, 0.0, 1e-6);
+            EXPECT_NEAR(equip.FractionLost, 0.0, 1e-6);
+            continue;
+        }
+        if (equip.Name == "ZONE1 ELECEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone1Elec");
+        } else if (equip.Name == "ZONE2 ELECEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone2Elec");
+        } else {
+            FAIL() << "Unexpected electric equipment name: " << equip.Name;
+        }
+        EXPECT_NEAR(equip.DesignLevel, 1056.0, 1e-6);
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_Multiplier)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        // A single definition representing one workstation, shared by two instances with
+        // different counts of workstations
+        "ElectricEquipment:Instance,",
+        "  Zone1 One Workstation,   !- Name",
+        "  Workstation Def,         !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Workstations;            !- End-Use Subcategory",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 Twelve Workstations,  !- Name",
+        "  Workstation Def,         !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  12,                      !- Multiplier",
+        "  Workstations;            !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  Workstation Def,         !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  100.0,                   !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 2u);
+
+    for (const auto &equip : state->dataHeatBal->ZoneElectric) {
+        if (equip.Name == "ZONE1 ONE WORKSTATION") {
+            EXPECT_NEAR(equip.DesignLevel, 100.0, 1e-6);
+            EXPECT_NEAR(equip.NomMaxDesignLevel, 100.0, 1e-6);
+        } else if (equip.Name == "ZONE1 TWELVE WORKSTATIONS") {
+            EXPECT_NEAR(equip.DesignLevel, 1200.0, 1e-6);
+            EXPECT_NEAR(equip.NomMaxDesignLevel, 1200.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected electric equipment name: " << equip.Name;
+        }
+        // The fractions come from the shared definition
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_ZoneList)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ZoneList,BothZones,Zone1,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "ElectricEquipment,",
+        "  Zone1 Legacy ElecEq,     !- Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "ElectricEquipment:Instance,",
+        "  List ElecEq,             !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  BothZones,               !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  ListElec;                !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  100.0,                   !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    // 1 legacy statement on Zone1 + 1 instance statement expanded over the 2 zones of the ZoneList
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotElecEquip, 3);
+
+    int numLegacy = 0;
+    int numFromList = 0;
+    for (const auto &equip : state->dataHeatBal->ZoneElectric) {
+        if (equip.Name == "ZONE1 LEGACY ELECEQ") {
+            ++numLegacy;
+            EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+        } else {
+            ++numFromList;
+            // Each zone of the ZoneList gets the full definition level times the multiplier
+            EXPECT_NEAR(equip.DesignLevel, 200.0, 1e-6);
+            EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+            EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+            EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+            EXPECT_EQ(equip.EndUseSubcategory, "ListElec");
+        }
+    }
+    EXPECT_EQ(numLegacy, 1);
+    EXPECT_EQ(numFromList, 2);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef WITH A TYPO,  !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1056,                    !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: ElectricEquipment:Instance = ZONE1 ELECEQ",
+        "   **   ~~~   ** Electric Equipment Definition Name = ELECEQUIPDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_InvalidSchedule)
+{
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  MissingSchedule,         !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  General;                 !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  100.0,                   !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: ElectricEquipment:Instance = ZONE1 ELECEQ",
+        "   **   ~~~   ** Schedule Name = MISSINGSCHEDULE, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_DuplicateLegacyName)
+{
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Schedule:Constant,AlwaysOn,,1.0;",
+
+        "ElectricEquipment,",
+        "  Shared Name,",
+        "  Zone1,",
+        "  AlwaysOn,",
+        "  EquipmentLevel,",
+        "  50.0,",
+        "  ,",
+        "  ,",
+        "  0.0,",
+        "  0.0,",
+        "  0.0;",
+
+        "ElectricEquipment:Instance,",
+        "  Shared Name,",
+        "  ElecEquipDef,",
+        "  Zone1,",
+        "  AlwaysOn,",
+        "  1.0,",
+        "  General;",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,",
+        "  EquipmentLevel,",
+        "  100.0,",
+        "  ,",
+        "  ,",
+        "  0.0,",
+        "  0.0,",
+        "  0.0;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(
+        compare_err_stream_substring("SHARED NAME with object type ElectricEquipment:Instance duplicates a name in object type ElectricEquipment"));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  Watts/AREA,              !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  10.0,                    !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    EXPECT_EQ(100.0, state->dataHeatBal->Zone(1).UserEnteredFloorArea);
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneElectric(1);
+
+    std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+    std::string const &schedName = equip.sched->Name;
+    EXPECT_EQ("ZONE1 ELECEQ", equip.Name);
+    EXPECT_EQ(zoneName, "ZONE1");
+    EXPECT_EQ(schedName, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Elec");
+    EXPECT_NEAR(equip.DesignLevel, 100.0 * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_PerPerson)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  Watts/PERSON,            !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  10.0,                    !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Fake having people in the zone by setting the number of occupants to 12
+    constexpr Real64 TotOccupants = 12.0;
+    state->dataHeatBal->Zone(1).TotOccupants = TotOccupants;
+    state->dataHeatBal->space(1).TotOccupants = TotOccupants;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneElectric(1);
+
+    std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+    std::string const &schedName = equip.sched->Name;
+    EXPECT_EQ("ZONE1 ELECEQ", equip.Name);
+    EXPECT_EQ(zoneName, "ZONE1");
+    EXPECT_EQ(schedName, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Elec");
+    EXPECT_NEAR(equip.DesignLevel, TotOccupants * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipmentInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "ElectricEquipment:Instance,",
+        "  Zone1 ElecEq,            !- Name",
+        "  ElecEquipDef,            !- Electric Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Elec;               !- End-Use Subcategory",
+
+        "ElectricEquipment:Definition,",
+        "  ElecEquipDef,            !- Name",
+        "  Watts/AREA,              !- Design Level Calculation Method",
+        "  1056,                    !- Design Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}", // Shouldn't be blank
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetSpaceLoadDefinition: ElectricEquipment:Definition="ELECEQUIPDEF", specifies Method=WATTS/AREA, but the corresponding field "watts_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: ElectricEquipment:Instance="ZONE1 ELECEQ", specifies watts_per_floor_area, but that field is blank.  0 ElectricEquipment:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneElectric.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneElectric(1);
+
+    std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+    std::string const &schedName = equip.sched->Name;
+    EXPECT_EQ("ZONE1 ELECEQ", equip.Name);
+    EXPECT_EQ(zoneName, "ZONE1");
+    EXPECT_EQ(schedName, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Elec");
+    EXPECT_NEAR(equip.DesignLevel, 0.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_GasEquipmentInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular GasEquipment object, which must coexist untouched with the new pair
+        "GasEquipment,",
+        "  Zone2 Legacy GasEq,      !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "GasEquipment:Instance,",
+        "  Zone1 GasEq,             !- Name",
+        "  GasEquipDef,             !- Gas Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  ,                        !- Multiplier",
+        "  Zone1Gas;                !- End-Use Subcategory",
+
+        "GasEquipment:Instance,",
+        "  Zone2 GasEq,             !- Name",
+        "  GASEQUIPDEF,             !- Gas Equipment Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  Zone2Gas;                !- End-Use Subcategory",
+
+        "GasEquipment:Definition,",
+        "  GasEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2,                     !- Fraction Lost",
+        "  3.45E-8;                 !- Carbon Dioxide Generation Rate {m3/s-W}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->ZoneGas.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotGasEquip, 3);
+
+    for (const auto &equip : state->dataHeatBal->ZoneGas) {
+        std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+        std::string const &schedName = equip.sched->Name;
+        if (equip.Name == "ZONE2 LEGACY GASEQ") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            EXPECT_NEAR(equip.CO2RateFactor, 0.0, 1e-15);
+            continue;
+        }
+        if (equip.Name == "ZONE1 GASEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone1Gas");
+            // Blank Multiplier defaults to 1
+            EXPECT_NEAR(equip.DesignLevel, 1500.0, 1e-6);
+        } else if (equip.Name == "ZONE2 GASEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone2Gas");
+            EXPECT_NEAR(equip.DesignLevel, 2.0 * 1500.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected gas equipment name: " << equip.Name;
+        }
+        // From the shared definition
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+        EXPECT_NEAR(equip.CO2RateFactor, 3.45e-8, 1e-15);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_GasEquipmentInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "GasEquipment:Instance,",
+        "  Zone1 GasEq,             !- Name",
+        "  GasEquipDef WITH A TYPO, !- Gas Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Gas;                !- End-Use Subcategory",
+
+        "GasEquipment:Definition,",
+        "  GasEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: GasEquipment:Instance = ZONE1 GASEQ",
+        "   **   ~~~   ** Gas Equipment Definition Name = GASEQUIPDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_GasEquipmentInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "GasEquipment:Instance,",
+        "  Zone1 GasEq,             !- Name",
+        "  GasEquipDef,             !- Gas Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Gas;                !- End-Use Subcategory",
+
+        // Power/Area exercises the Watts/Power field name aliasing in GetSpaceLoadDefinition
+        "GasEquipment:Definition,",
+        "  GasEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  10.0,                    !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneGas.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneGas(1);
+    EXPECT_EQ("ZONE1 GASEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Gas");
+    EXPECT_NEAR(equip.DesignLevel, 100.0 * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_GasEquipmentInstance_PerPerson)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "GasEquipment:Instance,",
+        "  Zone1 GasEq,             !- Name",
+        "  GasEquipDef,             !- Gas Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Gas;                !- End-Use Subcategory",
+
+        "GasEquipment:Definition,",
+        "  GasEquipDef,             !- Name",
+        "  Power/Person,            !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  10.0,                    !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Fake having people in the zone by setting the number of occupants to 12
+    constexpr Real64 TotOccupants = 12.0;
+    state->dataHeatBal->Zone(1).TotOccupants = TotOccupants;
+    state->dataHeatBal->space(1).TotOccupants = TotOccupants;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneGas.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneGas(1);
+    EXPECT_EQ("ZONE1 GASEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Gas");
+    EXPECT_NEAR(equip.DesignLevel, TotOccupants * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_GasEquipmentInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "GasEquipment:Instance,",
+        "  Zone1 GasEq,             !- Name",
+        "  GasEquipDef,             !- Gas Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Gas;                !- End-Use Subcategory",
+
+        "GasEquipment:Definition,",
+        "  GasEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}", // Shouldn't be blank
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetSpaceLoadDefinition: GasEquipment:Definition="GASEQUIPDEF", specifies Method=POWER/AREA, but the corresponding field "power_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: GasEquipment:Instance="ZONE1 GASEQ", specifies power_per_floor_area, but that field is blank.  0 GasEquipment:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneGas.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneGas(1);
+    EXPECT_EQ("ZONE1 GASEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Gas");
+    EXPECT_NEAR(equip.DesignLevel, 0.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_HotWaterEquipmentInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular HotWaterEquipment object, which must coexist untouched with the new pair
+        "HotWaterEquipment,",
+        "  Zone2 Legacy HWEq,      !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone1 HWEq,             !- Name",
+        "  HWEquipDef,             !- Hot Water Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  ,                        !- Multiplier",
+        "  Zone1HW;                !- End-Use Subcategory",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone2 HWEq,             !- Name",
+        "  HWEQUIPDEF,             !- Hot Water Equipment Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  Zone2HW;                !- End-Use Subcategory",
+
+        "HotWaterEquipment:Definition,",
+        "  HWEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->ZoneHWEq.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotHWEquip, 3);
+
+    for (const auto &equip : state->dataHeatBal->ZoneHWEq) {
+        std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+        std::string const &schedName = equip.sched->Name;
+        if (equip.Name == "ZONE2 LEGACY HWEQ") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            continue;
+        }
+        if (equip.Name == "ZONE1 HWEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone1HW");
+            // Blank Multiplier defaults to 1
+            EXPECT_NEAR(equip.DesignLevel, 1500.0, 1e-6);
+        } else if (equip.Name == "ZONE2 HWEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone2HW");
+            EXPECT_NEAR(equip.DesignLevel, 2.0 * 1500.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected hot water equipment name: " << equip.Name;
+        }
+        // From the shared definition
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_HotWaterEquipmentInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone1 HWEq,             !- Name",
+        "  HWEquipDef WITH A TYPO, !- Hot Water Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1HW;                !- End-Use Subcategory",
+
+        "HotWaterEquipment:Definition,",
+        "  HWEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: HotWaterEquipment:Instance = ZONE1 HWEQ",
+        "   **   ~~~   ** Hot Water Equipment Definition Name = HWEQUIPDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_HotWaterEquipmentInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone1 HWEq,             !- Name",
+        "  HWEquipDef,             !- Hot Water Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1HW;                !- End-Use Subcategory",
+
+        // Power/Area exercises the Watts/Power field name aliasing in GetSpaceLoadDefinition
+        "HotWaterEquipment:Definition,",
+        "  HWEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  10.0,                    !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneHWEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneHWEq(1);
+    EXPECT_EQ("ZONE1 HWEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1HW");
+    EXPECT_NEAR(equip.DesignLevel, 100.0 * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_HotWaterEquipmentInstance_PerPerson)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone1 HWEq,             !- Name",
+        "  HWEquipDef,             !- Hot Water Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1HW;                !- End-Use Subcategory",
+
+        "HotWaterEquipment:Definition,",
+        "  HWEquipDef,             !- Name",
+        "  Power/Person,            !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  10.0,                    !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Fake having people in the zone by setting the number of occupants to 12
+    constexpr Real64 TotOccupants = 12.0;
+    state->dataHeatBal->Zone(1).TotOccupants = TotOccupants;
+    state->dataHeatBal->space(1).TotOccupants = TotOccupants;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneHWEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneHWEq(1);
+    EXPECT_EQ("ZONE1 HWEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1HW");
+    EXPECT_NEAR(equip.DesignLevel, TotOccupants * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_HotWaterEquipmentInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "HotWaterEquipment:Instance,",
+        "  Zone1 HWEq,             !- Name",
+        "  HWEquipDef,             !- Hot Water Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1HW;                !- End-Use Subcategory",
+
+        "HotWaterEquipment:Definition,",
+        "  HWEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}", // Shouldn't be blank
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetSpaceLoadDefinition: HotWaterEquipment:Definition="HWEQUIPDEF", specifies Method=POWER/AREA, but the corresponding field "power_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: HotWaterEquipment:Instance="ZONE1 HWEQ", specifies power_per_floor_area, but that field is blank.  0 HotWaterEquipment:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneHWEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneHWEq(1);
+    EXPECT_EQ("ZONE1 HWEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1HW");
+    EXPECT_NEAR(equip.DesignLevel, 0.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_SteamEquipmentInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular SteamEquipment object, which must coexist untouched with the new pair
+        "SteamEquipment,",
+        "  Zone2 Legacy StmEq,      !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "SteamEquipment:Instance,",
+        "  Zone1 StmEq,             !- Name",
+        "  StmEquipDef,             !- Steam Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  ,                        !- Multiplier",
+        "  Zone1Stm;                !- End-Use Subcategory",
+
+        "SteamEquipment:Instance,",
+        "  Zone2 StmEq,             !- Name",
+        "  STMEQUIPDEF,             !- Steam Equipment Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  Zone2Stm;                !- End-Use Subcategory",
+
+        "SteamEquipment:Definition,",
+        "  StmEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->ZoneSteamEq.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotStmEquip, 3);
+
+    for (const auto &equip : state->dataHeatBal->ZoneSteamEq) {
+        std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+        std::string const &schedName = equip.sched->Name;
+        if (equip.Name == "ZONE2 LEGACY STMEQ") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            continue;
+        }
+        if (equip.Name == "ZONE1 STMEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone1Stm");
+            // Blank Multiplier defaults to 1
+            EXPECT_NEAR(equip.DesignLevel, 1500.0, 1e-6);
+        } else if (equip.Name == "ZONE2 STMEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone2Stm");
+            EXPECT_NEAR(equip.DesignLevel, 2.0 * 1500.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected steam equipment name: " << equip.Name;
+        }
+        // From the shared definition
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_SteamEquipmentInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "SteamEquipment:Instance,",
+        "  Zone1 StmEq,             !- Name",
+        "  StmEquipDef WITH A TYPO, !- Steam Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Stm;                !- End-Use Subcategory",
+
+        "SteamEquipment:Definition,",
+        "  StmEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: SteamEquipment:Instance = ZONE1 STMEQ",
+        "   **   ~~~   ** Steam Equipment Definition Name = STMEQUIPDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_SteamEquipmentInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "SteamEquipment:Instance,",
+        "  Zone1 StmEq,             !- Name",
+        "  StmEquipDef,             !- Steam Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Stm;                !- End-Use Subcategory",
+
+        // Power/Area exercises the Watts/Power field name aliasing in GetSpaceLoadDefinition
+        "SteamEquipment:Definition,",
+        "  StmEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  10.0,                    !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneSteamEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneSteamEq(1);
+    EXPECT_EQ("ZONE1 STMEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Stm");
+    EXPECT_NEAR(equip.DesignLevel, 100.0 * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_SteamEquipmentInstance_PerPerson)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "SteamEquipment:Instance,",
+        "  Zone1 StmEq,             !- Name",
+        "  StmEquipDef,             !- Steam Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Stm;                !- End-Use Subcategory",
+
+        "SteamEquipment:Definition,",
+        "  StmEquipDef,             !- Name",
+        "  Power/Person,            !- Design Level Calculation Method",
+        "  ,                        !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  10.0,                    !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Fake having people in the zone by setting the number of occupants to 12
+    constexpr Real64 TotOccupants = 12.0;
+    state->dataHeatBal->Zone(1).TotOccupants = TotOccupants;
+    state->dataHeatBal->space(1).TotOccupants = TotOccupants;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneSteamEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneSteamEq(1);
+    EXPECT_EQ("ZONE1 STMEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Stm");
+    EXPECT_NEAR(equip.DesignLevel, TotOccupants * 10.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_SteamEquipmentInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "SteamEquipment:Instance,",
+        "  Zone1 StmEq,             !- Name",
+        "  StmEquipDef,             !- Steam Equipment Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Stm;                !- End-Use Subcategory",
+
+        "SteamEquipment:Definition,",
+        "  StmEquipDef,             !- Name",
+        "  Power/Area,              !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}", // Shouldn't be blank
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetSpaceLoadDefinition: SteamEquipment:Definition="STMEQUIPDEF", specifies Method=POWER/AREA, but the corresponding field "power_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: SteamEquipment:Instance="ZONE1 STMEQ", specifies power_per_floor_area, but that field is blank.  0 SteamEquipment:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->ZoneSteamEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneSteamEq(1);
+    EXPECT_EQ("ZONE1 STMEQ", equip.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(equip.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(equip.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(equip.EndUseSubcategory, "Zone1Stm");
+    EXPECT_NEAR(equip.DesignLevel, 0.0, 1e-6);
+    EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+    EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipmentInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular OtherEquipment object, which must coexist untouched with the new pair
+        "OtherEquipment,",
+        "  Zone2 Legacy OthEq,      !- Name",
+        "  None,                    !- Fuel Type",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  500.0,                   !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+
+        "OtherEquipment:Instance,",
+        "  Zone1 OthEq,             !- Name",
+        "  OthEquipDef,             !- Other Equipment Definition Name",
+        "  NaturalGas,              !- Fuel Type",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  ,                        !- Multiplier",
+        "  Zone1Oth;                !- End-Use Subcategory",
+
+        "OtherEquipment:Instance,",
+        "  Zone2 OthEq,             !- Name",
+        "  OTHEQUIPDEF,             !- Other Equipment Definition Name",
+        "  NaturalGas,              !- Fuel Type",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  Zone2Oth;                !- End-Use Subcategory",
+
+        "OtherEquipment:Definition,",
+        "  OthEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2,                     !- Fraction Lost",
+        "  3.45E-8;                 !- Carbon Dioxide Generation Rate {m3/s-W}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->ZoneOtherEq.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotOthEquip, 3);
+
+    for (const auto &equip : state->dataHeatBal->ZoneOtherEq) {
+        std::string const &zoneName = state->dataHeatBal->Zone(equip.ZonePtr).Name;
+        std::string const &schedName = equip.sched->Name;
+        if (equip.Name == "ZONE2 LEGACY OTHEQ") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "General");
+            EXPECT_NEAR(equip.DesignLevel, 500.0, 1e-6);
+            EXPECT_ENUM_EQ(equip.OtherEquipFuelType, Constant::eFuel::None);
+            continue;
+        }
+        if (equip.Name == "ZONE1 OTHEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone1Oth");
+            // Blank Multiplier defaults to 1
+            EXPECT_NEAR(equip.DesignLevel, 1500.0, 1e-6);
+        } else if (equip.Name == "ZONE2 OTHEQ") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(equip.EndUseSubcategory, "Zone2Oth");
+            EXPECT_NEAR(equip.DesignLevel, 2.0 * 1500.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected other equipment name: " << equip.Name;
+        }
+        // The Fuel Type is set on the instance
+        EXPECT_ENUM_EQ(equip.OtherEquipFuelType, Constant::eFuel::NaturalGas);
+        // From the shared definition
+        EXPECT_NEAR(equip.FractionLatent, 0.1, 1e-6);
+        EXPECT_NEAR(equip.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(equip.FractionLost, 0.2, 1e-6);
+        EXPECT_NEAR(equip.CO2RateFactor, 3.45e-8, 1e-15);
+    }
+
+    EXPECT_EQ(state->dataHeatBal->Zone(1).otherEquipFuelTypeNums.size(), 1u);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipmentInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "OtherEquipment:Instance,",
+        "  Zone1 OthEq,             !- Name",
+        "  OthEquipDef WITH A TYPO, !- Other Equipment Definition Name",
+        "  None,                    !- Fuel Type",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Oth;                !- End-Use Subcategory",
+
+        "OtherEquipment:Definition,",
+        "  OthEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  1500,                    !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: OtherEquipment:Instance = ZONE1 OTHEQ",
+        "   **   ~~~   ** Other Equipment Definition Name = OTHEQUIPDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipmentInstance_NegativeDesignLevel)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "OtherEquipment:Instance,",
+        "  Zone1 OthEq,             !- Name",
+        "  OthEquipDef,             !- Other Equipment Definition Name",
+        "  NaturalGas,              !- Fuel Type",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Oth;                !- End-Use Subcategory",
+
+        "OtherEquipment:Definition,",
+        "  OthEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  -500.0,                  !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.1,                     !- Fraction Latent",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // A negative design level is not allowed when a fuel type is specified
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Severe  ** GetInternalHeatGains: OtherEquipment:Instance="ZONE1 OTHEQ", design_level is not allowed to be negative)",
+        "   **   ~~~   ** ... when a fuel type of NaturalGas is specified.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipmentInstance_NegativeDesignLevelAllowed)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        // Without a fuel type, a negative design level is a valid way to model a heat loss
+        "OtherEquipment:Instance,",
+        "  Zone1 OthEq,             !- Name",
+        "  OthEquipDef,             !- Other Equipment Definition Name",
+        "  None,                    !- Fuel Type",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  Zone1Oth;                !- End-Use Subcategory",
+
+        "OtherEquipment:Definition,",
+        "  OthEquipDef,             !- Name",
+        "  EquipmentLevel,          !- Design Level Calculation Method",
+        "  -500.0,                  !- Design Level {W}",
+        "  ,                        !- Power per Floor Area {W/m2}",
+        "  ,                        !- Power per Person {W/person}",
+        "  0.0,                     !- Fraction Latent",
+        "  0.0,                     !- Fraction Radiant",
+        "  0.0;                     !- Fraction Lost",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+
+    ASSERT_EQ(state->dataHeatBal->ZoneOtherEq.size(), 1u);
+
+    const auto &equip = state->dataHeatBal->ZoneOtherEq(1);
+    EXPECT_EQ("ZONE1 OTHEQ", equip.Name);
+    EXPECT_ENUM_EQ(equip.OtherEquipFuelType, Constant::eFuel::None);
+    // The Multiplier also applies to negative (loss) design levels
+    EXPECT_NEAR(equip.DesignLevel, 2.0 * -500.0, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_LightsInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+
+        // A regular Lights object, which must coexist untouched with the new pair
+        "Lights,",
+        "  Zone2 Legacy Lights,     !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  LightingLevel,           !- Design Level Calculation Method",
+        "  500.0,                   !- Lighting Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Return Air Fraction",
+        "  0.4,                     !- Fraction Radiant",
+        "  0.2,                     !- Fraction Visible",
+        "  1.0;                     !- Fraction Replaceable",
+
+        "Lights:Instance,",
+        "  Zone1 Lights,            !- Name",
+        "  LightsDef,               !- Lights Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Fraction Replaceable",
+        "  ,                        !- Multiplier",
+        "  Zone1Lights;             !- End-Use Subcategory",
+
+        "Lights:Instance,",
+        "  Zone2 Lights,            !- Name",
+        "  LIGHTSDef,               !- Lights Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Schedule Name",
+        "  0.0,                     !- Fraction Replaceable",
+        "  12,                      !- Multiplier",
+        "  Zone2Lights;             !- End-Use Subcategory",
+
+        "Lights:Definition,",
+        "  LightsDef,               !- Name",
+        "  LightingLevel,           !- Design Level Calculation Method",
+        "  60.0,                    !- Lighting Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Return Air Fraction",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2,                     !- Fraction Visible",
+        "  No,                      !- Return Air Fraction Calculated from Plenum Temperature",
+        "  0.0,                     !- Return Air Fraction Function of Plenum Temperature Coefficient 1",
+        "  0.0;                     !- Return Air Fraction Function of Plenum Temperature Coefficient 2 {1/K}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->Lights.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotLights, 3);
+
+    for (const auto &lights : state->dataHeatBal->Lights) {
+        std::string const &zoneName = state->dataHeatBal->Zone(lights.ZonePtr).Name;
+        std::string const &schedName = lights.sched->Name;
+        if (lights.Name == "ZONE2 LEGACY LIGHTS") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(lights.EndUseSubcategory, "General");
+            EXPECT_NEAR(lights.DesignLevel, 500.0, 1e-6);
+            EXPECT_NEAR(lights.FractionRadiant, 0.4, 1e-6);
+            EXPECT_NEAR(lights.FractionShortWave, 0.2, 1e-6);
+            EXPECT_NEAR(lights.FractionReplaceable, 1.0, 1e-6);
+            continue;
+        }
+        if (lights.Name == "ZONE1 LIGHTS") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_EQ(lights.EndUseSubcategory, "Zone1Lights");
+            EXPECT_NEAR(lights.FractionReplaceable, 1.0, 1e-6);
+            // Blank Multiplier defaults to 1: a single 60 W bulb
+            EXPECT_NEAR(lights.DesignLevel, 60.0, 1e-6);
+        } else if (lights.Name == "ZONE2 LIGHTS") {
+            EXPECT_EQ(zoneName, "ZONE1");
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_EQ(lights.EndUseSubcategory, "Zone2Lights");
+            // The Fraction Replaceable is set on the instance
+            EXPECT_NEAR(lights.FractionReplaceable, 0.0, 1e-6);
+            // Twelve 60 W bulbs
+            EXPECT_NEAR(lights.DesignLevel, 12.0 * 60.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected lights name: " << lights.Name;
+        }
+        // From the shared definition
+        EXPECT_NEAR(lights.FractionReturnAir, 0.0, 1e-6);
+        EXPECT_NEAR(lights.FractionRadiant, 0.3, 1e-6);
+        EXPECT_NEAR(lights.FractionShortWave, 0.2, 1e-6);
+        EXPECT_FALSE(lights.FractionReturnAirIsCalculated);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_LightsInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "Lights:Instance,",
+        "  Zone1 Lights,            !- Name",
+        "  LightsDef WITH A TYPO,   !- Lights Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Fraction Replaceable",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Lights;             !- End-Use Subcategory",
+
+        "Lights:Definition,",
+        "  LightsDef,               !- Name",
+        "  LightingLevel,           !- Design Level Calculation Method",
+        "  60.0,                    !- Lighting Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Return Air Fraction",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Visible",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: Lights:Instance = ZONE1 LIGHTS",
+        "   **   ~~~   ** Lights Definition Name = LIGHTSDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_LightsInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "Lights:Instance,",
+        "  Zone1 Lights,            !- Name",
+        "  LightsDef,               !- Lights Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Fraction Replaceable",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Lights;             !- End-Use Subcategory",
+
+        "Lights:Definition,",
+        "  LightsDef,               !- Name",
+        "  Watts/AREA,              !- Design Level Calculation Method",
+        "  ,                        !- Lighting Level {W}",
+        "  10.0,                    !- Watts per Floor Area {W/m2}",
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Return Air Fraction",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Visible",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->Lights.size(), 1u);
+
+    const auto &lights = state->dataHeatBal->Lights(1);
+    EXPECT_EQ("ZONE1 LIGHTS", lights.Name);
+    EXPECT_EQ(state->dataHeatBal->Zone(lights.ZonePtr).Name, "ZONE1");
+    EXPECT_EQ(lights.sched->Name, "SCHEDULE1");
+    EXPECT_EQ(lights.EndUseSubcategory, "Zone1Lights");
+    EXPECT_NEAR(lights.DesignLevel, 100.0 * 10.0, 1e-6);
+    EXPECT_NEAR(lights.FractionRadiant, 0.3, 1e-6);
+    EXPECT_NEAR(lights.FractionShortWave, 0.2, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_LightsInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+
+        "Lights:Instance,",
+        "  Zone1 Lights,            !- Name",
+        "  LightsDef,               !- Lights Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Schedule Name",
+        "  1.0,                     !- Fraction Replaceable",
+        "  1.0,                     !- Multiplier",
+        "  Zone1Lights;             !- End-Use Subcategory",
+
+        "Lights:Definition,",
+        "  LightsDef,               !- Name",
+        "  Watts/AREA,              !- Design Level Calculation Method",
+        "  60.0,                    !- Lighting Level {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}", // Shouldn't be blank
+        "  ,                        !- Watts per Person {W/person}",
+        "  0.0,                     !- Return Air Fraction",
+        "  0.3,                     !- Fraction Radiant",
+        "  0.2;                     !- Fraction Visible",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetLightsDefinition: Lights:Definition="LIGHTSDEF", specifies Method=WATTS/AREA, but the corresponding field "watts_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: Lights:Instance="ZONE1 LIGHTS", specifies watts_per_floor_area, but that field is blank.  0 Lights:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->Lights.size(), 1u);
+
+    const auto &lights = state->dataHeatBal->Lights(1);
+    EXPECT_EQ("ZONE1 LIGHTS", lights.Name);
+    EXPECT_NEAR(lights.DesignLevel, 0.0, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "ScheduleTypeLimits,AnyNumber;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,Schedule2,SchType1,0.5;",
+        "Schedule:Constant,ActivitySchedule,AnyNumber,100.0;",
+
+        // A regular People object, which must coexist untouched with the new pair
+        "People,",
+        "  Zone2 Legacy People,     !- Name",
+        "  Zone2,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  People,                  !- Number of People Calculation Method",
+        "  3.0,                     !- Number of People",
+        "  ,                        !- People per Floor Area {person/m2}",
+        "  ,                        !- Floor Area per Person {m2/person}",
+        "  0.3,                     !- Fraction Radiant",
+        "  autocalculate,           !- Sensible Heat Fraction",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef,               !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Instance,",
+        "  Zone1 More People,       !- Name",
+        "  PEOPLEDef,               !- People Definition Name",
+        "  ZOnE1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  ScheDULe2,               !- Number of People Schedule Name",
+        "  ActivitySchedule,        !- Activity Level Schedule Name",
+        "  ,                        !- Surface Name/Angle Factor List Name",
+        "  ,                        !- Work Efficiency Schedule Name",
+        "  ,                        !- Clothing Insulation Calculation Method",
+        "  ,                        !- Clothing Insulation Calculation Method Schedule Name",
+        "  ,                        !- Clothing Insulation Schedule Name",
+        "  ,                        !- Air Velocity Schedule Name",
+        "  2.0,                     !- Multiplier",
+        "  ,                        !- Ankle Level Air Velocity Schedule Name",
+        "  10.0,                    !- Cold Stress Temperature Threshold {C}",
+        "  28.0;                    !- Heat Stress Temperature Threshold {C}",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People,                  !- Number of People Calculation Method",
+        "  4.0,                     !- Number of People",
+        "  ,                        !- People per Floor Area {person/m2}",
+        "  ,                        !- Floor Area per Person {m2/person}",
+        "  0.35,                    !- Fraction Radiant",
+        "  0.6,                     !- Sensible Heat Fraction",
+        "  3.0E-8;                  !- Carbon Dioxide Generation Rate {m3/s-W}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    ASSERT_EQ(state->dataHeatBal->People.size(), 3u);
+    EXPECT_EQ(state->dataHeatBal->TotPeople, 3);
+
+    for (const auto &people : state->dataHeatBal->People) {
+        std::string const &zoneName = state->dataHeatBal->Zone(people.ZonePtr).Name;
+        std::string const &schedName = people.sched->Name;
+        if (people.Name == "ZONE2 LEGACY PEOPLE") {
+            EXPECT_EQ(zoneName, "ZONE2");
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            EXPECT_NEAR(people.NumberOfPeople, 3.0, 1e-6);
+            EXPECT_NEAR(people.FractionRadiant, 0.3, 1e-6);
+            EXPECT_NEAR(people.UserSpecSensFrac, Constant::AutoCalculate, 1e-6);
+            continue;
+        }
+        if (people.Name == "ZONE1 PEOPLE") {
+            EXPECT_EQ(schedName, "SCHEDULE1");
+            // Blank Multiplier defaults to 1
+            EXPECT_NEAR(people.NumberOfPeople, 4.0, 1e-6);
+            // Default stress thresholds
+            EXPECT_NEAR(people.ColdStressTempThresh, 15.56, 1e-6);
+            EXPECT_NEAR(people.HeatStressTempThresh, 30.0, 1e-6);
+        } else if (people.Name == "ZONE1 MORE PEOPLE") {
+            EXPECT_EQ(schedName, "SCHEDULE2");
+            EXPECT_NEAR(people.NumberOfPeople, 2.0 * 4.0, 1e-6);
+            // The stress thresholds are set on the instance
+            EXPECT_NEAR(people.ColdStressTempThresh, 10.0, 1e-6);
+            EXPECT_NEAR(people.HeatStressTempThresh, 28.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected people name: " << people.Name;
+        }
+        EXPECT_EQ(zoneName, "ZONE1");
+        // From the shared definition
+        EXPECT_NEAR(people.FractionRadiant, 0.35, 1e-6);
+        EXPECT_NEAR(people.UserSpecSensFrac, 0.6, 1e-6);
+        EXPECT_NEAR(people.CO2RateFactor, 3.0e-8, 1e-15);
+    }
+
+    // Occupants accumulate on the zone: 4 + 8 in Zone1, 3 in Zone2
+    EXPECT_NEAR(state->dataHeatBal->Zone(1).TotOccupants, 12.0, 1e-6);
+    EXPECT_NEAR(state->dataHeatBal->Zone(2).TotOccupants, 3.0, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance_InvalidDefinition)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "ScheduleTypeLimits,AnyNumber;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,ActivitySchedule,AnyNumber,100.0;",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef WITH A TYPO,   !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People,                  !- Number of People Calculation Method",
+        "  4.0;                     !- Number of People",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: People:Instance = ZONE1 PEOPLE",
+        "   **   ~~~   ** People Definition Name = PEOPLEDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance_PerArea)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  100.0;                   !- Floor Area {m2}",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "ScheduleTypeLimits,AnyNumber;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,ActivitySchedule,AnyNumber,100.0;",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef,               !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People/Area,             !- Number of People Calculation Method",
+        "  ,                        !- Number of People",
+        "  0.1;                     !- People per Floor Area {person/m2}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    // Assignment of UserEnteredFloorArea to Zone FloorArea is done in GetSurfaceData, we just mimic it here to get the correct design level
+    // calculation for this test
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    ASSERT_EQ(state->dataHeatBal->People.size(), 1u);
+
+    const auto &people = state->dataHeatBal->People(1);
+    EXPECT_EQ("ZONE1 PEOPLE", people.Name);
+    EXPECT_NEAR(people.NumberOfPeople, 100.0 * 0.1, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance_MissingLevelField)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "ScheduleTypeLimits,AnyNumber;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,ActivitySchedule,AnyNumber,100.0;",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef,               !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People/Area,             !- Number of People Calculation Method",
+        "  4.0,                     !- Number of People",
+        "  ,                        !- People per Floor Area {person/m2}", // Shouldn't be blank
+        "  ;                        !- Floor Area per Person {m2/person}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetPeopleDefinition: People:Definition="PEOPLEDEF", specifies Method=PEOPLE/AREA, but the corresponding field "people_per_floor_area" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: People:Instance="ZONE1 PEOPLE", specifies people_per_floor_area, but that field is blank.  0 People:Instance will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->People.size(), 1u);
+    EXPECT_NEAR(state->dataHeatBal->People(1).NumberOfPeople, 0.0, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance_ThermalComfort)
+{
+
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "ScheduleTypeLimits,AnyNumber;",
+
+        "Schedule:Constant,Schedule1,SchType1,1.0;",
+        "Schedule:Constant,ActivitySchedule,AnyNumber,100.0;",
+        "Schedule:Constant,WorkEffSchedule,SchType1,0.5;",
+        "Schedule:Constant,ClothingSchedule,AnyNumber,1.0;",
+        "Schedule:Constant,AirVelocitySchedule,AnyNumber,0.2;",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef,               !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  Schedule1,               !- Number of People Schedule Name",
+        "  ActivitySchedule,        !- Activity Level Schedule Name",
+        "  ,                        !- Surface Name/Angle Factor List Name",
+        "  WorkEffSchedule,         !- Work Efficiency Schedule Name",
+        "  ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
+        "  ,                        !- Clothing Insulation Calculation Method Schedule Name",
+        "  ClothingSchedule,        !- Clothing Insulation Schedule Name",
+        "  AirVelocitySchedule,     !- Air Velocity Schedule Name",
+        "  2.0;                     !- Multiplier",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People,                  !- Number of People Calculation Method",
+        "  4.0,                     !- Number of People",
+        "  ,                        !- People per Floor Area {person/m2}",
+        "  ,                        !- Floor Area per Person {m2/person}",
+        "  0.3,                     !- Fraction Radiant",
+        "  autocalculate,           !- Sensible Heat Fraction",
+        "  ,                        !- Carbon Dioxide Generation Rate {m3/s-W}",
+        "  Yes,                     !- Enable ASHRAE 55 Comfort Warnings",
+        "  EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type",
+        "  Fanger,                  !- Thermal Comfort Model 1 Type",
+        "  Pierce;                  !- Thermal Comfort Model 2 Type",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_FALSE(has_err_output());
+
+    ASSERT_EQ(state->dataHeatBal->People.size(), 1u);
+
+    const auto &people = state->dataHeatBal->People(1);
+    EXPECT_EQ("ZONE1 PEOPLE", people.Name);
+    EXPECT_NEAR(people.NumberOfPeople, 2.0 * 4.0, 1e-6);
+    // Thermal comfort selections come from the definition
+    EXPECT_TRUE(people.Show55Warning);
+    EXPECT_TRUE(people.Fanger);
+    EXPECT_TRUE(people.Pierce);
+    EXPECT_FALSE(people.KSU);
+    EXPECT_TRUE(state->dataHeatBal->AnyThermalComfortPierceModel);
+    EXPECT_ENUM_EQ(people.MRTCalcType, DataHeatBalance::CalcMRT::EnclosureAveraged);
+    // The comfort-related schedules stay on the instance
+    ASSERT_NE(people.workEffSched, nullptr);
+    EXPECT_EQ(people.workEffSched->Name, "WORKEFFSCHEDULE");
+    ASSERT_NE(people.clothingSched, nullptr);
+    EXPECT_EQ(people.clothingSched->Name, "CLOTHINGSCHEDULE");
+    ASSERT_NE(people.airVelocitySched, nullptr);
+    EXPECT_EQ(people.airVelocitySched->Name, "AIRVELOCITYSCHEDULE");
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_PeopleInstance_AdaptiveSurfaceWeightedMissingSurface)
+{
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "Schedule:Constant,NumberSchedule,,1.0;",
+        "Schedule:Constant,ActivitySchedule,,100.0;",
+
+        "People:Instance,",
+        "  Zone1 People,            !- Name",
+        "  PeopleDef,               !- People Definition Name",
+        "  Zone1,                   !- Zone or ZoneList or Space or SpaceList Name",
+        "  NumberSchedule,          !- Number of People Schedule Name",
+        "  ActivitySchedule;        !- Activity Level Schedule Name",
+
+        "People:Definition,",
+        "  PeopleDef,               !- Name",
+        "  People,                  !- Number of People Calculation Method",
+        "  1.0,                     !- Number of People",
+        "  ,                        !- People per Floor Area {person/m2}",
+        "  ,                        !- Floor Area per Person {m2/person}",
+        "  0.3,                     !- Fraction Radiant",
+        "  autocalculate,           !- Sensible Heat Fraction",
+        "  ,                        !- Carbon Dioxide Generation Rate {m3/s-W}",
+        "  No,                      !- Enable ASHRAE 55 Comfort Warnings",
+        "  SurfaceWeighted,         !- Mean Radiant Temperature Calculation Type",
+        "  AdaptiveASH55;           !- Thermal Comfort Model 1 Type",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: People:Instance=\"ZONE1 PEOPLE\", invalid Surface Name=",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITEAirCooledInstance)
+{
+    // Two instances sharing one definition; verify name, zone, power, fractions, end-use subcategories.
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+        "Zone,Zone2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+        "Schedule:Constant,OpSched1,SchType1,1.0;",
+        "Schedule:Constant,OpSched2,SchType1,0.5;",
+        "Schedule:Constant,CPUSched,SchType1,1.0;",
+
+        "ElectricEquipment:ITE:AirCooled:Instance,",
+        "  Zone1 ITE,               !- Name",
+        "  ServerDef,               !- ElectricEquipment ITE AirCooled Definition Name",
+        "  Zone1,                   !- Zone or Space Name",
+        "  10,                      !- Multiplier",
+        "  OpSched1,                !- Design Power Input Schedule Name",
+        "  CPUSched,                !- CPU Loading Schedule Name",
+        "  ,                        !- Air Inlet Room Air Model Node Name",
+        "  ,                        !- Air Outlet Room Air Model Node Name",
+        "  Zone1 Supply Node,       !- Supply Air Node Name",
+        "  CPU-Cat,                 !- CPU End-Use Subcategory",
+        "  Fan-Cat,                 !- Fan End-Use Subcategory",
+        "  UPS-Cat;                 !- Electric Power Supply End-Use Subcategory",
+
+        "ElectricEquipment:ITE:AirCooled:Instance,",
+        "  Zone2 ITE,               !- Name",
+        "  SERVERDEF,               !- ElectricEquipment ITE AirCooled Definition Name",
+        "  Zone2,                   !- Zone or Space Name",
+        "  5,                       !- Multiplier",
+        "  OpSched2,                !- Design Power Input Schedule Name",
+        "  CPUSched,                !- CPU Loading Schedule Name",
+        "  ,                        !- Air Inlet Room Air Model Node Name",
+        "  ,                        !- Air Outlet Room Air Model Node Name",
+        "  Zone2 Supply Node,       !- Supply Air Node Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  ;                        !- Electric Power Supply End-Use Subcategory",
+
+        "ElectricEquipment:ITE:AirCooled:Definition,",
+        "  ServerDef,               !- Name",
+        "  FlowFromSystem,          !- Air Flow Calculation Method",
+        "  EquipmentLevel,          !- Design Power Input Calculation Method",
+        "  1000,                    !- Watts per Unit {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  CPU Power fLoadTemp,     !- CPU Power Input Function of Loading and Air Temperature Curve Name",
+        "  0.3,                     !- Design Fan Power Input Fraction",
+        "  0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}",
+        "  AirFlow fLoadTemp,       !- Air Flow Function of Loading and Air Temperature Curve Name",
+        "  FanPower fFlow,          !- Fan Power Input Function of Flow Curve Name",
+        "  20.0,                    !- Design Entering Air Temperature {C}",
+        "  A3,                      !- Environmental Class",
+        "  AdjustedSupply,          !- Air Inlet Connection Type",
+        "  0.1,                     !- Design Recirculation Fraction",
+        "  ,                        !- Recirculation Function of Loading and Supply Temperature Curve Name",
+        "  0.9,                     !- Design Electric Power Supply Efficiency",
+        "  UPS Effic fPLR,          !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name",
+        "  1.0;                     !- Fraction of Electric Power Supply Losses to Zone",
+
+        "Curve:Biquadratic,",
+        "  CPU Power fLoadTemp,      !- Name",
+        "  -1.0,                    !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.06667,                 !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Biquadratic,",
+        "  AirFlow fLoadTemp,        !- Name",
+        "  -1.4,                    !- Coefficient1 Constant",
+        "  0.9,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.1,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Quadratic,",
+        "  FanPower fFlow,           !- Name",
+        "  0.0,                     !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  99.0;                    !- Maximum Value of x",
+
+        "Curve:Quadratic,",
+        "  UPS Effic fPLR,           !- Name",
+        "  1.0,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  99.0;                    !- Maximum Value of x",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    EXPECT_FALSE(has_err_output());
+
+    ASSERT_EQ(state->dataHeatBal->TotITEquip, 2);
+
+    for (int i = 1; i <= state->dataHeatBal->TotITEquip; ++i) {
+        const auto &ite = state->dataHeatBal->ZoneITEq(i);
+        if (ite.Name == "ZONE1 ITE") {
+            EXPECT_EQ(state->dataHeatBal->Zone(ite.ZonePtr).Name, "ZONE1");
+            EXPECT_EQ(ite.operSched->Name, "OPSCHED1");
+            EXPECT_EQ(ite.EndUseSubcategoryCPU, "CPU-Cat");
+            EXPECT_EQ(ite.EndUseSubcategoryFan, "Fan-Cat");
+            EXPECT_EQ(ite.EndUseSubcategoryUPS, "UPS-Cat");
+            // 1000 W/unit * 10 units = 10000 W
+            EXPECT_NEAR(ite.DesignTotalPower, 10000.0, 1e-6);
+        } else if (ite.Name == "ZONE2 ITE") {
+            EXPECT_EQ(state->dataHeatBal->Zone(ite.ZonePtr).Name, "ZONE2");
+            EXPECT_EQ(ite.operSched->Name, "OPSCHED2");
+            // 1000 W/unit * 5 units = 5000 W
+            EXPECT_NEAR(ite.DesignTotalPower, 5000.0, 1e-6);
+        } else {
+            FAIL() << "Unexpected ITE name: " << ite.Name;
+        }
+        // Both share the same definition
+        EXPECT_NEAR(ite.DesignFanPowerFrac, 0.3, 1e-6);
+        EXPECT_NEAR(ite.DesignRecircFrac, 0.1, 1e-6);
+        EXPECT_NEAR(ite.DesignUPSEfficiency, 0.9, 1e-6);
+        EXPECT_NEAR(ite.UPSLossToZoneFrac, 1.0, 1e-6);
+        EXPECT_NEAR(ite.DesignTAirIn, 20.0, 1e-6);
+        // DesignAirVolFlowRate = DesignFanAirFlowPerPower * DesignTotalPower
+        EXPECT_NEAR(ite.DesignAirVolFlowRate, 0.0001 * ite.DesignTotalPower, 1e-6);
+    }
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITEAirCooledInstance_InvalidDefinition)
+{
+    // Typo in definition name → Severe error + Fatal
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ElectricEquipment:ITE:AirCooled:Instance,",
+        "  Zone1 ITE,               !- Name",
+        "  ServerDef WITH A TYPO,   !- ElectricEquipment ITE AirCooled Definition Name",
+        "  Zone1,                   !- Zone or Space Name",
+        "  10,                      !- Multiplier",
+        "  ,                        !- Design Power Input Schedule Name",
+        "  ,                        !- CPU Loading Schedule Name",
+        "  ,                        !- Air Inlet Room Air Model Node Name",
+        "  ,                        !- Air Outlet Room Air Model Node Name",
+        "  ,                        !- Supply Air Node Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  ;                        !- Electric Power Supply End-Use Subcategory",
+
+        "ElectricEquipment:ITE:AirCooled:Definition,",
+        "  ServerDef,               !- Name",
+        "  FlowFromSystem,          !- Air Flow Calculation Method",
+        "  EquipmentLevel,          !- Design Power Input Calculation Method",
+        "  1000,                    !- Watts per Unit {W}",
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  CPU Power fLoadTemp,     !- CPU Power Input Function of Loading and Air Temperature Curve Name",
+        "  0.3,                     !- Design Fan Power Input Fraction",
+        "  0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}",
+        "  AirFlow fLoadTemp,       !- Air Flow Function of Loading and Air Temperature Curve Name",
+        "  FanPower fFlow,          !- Fan Power Input Function of Flow Curve Name",
+        "  20.0,                    !- Design Entering Air Temperature {C}",
+        "  A3,                      !- Environmental Class",
+        "  AdjustedSupply,          !- Air Inlet Connection Type",
+        "  0.1,                     !- Design Recirculation Fraction",
+        "  ,                        !- Recirculation Function of Loading and Supply Temperature Curve Name",
+        "  0.9,                     !- Design Electric Power Supply Efficiency",
+        "  ,                        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name",
+        "  1.0;                     !- Fraction of Electric Power Supply Losses to Zone",
+
+        "Curve:Biquadratic,",
+        "  CPU Power fLoadTemp,      !- Name",
+        "  -1.0,                    !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.06667,                 !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Biquadratic,",
+        "  AirFlow fLoadTemp,        !- Name",
+        "  -1.4,                    !- Coefficient1 Constant",
+        "  0.9,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.1,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Quadratic,",
+        "  FanPower fFlow,           !- Name",
+        "  0.0,                     !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  99.0;                    !- Maximum Value of x",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Severe  ** GetInternalHeatGains: ElectricEquipment:ITE:AirCooled:Instance = ZONE1 ITE",
+        "   **   ~~~   ** ElectricEquipment ITE AirCooled Definition Name = SERVERDEF WITH A TYPO, item not found.",
+        "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+    })));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITEAirCooledInstance_WattsPerArea)
+{
+    // Watts/Area method: DesignTotalPower = watts_per_floor_area * zone floor area
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                   !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  3.0,                     !- Ceiling Height {m}",
+        "  300.0,                   !- Volume {m3}",
+        "  50.0;                    !- Floor Area {m2}",
+
+        "ElectricEquipment:ITE:AirCooled:Instance,",
+        "  Zone1 ITE,               !- Name",
+        "  ServerDefArea,           !- ElectricEquipment ITE AirCooled Definition Name",
+        "  Zone1,                   !- Zone or Space Name",
+        "  1,                       !- Multiplier",
+        "  ,                        !- Design Power Input Schedule Name",
+        "  ,                        !- CPU Loading Schedule Name",
+        "  ,                        !- Air Inlet Room Air Model Node Name",
+        "  ,                        !- Air Outlet Room Air Model Node Name",
+        "  Zone1 Supply Node,       !- Supply Air Node Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  ;                        !- Electric Power Supply End-Use Subcategory",
+
+        "ElectricEquipment:ITE:AirCooled:Definition,",
+        "  ServerDefArea,           !- Name",
+        "  FlowFromSystem,          !- Air Flow Calculation Method",
+        "  Watts/Area,              !- Design Power Input Calculation Method",
+        "  ,                        !- Watts per Unit {W}",
+        "  200.0,                   !- Watts per Floor Area {W/m2}",
+        "  CPU Power fLoadTemp,     !- CPU Power Input Function of Loading and Air Temperature Curve Name",
+        "  0.3,                     !- Design Fan Power Input Fraction",
+        "  0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}",
+        "  AirFlow fLoadTemp,       !- Air Flow Function of Loading and Air Temperature Curve Name",
+        "  FanPower fFlow,          !- Fan Power Input Function of Flow Curve Name",
+        "  20.0,                    !- Design Entering Air Temperature {C}",
+        "  A3,                      !- Environmental Class",
+        "  AdjustedSupply,          !- Air Inlet Connection Type",
+        "  0.0,                     !- Design Recirculation Fraction",
+        "  ,                        !- Recirculation Function of Loading and Supply Temperature Curve Name",
+        "  1.0,                     !- Design Electric Power Supply Efficiency",
+        "  ,                        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name",
+        "  1.0;                     !- Fraction of Electric Power Supply Losses to Zone",
+
+        "Curve:Biquadratic,",
+        "  CPU Power fLoadTemp,      !- Name",
+        "  -1.0,                    !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.06667,                 !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Biquadratic,",
+        "  AirFlow fLoadTemp,        !- Name",
+        "  -1.4,                    !- Coefficient1 Constant",
+        "  0.9,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.1,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Quadratic,",
+        "  FanPower fFlow,           !- Name",
+        "  0.0,                     !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  99.0;                    !- Maximum Value of x",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    state->dataHeatBal->Zone(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+    state->dataHeatBal->space(1).FloorArea = state->dataHeatBal->Zone(1).UserEnteredFloorArea;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    EXPECT_FALSE(has_err_output());
+
+    ASSERT_EQ(state->dataHeatBal->TotITEquip, 1);
+    const auto &ite = state->dataHeatBal->ZoneITEq(1);
+    EXPECT_EQ(ite.Name, "ZONE1 ITE");
+    // 200 W/m2 * 50 m2 = 10000 W
+    EXPECT_NEAR(ite.DesignTotalPower, 200.0 * 50.0, 1e-6);
+    EXPECT_NEAR(ite.DesignFanPowerFrac, 0.3, 1e-6);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITEAirCooledInstance_MissingLevelField)
+{
+    // EquipmentLevel specified but watts_per_unit field is blank → two warnings, DesignTotalPower == 0
+    std::string const idf_objects = delimited_string({
+        "Zone,Zone1;",
+
+        "ElectricEquipment:ITE:AirCooled:Instance,",
+        "  Zone1 ITE,               !- Name",
+        "  ServerDef,               !- ElectricEquipment ITE AirCooled Definition Name",
+        "  Zone1,                   !- Zone or Space Name",
+        "  10,                      !- Multiplier",
+        "  ,                        !- Design Power Input Schedule Name",
+        "  ,                        !- CPU Loading Schedule Name",
+        "  ,                        !- Air Inlet Room Air Model Node Name",
+        "  ,                        !- Air Outlet Room Air Model Node Name",
+        "  Zone1 Supply Node,       !- Supply Air Node Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  ;                        !- Electric Power Supply End-Use Subcategory",
+
+        "ElectricEquipment:ITE:AirCooled:Definition,",
+        "  ServerDef,               !- Name",
+        "  FlowFromSystem,          !- Air Flow Calculation Method",
+        "  EquipmentLevel,          !- Design Power Input Calculation Method",
+        "  ,                        !- Watts per Unit {W}", // intentionally blank to trigger warning
+        "  ,                        !- Watts per Floor Area {W/m2}",
+        "  CPU Power fLoadTemp,     !- CPU Power Input Function of Loading and Air Temperature Curve Name",
+        "  0.3,                     !- Design Fan Power Input Fraction",
+        "  0.0001,                  !- Design Fan Air Flow Rate per Power Input {m3/s-W}",
+        "  AirFlow fLoadTemp,       !- Air Flow Function of Loading and Air Temperature Curve Name",
+        "  FanPower fFlow,          !- Fan Power Input Function of Flow Curve Name",
+        "  20.0,                    !- Design Entering Air Temperature {C}",
+        "  A3,                      !- Environmental Class",
+        "  AdjustedSupply,          !- Air Inlet Connection Type",
+        "  0.0,                     !- Design Recirculation Fraction",
+        "  ,                        !- Recirculation Function of Loading and Supply Temperature Curve Name",
+        "  1.0,                     !- Design Electric Power Supply Efficiency",
+        "  ,                        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name",
+        "  1.0;                     !- Fraction of Electric Power Supply Losses to Zone",
+
+        "Curve:Biquadratic,",
+        "  CPU Power fLoadTemp,      !- Name",
+        "  -1.0,                    !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.06667,                 !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Biquadratic,",
+        "  AirFlow fLoadTemp,        !- Name",
+        "  -1.4,                    !- Coefficient1 Constant",
+        "  0.9,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.1,                     !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  1.5,                     !- Maximum Value of x",
+        "  -10,                     !- Minimum Value of y",
+        "  99.0,                    !- Maximum Value of y",
+        "  0.0,                     !- Minimum Curve Output",
+        "  99.0,                    !- Maximum Curve Output",
+        "  Dimensionless,           !- Input Unit Type for X",
+        "  Temperature,             !- Input Unit Type for Y",
+        "  Dimensionless;           !- Output Unit Type",
+
+        "Curve:Quadratic,",
+        "  FanPower fFlow,           !- Name",
+        "  0.0,                     !- Coefficient1 Constant",
+        "  1.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.0,                     !- Minimum Value of x",
+        "  99.0;                    !- Maximum Value of x",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        R"(   ** Warning ** GetITEAirCooledDefinition: ElectricEquipment:ITE:AirCooled:Definition="SERVERDEF", specifies Method=EQUIPMENTLEVEL, but the corresponding field "watts_per_unit" is blank. 0 will result.)",
+        R"(   ** Warning ** GetInternalHeatGains: ElectricEquipment:ITE:AirCooled:Instance="ZONE1 ITE", specifies EquipmentLevel, but the definition's Watts per Unit is blank.  0 IT Equipment will result.)",
+    })));
+
+    ASSERT_EQ(state->dataHeatBal->TotITEquip, 1);
+    const auto &ite = state->dataHeatBal->ZoneITEq(1);
+    EXPECT_NEAR(ite.DesignTotalPower, 0.0, 1e-6);
+}

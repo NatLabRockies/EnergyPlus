@@ -68,6 +68,32 @@ Resulting instances of People:
 \end{itemize}
 
 
+
+\subsection{SpaceLoad Instance and Definition Objects}\label{internal-gains-instance-and-definition-objects}
+
+Each internal gains (SpaceLoad) object type has a companion pair of new objects: an \textbf{Instance} object and a \textbf{Definition} object. The original objects (\hyperref[people]{People}, \hyperref[lights-000]{Lights}, etc.) are unchanged and remain fully supported; the new pairs are an alternative input method:
+
+\begin{itemize}
+\tightlist
+\item \hyperref[peopleinstance]{People:Instance} / \hyperref[peopledefinition]{People:Definition}
+\item \hyperref[lightsinstance]{Lights:Instance} / \hyperref[lightsdefinition]{Lights:Definition}
+\item \hyperref[electricequipmentinstance]{ElectricEquipment:Instance} / \hyperref[electricequipmentdefinition]{ElectricEquipment:Definition}
+\item \hyperref[gasequipmentinstance]{GasEquipment:Instance} / \hyperref[gasequipmentdefinition]{GasEquipment:Definition}
+\item \hyperref[hotwaterequipmentinstance]{HotWaterEquipment:Instance} / \hyperref[hotwaterequipmentdefinition]{HotWaterEquipment:Definition}
+\item \hyperref[steamequipmentinstance]{SteamEquipment:Instance} / \hyperref[steamequipmentdefinition]{SteamEquipment:Definition}
+\item \hyperref[otherequipmentinstance]{OtherEquipment:Instance} / \hyperref[otherequipmentdefinition]{OtherEquipment:Definition}
+\item \hyperref[electricequipmentiteaircooledinstance]{ElectricEquipment:ITE:AirCooled:Instance} / \hyperref[electricequipmentiteaircooleddefinition]{ElectricEquipment:ITE:AirCooled:Definition}
+\end{itemize}
+
+The \textbf{Definition} object holds the physical characteristics of the load: the design level calculation method, the level values (per floor area, per person, or absolute), and the heat gain fractions, and any other similar applicable characteristics (CO2 Generation Rate, Return Air Fraction, etc). Because a definition does not reference any zone or space, it can be shared by any number of instance objects.
+
+The \textbf{Instance} object holds at least the zone/space assignment, the operating schedule, and the end-use subcategory, and any other attributes that are specific to a particular installation. It references its definition by name.
+
+This separation makes it straightforward to apply the same load characteristics to many zones or spaces without duplicating the physical data. For example, a single \texttt{ElectricEquipment:Definition} describing a standard workstation can be shared by dozens of \texttt{ElectricEquipment:Instance} objects, each with its own zone and schedule and end-use subcategory.
+
+
+In addition, each Instance object carries a \textbf{Multiplier} field (default 1) which multiplies the design level from the referenced definition. A definition can thus describe a single physical item (one workstation defined with an absolute Watts value, one light bulb, one server unit), with each instance specifying how many of them are installed.
+
 \subsection{People}\label{people}
 
 The people statement is used to model the occupant's effect on the space conditions. The following definition addresses the basic affects as well as providing information that can be used to report the thermal comfort of a group of occupants. The Fanger, Pierce Two-Node, Kansas State University Two-Node, ASHRAE Standard 55 Elevated Air Cooling Effect model, and ASHRAE Standard 55 Ankle Draft Risk thermal comfort models are available in EnergyPlus. A user may select any of these models for each People statement by simply adding the appropriate choice keyword after the air velocity schedule name. Thermal comfort calculations will only be made for people statements that include specific requests for these thermal comfort models. This object also requires input of carbon dioxide generation rate based on people activity level for zone carbon dioxide simulations.
@@ -193,6 +219,8 @@ Wrestling, competitive & 738 to 909 & 410 to 505 & 7.0 to 8.7 \tabularnewline
 This field specifies the type of Mean Radiant Temperature (MRT) calculation the user wishes to use for the thermal comfort model. At the present time, there are three options for MRT calculation type: enclosure averaged, surface weighted, and a list of angle factors. The default calculation is ``EnclosureAveraged'' and is used if field is left blank. In the enclosure averaged MRT calculation, the MRT used for the thermal comfort calculations is for an ``average'' point in the zone. MRT is calculated based on an area-emissivity weighted average of all of the surfaces in the same radiant enclosure (one or more \hyperref[space]{Spaces}). In cases where the emissivity of all of the surfaces are sufficiently small (near zero), the mean radiant temperature will be set to the mean air temperature of the space to avoid divide by zero errors. The other MRT calculation type is ``SurfaceWeighted''. The goal of this calculation type is to estimate a person in the space close to a particular surface without having to define exact view factors for all of the surfaces and the location of the person in the space. The MRT used in the thermal comfort calculations when the ``surface weighted'' calculation type is selected is actually the average of the temperature of the surface to which the person is closest (defined by the next field ``Surface Name'') and the enclosure averaged MRT (defined above). The surface temperature alone is not used because in theory the maximum view factor from a person to any flat surface is roughly 0.5. In the ``surfaceweighted'' calculation, the surface in question actually gets slightly more weighting than 50\% since the surface selected is still a part of the zone average MRT calculation. Again, this simplification was made to avoid the specification of view factors and the exact location of the person.
 
 A third option is to use ``AngleFactor''. This option allows for more explicit positioning of the person within the space by defining the angle factors from the person to the various surfaces in the enclosure. This option requires the user to list the surfaces that the person can see from a radiation standpoint and also define the angle (or view) factor for each surface. The \hyperref[comfortviewfactorangles]{ComfortViewFactorAngles} object (see next object description) is intended to give the user this opportunity.
+
+While this field will impact the \hyperref[zone-thermal-comfort-mean-radiant-temperature-c]{Zone Thermal Comfort Mean Radiant Temperature}, it can also be used in conjunction with the \hyperref[zonemrtcalculation]{ZoneMRTCalculation} input object to determine the actual MRT for a zone. This can have a direct impact on systems that are controlled on MRT or Operative Temperature.
 
 \paragraph{Field: Surface Name/Angle Factor List Name}\label{field-surface-nameangle-factor-list-name}
 
@@ -775,6 +803,282 @@ The time when any zone is occupied that the combination of humidity ratio and op
 
 The time when any zone is occupied that the combination of humidity ratio and operative temperature is not in the ASHRAE 55-2004 summer or winter clothes region (see above)
 
+
+\subsection{People:Instance}\label{peopleinstance}
+
+The people statement is used to model the occupant's effect on the space conditions. The following definition addresses the basic affects as well as providing information that can be used to report the thermal comfort of a group of occupants. The Fanger, Pierce Two-Node, Kansas State University Two-Node, ASHRAE Standard 55 Elevated Air Cooling Effect model, and ASHRAE Standard 55 Ankle Draft Risk thermal comfort models are available in EnergyPlus. A user may select any of these models for each People statement by simply adding the appropriate choice keyword in the associated \hyperref[peopledefinition]{People:Definition} object. Thermal comfort calculations will only be made for people statements that include specific requests for these thermal comfort models. This object also requires input of carbon dioxide generation rate based on people activity level for zone carbon dioxide simulations.
+
+\subsubsection{Inputs}\label{inputs-025-people-instance}
+
+\paragraph{Field: Name}\label{field-name-024-people-instance}
+
+The name of the People:Instance object. Must be unique across all People objects.
+
+\paragraph{Field: People Definition Name}\label{field-people-definition-name}
+
+The name of the \hyperref[peopledefinition]{People:Definition} object that specifies the occupancy calculation method, heat gain fractions, CO\(_{2}\) generation rate, and thermal comfort model types for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{field-zone-or-zonelist-name-000-people-instance}
+
+This field applies this People:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the people/area and area/person options of the Number of People Calculation Method to place a varying number of people at the same density in each zone or space. The names of the actual people objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}People Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+When multiple people objects are defined for the same zone, and they have different SET, PMV, Heat/Cold Stress Temperature Threshold, a warning message will be produced to caution users that zone-level resilience metrics results will only be meaningful if each zone has at most one People object defined. This is especially true for SET Degree-Hours and Discomfort-Weighted Exceedance Hours tables. In the SET Degree-Hour case, this is because in the calculation of zone level Heating/Cooling SET Degree-Hours, if multiple People objects are defined for one zone, EnergyPlus will only use the SET of one People object to compute the zone level SET Degree-Hours, and neglecting the SET of other people object defined in the same zone. As a result, when multiple people objects with different SET, PMV, or Heat/Cold Stress Temperature are linked to one zone, the corresponding zone-level resilience metrics results might be invalid.
+
+\paragraph{Field: Number of People Schedule Name}\label{field-number-of-people-schedule-name-people-instance}
+
+This field is the name of the schedule (ref: Schedules) that modifies the number of people parameter (see Number of People Calculation Method in the associated People:Definition object). The schedule values can be any positive number. The actual number of people in a zone as defined by this statement is the product of the number of people and the value of this schedule.
+
+\paragraph{Field: Activity Level Schedule Name}\label{field-activity-level-schedule-name-people-instance}
+
+This field is the name of the schedule that determines the amount of heat gain per person in the zone under design conditions. This heat gain impacts the basic zone heat balance as well as the modeling of thermal comfort. This value is modified somewhat based on a correlation to account for variations in space temperature. The schedule values may be any positive number and the units for this parameter is Watts per person. This schedule represents the total heat gain per person including convective, radiant, and latent. An internal algorithm is used to determine what fraction of the total is sensible and what fraction is latent. Then, the sensible portion is divided into radiant and convective portions using the value specified for Fraction Radiant in the associated People:Definition. See the Engineering Reference document for more details.
+
+Values for activity level can range anywhere from approximately 100-150 Watts per person for most office activities up to over 900 Watts per person for strenuous physical activities such as competitive wrestling. The following table (Table~\ref{table:metabolic-rates-for-various-activities}) is based on Table~\ref{table:wind-speed-profile-coefficients-ashrae} from the 2005 ASHRAE Handbook of Fundamentals, page 8.6. In addition to the information from the ASHRAE HOF, there is an added column of values in W/Person such as necessary for the activity level schedule values. This column uses the standard adult body surface area of 1.8 m\(^{2}\) to multiply the activity levels in W/m\(^{2}\) that are used in the table. Warnings are produced when the activity level schedule values fall outside normal ranges. Having too low or too high values can also skew thermal comfort reporting values.
+
+
+\paragraph{Field: Surface Name/Angle Factor List Name}\label{field-surface-nameangle-factor-list-name-people-instance}
+
+This field is only valid when the associated \hyperref[peopledefinition]{People:Definition} has Mean Radiant Temperature Calculation Type set to ``SurfaceWeighted'' or ``AngleFactor''. In the case of ``SurfaceWeighted'', the field is the name of a surface within the enclosure the people are residing. This surface will be used in the MRT calculation to come up with a more representative MRT for a person near a particular surface. The MRT used for thermal comfort calculations using the ``SurfaceWeighted'' MRT calculation method is the average of the temperature of the surface specified in this field and the enclosure-averaged MRT. In the case of ``AngleFactor'', the field is the name of a \hyperref[comfortviewfactorangles]{ComfortViewFactorAngles} input object defined elsewhere. This field is required when the definition's Mean Radiant Temperature Calculation Type is set to ``SurfaceWeighted'' or ``AngleFactor'' and one of the following thermal comfort models is active: Fanger, Pierce, KSU, CoolingEffectASH55 or AnkleDraftASH55.
+
+\paragraph{Field: Work Efficiency Schedule Name}\label{field-work-efficiency-schedule-name-people-instance}
+
+This field is the name of the schedule that determines the efficiency of energy usage within the human body that will be used for thermal comfort calculations. Note that all energy produced by the body is assumed to be converted to heat for the zone heat balance calculation. A value of zero corresponds to all of the energy produced in the body being converted to heat. A value of unity corresponds to all of the energy produced in the body being converted to mechanical energy. The values for this parameter defined in the schedule must be between 0.0 and 1.0. Any value greater than zero will result in a reduction of heat that impacts the thermal comfort energy balance of a person within the space, resulting in PMV results appearing lower than expected.~ Ensure that if this value is non-zero, the base activity level is chosen to ensure that the net activity converted to heat and zone conditions are sufficient to maintain thermal comfort. This field is required to run one of the following thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 or AnkleDraftASH55. If a schedule is listed here but no thermal comfort model is selected, then a warning message will be produced and this schedule will be listed as unused in the error file.
+
+\paragraph{Field: Clothing Insulation Calculation Method}\label{field-clothing-insulation-calculation-method-people-instance}
+
+This field is a key/choice field that tells which of the next two fields are filled and is descriptive of the method for calculating the clothing insulation value of occupants (people) in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  ClothingInsulationSchedule
+\end{itemize}
+
+With this choice, the method used will be a straight insertion of the scheduled clothing insulation values of occupants (people).~ (The Clothing Insulation Schedule Name field should be filled.)
+
+\begin{itemize}
+\tightlist
+\item
+  DynamicClothingModelASHRAE55
+\end{itemize}
+
+With this choice, the method used will be the dynamic predictive clothing insulation model developed by Schiavon and Lee (2013) based on 6,333 selected observations taken from ASHRAE RP-884 and RP-921 databases. It varies the clothing insulation as a function of outdoor air temperature measured at 6am as illustrated in Figure~\ref{fig:graphical-representation-of-the-dynamic} in the \hyperref[people]{People} object documentation.
+
+\begin{itemize}
+\tightlist
+\item
+  CalculationMethodSchedule
+\end{itemize}
+
+With this choice, the method used can be either the ClothingInsulationSchedule or the DynamicClothingModelASHRAE55, depending on a schedule (to be entered as the next field) that determines which method to use in different time of a day. When this option is chosen, the next field ``Clothing Insulation Calculation Method Schedule Name'' is a required input.
+
+
+\paragraph{Field: Clothing Insulation Calculation Method Schedule Name}\label{field-clothing-insulation-calculation-method-schedule-name-people-instance}
+
+This field specifies which clothing insulation method (ClothingInsulationSchedule or DynamicClothingModelASHRAE55) to use at a particular time of the day. A schedule value of 1 means the ClothingInsulationSchedule method, and 2 means the DynamicClothingModelASHRAE55 method. This field is only required when the ``Clothing Insulation Calculation Method'' field is set to \textbf{CalculationMethodSchedule}. If this field is left blank, the specified clothing insulation calculation method will be used and not changed during the simulation.
+
+\paragraph{Field: Clothing Insulation Schedule Name}\label{field-clothing-insulation-schedule-name-people-instance}
+
+This field is the name of the schedule that defines the amount of clothing being worn by a typical zone occupant during various times in the simulation period. The choice from the Clothing Insulation Calculation Method field should be ``\textbf{ClothingInsulationSchedule}''. This parameter must be a positive real number and has units of Clo. Typical values for Clo can be seen in the ASHRAE 2009 HOF Table 7, page 9.8 (for clothing ensembles) and Table~\ref{table:window-modeling-options}, page 9.9 (for garment values) ) or \url{https://comfort.cbe.berkeley.edu/}. This field is required to run one of the following thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 or AnkleDraftASH55. If a schedule is listed here but no thermal comfort model is selected, then a warning message will be produced and this schedule will be listed as unused in the error file.
+
+\paragraph{Field: Air Velocity Schedule Name}\label{field-air-velocity-schedule-name-people-instance}
+
+This field is the name of the schedule that approximates the amount of air movement in the space as a function of time throughout the simulation period. The user has control over this parameter through the schedule that requires the individual numbers in the schedule to be positive real numbers having units of meters per second. This field is required to run one of the following thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 or AnkleDraftASH55. If a schedule is listed here but no thermal comfort model is selected, then a warning message will be produced and this schedule will be listed as unused in the error file.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-peopleinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the number of people from the referenced \hyperref[peopledefinition]{People:Definition} object.
+
+\paragraph{Field: Ankle Level Air Velocity Schedule Name}\label{field-ankle-level-air-velocity-schedule-name-people-instance}
+
+This field is the name of the schedule that approximates the amount of air movement at the occupants’ ankle level (0.1 m above floor level) as a function of time throughout the simulation period. The user has control over this parameter through the schedule that requires the individual numbers in the schedule to be positive real numbers having units of meters per second. This field is required to run the AnkleDraftASH55 thermal comfort model. If a schedule is listed here but no thermal comfort model is selected, then a warning message will be produced and this schedule will be listed as unused in the error file.
+
+\paragraph{Field: Cold Stress Temperature Threshold}\label{cold-stress-temperature-threshold-people-instance}
+
+This field is used in the calculation of hours of safety for cold events, which
+is defined as the longest duration (number of hours), starting from the
+beginning time of the risk period (e.g., the start time of a power outage) to
+not below a certain temperature threshold (specified in this field). If not
+specified, 60$^\circ$F (or 15.56$^\circ$C) will be used as the default temperature threshold.
+
+\paragraph{Field: Heat Stress Temperature Threshold}\label{heat-stress-temperature-threshold-people-instance}
+
+This field is used in the calculation of hours of safety for hot events, which
+is defined as the longest duration (number of hours), starting from the
+beginning time of the risk period (e.g., the start time of a power outage) to
+not above a certain temperature threshold (specified in this field). If not
+specified, 86$^\circ$F (or 30$^\circ$C) will be used as the default temperature threshold.
+
+An IDF example (simple, no thermal comfort):
+
+\begin{lstlisting}
+People:Definition,
+  Office People Def,          !- Name
+  People/Area,                !- Number of People Calculation Method
+  ,                           !- Number of People
+  0.11,                       !- People per Floor Area {person/m2}
+  ,                           !- Floor Area per Person {m2/person}
+  0.3,                        !- Fraction Radiant
+  Autocalculate,              !- Sensible Heat Fraction
+  3.82E-8;                    !- Carbon Dioxide Generation Rate {m3/s-W}
+
+People:Instance,
+  SPACE1-1 People,            !- Name
+  Office People Def,          !- People Definition Name
+  SPACE1-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  SPACE1-1 Occupancy Sch,     !- Number of People Schedule Name
+  ActSchd;                    !- Activity Level Schedule Name
+
+People:Instance,
+  SPACE2-1 People,            !- Name
+  Office People Def,          !- People Definition Name
+  SPACE2-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  SPACE2-1 Occupancy Sch,     !- Number of People Schedule Name
+  ActSchd;                    !- Activity Level Schedule Name
+\end{lstlisting}
+
+Global People example:
+
+\begin{lstlisting}
+ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
+
+People:Definition,
+  AllZones People Def,        !- Name
+  People/Area,                !- Number of People Calculation Method
+  ,                           !- Number of People
+  0.11,                       !- People per Floor Area {person/m2}
+  ,                           !- Floor Area per Person {m2/person}
+  0.3,                        !- Fraction Radiant
+  ,                           !- Sensible Heat Fraction
+  3.82E-8;                    !- Carbon Dioxide Generation Rate {m3/s-W}
+
+People:Instance,
+  AllZones with People,       !- Name
+  AllZones People Def,        !- People Definition Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  Occupancy Sch,              !- Number of People Schedule Name
+  ActSchd;                    !- Activity Level Schedule Name
+\end{lstlisting}
+
+\subsection{People:Definition}\label{peopledefinition}
+
+This object defines the occupancy calculation method, heat gain fractions, CO\(_{2}\) generation rate, and thermal comfort model types shared by one or more \hyperref[peopleinstance]{People:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-peopledefinition}
+
+\paragraph{Field: Name}\label{field-name-peopledefinition}
+
+The name of the People:Definition object. This name is referenced by the \textit{People Definition Name} field of \hyperref[peopleinstance]{People:Instance} instances.
+
+\paragraph{Field: Number of People Calculation Method}\label{field-number-of-people-calculation-method-people-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal number of occupants (people) in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{People} -- With this choice, the method used will be a straight insertion of the number of occupants (people). (The Number of People field should be filled.)
+\item
+  \textbf{People/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The People per Floor Area field should be filled.)
+\item
+  \textbf{Area/Person} -- With this choice, the method used will be a factor of floor area per person. (The Floor Area per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Number of People}\label{field-number-of-people-people-definition}
+
+This field is used to represent the maximum number of people in a zone that is then multiplied by a schedule fraction (see Number of People Schedule Name in the People instance). In EnergyPlus, this is slightly more flexible in that the number of people could be a ``diversity factor’’ applied to a schedule of real numbers. Note that while the schedule value can vary from hour to hour, the number of people field is constant for all simulation environments.
+
+\paragraph{Field: People per Floor Area}\label{field-people-per-zone-floor-area-people-definition}
+
+This factor (person/m\(^{2}\)) is used, along with the Zone or Space Floor Area to determine the maximum number of people as described in the Number of People field. The choice from the method field should be ``People/Area’’.
+
+\paragraph{Field: Floor Area per Person}\label{field-zone-floor-area-per-person-people-definition}
+
+This factor (m\(^{2}\)/person) is used, along with the Zone or Space Floor Area to determine the maximum number of people as described in the Number of People field. The choice from the method field should be ``Area/Person’’.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-people-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the type of heat being given off by people in a zone. The number specified in this field will be multiplied by the total sensible energy emitted by people to give the amount of long wavelength radiation gain from human beings in a zone. The remainder of the sensible load is assumed to be convective heat gain. Note that latent gains from people are not included in either the radiant or convective heat gains. See the Engineering Reference document for more details. Default value is 0.30.
+
+\paragraph{Field: Sensible Heat Fraction}\label{field-sensible-heat-fraction-people-definition}
+
+The user can use this field to specify a fixed sensible fraction for the heat gain due to this People:Definition object. Normally the program calculates the sensible/latent split; this field gives the user control over this split. This field is autocalculated: if the field is blank or \textbf{autocalculate}, the program will calculate the sensible/latent split; if a value is entered, it will be used as the sensible fraction of the current total heat gain.
+
+\paragraph{Field: Carbon Dioxide Generation Rate}\label{field-carbon-dioxide-generation-rate-people-definition}
+
+This numeric input field specifies carbon dioxide generation rate per person with units of m3/s-W. The total carbon dioxide generation rate from this object is:
+
+Number of People * People Schedule * People Activity * Carbon Dioxide Generation Rate. The default value is 3.82E-8 m3/s-W (obtained from ASHRAE Standard 62.1-2007 value at 0.0084 cfm/met/person over the general adult population). The maximum value can be 10 times the default value.
+
+\paragraph{Field: Enable ASHRAE 55 comfort warnings}\label{field-enable-ashrae-55-comfort-warnings-people-definition}
+
+This field accepts either ``Yes’’ or ``No’’ as values. When ``Yes’’ is specified, warnings are generated when the space conditions are outside of the ASHRAE 55 comfort range as discussed in the sections that follow titled ``Simplified ASHRAE 55-2004 Graph Related Outputs’’ and ``Simplified ASHRAE 55 Warnings.’’ The default is not to provide these warnings so if you want to know if your space is outside this comfort range you must set this field to Yes.
+
+\paragraph{Field: Mean Radiant Temperature Calculation Type}\label{field-mean-radiant-temperature-calculation-type-people-definition}
+
+This field specifies the type of Mean Radiant Temperature (MRT) calculation the user wishes to use for the thermal comfort model. At the present time, there are three options for MRT calculation type: enclosure averaged, surface weighted, and a list of angle factors. The default calculation is ``EnclosureAveraged’’ and is used if field is left blank. In the enclosure averaged MRT calculation, the MRT used for the thermal comfort calculations is for an ``average’’ point in the zone. MRT is calculated based on an area-emissivity weighted average of all of the surfaces in the same radiant enclosure (one or more \hyperref[space]{Spaces}). In cases where the emissivity of all of the surfaces are sufficiently small (near zero), the mean radiant temperature will be set to the mean air temperature of the space to avoid divide by zero errors. The other MRT calculation type is ``SurfaceWeighted’’. The goal of this calculation type is to estimate a person in the space close to a particular surface without having to define exact view factors for all of the surfaces and the location of the person in the space. The MRT used in the thermal comfort calculations when the ``surface weighted’’ calculation type is selected is actually the average of the temperature of the surface to which the person is closest (defined by the Surface Name/Angle Factor List Name field in the People instance) and the enclosure averaged MRT. The surface temperature alone is not used because in theory the maximum view factor from a person to any flat surface is roughly 0.5. In the ``surfaceweighted’’ calculation, the surface in question actually gets slightly more weighting than 50\% since the surface selected is still a part of the zone average MRT calculation.
+
+A third option is to use ``AngleFactor’’. This option allows for more explicit positioning of the person within the space by defining the angle factors from the person to the various surfaces in the enclosure. This option requires the user to list the surfaces that the person can see from a radiation standpoint and also define the angle (or view) factor for each surface. The \hyperref[comfortviewfactorangles]{ComfortViewFactorAngles} object (see next object description) is intended to give the user this opportunity.
+
+\paragraph{Field: Thermal Comfort Model Type (up to 7 allowed)}\label{field-thermal-comfort-model-type-up-to-7-allowed-people-definition}
+
+Up to seven optional fields trigger thermal comfort models within EnergyPlus. By entering the keywords Fanger, Pierce, KSU, AdaptiveASH55, AdaptiveCEN15251, CoolingEffectASH55, and AnkleDraftASH55, the user can request the Fanger, Pierce Two-Node, Kansas State University Two-Node, the adaptive comfort models of ASHRAE Standard 55 and CEN Standard 15251, ASHRAE Standard 55 Elevated Air Cooling Effect model, and ASHRAE Standard 55 Ankle Draft Risk model results. Detailed descriptions and requirements of the seven models are listed below.
+
+\begin{description}
+  \item[Fanger]
+  Fanger’s Comfort model is applied to calculate related thermal comfort metrics. Fanger Model PMV, PPD, and Clothing Surface Temperature are calculated and reported each time step. Extra fields required in the People instance for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
+
+  \item[Pierce]
+  The Pierce Two-Node model is applied to calculate related thermal comfort metrics. Pierce Model Effective Temperature PMV, Standard Effective Temperature PMV, Discomfort Index, Thermal Sensation Index, and Standard Effective Temperature are calculated and reported each time step. Extra fields required in the People instance for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
+
+  \item[KSU]
+  The KSU Two-Node Model is applied to calculate related thermal comfort metrics. KSU Model Thermal Sensation Vote is calculated and reported each time step. Note that the KSU model is computationally intensive and may noticeably increase the execution time of the simulation. Extra fields required in the People instance for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
+
+  \item[AdaptiveASH55]
+  Adaptive Comfort Model Based on ASHRAE Standard 55-2010 is applied to calculate related thermal comfort metrics. ASHRAE 55 Adaptive Model 90\% Acceptability Status, 80\% Acceptability Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported each time step. AdaptiveASH55 is only applicable when the running average outdoor air temperature for the past 7 days is between 10.0 and 33.5$^\circ$C.
+
+  \item[AdaptiveCEN15251]
+  Adaptive Comfort Model Based on European Standard EN15251-2007 is applied to calculate related thermal comfort metrics. CEN 15251 Adaptive Model Category I/II/II Status, Running Average Outdoor Air Temperature, and the Adaptive Model Temperature are calculated and reported each time step. AdaptiveCEN15251 is only applicable when the running average outdoor air temperature for the past 30 days is between 10.0 and 30.0$^\circ$C.
+
+  \item[CoolingEffectASH55]
+  ASHRAE 55-2017 Elevated Air Speed Cooling Effect Model is applied to calculate related thermal comfort metrics. Elevated Air Speed Cooling Effect, Cooling Effect Adjusted PMV, and Cooling Effect Adjusted PPD are calculated and reported each time step. Extra fields required in the People instance for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, and Air Velocity Schedule Name.
+
+  \item[AnkleDraftASH55]
+  ASHRAE 55-2017 Ankle Draft Risk Model is applied to calculate related thermal comfort metrics. Zone Thermal Comfort ASHRAE 55 Ankle Draft PPD is calculated and reported each time step. Extra fields required in the People instance for this model include Surface Name/Angle Factor List Name, Work Efficiency Schedule Name, Clothing Insulation Schedule Name, Air Velocity Schedule Name, and Ankle Level Air Velocity Schedule Name. Ankle draft PPD calculations are only applicable when relative air velocity is below 0.2 m/s, and the subject’s metabolic rate and clothing level should be kept below 1.3 met and 0.7 clo. PPD at ankle draft will be set to -1.0 if these conditions are not met.
+
+\end{description}
+
+For descriptions of the thermal comfort calculations, see the Engineering Reference document. Up to seven models may be specified simultaneously.
+
+An IDF example with thermal comfort:
+
+\begin{lstlisting}
+People:Definition,
+  Kitchen People Def,         !- Name
+  People,                     !- Number of People Calculation Method
+  25.2,                       !- Number of People
+  ,                           !- People per Floor Area {person/m2}
+  ,                           !- Floor Area per Person {m2/person}
+  0.3,                        !- Fraction Radiant
+  AUTOCALCULATE,              !- Sensible Heat Fraction
+  3.82E-8,                    !- Carbon Dioxide Generation Rate {m3/s-W}
+  No,                         !- Enable ASHRAE 55 Comfort Warnings
+  EnclosureAveraged,          !- Mean Radiant Temperature Calculation Type
+  Fanger;                     !- Thermal Comfort Model 1 Type
+
+People:Instance,
+  Kitchen_ZN_1_FLR_1,         !- Name
+  Kitchen People Def,         !- People Definition Name
+  Kitchen_ZN_1_FLR_1,         !- Zone or ZoneList or Space or SpaceList Name
+  BLDG_OCC_SCH,               !- Number of People Schedule Name
+  ACTIVITY_SCH,               !- Activity Level Schedule Name
+  ,                           !- Surface Name/Angle Factor List Name
+  WORK_EFF_SCH,               !- Work Efficiency Schedule Name
+  ClothingInsulationSchedule, !- Clothing Insulation Calculation Method
+  ,                           !- Clothing Insulation Calculation Method Schedule Name
+  CLOTHING_SCH,               !- Clothing Insulation Schedule Name
+  AIR_VELO_SCH;               !- Air Velocity Schedule Name
+\end{lstlisting}
+
 \subsection{Simplified ASHRAE 55 Warnings}\label{simplified-ashrae-55-warnings}
 
 The simplified ASHRAE 55 calculations may be computed for occupied zones and, possibly, warnings are shown on the .err file at the end of each simulated environment. To enable this option set the ``Enable ASHRAE 55 comfort warnings'' field of the \hyperref[people]{People} object to Yes. These warnings will not be generated by default.
@@ -1227,6 +1531,207 @@ The total heat gain from all lights in the space or zone. It is the sum of the f
 
 The electric power input for all lights in the space or zone. This will have the same value as Zone Lights Total Heating Rate or Energy (above).
 
+
+\subsection{Lights:Instance}\label{lightsinstance}
+
+The Lights statement allows you to specify information about a zone's electric lighting system, including design power level and operation schedule, and how the heat from lights is distributed thermally. Physical characteristics are specified in the associated \hyperref[lightsdefinition]{Lights:Definition} object.
+
+A zone may have multiple Lights statements. For example, one statement may describe the general lighting in the zone and another the task lighting. Or you can use multiple Lights statements for a zone that has two or more general lighting systems that differ in design level, schedule, etc.
+
+\subsubsection{Inputs}\label{inputs-2-021-lights-instance}
+
+\paragraph{Field: Name}\label{field-name-2-020-lights-instance}
+
+The name of the Lights:Instance object.
+
+\paragraph{Field: Lights Definition Name}\label{field-lights-definition-name}
+
+The name of the \hyperref[lightsdefinition]{Lights:Definition} object that specifies the design level calculation method and heat gain fractions for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{lights-field-zone-or-zonelist-name-000-lights-instance}
+
+This field applies this Lights:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying lighting load at the same density in each zone or space. The names of the actual lights objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}Lights Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-002-lights-instance}
+
+The name of the schedule that modifies the lighting power design level (see Design Level Calculation Method field in the associated Lights:Definition object). The schedule values can be any positive number. The electrical input for lighting in a particular timestep is the product of the design level and the value of this schedule in that timestep. If the design level is the maximum lighting power input the schedule should contain values between 0.0 and 1.0.
+
+\paragraph{Field: Fraction Replaceable}\label{field-fraction-replaceable-lights-instance}
+
+This field defines the daylighting control for the Lights object.
+
+If \textbf{\hyperref[daylightingcontrols-000]{Daylighting:Controls}} is specified for the space or zone, this field is used as an on/off flag for dimming controls. If set to 0.0, the lights are not dimmed by the daylighting controls. If set to 1.0, the lights are allowed to be dimmed by the applicable daylighting control. If daylighting controls are operating in the space or zone, all of the applicable Lights objects with a Fraction Replaceable greater than zero will be reduced by a multiplicative factor that accounts for how much the electric lighting is lowered due to daylighting (ref. \hyperref[daylighting-lighting-power-multiplier-1]{Daylighting Lighting Power Multiplier}).
+
+\paragraph{Field: Multiplier}\label{field-multiplier-lightsinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[lightsdefinition]{Lights:Definition} object. It allows a single definition describing one physical item (e.g., a single light bulb defined with an absolute Lighting Level in Watts) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-002-lights-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Task Lights'', ``Hall Lights'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} objects). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the lights will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and the LEED EAp2-4/5. Performance Rating Method Compliance table.
+
+\paragraph{Field: Return Air Heat Gain Node Name}\label{field-return-air-heat-gain-node-name-lights-instance}
+
+Name of the return air node for this heat gain. If left blank, it defaults to the first return air node for the zone containing this Lights object. Leave blank when using a \hyperref[zonelist]{ZoneList} name. See Figure~\ref{fig:vertical-section-through-a-zone-and-its}.
+
+\paragraph{Field: Exhaust Air Heat Gain Node Name}\label{field-exhaust-air-heat-gain-node-name-lights-instance}
+
+Name of the exhaust air node for this heat gain. If left blank, no heat gain from return air fraction will be added to the zone exhaust node. When the exhaust node name is entered, the return air heat gain will be shared by both return and exhaust nodes. The equipment can draw air from the exhaust node, but the inlet air properties is combined properties with mixing mass flow rates of both nodes and added lights heat gain.
+
+An IDF example:
+
+\begin{lstlisting}
+Lights:Definition,
+  Office Lights Def,          !- Name
+  LightingLevel,              !- Design Level Calculation Method
+  1039.706,                   !- Lighting Level {W}
+  ,                           !- Watts per Floor Area {W/m2}
+  ,                           !- Watts per Person {W/person}
+  0.0,                        !- Return Air Fraction
+  0.4,                        !- Fraction Radiant
+  0.2;                        !- Fraction Visible
+
+Lights:Instance,
+  RIGHT FORK Lights,          !- Name
+  Office Lights Def,          !- Lights Definition Name
+  RIGHT FORK,                 !- Zone or ZoneList or Space or SpaceList Name
+  Office Lighting,            !- Schedule Name
+  1.0,                        !- Fraction Replaceable
+  1,                          !- Multiplier
+  GeneralLights;              !- End-Use Subcategory
+
+Lights:Instance,
+  LEFT FORK Non Replaceable Lights,  !- Name
+  Office Lights Def,          !- Lights Definition Name
+  LEFT FORK,                  !- Zone or ZoneList or Space or SpaceList Name
+  Office Lighting,            !- Schedule Name
+  0.0,                        !- Fraction Replaceable
+  1,                          !- Multiplier
+  GeneralLights;              !- End-Use Subcategory
+\end{lstlisting}
+
+Global Lights example:
+
+\begin{lstlisting}
+ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
+
+Lights:Definition,
+  AllZones Lights Def,        !- Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Lighting Level {W}
+  16,                         !- Watts per Floor Area {W/m2}
+  ,                           !- Watts per Person {W/person}
+  0.2,                        !- Return Air Fraction
+  0.59,                       !- Fraction Radiant
+  0.2;                        !- Fraction Visible
+
+Lights:Instance,
+  AllZones with Lights,       !- Name
+  AllZones Lights Def,        !- Lights Definition Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  LIGHTS-1,                   !- Schedule Name
+  0;                          !- Fraction Replaceable
+\end{lstlisting}
+
+\subsection{Lights:Definition}\label{lightsdefinition}
+
+This object defines the design-level calculation method and heat gain fractions shared by one or more \hyperref[lightsinstance]{Lights:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-2-lightsdefinition}
+
+\paragraph{Field: Name}\label{field-name-lightsdefinition}
+
+The name of the Lights:Definition object. This name is referenced by the \textit{Lights Definition Name} field of \hyperref[lightsinstance]{Lights:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-lights-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal lighting level in the Zone. The key/choice options are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{LightingLevel} -- With this choice, the method used will be a straight insertion of the lighting level (Watts) for the Zone. (The Lighting Level field should be filled.)
+\item
+  \textbf{Watts/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Watts per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person} -- With this choice, the method used will be a factor of lighting level (watts) per person. (The Watts per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Lighting Level}\label{field-lighting-level-lights-definition}
+
+This is typically the maximum electrical power input (in Watts) to lighting in a zone, including ballasts, if present. This value is multiplied by a schedule fraction (see Schedule Name in the Lights instance) to get the lighting power in a particular timestep. In EnergyPlus, this is slightly more flexible in that the lighting design level could be a ``diversity factor'' applied to a schedule of real numbers.
+
+\paragraph{Field: Watts per Floor Area}\label{field-watts-per-zone-floor-area-lights-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Floor Area to determine the maximum lighting level as described in the Lighting Level field. The choice from the method field should be ``Watts/Area''.
+
+\paragraph{Field: Watts per Person}\label{field-watts-per-person-lights-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum lighting level as described in the Lighting Level field. The choice from the method field should be ``Watts/Person''.
+
+\paragraph{Heat Gains from Lights:}\label{heat-gains-from-lights-lights-definition}
+
+The electrical input to lighting ultimately appears as heat that contributes to zone loads or to return air heat gains. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Return Air Fraction, Fraction Radiant and Fraction Visible. A fourth, defined as the fraction of the heat from lights convected to the zone air, is calculated by the program as:
+
+$$ f_{\textrm{convected}} = 1.0 - (\textrm{Return Air Fraction} + \textrm{Fraction Radiant} + \textrm{Fraction Visible}) $$
+
+You will get an error message if Return Air Fraction + Fraction Radiant + Fraction Visible exceeds 1.0.
+
+These fractions depend on the type of lamp and luminaire, whether the luminaire is vented to the return air, etc.
+
+\paragraph{Field: Return Air Fraction}\label{field-return-air-fraction-lights-definition}
+
+The fraction of the heat from lights that goes into the zone return air (i.e., into the zone outlet node). If the return air flow is zero or the zone has no return air system, the program will put this fraction into the zone air. Return Air Fraction should be non-zero only for luminaires that are return-air ducted~ (see Table~\ref{table:approximate-values-of-return-air-fraction} and Figure \ref{fig:vertical-section-through-a-zone-and-its}). (However, see the field ``Return Air Fraction Is Calculated from Plenum Temperature,'' below, for an approach to modeling the case where Return Air Fraction is caused by \emph{conduction} between a luminaire that is in contact with a return-air plenum.)
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-1-lights-definition}
+
+The fraction of heat from lights that goes into the zone as long-wave (thermal) radiation. The program calculates how much of this radiation is absorbed by the inside surfaces of the zone according the area times thermal absorptance product of these surfaces.
+
+\paragraph{Field: Fraction Visible}\label{field-fraction-visible-lights-definition}
+
+The fraction of heat from lights that goes into the zone as visible (short-wave) radiation. The program calculates how much of this radiation is absorbed by the inside surfaces of the zone according the area times solar absorptance product of these surfaces.
+
+Approximate values of Return Air Fraction, Fraction Radiant and Fraction Visible are given in Table~\ref{table:approximate-values-of-return-air-fraction} for overhead fluorescent lighting for a variety of luminaire configurations. The data is based on ASHRAE 1282-RP ``Lighting Heat Gain Distribution in Buildings'' by Daniel E. Fisher and Chanvit Chantrasrisalai.
+
+% table 14
+Approximate values of these fractions for overhead fluorescent lighting for different luminaire configurations are given in Table~\ref{table:approximate-values-of-return-air-fraction} in the \hyperref[lights-000]{Lights} object documentation.
+
+\paragraph{Field: Return Air Fraction Calculated from Plenum Temperature}\label{field-return-air-fraction-calculated-from-plenum-temperature-lights-definition}
+
+Accepts values Yes or No (the default). Yes is for advanced used only. In this case the program will calculate the return air fraction by assuming that it is due to conduction of some of the light heat into the zone's return air plenum and that the amount of the conduction depends on the plenum air temperature. A Yes value should only be used for luminaires that are recessed and non-vented, as shown in Figure~\ref{fig:vertical-section-through-a-zone-and-its}.
+
+The value you enter for the Return Air Fraction field will be ignored and you can enter, for fluorescent lighting, Fraction Radiant = 0.37 and Fraction Visible = 0.18, as indicated in Table~\ref{table:approximate-values-of-return-air-fraction}.
+
+This feature requires that the coefficients described below be determined from measurements or detailed calculations since they are very sensitive to the luminaire type, lamp type, thermal resistance between fixture and plenum, etc.
+
+If ``Return Air Fraction Is Calculated from Plenum Temperature'' = Yes, the return air fraction is calculated \emph{each timestep} from the following empirical correlation:
+
+\begin{equation}
+  (\rm{Return Air Fraction})_{\rm{calculated}} = C_{1} - C_{2} \times T_{\rm{plenum}}
+\end{equation}
+
+where T\(_{\rm{plenum}}\) is the previous-time-step value of the return plenum air temperature (C),
+
+and C\(_{1}\) and C\(_{2}\) are the values of the coefficients entered in the next two fields.
+
+To compensate for the change in the return air fraction relative to its input value, the program modifies Fraction Radiant and \(f_{\rm{convected}}\) by a scale factor such that
+
+\begin{equation}
+  (\rm{Return Air Fraction})_{\rm{calculated}} + (\rm{Fraction Radiant})_{\rm{modified}} + (f_{\rm{convected}})_{\rm{modified}} + (\rm{Fraction Visible})_{\rm{input}} = 1.0
+\end{equation}
+
+It is assumed that Fraction Visible is a constant equal to its input value.
+
+\paragraph{Field: Return Air Fraction Function of Plenum Temperature Coefficient 1}\label{field-return-air-fraction-function-of-plenum-temperature-coefficient-1-lights-definition}
+
+The coefficient C\(_{1}\) in the equation for (Return Air Fraction)\(_{calculated}\).
+
+\paragraph{Field: Return Air Fraction Function of Plenum Temperature Coefficient 2}\label{field-return-air-fraction-function-of-plenum-temperature-coefficient-2-lights-definition}
+
+The coefficient C\(_{2}\) in the equation for (Return Air Fraction)\(_{calculated}\). Its units are 1/$^\circ$C.
+
+See Figure~\ref{fig:vertical-section-through-a-zone-and-its} in the \hyperref[lights-000]{Lights} object documentation for a vertical section through a zone and its return air plenum showing recessed lighting.
+
 \subsection{ElectricEquipment}\label{electricequipment}
 
 The object models equipment in the zone which consumes electricity, such as computers, televisions, and cooking equipment, also known as ``plug loads.'' All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified below.
@@ -1345,6 +1850,147 @@ ElectricEquipment,
   0.3,                        !- Fraction Radiant
   0;                          !- Fraction Lost
 \end{lstlisting}
+
+
+\subsection{ElectricEquipment:Instance}\label{electricequipmentinstance}
+
+The object models equipment in the zone which consumes electricity, such as computers, televisions, and cooking equipment, also known as ``plug loads.'' All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified in the associated \hyperref[electricequipmentdefinition]{ElectricEquipment:Definition} object.
+
+\subsubsection{Inputs}\label{inputs-3-019-ee-instance}
+
+\paragraph{Field: Name}\label{field-name-3-017-ee-instance}
+
+The name of the ElectricEquipment:Instance object.
+
+\paragraph{Field: Electric Equipment Definition Name}\label{field-electric-equipment-definition-name}
+
+The name of the \hyperref[electricequipmentdefinition]{ElectricEquipment:Definition} object that specifies the design level calculation method and heat gain fractions for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{eleceq-field-zone-or-zonelist-name-000-ee-instance}
+
+This field applies this ElectricEquipment:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying equipment load at the same density in each zone or space. The names of the actual electric equipment objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}ElectricEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-1-001-ee-instance}
+
+This field is the name of the schedule that modifies the design level parameter for electric equipment (see Design Level Calculation Method field in the associated ElectricEquipment:Definition object). The schedule values can be any positive number. The actual electrical input for equipment in a zone as defined by this statement is the product of the design level and the value of this schedule.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-electricequipmentinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[electricequipmentdefinition]{ElectricEquipment:Definition} object. It allows a single definition describing one physical item (e.g., defined with an absolute Watts value) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-1-001-ee-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Computers'', ``Copy Machines'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} objects). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the equipment will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and the LEED Summary table EAp2-4/5. Performance Rating Method Compliance.
+
+An IDF example:
+
+\begin{lstlisting}
+ElectricEquipment:Definition,
+  Residential ElecEq Def,     !- Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  10.0,                       !- Watts per Floor Area {W/m2}
+  ,                           !- Watts per Person {W/person}
+  0.0,                        !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0.0;                        !- Fraction Lost
+
+ElectricEquipment:Instance,
+  DORM ROOMS ElecEq ,         !- Name
+  Residential ElecEq Def,     !- Electric Equipment Definition Name
+  DORM ROOMS,                 !- Zone or ZoneList or Space or SpaceList Name
+  Residential Equipment Sch,  !- Schedule Name
+  1,                          !- Multiplier
+  Dorms;                      !- End-Use Subcategory
+
+ElectricEquipment:Instance,
+  COMMON AREAS ElecEq ,       !- Name
+  Residential ElecEq Def,     !- Electric Equipment Definition Name
+  COMMON AREAS,               !- Zone or ZoneList or Space or SpaceList Name
+  Residential Equipment Sch,  !- Schedule Name
+  1,                          !- Multiplier
+  Common;                     !- End-Use Subcategory
+\end{lstlisting}
+
+Global ElectricEquipment example:
+
+\begin{lstlisting}
+ZoneList,AllOccupiedZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
+
+ElectricEquipment:Definition,
+  AllZones ElecEq Def,        !- Name
+  Watts/Person,               !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  ,                           !- Watts per Floor Area {W/m2}
+  96,                         !- Watts per Person {W/person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0;                          !- Fraction Lost
+
+ElectricEquipment:Instance,
+  AllZones with Electric Equipment,  !- Name
+  AllZones ElecEq Def,        !- Electric Equipment Definition Name
+  AllOccupiedZones,           !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1;                    !- Schedule Name
+\end{lstlisting}
+
+\subsection{ElectricEquipment:Definition}\label{electricequipmentdefinition}
+
+This object defines the design-level calculation method and heat gain fractions shared by one or more \hyperref[electricequipmentinstance]{ElectricEquipment:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-3-electricequipmentdefinition}
+
+\paragraph{Field: Name}\label{field-name-electricequipmentdefinition}
+
+The name of the ElectricEquipment:Definition object. This name is referenced by the \textit{Electric Equipment Definition Name} field of \hyperref[electricequipmentinstance]{ElectricEquipment:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-1-ee-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal electric equipment level in the Zone or Space. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the method used will be a straight insertion of the electric equipment level (Watts) for the Zone. (The Design Level field should be filled.)
+\item
+  \textbf{Watts/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Watts per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person} -- With this choice, the method used will be a factor of equipment level (watts) per person. (The Watts per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Design Level}\label{field-design-level-000-ee-definition}
+
+This field (in Watts) is typically used to represent the maximum electrical input to equipment in a zone that is then multiplied by a schedule fraction (see Schedule Name in the ElectricEquipment instance). In EnergyPlus, this is slightly more flexible in that the electric equipment design level could be a ``diversity factor'' applied to a schedule of real numbers. Note that while the schedule value can vary from hour to hour, the design level field is constant for all simulation environments.
+
+\paragraph{Field: Watts per Floor Area}\label{field-watts-per-zone-floor-area-1-ee-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Floor Area to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``Watts/Area''.
+
+\paragraph{Field: Watts per Person}\label{field-watts-per-person-1-ee-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``Watts/Person''.
+
+\paragraph{Heat Gains from Electric Equipment:}\label{heat-gains-from-electric-equipment-ee-definition}
+
+The electrical input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from electric equipment convected to the zone air, is calculated by the program as:
+
+\begin{equation}
+  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+\end{equation}
+
+You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
+
+\paragraph{Field: Fraction Latent}\label{field-fraction-latent-ee-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of latent heat given off by electric equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by electric equipment to give the amount of latent energy produced by the electric equipment. This energy affects the moisture balance within the zone.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-2-ee-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of long-wave radiant heat being given off by electric equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by electric equipment to give the amount of long wavelength radiation gain from electric equipment in a zone.
+
+\paragraph{Field: Fraction Lost}\label{field-fraction-lost-ee-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of ``lost'' heat being given off by electric equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by electric equipment to give the amount of heat which is ``lost'' and does not impact the zone energy balances. This might correspond to electrical energy converted to mechanical work or heat that is vented to the atmosphere.
 
 \subsection{GasEquipment}\label{gasequipment}
 
@@ -1469,6 +2115,152 @@ GasEquipment,
   0.0000000E+00;              !- Fraction Lost
 \end{lstlisting}
 
+
+\subsection{GasEquipment:Instance}\label{gasequipmentinstance}
+
+The object models equipment in the zone which consumes natural gas, such as cooking equipment or a gas fireplace. All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified in the associated \hyperref[gasequipmentdefinition]{GasEquipment:Definition} object.
+
+\subsubsection{Inputs}\label{inputs-4-017-gas-instance}
+
+\paragraph{Field: Name}\label{field-name-4-014-gas-instance}
+
+The name of the GasEquipment:Instance object.
+
+\paragraph{Field: Gas Equipment Definition Name}\label{field-gas-equipment-definition-name}
+
+The name of the \hyperref[gasequipmentdefinition]{GasEquipment:Definition} object that specifies the design level calculation method, heat gain fractions, and CO\(_{2}\) generation rate for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{gaseq-field-zone-or-zonelist-name-000-gas-instance}
+
+This field applies this GasEquipment:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying equipment load at the same density in each zone or space. The names of the actual gas equipment objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}GasEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-2-001-gas-instance}
+
+This field is the name of the schedule that modifies the design level parameter for gas equipment (see Design Level Calculation Method field in the associated GasEquipment:Definition object). The schedule values can be any positive number. The actual energy input for gas equipment in a zone as defined by this statement is the product of the design level and the value of this schedule.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-gasequipmentinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[gasequipmentdefinition]{GasEquipment:Definition} object. It allows a single definition describing one physical item (e.g., defined with an absolute Watts value) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-2-001-gas-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Cooking'', ``Clothes Drying'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} objects). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the equipment will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and the LEED Summary table EAp2-4/5 Performance Rating Method Compliance.
+
+An IDF example:
+
+\begin{lstlisting}
+GasEquipment:Definition,
+  Kitchen GasEq Def,          !- Name
+  EquipmentLevel,             !- Design Level Calculation Method
+  29287.51,                   !- Design Level {W}
+  ,                           !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/Person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0,                          !- Fraction Lost
+  0;                          !- Carbon Dioxide Generation Rate {m3/s-W}
+
+GasEquipment:Instance,
+  DORM ROOMS GasEq,           !- Name
+  Kitchen GasEq Def,          !- Gas Equipment Definition Name
+  DORM ROOMS,                 !- Zone or ZoneList or Space or SpaceList Name
+  Gas Eq Sch,                 !- Schedule Name
+  1,                          !- Multiplier
+  Cooking;                    !- End-Use Subcategory
+
+GasEquipment:Instance,
+  COMMON AREAS GasEq,         !- Name
+  Kitchen GasEq Def,          !- Gas Equipment Definition Name
+  COMMON AREAS,               !- Zone or ZoneList or Space or SpaceList Name
+  Gas Eq Sch,                 !- Schedule Name
+  1,                          !- Multiplier
+  Cooking;                    !- End-Use Subcategory
+\end{lstlisting}
+
+Global GasEquipment example:
+
+\begin{lstlisting}
+ZoneList,OfficeZones,Left Fork, Middle Fork, Right Fork;
+
+GasEquipment:Definition,
+  OfficeZones GasEq Def,      !- Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  197,                        !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/Person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0;                          !- Fraction Lost
+
+GasEquipment:Instance,
+  Office Zones with Gas,      !- Name
+  OfficeZones GasEq Def,      !- Gas Equipment Definition Name
+  OfficeZones,                !- Zone or ZoneList or Space or SpaceList Name
+  Gas Eq Sch;                 !- Schedule Name
+\end{lstlisting}
+
+\subsection{GasEquipment:Definition}\label{gasequipmentdefinition}
+
+This object defines the design-level calculation method, heat gain fractions, and CO\(_{2}\) generation rate shared by one or more \hyperref[gasequipmentinstance]{GasEquipment:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-4-gasequipmentdefinition}
+
+\paragraph{Field: Name}\label{field-name-gasequipmentdefinition}
+
+The name of the GasEquipment:Definition object. This name is referenced by the \textit{Gas Equipment Definition Name} field of \hyperref[gasequipmentinstance]{GasEquipment:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-2-gas-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal gas equipment level in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the method used will be a straight insertion of the gas equipment level (Watts) for the Zone. (The Design Level field should be filled.)
+\item
+  \textbf{Watts/Area or Power/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Power per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person or Power/Person} -- With this choice, the method used will be a factor of equipment level (watts) per person. (The Power per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Design Level}\label{field-design-level-1-000-gas-definition}
+
+This field (in Watts) is typically used to represent the maximum energy input to gas equipment in a zone that is then multiplied by a schedule fraction (see Schedule Name in the GasEquipment instance). In EnergyPlus, this is slightly more flexible in that the gas equipment design level could be a ``diversity factor'' applied to a schedule of real numbers. Note that while the schedule value can vary from hour to hour, the design level field is constant for all simulation environments.
+
+\paragraph{Field: Power per Floor Area}\label{field-power-per-zone-floor-area-gas-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Area to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Area}'' or ``\textbf{Power/Area}''.
+
+\paragraph{Field: Power per Person}\label{field-power-per-person-gas-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Person}'' or ``\textbf{Power/Person}''.
+
+\paragraph{Heat Gains from Gas Equipment:}\label{heat-gains-from-gas-equipment-gas-definition}
+
+The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from gas equipment convected to the zone air, is calculated by the program as:
+
+\begin{equation}
+  f_{convected} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+\end{equation}
+
+You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
+
+\paragraph{Field: Fraction Latent}\label{field-fraction-latent-1-gas-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of latent heat given off by gas equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by gas equipment to give the amount of latent energy produced by the gas equipment. This energy affects the moisture balance within the zone.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-3-gas-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of long-wave radiant heat being given off by gas equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by gas equipment to give the amount of long wavelength radiation gain from gas equipment in a zone.
+
+\paragraph{Field: Fraction Lost}\label{field-fraction-lost-1-gas-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of ``lost'' heat being given off by gas equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by gas equipment to give the amount of heat which is ``lost'' and does not impact the zone energy balances. This might correspond to input energy converted to mechanical work or heat that is vented to the atmosphere.
+
+\paragraph{Field: Carbon Dioxide Generation Rate}\label{field-carbon-dioxide-generation-rate-1-gas-definition}
+
+This numeric input field specifies carbon dioxide generation rate with units of m3/s-W. The default value of 0.0 assumes the equipment is fully vented to outdoors. In the absence of better information, the user might consider using a value of 3.45E-8 m3/s-W which assumes the equipment is not vented to outdoors. This value is converted from natural gas CO\(_{2}\) emission rate at 11.7 lbs CO\(_{2}\) per therm. The CO\(_{2}\) emission rate is provided by U.S. Energy Information Administration, ``Frequently Asked Questions - Environment, Questions About Environmental Emissions'', \url{http://tonto.eia.doe.gov/ask/environment_faqs.asp#CO2_quantity}, January 2010. The maximum value for this input field is 3.45$\times$10$^{-7}$ m3/s-W.
+
 \subsection{HotWaterEquipment}\label{hotwaterequipment}
 
 The object models hot water equipment in the zone which consumes district heating, such as cooking equipment or process loads. All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified below. This object consumes district heating energy directly and does not cause a load on a hot water plant loop or water heater. For domestic hot water uses, such as sinks and showers, see \hyperref[wateruseequipment]{WaterUse:Equipment}.
@@ -1587,6 +2379,147 @@ HotWaterEquipment,
   0.0000000E+00;              !- Fraction Lost
 \end{lstlisting}
 
+
+\subsection{HotWaterEquipment:Instance}\label{hotwaterequipmentinstance}
+
+The object models hot water equipment in the zone which consumes district heating, such as cooking equipment or process loads. All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified in the associated \hyperref[hotwaterequipmentdefinition]{HotWaterEquipment:Definition} object. This object consumes district heating energy directly and does not cause a load on a hot water plant loop or water heater. For domestic hot water uses, such as sinks and showers, see \hyperref[wateruseequipment]{WaterUse:Equipment}.
+
+\subsubsection{Inputs}\label{inputs-5-015-hw-instance}
+
+\paragraph{Field: Name}\label{field-name-5-011-hw-instance}
+
+The name of the HotWaterEquipment:Instance object.
+
+\paragraph{Field: Hot Water Equipment Definition Name}\label{field-hot-water-equipment-definition-name}
+
+The name of the \hyperref[hotwaterequipmentdefinition]{HotWaterEquipment:Definition} object that specifies the design level calculation method and heat gain fractions for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{hweq-field-zone-or-zonelist-name-000-hw-instance}
+
+This field applies this HotWaterEquipment:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying equipment load at the same density in each zone or space. The names of the actual hot water equipment objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}HotWaterEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-3-000-hw-instance}
+
+This field is the name of the schedule that modifies the design level parameter for hot water equipment (see Design Level Calculation Method field in the associated HotWaterEquipment:Definition object). The schedule values can be any positive number. The actual energy input for hot water equipment in a zone as defined by this statement is the product of the design level and the value of this schedule.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-hotwaterequipmentinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[hotwaterequipmentdefinition]{HotWaterEquipment:Definition} object. It allows a single definition describing one physical item (e.g., defined with an absolute Watts value) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-3-000-hw-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Cooking'', ``Clothes Drying'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} object). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the equipment will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and the LEED Summary table EAp2-4/5 Performance Rating Method Compliance.
+
+An IDF example:
+
+\begin{lstlisting}
+HotWaterEquipment:Definition,
+  Kitchen HWEq Def,           !- Name
+  EquipmentLevel,             !- Design Level Calculation Method
+  300,                        !- Design Level {W}
+  ,                           !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/person}
+  0.2,                        !- Fraction Latent
+  0.1,                        !- Fraction Radiant
+  0.5;                        !- Fraction Lost
+
+HotWaterEquipment:Instance,
+  SPACE2-1 HWEq,              !- Name
+  Kitchen HWEq Def,           !- Hot Water Equipment Definition Name
+  SPACE2-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- Schedule Name
+  1,                          !- Multiplier
+  Dishwashing;                !- End-Use Subcategory
+
+HotWaterEquipment:Instance,
+  SPACE3-1 HWEq,              !- Name
+  Kitchen HWEq Def,           !- Hot Water Equipment Definition Name
+  SPACE3-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- Schedule Name
+  1,                          !- Multiplier
+  Dishwashing;                !- End-Use Subcategory
+\end{lstlisting}
+
+Global HotWaterEquipment example:
+
+\begin{lstlisting}
+ZoneList,OfficeZones,Left Fork, Middle Fork, Right Fork;
+
+HotWaterEquipment:Definition,
+  OfficeZones HWEq Def,       !- Name
+  Watts/Area,                 !- Design Level Calculation Method
+  ,                           !- Design Level {W}
+  50,                         !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0;                          !- Fraction Lost
+
+HotWaterEquipment:Instance,
+  Office Zones with Hot Water Equipment,  !- Name
+  OfficeZones HWEq Def,       !- Hot Water Equipment Definition Name
+  OfficeZones,                !- Zone or ZoneList or Space or SpaceList Name
+  HotWater Eq Sch;            !- Schedule Name
+\end{lstlisting}
+
+\subsection{HotWaterEquipment:Definition}\label{hotwaterequipmentdefinition}
+
+This object defines the design-level calculation method and heat gain fractions shared by one or more \hyperref[hotwaterequipmentinstance]{HotWaterEquipment:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-5-hotwaterequipmentdefinition}
+
+\paragraph{Field: Name}\label{field-name-hotwaterequipmentdefinition}
+
+The name of the HotWaterEquipment:Definition object. This name is referenced by the \textit{Hot Water Equipment Definition Name} field of \hyperref[hotwaterequipmentinstance]{HotWaterEquipment:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-3-hw-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal hot water equipment level in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the method used will be a straight insertion of the hot water equipment level (Watts) for the Zone. (The Design Level field should be filled.)
+\item
+  \textbf{Watts/Area or Power/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Power per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person or Power/Person} -- With this choice, the method used will be a factor of equipment level (watts) per person. (The Power per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Design Level}\label{field-design-level-2-000-hw-definition}
+
+This field (in Watts) is typically used to represent the maximum energy input to hot water equipment in a zone that is then multiplied by a schedule fraction (see Schedule Name in the HotWaterEquipment instance). In EnergyPlus, this is slightly more flexible in that the hot water equipment design level could be a ``diversity factor'' applied to a schedule of real numbers. Note that while the schedule value can vary from hour to hour, the design level field is constant for all simulation environments.
+
+\paragraph{Field: Power per Floor Area}\label{field-power-per-zone-floor-area-1-hw-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Area to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Area}'' or ``\textbf{Power/Area}''.
+
+\paragraph{Field: Power per Person}\label{field-power-per-person-1-hw-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Person}'' or ``\textbf{Power/Person}''.
+
+\paragraph{Heat Gains from Hot Water Equipment:}\label{heat-gains-from-hot-water-equipment-hw-definition}
+
+The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from hot water equipment convected to the zone air, is calculated by the program as:
+
+\begin{equation}
+  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+\end{equation}
+
+You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
+
+\paragraph{Field: Fraction Latent}\label{field-fraction-latent-2-hw-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of latent heat given off by hot water equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by hot water equipment to give the amount of latent energy produced by the hot water equipment. This energy affects the moisture balance within the zone.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-4-hw-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of long-wave radiant heat being given off by hot water equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by hot water equipment to give the amount of long wavelength radiation gain from hot water equipment in a zone.
+
+\paragraph{Field: Fraction Lost}\label{field-fraction-lost-2-hw-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of ``lost'' heat being given off by hot water equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by hot water equipment to give the amount of heat which is ``lost'' and does not impact the zone energy balances. This might correspond to input energy converted to mechanical work or heat that is vented to the atmosphere.
+
 \subsection{SteamEquipment}\label{steamequipment}
 
 The object models steam equipment in the zone which consumes district heating, such as cooking equipment or process loads. All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified below. This object consumes district heating energy directly and does not cause a load on a steam plant loop.
@@ -1687,6 +2620,125 @@ SteamEquipment,
   0,                          !- Fraction Lost
   Laundry;                    !- End-Use Subcategory
 \end{lstlisting}
+
+
+\subsection{SteamEquipment:Instance}\label{steamequipmentinstance}
+
+The object models steam equipment in the zone which consumes district heating, such as cooking equipment or process loads. All of the energy consumed by the equipment becomes a heat gain in the zone or is lost (exhausted) as specified in the associated \hyperref[steamequipmentdefinition]{SteamEquipment:Definition} object. This object consumes district heating energy directly and does not cause a load on a steam plant loop.
+
+\subsubsection{Inputs}\label{inputs-6-012-steam-instance}
+
+\paragraph{Field: Name}\label{field-name-6-009-steam-instance}
+
+The name of the SteamEquipment:Instance object.
+
+\paragraph{Field: Steam Equipment Definition Name}\label{field-steam-equipment-definition-name}
+
+The name of the \hyperref[steamequipmentdefinition]{SteamEquipment:Definition} object that specifies the design level calculation method and heat gain fractions for this instance.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{steameq-field-zone-or-zonelist-name-000-steam-instance}
+
+This field applies this SteamEquipment:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying equipment load at the same density in each zone or space. The names of the actual steam equipment objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}SteamEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-4-000-steam-instance}
+
+This field is the name of the schedule that modifies the design level parameter for steam equipment (see Design Level Calculation Method field in the associated SteamEquipment:Definition object). The schedule values can be any positive number. The actual energy input for steam equipment in a zone as defined by this statement is the product of the design level and the value of this schedule.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-steamequipmentinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[steamequipmentdefinition]{SteamEquipment:Definition} object. It allows a single definition describing one physical item (e.g., defined with an absolute Watts value) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-4-000-steam-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Cooking'', ``Clothes Drying'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} objects). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the equipment will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and the LEED Summary table EAp2-4/5 Performance Rating Method Compliance.
+
+An IDF example:
+
+\begin{lstlisting}
+SteamEquipment:Definition,
+  Laundry SteamEq Def,        !- Name
+  EquipmentLevel,             !- Design Level Calculation Method
+  1050,                       !- Design Level {W}
+  ,                           !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/person}
+  0.5,                        !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0;                          !- Fraction Lost
+
+SteamEquipment:Instance,
+  SPACE4-1 SteamEq,           !- Name
+  Laundry SteamEq Def,        !- Steam Equipment Definition Name
+  SPACE4-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- Schedule Name
+  1,                          !- Multiplier
+  Laundry;                    !- End-Use Subcategory
+
+SteamEquipment:Instance,
+  SPACE5-1 SteamEq,           !- Name
+  Laundry SteamEq Def,        !- Steam Equipment Definition Name
+  SPACE5-1,                   !- Zone or ZoneList or Space or SpaceList Name
+  EQUIP-1,                    !- Schedule Name
+  1,                          !- Multiplier
+  Laundry;                    !- End-Use Subcategory
+\end{lstlisting}
+
+\subsection{SteamEquipment:Definition}\label{steamequipmentdefinition}
+
+This object defines the design-level calculation method and heat gain fractions shared by one or more \hyperref[steamequipmentinstance]{SteamEquipment:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-6-steamequipmentdefinition}
+
+\paragraph{Field: Name}\label{field-name-steamequipmentdefinition}
+
+The name of the SteamEquipment:Definition object. This name is referenced by the \textit{Steam Equipment Definition Name} field of \hyperref[steamequipmentinstance]{SteamEquipment:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-4-steam-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal steam equipment level in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the method used will be a straight insertion of the steam equipment level (Watts) for the Zone. (The Design Level field should be filled.)
+\item
+  \textbf{Watts/Area or Power/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Power per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person or Power/Person} -- With this choice, the method used will be a factor of equipment level (watts) per person. (The Power per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Design Level}\label{field-design-level-3-steam-definition}
+
+This field (in Watts) is typically used to represent the maximum energy input to steam equipment in a zone that is then multiplied by a schedule fraction (see Schedule Name in the SteamEquipment instance). In EnergyPlus, this is slightly more flexible in that the steam equipment design level could be a ``diversity factor'' applied to a schedule of real numbers. Note that while the schedule value can vary from hour to hour, the design level field is constant for all simulation environments.
+
+\paragraph{Field: Power per Floor Area}\label{field-power-per-zone-floor-area-2-steam-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Area to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Area}'' or ``\textbf{Power/Area}''.
+
+\paragraph{Field: Power per Person}\label{field-power-per-person-2-steam-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum equipment level as described in the Design Level field. The choice from the method field should be ``\textbf{Watts/Person}'' or ``\textbf{Power/Person}''.
+
+\paragraph{Heat Gains from Steam Equipment:}\label{heat-gains-from-steam-equipment-steam-definition}
+
+The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from steam equipment convected to the zone air, is calculated by the program as:
+
+\begin{equation}
+  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+\end{equation}
+
+You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
+
+\paragraph{Field: Fraction Latent}\label{field-fraction-latent-3-steam-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of latent heat given off by steam equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by steam equipment to give the amount of latent energy produced by the steam equipment. This energy affects the moisture balance within the zone.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-5-steam-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of long-wave radiant heat being given off by steam equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by steam equipment to give the amount of long wavelength radiation gain from steam equipment in a zone.
+
+\paragraph{Field: Fraction Lost}\label{field-fraction-lost-3-steam-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of ``lost'' heat being given off by steam equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by steam equipment to give the amount of heat which is ``lost'' and does not impact the zone energy balances. This might correspond to input energy converted to mechanical work or heat that is vented to the atmosphere.
 
 \subsection{OtherEquipment}\label{otherequipment}
 
@@ -1799,6 +2851,136 @@ OtherEquipment,
   1.2E-7,                     !- Carbon Dioxide Generation Rate
   SubCategory1;               !- End-Use Subcategory
 \end{lstlisting}
+
+
+\subsection{OtherEquipment:Instance}\label{otherequipmentinstance}
+
+Other Equipment object is provided as an additional source for heat gains or losses directly to the zone with a fuel type that is configurable. If a fuel type is specified, the energy is attributed to the appropriate end use. Otherwise, a loss can be entered by putting a negative value into the Design Level field and this object will not have an end-use component -- gains or losses do not show up in the bottom energy lines (except as influencing overall zone gains or losses). Physical characteristics are specified in the associated \hyperref[otherequipmentdefinition]{OtherEquipment:Definition} object.
+
+\subsubsection{Inputs}\label{inputs-8-010-other-instance}
+
+\paragraph{Field: Name}\label{field-name-8-008-other-instance}
+
+The name of the OtherEquipment:Instance object.
+
+\paragraph{Field: Other Equipment Definition Name}\label{field-other-equipment-definition-name}
+
+The name of the \hyperref[otherequipmentdefinition]{OtherEquipment:Definition} object that specifies the design level calculation method, heat gain fractions, and CO\(_{2}\) generation rate for this instance.
+
+\paragraph{Field: Fuel Type}\label{field-fuel-use-type-other-instance}
+
+This field designates the appropriate meter for the equipment. Valid fuel types are: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, DistrictHeatingSteam, \hyperref[districtheating]{DistrictHeatingWater}, \hyperref[districtcooling]{DistrictCooling}, OtherFuel1 and OtherFuel2. The fuel type triggers the application of consumption amounts to the appropriate energy meters. If the None fuel type is selected (the default if left blank), no end uses will be associated with the object, only the zone gains.
+
+\paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{othereq-field-zone-or-zonelist-name-000-other-instance}
+
+This field applies this OtherEquipment:Instance object to one or more thermal zones or spaces in the building. The Zone, Zonelist or SpaceList options can be used effectively with the watts/area and watts/person options of the Design Level Calculation Method to place a varying equipment load at the same density in each zone or space. The names of the actual other equipment objects may be concatenated as \textless{}Space Name\textgreater{} \textless{}OtherEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Schedule Name}\label{field-schedule-name-5-000-other-instance}
+
+This field is the name of the schedule that modifies the design level parameter for other equipment (see Design Level Calculation Method field in the associated OtherEquipment:Definition object). The schedule values can be any positive number. The actual energy input for other equipment in a zone as defined by this statement is the product of the design level and the value of this schedule.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-otherequipmentinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design level from the referenced \hyperref[otherequipmentdefinition]{OtherEquipment:Definition} object. It allows a single definition describing one physical item (e.g., defined with an absolute Watts value) to be shared by several instances, each specifying its own count of that item.
+
+\paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-otherequip-other-instance}
+
+Allows you to specify a user-defined end-use subcategory, e.g., ``Cooking'', ``Clothes Drying'', etc. A new meter for reporting is created for each unique subcategory~ (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} objects). Subcategories are also reported in the ABUPS table. If this field is omitted or blank, the equipment will be assigned to the ``General'' end-use subcategory. Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and in the LEED Summary table EAp2-4/5 Performance Rating Method Compliance.
+
+An IDF example:
+
+\begin{lstlisting}
+OtherEquipment:Definition,
+  OthEq Def,                  !- Name
+  EquipmentLevel,             !- Design Level Calculation Method
+  6766.,                      !- Design Level {W}
+  ,                           !- Power per Floor Area {W/m2}
+  ,                           !- Power per Person {W/person}
+  0,                          !- Fraction Latent
+  0.3,                        !- Fraction Radiant
+  0,                          !- Fraction Lost
+  1.2E-7;                     !- Carbon Dioxide Generation Rate {m3/s-W}
+
+OtherEquipment:Instance,
+  BASE-1 OthEq,               !- Name
+  OthEq Def,                  !- Other Equipment Definition Name
+  Propane,                    !- Fuel Type
+  BASE-1,                     !- Zone or ZoneList or Space or SpaceList Name
+  ALWAYSON,                   !- Schedule Name
+  1,                          !- Multiplier
+  SubCategory1;               !- End-Use Subcategory
+
+OtherEquipment:Instance,
+  BASE-2 OthEq,               !- Name
+  OthEq Def,                  !- Other Equipment Definition Name
+  NaturalGas,                 !- Fuel Type
+  BASE-2,                     !- Zone or ZoneList or Space or SpaceList Name
+  ALWAYSON,                   !- Schedule Name
+  1,                          !- Multiplier
+  SubCategory1;               !- End-Use Subcategory
+\end{lstlisting}
+
+\subsection{OtherEquipment:Definition}\label{otherequipmentdefinition}
+
+This object defines the design-level calculation method, heat gain fractions, and CO\(_{2}\) generation rate shared by one or more \hyperref[otherequipmentinstance]{OtherEquipment:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-8-otherequipmentdefinition}
+
+\paragraph{Field: Name}\label{field-name-otherequipmentdefinition}
+
+The name of the OtherEquipment:Definition object. This name is referenced by the \textit{Other Equipment Definition Name} field of \hyperref[otherequipmentinstance]{OtherEquipment:Instance} instances.
+
+\paragraph{Field: Design Level Calculation Method}\label{field-design-level-calculation-method-5-other-definition}
+
+This field is a key/choice field that tells which of the next three fields are filled and is descriptive of the method for calculating the nominal other equipment level in the Zone. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the method used will be a straight insertion of the other equipment level (Watts) for the Zone. (The Design Level field should be filled.)
+\item
+  \textbf{Watts/Area or Power/Area} -- With this choice, the method used will be a factor per floor area of the zone or space. (The Power per Floor Area field should be filled.)
+\item
+  \textbf{Watts/Person or Power/Person} -- With this choice, the method used will be a factor of equipment level (watts) per person. (The Power per Person field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Design Level}\label{field-design-level-4-other-definition}
+
+This field (in Watts) is typically used to represent the maximum energy input to other equipment in a zone that is then multiplied by a schedule fraction (see Schedule Name in the OtherEquipment instance). In EnergyPlus, this is slightly more flexible in that the other equipment design level could be a ``diversity factor'' applied to a schedule of real numbers. This value can be negative to denote a loss if the None fuel type is selected, otherwise this must be positive. Note that while the schedule value can vary from hour to hour, the design level field is constant for all simulation environments.
+
+\paragraph{Field: Power per Floor Area}\label{field-power-per-zone-floor-area-3-other-definition}
+
+This factor (watts/m\(^{2}\)) is used, along with the Zone or Space Area to determine the maximum equipment level as described in the Design Level field. This value can be negative to denote a loss if the None fuel type is selected, otherwise this must be positive. The choice from the method field should be ``\textbf{Watts/Area}'' or ``\textbf{Power/Area}''.
+
+\paragraph{Field: Power per Person}\label{field-power-per-person-3-other-definition}
+
+This factor (watts/person) is used, along with the number of occupants (people) to determine the maximum equipment level as described in the Design Level field. This value can be negative to denote a loss if the None fuel type is selected, otherwise this must be positive. The choice from the method field should be ``\textbf{Watts/Person}'' or ``\textbf{Power/Person}''.
+
+\paragraph{Heat Gains/Losses from Other Equipment:}\label{heat-gainslosses-from-other-equipment-other-definition}
+
+The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from other equipment convected to the zone air, is calculated by the program as:
+
+\begin{equation}
+  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+\end{equation}
+
+You will get an error message if \(\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost}\) exceeds 1.0.
+
+\paragraph{Field: Fraction Latent}\label{field-fraction-latent-4-other-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of latent heat given off by other equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by other equipment to give the amount of latent energy produced by the other equipment. This energy affects the moisture balance within the zone.
+
+\paragraph{Field: Fraction Radiant}\label{field-fraction-radiant-6-other-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of long-wave radiant heat being given off by other equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by other equipment to give the amount of long wavelength radiation gain from other equipment in a zone.
+
+\paragraph{Field: Fraction Lost}\label{field-fraction-lost-4-other-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to characterize the amount of ``lost'' heat being given off by other equipment in a zone. The number specified in this field will be multiplied by the total energy consumed by other equipment to give the amount of heat which is ``lost'' and does not impact the zone energy balances. This might correspond to input energy converted to mechanical work or heat that is vented to the atmosphere.
+
+\paragraph{Field: Carbon Dioxide Generation Rate}\label{field-carbon-dioxide-generation-rate-otherequip-other-definition}
+
+This numeric input field specifies carbon dioxide generation rate with units of m3/s-W. The default value of 0.0 assumes the equipment is fully vented to outdoors. The maximum value for this input field is 3.45E-7 m3/s-W.
 
 \subsection{Internal Gain Equipment Outputs}\label{outputs-5-004}
 
@@ -3113,6 +4295,268 @@ The difference (in $\Delta\%$) between the air inlet relative humidity and the m
 \paragraph{Zone ITE Adjusted Return Air Temperature [C]}
 
 Return air temperature after adjustment by ITE objects.
+
+
+\subsection{ElectricEquipment:ITE:AirCooled:Instance}\label{electricequipmentiteaircooledinstance}
+
+This object describes air-cooled electric information technology equipment (ITE) which has variable power consumption as a function of loading and temperature. Performance characteristics are specified in the associated \hyperref[electricequipmentiteaircooleddefinition]{ElectricEquipment:ITE:AirCooled:Definition} object.
+
+\subsubsection{Inputs}\label{inputs-9-009-ite-instance}
+
+\paragraph{Field: Name}\label{field-name-9-008-ite-instance}
+
+The name of this object.
+
+\paragraph{Field: ElectricEquipment ITE AirCooled Definition Name}\label{field-electricequipment-ite-aircooled-definition-name}
+
+The name of the \hyperref[electricequipmentiteaircooleddefinition]{ElectricEquipment:ITE:AirCooled:Definition} object that specifies the performance characteristics for this instance.
+
+\paragraph{Field: Zone or Space Name}\label{iteq-field-zone-or-space-name-000-ite-instance}
+
+This field applies this ElectricEquipment:ITE:AirCooled:Instance object to a thermal zone or space in the building. If a Zone Name is specified and the zone contains more than one Space, the names of the actual IT equipment objects will be concatenated as \textless{}Space Name\textgreater{} \textless{}ITEquipment Object Name\textgreater{}. See \hyperref[specifying-applicable-zones-or-spaces]{Specifying Applicable Zone(s) or Space(s)} for more details.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-iteinstance}
+
+This field is a multiplier, with a default of 1.0, applied to the design power input from the referenced \hyperref[electricequipmentiteaircooleddefinition]{ElectricEquipment:ITE:AirCooled:Definition} object. It generalizes the \emph{Number of Units} field of the \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled} object: it applies with both Design Power Input Calculation Method choices, including Watts/Area.
+
+\paragraph{Field: Design Power Input Schedule Name}\label{field-design-power-input-schedule-name-ite-instance}
+
+This field is the name of the operating schedule that modifies the design level power input for this equipment. This schedule specifies the fraction (typically 0.0 to 1.0) of this equipment which is available (powered up), regardless of CPU utilization. If this field is blank, the schedule is assumed to always be 1.0.
+
+\paragraph{Field: CPU Loading Schedule Name}\label{field-cpu-loading-schedule-name-ite-instance}
+
+This field is the name of the schedule that specifies the CPU loading for this equipment as a fraction from 0.0 (idle) to 1.0 (full load). If this field is blank, the schedule is assumed to always be 1.0.
+
+\paragraph{Field: Air Inlet Room Air Model Node Name}\label{field-air-inlet-room-air-model-node-name-ite-instance}
+
+Specifies the name of a room air model node (ref. \hyperref[roomairnode]{RoomAir:Node}) which is the air inlet to this equipment. This field is required if the Air Inlet Connection Type in the associated definition = RoomAirModel.
+
+\paragraph{Field: Air Outlet Room Air Model Node Name}\label{field-air-outlet-room-air-model-node-name-ite-instance}
+
+Specifies the node name of a room air model node (ref. \hyperref[roomairnode]{RoomAir:Node}) which is the air outlet from this equipment. This field is required if the Air Inlet Connection Type in the associated definition = RoomAirModel.
+
+\paragraph{Field: Supply Air Node Name}\label{field-supply-air-node-name-ite-instance}
+
+Specifies the node name of the supply air inlet node serving this ITE. Required if the Air Inlet Connection Type in the associated definition = AdjustedSupply. Also required if Air Flow Calculation Method = \textbf{FlowControlWithApproachTemperatures} or if reporting of the Supply Heat Index is desired.
+
+\paragraph{Field: CPU End-Use Subcategory}\label{field-cpu-end-use-subcategory-ite-instance}
+
+This equipment is metered on the Interior Equipment end-use category for Electricity. This field allows you to specify a user-defined end-use subcategory for the CPU power consumption. A new meter for reporting is created for each unique subcategory (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} object). Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and in the LEED Summary table EAp2-4/5 Performance Rating Method Compliance. The default is ITE-CPU.
+
+\paragraph{Field: Fan End-Use Subcategory}\label{field-fan-end-use-subcategory-ite-instance}
+
+This equipment is metered on the Interior Equipment end-use category for Electricity. This field allows you to specify a user-defined end-use subcategory for the fan power consumption. A new meter for reporting is created for each unique subcategory (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} object). Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and in the LEED Summary table EAp2-4/5 Performance Rating Method Compliance. The default is ITE-Fans.
+
+\paragraph{Field: Electric Power Supply End-Use Subcategory}\label{field-electric-power-supply-end-use-subcategory-ite-instance}
+
+This equipment is metered on the Interior Equipment end-use category for Electricity. This field allows you to specify a user-defined end-use subcategory for the electric power supply power consumption. A new meter for reporting is created for each unique subcategory (ref: \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} object). Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table and in the LEED Summary table EAp2-4/5 Performance Rating Method Compliance. The default is ITE-UPS.
+
+An IDF example:
+
+\begin{lstlisting}
+ElectricEquipment:ITE:AirCooled:Definition,
+  Model5250 ITE Def,          !- Name
+  FlowFromSystem,             !- Air Flow Calculation Method
+  EquipmentLevel,             !- Design Power Input Calculation Method
+  500,                        !- Watts per Unit {W}
+  ,                           !- Watts per Floor Area {W/m2}
+  Model 5250 Power fLoadTemp, !- CPU Power Input Function of Loading and Air Temperature Curve Name
+  0.4,                        !- Design Fan Power Input Fraction
+  0.0001,                     !- Design Fan Air Flow Rate per Power Input {m3/s-W}
+  Model 5250 AirFlow fLoadTemp,  !- Air Flow Function of Loading and Air Temperature Curve Name
+  ECM FanPower fFlow,         !- Fan Power Input Function of Flow Curve Name
+  15,                         !- Design Entering Air Temperature {C}
+  A3,                         !- Environmental Class
+  AdjustedSupply,             !- Air Inlet Connection Type
+  0.1,                        !- Design Recirculation Fraction
+  Data Center Recirculation fLoadTemp,  !- Recirculation Function of Loading and Supply Temperature Curve Name
+  0.9,                        !- Design Electric Power Supply Efficiency
+  UPS Efficiency fPLR,        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
+  1;                          !- Fraction of Electric Power Supply Losses to Zone
+
+ElectricEquipment:ITE:AirCooled:Instance,
+  Data Center Servers Row A,  !- Name
+  Model5250 ITE Def,          !- ElectricEquipment ITE AirCooled Definition Name
+  Main Zone,                  !- Zone or Space Name
+  200,                        !- Multiplier
+  Data Center Operation Schedule,  !- Design Power Input Schedule Name
+  Data Center CPU Loading Schedule,  !- CPU Loading Schedule Name
+  ,                           !- Air Inlet Room Air Model Node Name
+  ,                           !- Air Outlet Room Air Model Node Name
+  Main Zone Inlet Node;       !- Supply Air Node Name
+
+ElectricEquipment:ITE:AirCooled:Instance,
+  Data Center Servers Row B,  !- Name
+  Model5250 ITE Def,          !- ElectricEquipment ITE AirCooled Definition Name
+  Main Zone,                  !- Zone or Space Name
+  150,                        !- Multiplier
+  Data Center Operation Schedule,  !- Design Power Input Schedule Name
+  Data Center CPU Loading Schedule,  !- CPU Loading Schedule Name
+  ,                           !- Air Inlet Room Air Model Node Name
+  ,                           !- Air Outlet Room Air Model Node Name
+  Main Zone Inlet Node;       !- Supply Air Node Name
+\end{lstlisting}
+
+\subsection{ElectricEquipment:ITE:AirCooled:Definition}\label{electricequipmentiteaircooleddefinition}
+
+This object defines the performance characteristics shared by one or more \hyperref[electricequipmentiteaircooledinstance]{ElectricEquipment:ITE:AirCooled:Instance} instances.
+
+\subsubsection{Inputs}\label{inputs-9-electricequipmentiteaircooleddefinition}
+
+\paragraph{Field: Name}\label{field-name-electricequipmentiteaircooleddefinition}
+
+The name of the ElectricEquipment:ITE:AirCooled:Definition object. This name is referenced by the \textit{ElectricEquipment ITE AirCooled Definition Name} field of \hyperref[electricequipmentiteaircooledinstance]{ElectricEquipment:ITE:AirCooled:Instance} instances.
+
+\paragraph{Field: Air Flow Calculation Method}\label{field-air-flow-calculation-method-ite-definition}
+
+This field specifies the method used to calculate the IT inlet temperature and zone return air temperature.
+
+If \textbf{FlowFromSystem} is chosen, the zone is assumed to be well-mixed.
+
+If \textbf{FlowControlWithApproachTemperatures} is chosen, Supply and Return approach temperature should be defined to indicate the temperature difference due to the air distribution. The inputs of \textit{Air Inlet Connection Type}, \textit{Design Recirculation Fraction} and \textit{Recirculation Function of Loading and Supply Temperature Curve Name} are ignored. For multiple ITE objects defined for one zone, the same calculation method should apply. The \textbf{FlowControlWithApproachTemperatures} only applies to ITE zones with single duct VAV terminal unit. Other return air heat gains from window or lights are not allowed when \textbf{FlowControlWithApproachTemperatures} is chosen.
+
+The default method is FlowFromSystem.
+
+\paragraph{Field: Design Power Input Calculation Method}\label{field-design-power-input-calculation-method-ite-definition}
+
+This field is a key/choice field that tells which of the next two fields are filled and is descriptive of the method for calculating the nominal electric power input to the ITE. The key/choices are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{EquipmentLevel} -- With this choice, the design power input will be the product of Watts per Unit and the Multiplier (from the instance). This is the default.
+\item
+  \textbf{Watts/Area} -- With this choice, the design power input will be a factor per floor area of the zone or space, times the Multiplier (from the instance). (The Watts per Floor Area field should be filled.)
+\end{itemize}
+
+\paragraph{Field: Watts per Unit}\label{field-watts-per-unit-ite-definition}
+
+This field (in Watts) is the design electrical power input to the ITE per unit when fully loaded and the entering air temperature is at the specified design value. Used when the Design Power Input Calculation Method is ``EquipmentLevel''.
+
+\paragraph{Field: Watts per Floor Area}\label{field-watts-per-zone-floor-area-2-ite-definition}
+
+This factor (Watts/m\(^{2}\)) is used, along with the Zone or Space floor area to determine the design electrical power input. Used when the Design Power Input Calculation Method is ``Watts/Area''.
+
+\paragraph{Field: CPU Power Input Function of Loading and Air Temperature Curve Name}\label{field-cpu-power-input-function-of-loading-and-air-temperature-curve-name-ite-definition}
+
+The name of a two-variable curve or table lookup object which modifies the CPU power input as a function of CPU loading ($x$) and air inlet node temperature ($y$). This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and Design Entering Air Temperature).
+
+\paragraph{Field: Design Fan Power Input Fraction}\label{field-design-fan-power-input-fraction-ite-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to specify the fraction of the total power input at design conditions which is for the cooling fan(s). If fan power data is not available, set this fraction to 0.0. The default is 0.0.
+
+\paragraph{Field: Design Fan Air Flow Rate per Power Input}\label{field-design-fan-air-flow-rate-per-power-input-ite-definition}
+
+Specifies the cooling fan air flow rate in m$^3$/s per Watt of total electric power input at design conditions (CPU loading = 1.0 and Design Entering Air Temperature). This is normalized by power input to allow the design power input to be changed without needing to change this value.
+
+\paragraph{Field: Air Flow Function of Loading and Air Temperature Curve Name}\label{field-air-flow-function-of-loading-and-air-temperature-curve-name-ite-definition}
+
+The name of a two-variable curve or table lookup object which modifies the cooling air flow rate as a function of CPU loading ($x$) and air inlet node temperature ($y$). This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and Design Entering Air Temperature).
+
+\paragraph{Field: Fan Power Input Function of Flow Curve Name}\label{field-fan-power-input-function-of-flow-curve-name-ite-definition}
+
+The name of a single-variable curve or table lookup object which modifies the fan power input as a function of airflow fraction ($x$). This curve (table) should equal 1.0 at the design air flow rate (flow fraction = 1.0).
+
+\paragraph{Field: Design Entering Air Temperature}\label{field-design-entering-air-temperature-ite-definition}
+
+Specifies the entering air temperature in $^\circ$C at design conditions. The default is 15$^\circ$C.
+
+\paragraph{Field: Environmental Class}\label{field-environmental-class-ite-definition}
+
+Specifies the allowable operating conditions for the air inlet conditions. The available inputs are A1, A2, A3, A4, B, C, H1, or None. This is used to report the ``ITE Air Inlet Operating Range Exceeded Time.'' If None is specified (the default), then no reporting of time outside allowable conditions will be done.
+
+The related reporting variables (such as ``ITE Air Inlet Operating Range Exceeded Time'') are based on the following limits\footnote{Sources: [1]. ASHRAE, 2021. ``Thermal Guidelines for Data Processing Environments (5$^{\textrm{th}}$ Edition),'' Peachtree Corners: ASHRAE; [2]. Quirk, Davidson, and Schmidt, 2022. ``ASHRAE's Data Center Thermal Guidelines---Air-Cooled Evolution,'' ASHRAE Journal, May 2022.} on the air inlet temperature and humidity conditions shown in Table \ref{table:ite-aircooled-air-inlet-code-specification-limits}:
+
+The limiting temperature and humidity levels for each environmental class are given in Table~\ref{table:ite-aircooled-air-inlet-code-specification-limits} in the \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled} object documentation.
+
+\paragraph{Field: Air Inlet Connection Type}\label{field-air-inlet-connection-type-ite-definition}
+
+Specifies the type of connection between the zone and the ITE air inlet node. The choices are:
+
+\begin{description}
+	\item[AdjustedSupply:] This option is used to apply a recirculation adjustment to the ITE inlet conditions. If this option is specified, then the Supply Air Node Name in the instance is required and the air inlet temperature to the ITE will be the current supply air node temperature adjusted by the current recirculation fraction. All heat output is added to the zone air heat balance as a convective gain. AdjustedSupply is the default.
+
+	\item[ZoneAirNode:] This option is used if there is no containment and the ITE air inlet node is at the average zone condition. All heat output is added to the zone air heat balance as a convective gain.
+
+	\item[RoomAirModel:] This option connects the ITE air inlet and outlet nodes to a room air model (Ref. \hyperref[roomairmodeltype]{RoomAirModelType} and \hyperref[roomairnode]{RoomAir:Node}).  Currently in EnergyPlus, this option has not been fully implemented.  If the user chooses this option, the program will issue a warning message and this field will be adjusted to ZoneAirNode.
+\end{description}
+
+This field is only used when Air Flow Calculation Method is \textbf{FlowFromSystem}.
+
+\paragraph{Field: Design Recirculation Fraction}\label{field-design-recirculation-fraction-ite-definition}
+
+Specifies the recirculation fraction for this equipment at design conditions. This field is used only if the Air Inlet Connection Type = AdjustedSupply. The recirculation fraction is defined as the ratio of recirculated air flow to total air flow entering the ITE. Recirculation is dependent upon many factors including rack and containment configuration. The default is 0.0 (no recirculation). This field is only used when Air Flow Calculation Method = \textbf{FlowFromSystem}.
+
+\paragraph{Field: Recirculation Function of Loading and Supply Temperature Curve Name}\label{field-recirculation-function-of-loading-and-supply-temperature-curve-name-ite-definition}
+
+The name of a two-variable curve or table lookup object which modifies the Design Recirculation Fraction as a function of CPU loading ($x$) and supply air node temperature ($y$). This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and Design Entering Air Temperature). This field is used only if the Air Inlet Connection Type = AdjustedSupply. If this curve is left blank, then the curve is assumed to always equal 1.0. This field is only used when Air Flow Calculation Method = \textbf{FlowFromSystem}.
+
+\paragraph{Field: Design Electric Power Supply Efficiency}\label{field-design-electric-power-supply-efficiency-ite-definition}
+
+This field is a decimal number used to specify the efficiency of the power supply system serving this ITE. The default is 1.0.
+
+\paragraph{Field: Electric Power Supply Efficiency Function of Part Load Ratio Curve Name}\label{field-electric-power-supply-efficiency-function-of-part-load-ratio-curve-name-ite-definition}
+
+The name of a single-variable curve or table lookup object which modifies the electric power supply efficiency as a function of part load ratio ($x$). This curve (table) should equal 1.0 at the design power consumption (part load ratio = 1.0). If this curve is left blank, then the curve is assumed to always equal 1.0.
+
+\paragraph{Field: Fraction of Electric Power Supply Losses to Zone}\label{field-fraction-of-electric-power-supply-losses-to-zone-ite-definition}
+
+This field is a decimal number between 0.0 and 1.0 and is used to specify the fraction of the electric power supply losses which are a heat gain to the zone containing the ITE. If this value is less than 1.0, the remainder of the losses are assumed to be lost to the outdoors. The default is 1.0.
+
+\paragraph{Field: Supply Temperature Difference}\label{field-supply-temperature-difference-ite-definition}
+
+The difference of the IT inlet temperature from the AHU supply air temperature (${\Delta}T_{\textrm{supply}} = T_{\textrm{in}}-T_{\textrm{supply}}$). Either Supply Temperature Difference or Supply Temperature Difference Schedule is required if Air Flow Calculation Method is set to \textbf{FlowControlWithApproachTemperatures}. This field is ignored when Air Flow Calculation Method is \textbf{FlowFromSystem}.
+
+\paragraph{Field: Supply Temperature Difference Schedule}\label{field-supply-temperature-difference-schedule-ite-definition}
+
+The difference schedule of the IT inlet temperature from the AHU supply air temperature (${\Delta}T_{\textrm{supply}} = T_{\textrm{in}}-T_{\textrm{supply}}$). Either Supply Temperature Difference or Supply Temperature Difference Schedule is required if Air Flow Calculation Method is set to \textbf{FlowControlWithApproachTemperatures}. This field is ignored when Air Flow Calculation Method is \textbf{FlowFromSystem}.
+
+\paragraph{Field: Return Temperature Difference}\label{field-return-temperature-difference-ite-definition}
+
+The difference of the actual AHU return air temperature to the IT equipment outlet temperature (${\Delta}T_{\textrm{return}} = T_{\textrm{return}}-T_{\textrm{out}}$). Either Return Temperature Difference or Return Temperature Difference Schedule is required if Air Flow Calculation Method is set to \textbf{FlowControlWithApproachTemperatures}. This field is ignored when Air Flow Calculation Method is \textbf{FlowFromSystem}.
+
+\paragraph{Field: Return Temperature Difference Schedule}\label{field-return-temperature-difference-schedule-ite-definition}
+
+The difference schedule of the actual AHU return air temperature to the IT equipment outlet temperature (${\Delta}T_{\textrm{return}} = T_{\textrm{return}}-T_{\textrm{out}}$). Either Return Temperature Difference or Return Temperature Difference Schedule is required if Air Flow Calculation Method is set to \textbf{FlowControlWithApproachTemperatures}. This field is ignored when Air Flow Calculation Method is \textbf{FlowFromSystem}.
+
+An IDF example with Air Flow Calculation Method = FlowControlWithApproachTemperatures:
+
+\begin{lstlisting}
+ElectricEquipment:ITE:AirCooled:Definition,
+  SmallDataCenter ITE Def,    !- Name
+  FlowControlWithApproachTemperatures,  !- Air Flow Calculation Method
+  Watts/Area,                 !- Design Power Input Calculation Method
+  ,                           !- Watts per Unit {W}
+  430.556416668389,           !- Watts per Floor Area {W/m2}
+  Data Center Servers Power fLoadTemp,  !- CPU Power Input Function of Loading and Air Temperature Curve Name
+  0.4,                        !- Design Fan Power Input Fraction
+  0.0001,                     !- Design Fan Air Flow Rate per Power Input {m3/s-W}
+  Data Center Servers Airflow fLoadTemp,  !- Air Flow Function of Loading and Air Temperature Curve Name
+  ECM FanPower fFlow,         !- Fan Power Input Function of Flow Curve Name
+  15,                         !- Design Entering Air Temperature {C}
+  A3,                         !- Environmental Class
+  AdjustedSupply,             !- Air Inlet Connection Type
+  0,                          !- Design Recirculation Fraction
+  Data Center Recirculation fLoadTemp,  !- Recirculation Function of Loading and Supply Temperature Curve Name
+  0.9,                        !- Design Electric Power Supply Efficiency
+  UPS Efficiency fPLR,        !- Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
+  1,                          !- Fraction of Electric Power Supply Losses to Zone
+  3,                          !- Supply Temperature Difference {deltaC}
+  ,                           !- Supply Temperature Difference Schedule
+  -3,                         !- Return Temperature Difference {deltaC}
+  ;                           !- Return Temperature Difference Schedule
+
+ElectricEquipment:ITE:AirCooled:Instance,
+  SmallDataCenter ComputerRoom Elec Equip,  !- Name
+  SmallDataCenter ITE Def,    !- ElectricEquipment ITE AirCooled Definition Name
+  ComputerRoom ZN,            !- Zone or Space Name
+  ,                           !- Multiplier
+  Data Center Operation Schedule,  !- Design Power Input Schedule Name
+  DataCenter Equipment_SCH,   !- CPU Loading Schedule Name
+  ,                           !- Air Inlet Room Air Model Node Name
+  ,                           !- Air Outlet Room Air Model Node Name
+  Node 6;                     !- Supply Air Node Name
+\end{lstlisting}
 
 \subsection{ZoneBaseboard:OutdoorTemperatureControlled}\label{zonebaseboardoutdoortemperaturecontrolled}
 

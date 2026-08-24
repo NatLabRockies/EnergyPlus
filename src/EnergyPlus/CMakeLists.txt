@@ -234,6 +234,8 @@ set(SRC
     DaylightingDevices.hh
     DaylightingManager.cc
     DaylightingManager.hh
+    ConstructionAssignmentSet.cc
+    ConstructionAssignmentSet.hh
     DemandManager.cc
     DemandManager.hh
     DesiccantDehumidifiers.cc

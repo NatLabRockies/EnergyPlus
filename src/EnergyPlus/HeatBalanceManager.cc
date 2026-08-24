@@ -60,6 +60,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
+#include <EnergyPlus/ConstructionAssignmentSet.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
@@ -272,6 +273,8 @@ namespace HeatBalanceManager {
         GetFrameAndDividerData(state);
 
         GetConstructData(state, ErrorsFound); // Read constructs from input file/transfer from legacy data structure
+
+        ConstructionAssignments::GetConstructionAssignmentSetData(state, ErrorsFound);
 
         GetBuildingData(state, ErrorsFound); // Read building data from input file
 
@@ -702,6 +705,9 @@ namespace HeatBalanceManager {
             state.dataHeatBal->MaxNumberOfWarmupDays = DataHeatBalance::DefaultMaxNumberOfWarmupDays;
             state.dataHeatBal->MinNumberOfWarmupDays = DataHeatBalance::DefaultMinNumberOfWarmupDays;
         }
+
+        // Construction Assignment Set Name (resolved after ConstructionAssignmentSet data is loaded in GetConstructionAssignmentSetData)
+        state.dataConstructionAssignments->buildingConstructionAssignmentSetName = AlphaName(4);
 
         constexpr const char *Format_720(" Building Information,{},{:.3f},{},{:#G},{:#G},{},{},{}\n");
         constexpr const char *Format_721("! <Building Information>, Building Name,North Axis {{deg}},Terrain,  Loads Convergence Tolerance "
@@ -2282,6 +2288,231 @@ namespace HeatBalanceManager {
         }
     }
 
+    void getZoneMRTCalculationData(EnergyPlusData &state)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Rick Strand, UIUC
+        //       DATE WRITTEN   July 2026
+
+        // PURPOSE OF THIS SUBROUTINE:
+        // Get the input for the object/method being used to calculate the ZoneMRT
+
+        static constexpr std::string_view routineName = "getZoneMRTCalculationData";
+        std::string const cCurrentModuleObject = "ZoneMRTCalculation";
+        auto &s_ip = state.dataInputProcessing->inputProcessor;
+        bool errorsFound = false;
+        auto const peopleInputInstances = s_ip->epJSON.find("People");
+        auto isPeopleInputObjectName = [&peopleInputInstances, &s_ip](std::string const &peopleName) {
+            if (peopleInputInstances == s_ip->epJSON.end()) {
+                return false;
+            }
+            for (auto peopleInputInstance = peopleInputInstances.value().begin(); peopleInputInstance != peopleInputInstances.value().end();
+                 ++peopleInputInstance) {
+                if (Util::SameString(peopleInputInstance.key(), peopleName)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        auto const instances = s_ip->epJSON.find(cCurrentModuleObject);
+        if (instances != s_ip->epJSON.end()) {
+            auto &instancesValue = instances.value();
+            for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto const &fields = instance.value();
+                auto const &thisZoneName = fields.find("zone_name");
+                std::string zone_name = thisZoneName.value().get<std::string>();
+                DataHeatBalance::ZoneMRTData thisZnMRTObj;
+                thisZnMRTObj.name = Util::makeUPPER(zone_name);
+                s_ip->markObjectAsUsed(cCurrentModuleObject, instance.key());
+                auto peoplePairs = fields.find("people_names");
+                if (peoplePairs == fields.end() || peoplePairs.value().empty()) {
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" must include at least one People name and MRT weighting factor pair.",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZnMRTObj.name));
+                    errorsFound = true;
+                } else {
+                    auto &peoplePairsArray = peoplePairs.value();
+                    thisZnMRTObj.numPeople = peoplePairsArray.size();
+                    for (auto &peoplePair : peoplePairsArray) {
+                        DataHeatBalance::ZoneMRTPeopleData thisPplData;
+                        auto peopleName = peoplePair.find("people_name");
+                        if (peopleName != peoplePair.end()) {
+                            std::string people_name = peopleName.value().get<std::string>();
+                            if (!people_name.empty()) {
+                                thisPplData.name = Util::makeUPPER(people_name);
+                            }
+                        }
+                        auto peopleMRTWeightFactor = peoplePair.find("mrt_weighting_factor");
+                        if (peopleMRTWeightFactor != peoplePair.end()) {
+                            thisPplData.fracMRT = peopleMRTWeightFactor.value().get<Real64>();
+                        }
+                        thisZnMRTObj.zoneMRTPeople.push_back(thisPplData);
+                    }
+                }
+                state.dataHeatBal->zoneMRTCalc.push_back(thisZnMRTObj);
+            } // for (instance)
+        }
+
+        state.dataHeatBal->totZoneMRT = state.dataHeatBal->zoneMRTCalc.size();
+
+        for (int mrtNum = 1; mrtNum <= state.dataHeatBal->totZoneMRT; mrtNum++) { // set up and check zone and people indices
+            auto &thisZoneMRT = state.dataHeatBal->zoneMRTCalc(mrtNum);
+            bool thisZoneMRTErrorsFound = false;
+            thisZoneMRT.zoneIndex = Util::FindItemInList(thisZoneMRT.name, state.dataHeatBal->Zone);
+            if (thisZoneMRT.zoneIndex <= 0) { // zone was not found so produce an error message alerting the user of the problem
+                ShowSevereError(
+                    state,
+                    std::format(
+                        "{}, {}=\"{}\" does not reference a Zone defined in this input file.", routineName, cCurrentModuleObject, thisZoneMRT.name));
+                ShowContinueError(state, "The Zone Name field accepts a Zone name only; Space and SpaceList names are not supported.");
+                errorsFound = true;
+            } else { // zone was found, set the flag to make sure the user specified MRT for this zone is calculated
+                state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc = true;
+            }
+            for (int mrtNum2 = 1; mrtNum2 < mrtNum; ++mrtNum2) {
+                auto &thisZoneMRT2 = state.dataHeatBal->zoneMRTCalc(mrtNum2);
+                if (thisZoneMRT.zoneIndex > 0 &&
+                    thisZoneMRT.zoneIndex ==
+                        thisZoneMRT2.zoneIndex) { // zone was already referenced by another ZoneMRTCalculation object--not allowed
+                    ShowSevereError(
+                        state,
+                        std::format(
+                            "{}, Zone=\"{}\" is referenced by more than one {} object.", routineName, thisZoneMRT.name, cCurrentModuleObject));
+                    ShowContinueError(state, "Only one ZoneMRTCalculation object is allowed for each Zone.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                }
+            }
+            if (thisZoneMRT.zoneIndex <= 0 || thisZoneMRT.numPeople <= 0) {
+                continue;
+            }
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                auto &thisPeople = state.dataHeatBal->zoneMRTCalc(mrtNum).zoneMRTPeople(pNum);
+                thisPeople.peopleIndex = Util::FindItemInList(thisPeople.name, state.dataHeatBal->People);
+                if (thisPeople.peopleIndex <= 0) { // people name was not matched so produce an error message
+                    if (isPeopleInputObjectName(thisPeople.name)) {
+                        ShowSevereError(state,
+                                        std::format("{}, {}=\"{}\" references People=\"{}\", but that input object was expanded across "
+                                                    "multiple Spaces.",
+                                                    routineName,
+                                                    cCurrentModuleObject,
+                                                    thisZoneMRT.name,
+                                                    thisPeople.name));
+                        ShowContinueError(state, "The original People input name is not supported after expansion into separate People instances.");
+                        ShowContinueError(state,
+                                          std::format("For an explicitly defined Space, reference an expanded instance using \"<Space Name> "
+                                                      "{}\" or reference a People object assigned directly to that Space in Zone=\"{}\".",
+                                                      thisPeople.name,
+                                                      thisZoneMRT.name));
+                    } else {
+                        ShowSevereError(state,
+                                        std::format("{}, {}=\"{}\" references People=\"{}\", but no People object or expanded People "
+                                                    "instance has that name.",
+                                                    routineName,
+                                                    cCurrentModuleObject,
+                                                    thisZoneMRT.name,
+                                                    thisPeople.name));
+                        ShowContinueError(state, "Check the People Name and the ZoneMRTCalculation naming rules in the Input Output Reference.");
+                    }
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr != thisZoneMRT.zoneIndex) {
+                    auto const &peopleZone = state.dataHeatBal->Zone(state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr);
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\" in Zone=\"{}\".",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name,
+                                                peopleZone.Name));
+                    ShowContinueError(state, "Every referenced People instance must belong to the Zone named by ZoneMRTCalculation.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex > 0 &&
+                           state.dataHeatBal->space(state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex).isRemainderSpace) {
+                    auto const &remainderSpace = state.dataHeatBal->space(state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex);
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\" in internally generated remainder Space=\"{}\".",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name,
+                                                remainderSpace.Name));
+                    ShowContinueError(state, "ZoneMRTCalculation does not support People instances in an automatically generated remainder Space.");
+                    ShowContinueError(state,
+                                      std::format("Reference a People instance associated with Zone=\"{}\" or with an explicitly defined Space "
+                                                  "in that Zone.",
+                                                  thisZoneMRT.name));
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).MRTCalcType == DataHeatBalance::CalcMRT::Invalid) {
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\", which does not select a Thermal Comfort Model Type.",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name));
+                    ShowContinueError(state,
+                                      "ZoneMRTCalculation currently requires each referenced People instance to select at least one thermal "
+                                      "comfort model so that its MRT method is calculated.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                }
+            }
+            if (thisZoneMRTErrorsFound) {
+                continue;
+            }
+            // Now that error checking is done, calculate sums and fractions that will be used throughout the simulation
+            Real64 constexpr tolerance = 0.000001;
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                thisZoneMRT.sumFracZoneMRT += thisZoneMRT.zoneMRTPeople(pNum).fracMRT;
+            }
+            if ((thisZoneMRT.sumFracZoneMRT - 1.0) > tolerance) {
+                ShowSevereError(state,
+                                std::format("{}, {}=\"{}\" object has individual People MRT weighting factors that sum up to greater than 1.0.",
+                                            routineName,
+                                            cCurrentModuleObject,
+                                            thisZoneMRT.name));
+                ShowContinueError(state,
+                                  std::format("The weighting factors for this object will be reset to zero and the standard zone MRT will be used."));
+                // do not set errorsFound equal to true here as this is not will not cause any issues elsewhere
+                for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                    thisZoneMRT.zoneMRTPeople(pNum).fracMRT = 0.0;
+                }
+                thisZoneMRT.sumFracZoneMRT = 0.0;
+            }
+            if ((1.0 - thisZoneMRT.sumFracZoneMRT) > tolerance) {
+                ShowWarningMessage(state,
+                                   std::format("{}, {}=\"{}\" object has individual People MRT weighting factors that sum up to less than 1.0.",
+                                               routineName,
+                                               cCurrentModuleObject,
+                                               thisZoneMRT.name));
+                ShowContinueError(state, std::format("The remaining fraction of the MRT calculation will use the standard zone MRT."));
+                // do not set errorsFound equal to true here because this is possible and potentially intentional on the part of the user
+            }
+            thisZoneMRT.fracZoneStdMRT = max(1.0 - thisZoneMRT.sumFracZoneMRT, 0.0);
+        }
+
+        if (errorsFound) {
+            ShowFatalError(state, std::format("{} Errors found getting inputs. Previous error(s) cause program termination.", routineName));
+        }
+
+        for (auto &thisZoneMRT : state.dataHeatBal->zoneMRTCalc) { // Set up the output variables
+            if (state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc) {
+                SetupOutputVariable(state,
+                                    "Zone Standard Mean Radiant Temperature",
+                                    Constant::Units::C,
+                                    state.dataZoneTempPredictorCorrector->zoneHeatBalance(thisZoneMRT.zoneIndex).stdMRT,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    thisZoneMRT.name);
+            }
+        }
+    }
+
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
@@ -2468,6 +2699,25 @@ namespace HeatBalanceManager {
                     ++state.dataGlobal->numSpaceTypes;
                     state.dataHeatBal->spaceTypes(state.dataGlobal->numSpaceTypes) = thisSpace.spaceType;
                     thisSpace.spaceTypeNum = state.dataGlobal->numSpaceTypes;
+                }
+
+                std::string dcsName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "construction_assignment_set_name");
+                if (!dcsName.empty()) {
+                    auto &dcSets = state.dataConstructionAssignments->constructionAssignmentSets;
+                    auto it = std::find_if(dcSets.begin(), dcSets.end(), [&dcsName](const ConstructionAssignments::ConstructionAssignmentSetData &d) {
+                        return d.Name == dcsName;
+                    });
+                    if (it == dcSets.end()) {
+                        ShowSevereError(state,
+                                        std::format(R"({}{}="{}", invalid construction_assignment_set_name="{}" not found.)",
+                                                    RoutineName,
+                                                    cCurrentModuleObject,
+                                                    thisSpace.Name,
+                                                    dcsName));
+                        ErrorsFound = true;
+                    } else {
+                        thisSpace.constructionAssignmentSetIndex = static_cast<int>(std::distance(dcSets.begin(), it));
+                    }
                 }
 
                 auto extensibles = objectFields.find("tags");
@@ -4147,7 +4397,8 @@ namespace HeatBalanceManager {
                     if (mat->Thickness <= 0.0) {
                     }
                     mat->Roughness = Material::SurfaceRoughness::VerySmooth;
-                    mat->AbsorpThermal = mat->AbsorpThermalBack;
+                    mat->AbsorpThermalIn = mat->AbsorpThermalBack;
+                    mat->AbsorpThermalOut = mat->AbsorpThermalFront;
                     if (mat->Thickness <= 0.0) {
                         ShowSevereError(
                             state,

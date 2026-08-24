@@ -221,6 +221,8 @@
     0.7500000,               !- Solar Absorptance
     0.7500000;               !- Visible Absorptance
 
+  ! Apply the same temperature-driven functions independently to both faces.
+
   MaterialProperty:VariableAbsorptance,
     variableThermalR13LAYER, !- Name
     R13LAYER_vary,           !- Reference Material Name
@@ -228,7 +230,12 @@
     ThermalAbsorptanceTemperatureTable,  !- Thermal Absorptance Function Name
     ,                        !- Thermal Absorptance Schedule Name
     SolarAbsorptanceTemperatureCurve,  !- Solar Absorptance Function Name
-    ;                        !- Solar Absorptance Schedule Name
+    ,                        !- Solar Absorptance Schedule Name
+    SurfaceTemperature,      !- Control Signal Inside Face
+    ThermalAbsorptanceTemperatureTable,  !- Thermal Absorptance Function Name Inside Face
+    ,                        !- Thermal Absorptance Schedule Name Inside Face
+    SolarAbsorptanceTemperatureCurve,  !- Solar Absorptance Function Name Inside Face
+    ;                        !- Solar Absorptance Schedule Name Inside Face
 
   Table:IndependentVariable,
     ThermalAbsorptanceTemperatureTable_IndependentVariable1,  !- Name

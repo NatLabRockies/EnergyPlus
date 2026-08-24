@@ -56,7 +56,7 @@ This definition should be used when the four main thermal properties (thickness,
 
 When a Material is used for the Construction of a building surface, care should be taken to not attempt to model assemblies that were not included in the intended scope of applicability for the underlying heat transfer models.~ The building surface models are for normal applications to building energy efficiency where the main focus is on assemblies with some thermal resistance. Extremely thin and/or highly conductive material layers should be neglected from the Construction rather than included because they will not contribute to the assembly's overall thermal resistance or heat capacity. For some cases, thin and/or highly conductive materials are a serious problem for the heat transfer modeling and the values for thickness, conductivity, density and specific heat are checked for appropriateness. This check calculates the Material's thermal diffusivity from the inputs for conductivity, density, and specific heat and compares it to a maximum threshold of $10^{-5}$ (m\(^{2}\)/s). If the diffusivity is above this threshold, then the program checks if the layer is sufficiently thick and may issue a warning if it is too thin and highly conductive.
 
-The absorptance values in this object impart surface properties to the construction and should be applied to the thermally significant inner and outer layers in the overall assembly.~ Attempting to trick the program by modeling thin ``paint'' layers to apply surface properties is not a good idea; the models were not intended to support such strategies.
+The absorptance values in this object impart surface properties to the construction and should be applied to the thermally significant inner and outer layers in the overall assembly.~ For an opaque construction, only the outside-face properties of the outermost layer and the inside-face properties of the innermost layer affect the surface heat balances; absorptance values on intermediate layers are not surface properties. Attempting to trick the program by modeling thin ``paint'' layers to apply surface properties is not a good idea; the models were not intended to support such strategies.
 
 \subsubsection{Inputs}\label{inputs-046}
 
@@ -86,20 +86,33 @@ This field represents the specific heat of the material layer in units of J/(kg-
 
 \paragraph{Field: Thermal Absorptance}\label{field-thermal-absorptance}
 
-The thermal absorptance field in the Material input syntax represents the fraction of incident long wavelength (>2.5 microns) radiation that is absorbed by the material. This parameter is used when calculating the long wavelength radiant exchange between various surfaces and affects the surface heat balances (both inside and outside as appropriate). For long wavelength radiant exchange, thermal emissivity and thermal emittance are equal to thermal absorptance. Values for this field must be between 0.0 and 1.0 (with 1.0 representing ``black body'' conditions). The default value for this field is 0.9.
+This field specifies the bulk thermal absorptance: the fraction of incident longwave radiation (wavelengths greater than 2.5~$\mu{}m$) absorbed by the material. When Thermal Absorptance Inside Face is blank, this value is used at both faces. When that optional field is entered, this value applies to the outside face. Thermal absorptance is used in longwave radiant exchange and the surface heat balances; by Kirchhoff's law, thermal emissivity and emittance equal thermal absorptance. The value must be greater than 0.0 and no greater than 0.99999. The default is 0.9.
 
 \paragraph{Field: Solar Absorptance}\label{field-solar-absorptance}
 
-The solar absorptance field in the Material input syntax represents the fraction of incident~ solar radiation that is absorbed by the material. Solar radiation (0.3 to 2.537 $\mu{}m$) includes the visible spectrum as well as infrared and ultraviolet wavelengths. This parameter is used when calculating the amount of incident solar radiation absorbed by various surfaces and affects the surface heat balances (both inside and outside as appropriate). If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Values for this field must be between 0.0 and 1.0. The default value for this field is 0.7.
+This field specifies the bulk solar absorptance: the fraction of incident solar radiation (approximately 0.3 to 2.537~$\mu{}m$) absorbed by the material. When Solar Absorptance Inside Face is blank, this value is used at both faces. When that optional field is entered, this value applies to the outside face. For an opaque material, absorptance equals 1.0 minus reflectance. The value must be between 0.0 and 1.0. The default is 0.7.
 
 \paragraph{Field: Visible Absorptance}\label{field-visible-absorptance}
 
-The visible absorptance field in the Material input syntax represents the fraction of incident visible wavelength radiation that is absorbed by the material. Visible wavelength radiation (0.37 to 0.78 $\mu{}m$ weighted by photopic response) is slightly different than solar radiation in that the visible band of wavelengths is much more narrow while solar radiation includes the visible spectrum as well as infrared and ultraviolet wavelengths. This parameter is used when calculating the amount of incident visible radiation absorbed by various surfaces and affects the surface heat balances (both inside and outside as appropriate) as well as the daylighting calculations. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Values for this field must be between 0.0 and 1.0. The default value for this field is 0.7.
+This field specifies the bulk visible absorptance: the fraction of photopically weighted visible radiation (approximately 0.37 to 0.78~$\mu{}m$) absorbed by the material. When Visible Absorptance Inside Face is blank, this value is used at both faces. When that optional field is entered, this value applies to the outside face. The value affects visible-radiation and daylighting calculations and, for an opaque material, equals 1.0 minus visible reflectance. The value must be between 0.0 and 1.0. The default is 0.7.
 
-An IDF example:
+\paragraph{Field: Thermal Absorptance Inside Face}\label{field-thermal-absorptance-inside-face}
+
+This optional field specifies the thermal absorptance used at the inside face when this material is the innermost layer of a construction. When blank, it inherits the Thermal Absorptance value above. The value must be greater than 0.0 and no greater than 0.99999.
+
+\paragraph{Field: Solar Absorptance Inside Face}\label{field-solar-absorptance-inside-face}
+
+This optional field specifies the solar absorptance used at the inside face when this material is the innermost layer of a construction. When blank, it inherits the Solar Absorptance value above. The value must be between 0.0 and 1.0.
+
+\paragraph{Field: Visible Absorptance Inside Face}\label{field-visible-absorptance-inside-face}
+
+This optional field specifies the visible absorptance used at the inside face when this material is the innermost layer of a construction. When blank, it inherits the Visible Absorptance value above. The value must be between 0.0 and 1.0.
+
+Here are two IDF examples:
 
 \begin{lstlisting}
-Material,A2 - 4 IN DENSE FACE BRICK,  !- Material Name
+Material,
+  A2 - 4 IN DENSE FACE BRICK,  !- Material Name
   Rough,                      !- Roughness
   0.1014984,                  !- Thickness {m}
   1.245296,                   !- Conductivity {W/M*K}
@@ -109,6 +122,26 @@ Material,A2 - 4 IN DENSE FACE BRICK,  !- Material Name
   0.9300000,                  !- Solar Absorptance
   0.9300000;                  !- Visible Absorptance
 \end{lstlisting}
+
+In the example above, the three existing absorptance fields are bulk values and therefore apply to both faces.
+
+\begin{lstlisting}
+Material,
+  Material Diff Absorptances,  !- Material Name
+  Rough,                       !- Roughness
+  0.05,                        !- Thickness {m}
+  2.5,                         !- Conductivity {W/M*K}
+  1500.0,                      !- Density {Kg/M**3}
+  888.8,                       !- Specific Heat {J/Kg*K}
+  0.9000000,                   !- Thermal Absorptance
+  0.7000000,                   !- Solar Absorptance
+  0.7000000,                   !- Visible Absorptance
+  0.6000000,                   !- Thermal Absorptance Inside Face
+  0.4500000,                   !- Solar Absorptance Inside Face
+  0.4500000;                   !- Visible Absorptance Inside Face
+\end{lstlisting}
+
+In the second example, the three existing absorptance fields apply to the outside face and the three optional fields apply to the inside face.
 
 \subsection{Material:NoMass}\label{materialnomass}
 
@@ -130,27 +163,56 @@ This field is used to enter the thermal resistance (R-value) of the material lay
 
 \paragraph{Field: Thermal Absorptance}\label{field-thermal-absorptance-1}
 
-The thermal absorptance field in the Material input syntax represents the fraction of incident long wavelength (>2.5 $\mu{}m$) radiation that is absorbed by the material. This parameter is used when calculating the long wavelength radiant exchange between various surfaces and affects the surface heat balances (both inside and outside as appropriate). For long wavelength radiant exchange, thermal emissivity and thermal emittance are equal to thermal absorptance. Values for this field must be between 0.0 and 1.0 (with 1.0 representing ``black body'' conditions). The default value for this field is 0.9.
+This field has the same bulk and face-specific behavior as Thermal Absorptance for the \hyperref[material]{Material} object. It is used at both faces when Thermal Absorptance Inside Face is blank and at the outside face when the optional inside-face value is entered. The value must be greater than 0.0 and no greater than 0.99999. The default is 0.9.
 
 \paragraph{Field: Solar Absorptance}\label{field-solar-absorptance-1}
 
-The solar absorptance field in the Material input syntax represents the fraction of incident~ solar radiation that is absorbed by the material. Solar radiation (0.3 to 2.537 $\mu{}m$) includes the visible spectrum as well as infrared and ultraviolet wavelengths. This parameter is used when calculating the amount of incident solar radiation absorbed by various surfaces and affects the surface heat balances (both inside and outside as appropriate). If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Values for this field must be between 0.0 and 1.0. The default value for this field is 0.7.
+This field has the same bulk and face-specific behavior as Solar Absorptance for the \hyperref[material]{Material} object. It is used at both faces when Solar Absorptance Inside Face is blank and at the outside face when the optional inside-face value is entered. The value must be between 0.0 and 1.0. The default is 0.7.
 
 \paragraph{Field: Visible Absorptance}\label{field-visible-absorptance-1}
 
-The visible absorptance field in the Material input syntax represents the fraction of incident visible wavelength radiation that is absorbed by the material. Visible wavelength radiation (0.37 to 0.78 $\mu{}m$ weighted by photopic response) is slightly different than solar radiation in that the visible band of wavelengths is much more narrow while solar radiation includes the visible spectrum as well as infrared and ultraviolet wavelengths. This parameter is used when calculating the amount of incident visible radiation absorbed by various surfaces and affects the surface heat balances (both inside and outside as appropriate) as well as the daylighting calculations. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Values for this field must be between 0.0 and 1.0. The default value for this field is 0.7.
+This field has the same bulk and face-specific behavior as Visible Absorptance for the \hyperref[material]{Material} object. It is used at both faces when Visible Absorptance Inside Face is blank and at the outside face when the optional inside-face value is entered. The value must be between 0.0 and 1.0. The default is 0.7.
 
-An IDF example:
+\paragraph{Field: Thermal Absorptance Inside Face}\label{field-thermal-absorptance-inside-face-1}
+
+This optional field specifies the inside-face thermal absorptance. When blank, it inherits the Thermal Absorptance value above. The value must be greater than 0.0 and no greater than 0.99999.
+
+\paragraph{Field: Solar Absorptance Inside Face}\label{field-solar-absorptance-inside-face-1}
+
+This optional field specifies the inside-face solar absorptance. When blank, it inherits the Solar Absorptance value above. The value must be between 0.0 and 1.0.
+
+\paragraph{Field: Visible Absorptance Inside Face}\label{field-visible-absorptance-inside-face-1}
+
+This optional field specifies the inside-face visible absorptance. When blank, it inherits the Visible Absorptance value above. The value must be between 0.0 and 1.0.
+
+Here are two IDF examples:
 
 \begin{lstlisting}
 Material:NoMass,
-  R13LAYER,                   !- Material Name
-  Rough,                      !- Roughness
-  2.290965,                   !- Resistance {M**2K/W}
-  0.9000000,                  !- Thermal Absorptance
-  0.7500000,                  !- Solar Absorptance
-  0.7500000;                  !- Visible Absorptance
+  R13LAYER,      !- Material Name
+  Rough,         !- Roughness
+  2.290965,      !- Resistance {M**2K/W}
+  0.9000000,     !- Thermal Absorptance
+  0.7500000,     !- Solar Absorptance
+  0.7500000;     !- Visible Absorptance
 \end{lstlisting}
+
+In the example above, the three existing absorptance fields are bulk values and therefore apply to both faces.
+
+\begin{lstlisting}
+Material:NoMass,
+  R13LAYER with diff abs, !- Material Name
+  Rough,                  !- Roughness
+  2.290965,               !- Resistance {M**2K/W}
+  0.9000000,              !- Thermal Absorptance
+  0.7500000,              !- Solar Absorptance
+  0.7500000,              !- Visible Absorptance
+  0.2000000,              !- Thermal Absorptance Inside Face
+  0.2000000,              !- Solar Absorptance Inside Face
+  0.2000000;              !- Visible Absorptance Inside Face
+\end{lstlisting}
+
+In the second example, the three existing absorptance fields apply to the outside face and the three optional fields apply to the inside face.
 
 \subsection{Material:InfraredTransparent}\label{materialinfraredtransparent}
 
@@ -741,21 +803,11 @@ These will output the half-node heat capacitance in surfaces being simulated wit
 
 \subsection{MaterialProperty:VariableAbsorptance}\label{materialpropertyvariableabsorptance}
 
-This object is used to describe a dynamic coating material applied on the
-outside of opaque exterior walls or roofs. The object will modify the thermal
-or solar absorptance of the outside surface of an existing material defined in
-the field ``Reference Material Name''. The variation of the thermal or solar
-absorptance of the coating can be driven by any of the following four control
-variables: surface temperature, surface received solar radiation, zone
-heating/cooling mode, or a schedule. If both the thermal and the solar
-absorptance are varying, the control signals are assumed to be the same, but
-different functions/schedules are allowed. The material can have a variable
-thermal absorptance and a constant solar absorptance, or a constant thermal
-absorptance and a variable solar absorptance. Note that the variable-absorptance
-coatings modeled with this object are not exactly equivalent to those modeled
-with EMS. This object only adjusts the thermal or solar absorptance of the
-exterior surfaces, while the EMS approach overwrites the absorptance of both the
-interior and exterior surfaces.
+This object defines variable thermal and solar absorptance controls for the outside and inside faces of an opaque exterior heat-transfer surface. The referenced material must be the outermost construction layer for its outside-face controls to apply and the innermost layer for its inside-face controls to apply. Controls on interzone surfaces or on other construction layers are ignored with a warning.
+
+Each face has one control signal---surface temperature, surface received solar radiation, zone heating/cooling mode, or a schedule---shared by its thermal and solar absorptance controls. Thermal and solar absorptance may reference different functions or schedules, and either property may remain constant. The existing Control Signal and function/schedule fields control the outside face. The optional Inside Face fields independently control the inside face. If Control Signal Inside Face is blank, the inside-face absorptances remain at the constant values defined by the referenced material; they do not follow the outside-face controls.
+
+Variable-absorptance coatings can also be modeled with EMS.
 
 \subsubsection{Inputs}\label{inputs-materialpropertyvariableabsorptance}
 
@@ -770,30 +822,76 @@ variable absorptance property information will be associated.
 
 \paragraph{Field: Control Signal}\label{field-control-signal}
 
-It can be one of the following: surface temperature, surface received solar radiation, zone heating/cooling mode, or a schedule.
-If the control signal is ``Scheduled'', then a schedule needs to be specified in ``Thermal Absorptance Schedule Name'' or
-``Solar Absorptance Schedule Name''. The schedule value will override the material absorptance value. If the control signal
-is not ``Scheduled'', then the control signal value at the target surface or zone will decide the absorptance, based on
-the function referenced in ``Thermal Absorptance Function Name'' or ``Solar Absorptance Function Name''. If not specified,
-the control signal will assumed to be surface temperature.
+This required field selects the outside-face control signal: surface temperature, surface received solar radiation, zone heating/cooling mode, or a schedule. For ``Scheduled'', specify at least one outside-face absorptance schedule. For any other signal, specify at least one outside-face absorptance function. Thermal and solar absorptance use the same signal but may use different functions or schedules. The default is SurfaceTemperature.
 
 \paragraph{Field: Thermal Absorptance Function Name}\label{field-thermal-absorptance-function-name}
 
-The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the thermal absorptance.
+The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the thermal absorptance at the outside face or exterior side.
 
 \paragraph{Field: Thermal Absorptance Schedule Name}\label{field-thermal-absorptance-schedule-name}
 
-The name of a Schedule object that overwrites the material thermal absorptance.
-If neither this field or the previous field are defined, then the thermal absorptance is assumed to be constant
+The name of a Schedule object that overrides the outside-face thermal absorptance when Control Signal is Scheduled. If neither this field nor Thermal Absorptance Function Name is defined, the outside-face thermal absorptance remains constant.
 
 \paragraph{Field: Solar Absorptance Function Name}\label{field-solar-absorptance-function-name}
 
-The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the solar absorptance.
+The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the solar absorptance at the outside face or exterior side.
 
 \paragraph{Field: Solar Absorptance Schedule Name}\label{field-solar-absorptance-schedule-name}
 
-The name of a Schedule object that overwrites the material solar absorptance.
-If neither this field or the previous field are defined, then the solar absorptance is assumed to be constant
+The name of a Schedule object that overrides the outside-face solar absorptance when Control Signal is Scheduled. If neither this field nor Solar Absorptance Function Name is defined, the outside-face solar absorptance remains constant.
+
+\paragraph{Field: Control Signal Inside Face}\label{field-control-signal-inside-face}
+
+This optional field selects the inside-face control signal using the same choices as Control Signal. For ``Scheduled'', specify at least one inside-face absorptance schedule. For any other signal, specify at least one inside-face absorptance function. If this field is blank, all inside-face absorptances remain at the constant values defined by the referenced material. This preserves the behavior of input files created before inside-face variable absorptance controls were available.
+
+\paragraph{Field: Thermal Absorptance Function Name Inside Face}\label{field-thermal-absorptance-function-name-inside-face}
+
+The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the thermal absorptance at the inside face or interior side.
+
+\paragraph{Field: Thermal Absorptance Schedule Name Inside Face}\label{field-thermal-absorptance-schedule-name-inside-face}
+
+The name of a Schedule object that overrides the inside-face thermal absorptance when Control Signal Inside Face is Scheduled. If neither this field nor Thermal Absorptance Function Name Inside Face is defined, the inside-face thermal absorptance remains constant.
+
+\paragraph{Field: Solar Absorptance Function Name Inside Face}\label{field-solar-absorptance-function-name-inside-face}
+
+The name of a Curve or a Table:Lookup object describing the relationship between the control signal and the solar absorptance at the inside face or interior side.
+
+\paragraph{Field: Solar Absorptance Schedule Name Inside Face}\label{field-solar-absorptance-schedule-name-inside-face}
+
+The name of a Schedule object that overrides the inside-face solar absorptance when Control Signal Inside Face is Scheduled. If neither this field nor Solar Absorptance Function Name Inside Face is defined, the inside-face solar absorptance remains constant.
+
+Here are two IDF examples of this object:
+
+\begin{lstlisting}
+  MaterialProperty:VariableAbsorptance,
+    variableThermalR13LAYER, !- Name
+    R13LAYER_vary,           !- Reference Material Name
+    SurfaceTemperature,      !- Control Signal
+    ThermalAbsTempTable,     !- Thermal Absorptance Function Name
+    ,                        !- Thermal Absorptance Schedule Name
+    SolarAbsTempCurve,       !- Solar Absorptance Function Name
+    ;                        !- Solar Absorptance Schedule Name
+\end{lstlisting}
+
+In the example above, only the outside face varies. The inside-face absorptances remain at the constant values defined by the referenced material.
+
+\begin{lstlisting}
+  MaterialProperty:VariableAbsorptance,
+    variableAbsR13LAYERdiff, !- Name
+    R13LAYER_vary_diff,      !- Reference Material Name
+    SurfaceTemperature,      !- Control Signal
+    ThermalAbsTempTable,     !- Thermal Absorptance Function Name
+    ,                        !- Thermal Absorptance Schedule Name
+    SolarAbsTempCurve,       !- Solar Absorptance Function Name
+    ,                        !- Solar Absorptance Schedule Name
+    Scheduled,               !- Inside Face Control Signal
+    ,                        !- Inside Face Thermal Absorptance Function Name
+    ThermalAbsSched,         !- Inside Face Thermal Absorptance Schedule Name
+    ,                        !- Inside Face Solar Absorptance Function Name
+    SolarAbsSched;           !- Inside Face Solar Absorptance Schedule Name
+\end{lstlisting}
+
+In the second example, the outside face follows the temperature functions while the inside face follows the thermal and solar schedules.
 
 \subsection{MaterialProperty:HeatAndMoistureTransfer:Settings}\label{materialpropertyheatandmoisturetransfersettings}
 
@@ -3870,6 +3968,210 @@ Construction, DOUBLE PANE WITH ROLL SHADE,  !- Material layer names follow:
   WinAirB1 - AIRSPACE RESISTANCE,
   GLASS - CLEAR SHEET 1 / 8 IN,
   ROLL SHADE - LIGHT
+\end{lstlisting}
+
+\subsection{Constructions - Inheriting Surface Constructions Instead of Hard-Assigning Them}\label{constructions---inheriting-surface-constructions-instead-of-hard-assigning-them}
+
+Historically, every \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed}, \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed}, and \hyperref[internalmass]{InternalMass} object had to be given an explicit \emph{Construction Name}. For large models this means repeating the same handful of construction names, by surface type and boundary condition, across hundreds or thousands of surfaces. Three objects -- \textbf{\hyperref[constructionassignmentset]{ConstructionAssignmentSet}}, \textbf{\hyperref[surfaceconstructionassignments]{SurfaceConstructionAssignments}}, and \textbf{\hyperref[subsurfaceconstructionassignments]{SubSurfaceConstructionAssignments}} -- let a construction be assigned once, at the \hyperref[building]{Building} or \hyperref[space]{Space} level, and inherited by every surface that leaves its own \emph{Construction Name} field blank.
+
+The \emph{Construction Name} field on BuildingSurface:Detailed, FenestrationSurface:Detailed, and InternalMass is optional. When it is blank, EnergyPlus resolves the construction in the following order, stopping at the first one found (see Figure~\ref{fig:construction-assignment-inheritance}):
+
+\begin{enumerate}
+  \item
+    An explicit (non-blank) \emph{Construction Name} on the surface itself.
+  \item
+    The \hyperref[constructionassignmentset]{ConstructionAssignmentSet} referenced by the surface's \hyperref[space]{Space} (\emph{Construction Assignment Set Name} field).
+  \item
+    The \hyperref[constructionassignmentset]{ConstructionAssignmentSet} referenced by the \hyperref[building]{Building} (\emph{Construction Assignment Set Name} field).
+\end{enumerate}
+
+If none of these resolves a construction, EnergyPlus issues a fatal error.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.45\textwidth, keepaspectratio=true]{media/construction-assignment-inheritance.png}
+\caption{Construction resolution order: explicit assignment, then Space-level, then Building-level ConstructionAssignmentSet}
+\label{fig:construction-assignment-inheritance}
+\end{figure}
+
+Within a ConstructionAssignmentSet, the slot used to resolve a surface depends on its type and outside boundary condition, as shown in Figure~\ref{fig:construction-assignment-set-structure} and Table~\ref{table:constructionassignmentset-slot-resolution} below. Sub-surface types resolve using their own declared Surface Type (ref: \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed}), not the generic Window/Door class they are remapped to for heat transfer calculations.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth, keepaspectratio=true]{media/construction-assignment-set-structure.png}
+\caption{Structure of ConstructionAssignmentSet, SurfaceConstructionAssignments, and SubSurfaceConstructionAssignments, and how their fields link to Construction}
+\label{fig:construction-assignment-set-structure}
+\end{figure}
+
+In the table, ``window-type'' covers FixedWindow, OperableWindow, Window, Skylight, GlassDoor, TubularDaylightDome, and TubularDaylightDiffuser; ``door-type'' covers Door and OverheadDoor.
+
+% table cas
+\begin{longtable}[c]{@{}>{\raggedright}p{1.6in}>{\raggedright}p{1.7in}>{\raggedright\arraybackslash}p{2.6in}@{}}
+    \caption{ConstructionAssignmentSet slot resolution \label{table:constructionassignmentset-slot-resolution}} \tabularnewline
+    \toprule
+    Surface/Sub-surface Type & Outside Boundary Condition & Slot \tabularnewline
+    \midrule
+    \endfirsthead
+
+    \caption[]{ConstructionAssignmentSet slot resolution} \tabularnewline
+    \toprule
+    Surface/Sub-surface Type & Outside Boundary Condition & Slot \tabularnewline
+    \midrule
+    \endhead
+
+    Wall / Floor / Roof or Ceiling & Outdoors & Exterior Surface Construction Assignments \tabularnewline
+    Wall / Floor / Roof or Ceiling & Surface / Zone / Space & Interior Surface Construction Assignments \tabularnewline
+    Wall / Floor / Roof or Ceiling & Ground / GroundFCfactorMethod / Foundation & Ground Contact Surface Construction Assignments \tabularnewline
+    Wall / Floor / Roof or Ceiling & Adiabatic & Adiabatic Surface Construction Name (direct) \tabularnewline
+    Window-type sub-surface & Exterior base surface & Exterior SubSurface Construction Assignments \tabularnewline
+    Window-type sub-surface & Interior base surface & Interior SubSurface Construction Assignments \tabularnewline
+    Door-type sub-surface & Exterior base surface & Exterior SubSurface Construction Assignments \tabularnewline
+    Door-type sub-surface & Interior base surface & Interior SubSurface Construction Assignments \tabularnewline
+    InternalMass & -- & Interior Partition Construction Name (direct) \tabularnewline
+    \bottomrule
+\end{longtable}
+
+For an interzone pair (two surfaces facing each other across a Surface/Zone/Space boundary), when at least one side's construction is inherited rather than explicit, the side with the higher-precedence assignment (Explicit, then Space, then Building) governs the pair, and EnergyPlus finds or creates the reversed-layer-order construction for the other side -- reusing an existing construction with matching reversed layers if one is found, rather than creating a duplicate.
+
+\subsection{ConstructionAssignmentSet}\label{constructionassignmentset}
+
+This object defines a set of inherited construction assignments for surfaces and sub-surfaces, indexed by surface/sub-surface type and outside boundary condition. It can be referenced by a \hyperref[building]{Building} object or by one or more \hyperref[space]{Space} objects (Space-level references take precedence over the Building-level reference). Any \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed}, \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed}, or \hyperref[internalmass]{InternalMass} object with a blank \emph{Construction Name} field resolves its construction through the referencing chain, in order: an explicit assignment on the surface itself, then the ConstructionAssignmentSet referenced by its Space, then the ConstructionAssignmentSet referenced by the Building.
+
+\subsubsection{Inputs}\label{constructionassignmentset-inputs}
+
+\paragraph{Field: Name}\label{constructionassignmentset-field-name}
+
+This field is a user specified name that will be used as a reference by the \emph{Construction Assignment Set Name} field on \hyperref[building]{Building} and \hyperref[space]{Space} objects.
+
+\paragraph{Field: Exterior Surface Construction Assignments Name}\label{constructionassignmentset-field-exterior-surface-construction-assignments-name}
+
+The name of a \hyperref[surfaceconstructionassignments]{SurfaceConstructionAssignments} object giving the Floor, Wall, and Roof/Ceiling constructions for surfaces with Outside Boundary Condition = Outdoors.
+
+\paragraph{Field: Interior Surface Construction Assignments Name}\label{constructionassignmentset-field-interior-surface-construction-assignments-name}
+
+The name of a \hyperref[surfaceconstructionassignments]{SurfaceConstructionAssignments} object giving the Floor, Wall, and Roof/Ceiling constructions for surfaces with Outside Boundary Condition = Surface, Zone, or Space.
+
+\paragraph{Field: Ground Contact Surface Construction Assignments Name}\label{constructionassignmentset-field-ground-contact-surface-construction-assignments-name}
+
+The name of a \hyperref[surfaceconstructionassignments]{SurfaceConstructionAssignments} object giving the Floor, Wall, and Roof/Ceiling constructions for surfaces with Outside Boundary Condition = Ground, GroundFCfactorMethod, or Foundation.
+
+\paragraph{Field: Exterior SubSurface Construction Assignments Name}\label{constructionassignmentset-field-exterior-subsurface-construction-assignments-name}
+
+The name of a \hyperref[subsurfaceconstructionassignments]{SubSurfaceConstructionAssignments} object giving the constructions for sub-surfaces on exterior base surfaces.
+
+\paragraph{Field: Interior SubSurface Construction Assignments Name}\label{constructionassignmentset-field-interior-subsurface-construction-assignments-name}
+
+The name of a \hyperref[subsurfaceconstructionassignments]{SubSurfaceConstructionAssignments} object giving the constructions for sub-surfaces on interior base surfaces.
+
+\paragraph{Field: Interior Partition Construction Name}\label{constructionassignmentset-field-interior-partition-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for \hyperref[internalmass]{InternalMass} objects with a blank \emph{Construction Name}.
+
+\paragraph{Field: Adiabatic Surface Construction Name}\label{constructionassignmentset-field-adiabatic-surface-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for surfaces with Outside Boundary Condition = Adiabatic.
+
+IDF Example:
+
+\begin{lstlisting}
+ConstructionAssignmentSet,
+  Default Construction Set,     !- Name
+  Exterior Surface Constructions,  !- Exterior Surface Construction Assignments Name
+  Interior Surface Constructions,  !- Interior Surface Construction Assignments Name
+  Ground Surface Constructions,    !- Ground Contact Surface Construction Assignments Name
+  Exterior SubSurface Constructions,  !- Exterior SubSurface Construction Assignments Name
+  Interior SubSurface Constructions,  !- Interior SubSurface Construction Assignments Name
+  Interior Partition Construction, !- Interior Partition Construction Name
+  Adiabatic Surface Construction;  !- Adiabatic Surface Construction Name
+\end{lstlisting}
+
+\subsection{SurfaceConstructionAssignments}\label{surfaceconstructionassignments}
+
+This object defines the Floor, Wall, and Roof/Ceiling constructions for one outside-boundary-condition category (exterior, interior, or ground-contact), for reference by a \hyperref[constructionassignmentset]{ConstructionAssignmentSet}.
+
+\subsubsection{Inputs}\label{surfaceconstructionassignments-inputs}
+
+\paragraph{Field: Name}\label{surfaceconstructionassignments-field-name}
+
+This field is a user specified name that will be used as a reference by \hyperref[constructionassignmentset]{ConstructionAssignmentSet} objects.
+
+\paragraph{Field: Floor Construction Name}\label{surfaceconstructionassignments-field-floor-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for Floor surfaces in this category. May be left blank; a surface routed to this slot with this field blank falls through to the Building-level ConstructionAssignmentSet (if this SurfaceConstructionAssignments is referenced from a Space-level set).
+
+\paragraph{Field: Wall Construction Name}\label{surfaceconstructionassignments-field-wall-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for Wall surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Roof Ceiling Construction Name}\label{surfaceconstructionassignments-field-roof-ceiling-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for Roof/Ceiling surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+IDF Example:
+
+\begin{lstlisting}
+SurfaceConstructionAssignments,
+  Exterior Surface Constructions,  !- Name
+  Exterior Floor Construction,  !- Floor Construction Name
+  Exterior Wall Construction,   !- Wall Construction Name
+  Exterior Roof Construction;   !- Roof Ceiling Construction Name
+\end{lstlisting}
+
+\subsection{SubSurfaceConstructionAssignments}\label{subsurfaceconstructionassignments}
+
+This object defines the constructions for each sub-surface type for one outside-boundary-condition category (exterior or interior), for reference by a \hyperref[constructionassignmentset]{ConstructionAssignmentSet}. The generic \emph{Window} Surface Type (ref: \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed}) resolves via the Fixed Window Construction Name slot.
+
+\subsubsection{Inputs}\label{subsurfaceconstructionassignments-inputs}
+
+\paragraph{Field: Name}\label{subsurfaceconstructionassignments-field-name}
+
+This field is a user specified name that will be used as a reference by \hyperref[constructionassignmentset]{ConstructionAssignmentSet} objects.
+
+\paragraph{Field: Fixed Window Construction Name}\label{subsurfaceconstructionassignments-field-fixed-window-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for FixedWindow and Window sub-surfaces in this category. May be left blank, in which case a sub-surface routed to this slot falls through to the Building-level ConstructionAssignmentSet (if this SubSurfaceConstructionAssignments is referenced from a Space-level set).
+
+\paragraph{Field: Operable Window Construction Name}\label{subsurfaceconstructionassignments-field-operable-window-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for OperableWindow sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Door Construction Name}\label{subsurfaceconstructionassignments-field-door-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for Door sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Glass Door Construction Name}\label{subsurfaceconstructionassignments-field-glass-door-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for GlassDoor sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Overhead Door Construction Name}\label{subsurfaceconstructionassignments-field-overhead-door-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for OverheadDoor sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Skylight Construction Name}\label{subsurfaceconstructionassignments-field-skylight-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for Skylight sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Tubular Daylight Dome Construction Name}\label{subsurfaceconstructionassignments-field-tubular-daylight-dome-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for TubularDaylightDome sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+\paragraph{Field: Tubular Daylight Diffuser Construction Name}\label{subsurfaceconstructionassignments-field-tubular-daylight-diffuser-construction-name}
+
+The name of a \hyperref[construction-000]{Construction} used for TubularDaylightDiffuser sub-surfaces in this category. May be left blank, with the same fall-through behavior described above.
+
+IDF Example:
+
+\begin{lstlisting}
+SubSurfaceConstructionAssignments,
+  Exterior SubSurface Constructions,  !- Name
+  Exterior FixedWindow Construction,  !- Fixed Window Construction Name
+  Exterior OperableWindow Construction,  !- Operable Window Construction Name
+  Exterior Door Construction,   !- Door Construction Name
+  Exterior GlassDoor Construction,  !- Glass Door Construction Name
+  Exterior OverheadDoor Construction,  !- Overhead Door Construction Name
+  Exterior Skylight Construction,  !- Skylight Construction Name
+  Exterior TubularDaylightDome Construction,  !- Tubular Daylight Dome Construction Name
+  Exterior TubularDaylightDiffuser Construction;  !- Tubular Daylight Diffuser Construction Name
 \end{lstlisting}
 
 \subsection{Constructions - Modeling Underground Walls and Ground Floors Defined with C and F Factors for Building Energy Code Compliance}\label{constructions---modeling-underground-walls-and-ground-floors-defined-with-c-and-f-factors-for-building-energy-code-compliance}
