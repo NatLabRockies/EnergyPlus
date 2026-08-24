@@ -1338,10 +1338,14 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         assert(surface.OriginalClass < DataSurfaces::SurfaceClass::Num);
         assert(surface.OriginalClass > DataSurfaces::SurfaceClass::None);
 
-        int const currSurfaceClass = static_cast<int>(surface.OriginalClass);
-        ++numSurfaces(currSurfaceClass);
+        DataSurfaces::SurfaceClass currSurfaceClass = surface.OriginalClass;
+        if (currSurfaceClass == DataSurfaces::SurfaceClass::Window) {
+            currSurfaceClass = DataSurfaces::SurfaceClass::FixedWindow;
+        }
+        int const iCurrSurfaceClass = static_cast<int>(currSurfaceClass);
+        ++numSurfaces(iCurrSurfaceClass);
         if (isExterior) {
-            ++numExtSurfaces(currSurfaceClass);
+            ++numExtSurfaces(iCurrSurfaceClass);
         }
     }
     // for fins and overhangs just add them explicitly since not otherwise classified
@@ -1451,10 +1455,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Detached Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Detached Shading", numExtSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
-    OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntTot, "Window", numSurfaces(int(DataSurfaces::SurfaceClass::Window)));
-    OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntExt, "Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)));
+
+    // IDD Entry / OriginalClass == Window is kept for backward compatibility only and is treated as a FixedWindow
+    assert(numSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
+    assert(numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Window", numSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
     OutputReportPredefined::PreDefTableEntry(
