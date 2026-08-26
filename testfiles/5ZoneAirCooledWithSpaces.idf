@@ -564,6 +564,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -574,6 +575,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Conference,              !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Conference/meeting,  !- Tag 1
     Std 90.1 Conference/Meeting/Multipurpose;  !- Tag 2
 
@@ -584,6 +586,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Reception,               !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Reception areas,!- Tag 1
     Std 90.1 Lobby;          !- Tag 2
 
@@ -594,6 +597,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -604,6 +608,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -614,6 +619,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Storage,                 !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Storage,        !- Tag 1
     Std 90.1 Storage;        !- Tag 2
 
@@ -624,6 +630,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -634,6 +641,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 

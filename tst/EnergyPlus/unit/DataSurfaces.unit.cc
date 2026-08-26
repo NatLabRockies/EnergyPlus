@@ -601,3 +601,36 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
         EXPECT_DOUBLE_EQ(s.SinTilt, 1.0);
     }
 }
+
+TEST_F(EnergyPlusFixture, DataSurfaces_SurfaceClassHelpers)
+{
+    // SurfaceClassIsWindow: true for the four window types only
+    EXPECT_TRUE(SurfaceClassIsWindow(SurfaceClass::Window));
+    EXPECT_TRUE(SurfaceClassIsWindow(SurfaceClass::FixedWindow));
+    EXPECT_TRUE(SurfaceClassIsWindow(SurfaceClass::OperableWindow));
+    EXPECT_TRUE(SurfaceClassIsWindow(SurfaceClass::Skylight));
+    EXPECT_FALSE(SurfaceClassIsWindow(SurfaceClass::GlassDoor));
+    EXPECT_FALSE(SurfaceClassIsWindow(SurfaceClass::Door));
+    EXPECT_FALSE(SurfaceClassIsWindow(SurfaceClass::OverheadDoor));
+    EXPECT_FALSE(SurfaceClassIsWindow(SurfaceClass::Wall));
+
+    // SurfaceClassIsGlazed: window types plus GlassDoor
+    EXPECT_TRUE(SurfaceClassIsGlazed(SurfaceClass::Window));
+    EXPECT_TRUE(SurfaceClassIsGlazed(SurfaceClass::FixedWindow));
+    EXPECT_TRUE(SurfaceClassIsGlazed(SurfaceClass::OperableWindow));
+    EXPECT_TRUE(SurfaceClassIsGlazed(SurfaceClass::Skylight));
+    EXPECT_TRUE(SurfaceClassIsGlazed(SurfaceClass::GlassDoor));
+    EXPECT_FALSE(SurfaceClassIsGlazed(SurfaceClass::Door));
+    EXPECT_FALSE(SurfaceClassIsGlazed(SurfaceClass::OverheadDoor));
+    EXPECT_FALSE(SurfaceClassIsGlazed(SurfaceClass::Wall));
+
+    // SurfaceClassIsDoor: Door, OverheadDoor, GlassDoor
+    EXPECT_TRUE(SurfaceClassIsDoor(SurfaceClass::Door));
+    EXPECT_TRUE(SurfaceClassIsDoor(SurfaceClass::OverheadDoor));
+    EXPECT_TRUE(SurfaceClassIsDoor(SurfaceClass::GlassDoor));
+    EXPECT_FALSE(SurfaceClassIsDoor(SurfaceClass::Window));
+    EXPECT_FALSE(SurfaceClassIsDoor(SurfaceClass::FixedWindow));
+    EXPECT_FALSE(SurfaceClassIsDoor(SurfaceClass::OperableWindow));
+    EXPECT_FALSE(SurfaceClassIsDoor(SurfaceClass::Skylight));
+    EXPECT_FALSE(SurfaceClassIsDoor(SurfaceClass::Wall));
+}

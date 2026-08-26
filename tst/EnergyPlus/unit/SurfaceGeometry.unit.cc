@@ -16784,3 +16784,341 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_SpaceOutsideBC_SpacesInput)
     // SINGLE PANE HW WINDOW is a single-layer construction, so the same construction works for both sides
     EXPECT_EQ(state->dataConstruction->Construct(izIntWin.Construction).Name, "SINGLE PANE HW WINDOW");
 }
+
+TEST_F(EnergyPlusFixture, SurfaceGeometry_NewSubSurfaceTypes)
+{
+    // Verify that FixedWindow/OperableWindow/Skylight/OverheadDoor are parsed correctly,
+    // remapped to Window/Door in Class while OriginalClass retains the fine-grained type,
+
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                                  !- Name",
+        "  0,                                      !- Direction of Relative North {deg}",
+        "  0,                                      !- X Origin {m}",
+        "  0,                                      !- Y Origin {m}",
+        "  0,                                      !- Z Origin {m}",
+        "  ,                                       !- Type",
+        "  1,                                      !- Multiplier",
+        "  ,                                       !- Ceiling Height {m}",
+        "  ,                                       !- Volume {m3}",
+        "  ,                                       !- Floor Area {m2}",
+        "  ,                                       !- Zone Inside Convection Algorithm",
+        "  ,                                       !- Zone Outside Convection Algorithm",
+        "  Yes;                                    !- Part of Total Floor Area",
+
+        "BuildingSurface:Detailed,",
+        "  1-SOUTH,                                !- Name",
+        "  Wall,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  15, 0, 3,                               !- X,Y,Z Vertex 1 {m}",
+        "  0, 0, 3,                                !- X,Y,Z Vertex 2 {m}",
+        "  0, 0, 0,                                !- X,Y,Z Vertex 3 {m}",
+        "  15, 0, 0;                               !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Door Door,                              !- Name",
+        "  Door,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  1-SOUTH,                                !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  7, 0, 2,                                !- X,Y,Z Vertex 1 {m}",
+        "  7, 0, 0,                                !- X,Y,Z Vertex 2 {m}",
+        "  8, 0, 0,                                !- X,Y,Z Vertex 3 {m}",
+        "  8, 0, 2;                                !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Door GlassDoor,                         !- Name",
+        "  GlassDoor,                              !- Surface Type",
+        "  Simple Glazing,                         !- Construction Name",
+        "  1-SOUTH,                                !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  12, 0, 2,                               !- X,Y,Z Vertex 1 {m}",
+        "  12, 0, 0,                               !- X,Y,Z Vertex 2 {m}",
+        "  13, 0, 0,                               !- X,Y,Z Vertex 3 {m}",
+        "  13, 0, 2;                               !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Door OverheadDoor,                      !- Name",
+        "  OverheadDoor,                           !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  1-SOUTH,                                !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  0.5, 0, 2.5,                            !- X,Y,Z Vertex 1 {m}",
+        "  0.5, 0, 0,                              !- X,Y,Z Vertex 2 {m}",
+        "  4.5, 0, 0,                              !- X,Y,Z Vertex 3 {m}",
+        "  4.5, 0, 2.5;                            !- X,Y,Z Vertex 4 {m}",
+
+        "BuildingSurface:Detailed,",
+        "  2-WEST,                                 !- Name",
+        "  Wall,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  0, 0, 3,                                !- X,Y,Z Vertex 1 {m}",
+        "  0, 10, 3,                               !- X,Y,Z Vertex 2 {m}",
+        "  0, 10, 0,                               !- X,Y,Z Vertex 3 {m}",
+        "  0, 0, 0;                                !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Window FixedWindow,                     !- Name",
+        "  FixedWindow,                            !- Surface Type",
+        "  Simple Glazing,                         !- Construction Name",
+        "  2-WEST,                                 !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  0, 9.9746, 1.96812712579906,            !- X,Y,Z Vertex 1 {m}",
+        "  0, 9.9746, 0.762,                       !- X,Y,Z Vertex 2 {m}",
+        "  0, 0.0254000000000012, 0.762,           !- X,Y,Z Vertex 3 {m}",
+        "  0, 0.0254000000000012, 1.96812712579906; !- X,Y,Z Vertex 4 {m}",
+
+        "BuildingSurface:Detailed,",
+        "  3-EAST,                                 !- Name",
+        "  Wall,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  15, 10, 3,                              !- X,Y,Z Vertex 1 {m}",
+        "  15, 0, 3,                               !- X,Y,Z Vertex 2 {m}",
+        "  15, 0, 0,                               !- X,Y,Z Vertex 3 {m}",
+        "  15, 10, 0;                              !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Window OperableWindow,                  !- Name",
+        "  OperableWindow,                         !- Surface Type",
+        "  Simple Glazing,                         !- Construction Name",
+        "  3-EAST,                                 !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  15, 0.0254, 1.96812712579906,           !- X,Y,Z Vertex 1 {m}",
+        "  15, 0.0254, 0.762,                      !- X,Y,Z Vertex 2 {m}",
+        "  15, 9.9746, 0.762,                      !- X,Y,Z Vertex 3 {m}",
+        "  15, 9.9746, 1.96812712579906;           !- X,Y,Z Vertex 4 {m}",
+
+        "BuildingSurface:Detailed,",
+        "  4-NORTH,                                !- Name",
+        "  Wall,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  0, 10, 3,                               !- X,Y,Z Vertex 1 {m}",
+        "  15, 10, 3,                              !- X,Y,Z Vertex 2 {m}",
+        "  15, 10, 0,                              !- X,Y,Z Vertex 3 {m}",
+        "  0, 10, 0;                               !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Window Window,                          !- Name",
+        "  Window,                                 !- Surface Type",
+        "  Simple Glazing,                         !- Construction Name",
+        "  4-NORTH,                                !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  14.9746, 10, 1.96607781018382,          !- X,Y,Z Vertex 1 {m}",
+        "  14.9746, 10, 0.762,                     !- X,Y,Z Vertex 2 {m}",
+        "  0.0254000000000012, 10, 0.762,          !- X,Y,Z Vertex 3 {m}",
+        "  0.0254000000000012, 10, 1.96607781018382; !- X,Y,Z Vertex 4 {m}",
+
+        "BuildingSurface:Detailed,",
+        "  Space1 Floor,                           !- Name",
+        "  Floor,                                  !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Ground,                                 !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  NoSun,                                  !- Sun Exposure",
+        "  NoWind,                                 !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  15, 10, 0,                              !- X,Y,Z Vertex 1 {m}",
+        "  15, 0, 0,                               !- X,Y,Z Vertex 2 {m}",
+        "  0, 0, 0,                                !- X,Y,Z Vertex 3 {m}",
+        "  0, 10, 0;                               !- X,Y,Z Vertex 4 {m}",
+
+        "BuildingSurface:Detailed,",
+        "  Space1 RoofCeiling,                     !- Name",
+        "  Roof,                                   !- Surface Type",
+        "  R13 Construction,                       !- Construction Name",
+        "  Zone1,                                  !- Zone Name",
+        "  ,                                       !- Space Name",
+        "  Outdoors,                               !- Outside Boundary Condition",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  SunExposed,                             !- Sun Exposure",
+        "  WindExposed,                            !- Wind Exposure",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Number of Vertices",
+        "  0, 10, 3,                               !- X,Y,Z Vertex 1 {m}",
+        "  0, 0, 3,                                !- X,Y,Z Vertex 2 {m}",
+        "  15, 0, 3,                               !- X,Y,Z Vertex 3 {m}",
+        "  15, 10, 3;                              !- X,Y,Z Vertex 4 {m}",
+
+        "FenestrationSurface:Detailed,",
+        "  Window Skylight,                        !- Name",
+        "  Skylight,                               !- Surface Type",
+        "  Simple Glazing,                         !- Construction Name",
+        "  Space1 RoofCeiling,                     !- Building Surface Name",
+        "  ,                                       !- Outside Boundary Condition Object",
+        "  ,                                       !- View Factor to Ground",
+        "  ,                                       !- Frame and Divider Name",
+        "  ,                                       !- Multiplier",
+        "  ,                                       !- Number of Vertices",
+        "  2.75658350974743, 8.16227766016838, 3,  !- X,Y,Z Vertex 1 {m}",
+        "  2.75658350974743, 1.83772233983162, 3,  !- X,Y,Z Vertex 2 {m}",
+        "  12.2434164902526, 1.83772233983162, 3,  !- X,Y,Z Vertex 3 {m}",
+        "  12.2434164902526, 8.16227766016838, 3;  !- X,Y,Z Vertex 4 {m}",
+
+        "Material,",
+        "  M15 200mm heavyweight concrete,         !- Name",
+        "  MediumRough,                            !- Roughness",
+        "  0.2032,                                 !- Thickness {m}",
+        "  1.95,                                   !- Conductivity {W/m-K}",
+        "  2240,                                   !- Density {kg/m3}",
+        "  900,                                    !- Specific Heat {J/kg-K}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "Material:NoMass,",
+        "  R13-IP,                                 !- Name",
+        "  Smooth,                                 !- Roughness",
+        "  2.28943238786998,                       !- Thermal Resistance {m2-K/W}",
+        "  0.9,                                    !- Thermal Absorptance",
+        "  0.7,                                    !- Solar Absorptance",
+        "  0.7;                                    !- Visible Absorptance",
+
+        "WindowMaterial:SimpleGlazingSystem,",
+        "  Simple Glazing Mat,                     !- Name",
+        "  0.1,                                    !- U-Factor {W/m2-K}",
+        "  0.1;                                    !- Solar Heat Gain Coefficient",
+
+        "Construction,",
+        "  R13 Construction,                       !- Name",
+        "  M15 200mm heavyweight concrete,         !- Layer 1",
+        "  R13-IP;                                 !- Layer 2",
+
+        "Construction,",
+        "  Simple Glazing,                         !- Name",
+        "  Simple Glazing Mat;                     !- Layer 1",
+
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool ErrorsFound = false;
+    GetMaterialData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    GetConstructData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    state->dataSurfaceGeometry->CosZoneRelNorth.allocate(1);
+    state->dataSurfaceGeometry->SinZoneRelNorth.allocate(1);
+    state->dataSurfaceGeometry->CosZoneRelNorth(1) = 1.0;
+    state->dataSurfaceGeometry->SinZoneRelNorth(1) = 0.0;
+    state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
+    state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
+
+    GetSurfaceData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    int fixedWinNum = Util::FindItemInList("WINDOW FIXEDWINDOW", state->dataSurface->Surface);
+    int operableWinNum = Util::FindItemInList("WINDOW OPERABLEWINDOW", state->dataSurface->Surface);
+    int skylightNum = Util::FindItemInList("WINDOW SKYLIGHT", state->dataSurface->Surface);
+    int overheadDoorNum = Util::FindItemInList("DOOR OVERHEADDOOR", state->dataSurface->Surface);
+    int windowNum = Util::FindItemInList("WINDOW WINDOW", state->dataSurface->Surface);
+    int doorNum = Util::FindItemInList("DOOR DOOR", state->dataSurface->Surface);
+    int glassDoorNum = Util::FindItemInList("DOOR GLASSDOOR", state->dataSurface->Surface);
+
+    ASSERT_GT(fixedWinNum, 0);
+    ASSERT_GT(operableWinNum, 0);
+    ASSERT_GT(skylightNum, 0);
+    ASSERT_GT(overheadDoorNum, 0);
+    ASSERT_GT(windowNum, 0);
+    ASSERT_GT(doorNum, 0);
+    ASSERT_GT(glassDoorNum, 0);
+
+    auto const &fixedWin = state->dataSurface->Surface(fixedWinNum);
+    auto const &operableWin = state->dataSurface->Surface(operableWinNum);
+    auto const &skylight = state->dataSurface->Surface(skylightNum);
+    auto const &overheadDoor = state->dataSurface->Surface(overheadDoorNum);
+    auto const &window = state->dataSurface->Surface(windowNum);
+    auto const &door = state->dataSurface->Surface(doorNum);
+    auto const &glassDoor = state->dataSurface->Surface(glassDoorNum);
+
+    // OriginalClass retains fine-grained type
+    EXPECT_ENUM_EQ(SurfaceClass::FixedWindow, fixedWin.OriginalClass);
+    EXPECT_ENUM_EQ(SurfaceClass::OperableWindow, operableWin.OriginalClass);
+    EXPECT_ENUM_EQ(SurfaceClass::Skylight, skylight.OriginalClass);
+    EXPECT_ENUM_EQ(SurfaceClass::OverheadDoor, overheadDoor.OriginalClass);
+    // Backward-compat types preserve their OriginalClass
+    EXPECT_ENUM_EQ(SurfaceClass::Window, window.OriginalClass);
+    EXPECT_ENUM_EQ(SurfaceClass::Door, door.OriginalClass);
+    EXPECT_ENUM_EQ(SurfaceClass::GlassDoor, glassDoor.OriginalClass);
+
+    // Class is remapped for heat transfer calculations
+    EXPECT_ENUM_EQ(SurfaceClass::Window, fixedWin.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Window, operableWin.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Window, skylight.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Door, overheadDoor.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Window, window.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Door, door.Class);
+    EXPECT_ENUM_EQ(SurfaceClass::Window, glassDoor.Class); // GlassDoor remaps to Window
+
+    // All glazed surfaces are within the space WindowSurfaceFirst/Last range
+    int spaceNum = fixedWin.spaceNum;
+    auto const &thisSpace = state->dataHeatBal->space(spaceNum);
+    EXPECT_GT(thisSpace.WindowSurfaceFirst, 0);
+    EXPECT_GE(thisSpace.WindowSurfaceLast, thisSpace.WindowSurfaceFirst);
+    for (int surfNum : {fixedWinNum, operableWinNum, skylightNum, windowNum, glassDoorNum}) {
+        EXPECT_GE(surfNum, thisSpace.WindowSurfaceFirst);
+        EXPECT_LE(surfNum, thisSpace.WindowSurfaceLast);
+    }
+}

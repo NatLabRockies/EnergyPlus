@@ -4410,7 +4410,7 @@ TEST_F(InputProcessorFixture, epJSONgetObjectItem_minfields)
 
     std::string obj_name2 = "Material:NoMass";
     std::string name2 = "Standard insulation_01";
-    json mat1 = {{"name", name1}, {"roughness", "MediumRough"}, {"thermal_resistance", 2.0}, {"solar_absorptance", 0.5}};
+    json mat1 = {{"name", name2}, {"roughness", "MediumRough"}, {"thermal_resistance", 2.0}, {"solar_absorptance", 0.5}};
     EXPECT_TRUE(mat1.is_object());
     root[obj_name2][name2] = mat1;
 

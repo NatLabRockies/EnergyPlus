@@ -81,6 +81,7 @@
 #include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/WindowComplexManager.hh>
 #include <EnergyPlus/WindowManager.hh>
+#include <EnergyPlus/WindowManagerExteriorOptical.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -131,6 +132,61 @@ TEST_F(EnergyPlusFixture, W5InitGlassParameters_ClearsCoefficients)
     for (auto const &coeff : construct.TransVisBeamCoef) {
         EXPECT_EQ(0.0, coeff);
     }
+}
+
+TEST_F(EnergyPlusFixture, WindowManagerExteriorOptical_InteriorShadeUsesInsideThermalAbsorptance)
+{
+    // Skip the optical-layer setup so this test isolates the effective emissivity calculation below it.
+    state->dataHeatBal->TotConstructs = 0;
+    state->dataConstruction->Construct.allocate(2);
+
+    constexpr Real64 glassEmissivity = 0.84;
+    auto *glassMaterial = new Material::MaterialBase;
+    glassMaterial->Name = "GLASS MATERIAL";
+    glassMaterial->group = Material::Group::Glass;
+    glassMaterial->AbsorpThermalBack = glassEmissivity;
+    state->dataMaterial->materials.push_back(glassMaterial);
+
+    constexpr Real64 shadeTransmittance = 0.10;
+    constexpr Real64 outsideShadeEmissivity = 0.20;
+    constexpr Real64 insideShadeEmissivity = 0.60;
+    auto *shadeMaterial = new Material::MaterialShade;
+    shadeMaterial->Name = "INTERIOR SHADE MATERIAL";
+    shadeMaterial->TransThermal = shadeTransmittance;
+    shadeMaterial->AbsorpThermalOut = outsideShadeEmissivity;
+    shadeMaterial->AbsorpThermalIn = insideShadeEmissivity;
+    state->dataMaterial->materials.push_back(shadeMaterial);
+
+    auto &baseConstruction = state->dataConstruction->Construct(1);
+    baseConstruction.TypeIsWindow = true;
+    baseConstruction.TotLayers = 1;
+    baseConstruction.LayerPoint.allocate(1);
+    baseConstruction.LayerPoint(1) = 1;
+
+    auto &shadedConstruction = state->dataConstruction->Construct(2);
+    shadedConstruction.TotLayers = 2;
+    shadedConstruction.LayerPoint.allocate(2);
+    shadedConstruction.LayerPoint(1) = 1;
+    shadedConstruction.LayerPoint(2) = 2;
+
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    state->dataSurface->surfShades.allocate(1);
+    state->dataSurface->SurfWinWindowModelType.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.HeatTransSurf = true;
+    surface.Construction = 1;
+    surface.activeShadedConstruction = 2;
+    state->dataSurface->SurfWinWindowModelType(1) = DataSurfaces::WindowModel::Detailed;
+
+    InitWCE_SimplifiedOpticalData(*state);
+
+    Real64 const glassReflectance = 1.0 - glassEmissivity;
+    Real64 const shadeReflectance = 1.0 - shadeTransmittance - insideShadeEmissivity;
+    Real64 const denominator = 1.0 - glassReflectance * shadeReflectance;
+    EXPECT_NEAR(
+        state->dataSurface->surfShades(1).effShadeEmi, insideShadeEmissivity * (1.0 + glassReflectance * shadeTransmittance / denominator), 1.0e-12);
+    EXPECT_NEAR(state->dataSurface->surfShades(1).effGlassEmi, glassEmissivity * shadeTransmittance / denominator, 1.0e-12);
 }
 
 TEST_F(EnergyPlusFixture, WindowFrameTest)

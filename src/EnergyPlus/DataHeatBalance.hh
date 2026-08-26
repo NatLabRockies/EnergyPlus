@@ -467,6 +467,8 @@ namespace DataHeatBalance {
         Real64 maxOccupants = 0.0;     // maximum occupancy (sum of NomMaxNumberPeople for the space People objects, not multiplied)
         bool isRemainderSpace = false; // True if this space is auto-generated "-Remainder" space
 
+        int constructionAssignmentSetIndex = -1; // 0-Index into state.dataConstructionAssignments->constructionAssignmentSets, or -1 if none
+
         std::vector<Constant::eFuel> otherEquipFuelTypeNums; // List of fuel types used by other equipment in this space
 
         // Pointers to Surface Data Structure

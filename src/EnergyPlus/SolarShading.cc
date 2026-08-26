@@ -7729,7 +7729,7 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
                                     auto const *matFenSh = dynamic_cast<Material::MaterialFen const *>(matSh);
                                     assert(matFenSh != nullptr);
 
-                                    Real64 AbsSh = matFenSh->AbsorpSolar;
+                                    Real64 AbsSh = matFenSh->AbsorpSolarOut;
                                     Real64 RhoSh = 1.0 - AbsSh - matFenSh->Trans;
                                     Real64 AShBack = Window::POLYF(CosIncBack, constrBack.TransSolBeamCoef) * AbsSh / (1.0 - RGlFront * RhoSh);
                                     BABSZone += BOverlap * AShBack;
@@ -11884,7 +11884,7 @@ void ComputeWinShadeAbsorpFactors(EnergyPlusData &state)
                         auto const *matSh = s_mat->materials(MatNumSh);
                         auto const *matFenSh = dynamic_cast<Material::MaterialFen const *>(matSh);
                         assert(matFenSh != nullptr);
-                        AbsorpEff = matFenSh->AbsorpSolar / (matFenSh->AbsorpSolar + matFenSh->Trans + 0.0001);
+                        AbsorpEff = matFenSh->AbsorpSolarOut / (matFenSh->AbsorpSolarOut + matFenSh->Trans + 0.0001);
                         AbsorpEff = min(max(AbsorpEff, 0.0001),
                                         0.999); // Constrain to avoid problems with following log eval
                         s_surf->SurfWinShadeAbsFacFace1(SurfNum) = (1.0 - std::exp(0.5 * std::log(1.0 - AbsorpEff))) / AbsorpEff;
@@ -13073,7 +13073,7 @@ void CalcComplexWindowOverlap(EnergyPlusData &state,
                 VisibleReflectance = state.dataConstruction->Construct(IConst).ReflectVisDiffBack;
             } else {
                 int const insideMaterialNum = state.dataConstruction->Construct(IConst).LayerPoint(InsideConLay);
-                VisibleReflectance = (1.0 - s_mat->materials(insideMaterialNum)->AbsorpVisible);
+                VisibleReflectance = (1.0 - s_mat->materials(insideMaterialNum)->AbsorpVisibleIn);
             }
             Geom.ARhoVisOverlap(KBkSurf, IRay) = Geom.AOverlap(KBkSurf, IRay) * VisibleReflectance;
             TotAOverlap += Geom.AOverlap(KBkSurf, IRay);

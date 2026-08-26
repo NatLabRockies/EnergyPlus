@@ -643,11 +643,11 @@ void DXFOut(EnergyPlusData &state,
             if (thisSurface.Class == DataSurfaces::SurfaceClass::Floor) {
                 colorindex = DataSurfaceColors::ColorNo::Floor;
             }
-            if (thisSurface.Class == DataSurfaces::SurfaceClass::Door) {
+            if (thisSurface.Class == DataSurfaces::SurfaceClass::Door) { // OriginalClass may be Door or OverheadDoor
                 colorindex = DataSurfaceColors::ColorNo::Door;
             }
             if (thisSurface.Class == DataSurfaces::SurfaceClass::Window) {
-                if (thisSurface.OriginalClass == DataSurfaces::SurfaceClass::Window) {
+                if (SurfaceClassIsWindow(thisSurface.OriginalClass)) {
                     colorindex = DataSurfaceColors::ColorNo::Window;
                 }
                 if (thisSurface.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor) {
@@ -942,11 +942,11 @@ void DXFOutWireFrame(EnergyPlusData &state, std::string const &ColorScheme)
             if (thisSurface.Class == DataSurfaces::SurfaceClass::Floor) {
                 colorindex = DataSurfaceColors::ColorNo::Floor;
             }
-            if (thisSurface.Class == DataSurfaces::SurfaceClass::Door) {
+            if (thisSurface.Class == DataSurfaces::SurfaceClass::Door) { // OriginalClass may be Door or OverheadDoor
                 colorindex = DataSurfaceColors::ColorNo::Door;
             }
             if (thisSurface.Class == DataSurfaces::SurfaceClass::Window) {
-                if (thisSurface.OriginalClass == DataSurfaces::SurfaceClass::Window) {
+                if (SurfaceClassIsWindow(thisSurface.OriginalClass)) {
                     colorindex = DataSurfaceColors::ColorNo::Window;
                 }
                 if (thisSurface.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor) {
@@ -1661,7 +1661,7 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
                 colorindex = Color::Window;
             }
             if (thisSurface.Class == DataSurfaces::SurfaceClass::Door) {
-                colorindex = Color::Window;
+                colorindex = Color::Window; // TODO: should probably be Color::Door
             }
 
             print(wrlfile, "# {}:{}\n", thisSurface.ZoneName, thisSurface.Name);

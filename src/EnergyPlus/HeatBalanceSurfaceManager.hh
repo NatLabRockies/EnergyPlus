@@ -92,7 +92,9 @@ namespace HeatBalanceSurfaceManager {
     // Beginning Initialization Section of the Module
     //******************************************************************************
 
-    void UpdateVariableAbsorptances(EnergyPlusData &state);
+    void UpdateVariableAbsorptancesOut(EnergyPlusData &state);
+
+    void UpdateVariableAbsorptancesIn(EnergyPlusData &state);
 
     void InitSurfaceHeatBalance(EnergyPlusData &state);
 

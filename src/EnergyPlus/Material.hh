@@ -240,16 +240,25 @@ namespace Material {
         Real64 SpecHeat = 0.0;  // Layer specific heat (J/kgK)
         Real64 Thickness = 0.0; // Layer thickness (m)
 
-        Real64 AbsorpThermal = 0.0;      // Layer thermal absorptance
-        Real64 AbsorpThermalInput = 0.0; // Layer thermal absorptance input by user
-        Real64 AbsorpThermalBack = 0.0;  // Infrared radiation back absorption
-        Real64 AbsorpThermalFront = 0.0; // Infrared radiation front absorption
+        Real64 AbsorpThermalOut = 0.0;        // Layer thermal absorptance outside face
+        Real64 AbsorpThermalInputOut = 0.0;   // Layer thermal absorptance outside face input by user
+        Real64 AbsorpThermalIn = 0.0;         // Layer thermal absorptance inside face
+        Real64 AbsorpThermalInputIn = 0.0;    // Layer thermal absorptance inside face input by user
+        bool hasAbsorpThermalInputIn = false; // Optional inside-face thermal absorptance was explicitly input
+        Real64 AbsorpThermalBack = 0.0;       // Infrared radiation back absorption
+        Real64 AbsorpThermalFront = 0.0;      // Infrared radiation front absorption
 
-        Real64 AbsorpSolar = 0.0;      // Layer solar absorptance
-        Real64 AbsorpSolarInput = 0.0; // Layer solar absorptance input by user
+        Real64 AbsorpSolarOut = 0.0;        // Layer solar absorptance outside face
+        Real64 AbsorpSolarInputOut = 0.0;   // Layer solar absorptance outside face input by user
+        Real64 AbsorpSolarIn = 0.0;         // Layer solar absorptance inside face
+        Real64 AbsorpSolarInputIn = 0.0;    // Layer solar absorptance inside face input by user
+        bool hasAbsorpSolarInputIn = false; // Optional inside-face solar absorptance was explicitly input
 
-        Real64 AbsorpVisible = 0.0;      // Layer Visible Absorptance
-        Real64 AbsorpVisibleInput = 0.0; // Layer Visible Absorptance input by user
+        Real64 AbsorpVisibleOut = 0.0;        // Layer Visible Absorptance outside face
+        Real64 AbsorpVisibleInputOut = 0.0;   // Layer Visible Absorptance outside face input by user
+        Real64 AbsorpVisibleIn = 0.0;         // Layer Visible Absorptance inside face
+        Real64 AbsorpVisibleInputIn = 0.0;    // Layer Visible Absorptance inside face input by user
+        bool hasAbsorpVisibleInputIn = false; // Optional inside-face visible absorptance was explicitly input
 
         // Radiation parameters // Are these for windows or for opaque materials also?
         bool AbsorpSolarEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
@@ -260,11 +269,16 @@ namespace Material {
         Real64 AbsorpVisibleEMSOverride = 0.0;   // value to use when EMS calling to override value for visible absorptance
 
         // dynamic thermal and solar absorptance coating parameters
-        VariableAbsCtrlSignal absorpVarCtrlSignal = VariableAbsCtrlSignal::Invalid;
-        Sched::Schedule *absorpThermalVarSched = nullptr;
-        Curve::Curve *absorpThermalVarCurve = nullptr;
-        Sched::Schedule *absorpSolarVarSched = nullptr;
-        Curve::Curve *absorpSolarVarCurve = nullptr;
+        VariableAbsCtrlSignal absorpVarCtrlSignalOut = VariableAbsCtrlSignal::Invalid;
+        Sched::Schedule *absorpThermalVarSchedOut = nullptr;
+        Curve::Curve *absorpThermalVarCurveOut = nullptr;
+        Sched::Schedule *absorpSolarVarSchedOut = nullptr;
+        Curve::Curve *absorpSolarVarCurveOut = nullptr;
+        VariableAbsCtrlSignal absorpVarCtrlSignalIn = VariableAbsCtrlSignal::Invalid;
+        Sched::Schedule *absorpThermalVarSchedIn = nullptr;
+        Curve::Curve *absorpThermalVarCurveIn = nullptr;
+        Sched::Schedule *absorpSolarVarSchedIn = nullptr;
+        Curve::Curve *absorpSolarVarCurveIn = nullptr;
 
         bool hasEMPD = false;
         bool hasHAMT = false;

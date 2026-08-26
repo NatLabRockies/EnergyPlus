@@ -2045,14 +2045,13 @@ namespace ThermalComfort {
             }
             thisPeople.AngleFactorListPtr = Util::FindItemInList(thisPeople.AngleFactorListName, state.dataThermalComforts->AngleFactorList);
             int WhichAFList = thisPeople.AngleFactorListPtr;
-            if (WhichAFList == 0 && (thisPeople.Fanger || thisPeople.Pierce || thisPeople.KSU)) {
+            if (WhichAFList == 0) {
                 ShowSevereError(state, std::format("{}{}=\"{}\", invalid", routineName, cCurrentModuleObject, thisPeople.AngleFactorListName));
                 ShowContinueError(state, std::format("... Angle Factor List Name not found for PEOPLE=\"{}\"", thisPeople.Name));
                 ErrorsFound = true;
             } else {
                 auto &thisAngFacList = state.dataThermalComforts->AngleFactorList(WhichAFList);
-                if (state.dataHeatBal->space(thisPeople.spaceIndex).radiantEnclosureNum != thisAngFacList.EnclosurePtr &&
-                    (thisPeople.Fanger || thisPeople.Pierce || thisPeople.KSU)) {
+                if (state.dataHeatBal->space(thisPeople.spaceIndex).radiantEnclosureNum != thisAngFacList.EnclosurePtr) {
                     ShowWarningError(state,
                                      std::format("{}{}=\"{}\", radiant enclosure mismatch.", routineName, cCurrentModuleObject, thisAngFacList.Name));
                     ShowContinueError(
