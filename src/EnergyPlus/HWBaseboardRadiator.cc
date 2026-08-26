@@ -1108,7 +1108,10 @@ namespace HWBaseboardRadiator {
                         }
                     }
                 }
-                if (RatedCapacityUser > 0.0) { // sizing result given any sizing method choice or result
+                // If the BB Heating Capacity is hard-sized then sizing uses the BB input for Rated Water Mass Flow Rate to calculate UA.
+                // If the BB is autosized then sizing uses the BB Maximum Water Flow Rate.
+                // The BB input for Heating Capacity is only > 0 when Heating Capacity is autosized and design method = Heating Capacity
+                if (hWBaseboard.ScaledHeatingCapacity > 0.0) {
                     DesCoilLoad = RatedCapacityUser;
                     WaterMassFlowRateStd = hWBaseboard.WaterMassFlowRateStd;
                 } else { // use zone NonAirSysDesHeatLoad load instead. It's either 0, or the zone heating load if sizing was requested.
@@ -1226,11 +1229,11 @@ namespace HWBaseboardRadiator {
                                                  RatedCapacityUser);
                 } else {
                     BaseSizer::reportSizerOutput(
-                        state, cCMO_BBRadiator_Water, hWBaseboard.Name, "Design Size Heating Design Capacity [W]", RatedCapacityUser);
+                        state, cCMO_BBRadiator_Water, hWBaseboard.Name, "User-Specified Heating Design Capacity [W]", RatedCapacityUser);
                 }
             } else {
                 BaseSizer::reportSizerOutput(
-                    state, cCMO_BBRadiator_Water, hWBaseboard.Name, "User-Specified Heating Capacity [W]", RatedCapacityUser);
+                    state, cCMO_BBRadiator_Water, hWBaseboard.Name, "User-Specified Heating Design Capacity [W]", RatedCapacityUser);
             }
             hWBaseboard.RatedCapacity = RatedCapacityUser;
         }
