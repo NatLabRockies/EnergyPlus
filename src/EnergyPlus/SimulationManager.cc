@@ -2036,6 +2036,9 @@ namespace SimulationManager {
             if (ErrorsFound) {
                 break;
             }
+            if ((!state.dataGlobal->DoWeathSim) && (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather)) {
+                continue;
+            }
 
             state.dataGlobal->BeginEnvrnFlag = true;
             state.dataGlobal->EndEnvrnFlag = false;
