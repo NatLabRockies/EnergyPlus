@@ -1947,6 +1947,82 @@ TEST_F(EnergyPlusFixture, WeatherRunPeriod_WeatherFile_Missing)
     EXPECT_ENUM_EQ(state->dataWeather->Environment(1).KindOfEnvrn, Constant::KindOfSim::RunPeriodWeather);
 }
 
+TEST_F(EnergyPlusFixture, Issue7913_DisabledWeatherRunPeriodDoesNotReadEPW)
+{
+    std::string const idf_objects = delimited_string({
+        "Timestep,4;",
+
+        "SimulationControl,",
+        "  No,                      !- Do Zone Sizing Calculation",
+        "  No,                      !- Do System Sizing Calculation",
+        "  No,                      !- Do Plant Sizing Calculation",
+        "  Yes,                     !- Run Simulation for Sizing Periods",
+        "  No;                      !- Run Simulation for Weather File Run Periods",
+
+        "RunPeriod,",
+        "  Disabled Weather Period, !- Name",
+        "  1,                       !- Begin Month",
+        "  1,                       !- Begin Day of Month",
+        "  2017,                    !- Begin Year",
+        "  12,                      !- End Month",
+        "  31,                      !- End Day of Month",
+        "  2017,                    !- End Year",
+        "  Sunday,                  !- Day of Week for Start Day",
+        "  Yes,                     !- Use Weather File Holidays and Special Days",
+        "  Yes,                     !- Use Weather File Daylight Saving Period",
+        "  No,                      !- Apply Weekend Holiday Rule",
+        "  Yes,                     !- Use Weather File Rain Indicators",
+        "  Yes,                     !- Use Weather File Snow Indicators",
+        "  Yes;                     !- Treat Weather as Actual",
+
+        "SizingPeriod:DesignDay,",
+        "  Winter Design Day,       !- Name",
+        "  1,                       !- Month",
+        "  21,                      !- Day of Month",
+        "  WinterDesignDay,         !- Day Type",
+        "  -17.3,                   !- Maximum Dry-Bulb Temperature {C}",
+        "  0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}",
+        "  ,                        !- Dry-Bulb Temperature Range Modifier Type",
+        "  ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name",
+        "  Wetbulb,                 !- Humidity Condition Type",
+        "  -17.3,                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}",
+        "  ,                        !- Humidity Condition Day Schedule Name",
+        "  ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}",
+        "  ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}",
+        "  ,                        !- Daily Wet-Bulb Temperature Range {deltaC}",
+        "  99063.,                  !- Barometric Pressure {Pa}",
+        "  4.9,                     !- Wind Speed {m/s}",
+        "  270,                     !- Wind Direction {deg}",
+        "  No,                      !- Rain Indicator",
+        "  No,                      !- Snow Indicator",
+        "  No,                      !- Daylight Saving Time Indicator",
+        "  ASHRAEClearSky,          !- Solar Model Indicator",
+        "  ,                        !- Beam Solar Day Schedule Name",
+        "  ,                        !- Diffuse Solar Day Schedule Name",
+        "  ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}",
+        "  ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}",
+        "  0.0;                     !- Sky Clearness",
+
+        "Site:Location,",
+        "  CHICAGO_IL_USA TMY3-725300,  !- Name",
+        "  41.98,                   !- Latitude {deg}",
+        "  -87.92,                  !- Longitude {deg}",
+        "  -6.00,                   !- Time Zone {hr}",
+        "  201.00;                  !- Elevation {m}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataWeather->WeatherFileExists = true;
+    state->files.inputWeatherFilePath.filePath =
+        configured_source_directory() / "weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw";
+
+    state->init_state(*state);
+
+    EXPECT_NO_THROW(SimulationManager::ManageSimulation(*state));
+    EXPECT_FALSE(match_err_stream("Multiple rewinds on EPW"));
+}
+
 TEST_F(EnergyPlusFixture, epwHeaderTest)
 {
     // Test for #9743
