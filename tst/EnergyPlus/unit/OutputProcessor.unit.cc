@@ -5037,7 +5037,7 @@ namespace OutputProcessor {
         EXPECT_EQ(op->meters[14]->Name, "METER AIR SYSTEM HOT WATER ENERGY");
     }
 
-    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustomInvalidReference)
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustom_InvalidReference)
     {
         std::string const idf_objects = delimited_string({"Meter:Custom,",
                                                           "CustomMeter1,               !- Name",
@@ -5064,7 +5064,7 @@ namespace OutputProcessor {
         compare_err_stream(errMsg);
     }
 
-    TEST_F(EnergyPlusFixture, OutputProcessor_CustomMeterReferenceValidation)
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustom_MeterCustomDecrement_ReferenceValidation)
     {
         auto &op = state->dataOutputProcessor;
         std::string const idf_objects = delimited_string({
