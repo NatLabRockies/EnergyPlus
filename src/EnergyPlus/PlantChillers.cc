@@ -2061,6 +2061,8 @@ namespace PlantChillers {
             if (this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
                 // reset flow priority
                 DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
+                // this chiller sets its own evaporator flow rate to hold the leaving setpoint
+                DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).ModulatedFlow = true;
 
                 // check if setpoint on outlet node
                 if ((state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
@@ -4123,6 +4125,8 @@ namespace PlantChillers {
             if (this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
                 // reset flow priority
                 DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
+                // this chiller sets its own evaporator flow rate to hold the leaving setpoint
+                DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).ModulatedFlow = true;
                 // check if setpoint on outlet node
                 if ((state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
                     (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi == Node::SensedNodeFlagValue)) {
@@ -6083,6 +6087,8 @@ namespace PlantChillers {
             if (this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
                 // reset flow priority
                 DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
+                // this chiller sets its own evaporator flow rate to hold the leaving setpoint
+                DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).ModulatedFlow = true;
 
                 // check if setpoint on outlet node
                 if ((state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
