@@ -556,11 +556,7 @@ namespace PlantChillers {
                 thisChiller.DesignHeatRecMassFlowRate = 0.0;
                 thisChiller.HeatRecInletNodeNum = 0;
                 thisChiller.HeatRecOutletNodeNum = 0;
-                // if heat recovery is not used, don't care about condenser flow rate for air/evap-cooled equip.
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
-                }
+
                 if ((!state.dataIPShortCut->lAlphaFieldBlanks(8)) || (!state.dataIPShortCut->lAlphaFieldBlanks(9))) {
                     ShowWarningError(state,
                                      std::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
@@ -1215,6 +1211,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
         if (ErrorsFound) {
             ShowFatalError(state, "Preceding sizing errors cause program termination");
@@ -2577,11 +2578,7 @@ namespace PlantChillers {
                 thisChiller.DesignHeatRecMassFlowRate = 0.0;
                 thisChiller.HeatRecInletNodeNum = 0;
                 thisChiller.HeatRecOutletNodeNum = 0;
-                // if heat recovery is not used, don't care about condenser flow rate for air/evap-cooled equip.
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
-                }
+
                 if ((!state.dataIPShortCut->lAlphaFieldBlanks(13)) || (!state.dataIPShortCut->lAlphaFieldBlanks(14))) {
                     ShowWarningError(state,
                                      std::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
@@ -3248,6 +3245,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         // autosize support for heat recovery flow rate.
@@ -4573,10 +4575,6 @@ namespace PlantChillers {
                                                  state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "However, Node names were specified for heat recovery inlet or outlet nodes");
                 }
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
-                }
             }
 
             thisChiller.FlowMode = static_cast<DataPlant::FlowMode>(getEnumValue(DataPlant::FlowModeNamesUC, state.dataIPShortCut->cAlphaArgs(9)));
@@ -5214,6 +5212,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         Real64 GTEngineCapacityDes = this->NomCap / (this->engineCapacityScalar * this->COP);
@@ -6269,15 +6272,10 @@ namespace PlantChillers {
             if (thisChiller.EvapVolFlowRate == DataSizing::AutoSize) {
                 thisChiller.EvapVolFlowRateWasAutoSized = true;
             }
-            if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) { // Condenser flow rate not used for these cond types
-                thisChiller.CondVolFlowRate = 0.0011;
-            } else {
-                thisChiller.CondVolFlowRate = state.dataIPShortCut->rNumericArgs(4);
-                if (thisChiller.CondVolFlowRate == DataSizing::AutoSize) {
-                    if (thisChiller.CondenserType == DataPlant::CondenserType::WaterCooled) {
-                        thisChiller.CondVolFlowRateWasAutoSized = true;
-                    }
+            thisChiller.CondVolFlowRate = state.dataIPShortCut->rNumericArgs(4);
+            if (thisChiller.CondVolFlowRate == DataSizing::AutoSize) {
+                if (thisChiller.CondenserType == DataPlant::CondenserType::WaterCooled) {
+                    thisChiller.CondVolFlowRateWasAutoSized = true;
                 }
             }
             thisChiller.SizFac = state.dataIPShortCut->rNumericArgs(5);
@@ -6972,6 +6970,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         if (ErrorsFound) {
