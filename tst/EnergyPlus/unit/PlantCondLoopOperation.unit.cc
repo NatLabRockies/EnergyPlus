@@ -55,6 +55,8 @@
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantCondLoopOperation.hh>
@@ -1444,4 +1446,44 @@ TEST_F(EnergyPlusFixture, OperationSchemePriority)
     EXPECT_EQ(coolingTower(1).NumOpSchemes, 2);
     EXPECT_EQ(coolingTower(1).CurCompLevelOpNum, 1);
     EXPECT_EQ(coolingTower(1).CurOpSchemeType, DataPlant::OpScheme::Uncontrolled);
+}
+
+TEST_F(EnergyPlusFixture, AdjustChangeInLoadByHowServed_ModulatedFlowChiller)
+{
+    // A chiller in LeavingSetpointModulated mode sets its own flow rate, so its capacity must not be truncated using the current (branch pump
+    // minimum) flow rate.
+
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &thisLoop = state->dataPlnt->PlantLoop(1);
+    thisLoop.glycol = Fluid::GetWater(*state);
+    thisLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    thisLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+
+    state->dataLoopNodes->Node.allocate(1);
+    state->dataLoopNodes->Node(1).Temp = 8.0;                  // chiller inlet, low load return temp
+    state->dataLoopNodes->Node(1).MassFlowRate = 1.0;          // currently at the pump minimum
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 10.0; // what the chiller could pull
+
+    auto &thisComp = thisLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
+    thisComp.HowLoadServed = DataPlant::HowMet::ByNominalCapLowOutLimit;
+    thisComp.NodeNumIn = 1;
+    thisComp.MinOutletTemp = 6.7; // same as the loop setpoint, as in the defect file
+
+    PlantLocation plantLoc(1, DataPlant::LoopSideLocation::Supply, 1, 1);
+    PlantUtilities::SetPlantLocationLinks(*state, plantLoc);
+
+    Real64 const Cp = thisLoop.glycol->getSpecificHeat(*state, 8.0, "AdjustChangeInLoadByHowServed_ModulatedFlowChiller");
+    Real64 const dispatchedLoad = 20000.0;
+
+    // Constant flow chiller: capacity is limited by the flow it actually has
+    thisComp.ModulatedFlow = false;
+    Real64 changeInLoad = dispatchedLoad;
+    PlantCondLoopOperation::AdjustChangeInLoadByHowServed(*state, plantLoc, changeInLoad);
+    EXPECT_NEAR(changeInLoad, 1.0 * Cp * (8.0 - 6.7), 0.001);
+
+    // Variable flow chiller: it can raise its own flow, so the full dispatched load stands
+    thisComp.ModulatedFlow = true;
+    changeInLoad = dispatchedLoad;
+    PlantCondLoopOperation::AdjustChangeInLoadByHowServed(*state, plantLoc, changeInLoad);
+    EXPECT_NEAR(changeInLoad, dispatchedLoad, 0.001);
 }
