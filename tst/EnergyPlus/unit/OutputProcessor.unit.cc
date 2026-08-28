@@ -5037,20 +5037,14 @@ namespace OutputProcessor {
         EXPECT_EQ(op->meters[14]->Name, "METER AIR SYSTEM HOT WATER ENERGY");
     }
 
-    TEST_F(EnergyPlusFixture, OutputProcessor_DuplicateMeterCustom)
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustomInvalidReference)
     {
         std::string const idf_objects = delimited_string({"Meter:Custom,",
                                                           "CustomMeter1,               !- Name",
                                                           "Generic,                    !- Fuel Type",
                                                           ",                           !- Key Name 1",
                                                           "DistrictHeatingWater:Facility;   !- Variable or Meter 1 Name",
-                                                          "Meter:Custom,",
-                                                          "CustomMeter2,               !- Name",
-                                                          "Generic,                    !- Fuel Type",
-                                                          ",                           !- Key Name 1",
-                                                          "CustomMeter1;               !- Variable or Meter 1 Name",
-                                                          "Output:Meter,CustomMeter1,Hourly;",
-                                                          "Output:Meter,CustomMeter2,Hourly;"});
+                                                          "Output:Meter,CustomMeter1,Hourly;"});
 
         ASSERT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
@@ -5066,12 +5060,107 @@ namespace OutputProcessor {
              "   **   ~~~   ** ...will not be shown with the Meter results.",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", no items assigned ",
              "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom.",
-             "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", contains a reference to another Meter:Custom in field: Output Variable or Meter "
-             "Name=\"CUSTOMMETER1\".",
-             "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
              "Meter:Custom."});
+        compare_err_stream(errMsg);
+    }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_CustomMeterReferenceValidation)
+    {
+        auto &op = state->dataOutputProcessor;
+        std::string const idf_objects = delimited_string({
+            "  Meter:Custom,",
+            "    MyCustomLights,             !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    SPACE1-1,                   !- Key Name 1",
+            "    Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    GoodDecrement,              !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    Electricity:Building,       !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    GoodDecrementFromCustomSource,  !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    MyCustomLights,             !- Source Meter Name",
+            "    SPACE1-1,                   !- Key Name 1",
+            "    Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    BadDecrementSource,         !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    GoodDecrement,              !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    BadDecrementGroup,          !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    Electricity:Building,       !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    GoodDecrement;              !- Output Variable or Meter Name 1",
+            "  Meter:Custom,",
+            "    BadCustomRefDec,            !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    ,                           !- Key Name 1",
+            "    GoodDecrement;              !- Output Variable or Meter Name 1",
+            "  Meter:Custom,",
+            "    BadCustomRefCustom,         !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0;
+        SetupOutputVariable(*state,
+                            "Lights Electricity Energy",
+                            Constant::Units::J,
+                            light_consumption,
+                            TimeStepType::Zone,
+                            StoreType::Sum,
+                            "SPACE1-1",
+                            Constant::eResource::Electricity,
+                            Group::Building,
+                            EndUseCat::InteriorLights,
+                            "GeneralLights",
+                            "SPACE1-1",
+                            1,
+                            1);
+
+        bool errors_found = false;
+
+        GetCustomMeterInput(*state, errors_found);
+
+        // BadDecrementSource's bad Source Meter Name reference is a hard error; the others are warnings only.
+        EXPECT_TRUE(errors_found);
+
+        // MyCustomLights (Meter:Custom) is valid.
+        // GoodDecrement is valid: its Source Meter Name is a Normal meter, and its group references a Meter:Custom.
+        // GoodDecrementFromCustomSource is valid: its Source Meter Name is itself a Meter:Custom.
+        EXPECT_NE(op->meterMap.find("MYCUSTOMLIGHTS"), op->meterMap.end());
+        EXPECT_NE(op->meterMap.find("GOODDECREMENT"), op->meterMap.end());
+        EXPECT_NE(op->meterMap.find("GOODDECREMENTFROMCUSTOMSOURCE"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADDECREMENTSOURCE"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADDECREMENTGROUP"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADCUSTOMREFDEC"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADCUSTOMREFCUSTOM"), op->meterMap.end());
+
+        std::string errMsg = delimited_string(
+            {"   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", contains a reference to another Meter:CustomDecrement in field: Output "
+             "Variable or Meter Name 1=\"GOODDECREMENT\".",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", no items assigned ",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
+             "Meter:Custom.",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", contains a reference to another Meter:Custom in field: Output "
+             "Variable or Meter Name 1=\"MYCUSTOMLIGHTS\".",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", no items assigned ",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
+             "Meter:Custom.",
+             "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTSOURCE\", contains a reference to another Meter:CustomDecrement in field: "
+             "Source Meter Name=\"GOODDECREMENT\".",
+             "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTGROUP\", contains a reference to another Meter:CustomDecrement in field: "
+             "Output Variable or Meter Name 1=\"GOODDECREMENT\"."});
         compare_err_stream(errMsg);
     }
 
