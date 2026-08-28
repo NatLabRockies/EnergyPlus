@@ -561,7 +561,7 @@ Building,
        \type integer
        \minimum> 0
        \default 25
-  N5 ; \field Minimum Number of Warmup Days
+  N5 , \field Minimum Number of Warmup Days
        \note The minimum number of warmup days that produce enough temperature and flux history
        \note to start EnergyPlus simulation for all reference buildings was suggested to be 6.
        \note However this can lead to excessive run times as warmup days can be repeated needlessly.
@@ -572,6 +572,11 @@ Building,
        \type integer
        \minimum> 0
        \default 1
+  A4 ; \field Construction Assignment Set Name
+       \note Optional. Provides inherited construction assignments for surfaces and sub-surfaces in the building.
+       \note Assignments referenced by Space take precedence over assignments referenced by Building.
+       \type object-list
+       \object-list ConstructionAssignmentSetNames
 
 ShadowCalculation,
        \unique-object
@@ -4841,6 +4846,127 @@ Schedule:Constant,
        \type real
        \default 0
 
+Schedule:Year:Rules,
+       \memo A Schedule:Year:Rules defines a yearly schedule using a default day profile and
+       \memo a prioritized list of override rules (Schedule:Week:Rule objects). Rules are evaluated
+       \memo in ascending Rule Priority Order; the first matching rule for a given day is used.
+       \memo If no rule matches, the Default Day Schedule is used.
+       \memo Exception: if no rule date range includes February 29, February 29 inherits February 28.
+       \min-fields 3
+  A1,  \field Name
+       \type alpha
+       \required-field
+       \reference ScheduleNames
+       \reference ScheduleYearRulesNames
+  A2,  \field Schedule Type Limits Name
+       \type object-list
+       \object-list ScheduleTypeLimitsNames
+  A3,  \field Default Day Schedule Name
+       \type object-list
+       \required-field
+       \object-list DayScheduleNames
+  A4,  \field Summer Design Day Schedule Name
+       \note If blank, the Default Day Schedule is used for Summer Design Days.
+       \type object-list
+       \object-list DayScheduleNames
+  A5,  \field Winter Design Day Schedule Name
+       \note If blank, the Default Day Schedule is used for Winter Design Days.
+       \type object-list
+       \object-list DayScheduleNames
+  A6,  \field Holiday Schedule Name
+       \note If blank, the Default Day Schedule is used for Holidays.
+       \type object-list
+       \object-list DayScheduleNames
+  A7,  \field Custom Day 1 Schedule Name
+       \note If blank, the Default Day Schedule is used for Custom Day 1.
+       \type object-list
+       \object-list DayScheduleNames
+  A8;  \field Custom Day 2 Schedule Name
+       \note If blank, the Default Day Schedule is used for Custom Day 2.
+       \type object-list
+       \object-list DayScheduleNames
+
+Schedule:Week:Rule,
+       \memo A Schedule:Week:Rule defines one override rule for a Schedule:Year:Rules.
+       \memo Rules are evaluated in ascending Rule Priority Order; the first matching rule wins.
+       \memo A rule matches a day if: (a) the day falls within the specified date ranges,
+       \memo AND (b) the corresponding Apply <DayOfWeek> field is Yes.
+       \extensible:4 - repeat last four fields (Start Month, Start Day, End Month, End Day)
+       \min-fields 11
+  A1,  \field Name
+       \type alpha
+       \required-field
+       \reference ScheduleWeekRuleNames
+  A2,  \field Schedule Year Rules Name
+       \type object-list
+       \required-field
+       \object-list ScheduleYearRulesNames
+  N1,  \field Rule Priority Order
+       \note Lower values have higher priority. Must be unique within a Schedule:Year:Rules.
+       \type integer
+       \required-field
+       \minimum 0
+  A3,  \field Day Schedule Name
+       \type object-list
+       \required-field
+       \object-list DayScheduleNames
+  A4,  \field Apply Sunday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A5,  \field Apply Monday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A6,  \field Apply Tuesday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A7,  \field Apply Wednesday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A8,  \field Apply Thursday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A9,  \field Apply Friday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  A10, \field Apply Saturday
+       \type choice
+       \default No
+       \key Yes
+       \key No
+  N2 , \field Start Month 1
+       \begin-extensible
+       \type integer
+       \minimum 1
+       \maximum 12
+       \default 1
+  N3 , \field Start Day 1
+       \type integer
+       \minimum 1
+       \maximum 31
+       \default 1
+  N4 , \field End Month 1
+       \type integer
+       \minimum 1
+       \maximum 12
+       \default 12
+  N5 ; \field End Day 1
+       \type integer
+       \minimum 1
+       \maximum 31
+       \default 31
+
 Schedule:File:Shading,
        \min-fields 1
        \memo A Schedule:File:Shading points to a CSV file that has 8760-8784
@@ -4956,10 +5082,28 @@ Material,
        \default .7
        \minimum 0
        \maximum 1
-  N7 ; \field Visible Absorptance
+  N7 , \field Visible Absorptance
        \type real
        \minimum 0
        \default .7
+       \maximum 1
+  N8 , \field Thermal Absorptance Inside Face
+       \note When blank, this value is equal to the Thermal Absorptance field above.
+       \note When entered, the Thermal Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum> 0
+       \maximum 0.99999
+  N9 , \field Solar Absorptance Inside Face
+       \note When blank, this value is equal to the Solar Absorptance field above.
+       \note When entered, the Solar Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum 0
+       \maximum 1
+  N10; \field Visible Absorptance Inside Face
+       \note When blank, this value is equal to the Visible Absorptance field above.
+       \note When entered, the Visible Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum 0
        \maximum 1
 
 Material:NoMass,
@@ -4993,10 +5137,28 @@ Material:NoMass,
        \minimum 0
        \default .7
        \maximum 1
-  N4 ; \field Visible Absorptance
+  N4 , \field Visible Absorptance
        \type real
        \minimum 0
        \default .7
+       \maximum 1
+  N5 , \field Thermal Absorptance Inside Face
+       \note When blank, this value is equal to the Thermal Absorptance field above.
+       \note When entered, the Thermal Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum> 0
+       \maximum 0.99999
+  N6 , \field Solar Absorptance Inside Face
+       \note When blank, this value is equal to the Solar Absorptance field above.
+       \note When entered, the Solar Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum 0
+       \maximum 1
+  N7 ; \field Visible Absorptance Inside Face
+       \note When blank, this value is equal to the Visible Absorptance field above.
+       \note When entered, the Visible Absorptance field applies to the outside face and this field applies to the inside face.
+       \type real
+       \minimum 0
        \maximum 1
 
 Material:InfraredTransparent,
@@ -7771,17 +7933,35 @@ MaterialProperty:VariableAbsorptance,
        \key SpaceHeatingCoolingMode
        \key Scheduled
        \default SurfaceTemperature
-       \note the variable that drives the change in thermal/solar absorptance
+       \note the variable that drives the change in outside-face thermal/solar absorptance
   A4 , \field Thermal Absorptance Function Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
-       \note the control signal value and the surface thermal absorptance.
+       \note the control signal value and the outside-face surface thermal absorptance.
   A5 , \field Thermal Absorptance Schedule Name
-       \note only used when Control Signal = "Scheduled"
+       \note only used for the outside face when Control Signal = "Scheduled"
   A6 , \field Solar Absorptance Function Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
-       \note the control signal value and the surface solar absorptance.
-  A7 ; \field Solar Absorptance Schedule Name
-       \note only used when Control Signal = "Scheduled"
+       \note the control signal value and the outside-face surface solar absorptance.
+  A7 , \field Solar Absorptance Schedule Name
+       \note only used for the outside face when Control Signal = "Scheduled"
+  A8 , \field Control Signal Inside Face
+       \type choice
+       \key SurfaceTemperature
+       \key SurfaceReceivedSolarRadiation
+       \key SpaceHeatingCoolingMode
+       \key Scheduled
+       \note the variable that drives the change in thermal/solar absorptance
+       \note when this field is blank the inside-face absorptances remain at the constant values defined by the referenced material
+  A9 , \field Thermal Absorptance Function Name Inside Face
+       \note A Curve:* or Table:Lookup object encoding the relationship between
+       \note the control signal inside face value and the surface thermal absorptance.
+  A10, \field Thermal Absorptance Schedule Name Inside Face
+       \note only used when Control Signal Inside Face = "Scheduled"
+  A11, \field Solar Absorptance Function Name Inside Face
+       \note A Curve:* or Table:Lookup object encoding the relationship between
+       \note the control signal inside face value and the surface solar absorptance.
+  A12; \field Solar Absorptance Schedule Name Inside Face
+       \note only used when Control Signal Inside Face = "Scheduled"
 
 MaterialProperty:HeatAndMoistureTransfer:Settings,
     \memo HeatBalanceAlgorithm = CombinedHeatAndMoistureFiniteElement solution algorithm only.
@@ -9385,6 +9565,93 @@ Construction:WindowDataFile,
        \note default file name is "Window5DataFile.dat"
        \note limit on this field is 100 characters.
 
+ConstructionAssignmentSet,
+       \memo Defines a set of construction assignments for surfaces and sub-surfaces
+       \memo based on their type and outside boundary condition. Can be referenced by Building
+       \memo or Space objects. Space-level assignments take precedence over Building-level.
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference ConstructionAssignmentSetNames
+  A2 , \field Exterior Surface Construction Assignments Name
+       \note Constructions for exterior walls, floors, and roofs (Outside Boundary Condition = Outdoors).
+       \type object-list
+       \object-list SurfaceConstructionAssignmentNames
+  A3 , \field Interior Surface Construction Assignments Name
+       \note Constructions for interior surfaces (Outside Boundary Condition = Surface, Zone, or Space).
+       \type object-list
+       \object-list SurfaceConstructionAssignmentNames
+  A4 , \field Ground Contact Surface Construction Assignments Name
+       \note Constructions for ground-contact surfaces (Outside Boundary Condition = Ground*, Foundation).
+       \type object-list
+       \object-list SurfaceConstructionAssignmentNames
+  A5 , \field Exterior SubSurface Construction Assignments Name
+       \note Constructions for sub-surfaces on exterior base surfaces.
+       \type object-list
+       \object-list SubSurfaceConstructionAssignmentNames
+  A6 , \field Interior SubSurface Construction Assignments Name
+       \note Constructions for sub-surfaces on interior base surfaces.
+       \type object-list
+       \object-list SubSurfaceConstructionAssignmentNames
+  A7 , \field Interior Partition Construction Name
+       \note Construction for InternalMass objects in spaces referencing this set.
+       \type object-list
+       \object-list ConstructionNames
+  A8 ; \field Adiabatic Surface Construction Name
+       \note Construction for surfaces with Outside Boundary Condition = Adiabatic.
+       \type object-list
+       \object-list ConstructionNames
+
+SurfaceConstructionAssignments,
+       \memo Defines construction assignments for the three opaque surface types (Floor, Wall, Roof/Ceiling)
+       \memo for a single boundary-condition category (exterior, interior, or ground-contact).
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference SurfaceConstructionAssignmentNames
+  A2 , \field Floor Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A3 , \field Wall Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A4 ; \field Roof Ceiling Construction Name
+       \type object-list
+       \object-list ConstructionNames
+
+SubSurfaceConstructionAssignments,
+       \memo Defines construction assignments for each sub-surface type for a single boundary-condition
+       \memo category (exterior or interior).
+       \memo The generic Window type (kept for backward compatibility) resolves via the Fixed Window slot.
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference SubSurfaceConstructionAssignmentNames
+  A2 , \field Fixed Window Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A3 , \field Operable Window Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A4 , \field Door Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A5 , \field Glass Door Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A6 , \field Overhead Door Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A7 , \field Skylight Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A8 , \field Tubular Daylight Dome Construction Name
+       \type object-list
+       \object-list ConstructionNames
+  A9 ; \field Tubular Daylight Diffuser Construction Name
+       \type object-list
+       \object-list ConstructionNames
+
 \group Thermal Zones and Surfaces
 
 GlobalGeometryRules,
@@ -9502,14 +9769,18 @@ Space,
        \note Space type is used to tag spaces by activity type, such as office, classroom, storage, etc.
        \type alpha
        \default General
-  A4,  \field Tag 1
+  A4,  \field Construction Assignment Set Name
+       \note Optional. Overrides the Building-level Construction Assignment Set for surfaces in this Space.
+       \type object-list
+       \object-list ConstructionAssignmentSetNames
+  A5,  \field Tag 1
        \note Optional reporting tag
        \type alpha
        \begin-extensible
-  A5,  \field Tag 2
+  A6,  \field Tag 2
        \note Optional reporting tag
        \type alpha
-  A6;  \field Tag 3
+  A7;  \field Tag 3
        \note Optional reporting tag
        \type alpha
 
@@ -10189,8 +10460,8 @@ BuildingSurface:Detailed,
        \key Ceiling
        \key Roof
   A3 , \field Construction Name
-       \required-field
-       \note To be matched with a construction in this input file
+       \note To be matched with a construction in this input file.
+       \note If blank, a ConstructionAssignmentSet assigned to the surface's Space or Building is required.
        \type object-list
        \object-list ConstructionNames
   A4 , \field Zone Name
@@ -12479,13 +12750,19 @@ FenestrationSurface:Detailed,
        \required-field
        \type choice
        \key Window
+       \note Window is kept for backward compatibility and is treated as FixedWindow.
+       \note Prefer FixedWindow, OperableWindow, or Skylight for new models.
        \key Door
        \key GlassDoor
        \key TubularDaylightDome
        \key TubularDaylightDiffuser
+       \key FixedWindow
+       \key OperableWindow
+       \key Skylight
+       \key OverheadDoor
   A3 , \field Construction Name
-       \required-field
-       \note To be matched with a construction in this input file
+       \note To be matched with a construction in this input file.
+       \note If blank, a ConstructionAssignmentSet assigned to the surface's Space or Building is required.
        \type object-list
        \object-list ConstructionNames
        \object-list ComplexFenestrationStates
@@ -13382,8 +13659,8 @@ InternalMass,
        \reference AllHeatTranAngFacNames
        \reference RadiantSurfaceNames
   A2 , \field Construction Name
-       \required-field
-       \note To be matched with a construction in this input file
+       \note To be matched with a construction in this input file.
+       \note If blank, a ConstructionAssignmentSet assigned to the surface's Space or Building is required.
        \type object-list
        \object-list ConstructionNames
   A3 , \field Zone or ZoneList Name
@@ -19187,7 +19464,6 @@ ComplexFenestrationProperty:SolarAbsorbedLayers,
        \type object-list
        \object-list ScheduleNames
 
-
 ZoneProperty:UserViewFactors:BySurfaceName,
        \memo View factors for Surface to Surface in a zone.
        \memo (Number of Surfaces)**2 are expected. Any omitted surface pairs will be assumed to have a view factor of zero.
@@ -19450,6 +19726,168 @@ ZoneProperty:UserViewFactors:BySurfaceName,
   A922,A923,N461,A924,A925,N463,A926,A927,N465,A928,A929,N467,A930,A931,N469,A932,A933,N471,A934,A935,N473,A936,A937,N475,A938,A939,N477,A940,A941,N479,
   A942,A943,N471,A944,A945,N473,A946,A947,N475,A948,A949,N477,A950,A951,N479,A952,A953,N481,A954,A955,N483,A956,A957,N485,A958,A959,N487,A960,A961,N489,
   A962,A963,N481,A964,A965,N483,A966,A967,N485,A968,A969,N487,A970,A971,N489,A972,A973,N491,A974,A975,N493,A976,A977,N495,A978,A979,N497,A980,A981,N499;
+
+ZoneMRTCalculation,
+       \min-fields 3
+       \memo Blends MRT values calculated for People instances into one Zone MRT.
+       \memo The weighting factors must sum to a value from 0.0 through 1.0.
+       \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
+       \memo Only one ZoneMRTCalculation object is allowed for each Zone.
+       \memo All referenced People instances must be in the named Zone and must select at least
+       \memo one Thermal Comfort Model Type.
+  A1 , \field Zone Name
+       \type alpha
+       \type object-list
+       \object-list ZoneNames
+       \required-field
+       \note This field accepts a Zone name only, not a Space or SpaceList name.
+  A2 , \field People 1 Name
+       \begin-extensible
+       \type object-list
+       \object-list PeopleNames
+       \required-field
+       \note A People object assigned directly to a Space retains its input name.
+       \note A People object expanded across multiple Spaces must use an expanded instance name
+       \note formed as "<Space Name> <People Name>"; its original input name is not accepted.
+       \note People instances in automatically generated remainder Spaces are not supported.
+  N1 , \field MRT Weighting Factor 1
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \required-field
+  A3 , \field People 2 Name
+       \type object-list
+       \object-list PeopleNames
+  N2 , \field MRT Weighting Factor 2
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A4 , \field People 3 Name
+       \type object-list
+       \object-list PeopleNames
+  N3 , \field MRT Weighting Factor 3
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A5 , \field People 4 Name
+       \type object-list
+       \object-list PeopleNames
+  N4 , \field MRT Weighting Factor 4
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A6 , \field People 5 Name
+       \type object-list
+       \object-list PeopleNames
+  N5 , \field MRT Weighting Factor 5
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A7 , \field People 6 Name
+       \type object-list
+       \object-list PeopleNames
+  N6 , \field MRT Weighting Factor 6
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A8 , \field People 7 Name
+       \type object-list
+       \object-list PeopleNames
+  N7 , \field MRT Weighting Factor 7
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A9 , \field People 8 Name
+       \type object-list
+       \object-list PeopleNames
+  N8 , \field MRT Weighting Factor 8
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A10 , \field People 9 Name
+        \type object-list
+        \object-list PeopleNames
+  N9 ,  \field MRT Weighting Factor 9
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A11,  \field People 10 Name
+        \type object-list
+        \object-list PeopleNames
+  N10,  \field MRT Weighting Factor 10
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A12,  \field People 11 Name
+        \type object-list
+        \object-list PeopleNames
+  N11,  \field MRT Weighting Factor 11
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A13,  \field People 12 Name
+        \type object-list
+        \object-list PeopleNames
+  N12,  \field MRT Weighting Factor 12
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A14,  \field People 13 Name
+        \type object-list
+        \object-list PeopleNames
+  N13,  \field MRT Weighting Factor 13
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A15,  \field People 14 Name
+        \type object-list
+        \object-list PeopleNames
+  N14,  \field MRT Weighting Factor 14
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A16,  \field People 15 Name
+        \type object-list
+        \object-list PeopleNames
+  N15,  \field MRT Weighting Factor 15
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A17,  \field People 16 Name
+        \type object-list
+        \object-list PeopleNames
+  N16,  \field MRT Weighting Factor 16
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A18,  \field People 17 Name
+        \type object-list
+        \object-list PeopleNames
+  N17,  \field MRT Weighting Factor 17
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A19,  \field People 18 Name
+        \type object-list
+        \object-list PeopleNames
+  N18,  \field MRT Weighting Factor 18
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A20,  \field People 19 Name
+        \type object-list
+        \object-list PeopleNames
+  N19,  \field MRT Weighting Factor 19
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A21,  \field People 20 Name
+        \type object-list
+        \object-list PeopleNames
+  N20;  \field MRT Weighting Factor 20
+        \type real
+        \minimum 0.0
+        \maximum 1.0
 
 \group Detailed Ground Heat Transfer
 
@@ -21642,6 +22080,229 @@ People,
        \note this is the indoor safe temperature threshold for heat stress
        \default 30
 
+People:Instance,
+   \memo Sets internal gains and contaminant rates for occupants in the zone.
+   \memo The physical characteristics are given by the referenced People:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 5
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference PeopleNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field People Definition Name
+       \required-field
+       \type object-list
+       \object-list PeopleDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Number of People Schedule Name
+       \required-field
+       \type object-list
+       \note units in schedule should be fraction applied to number of people (0.0 - 1.0)
+       \object-list ScheduleNames
+  A5 , \field Activity Level Schedule Name
+       \required-field
+       \note Note that W has to be converted to mets in TC routine
+       \type object-list
+       \note units in schedule are W/person
+       \object-list ScheduleNames
+  A6 , \field Surface Name/Angle Factor List Name
+       \type object-list
+       \object-list AllHeatTranAngFacNames
+       \note optional (only required for runs of thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 and AnkleDraftASH55)
+  A7 , \field Work Efficiency Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note units in schedule are 0.0 to 1.0
+       \note optional (only required for runs of thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 and AnkleDraftASH55)
+  A8 , \field Clothing Insulation Calculation Method
+       \type choice
+       \key ClothingInsulationSchedule
+       \key DynamicClothingModelASHRAE55
+       \key CalculationMethodSchedule
+       \default ClothingInsulationSchedule
+  A9 , \field Clothing Insulation Calculation Method Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note a schedule value of 1 for the Scheduled method, and 2 for the DynamicClothingModelASHRAE55 method
+  A10, \field Clothing Insulation Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note use "Clo" from ASHRAE or Thermal Comfort guides
+       \note optional (only required for runs of thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 and AnkleDraftASH55)
+  A11, \field Air Velocity Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note units in the schedule are m/s
+       \note optional (only required for runs of thermal comfort models: Fanger, Pierce, KSU, CoolingEffectASH55 and AnkleDraftASH55)
+  N1 , \field Multiplier
+       \note Multiplies the number of people from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A12, \field Ankle Level Air Velocity Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note units in the schedule are m/s
+       \note this is the schedule of the air speed at the 0.1 m above the floor
+       \note optional (only required for runs of thermal comfort models AnkleDraftASH55)
+  N2 , \field Cold Stress Temperature Threshold
+       \type real
+       \units C
+       \note this is the indoor safe temperature threshold for cold stress
+       \default 15.56
+  N3 ; \field Heat Stress Temperature Threshold
+       \type real
+       \units C
+       \note this is the indoor safe temperature threshold for heat stress
+       \default 30
+
+People:Definition,
+   \memo Defines the physical characteristics (number of people, heat gain fractions, CO2 generation rate
+   \memo and thermal comfort model selections) for occupants.
+   \memo Referenced by one or more People:Instance objects.
+   \min-fields 5
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference PeopleDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Number of People Calculation Method
+       \note The entered calculation method is used to create the maximum number of people
+       \note for this set of attributes (i.e. sensible fraction, schedule, etc)
+       \note Choices: People -- simply enter number of occupants.
+       \note People per Floor Area -- enter the number to apply. Value * Floor Area = Number of people
+       \note Floor Area per Person -- enter the number to apply. Floor Area / Value = Number of people
+       \type choice
+       \key People
+       \key People/Area
+       \key Area/Person
+       \default People
+  N1 , \field Number of People
+       \type real
+       \minimum 0
+  N2 , \field People per Floor Area
+       \type real
+       \minimum 0
+       \units person/m2
+  N3 , \field Floor Area per Person
+       \type real
+       \minimum 0
+       \units m2/person
+  N4 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0.3
+       \note This is radiant fraction of the sensible heat released by people in a zone. This value will be
+       \note multiplied by the total sensible heat released by people yields the amount of long wavelength
+       \note radiation gain from people in a zone. Default value is 0.30.
+  N5 , \field Sensible Heat Fraction
+       \note if input, overrides program calculated sensible/latent split
+       \autocalculatable
+       \default autocalculate
+       \minimum 0.0
+       \maximum 1.0
+  N6 , \field Carbon Dioxide Generation Rate
+       \note CO2 generation rate per unit of activity level.
+       \type real
+       \units m3/s-W
+       \default 3.82E-8
+       \minimum 0.0
+       \maximum 3.82E-7
+       \note The default value is obtained from ASHRAE Std 62.1 at 0.0084 cfm/met/person over
+       \note the general adult population.
+  A3 , \field Enable ASHRAE 55 Comfort Warnings
+       \type choice
+       \key Yes
+       \key No
+       \default No
+  A4 , \field Mean Radiant Temperature Calculation Type
+       \note optional (only required for thermal comfort runs)
+       \type choice
+       \key EnclosureAveraged
+       \key SurfaceWeighted
+       \key AngleFactor
+       \default EnclosureAveraged
+  A5 , \field Thermal Comfort Model 1 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (only needed for people thermal comfort results reporting)
+  A6 , \field Thermal Comfort Model 2 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (second type of thermal comfort model and results reporting)
+  A7 , \field Thermal Comfort Model 3 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (third thermal comfort model and report type)
+  A8 , \field Thermal Comfort Model 4 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (fourth thermal comfort model and report type)
+  A9 , \field Thermal Comfort Model 5 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (fifth thermal comfort model and report type)
+  A10, \field Thermal Comfort Model 6 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (sixth thermal comfort model and report type)
+  A11; \field Thermal Comfort Model 7 Type
+       \type choice
+       \key Fanger
+       \key Pierce
+       \key KSU
+       \key AdaptiveASH55
+       \key AdaptiveCEN15251
+       \key CoolingEffectASH55
+       \key AnkleDraftASH55
+       \note optional (seventh thermal comfort model and report type)
+
 ComfortViewFactorAngles,
        \memo Used to specify radiant view factors for thermal comfort calculations.
        \memo Note that the following angle factor fractions must sum up to 1.0
@@ -22455,6 +23116,132 @@ Lights,
        \note The air properties of both nodes are weighted by both node mass flow rates.
        \type node
 
+Lights:Instance,
+   \memo Sets internal gains for lights in the zone.
+   \memo The physical characteristics are given by the referenced Lights:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 5
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference LightsNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Lights Definition Name
+       \required-field
+       \type object-list
+       \object-list LightsDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in schedule should be fraction applied to design level of lights, generally (0.0 - 1.0)
+  N1 , \field Fraction Replaceable
+       \note For Daylighting:Controls must be 0 or 1:  0 = no dimming control, 1 = full dimming control
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 1.0
+  N2 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A5 , \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+  A6 , \field Return Air Heat Gain Node Name
+       \note Name of the return air node for this heat gain.
+       \note If left blank, defaults to the first return air node for the zone.
+       \note Leave this field blank when using a ZoneList name.
+       \type node
+  A7 ; \field Exhaust Air Heat Gain Node Name
+       \note Name of the exhaust air node for this heat gain.
+       \note If the node name is entered, return heat gain will be shared by both return and exhaust air nodes.
+       \note The air properties of both nodes are weighted by both node mass flow rates.
+       \type node
+
+Lights:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for lights.
+   \memo Referenced by one or more Lights:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference LightsDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of lights
+       \note for this set of attributes
+       \note Choices: LightingLevel => Lighting Level -- simply enter watts of lights
+       \note Watts/Area => Watts per Floor Area -- enter the number to apply. Value * Floor Area = Lights
+       \note Watts/Person => Watts per Person -- enter the number to apply. Value * Occupants = Lights
+       \type choice
+       \key LightingLevel
+       \key Watts/Area
+       \key Watts/Person
+       \default LightingLevel
+  N1 , \field Lighting Level
+       \units W
+       \type real
+       \minimum 0
+       \ip-units W
+  N2 , \field Watts per Floor Area
+       \type real
+       \minimum 0
+       \units W/m2
+       \ip-units W/ft2
+  N3 , \field Watts per Person
+       \type real
+       \minimum 0
+       \units W/person
+       \ip-units W/person
+  N4 , \field Return Air Fraction
+       \note Used only for sizing calculation if return-air-fraction
+       \note coefficients are specified.
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 , \field Fraction Visible
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  A3 , \field Return Air Fraction Calculated from Plenum Temperature
+       \type choice
+       \key Yes
+       \key No
+       \default No
+  N7 , \field Return Air Fraction Function of Plenum Temperature Coefficient 1
+       \note Used only if Return Air Fraction Is Calculated from Plenum Temperature = Yes
+       \note Equation is Return Air Fraction = Coefficient#1 - Coefficient#2 X PlenumTemp(degC)
+       \type real
+       \minimum 0.0
+       \default 0.0
+  N8 ; \field Return Air Fraction Function of Plenum Temperature Coefficient 2
+       \note Used only if Return Air Fraction Is Calculated from Plenum Temperature = Yes
+       \note Equation is Return Air Fraction = Coefficient#1 - Coefficient#2 X PlenumTemp(degC)
+       \type real
+       \units 1/K
+       \minimum 0.0
+       \default 0.0
+
 ElectricEquipment,
    \memo Sets internal gains for electric equipment in the zone.
    \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
@@ -22521,6 +23308,96 @@ ElectricEquipment,
        \type alpha
        \retaincase
        \default General
+
+ElectricEquipment:Instance,
+   \memo Sets internal gains for electric equipment in the zone.
+   \memo The physical characteristics are given by the referenced ElectricEquipment:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 4
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference ElectricEquipmentNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Electric Equipment Definition Name
+       \required-field
+       \type object-list
+       \object-list ElectricEquipmentDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in schedule should be fraction applied to design level of electric equipment, generally (0.0 - 1.0)
+  N1 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A5 ; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+
+ElectricEquipment:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for electric equipment.
+   \memo Referenced by one or more ElectricEquipment:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference ElectricEquipmentDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of electric equipment
+       \note for this set of attributes
+       \note Choices: EquipmentLevel => Equipment Level -- simply enter watts of equipment
+       \note Watts/Area => Watts per Floor Area -- enter the number to apply. Value * Floor Area = Equipment Level
+       \note Watts/Person => Watts per Person -- enter the number to apply. Value * Occupants = Equipment Level
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \key Watts/Person
+       \default EquipmentLevel
+  N1 , \field Design Level
+       \units W
+       \type real
+       \minimum 0
+       \ip-units W
+  N2 , \field Watts per Floor Area
+       \type real
+       \minimum 0
+       \units W/m2
+       \ip-units W/ft2
+  N3 , \field Watts per Person
+       \type real
+       \minimum 0
+       \units W/person
+       \ip-units W/person
+  N4 , \field Fraction Latent
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 ; \field Fraction Lost
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
 
 GasEquipment,
    \memo Sets internal gains and contaminant rates for gas equipment in the zone.
@@ -22602,6 +23479,110 @@ GasEquipment,
        \retaincase
        \default General
 
+GasEquipment:Instance,
+   \memo Sets internal gains and contaminant rates for gas equipment in the zone.
+   \memo The physical characteristics are given by the referenced GasEquipment:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 4
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference GasEquipmentNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Gas Equipment Definition Name
+       \required-field
+       \type object-list
+       \object-list GasEquipmentDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in Schedule should be fraction applied to design level of gas equipment, generally (0.0 - 1.0)
+  N1 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A5 ; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+
+GasEquipment:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for gas equipment.
+   \memo Referenced by one or more GasEquipment:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference GasEquipmentDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of gas equipment
+       \note for this set of attributes
+       \note Choices: EquipmentLevel => Design Level -- simply enter power input of equipment
+       \note Watts/Area or Power/Area => Power per Floor Area -- enter the number to apply. Value * Floor Area = Equipment Level
+       \note Watts/Person or Power/Person => Power per Person -- enter the number to apply. Value * Occupants = Equipment Level
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \key Watts/Person
+       \key Power/Area
+       \key Power/Person
+       \default EquipmentLevel
+  N1 , \field Design Level
+       \units W
+       \type real
+       \minimum 0
+       \ip-units Btu/h
+  N2 , \field Power per Floor Area
+       \type real
+       \minimum 0
+       \units W/m2
+       \ip-units Btu/h-ft2
+  N3 , \field Power per Person
+       \type real
+       \minimum 0
+       \units W/person
+       \ip-units Btu/h-person
+  N4 , \field Fraction Latent
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 , \field Fraction Lost
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N7 ; \field Carbon Dioxide Generation Rate
+       \note CO2 generation rate per unit of power input
+       \type real
+       \units m3/s-W
+       \ip-units (ft3/min)/(Btu/h)
+       \default 0.0
+       \minimum 0.0
+       \maximum 4.0E-7
+       \note The default value assumes the equipment is fully vented.
+       \note For unvented equipment, a suggested value is 3.45E-8 m3/s-W. This value is
+       \note converted from a natural gas CO2 emission rate of 117 lbs CO2 per million Btu.
+       \note The maximum value assumes to be 10 times of the recommended value.
+
 HotWaterEquipment,
    \memo Sets internal gains for hot water equipment in the zone.
    \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
@@ -22670,6 +23651,98 @@ HotWaterEquipment,
        \retaincase
        \default General
 
+HotWaterEquipment:Instance,
+   \memo Sets internal gains for hot water equipment in the zone.
+   \memo The physical characteristics are given by the referenced HotWaterEquipment:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 4
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference HotWaterEquipmentNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Hot Water Equipment Definition Name
+       \required-field
+       \type object-list
+       \object-list HotWaterEquipmentDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in Schedule should be fraction applied to design level of hot water equipment, generally (0.0 - 1.0)
+  N1 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A5 ; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+
+HotWaterEquipment:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for hot water equipment.
+   \memo Referenced by one or more HotWaterEquipment:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference HotWaterEquipmentDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of hot water equipment
+       \note for this set of attributes
+       \note Choices: EquipmentLevel => Design Level -- simply enter power input of equipment
+       \note Watts/Area or Power/Area => Power per Floor Area -- enter the number to apply. Value * Floor Area = Equipment Level
+       \note Watts/Person or Power/Person => Power per Person -- enter the number to apply. Value * Occupants = Equipment Level
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \key Watts/Person
+       \key Power/Area
+       \key Power/Person
+       \default EquipmentLevel
+  N1 , \field Design Level
+       \units W
+       \type real
+       \minimum 0
+       \ip-units Btu/h
+  N2 , \field Power per Floor Area
+       \type real
+       \minimum 0
+       \units W/m2
+       \ip-units Btu/h-ft2
+  N3 , \field Power per Person
+       \type real
+       \minimum 0
+       \units W/person
+       \ip-units Btu/h-person
+  N4 , \field Fraction Latent
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 ; \field Fraction Lost
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+
 SteamEquipment,
    \memo Sets internal gains for steam equipment in the zone.
    \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
@@ -22737,6 +23810,98 @@ SteamEquipment,
        \type alpha
        \retaincase
        \default General
+
+SteamEquipment:Instance,
+   \memo Sets internal gains for steam equipment in the zone.
+   \memo The physical characteristics are given by the referenced SteamEquipment:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 4
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference SteamEquipmentNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Steam Equipment Definition Name
+       \required-field
+       \type object-list
+       \object-list SteamEquipmentDefinitionNames
+  A3 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A4 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in Schedule should be fraction applied to design level of steam equipment, generally (0.0 - 1.0)
+  N1 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A5 ; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+
+SteamEquipment:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for steam equipment.
+   \memo Referenced by one or more SteamEquipment:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference SteamEquipmentDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of steam equipment
+       \note for this set of attributes
+       \note Choices: EquipmentLevel => Design Level -- simply enter power input of equipment
+       \note Watts/Area or Power/Area => Power per Floor Area -- enter the number to apply. Value * Floor Area = Equipment Level
+       \note Watts/Person or Power/Person => Power per Person -- enter the number to apply. Value * Occupants = Equipment Level
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \key Watts/Person
+       \key Power/Area
+       \key Power/Person
+       \default EquipmentLevel
+  N1 , \field Design Level
+       \units W
+       \type real
+       \minimum 0
+       \ip-units Btu/h
+  N2 , \field Power per Floor Area
+       \type real
+       \minimum 0
+       \units W/m2
+       \ip-units Btu/h-ft2
+  N3 , \field Power per Person
+       \type real
+       \minimum 0
+       \units W/person
+       \ip-units Btu/h-person
+  N4 , \field Fraction Latent
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 ; \field Fraction Lost
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
 
 OtherEquipment,
    \memo Sets internal gains or losses for "other" equipment in the zone.
@@ -22829,6 +23994,122 @@ OtherEquipment,
        \type alpha
        \retaincase
        \default General
+
+OtherEquipment:Instance,
+   \memo Sets internal gains or losses for "other" equipment in the zone.
+   \memo The physical characteristics are given by the referenced OtherEquipment:Definition object.
+   \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 5
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference OtherEquipmentNames
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field Other Equipment Definition Name
+       \required-field
+       \type object-list
+       \object-list OtherEquipmentDefinitionNames
+  A3 , \field Fuel Type
+       \type choice
+       \key None
+       \key Electricity
+       \key NaturalGas
+       \key Propane
+       \key FuelOilNo1
+       \key FuelOilNo2
+       \key Diesel
+       \key Gasoline
+       \key Coal
+       \key OtherFuel1
+       \key OtherFuel2
+       \key DistrictHeatingWater
+       \key DistrictHeatingSteam
+       \key DistrictCooling
+       \default None
+  A4 , \field Zone or ZoneList or Space or SpaceList Name
+       \required-field
+       \type object-list
+       \object-list ZoneAndZoneListNames
+       \object-list SpaceAndSpaceListNames
+  A5 , \field Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note units in Schedule should be fraction applied to design level of other equipment, generally (0.0 - 1.0)
+  N1 , \field Multiplier
+       \note Multiplies the design level from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A6 ; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default General
+
+OtherEquipment:Definition,
+   \memo Defines the physical characteristics (design level and heat gain fractions) for "other" equipment.
+   \memo Referenced by one or more OtherEquipment:Instance objects.
+   \min-fields 8
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference OtherEquipmentDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Design Level Calculation Method
+       \note The entered calculation method is used to create the maximum amount of other equipment.
+       \note to set a loss, use a negative value in the following fields.
+       \note for this set of attributes
+       \note Choices: EquipmentLevel => Design Level -- simply enter power input of equipment
+       \note Watts/Area or Power/Area => Power per Floor Area -- enter the number to apply. Value * Floor Area = Equipment Level
+       \note Watts/Person or Power/Person => Power per Person -- enter the number to apply. Value * Occupants = Equipment Level
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \key Watts/Person
+       \key Power/Area
+       \key Power/Person
+       \default EquipmentLevel
+  N1 , \field Design Level
+       \units W
+       \type real
+       \ip-units Btu/h
+  N2 , \field Power per Floor Area
+       \type real
+       \units W/m2
+       \ip-units Btu/h-ft2
+  N3 , \field Power per Person
+       \type real
+       \units W/person
+       \ip-units Btu/h-person
+  N4 , \field Fraction Latent
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N5 , \field Fraction Radiant
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N6 , \field Fraction Lost
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0
+  N7 ; \field Carbon Dioxide Generation Rate
+       \note CO2 generation rate per unit of power input
+       \type real
+       \units m3/s-W
+       \ip-units (ft3/min)/(Btu/h)
+       \default 0.0
+       \minimum 0.0
+       \maximum 4.0E-7
+       \note The default value assumes the equipment is fully vented.
 
 IndoorLivingWall,
    \memo Indoor greenery systems such as indoor living walls are panels of plants, which grow hydroponically or from substrates.
@@ -23120,6 +24401,248 @@ ElectricEquipment:ITE:AirCooled,
        \type real
        \units deltaC
   A21; \field Return Temperature Difference Schedule
+       \note The difference schedule of the actual AHU return air temperature to the IT equipment outlet temperature.
+       \note Either Return Temperature Difference or Return Temperature Difference Schedule is required if Air Flow Calculation Method is set to FlowControlWithApproachTemperatures.
+       \note This field is ignored when Air Flow Calculation Method is FlowFromSystem.
+       \type object-list
+       \object-list ScheduleNames
+
+ElectricEquipment:ITE:AirCooled:Instance,
+   \memo This object describes air-cooled electric information technology equipment (ITE) which has
+   \memo variable power consumption as a function of loading and temperature.
+   \memo The performance characteristics are given by the referenced
+   \memo ElectricEquipment:ITE:AirCooled:Definition object.
+   \memo If a Zone comprised of more than one Space is specified
+   \memo then this definition applies to all applicable spaces, and each instance will
+   \memo be named with the Space Name plus this Object Name.
+   \min-fields 4
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference SpaceItemNames
+       \reference SpaceLoadNames
+       \reference SpaceComponentInstanceNames
+  A2 , \field ElectricEquipment ITE AirCooled Definition Name
+       \required-field
+       \type object-list
+       \object-list ElectricEquipmentITEAirCooledDefinitionNames
+  A3 , \field Zone or Space Name
+       \note ZoneList and SpaceList names are not allowed.
+       \required-field
+       \type object-list
+       \object-list ZoneNames
+       \object-list SpaceNames
+  N1 , \field Multiplier
+       \note Multiplies the design power input from the referenced definition.
+       \type real
+       \minimum 0
+       \default 1
+  A4 , \field Design Power Input Schedule Name
+       \note Operating schedule for this equipment, fraction applied to the design power input,
+       \note generally (0.0 - 1.0)
+       \note If this field is blank, the schedule is assumed to always be 1.0.
+       \type object-list
+       \object-list ScheduleNames
+  A5 , \field CPU Loading Schedule Name
+       \note CPU loading schedule for this equipment as a fraction from 0.0 (idle) to 1.0 (full load).
+       \note If this field is blank, the schedule is assumed to always be 1.0.
+       \type object-list
+       \object-list ScheduleNames
+  A6 , \field Air Inlet Room Air Model Node Name
+       \note Name of a RoomAir:Node object which is connected to the ITE air inlet.
+       \type object-list
+       \object-list RoomAirNodes
+  A7 , \field Air Outlet Room Air Model Node Name
+       \note Name of a RoomAir:Node object which is connected to the ITE air outlet.
+       \type object-list
+       \object-list RoomAirNodes
+  A8 , \field Supply Air Node Name
+       \note Name of the supply air inlet node serving this ITE. Required if the
+       \note Air Node Connection Type = AdjustedSupply (set in the Definition). Also required if
+       \note Air Flow Calculation Method = FlowControlWithApproachTemperatures (set in the Definition).
+       \note Also required if reporting of Supply Heat Index is desired.
+       \type node
+  A9 , \field CPU End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default ITE-CPU
+  A10, \field Fan End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default ITE-Fans
+  A11; \field Electric Power Supply End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default ITE-UPS
+
+ElectricEquipment:ITE:AirCooled:Definition,
+   \memo Performance characteristics for ElectricEquipment:ITE:AirCooled:Instance.
+   \memo Defines power, airflow, and efficiency as functions of loading and temperature.
+   \min-fields 18
+  A1 , \field Name
+       \required-field
+       \type alpha
+       \reference ElectricEquipmentITEAirCooledDefinitionNames
+       \reference SpaceComponentDefinitionNames
+  A2 , \field Air Flow Calculation Method
+       \note The specified method is used to calculate the IT inlet temperature and zone return
+       \note air temperature. If FlowFromSystem is chosen, the zone is assumed to be well-mixed.
+       \note If FlowControlWithApproachTemperatures is chosen, Supply and Return approach temperature
+       \note should be defined to indicate the temperature difference due to the air distribution. When
+       \note FlowControlWithApproachTemperatures is chosen, the inputs of Air Inlet Connection Type, Design Recirculation Fraction
+       \note and Recirculation Function of Loading and Supply Temperature Curve Name are ignored. For multiple
+       \note ITE objects defined for one zone, the same calculation method should apply.
+       \note The FlowControlWithApproachTemperatures only applies to ITE zones with single duct VAV terminal unit.
+       \note Other return air heat gains from window or lights are not allowed when FlowControlWithApproachTemperatures is chosen.
+       \type choice
+       \key FlowFromSystem
+       \key FlowControlWithApproachTemperatures
+       \default FlowFromSystem
+  A3 , \field Design Power Input Calculation Method
+       \note The entered calculation method is used to specify the design power input
+       \note Choices: EquipmentLevel => Equipment Level -- simply enter watts of equipment
+       \note Watts/Area => Watts per Floor Area -- Design Power = Watts per Floor Area * Floor Area
+       \type choice
+       \key EquipmentLevel
+       \key Watts/Area
+       \default EquipmentLevel
+  N1 , \field Watts per Unit
+       \type real
+       \units W
+       \ip-units W
+       \minimum 0
+  N2 , \field Watts per Floor Area
+       \type real
+       \units W/m2
+       \ip-units W/ft2
+       \minimum 0
+  A4 , \field CPU Power Input Function of Loading and Air Temperature Curve Name
+       \note The name of a two-variable curve or table lookup object which modifies the CPU power
+       \note input as a function of CPU loading (x) and air inlet node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
+       \note Design Entering Air Temperature).
+       \required-field
+       \type object-list
+       \object-list BivariateFunctions
+  N3 , \field Design Fan Power Input Fraction
+       \note The fraction of the total power input at design conditions which is for the cooling fan(s)
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0.0
+  N4 , \field Design Fan Air Flow Rate per Power Input
+       \note The cooling fan air flow rate per total electric power input at design conditions
+       \required-field
+       \type real
+       \units m3/s-W
+       \minimum 0.0
+  A5 , \field Air Flow Function of Loading and Air Temperature Curve Name
+       \note The name of a two-variable curve or table lookup object which modifies the cooling
+       \note air flow rate as a function of CPU loading (x) and air inlet node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
+       \note Design Entering Air Temperature).
+       \required-field
+       \type object-list
+       \object-list BivariateFunctions
+  A6 , \field Fan Power Input Function of Flow Curve Name
+       \note The name of a single-variable curve or table lookup object which modifies the cooling
+       \note fan power as a function of flow fraction (x).
+       \note This curve (table) should equal 1.0 at a flow fraction of 1.0.
+       \required-field
+       \type object-list
+       \object-list UnivariateFunctions
+  N5 , \field Design Entering Air Temperature
+       \note The entering air temperature at design conditions.
+       \type real
+       \units C
+       \default 15.0
+  A7 , \field Environmental Class
+       \note Specifies the allowable operating conditions for the air inlet conditions.
+       \note Used for reporting time outside allowable conditions.
+       \type choice
+       \key None
+       \key A1
+       \key A2
+       \key A3
+       \key A4
+       \key B
+       \key C
+       \key H1
+       \default None
+  A8 , \field Air Inlet Connection Type
+       \note Specifies the type of connection between the zone and the ITE air inlet node.
+       \note AdjustedSupply = ITE inlet temperature will be the current Supply Air Node temperature
+       \note adjusted by the current recirculation fraction.
+       \note All heat output is added to the zone air heat balance as a convective gain.
+       \note ZoneAirNode = ITE air inlet condition is the average zone condition.
+       \note All heat output is added to the zone air heat balance as a convective gain.
+       \note RoomAirModel = ITE air inlet and outlet are connected to room air model nodes.
+       \note This field is only used when Air Flow Calculation Method is FlowFromSystem.
+       \type choice
+       \key AdjustedSupply
+       \key ZoneAirNode
+       \key RoomAirModel
+       \default AdjustedSupply
+  N6 , \field Design Recirculation Fraction
+       \note The recirculation fraction for this equipment at design conditions. This field is used only
+       \note if the Air Node Connection Type = AdjustedSupply. The default is 0.0 (no recirculation).
+       \note This field is only used when Air Flow Calculation Method is FlowFromSystem.
+       \type real
+       \minimum 0.0
+       \maximum 0.5
+       \default 0.0
+  A9 , \field Recirculation Function of Loading and Supply Temperature Curve Name
+       \note The name of a two-variable curve or table lookup object which modifies the recirculation
+       \note fraction as a function of CPU loading (x) and supply air node temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions (CPU loading = 1.0 and
+       \note Design Entering Air Temperature). This field is used only if the
+       \note Air Node Connection Type = AdjustedSupply. If this curve is left blank, then the curve
+       \note is assumed to always equal 1.0.
+       \note This field is only used when Air Flow Calculation Method is FlowFromSystem.
+       \type object-list
+       \object-list BivariateFunctions
+  N7 , \field Design Electric Power Supply Efficiency
+       \note The efficiency of the power supply system serving this ITE
+       \type real
+       \minimum> 0.0
+       \maximum 1.0
+       \default 1.0
+  A10, \field Electric Power Supply Efficiency Function of Part Load Ratio Curve Name
+       \note The name of a single-variable curve or table lookup object which modifies the electric
+       \note power supply efficiency as a function of part-load ratio (x).
+       \note This curve (table) should equal 1.0 at full load (PLR = 1.0).
+       \note If this curve is left blank, then the curve is assumed to always equal 1.0.
+       \type object-list
+       \object-list UnivariateFunctions
+  N8 , \field Fraction of Electric Power Supply Losses to Zone
+       \note Fraction of the electric power supply losses which are a heat gain to the zone
+       \note If this field is <1.0, the remainder of the losses are assumed to be lost to the outdoors.
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 1.0
+  N9 , \field Supply Temperature Difference
+       \note The difference of the IT inlet temperature from the AHU supply air temperature.
+       \note Either Supply Temperature Difference or Supply Temperature Difference Schedule is required if Air Flow Calculation Method is set to FlowControlWithApproachTemperatures.
+       \note This field is ignored when Air Flow Calculation Method is FlowFromSystem.
+       \type real
+       \units deltaC
+  A11, \field Supply Temperature Difference Schedule
+       \note The difference schedule of the IT inlet temperature from the AHU supply air temperature.
+       \note Either Supply Temperature Difference or Supply Temperature Difference Schedule is required if Air Flow Calculation Method is set to FlowControlWithApproachTemperatures.
+       \note This field is ignored when Air Flow Calculation Method is FlowFromSystem.
+       \type object-list
+       \object-list ScheduleNames
+  N10, \field Return Temperature Difference
+       \note The difference of the actual AHU return air temperature to the IT equipment outlet temperature.
+       \note Either Return Temperature Difference or Return Temperature Difference Schedule is required if Air Flow Calculation Method is set to FlowControlWithApproachTemperatures.
+       \note This field is ignored when Air Flow Calculation Method is FlowFromSystem.
+       \type real
+       \units deltaC
+  A12; \field Return Temperature Difference Schedule
        \note The difference schedule of the actual AHU return air temperature to the IT equipment outlet temperature.
        \note Either Return Temperature Difference or Return Temperature Difference Schedule is required if Air Flow Calculation Method is set to FlowControlWithApproachTemperatures.
        \note This field is ignored when Air Flow Calculation Method is FlowFromSystem.
@@ -76523,8 +78046,8 @@ HeatPump:AirToWater,
         \type real
         \units C
         \default 8
-        \note inlet water temperature corresponding to rated performance
-        \note (heating capacity, COP).
+        \note outlet water temperature corresponding to rated heat pump performance
+        \note (cooling capacity, COP).
    N12 , \field Rated Water Flow Rate in Cooling Mode
         \type real
         \units m3/s

@@ -92,7 +92,9 @@ namespace HeatBalanceSurfaceManager {
     // Beginning Initialization Section of the Module
     //******************************************************************************
 
-    void UpdateVariableAbsorptances(EnergyPlusData &state);
+    void UpdateVariableAbsorptancesOut(EnergyPlusData &state);
+
+    void UpdateVariableAbsorptancesIn(EnergyPlusData &state);
 
     void InitSurfaceHeatBalance(EnergyPlusData &state);
 
@@ -139,6 +141,8 @@ namespace HeatBalanceSurfaceManager {
 
     void CalculateZoneMRT(EnergyPlusData &state,
                           ObjexxFCL::Optional_int_const ZoneToResimulate = _); // if passed in, then only calculate surfaces that have this zone
+
+    Real64 calcUserZoneMRT(EnergyPlusData &state, int mrtNum);
 
     // End of Record Keeping subroutines for the HB Module
     // *****************************************************************************

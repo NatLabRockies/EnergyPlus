@@ -1,0 +1,1304 @@
+! SpaceLoadInstanceDefinition.idf
+! Basic file description:  1 story building divided into 3 interior conditioned zones
+!
+! Highlights:              Uses the SpaceLoad Instance + Definition pattern
+!
+!
+! Simulation Location/Run: CHICAGO_IL_USA TMY2-94846, 2 design days
+!                          Run Control executes 2 design days
+!
+! Location:                Chicago, IL
+!
+! Design Days:             CHICAGO_IL_USA Annual Heating 99% Design Conditions DB, MaxDB= -17.3°C
+!                          CHICAGO_IL_USA Annual Cooling 1% Design Conditions, MaxDB=  31.5°C MCWB=  23.0°C
+!
+! Run Period (Weather File): none
+!
+! Run Control:             No zone or system sizing, design day simulation.
+!
+! Building: Single floor, 3 zones : two 100m2 1 bedroom zones, and one 200m2 2BR zone in between
+!           The building is oriented due north.
+!
+! Floor Area:        130.1 m2 (1403 ft2)
+! Number of Stories: 1
+!
+! Zone Description Details:
+!            y (=North)
+!   ▲
+!   │                  building height = 3m
+! 10├───────────┼──────────────────────┼───────────┤
+!   │           │                      │           │
+!   │           │                      │           │
+!   │ Space1-1BR│      Space2-2BR      │ Space3-1BR│
+!   │           │                      │           │
+!   │           │                      │           │
+!   └───────────┴──────────────────────┴───────────┴──► x
+!  0           10          20         30          40
+!
+!
+! Internal Gains description
+!
+! - ElectricEquipment:
+!   - General Plug Loads: a single ElectricEquipment:Definition, with 6.67 W/m2, shared by three instances: 1 for each Space, with multiplier = 1
+!
+!   - Bathroom Fan: A single ElectricEquipment:Definition object is used with EquipmentLevel, 100W
+!                   the 1BR spaces use a multiplier of 1, the 2BR one a multiplier of 2
+!
+! - GasEquipment:
+!   - Cooking Range: A single GasEquipment:Definition, 200W. A single GasEquipment:Instance, which applies to the "All Spaces" SpaceList
+!
+! - HotWaterEquipment:
+!   - Dishwashing: A single HotWaterEquipment:Definition, 300W. A single HotWaterEquipment:Instance, which applies to the "All Zones" ZoneList
+!
+! - SteamEquipment:
+!    - Steam: a single Steam:Definition and Steam:Instance for Space2-2BR, 105 W
+!
+! - OtherEquipment
+!    - OtherEquipment: a single OtherEquipment:Definition and OtherEquipment:Instance for Space1-1BR, 352 W
+!
+! - Lights:
+!    - A single Lights:Definition for a 60W incadescent bulb.
+!    - 2 Lights:Instance with actual bulb counts as Multiplier
+!       - 1 assigned a SpaceList "1BR SpaceList": 6 in 1BR apartments
+!       - 1 assigned directed to the Space "Space2-2BR": 11 bulbs
+!
+! - People:
+!    - A single People:Definition object with 1 people, defining CO2 generation an Thermal Comfort Models, etc
+!    - 2 People:Instance with actual people counts as Multiplier
+!       - 1 assigned a SpaceList "1BR SpaceList": 2 in 1BR apartments
+!       - 1 assigned directed to the Space "Space2-2BR": 3 people
+
+  Version,26.2;
+
+  Timestep,4;
+
+  Building,
+    Simple One Zone (Wireframe DXF),  !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.004,                   !- Temperature Convergence Tolerance Value {deltaC}
+    MinimalShadowing,        !- Solar Distribution
+    30,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    Counterclockwise,        !- Vertex Entry Direction
+    Relative,                !- Coordinate System
+    Relative,                !- Daylighting Reference Point Coordinate System
+    Relative;                !- Rectangular Surface Coordinate System
+
+  SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    Yes,                     !- Run Simulation for Sizing Periods
+    No,                      !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  Sizing:Parameters,
+    1.25,                    !- Heating Sizing Factor
+    1.15;                    !- Cooling Sizing Factor
+
+  RunPeriod,
+    Run Period 1,            !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    2009.0,                  !- Begin Year
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    2009.0,                  !- End Year
+    Thursday,                !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+  Site:Location,
+    CHICAGO_IL_USA TMY2-94846,  !- Name
+    41.78,                   !- Latitude {deg}
+    -87.75,                  !- Longitude {deg}
+    -6.0,                    !- Time Zone {hr}
+    190.0;                   !- Elevation {m}
+
+! CHICAGO_IL_USA Annual Heating 99% Design Conditions DB, MaxDB= -17.3°C
+
+  SizingPeriod:DesignDay,
+    CHICAGO_IL_USA Annual Heating 99% Design Conditions DB,  !- Name
+    1,                       !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    -17.3,                   !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    WetBulb,                 !- Humidity Condition Type
+    -17.3,                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.0,                 !- Barometric Pressure {Pa}
+    4.9,                     !- Wind Speed {m/s}
+    270.0,                   !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+! CHICAGO_IL_USA Annual Cooling 1% Design Conditions, MaxDB=  31.5°C MCWB=  23.0°C
+
+  SizingPeriod:DesignDay,
+    CHICAGO_IL_USA Annual Cooling 1% Design Conditions DB/MCWB,  !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    31.5,                    !- Maximum Dry-Bulb Temperature {C}
+    10.7,                    !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    WetBulb,                 !- Humidity Condition Type
+    23.0,                    !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.0,                 !- Barometric Pressure {Pa}
+    5.3,                     !- Wind Speed {m/s}
+    230.0,                   !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+  Material:NoMass,
+    R13LAYER,                !- Name
+    Rough,                   !- Roughness
+    2.290965,                !- Thermal Resistance {m2-K/W}
+    0.9,                     !- Thermal Absorptance
+    0.75,                    !- Solar Absorptance
+    0.75;                    !- Visible Absorptance
+
+  Material:NoMass,
+    R31LAYER,                !- Name
+    Rough,                   !- Roughness
+    5.456,                   !- Thermal Resistance {m2-K/W}
+    0.9,                     !- Thermal Absorptance
+    0.75,                    !- Solar Absorptance
+    0.75;                    !- Visible Absorptance
+
+  Material,
+    C5 - 4 IN HW CONCRETE,   !- Name
+    MediumRough,             !- Roughness
+    0.1014984,               !- Thickness {m}
+    1.729577,                !- Conductivity {W/m-K}
+    2242.585,                !- Density {kg/m3}
+    836.8,                   !- Specific Heat {J/kg-K}
+    0.9,                     !- Thermal Absorptance
+    0.65,                    !- Solar Absorptance
+    0.65;                    !- Visible Absorptance
+
+  Construction,
+    R13WALL,                 !- Name
+    R13LAYER;                !- Outside Layer
+
+  Construction,
+    FLOOR,                   !- Name
+    C5 - 4 IN HW CONCRETE;   !- Outside Layer
+
+  Construction,
+    ROOF31,                  !- Name
+    R31LAYER;                !- Outside Layer
+
+  Zone,
+    Space1-1BR Zn,           !- Name
+    ,                        !- Direction of Relative North {deg}
+    0.0,                     !- X Origin {m}
+    0.0,                     !- Y Origin {m}
+    0.0,                     !- Z Origin {m}
+    ,                        !- Type
+    1,                       !- Multiplier
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ,                        !- Zone Inside Convection Algorithm
+    ,                        !- Zone Outside Convection Algorithm
+    Yes;                     !- Part of Total Floor Area
+
+  Space,
+    Space1-1BR,              !- Name
+    Space1-1BR Zn,           !- Zone Name
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ;                        !- Space Type
+
+  BuildingSurface:Detailed,
+    Space1-1BR Floor,        !- Name
+    Floor,                   !- Surface Type
+    FLOOR,                   !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Ground,                  !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space1-1BR RoofCeiling,  !- Name
+    Roof,                    !- Surface Type
+    ROOF31,                  !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space1-1BR Wall 1,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space1-1BR Wall 2,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space1-1BR Wall 3,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space1-1BR Wall 4,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space1-1BR Zn,           !- Zone Name
+    Space1-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    0.0,                     !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  Zone,
+    Space2-2BR Zn,           !- Name
+    ,                        !- Direction of Relative North {deg}
+    0.0,                     !- X Origin {m}
+    0.0,                     !- Y Origin {m}
+    0.0,                     !- Z Origin {m}
+    ,                        !- Type
+    1,                       !- Multiplier
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ,                        !- Zone Inside Convection Algorithm
+    ,                        !- Zone Outside Convection Algorithm
+    Yes;                     !- Part of Total Floor Area
+
+  Space,
+    Space2-2BR,              !- Name
+    Space2-2BR Zn,           !- Zone Name
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ;                        !- Space Type
+
+  BuildingSurface:Detailed,
+    Space2-2BR Floor,        !- Name
+    Floor,                   !- Surface Type
+    FLOOR,                   !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Ground,                  !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space2-2BR RoofCeiling,  !- Name
+    Roof,                    !- Surface Type
+    ROOF31,                  !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space2-2BR Wall 1,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space2-2BR Wall 2,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space2-2BR Wall 3,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space2-2BR Wall 4,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space2-2BR Zn,           !- Zone Name
+    Space2-2BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    10.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  Zone,
+    Space3-1BR Zn,           !- Name
+    ,                        !- Direction of Relative North {deg}
+    0.0,                     !- X Origin {m}
+    0.0,                     !- Y Origin {m}
+    0.0,                     !- Z Origin {m}
+    ,                        !- Type
+    1,                       !- Multiplier
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ,                        !- Zone Inside Convection Algorithm
+    ,                        !- Zone Outside Convection Algorithm
+    Yes;                     !- Part of Total Floor Area
+
+  Space,
+    Space3-1BR,              !- Name
+    Space3-1BR Zn,           !- Zone Name
+    ,                        !- Ceiling Height {m}
+    ,                        !- Volume {m3}
+    ,                        !- Floor Area {m2}
+    ;                        !- Space Type
+
+  BuildingSurface:Detailed,
+    Space3-1BR Floor,        !- Name
+    Floor,                   !- Surface Type
+    FLOOR,                   !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Ground,                  !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space3-1BR RoofCeiling,  !- Name
+    Roof,                    !- Surface Type
+    ROOF31,                  !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space3-1BR Wall 1,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space3-1BR Wall 2,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space3-1BR Wall 3,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    0.0,                     !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Space3-1BR Wall 4,       !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    Space3-1BR Zn,           !- Zone Name
+    Space3-1BR,              !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    ,                        !- View Factor to Ground
+    ,                        !- Number of Vertices
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    3.0,                     !- Vertex Z-coordinate {m}
+    40.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0,                     !- Vertex Z-coordinate {m}
+    30.0,                    !- Vertex X-coordinate {m}
+    10.0,                    !- Vertex Y-coordinate {m}
+    0.0;                     !- Vertex Z-coordinate {m}
+
+  ZoneList,
+    All Zones,               !- Name
+    Space1-1BR Zn,           !- Zone Name
+    Space2-2BR Zn,           !- Zone Name
+    Space3-1BR Zn;           !- Zone Name
+
+  SpaceList,
+    All Spaces,              !- Name
+    Space1-1BR,              !- Space Name
+    Space2-2BR,              !- Space Name
+    Space3-1BR;              !- Space Name
+
+  SpaceList,
+    1BR SpaceList,           !- Name
+    Space1-1BR,              !- Space Name
+    Space3-1BR;              !- Space Name
+
+  ElectricEquipment:Definition,
+    Apartment Elec Equip Definition,  !- Name
+    Watts/Area,              !- Design Level Calculation Method
+    ,                        !- Design Level {W}
+    6.67,                    !- Watts per Floor Area {W/m2}
+    ,                        !- Watts per Person {W/person}
+    0.0,                     !- Fraction Latent
+    0.5,                     !- Fraction Radiant
+    0.0;                     !- Fraction Lost
+
+  ElectricEquipment:Instance,
+    Space1-1BR Elec Equip Instance,  !- Name
+    Apartment Elec Equip Definition,  !- Electric Equipment Definition Name
+    Space1-1BR,              !- Zone or ZoneList or Space or SpaceList Name
+    ApartmentMidRise EQP_APT_SCH,  !- Schedule Name
+    1.0,                     !- Multiplier
+    plug_loads;              !- End-Use Subcategory
+
+  ElectricEquipment:Instance,
+    Space2-2BR Elec Equip Instance,  !- Name
+    Apartment Elec Equip Definition,  !- Electric Equipment Definition Name
+    Space2-2BR,              !- Zone or ZoneList or Space or SpaceList Name
+    ApartmentMidRise EQP_APT_SCH,  !- Schedule Name
+    1.0,                     !- Multiplier
+    plug_loads;              !- End-Use Subcategory
+
+  ElectricEquipment:Instance,
+    Space3-1BR Elec Equip Instance,  !- Name
+    Apartment Elec Equip Definition,  !- Electric Equipment Definition Name
+    Space3-1BR,              !- Zone or ZoneList or Space or SpaceList Name
+    ApartmentMidRise EQP_APT_SCH,  !- Schedule Name
+    1.0,                     !- Multiplier
+    plug_loads;              !- End-Use Subcategory
+
+  Schedule:Day:Interval,
+    ApartmentMidRise EQP_APT_SCH Default,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    No,                      !- Interpolate to Timestep
+    01:00,                   !- Time {hh:mm}
+    0.649,                   !- Value Until Time
+    02:00,                   !- Time {hh:mm}
+    0.597,                   !- Value Until Time
+    03:00,                   !- Time {hh:mm}
+    0.572,                   !- Value Until Time
+    04:00,                   !- Time {hh:mm}
+    0.559,                   !- Value Until Time
+    05:00,                   !- Time {hh:mm}
+    0.566,                   !- Value Until Time
+    06:00,                   !- Time {hh:mm}
+    0.584,                   !- Value Until Time
+    07:00,                   !- Time {hh:mm}
+    0.625,                   !- Value Until Time
+    08:00,                   !- Time {hh:mm}
+    0.681,                   !- Value Until Time
+    09:00,                   !- Time {hh:mm}
+    0.713,                   !- Value Until Time
+    10:00,                   !- Time {hh:mm}
+    0.721,                   !- Value Until Time
+    11:00,                   !- Time {hh:mm}
+    0.72,                    !- Value Until Time
+    12:00,                   !- Time {hh:mm}
+    0.712,                   !- Value Until Time
+    13:00,                   !- Time {hh:mm}
+    0.716,                   !- Value Until Time
+    14:00,                   !- Time {hh:mm}
+    0.704,                   !- Value Until Time
+    15:00,                   !- Time {hh:mm}
+    0.705,                   !- Value Until Time
+    16:00,                   !- Time {hh:mm}
+    0.718,                   !- Value Until Time
+    17:00,                   !- Time {hh:mm}
+    0.779,                   !- Value Until Time
+    18:00,                   !- Time {hh:mm}
+    0.918,                   !- Value Until Time
+    19:00,                   !- Time {hh:mm}
+    1.0,                     !- Value Until Time
+    20:00,                   !- Time {hh:mm}
+    0.983,                   !- Value Until Time
+    21:00,                   !- Time {hh:mm}
+    0.938,                   !- Value Until Time
+    22:00,                   !- Time {hh:mm}
+    0.891,                   !- Value Until Time
+    23:00,                   !- Time {hh:mm}
+    0.835,                   !- Value Until Time
+    24:00,                   !- Time {hh:mm}
+    0.748;                   !- Value Until Time
+
+  Schedule:Week:Daily,
+    ApartmentMidRise EQP_APT_SCH Week Rule - Jan1-Dec31,  !- Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Sunday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Monday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Tuesday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Wednesday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Thursday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Friday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Saturday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- Holiday Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- SummerDesignDay Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- WinterDesignDay Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default,  !- CustomDay1 Schedule:Day Name
+    ApartmentMidRise EQP_APT_SCH Default;  !- CustomDay2 Schedule:Day Name
+
+  Schedule:Year,
+    ApartmentMidRise EQP_APT_SCH,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    ApartmentMidRise EQP_APT_SCH Week Rule - Jan1-Dec31,  !- Schedule:Week Name
+    1,                       !- Start Month
+    1,                       !- Start Day
+    12,                      !- End Month
+    31;                      !- End Day
+
+  ElectricEquipment:Definition,
+    Bathroom Fan,            !- Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    100.0,                   !- Design Level {W}
+    ,                        !- Watts per Floor Area {W/m2}
+    ,                        !- Watts per Person {W/person}
+    0.0,                     !- Fraction Latent
+    0.0,                     !- Fraction Radiant
+    0.5;                     !- Fraction Lost
+
+  ElectricEquipment:Instance,
+    Space1-1BR Bathroom Fan,  !- Name
+    Bathroom Fan,            !- Electric Equipment Definition Name
+    Space1-1BR,              !- Zone or ZoneList or Space or SpaceList Name
+    Always On Continuous,    !- Schedule Name
+    1.0,                     !- Multiplier
+    bathroom_fans;           !- End-Use Subcategory
+
+  ElectricEquipment:Instance,
+    Space2-2BR 2 Bathroom Fans,  !- Name
+    Bathroom Fan,            !- Electric Equipment Definition Name
+    Space2-2BR,              !- Zone or ZoneList or Space or SpaceList Name
+    Always On Continuous,    !- Schedule Name
+    1.0,                     !- Multiplier
+    bathroom_fans;           !- End-Use Subcategory
+
+  ElectricEquipment:Instance,
+    Space3-1BR Bathroom Fan,  !- Name
+    Bathroom Fan,            !- Electric Equipment Definition Name
+    Space3-1BR,              !- Zone or ZoneList or Space or SpaceList Name
+    Always On Continuous,    !- Schedule Name
+    1.0,                     !- Multiplier
+    bathroom_fans;           !- End-Use Subcategory
+
+  Schedule:Day:Interval,
+    cooking range schedule allday1,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    No,                      !- Interpolate to Timestep
+    05:00,                   !- Time {hh:mm}
+    0.0597014925373134,      !- Value Until Time
+    06:00,                   !- Time {hh:mm}
+    0.111940298507463,       !- Value Until Time
+    07:00,                   !- Time {hh:mm}
+    0.171641791044776,       !- Value Until Time
+    08:00,                   !- Time {hh:mm}
+    0.291044776119403,       !- Value Until Time
+    11:00,                   !- Time {hh:mm}
+    0.343283582089552,       !- Value Until Time
+    12:00,                   !- Time {hh:mm}
+    0.402985074626866,       !- Value Until Time
+    13:00,                   !- Time {hh:mm}
+    0.462686567164179,       !- Value Until Time
+    14:00,                   !- Time {hh:mm}
+    0.343283582089552,       !- Value Until Time
+    15:00,                   !- Time {hh:mm}
+    0.291044776119403,       !- Value Until Time
+    16:00,                   !- Time {hh:mm}
+    0.402985074626866,       !- Value Until Time
+    17:00,                   !- Time {hh:mm}
+    0.567164179104478,       !- Value Until Time
+    18:00,                   !- Time {hh:mm}
+    1.0,                     !- Value Until Time
+    19:00,                   !- Time {hh:mm}
+    0.850746268656716,       !- Value Until Time
+    20:00,                   !- Time {hh:mm}
+    0.432835820895522,       !- Value Until Time
+    21:00,                   !- Time {hh:mm}
+    0.291044776119403,       !- Value Until Time
+    22:00,                   !- Time {hh:mm}
+    0.23134328358209,        !- Value Until Time
+    23:00,                   !- Time {hh:mm}
+    0.171641791044776,       !- Value Until Time
+    24:00,                   !- Time {hh:mm}
+    0.111940298507463;       !- Value Until Time
+
+  Schedule:Week:Daily,
+    cooking range schedule Week Rule - Jan1-Dec31,  !- Name
+    cooking range schedule allday1,  !- Sunday Schedule:Day Name
+    cooking range schedule allday1,  !- Monday Schedule:Day Name
+    cooking range schedule allday1,  !- Tuesday Schedule:Day Name
+    cooking range schedule allday1,  !- Wednesday Schedule:Day Name
+    cooking range schedule allday1,  !- Thursday Schedule:Day Name
+    cooking range schedule allday1,  !- Friday Schedule:Day Name
+    cooking range schedule allday1,  !- Saturday Schedule:Day Name
+    cooking range schedule allday1,  !- Holiday Schedule:Day Name
+    cooking range schedule allday1,  !- SummerDesignDay Schedule:Day Name
+    cooking range schedule allday1,  !- WinterDesignDay Schedule:Day Name
+    cooking range schedule allday1,  !- CustomDay1 Schedule:Day Name
+    cooking range schedule allday1;  !- CustomDay2 Schedule:Day Name
+
+  Schedule:Year,
+    cooking range schedule,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    cooking range schedule Week Rule - Jan1-Dec31,  !- Schedule:Week Name
+    1,                       !- Start Month
+    1,                       !- Start Day
+    12,                      !- End Month
+    31;                      !- End Day
+
+  GasEquipment:Definition,
+    Cooking Range Definition,  !- Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    200.0,                   !- Design Level {W}
+    ,                        !- Power per Floor Area {W/m2}
+    ,                        !- Power per Person {W/person}
+    0.0,                     !- Fraction Latent
+    0.3,                     !- Fraction Radiant
+    0.3,                     !- Fraction Lost
+    3.45e-08;                !- Carbon Dioxide Generation Rate {m3/s-W}
+
+  GasEquipment:Instance,
+    Cooking Range,           !- Name
+    Cooking Range Definition,  !- Gas Equipment Definition Name
+    All Spaces,              !- Zone or ZoneList or Space or SpaceList Name
+    cooking range schedule,  !- Schedule Name
+    1.0,                     !- Multiplier
+    Cooking;                 !- End-Use Subcategory
+
+  HotWaterEquipment:Definition,
+    Dishwashing HW Equip Definition,  !- Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    300.0,                   !- Design Level {W}
+    ,                        !- Power per Floor Area {W/m2}
+    ,                        !- Power per Person {W/person}
+    0.2,                     !- Fraction Latent
+    0.1,                     !- Fraction Radiant
+    0.5;                     !- Fraction Lost
+
+  HotWaterEquipment:Instance,
+    Dishwashing HW Equip,    !- Name
+    Dishwashing HW Equip Definition,  !- Hot Water Equipment Definition Name
+    All Zones,               !- Zone or ZoneList or Space or SpaceList Name
+    EQUIP-1,                 !- Schedule Name
+    1.0,                     !- Multiplier
+    Dishwashing;             !- End-Use Subcategory
+
+  SteamEquipment:Definition,
+    Steam Equip Definition,  !- Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    105.0,                   !- Design Level {W}
+    ,                        !- Power per Floor Area {W/m2}
+    ,                        !- Power per Person {W/person}
+    0.5,                     !- Fraction Latent
+    0.3,                     !- Fraction Radiant
+    0.0;                     !- Fraction Lost
+
+  SteamEquipment:Instance,
+    Steam Equip,             !- Name
+    Steam Equip Definition,  !- Steam Equipment Definition Name
+    Space2-2BR,              !- Zone or ZoneList or Space or SpaceList Name
+    EQUIP-1,                 !- Schedule Name
+    1.0,                     !- Multiplier
+    Steam;                   !- End-Use Subcategory
+
+  OtherEquipment:Definition,
+    Other Equip Definition,  !- Name
+    EquipmentLevel,          !- Design Level Calculation Method
+    352.0,                   !- Design Level {W}
+    ,                        !- Power per Floor Area {W/m2}
+    ,                        !- Power per Person {W/person}
+    0.0,                     !- Fraction Latent
+    0.0,                     !- Fraction Radiant
+    0.0,                     !- Fraction Lost
+    3.45e-08;                !- Carbon Dioxide Generation Rate {m3/s-W}
+
+  OtherEquipment:Instance,
+    Steam Equip,             !- Name
+    Other Equip Definition,  !- Other Equipment Definition Name
+    FuelOilNo2,              !- Fuel Type
+    Space1-1BR,              !- Zone or ZoneList or Space or SpaceList Name
+    EQUIP-1,                 !- Schedule Name
+    1.0,                     !- Multiplier
+    other_equipment;         !- End-Use Subcategory
+
+  Schedule:Compact,
+    EQUIP-1,                 !- Name
+    Fractional,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: WeekDays SummerDesignDay CustomDay1 CustomDay2,  !- Field
+    Until: 8:00,             !- Field
+    0.02,                    !- Field
+    Until: 9:00,             !- Field
+    0.4,                     !- Field
+    Until: 14:00,            !- Field
+    0.9,                     !- Field
+    Until: 15:00,            !- Field
+    0.8,                     !- Field
+    Until: 16:00,            !- Field
+    0.7,                     !- Field
+    Until: 18:00,            !- Field
+    0.5,                     !- Field
+    Until: 20:00,            !- Field
+    0.3,                     !- Field
+    Until: 24:00,            !- Field
+    0.02,                    !- Field
+    For: Weekends WinterDesignDay Holiday,  !- Field
+    Until: 24:00,            !- Field
+    0.2;                     !- Field
+
+  Lights:Definition,
+    Lights 60W Incandescent Definition,  !- Name
+    LightingLevel,           !- Design Level Calculation Method
+    60.0,                    !- Lighting Level {W}
+    ,                        !- Watts per Floor Area {W/m2}
+    ,                        !- Watts per Person {W/person}
+    0.21,                    !- Return Air Fraction
+    0.59,                    !- Fraction Radiant
+    0.2,                     !- Fraction Visible
+    No,                      !- Return Air Fraction Calculated from Plenum Temperature
+    ,                        !- Return Air Fraction Function of Plenum Temperature Coefficient 1
+    ;                        !- Return Air Fraction Function of Plenum Temperature Coefficient 2 {1/K}
+
+  Lights:Instance,
+    1BR Lights,              !- Name
+    Lights 60W Incandescent Definition,  !- Lights Definition Name
+    1BR SpaceList,           !- Zone or ZoneList or Space or SpaceList Name
+    LIGHTS-1,                !- Schedule Name
+    0.7,                     !- Fraction Replaceable
+    6.0,                     !- Multiplier
+    Lighting,                !- End-Use Subcategory
+    ,                        !- Return Air Heat Gain Node Name
+    ;                        !- Exhaust Air Heat Gain Node Name
+
+  Lights:Instance,
+    Space2-2BR Lights,       !- Name
+    Lights 60W Incandescent Definition,  !- Lights Definition Name
+    Space2-2BR,              !- Zone or ZoneList or Space or SpaceList Name
+    LIGHTS-1,                !- Schedule Name
+    0.7,                     !- Fraction Replaceable
+    11.0,                    !- Multiplier
+    Lighting,                !- End-Use Subcategory
+    ,                        !- Return Air Heat Gain Node Name
+    ;                        !- Exhaust Air Heat Gain Node Name
+
+  Schedule:Compact,
+    LIGHTS-1,                !- Name
+    Fractional,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: WeekDays SummerDesignDay CustomDay1 CustomDay2,  !- Field
+    Until: 8:00,             !- Field
+    0.05,                    !- Field
+    Until: 9:00,             !- Field
+    0.9,                     !- Field
+    Until: 10:00,            !- Field
+    0.95,                    !- Field
+    Until: 11:00,            !- Field
+    1.00,                    !- Field
+    Until: 12:00,            !- Field
+    0.95,                    !- Field
+    Until: 13:00,            !- Field
+    0.8,                     !- Field
+    Until: 14:00,            !- Field
+    0.9,                     !- Field
+    Until: 18:00,            !- Field
+    1.00,                    !- Field
+    Until: 19:00,            !- Field
+    0.60,                    !- Field
+    Until: 21:00,            !- Field
+    0.40,                    !- Field
+    Until: 24:00,            !- Field
+    0.05,                    !- Field
+    For: Weekends WinterDesignDay Holiday,  !- Field
+    Until: 24:00,            !- Field
+    0.05;                    !- Field
+
+  People:Definition,
+    People Definition,       !- Name
+    People,                  !- Number of People Calculation Method
+    1.0,                     !- Number of People
+    ,                        !- People per Floor Area {person/m2}
+    ,                        !- Floor Area per Person {m2/person}
+    0.3,                     !- Fraction Radiant
+    Autocalculate,           !- Sensible Heat Fraction
+    3.82e-08,                !- Carbon Dioxide Generation Rate {m3/s-W}
+    No,                      !- Enable ASHRAE 55 Comfort Warnings
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
+    AdaptiveASH55,           !- Thermal Comfort Model 1 Type
+    Fanger;                  !- Thermal Comfort Model 2 Type
+
+  People:Instance,
+    1BR People,              !- Name
+    People Definition,       !- People Definition Name
+    1BR SpaceList,           !- Zone or ZoneList or Space or SpaceList Name
+    BLDG_OCC_SCH,            !- Number of People Schedule Name
+    ACTIVITY_SCH,            !- Activity Level Schedule Name
+    ,                        !- Surface Name/Angle Factor List Name
+    WORK_EFF_SCH,            !- Work Efficiency Schedule Name
+    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
+    ,                        !- Clothing Insulation Calculation Method Schedule Name
+    CLOTHING_SCH,            !- Clothing Insulation Schedule Name
+    AIR_VELO_SCH,            !- Air Velocity Schedule Name
+    2.0,                     !- Multiplier
+    ,                        !- Ankle Level Air Velocity Schedule Name
+    15.56,                   !- Cold Stress Temperature Threshold {C}
+    30.0;                    !- Heat Stress Temperature Threshold {C}
+
+  People:Instance,
+    Space2-2BR People,       !- Name
+    People Definition,       !- People Definition Name
+    Space2-2BR,              !- Zone or ZoneList or Space or SpaceList Name
+    BLDG_OCC_SCH,            !- Number of People Schedule Name
+    ACTIVITY_SCH,            !- Activity Level Schedule Name
+    ,                        !- Surface Name/Angle Factor List Name
+    WORK_EFF_SCH,            !- Work Efficiency Schedule Name
+    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
+    ,                        !- Clothing Insulation Calculation Method Schedule Name
+    CLOTHING_SCH,            !- Clothing Insulation Schedule Name
+    AIR_VELO_SCH,            !- Air Velocity Schedule Name
+    3.0,                     !- Multiplier
+    ,                        !- Ankle Level Air Velocity Schedule Name
+    15.56,                   !- Cold Stress Temperature Threshold {C}
+    30.0;                    !- Heat Stress Temperature Threshold {C}
+
+  Schedule:Compact,
+    ACTIVITY_SCH,            !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    120.;                    !- Field
+
+  Schedule:Compact,
+    AIR_VELO_SCH,            !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    0.2;                     !- Field
+
+  Schedule:Compact,
+    CLOTHING_SCH,            !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 04/30,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    1.0,                     !- Field
+    Through: 09/30,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    0.5,                     !- Field
+    Through: 12/31,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    1.0;                     !- Field
+
+  Schedule:Compact,
+    WORK_EFF_SCH,            !- Name
+    Fractional,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: AllDays,            !- Field
+    Until: 24:00,            !- Field
+    0.0;                     !- Field
+
+  Schedule:Compact,
+    BLDG_OCC_SCH,            !- Name
+    Fractional,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field
+    For: SummerDesignDay,    !- Field
+    Until: 06:00,            !- Field
+    0.0,                     !- Field
+    Until: 22:00,            !- Field
+    1.0,                     !- Field
+    Until: 24:00,            !- Field
+    0.05,                    !- Field
+    For: Weekdays,           !- Field
+    Until: 06:00,            !- Field
+    0.0,                     !- Field
+    Until: 07:00,            !- Field
+    0.1,                     !- Field
+    Until: 08:00,            !- Field
+    0.2,                     !- Field
+    Until: 12:00,            !- Field
+    0.95,                    !- Field
+    Until: 13:00,            !- Field
+    0.5,                     !- Field
+    Until: 17:00,            !- Field
+    0.95,                    !- Field
+    Until: 18:00,            !- Field
+    0.7,                     !- Field
+    Until: 20:00,            !- Field
+    0.4,                     !- Field
+    Until: 22:00,            !- Field
+    0.1,                     !- Field
+    Until: 24:00,            !- Field
+    0.05,                    !- Field
+    For: Saturday,           !- Field
+    Until: 06:00,            !- Field
+    0.0,                     !- Field
+    Until: 08:00,            !- Field
+    0.1,                     !- Field
+    Until: 14:00,            !- Field
+    0.5,                     !- Field
+    Until: 17:00,            !- Field
+    0.1,                     !- Field
+    Until: 24:00,            !- Field
+    0.0,                     !- Field
+    For: AllOtherDays,       !- Field
+    Until: 24:00,            !- Field
+    0.0;                     !- Field
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report Name
+
+  Schedule:Constant,Always On Discrete,OnOff,1.0;
+
+  Schedule:Constant,Always Off Discrete,OnOff;
+
+  Schedule:Constant,Always On Continuous,Fractional,1.0;
+
+  ScheduleTypeLimits,
+    Fractional,              !- Name
+    0.0,                     !- Lower Limit Value {BasedOnField A3}
+    1.0,                     !- Upper Limit Value {BasedOnField A3}
+    Continuous;              !- Numeric Type
+
+  ScheduleTypeLimits,
+    OnOff,                   !- Name
+    0.0,                     !- Lower Limit Value {BasedOnField A3}
+    1.0,                     !- Upper Limit Value {BasedOnField A3}
+    Discrete,                !- Numeric Type
+    Availability;            !- Unit Type
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
+
+  Output:VariableDictionary,IDF,Unsorted;
+
+  Output:SQLite,
+    SimpleAndTabular;        !- Option Type

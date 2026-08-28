@@ -51,6 +51,10 @@ Space type is used to categorize spaces by activity type, such as office, classr
 any valid input string may be used. Several table outputs include a subtable by Space Type. There are also SpaceType \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meters}. See the meter details (mtd) output file for a list of all available meters for a given simulation.
 If left blank, this field defaults to ``General'''.
 
+\paragraph{Field: Construction Assignment Set Name}\label{space-field-construction-assignment-set-name}
+
+This optional field references a \hyperref[constructionassignmentset]{ConstructionAssignmentSet} object. It overrides the Building-level Construction Assignment Set (ref: the \emph{Construction Assignment Set Name} field on the \hyperref[building]{Building} object) for any surface or sub-surface in this Space whose \emph{Construction Name} field is left blank. Only the slots filled in on this Space's set are overridden; slots left blank fall through to the Building-level set.
+
 \paragraph{Field: Tag \textless{}\#\textgreater{}}\label{field-space-tag}
 
 Tags are used to group spaces by additional characteristics that may be more or less detailed than Space Type. For example, codes and standards designations for ventilation or occupancy may use specific terms that are different from one standard to the next. There is no predefined list of tags;
@@ -316,6 +320,8 @@ In addition to the canned Surface reports (view the Reports section later in thi
 \item
   Zone,Average,Zone Mean Radiant Temperature {[}C{]}
 \item
+  Zone,Average,Zone Standard Mean Radiant Temperature {[}C{]}
+\item
   Zone,Average,Zone Operative Temperature {[}C{]}
 \item
   HVAC,Average,Zone Air Heat Balance Internal Convective Heat Gain Rate {[}W{]}
@@ -395,10 +401,11 @@ This is the dewpoint temperature of the zone calculated from the Zone Mean Air T
 This is the zone air node temperature for the well-mixed room air model, which is the default room air model type (\hyperref[roomairmodeltype]{RoomAirModelType} = Mixing). But for other types of Room Air Model (the RoomAir:TemperaturePattern:* and RoomAirSettings:* objects) the zone thermostat air temperature may depend on the Thermostat Height and Thermostat Offset.
 
 \paragraph{Zone Mean Radiant Temperature {[}C{]}}\label{zone-mean-radiant-temperature-c}
+\paragraph{Zone Standard Mean Radiant Temperature {[}C{]}}\label{zone-standard-mean-radiant-temperature-c}
 \paragraph{Space Mean Radiant Temperature {[}C{]}}\label{space-mean-radiant-temperature-c}
 \paragraph{Enclosure Mean Radiant Temperature {[}C{]}}\label{enclosure-mean-radiant-temperature-c}
 
-The Mean Radiant Temperature (MRT) in degrees Celsius is the surface area $\times$ emissivity weighted average of the \hyperref[surface-inside-face-temperature-c]{Surface Inside Face Temperature}, where emissivity is the Thermal Absorptance of the inside material layer of each surface. Zone Mean Radiant Temperature is based on all surfaces in the zone (regardless of what enclosure each surface is in). Enclosure Mean Radiant Temperature is based on all surfaces in an enclosure (one or more \hyperref[space]{Spaces}, see \hyperref[constructionairboundary]{Construction:AirBoundary}). Space Mean Radiant Temperature is based on all surfaces in the enclosure which contains the space (same as its Enclsoure Mean Radiant Temperature).
+The "Standard" Mean Radiant Temperature (MRT) in degrees Celsius is the surface area $\times$ emissivity weighted average of the \hyperref[surface-inside-face-temperature-c]{Surface Inside Face Temperature}, where emissivity is the Thermal Absorptance of the inside material layer of each surface. Standard Zone Mean Radiant Temperature is based on all surfaces in the zone (regardless of what enclosure each surface is in). Enclosure Mean Radiant Temperature is based on all surfaces in an enclosure (one or more \hyperref[space]{Spaces}, see \hyperref[constructionairboundary]{Construction:AirBoundary}). Space Mean Radiant Temperature is based on all surfaces in the enclosure which contains the space (same as its Enclsoure Mean Radiant Temperature).  The Zone Mean Radiant Temperature is identical to the Standard Mean Radiant temperature except when the user inputs the \hyperref[zonemrtcalculation]{ZoneMRTCalculation} input object which determines how the zone MRT is calculated via People object input. When the ZoneMRTCalculation object is entered, the information entered via this object controls how the zone MRT is calculated and this then impacts any system controlled on either the MRT or the Operative Temperature (see next paragraph).
 
 \paragraph{Zone Operative Temperature {[}C{]}}\label{zone-operative-temperature-c}
 
@@ -2441,6 +2448,8 @@ Used primarily for convenience, the surface type can be one of the choices illus
 
 This is the name of the construction (ref: Construction object) used in the surface. Regardless of location in the building, the ``full'' construction (all layers) is used. For example, for an interior wall separating two zones, zone x would have the outside layer (e.g.~drywall) as the material that shows in zone y and then the layers to the inside layer -- the material that shows in zone x. For symmetric constructions, the same construction can be used in the surfaces described in both zones.
 
+This field may be left blank, in which case the construction is resolved from a \hyperref[constructionassignmentset]{ConstructionAssignmentSet} referenced by this surface's Space or by the Building (ref: \emph{Construction Assignment Set Name} on \hyperref[space]{Space} and \hyperref[building]{Building}). For an interzone pair where one side is blank, the construction assigned to (or resolved for) the other side governs, and the blank side receives its reverse layer order automatically.
+
 \paragraph{Field: Zone Name}\label{field-zone-name-13}
 
 This is the zone name to which the surface belongs. This field is required.
@@ -2603,7 +2612,9 @@ This is a unique name associated with the heat transfer subsurface. It may be us
 
 \paragraph{Field: Surface Type}\label{field-surface-type-2016-06-16}
 
-The choices for Surface Type are Window, Door, GlassDoor, TubularDaylightDome, and TubularDaylightDiffuser. Doors are assumed to be opaque (do not transmit solar radiation) whereas the other surface types do transmit solar radiation. Windows and Glass Doors are treated identically in the calculation of conduction heat transfer, solar gain, daylighting, etc. A Window or GlassDoor, but not a Door, can have a movable interior, exterior or between-glass shading device, such as blinds (ref: \hyperref[windowmaterialblind]{WindowMaterial:Blind} object), and can have a frame and/or a divider (ref: \hyperref[windowpropertyframeanddivider]{WindowProperty:FrameAndDivider} object). TubularDaylightDomes and TubularDaylightDomes are specialized subsurfaces for use with the \hyperref[daylightingdevicetubular]{DaylightingDevice:Tubular} object to simulate Tubular Daylighting Devices (TDDs). TubularDaylightDomes and TubularDaylightDomes cannot have shades, screens or blinds. In the following, the term ``window'' applies to Window, GlassDoor, TubularDaylightDome, and TubularDaylightDome, if not otherwise explicitly mentioned.
+The choices for Surface Type are Window, FixedWindow, OperableWindow, Skylight, Door, OverheadDoor, GlassDoor, TubularDaylightDome, and TubularDaylightDiffuser. Doors and OverheadDoors are assumed to be opaque (do not transmit solar radiation) whereas the other surface types do transmit solar radiation. Windows and Glass Doors are treated identically in the calculation of conduction heat transfer, solar gain, daylighting, etc. A Window or GlassDoor, but not a Door, can have a movable interior, exterior or between-glass shading device, such as blinds (ref: \hyperref[windowmaterialblind]{WindowMaterial:Blind} object), and can have a frame and/or a divider (ref: \hyperref[windowpropertyframeanddivider]{WindowProperty:FrameAndDivider} object). TubularDaylightDomes and TubularDaylightDomes are specialized subsurfaces for use with the \hyperref[daylightingdevicetubular]{DaylightingDevice:Tubular} object to simulate Tubular Daylighting Devices (TDDs). TubularDaylightDomes and TubularDaylightDomes cannot have shades, screens or blinds. In the following, the term ``window'' applies to Window, GlassDoor, TubularDaylightDome, and TubularDaylightDome, if not otherwise explicitly mentioned.
+
+FixedWindow, OperableWindow, Skylight, and OverheadDoor are construction-selection categories only; they do not change heat transfer, airflow, or operability behavior. FixedWindow, OperableWindow, and Skylight are treated identically to Window everywhere except when resolving a blank \emph{Construction Name} through a \hyperref[constructionassignmentset]{ConstructionAssignmentSet}, where each selects its own slot. OverheadDoor is likewise treated identically to Door except for its own ConstructionAssignmentSet slot.
 
 As noted in the description of the \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed}, Azimuth (facing angle) and Tilt are calculated from the entered vertices. Tilts of subsurfaces will normally be the same as their base surface. If these are significantly beyond the ``normals'' for the base surface, warning messages may be issued. If the facing angles are not correct, you may have a window pointing ``into'' the zone rather than out of it -- this would cause problems in the calculations. Note, too, that a ``reveal'' (inset or outset) may occur if the plane of the subsurface is not coincident with the base surface; the reveal has an effect on shading of the subsurface.
 
@@ -2612,6 +2623,8 @@ As noted in the description of the \hyperref[buildingsurfacedetailed]{BuildingSu
 This is the name of the subsurface's construction (ref: Construction object {[}for Door{]} and Construction, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} objects {[}for Window and GlassDoor{]}).
 
 For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+
+This field may be left blank, in which case the construction is resolved from a \hyperref[constructionassignmentset]{ConstructionAssignmentSet}, the same way as for \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed}, using the slot matching this sub-surface's Surface Type.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-6}
 
@@ -2769,7 +2782,7 @@ This is a unique character string associated with the internal mass surface. Tho
 
 \paragraph{Field: Construction Name}\label{field-construction-name-21}
 
-This is the name of the construction (ref: Construction object) used in the surface.
+This is the name of the construction (ref: Construction object) used in the surface. If left blank, the \emph{Interior Partition Construction Name} from a \hyperref[constructionassignmentset]{ConstructionAssignmentSet} referenced by this surface's Space or Building is used.
 
 \paragraph{Field: Zone or ZoneList Name}\label{field-zone-or-zonelist-name-14}
 
@@ -2936,6 +2949,12 @@ Zone,Average,Zone Opaque Surface Outside Faces Conduction Heat Loss Rate [W]
 Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Gain Energy [J]
 Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Loss Energy [J]
 Zone,Average, Surface Inside Face Beam Solar Radiation Heat Gain Rate [W]
+Zone,Average,Surface Thermal Absorptance []
+Zone,Average,Surface Solar Absorptance []
+Zone,Average,Surface Thermal Absorptance Outside Face []
+Zone,Average,Surface Solar Absorptance Outside Face []
+Zone,Average,Surface Thermal Absorptance Inside Face []
+Zone,Average,Surface Solar Absorptance Inside Face []
 \end{lstlisting}
 
 \subsection{Window Output Variables}\label{window-output-variables}
@@ -3460,6 +3479,34 @@ These are the power and energy absolute value for the sums of the Opaque Surface
 \subsubsection{Surface Inside Face Beam Solar Radiation Heat Gain Rate {[}W{]}}\label{surface-inside-face-beam-solar-radiation-heat-gain-rate-w}
 
 Beam solar radiation from exterior windows absorbed on the inside face of an opaque heat transfer surface. For Solar Distribution = FullInteriorAndExterior, this quantity can be non-zero for both floor and wall surfaces. Otherwise, for Solar Distribution = FullExterior or MinimalShadowing, it can be non-zero only for floor surfaces since in this case all entering beam solar is assumed to fall on the floor. Note that this variable will not be operational (have a real value) unless there are exterior windows in the zone.
+
+\subsubsection{Surface Thermal Absorptance {[}{]}}\label{surface-thermal-absorptance}
+
+This variable reports the current outside-face thermal absorptance under the generic/bulk name. With no outside-face variable control, this is the bulk material value. If an outside-face control is active while no independent inside-face value or control applies, this variable follows the controlled outside-face value. When an explicitly entered inside-face thermal absorptance or an active inside-face thermal control applies, this generic variable is not registered for that surface; the corresponding Outside Face and Inside Face variables are registered instead.
+
+\subsubsection{Surface Solar Absorptance {[}{]}}\label{surface-solar-absorptance}
+
+This variable reports the current outside-face solar absorptance under the generic/bulk name. With no outside-face variable control, this is the bulk material value. If an outside-face control is active while no independent inside-face value or control applies, this variable follows the controlled outside-face value. When an explicitly entered inside-face solar absorptance or an active inside-face solar control applies, this generic variable is not registered for that surface; the corresponding Outside Face and Inside Face variables are registered instead.
+
+Output availability is determined independently for each surface and for thermal and solar absorptance. Therefore, a wildcard Output:Variable request may return generic keys for some surfaces and face-specific keys for others. An explicitly entered inside-face value selects the face-specific pair even when it numerically equals the bulk value. An inside-face value or control on a material that is not the innermost construction layer does not change the output names for that surface. Inside-face variable controls are ignored for non-exterior surfaces.
+
+The four face-specific variables below are registered as an outside/inside pair for a property only when the surface uses an explicitly entered inside-face value or an active inside-face variable-absorptance control for that property. Request both the generic and face-specific names when a single wildcard request must cover surfaces with both input configurations; EnergyPlus reports only the names applicable to each surface key.
+
+\subsubsection{Surface Thermal Absorptance Outside Face {[}{]}}\label{surface-thermal-absorptance-outside-face}
+
+This variable reports the current outside-face thermal absorptance. The value is taken from the outermost construction layer and may be constant or may vary according to an applicable \hyperref[materialpropertyvariableabsorptance]{MaterialProperty:VariableAbsorptance} control. See \hyperref[material]{Material} and \hyperref[materialnomass]{Material:NoMass} for the constant input fields.
+
+\subsubsection{Surface Solar Absorptance Outside Face {[}{]}}\label{surface-solar-absorptance-outside-face}
+
+This variable reports the current outside-face solar absorptance. The value is taken from the outermost construction layer and may be constant or may vary according to an applicable \hyperref[materialpropertyvariableabsorptance]{MaterialProperty:VariableAbsorptance} control. See \hyperref[material]{Material} and \hyperref[materialnomass]{Material:NoMass} for the constant input fields.
+
+\subsubsection{Surface Thermal Absorptance Inside Face {[}{]}}\label{surface-thermal-absorptance-inside-face}
+
+This variable reports the current inside-face thermal absorptance. The value is taken from the innermost construction layer and may be constant or may vary according to an applicable \hyperref[materialpropertyvariableabsorptance]{MaterialProperty:VariableAbsorptance} inside-face control. See \hyperref[material]{Material} and \hyperref[materialnomass]{Material:NoMass} for the constant input fields.
+
+\subsubsection{Surface Solar Absorptance Inside Face {[}{]}}\label{surface-solar-absorptance-inside-face}
+
+This variable reports the current inside-face solar absorptance. The value is taken from the innermost construction layer and may be constant or may vary according to an applicable \hyperref[materialpropertyvariableabsorptance]{MaterialProperty:VariableAbsorptance} inside-face control. See \hyperref[material]{Material} and \hyperref[materialnomass]{Material:NoMass} for the constant input fields.
 
 \subsection{Window Output Variables}\label{window-output-variables-1}
 
