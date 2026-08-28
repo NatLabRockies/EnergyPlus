@@ -2086,6 +2086,12 @@ namespace HeatBalanceManager {
 
         // Now get Space data after Zones are set up, because Space is optional, Zones are not
         GetSpaceData(state, ErrorsFound);
+
+        // Following used for reporting--moved here to avoid a crash in Kiva that sets up a report variable that uses ZnAirRpt
+        state.dataHeatBal->ZnAirRpt.allocate(state.dataGlobal->NumOfZones);
+        if (state.dataHeatBal->doSpaceHeatBalanceSizing || state.dataHeatBal->doSpaceHeatBalanceSimulation) {
+            state.dataHeatBal->spaceAirRpt.allocate(state.dataGlobal->numSpaces);
+        }
     }
 
     void GetIncidentSolarMultiplier(EnergyPlusData &state, bool &ErrorsFound)
