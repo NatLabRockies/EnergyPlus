@@ -155,7 +155,8 @@ TEST_F(EnergyPlusFixture, ElectricChiller_AirCooled_HardAndAutoSizing)
     EXPECT_DOUBLE_EQ(ch.NomCap, 50000.0);
     state->dataPlnt->PlantFinalSizesOkayToReport = true;
     ch.size(*state);
-    EXPECT_DOUBLE_EQ(ch.CondVolFlowRate, 5.7);
+    Real64 const expectedCondVol = ch.NomCap * 0.000114;
+    EXPECT_NEAR(ch.CondVolFlowRate, expectedCondVol, 1e-9);
 }
 
 TEST_F(EnergyPlusFixture, ElectricChiller_CondVolFlowSizingSimple)
@@ -214,9 +215,9 @@ TEST_F(EnergyPlusFixture, ElectricChiller_CondVolFlowSizingSimple)
     // Compute expected cond volumetric flow per sizing formula in PlantChillers.cc
     static constexpr std::string_view RoutineName("UnitTest");
 
-    Real64 rhoCond = ch.CDPlantLoc.loop->glycol->getDensity(*state, ch.TempDesCondIn, RoutineName);
-    Real64 CpCond = ch.CDPlantLoc.loop->glycol->getSpecificHeat(*state, ch.TempDesCondIn, RoutineName);
-    Real64 expectedCondVol = ch.NomCap * (1.0 + 1.0 / ch.COP) / (state->dataSize->PlantSizData(2).DeltaT * CpCond * rhoCond);
+    Real64 const rhoCond = ch.CDPlantLoc.loop->glycol->getDensity(*state, ch.TempDesCondIn, RoutineName);
+    Real64 const CpCond = ch.CDPlantLoc.loop->glycol->getSpecificHeat(*state, ch.TempDesCondIn, RoutineName);
+    Real64 const expectedCondVol = ch.NomCap * (1.0 + 1.0 / ch.COP) / (state->dataSize->PlantSizData(2).DeltaT * CpCond * rhoCond);
 
     EXPECT_NEAR(ch.CondVolFlowRate, expectedCondVol, 1e-9);
 }

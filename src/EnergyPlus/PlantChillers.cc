@@ -1145,7 +1145,7 @@ namespace PlantChillers {
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->EvapInletNodeNum, tmpEvapVolFlowRate);
 
         Real64 tmpCondVolFlowRate = this->CondVolFlowRate;
-        if (PltSizCondNum > 0 && PltSizNum > 0) {
+        if (PltSizCondNum > 0 && PltSizNum > 0 && this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow && tmpNomCap > 0.0) {
                 Real64 rho = this->CDPlantLoc.loop->glycol->getDensity(state, this->TempDesCondIn, RoutineName);
                 Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondIn, RoutineName);
@@ -1197,12 +1197,13 @@ namespace PlantChillers {
             }
         } else {
             if (this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state, "Autosizing of Electric Chiller condenser flow rate requires a condenser");
+                ShowSevereError(state, "Autosizing of Electric Chiller condenser waterflow rate requires a condenser");
                 ShowContinueError(state, "loop Sizing:Plant object");
                 ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
                 ErrorsFound = true;
             }
-            if (!this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->CondVolFlowRate > 0.0)) {
+            if (this->CondenserType == DataPlant::CondenserType::WaterCooled && !this->CondVolFlowRateWasAutoSized &&
+                state.dataPlnt->PlantFinalSizesOkayToReport && this->CondVolFlowRate > 0.0) {
                 BaseSizer::reportSizerOutput(
                     state, "Chiller:Electric", this->Name, "User-Specified Design Condenser Water Flow Rate [m3/s]", this->CondVolFlowRate);
             }
@@ -1213,8 +1214,24 @@ namespace PlantChillers {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
         } else {
             // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
-            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
-                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            if (state.dataPlnt->PlantFinalSizesOkayToReport) {
+                Real64 const desAirVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+                if (this->CondVolFlowRate == DataSizing::AutoSize) {
+                    this->CondVolFlowRate = desAirVolFlowRate;
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "Design Size Design Condenser Fluid Flow Rate [m3/s]", this->CondVolFlowRate);
+                } else if (std::abs((this->CondVolFlowRate - desAirVolFlowRate) / desAirVolFlowRate) > state.dataSize->AutoVsHardSizingThreshold) {
+                    ShowWarningError(state, std::format("User-specified Design Condenser Fluid Flow Rate = {:.5f} [m3/s]", this->CondVolFlowRate));
+                    ShowContinueError(state,
+                                      std::format("differs from design size design condenser fluid flow rate = {:.5f} [m3/s]", desAirVolFlowRate));
+                    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                    ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "Design Size Design Condenser Fluid Flow Rate [m3/s]", desAirVolFlowRate);
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "User-Specified Design Condenser Fluid Flow Rate [m3/s]", this->CondVolFlowRate);
+                }
             }
         }
         if (ErrorsFound) {
