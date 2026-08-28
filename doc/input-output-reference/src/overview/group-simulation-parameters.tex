@@ -1198,7 +1198,7 @@ HVACSystemRootFindingAlgorithm,
 
 \subsection{Meter:Custom}\label{metercustom}
 
-A custom meter allows the user to group variables or meters onto a virtual meter that can be used just like a normal meter created by EnergyPlus. For consistency, the items being grouped must all be similar. A Meter:Custom cannot reference another Meter:Custom.
+A custom meter allows the user to group variables or meters onto a virtual meter that can be used just like a normal meter created by EnergyPlus. For consistency, the items being grouped must all be similar. A Meter:Custom cannot reference another Meter:Custom or a Meter:CustomDecrement.
 
 \subsubsection{Inputs}\label{inputs-17-008}
 
@@ -1265,7 +1265,7 @@ Additionally, no regular expression can contain a ``,'' because the Input Proces
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name}
 
-This field must be a valid output variable name or a valid meter name. If a Meter:Custom references another Meter:Custom it will generate a warning and not produce any output.
+This field must be a valid output variable name or a valid meter name. If a Meter:Custom references another Meter:Custom or a Meter:CustomDecrement it will generate a warning and not produce any output.
 For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
 \begin{lstlisting}
  Zone,Sum,Exterior Equipment Electricity Energy [J]
@@ -1273,7 +1273,7 @@ For output variables, only summed variables are valid. For example from the rdd 
 
 \subsection{Meter:CustomDecrement}\label{metercustomdecrement}
 
-The decrement custom meter is very similar to the custom meter specification but additionally allows a predefined meter to be used as the ``source'' meter and the remaining items subtract from that predefined meter.
+The decrement custom meter is very similar to the custom meter specification but additionally allows a predefined meter to be used as the ``source'' meter and the remaining items subtract from that predefined meter. A Meter:CustomDecrement cannot reference another Meter:CustomDecrement, either as the Source Meter Name or in the group(s) Key Name-Output Variable/Meter Name fields, though it may reference a Meter:Custom.
 
 \subsubsection{Inputs}\label{inputs-18-008}
 
@@ -1320,7 +1320,7 @@ A resource type should be specified for the meter. All assignments to this meter
 
 \paragraph{Field: Source Meter Name}\label{field-source-meter-name}
 
-This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter.
+This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate a warning and not produce any output.
 
 \paragraph{Field: group(s) Key Name-Output Variable/Meter Name}\label{field-groups-key-name-output-variablemeter-name-1}
 
@@ -1342,7 +1342,7 @@ Additionally, no regular expression can contain a ``,'' because the Input Proces
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name-1}
 
-This field must be a valid output variable name or a valid meter name. Additionally, it must be contained on the Source Meter. Note that, if an error occurs, only the Variable in error will show -- confusing things if what was entered was a meter name. For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
+This field must be a valid output variable name or a valid meter name. Additionally, it must be contained on the Source Meter. Note that, if an error occurs, only the Variable in error will show -- confusing things if what was entered was a meter name. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate a warning and not produce any output. For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
 \begin{lstlisting}
  Zone,Sum,Exterior Equipment Electricity Energy [J]
 \end{lstlisting}
