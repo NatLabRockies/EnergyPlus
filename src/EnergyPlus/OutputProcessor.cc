@@ -1272,7 +1272,9 @@ namespace OutputProcessor {
 
             } // for (fldIndex)
 
-            // Somehow, this meter is not linked to any variables either directly or via another meter
+            // Unreachable: itemsAssigned is set true above as soon as the Source Meter Name resolves, before this loop even runs, and nothing
+            // in the loop above ever resets it to false. A valid decrement meter only requires a valid Source Meter Name; bad/empty group
+            // fields are handled separately via foundBadSrc.
             if (!itemsAssigned) {
                 ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
