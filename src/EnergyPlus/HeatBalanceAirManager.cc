@@ -291,6 +291,11 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
     RepVarSet.dimension(state.dataGlobal->NumOfZones, true);
 
+    // Following used for reporting
+    if (state.dataHeatBal->doSpaceHeatBalanceSizing || state.dataHeatBal->doSpaceHeatBalanceSimulation) {
+        state.dataHeatBal->spaceAirRpt.allocate(state.dataGlobal->numSpaces);
+    }
+
     for (int Loop = 1; Loop <= state.dataGlobal->NumOfZones; ++Loop) {
         std::string const &name = state.dataHeatBal->Zone(Loop).Name;
         auto &thisZnAirRpt = state.dataHeatBal->ZnAirRpt(Loop);
