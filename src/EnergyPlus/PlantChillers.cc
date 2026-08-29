@@ -1996,6 +1996,8 @@ namespace PlantChillers {
             if (this->CondenserType != DataPlant::CondenserType::WaterCooled) {
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).HumRat = state.dataLoopNodes->Node(this->CondInletNodeNum).HumRat;
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).Enthalpy = state.dataLoopNodes->Node(this->CondInletNodeNum).Enthalpy;
+                state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate = this->CondMassFlowRate;
+                state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = this->CondMassFlowRate;
             }
 
             this->EvapInletTemp = state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp;
@@ -2025,13 +2027,13 @@ namespace PlantChillers {
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).HumRat = this->CondOutletHumRat;
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).Enthalpy =
                     Psychrometrics::PsyHFnTdbW(this->CondOutletTemp, this->CondOutletHumRat);
+                state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate = this->CondMassFlowRate;
+                state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = this->CondMassFlowRate;
             }
             // set node flow rates;  for these load based models
             // assume that the sufficient evaporator flow rate available
             this->EvapInletTemp = state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp;
             this->CondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
-            this->CondOutletTemp = state.dataLoopNodes->Node(this->CondOutletNodeNum).Temp;
-            this->EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
             if (this->CondenserType == DataPlant::CondenserType::EvapCooled) {
                 this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
             }
