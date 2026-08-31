@@ -1320,7 +1320,7 @@ A resource type should be specified for the meter. All assignments to this meter
 
 \paragraph{Field: Source Meter Name}\label{field-source-meter-name}
 
-This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate a warning and not produce any output.
+This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate an error.
 
 \paragraph{Field: group(s) Key Name-Output Variable/Meter Name}\label{field-groups-key-name-output-variablemeter-name-1}
 

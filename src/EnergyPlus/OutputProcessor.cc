@@ -909,7 +909,8 @@ namespace OutputProcessor {
                 ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another Meter:Custom.");
+                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being assigned to a "
+                    "Meter:Custom.");
                 continue;
             }
 

@@ -5059,8 +5059,8 @@ namespace OutputProcessor {
             {"   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", invalid Output Variable or Meter Name=\"DISTRICTHEATINGWATER:FACILITY\".",
              "   **   ~~~   ** ...will not be shown with the Meter results.",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom."});
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom."});
         compare_err_stream(errMsg);
     }
 
@@ -5150,13 +5150,13 @@ namespace OutputProcessor {
             {"   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", contains a reference to another Meter:CustomDecrement in field: Output "
              "Variable or Meter Name=\"GOODDECREMENT\".",
              "   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom.",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom.",
              "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", contains a reference to another Meter:Custom in field: Output "
              "Variable or Meter Name=\"MYCUSTOMLIGHTS\".",
              "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom.",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom.",
              "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTSOURCE\", contains a reference to another Meter:CustomDecrement in field: "
              "Source Meter Name=\"GOODDECREMENT\".",
              "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTGROUP\", contains a reference to another Meter:CustomDecrement in field: "
