@@ -2384,11 +2384,14 @@ void InitThermalAndFluxHistories(EnergyPlusData &state)
 
     // First do the "bulk" initializations of arrays sized to NumOfZones
     for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+        // Save and restore the MsgIndex for Recurring errors
+        const int hmThermalMassMultErrIndex = state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum).hmThermalMassMultErrIndex;
         new (&state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum)) ZoneTempPredictorCorrector::ZoneHeatBalanceData();
         // Initialize the Zone Humidity Ratio here so that it is available for EMPD implementations
         auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum);
         thisZoneHB.airHumRatAvg = state.dataEnvrn->OutHumRat;
         thisZoneHB.airHumRat = state.dataEnvrn->OutHumRat;
+        thisZoneHB.hmThermalMassMultErrIndex = hmThermalMassMultErrIndex;
         state.dataHeatBalFanSys->TempTstatAir(zoneNum) = DataHeatBalance::ZoneInitialTemp;
     }
     for (auto &thisEnclosure : state.dataViewFactor->EnclRadInfo) {
