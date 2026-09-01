@@ -1051,6 +1051,31 @@ void ShowWarningMessage(EnergyPlusData &state, std::string const &ErrorMessage, 
     }
 }
 
+void DetectIncorrectMsgIndex(EnergyPlusData &state, std::string const &lookup, int &MsgIndex)
+{
+    if (MsgIndex == 0) {
+        for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
+            if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, lookup)) {
+                throw std::runtime_error(
+                    std::format("ShowRecurringWarningErrorAtEnd called with MsgIndex=0 but message already exists in RecurringErrors:\n{}", lookup));
+                // assert(false && "ShowRecurringWarningErrorAtEnd called with MsgIndex=0 but message already exists in RecurringErrors");
+            }
+        }
+    } else {
+        if (MsgIndex < 1 || MsgIndex > state.dataErrTracking->NumRecurringErrors) {
+            throw std::runtime_error(std::format("ShowRecurringWarningErrorAtEnd called with invalid MsgIndex:\n{}", lookup));
+        }
+        if (!Util::SameString(state.dataErrTracking->RecurringErrors(MsgIndex).Message, lookup)) {
+            throw std::runtime_error(
+                std::format("ShowRecurringWarningErrorAtEnd called with MsgIndex that does not match the message:\nrequested: {}\nat index = {}",
+                            lookup,
+                            state.dataErrTracking->RecurringErrors(MsgIndex).Message));
+        }
+        assert(MsgIndex > 0 && MsgIndex <= state.dataErrTracking->NumRecurringErrors);
+        assert(Util::SameString(state.dataErrTracking->RecurringErrors(MsgIndex).Message, lookup));
+    }
+}
+
 void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
                                    std::string const &Message, // Message automatically written to "error file" at end of simulation
                                    int &MsgIndex,              // Recurring message index, if zero, next available index is assigned
@@ -1079,27 +1104,14 @@ void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
     //  Use for recurring "severe" error messages shown once at end of simulation
     //  with count of occurrences and optional max, min, sum
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(Message, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-            break;
-        }
-    }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Severe  ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    const std::string lookup = " ** Severe  ** " + Message;
+
+#ifdef DEBUG_MSG_INDEX
+    DetectIncorrectMsgIndex(state, lookup, MsgIndex);
+#endif
 
     ++state.dataErrTracking->TotalSevereErrors;
-    StoreRecurringErrorMessage(
-        state, " ** Severe  ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+    StoreRecurringErrorMessage(state, lookup, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
@@ -1126,26 +1138,14 @@ void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
     //  Use for recurring "severe" error messages shown once at end of simulation
     //  with count of occurrences and optional max, min, sum
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(Message, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-            break;
-        }
-    }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Severe  ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    const std::string lookup = " ** Severe  ** " + Message;
+
+#ifdef DEBUG_MSG_INDEX
+    DetectIncorrectMsgIndex(state, lookup, MsgIndex);
+#endif
 
     ++state.dataErrTracking->TotalSevereErrors;
-    StoreRecurringErrorMessage(state, " ** Severe  ** " + Message, MsgIndex, val, val, _, units, units, "");
+    StoreRecurringErrorMessage(state, lookup, MsgIndex, val, val, _, units, units, "");
 }
 
 void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
@@ -1176,27 +1176,14 @@ void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
     //  Use for recurring "warning" error messages shown once at end of simulation
     //  with count of occurrences and optional max, min, sum
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(Message, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-            break;
-        }
-    }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Warning ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    const std::string lookup = " ** Warning ** " + Message;
+
+#ifdef DEBUG_MSG_INDEX
+    DetectIncorrectMsgIndex(state, lookup, MsgIndex);
+#endif
 
     ++state.dataErrTracking->TotalWarningErrors;
-    StoreRecurringErrorMessage(
-        state, " ** Warning ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+    StoreRecurringErrorMessage(state, lookup, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
@@ -1223,26 +1210,14 @@ void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
     //  Use for recurring "warning" error messages shown once at end of simulation
     //  with count of occurrences and optional max, min, sum
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(Message, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-            break;
-        }
-    }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Warning ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    const std::string lookup = " ** Warning ** " + Message;
+
+#ifdef DEBUG_MSG_INDEX
+    DetectIncorrectMsgIndex(state, lookup, MsgIndex);
+#endif
 
     ++state.dataErrTracking->TotalWarningErrors;
-    StoreRecurringErrorMessage(state, " ** Warning ** " + Message, MsgIndex, val, val, _, units, units, "");
+    StoreRecurringErrorMessage(state, lookup, MsgIndex, val, val, _, units, units, "");
 }
 
 void ShowRecurringContinueErrorAtEnd(EnergyPlusData &state,
@@ -1273,26 +1248,13 @@ void ShowRecurringContinueErrorAtEnd(EnergyPlusData &state,
     //  Use for recurring "continue" error messages shown once at end of simulation
     //  with count of occurrences and optional max, min, sum
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(Message, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-            break;
-        }
-    }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " **   ~~~   ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    const std::string lookup = " **   ~~~   ** " + Message;
 
-    StoreRecurringErrorMessage(
-        state, " **   ~~~   ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+#ifdef DEBUG_MSG_INDEX
+    DetectIncorrectMsgIndex(state, lookup, MsgIndex);
+#endif
+
+    StoreRecurringErrorMessage(state, lookup, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void StoreRecurringErrorMessage(EnergyPlusData &state,

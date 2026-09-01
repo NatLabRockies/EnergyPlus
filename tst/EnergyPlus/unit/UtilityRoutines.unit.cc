@@ -82,48 +82,63 @@ TEST_F(EnergyPlusFixture, RecurringWarningTest)
     // proper call to ShowRecurringWarningErrorAtEnd to set up new recurring warning
     int ErrIndex1 = 0;
     ShowRecurringWarningErrorAtEnd(*state, myMessage1, ErrIndex1);
-    EXPECT_EQ(ErrIndex1, 1);
-    EXPECT_EQ(state->dataErrTracking->RecurringErrors.size(), 1u);
-    EXPECT_EQ(" ** Warning ** " + myMessage1, state->dataErrTracking->RecurringErrors(1).Message);
-    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(1).Count);
+    EXPECT_EQ(1, ErrIndex1);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(" ** Warning ** " + myMessage1, state->dataErrTracking->RecurringErrors(ErrIndex1).Message);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex1).Count);
 
     std::string myMessage2 = "Test message 2";
-    // improper call to ShowRecurringWarningErrorAtEnd to set up new recurring warning
-    int ErrIndex2 = 6;
+    int ErrIndex2 = 0;
     ShowRecurringWarningErrorAtEnd(*state, myMessage2, ErrIndex2);
-    EXPECT_EQ(ErrIndex2, 2); // ShowRecurringWarningErrorAtEnd handles improper index and returns correct value
-    EXPECT_EQ(state->dataErrTracking->RecurringErrors.size(), 2u);
-    EXPECT_EQ(" ** Warning ** " + myMessage2, state->dataErrTracking->RecurringErrors(2).Message);
-    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(2).Count);
+    EXPECT_EQ(2, ErrIndex2);
+    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(" ** Warning ** " + myMessage2, state->dataErrTracking->RecurringErrors(ErrIndex2).Message);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
 
-    ErrIndex2 = 6;
+    // Passing the already existing index
     ShowRecurringWarningErrorAtEnd(*state, myMessage2, ErrIndex2);
-    EXPECT_EQ(ErrIndex2, 2); // ShowRecurringWarningErrorAtEnd handles improper index and returns correct value
-    EXPECT_EQ(state->dataErrTracking->RecurringErrors.size(), 2u);
-    EXPECT_EQ(" ** Warning ** " + myMessage2, state->dataErrTracking->RecurringErrors(2).Message);
-    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors(2).Count);
+    EXPECT_EQ(2, ErrIndex2); // Stays the same
+    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(" ** Warning ** " + myMessage2, state->dataErrTracking->RecurringErrors(ErrIndex2).Message);
+    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
 
+    // same message for different show message type (changed severe to warning) should result in an addition
     std::string myMessage3 = "Test message 3";
-    ShowRecurringContinueErrorAtEnd(*state, myMessage3, ErrIndex1);
+    int ErrIndex3AsError = 0;
+    ShowRecurringSevereErrorAtEnd(*state, myMessage3, ErrIndex3AsError);
     // index gets updated with correct value
-    EXPECT_EQ(ErrIndex1, 3);
-    EXPECT_EQ(state->dataErrTracking->RecurringErrors.size(), 3u);
-    EXPECT_EQ(" **   ~~~   ** " + myMessage3, state->dataErrTracking->RecurringErrors(3).Message);
-    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(3).Count);
+    EXPECT_EQ(3, ErrIndex3AsError);
+    EXPECT_EQ(3, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(" ** Severe  ** " + myMessage3, state->dataErrTracking->RecurringErrors(ErrIndex3AsError).Message);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsError).Count);
 
-    std::string myMessage4 = "Test message 4";
-    ShowRecurringSevereErrorAtEnd(*state, myMessage4, ErrIndex1);
+    int ErrIndex3AsWarning = 0;
+    ShowRecurringWarningErrorAtEnd(*state, myMessage3, ErrIndex3AsWarning);
     // index gets updated with correct value
-    EXPECT_EQ(ErrIndex1, 4);
-    EXPECT_EQ(state->dataErrTracking->RecurringErrors.size(), 4u);
-    EXPECT_EQ(" ** Severe  ** " + myMessage4, state->dataErrTracking->RecurringErrors(4).Message);
-    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(4).Count);
+    EXPECT_EQ(4, ErrIndex3AsWarning);
+    EXPECT_EQ(4, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(" ** Warning ** " + myMessage3, state->dataErrTracking->RecurringErrors(ErrIndex3AsWarning).Message);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsWarning).Count);
 
-    // same message for different show message type (changed severe to warning) should be valid
-    ShowRecurringWarningErrorAtEnd(*state, myMessage4, ErrIndex1);
-    // index gets updated with correct value
-    EXPECT_EQ(ErrIndex1, 5);
-    EXPECT_EQ(" ** Warning ** " + myMessage4, state->dataErrTracking->RecurringErrors(5).Message);
+#ifdef DEBUG_MSG_INDEX
+    // improper call to ShowRecurringWarningErrorAtEnd
+    // The Index doesn't even exist in the array
+    int WrongIndex = 6;
+    EXPECT_ANY_THROW(ShowRecurringWarningErrorAtEnd(*state, myMessage2, WrongIndex));
+
+    // improper call to ShowRecurringWarningErrorAtEnd: the Index exists, but the message doesn't match
+    EXPECT_ANY_THROW(ShowRecurringWarningErrorAtEnd(*state, myMessage2, ErrIndex1));
+
+    // improper call to ShowRecurringWarningErrorAtEnd: index is passed as 0, but the message already exists in the array
+    int ZeroIndex = 0;
+    EXPECT_ANY_THROW(ShowRecurringWarningErrorAtEnd(*state, myMessage2, ZeroIndex));
+
+    EXPECT_EQ(4, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex1).Count);
+    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsError).Count);
+    EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsWarning).Count);
+#endif
 }
 
 TEST_F(EnergyPlusFixture, DisplayMessageTest)
