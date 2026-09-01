@@ -1085,21 +1085,12 @@ void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
             break;
         }
     }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Severe  ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    std::string const fullMessage = " ** Severe  ** " + Message;
+    auto const foundMsg = state.dataErrTracking->RecurringErrorIndexByMessage.find(fullMessage);
+    MsgIndex = (foundMsg != state.dataErrTracking->RecurringErrorIndexByMessage.end()) ? foundMsg->second : 0;
 
     ++state.dataErrTracking->TotalSevereErrors;
-    StoreRecurringErrorMessage(
-        state, " ** Severe  ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+    StoreRecurringErrorMessage(state, fullMessage, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
@@ -1132,20 +1123,12 @@ void ShowRecurringSevereErrorAtEnd(EnergyPlusData &state,
             break;
         }
     }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Severe  ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    std::string const fullMessage = " ** Severe  ** " + Message;
+    auto const foundMsg = state.dataErrTracking->RecurringErrorIndexByMessage.find(fullMessage);
+    MsgIndex = (foundMsg != state.dataErrTracking->RecurringErrorIndexByMessage.end()) ? foundMsg->second : 0;
 
     ++state.dataErrTracking->TotalSevereErrors;
-    StoreRecurringErrorMessage(state, " ** Severe  ** " + Message, MsgIndex, val, val, _, units, units, "");
+    StoreRecurringErrorMessage(state, fullMessage, MsgIndex, val, val, _, units, units, "");
 }
 
 void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
@@ -1182,21 +1165,12 @@ void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
             break;
         }
     }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Warning ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    std::string const fullMessage = " ** Warning ** " + Message;
+    auto const foundMsg = state.dataErrTracking->RecurringErrorIndexByMessage.find(fullMessage);
+    MsgIndex = (foundMsg != state.dataErrTracking->RecurringErrorIndexByMessage.end()) ? foundMsg->second : 0;
 
     ++state.dataErrTracking->TotalWarningErrors;
-    StoreRecurringErrorMessage(
-        state, " ** Warning ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+    StoreRecurringErrorMessage(state, fullMessage, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
@@ -1229,20 +1203,12 @@ void ShowRecurringWarningErrorAtEnd(EnergyPlusData &state,
             break;
         }
     }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " ** Warning ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    std::string const fullMessage = " ** Warning ** " + Message;
+    auto const foundMsg = state.dataErrTracking->RecurringErrorIndexByMessage.find(fullMessage);
+    MsgIndex = (foundMsg != state.dataErrTracking->RecurringErrorIndexByMessage.end()) ? foundMsg->second : 0;
 
     ++state.dataErrTracking->TotalWarningErrors;
-    StoreRecurringErrorMessage(state, " ** Warning ** " + Message, MsgIndex, val, val, _, units, units, "");
+    StoreRecurringErrorMessage(state, fullMessage, MsgIndex, val, val, _, units, units, "");
 }
 
 void ShowRecurringContinueErrorAtEnd(EnergyPlusData &state,
@@ -1279,20 +1245,11 @@ void ShowRecurringContinueErrorAtEnd(EnergyPlusData &state,
             break;
         }
     }
-    bool bNewMessageFound = true;
-    for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-        if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, " **   ~~~   ** " + Message)) {
-            bNewMessageFound = false;
-            MsgIndex = Loop;
-            break;
-        }
-    }
-    if (bNewMessageFound) {
-        MsgIndex = 0;
-    }
+    std::string const fullMessage = " **   ~~~   ** " + Message;
+    auto const foundMsg = state.dataErrTracking->RecurringErrorIndexByMessage.find(fullMessage);
+    MsgIndex = (foundMsg != state.dataErrTracking->RecurringErrorIndexByMessage.end()) ? foundMsg->second : 0;
 
-    StoreRecurringErrorMessage(
-        state, " **   ~~~   ** " + Message, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
+    StoreRecurringErrorMessage(state, fullMessage, MsgIndex, ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits);
 }
 
 void StoreRecurringErrorMessage(EnergyPlusData &state,
@@ -1323,6 +1280,7 @@ void StoreRecurringErrorMessage(EnergyPlusData &state,
         ErrorMsgIndex = state.dataErrTracking->NumRecurringErrors;
         // The message string only needs to be stored once when a new recurring message is created
         state.dataErrTracking->RecurringErrors(ErrorMsgIndex).Message = ErrorMessage;
+        state.dataErrTracking->RecurringErrorIndexByMessage[ErrorMessage] = ErrorMsgIndex;
         state.dataErrTracking->RecurringErrors(ErrorMsgIndex).Count = 1;
         if (state.dataGlobal->WarmupFlag) {
             state.dataErrTracking->RecurringErrors(ErrorMsgIndex).WarmupCount = 1;
