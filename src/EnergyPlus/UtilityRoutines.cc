@@ -86,7 +86,120 @@ extern "C" {
 #include <EnergyPlus/Timer.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
+#ifndef NDEBUG
+#    ifndef DEBUG_MSG_INDEX
+#        define DEBUG_MSG_INDEX
+#    endif
+#endif
+
+#ifdef DEBUG_MSG_INDEX
+#    include <cassert>
+#endif
+
 namespace EnergyPlus {
+
+namespace DataErrorTracking {
+
+    struct ErrorSummaryInfo
+    {
+        std::string_view Summary;
+        std::string_view MoreDetails;
+    };
+
+    static constexpr std::array<ErrorSummaryInfo, static_cast<size_t>(ErrorSummaryType::Num)> ErrorSummaries{{
+        // InterZoneSurfaceAreaMismatch
+        {"InterZone Surface Areas -- mismatch",
+         "Area mismatch errors happen when the interzone surface in zone A is<CR>not the same size as it's companion in zone B.<CRE>"},
+        // InterZoneSurfaceDifferentZones
+        {"Interzone surfaces - different zones", ""},
+        // NodeConnectionErrors
+        {"Node Connection Errors",
+         "Node connection errors are often caused by spelling mistakes in a node name field.<CR>To track down the problem, search the idf file "
+         "for each node name listed to see if it<CR>occurs in the expected input fields.<CRE>"},
+        // InterZoneSurfaceAzimuthMismatch
+        {"InterZone Surface Azimuths -- mismatch",
+         "The azimuths (outward facing angle) of two interzone surfaces should not be the same.<CR>Normally, the absolute difference between the "
+         "two azimuths will be 180 degrees.<CR>You can turn on the report: Output:Surfaces:List,Details; to inspect your surfaces.<CRE>"},
+        // InterZoneSurfaceTiltMismatch
+        {"InterZone Surface Tilts -- mismatch", ""},
+        // NonPlanarSurfaces
+        {"Likely non-planar surfaces",
+         "EnergyPlus Surfaces should be planar. If the error indicates a small increment for the<CR>out of planar bounds, then the calculations "
+         "are likely okay though you should try to fix<CR>the problem. If a greater increment, the calculations will likely be incorrect.<CRE>"},
+        // DeprecatedFeaturesOrKeyValues
+        {"Deprecated Features or Key Values",
+         "A deprecated feature warning/severe error indicates that you are using a feature which will be<CR>removed in a future release. The new "
+         "feature is likely included in the EnergyPlus version you are<CR>using.  Consider switching now to avoid future problems.<CR>A "
+         "deprecated key value message indicates you are using an out-dated key value in your input file.<CR>While EnergyPlus may continue to "
+         "accept these values, some other input file readers may not.<CR>Consider changing to values that are included as valid in the "
+         "Energy+.idd for these objects.<CRE>"},
+        // IncorrectFloorTilt
+        {"Incorrect Floor Tilt",
+         "Floors are usually flat and \"tilted\" 180 degrees.  If you get this error message,<CR>it's likely that you need to reverse the "
+         "vertices of the surface to remove the error.<CR>EnergyPlus will attempt to fix the vertices for the running simulation.<CR>You can "
+         "turn on the report: Output:Surfaces:List,Details; to inspect your surfaces.<CRE>"},
+        // IncorrectRoofCeilingTilt
+        {"Incorrect Roof/Ceiling Tilt",
+         "Flat roofs/ceilings are \"tilted\" 0 degrees. Pitched roofs should be \"near\" 0 degrees.<CR>If you get this error message, it's "
+         "likely that you need to reverse the vertices of<CR>the surface to remove the error. EnergyPlus will attempt to fix the vertices for "
+         "the<CR>running simulation. You can turn on the report: Output:Surfaces:List,Details;<CR>to inspect your surfaces.<CRE>"},
+        // IncompleteViewFactors
+        {"Incomplete View factors",
+         "Incomplete view factors can result from incorrect floor specifications (such as tilting 0<CR>instead of 180) or not enough surfaces in "
+         "a zone to make an enclosure.  The error message<CR>also shows an enforced reciprocity value.  You can decide if you need to make "
+         "geometry<CR>changes based on that value.<CRE>"},
+        // UnbalancedExhaustAirFlow
+        {"Unbalanced exhaust air flow",
+         "Unbalanced exhaust air flow errors can occur when exhaust fans are running but there is no<CR>supply air. Turn off exhaust fans when "
+         "the system is not running may help resolve the problem.<CR>Time shown is first occurrence of error.<CRE>"},
+        // LoadsInitializationDidNotConverge
+        {"Loads Initialization did not Converge",
+         "1) very high thermal mass such as very thick concrete (solution: increase max number of warmup<CR>   days in the BUILDING "
+         "object);<CR>2) moderate mass and inadequate space conditioning such that the building keeps getting warmer<CR>   and warmer on "
+         "successive days (solution: add HVAC, check building thermal properties,<CR>   check if infiltration is included, make sure HVAC "
+         "properly controlled);<CR>3) a soil layer modeled below the concrete slab - (solution remove this layer and read about<CR>   ground "
+         "temperatures in the Auxiliary Programs document).<CR>4) unreasonable (too small) limits in the BUILDING object for temperature (.4 "
+         "default) or<CR>   loads tolerances (.04 default)<CRE>"},
+        // DaylightMapPointsNearWindow
+        {"CalcDaylightMapPoints: Window",
+         "Window is too close to map points for accurate calculation.  Suggested change is to create<CR>Output:IlluminanceMap coordinates "
+         "(x,y,z) that are more \"inside\" the zone<CRE>"},
+        // ZoneAirHeatBalanceWarnings
+        {"Zone Air Heat Balance Warnings",
+         "Zone Air Heat Balance out of Balance warnings are currently used by developers.<CR>Users can safely ignore these warnings.<CRE>"},
+        // OccupantDensityExtremelyHigh
+        {"Occupant density is extremely high",
+         "The occupant density warning is provided to alert you to potential conditions that can cause<CR>problems with the heat balance "
+         "calculations. Too high a density could be cause for severe<CR>temperature out of bounds errors in a zone leading to program "
+         "termination.<CRE>"},
+        // TemperatureLowOutOfBounds
+        {"Temperature (low) out of bounds",
+         "A temperature out of bounds problem can be caused by several things. The user should check:<CR>1) the weather environment (including "
+         "the horizontal IR from sky)<CR>2) the level of internal gains with respect to the zone<CR>3) the thermal properties of their "
+         "materials.  And other things.<CR>A common cause is a building with no or little thermal mass - all materials with Material:NoMass "
+         "definitions.<CRE>"},
+        // TemperatureHighOutOfBounds
+        {"Temperature (high) out of bounds",
+         "A temperature out of bounds problem can be caused by several things. The user should check:<CR>1) the weather environment (including "
+         "the horizontal IR from sky)<CR>2) the level of internal gains with respect to the zone<CR>3) the thermal properties of their "
+         "materials.  And other things.<CR>A common cause is a building with no or little thermal mass - all materials with Material:NoMass "
+         "definitions.<CRE>"},
+        // NominallyUnusedConstructions
+        {"Nominally Unused Constructions",
+         "The nominally unused constructions warning is provided to alert you to potential conditions that can cause<CR>extra time during "
+         "simulation. Each construction is calculated by the algorithm indicated in the HeatBalanceAlgorithm<CR>object. You may remove the "
+         "constructions indicated (when you use the DisplayExtraWarnings option).<CRE>"},
+        // InfraredTransparentUsage
+        {"Material:InfraredTransparent usage",
+         "Using Material:InfraredTransparent materials in constructions are correctly used in interzone surface<CR>constructions. Warnings are "
+         "given if they are used in other kinds of surfaces.<CR>They CANNOT currently be used with ConductionFiniteDifference algorithms.<CRE>"},
+        // NoReportingElementsRequested
+        {"No Reporting Elements requested",
+         "No Reporting elements have been requested. You will see no output values from your run.<CR>Add Output:Variable, Output:Meter, "
+         "Output:Table:SummaryReports, Output:Table:Monthly, Output:Table:TimeBins<CR>objects to your input file to receive output values from "
+         "the simulation.<CRE>"},
+    }};
+} // namespace DataErrorTracking
 
 namespace Util {
 
@@ -804,12 +917,6 @@ void ShowSevereError(EnergyPlusData &state, std::string const &ErrorMessage, Opt
     // METHODOLOGY EMPLOYED:
     // Calls ShowErrorMessage utility routine.
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(ErrorMessage, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-        }
-    }
-
     ++state.dataErrTracking->TotalSevereErrors;
     if (state.dataGlobal->WarmupFlag && !state.dataGlobal->DoingSizing && !state.dataGlobal->KickOffSimulation &&
         !state.dataErrTracking->AbortProcessing) {
@@ -844,12 +951,6 @@ void ShowSevereMessage(EnergyPlusData &state, std::string const &ErrorMessage, O
 
     // METHODOLOGY EMPLOYED:
     // Calls ShowErrorMessage utility routine.
-
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(ErrorMessage, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-        }
-    }
 
     ShowErrorMessage(state, std::format(" ** Severe  ** {}", ErrorMessage), OutUnit1, OutUnit2);
     state.dataErrTracking->LastSevereError = ErrorMessage;
@@ -996,12 +1097,6 @@ void ShowWarningError(EnergyPlusData &state, std::string const &ErrorMessage, Op
     // METHODOLOGY EMPLOYED:
     // Calls ShowErrorMessage utility routine.
 
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(ErrorMessage, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-        }
-    }
-
     ++state.dataErrTracking->TotalWarningErrors;
     if (state.dataGlobal->WarmupFlag && !state.dataGlobal->DoingSizing && !state.dataGlobal->KickOffSimulation &&
         !state.dataErrTracking->AbortProcessing) {
@@ -1035,12 +1130,6 @@ void ShowWarningMessage(EnergyPlusData &state, std::string const &ErrorMessage, 
 
     // METHODOLOGY EMPLOYED:
     // Calls ShowErrorMessage utility routine.
-
-    for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-        if (has(ErrorMessage, DataErrorTracking::MessageSearch[Loop])) {
-            ++state.dataErrTracking->MatchCounts(Loop);
-        }
-    }
 
     ShowErrorMessage(state, std::format(" ** Warning ** {}", ErrorMessage), OutUnit1, OutUnit2);
     if (state.dataSQLiteProcedures->sqlite) {
@@ -1400,34 +1489,40 @@ void SummarizeErrors(EnergyPlusData &state)
     // This subroutine provides a summary of certain errors that might
     // otherwise get lost in the shuffle of many similar messages.
 
-    std::string::size_type StartC;
-    std::string::size_type EndC;
-
-    if (any_gt(state.dataErrTracking->MatchCounts, 0)) {
-        ShowMessage(state, "");
-        ShowMessage(state, "===== Final Error Summary =====");
-        ShowMessage(state, "The following error categories occurred.  Consider correcting or noting.");
-        for (int Loop = 1; Loop <= DataErrorTracking::SearchCounts; ++Loop) {
-            if (state.dataErrTracking->MatchCounts(Loop) > 0) {
-                ShowMessage(state, DataErrorTracking::Summaries[Loop]);
-                std::string thisMoreDetails = DataErrorTracking::MoreDetails[Loop];
-                if (!thisMoreDetails.empty()) {
-                    StartC = 0;
-                    EndC = len(thisMoreDetails) - 1;
-                    while (EndC != std::string::npos) {
-                        EndC = index(thisMoreDetails.substr(StartC), "<CR");
-                        ShowMessage(state, std::format("..{}", thisMoreDetails.substr(StartC, EndC)));
-                        if (thisMoreDetails.substr(StartC + EndC, 5) == "<CRE>") {
-                            break;
-                        }
-                        StartC += EndC + 4;
-                        EndC = len(thisMoreDetails.substr(StartC)) - 1;
-                    }
-                }
-            }
-        }
-        ShowMessage(state, "");
+    if (std::ranges::none_of(state.dataErrTracking->ErrorSummaryCount, [](int v) { return v > 0; })) {
+        return;
     }
+
+    ShowMessage(state, "");
+    ShowMessage(state, "===== Final Error Summary =====");
+    ShowMessage(state, "The following error categories occurred.  Consider correcting or noting.");
+
+    for (size_t i = 0; i < static_cast<size_t>(DataErrorTracking::ErrorSummaryType::Num); ++i) {
+        if (state.dataErrTracking->ErrorSummaryCount[i] == 0) {
+            continue;
+        }
+        const auto &error = DataErrorTracking::ErrorSummaries[i];
+        ShowMessage(state, std::string{error.Summary}); // TODO: address, ShowMessage and co should allow a string_view
+
+        const auto &thisMoreDetails = error.MoreDetails;
+        if (thisMoreDetails.empty()) {
+            continue;
+        }
+
+        std::string_view::size_type StartC = 0;
+        std::string_view::size_type EndC = thisMoreDetails.size() - 1;
+
+        while (EndC != std::string_view::npos) {
+            EndC = thisMoreDetails.substr(StartC).find("<CR");
+            ShowMessage(state, std::format("..{}", thisMoreDetails.substr(StartC, EndC)));
+            if (thisMoreDetails.substr(StartC + EndC, 5) == "<CRE>") {
+                break;
+            }
+            StartC += EndC + 4;
+            EndC = thisMoreDetails.substr(StartC).size() - 1;
+        }
+    }
+    ShowMessage(state, "");
 }
 
 void ShowRecurringErrors(EnergyPlusData &state)

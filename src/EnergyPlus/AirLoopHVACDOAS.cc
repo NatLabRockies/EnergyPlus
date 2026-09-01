@@ -57,6 +57,7 @@
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataAirSystems.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DesiccantDehumidifiers.hh>
@@ -623,6 +624,8 @@ namespace AirLoopHVACDOAS {
                                     thisDOAS.m_exhaustFanTypeNum = SimAirServingZones::CompType::Fan_ComponentModel;
                                 }
                             } else {
+                                ++state.dataErrTracking
+                                      ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::NodeConnectionErrors)];
                                 ShowSevereError(
                                     state,
                                     std::format("getAirLoopMixer: Node Connection Error in AirLoopHVAC:DedicatedOutdoorAirSystem = {}. Inlet node "

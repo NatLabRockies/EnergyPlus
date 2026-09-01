@@ -65,6 +65,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -389,6 +390,7 @@ namespace HeatBalanceManager {
                                                                       state.dataConstruction->Construct.end(),
                                                                       [](Construction::ConstructionProps const &e) { return e.IsUsed; });
         if (Unused > 0) {
+            ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::NominallyUnusedConstructions)];
             if (!state.dataGlobal->DisplayExtraWarnings) {
                 ShowWarningError(state, std::format("CheckUsedConstructions: There are {} nominally unused constructions in input.", Unused));
                 ShowContinueError(state, "For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;");
@@ -3383,6 +3385,8 @@ namespace HeatBalanceManager {
                 if (state.dataGlobal->DayOfSim >= state.dataHeatBal->MaxNumberOfWarmupDays && state.dataGlobal->WarmupFlag) {
                     // Check convergence for individual zone
                     if (sum(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag) != 8) { // pass=2 * 4 values for convergence
+                        ++state.dataErrTracking
+                              ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::LoadsInitializationDidNotConverge)];
                         ShowSevereError(
                             state,
                             std::format("CheckWarmupConvergence: Loads Initialization, Zone=\"{}\" did not converge after {} warmup days.",
