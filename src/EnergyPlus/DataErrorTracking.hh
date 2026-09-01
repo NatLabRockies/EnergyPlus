@@ -48,16 +48,12 @@
 #ifndef DataErrorTracking_hh_INCLUDED
 #define DataErrorTracking_hh_INCLUDED
 
-#include <string>
-#include <unordered_map>
-
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -209,9 +205,6 @@ namespace DataErrorTracking {
 struct ErrorTrackingData : BaseGlobalStruct
 {
     Array1D<DataErrorTracking::RecurringErrorData> RecurringErrors;
-    // Maps a recurring error's full message text (e.g. " ** Warning ** ...") to its 1-based index in
-    // RecurringErrors, so repeat occurrences are resolved in O(1) instead of a linear SameString scan.
-    std::unordered_map<std::string, int, Util::case_insensitive_hasher, Util::case_insensitive_comparator> RecurringErrorIndexByMessage;
     Array1D_int MatchCounts;
     bool AbortProcessing = false;            // Flag used to if currently in "abort processing"
     int NumRecurringErrors = 0;              // Number of stored recurring error messages
