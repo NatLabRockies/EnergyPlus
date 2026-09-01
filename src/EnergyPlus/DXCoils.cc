@@ -13430,8 +13430,8 @@ void CalcMultiSpeedDXCoilCooling(EnergyPlusData &state,
                                 "at speed {} error continues...",
                                 HVAC::coilTypeNames[(int)thisDXCoil.coilType],
                                 thisDXCoil.Name,
-                                SpeedNumHS),
-                    thisDXCoil.MSErrIndex(SpeedNumHS),
+                                SpeedNum),
+                    thisDXCoil.MSErrIndex(SpeedNum),
                     VolFlowperRatedTotCap,
                     VolFlowperRatedTotCap);
             }
@@ -15117,12 +15117,13 @@ void CalcTwoSpeedDXCoilStandardRating(EnergyPlusData &state, int const DXCoilNum
                 state, thisDXCoil.CCapFTemp2, CoolingCoilInletAirWetBulbTempRated, OutdoorUnitInletAirDryBulbTempPLTestPoint(PartLoadTestPoint));
             //    Warn user if curve output goes negative
             if (TotCapTempModFac < 0.0) {
-                if (thisDXCoil.CCapFTempErrorIndex == 0) {
+                if (thisDXCoil.CCapFTempErrorIndex2 == 0) {
                     ShowWarningMessage(state,
                                        std::format("{}{} \"{}\":", RoutineName, HVAC::coilTypeNames[(int)thisDXCoil.coilType], thisDXCoil.Name));
-                    ShowContinueError(state,
-                                      std::format(" Total Cooling Capacity Modifier curve (function of temperature) output is negative ({:.3f}).",
-                                                  TotCapTempModFac));
+                    ShowContinueError(
+                        state,
+                        std::format(" Total Cooling Capacity Modifier curve (function of temperature), low speed, output is negative ({:.3f}).",
+                                    TotCapTempModFac));
                     ShowContinueError(
                         state,
                         std::format(" Negative value occurs using a coil inlet wet-bulb temperature of {:.1f} and an outdoor unit inlet air "
@@ -15131,16 +15132,15 @@ void CalcTwoSpeedDXCoilStandardRating(EnergyPlusData &state, int const DXCoilNum
                                     OutdoorUnitInletAirDryBulbTempPLTestPoint(PartLoadTestPoint)));
                     ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
                 }
-                ShowRecurringWarningErrorAtEnd(
-                    state,
-                    std::format(
-                        "{}{} \"{}\": Total Cooling Capacity Modifier curve (function of temperature) output is negative warning continues...",
-                        RoutineName,
-                        HVAC::coilTypeNames[(int)thisDXCoil.coilType],
-                        thisDXCoil.Name),
-                    thisDXCoil.CCapFTempErrorIndex,
-                    TotCapTempModFac,
-                    TotCapTempModFac);
+                ShowRecurringWarningErrorAtEnd(state,
+                                               std::format("{}{} \"{}\": Total Cooling Capacity Modifier curve (function of temperature), low "
+                                                           "speed, output is negative warning continues...",
+                                                           RoutineName,
+                                                           HVAC::coilTypeNames[(int)thisDXCoil.coilType],
+                                                           thisDXCoil.Name),
+                                               thisDXCoil.CCapFTempErrorIndex2,
+                                               TotCapTempModFac,
+                                               TotCapTempModFac);
                 TotCapTempModFac = 0.0;
             }
 
