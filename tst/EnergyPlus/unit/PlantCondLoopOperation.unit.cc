@@ -1473,7 +1473,7 @@ TEST_F(EnergyPlusFixture, AdjustChangeInLoadByHowServed_ModulatedFlowChiller)
     PlantUtilities::SetPlantLocationLinks(*state, plantLoc);
 
     Real64 const Cp = thisLoop.glycol->getSpecificHeat(*state, 8.0, "AdjustChangeInLoadByHowServed_ModulatedFlowChiller");
-    Real64 const dispatchedLoad = 20000.0;
+    Real64 constexpr dispatchedLoad = 20000.0;
 
     // Constant flow chiller: capacity is limited by the flow it actually has
     thisComp.ModulatedFlow = false;
