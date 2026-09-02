@@ -86,16 +86,6 @@ extern "C" {
 #include <EnergyPlus/Timer.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
-#ifndef NDEBUG
-#    ifndef DEBUG_MSG_INDEX
-#        define DEBUG_MSG_INDEX
-#    endif
-#endif
-
-#ifdef DEBUG_MSG_INDEX
-#    include <cassert>
-#endif
-
 namespace EnergyPlus {
 
 namespace DataErrorTracking {
@@ -1147,7 +1137,6 @@ void DetectIncorrectMsgIndex(EnergyPlusData &state, std::string const &lookup, i
             if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, lookup)) {
                 throw std::runtime_error(
                     std::format("ShowRecurringWarningErrorAtEnd called with MsgIndex=0 but message already exists in RecurringErrors:\n{}", lookup));
-                // assert(false && "ShowRecurringWarningErrorAtEnd called with MsgIndex=0 but message already exists in RecurringErrors");
             }
         }
     } else {
@@ -1160,8 +1149,6 @@ void DetectIncorrectMsgIndex(EnergyPlusData &state, std::string const &lookup, i
                             lookup,
                             state.dataErrTracking->RecurringErrors(MsgIndex).Message));
         }
-        assert(MsgIndex > 0 && MsgIndex <= state.dataErrTracking->NumRecurringErrors);
-        assert(Util::SameString(state.dataErrTracking->RecurringErrors(MsgIndex).Message, lookup));
     }
 }
 
