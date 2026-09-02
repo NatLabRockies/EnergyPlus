@@ -103,6 +103,125 @@ TEST_F(EnergyPlusFixture, GTChiller_HeatRecoveryAutosizeTest)
     state->dataPlnt->PlantLoop.deallocate();
 }
 
+TEST_F(EnergyPlusFixture, ElectricChiller_AirCooled_HardAndAutoSizing)
+{
+    state->init_state(*state);
+
+    // Allocate plant loops and sizing data for chilled water only
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataSize->PlantSizData.allocate(1);
+
+    // set sizing index and fluid for chilled water
+    state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+
+    // Provide plant sizing data
+    state->dataSize->PlantSizData(1).DesVolFlowRate = 0.001; // >= SmallWaterVolFlow
+    state->dataSize->PlantSizData(1).DeltaT = 5.0;
+
+    // Finalize sizing allowed
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
+    state->dataPlnt->PlantFirstSizesOkayToReport = true;
+    state->dataPlnt->PlantFinalSizesOkayToReport = false;
+
+    // Allocate and configure electric chiller (air-cooled)
+    state->dataPlantChillers->ElectricChiller.allocate(1);
+    auto &ch = state->dataPlantChillers->ElectricChiller(1);
+    ch.Name = "TestElectricChillerAir";
+    ch.CondenserType = DataPlant::CondenserType::AirCooled;
+    ch.NomCap = 50000.0; // W
+    ch.NomCapWasAutoSized = false;
+    ch.COP = 3.5;
+    ch.SizFac = 1.0;
+
+    // link chilled water loop only
+    ch.CWPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, ch.CWPlantLoc);
+
+    // Case 1: Hard-sized condenser volumetric flow remains unchanged after sizing
+    ch.CondVolFlowRate = 0.0005;
+    ch.CondVolFlowRateWasAutoSized = false;
+    ch.TempDesCondIn = 30.0; // not used for air-cooled path
+
+    ch.size(*state);
+    EXPECT_DOUBLE_EQ(ch.CondVolFlowRate, 0.0005);
+
+    // Case 2: Autosize condenser volumetric flow with air-cooled and no condenser loop
+    ch.CondVolFlowRate = DataSizing::AutoSize;
+    ch.CondVolFlowRateWasAutoSized = false; // for air-cooled chillers this flag should not be true
+    ch.size(*state);
+    EXPECT_DOUBLE_EQ(ch.CondVolFlowRate, DataSizing::AutoSize);
+    EXPECT_DOUBLE_EQ(ch.NomCap, 50000.0);
+    state->dataPlnt->PlantFinalSizesOkayToReport = true;
+    ch.size(*state);
+    Real64 const expectedCondVol = ch.NomCap * 0.000114;
+    EXPECT_NEAR(ch.CondVolFlowRate, expectedCondVol, 1e-9);
+}
+
+TEST_F(EnergyPlusFixture, ElectricChiller_CondVolFlowSizingSimple)
+{
+    state->init_state(*state);
+
+    // Allocate plant loops and sizing data
+    state->dataPlnt->PlantLoop.allocate(2);
+    state->dataSize->PlantSizData.allocate(2);
+
+    // set sizing indices and fluid
+    state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    state->dataPlnt->PlantLoop(2).PlantSizNum = 2;
+    state->dataPlnt->PlantLoop(2).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(2).glycol = Fluid::GetWater(*state);
+
+    // Provide plant sizing data (evap cond indexes 1 & 2)
+    state->dataSize->PlantSizData(1).DesVolFlowRate = 0.001; // >= SmallWaterVolFlow
+    state->dataSize->PlantSizData(1).DeltaT = 5.0;
+    state->dataSize->PlantSizData(2).DesVolFlowRate = 0.002;
+    state->dataSize->PlantSizData(2).DeltaT = 5.0;
+
+    // Finalize sizing allowed
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
+    state->dataPlnt->PlantFirstSizesOkayToReport = true;
+    state->dataPlnt->PlantFinalSizesOkayToReport = false;
+
+    // Allocate and configure electric chiller
+    state->dataPlantChillers->ElectricChiller.allocate(1);
+    auto &ch = state->dataPlantChillers->ElectricChiller(1);
+    ch.Name = "TestElectricChiller";
+    ch.CondenserType = DataPlant::CondenserType::WaterCooled;
+    ch.NomCap = 100000.0; // W (will be overridden by tmpNomCap calculation)
+    ch.NomCapWasAutoSized = false;
+    ch.COP = 4.0;
+    ch.SizFac = 1.0;
+
+    // link plant loops
+    ch.CWPlantLoc.loopNum = 1;
+    ch.CDPlantLoc.loopNum = 2;
+    PlantUtilities::SetPlantLocationLinks(*state, ch.CWPlantLoc);
+    PlantUtilities::SetPlantLocationLinks(*state, ch.CDPlantLoc);
+
+    // mark condenser flow to be autosized
+    ch.CondVolFlowRate = DataSizing::AutoSize;
+    ch.CondVolFlowRateWasAutoSized = true;
+
+    // ensure TempDesCondIn used for density/cp lookup
+    ch.TempDesCondIn = 25.0;
+
+    // Call size
+    ch.size(*state);
+
+    // Compute expected cond volumetric flow per sizing formula in PlantChillers.cc
+    static constexpr std::string_view RoutineName("UnitTest");
+
+    Real64 const rhoCond = ch.CDPlantLoc.loop->glycol->getDensity(*state, ch.TempDesCondIn, RoutineName);
+    Real64 const CpCond = ch.CDPlantLoc.loop->glycol->getSpecificHeat(*state, ch.TempDesCondIn, RoutineName);
+    Real64 const expectedCondVol = ch.NomCap * (1.0 + 1.0 / ch.COP) / (state->dataSize->PlantSizData(2).DeltaT * CpCond * rhoCond);
+
+    EXPECT_NEAR(ch.CondVolFlowRate, expectedCondVol, 1e-9);
+}
+
 TEST_F(EnergyPlusFixture, EngineDrivenChiller_HeatRecoveryAutosizeTest)
 {
     state->init_state(*state);
