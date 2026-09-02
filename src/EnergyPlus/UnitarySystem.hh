@@ -157,6 +157,10 @@ namespace UnitarySystems {
         Real64 cool_conv_tol = 0.001;
 
         UnitarySysInputSpec() = default;
+        UnitarySysInputSpec(UnitarySysInputSpec const &) = default;
+        UnitarySysInputSpec(UnitarySysInputSpec &&) = default;
+        UnitarySysInputSpec &operator=(UnitarySysInputSpec const &) = default;
+        UnitarySysInputSpec &operator=(UnitarySysInputSpec &&) = default;
         ~UnitarySysInputSpec() = default;
     };
 
@@ -948,6 +952,10 @@ namespace UnitarySystems {
         int getEquipIndex() override;
 
         UnitarySys() = default;
+        UnitarySys(UnitarySys const &) = default;
+        UnitarySys(UnitarySys &&) = default;
+        UnitarySys &operator=(UnitarySys const &) = default;
+        UnitarySys &operator=(UnitarySys &&) = default;
         virtual ~UnitarySys() = default;
     };
 
