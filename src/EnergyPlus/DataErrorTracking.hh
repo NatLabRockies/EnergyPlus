@@ -65,18 +65,12 @@ namespace DataErrorTracking {
     {
         // Enum Entry                      // "Search String" (used as a lookup in scripts/dev/check_error_summary_increment.py)
         InterZoneSurfaceAreaMismatch = 0,  // "InterZone Surface Areas"
-        InterZoneSurfaceDifferentZones,    // "CAUTION -- Interzone"
         NodeConnectionErrors,              // "Node Connection Error"
         InterZoneSurfaceAzimuthMismatch,   // "InterZone Surface Azimu"
         InterZoneSurfaceTiltMismatch,      // "InterZone Surface Tilts"
         NonPlanarSurfaces,                 // "Suspected non-planar"
-        DeprecatedFeaturesOrKeyValues,     // "Deprecated"
-        IncorrectFloorTilt,                // "Floor Tilt="
-        IncorrectRoofCeilingTilt,          // "Roof/Ceiling Tilt="
         IncompleteViewFactors,             // "View factors not"
-        UnbalancedExhaustAirFlow,          // "Unbalanced exhaust air"
         LoadsInitializationDidNotConverge, // "Loads Initialization"
-        DaylightMapPointsNearWindow,       // "CalcDaylightMapPoints:"
         ZoneAirHeatBalanceWarnings,        // "Zone Air Heat Balance"
         OccupantDensityExtremelyHigh,      // "occupant density is ext"
         TemperatureLowOutOfBounds,         // "Temperature (low) out o"

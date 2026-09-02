@@ -100,8 +100,6 @@ namespace DataErrorTracking {
         // InterZoneSurfaceAreaMismatch
         {"InterZone Surface Areas -- mismatch",
          "Area mismatch errors happen when the interzone surface in zone A is<CR>not the same size as it's companion in zone B.<CRE>"},
-        // InterZoneSurfaceDifferentZones
-        {"Interzone surfaces - different zones", ""},
         // NodeConnectionErrors
         {"Node Connection Errors",
          "Node connection errors are often caused by spelling mistakes in a node name field.<CR>To track down the problem, search the idf file "
@@ -116,32 +114,11 @@ namespace DataErrorTracking {
         {"Likely non-planar surfaces",
          "EnergyPlus Surfaces should be planar. If the error indicates a small increment for the<CR>out of planar bounds, then the calculations "
          "are likely okay though you should try to fix<CR>the problem. If a greater increment, the calculations will likely be incorrect.<CRE>"},
-        // DeprecatedFeaturesOrKeyValues
-        {"Deprecated Features or Key Values",
-         "A deprecated feature warning/severe error indicates that you are using a feature which will be<CR>removed in a future release. The new "
-         "feature is likely included in the EnergyPlus version you are<CR>using.  Consider switching now to avoid future problems.<CR>A "
-         "deprecated key value message indicates you are using an out-dated key value in your input file.<CR>While EnergyPlus may continue to "
-         "accept these values, some other input file readers may not.<CR>Consider changing to values that are included as valid in the "
-         "Energy+.idd for these objects.<CRE>"},
-        // IncorrectFloorTilt
-        {"Incorrect Floor Tilt",
-         "Floors are usually flat and \"tilted\" 180 degrees.  If you get this error message,<CR>it's likely that you need to reverse the "
-         "vertices of the surface to remove the error.<CR>EnergyPlus will attempt to fix the vertices for the running simulation.<CR>You can "
-         "turn on the report: Output:Surfaces:List,Details; to inspect your surfaces.<CRE>"},
-        // IncorrectRoofCeilingTilt
-        {"Incorrect Roof/Ceiling Tilt",
-         "Flat roofs/ceilings are \"tilted\" 0 degrees. Pitched roofs should be \"near\" 0 degrees.<CR>If you get this error message, it's "
-         "likely that you need to reverse the vertices of<CR>the surface to remove the error. EnergyPlus will attempt to fix the vertices for "
-         "the<CR>running simulation. You can turn on the report: Output:Surfaces:List,Details;<CR>to inspect your surfaces.<CRE>"},
         // IncompleteViewFactors
         {"Incomplete View factors",
          "Incomplete view factors can result from incorrect floor specifications (such as tilting 0<CR>instead of 180) or not enough surfaces in "
          "a zone to make an enclosure.  The error message<CR>also shows an enforced reciprocity value.  You can decide if you need to make "
          "geometry<CR>changes based on that value.<CRE>"},
-        // UnbalancedExhaustAirFlow
-        {"Unbalanced exhaust air flow",
-         "Unbalanced exhaust air flow errors can occur when exhaust fans are running but there is no<CR>supply air. Turn off exhaust fans when "
-         "the system is not running may help resolve the problem.<CR>Time shown is first occurrence of error.<CRE>"},
         // LoadsInitializationDidNotConverge
         {"Loads Initialization did not Converge",
          "1) very high thermal mass such as very thick concrete (solution: increase max number of warmup<CR>   days in the BUILDING "
@@ -150,10 +127,6 @@ namespace DataErrorTracking {
          "properly controlled);<CR>3) a soil layer modeled below the concrete slab - (solution remove this layer and read about<CR>   ground "
          "temperatures in the Auxiliary Programs document).<CR>4) unreasonable (too small) limits in the BUILDING object for temperature (.4 "
          "default) or<CR>   loads tolerances (.04 default)<CRE>"},
-        // DaylightMapPointsNearWindow
-        {"CalcDaylightMapPoints: Window",
-         "Window is too close to map points for accurate calculation.  Suggested change is to create<CR>Output:IlluminanceMap coordinates "
-         "(x,y,z) that are more \"inside\" the zone<CRE>"},
         // ZoneAirHeatBalanceWarnings
         {"Zone Air Heat Balance Warnings",
          "Zone Air Heat Balance out of Balance warnings are currently used by developers.<CR>Users can safely ignore these warnings.<CRE>"},
