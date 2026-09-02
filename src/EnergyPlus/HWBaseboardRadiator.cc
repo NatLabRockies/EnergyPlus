@@ -243,9 +243,9 @@ namespace HWBaseboardRadiator {
         Real64 constexpr MinFraction(0.0);
         Real64 constexpr MaxWaterTempAvg(150.0);              // Maximum limit of average water temperature in degree C
         Real64 constexpr MinWaterTempAvg(20.0);               // Minimum limit of average water temperature in degree C
-        Real64 constexpr HighWaterMassFlowRate(10.0);         // Maximum limit of water mass flow rate in kg/s
+        Real64 constexpr HighWaterMassFlowRate(10.0);         // Maximum limit of water mass flow rate in kg/s - these should be 1000x of volume flow
         Real64 constexpr LowWaterMassFlowRate(0.00001);       // Minimum limit of water mass flow rate in kg/s
-        Real64 constexpr MaxWaterFlowRate(10.0);              // Maximum limit of water volume flow rate in m3/s
+        Real64 constexpr MaxWaterFlowRate(10.0);              // Maximum limit of water volume flow rate in m3/s - these should be 1/1000 of mass flow
         Real64 constexpr MinWaterFlowRate(0.00001);           // Minimum limit of water volume flow rate in m3/s
         Real64 constexpr WaterMassFlowDefault(0.063);         // Default water mass flow rate in kg/s
         int constexpr MinDistribSurfaces(1);                  // Minimum number of surfaces that a baseboard heater can radiate to
@@ -987,6 +987,7 @@ namespace HWBaseboardRadiator {
         Real64 WaterVolFlowRateMaxDes = 0.0;
         Real64 WaterVolFlowRateMaxUser = 0.0;
         Real64 RatedCapacityDes = 0.0;
+        Real64 RatedCapacityUser = 0.0;
         state.dataSize->DataScalableCapSizingON = false;
 
         auto &hWBaseboard = state.dataHWBaseboardRad->HWBaseboard(BaseboardNum);
@@ -1016,7 +1017,7 @@ namespace HWBaseboardRadiator {
                     zoneEqSizing.HeatingCapacity = true;
                     zoneEqSizing.DesHeatingLoad =
                         hWBaseboard.ScaledHeatingCapacity * state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
-                    TempSize = zoneEqSizing.DesHeatingLoad;
+                    TempSize = DataSizing::AutoSize;
                     state.dataSize->DataScalableCapSizingON = true;
                 } else { // CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity
                     CheckZoneSizing(state, CompType, CompName);
@@ -1031,12 +1032,7 @@ namespace HWBaseboardRadiator {
                 HeatingCapacitySizer sizerHeatingCapacity;
                 sizerHeatingCapacity.overrideSizingString(SizingString);
                 sizerHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                TempSize = sizerHeatingCapacity.size(state, TempSize, errorsFound);
-                if (hWBaseboard.ScaledHeatingCapacity == DataSizing::AutoSize) {
-                    hWBaseboard.RatedCapacity = DataSizing::AutoSize;
-                } else {
-                    hWBaseboard.RatedCapacity = TempSize;
-                }
+                RatedCapacityUser = sizerHeatingCapacity.size(state, TempSize, errorsFound);
                 if (!state.dataSize->FinalZoneSizing.empty() &&
                     state.dataSize->CurZoneEqNum <= static_cast<int>(state.dataSize->FinalZoneSizing.size())) {
                     BaseSizer::reportSizerOutput(state,
@@ -1044,8 +1040,8 @@ namespace HWBaseboardRadiator {
                                                  hWBaseboard.Name,
                                                  "Design Size Heating Load [W]",
                                                  state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).NonAirSysDesHeatLoad);
+                    RatedCapacityDes = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).NonAirSysDesHeatLoad;
                 }
-                RatedCapacityDes = TempSize;
                 state.dataSize->DataScalableCapSizingON = false;
             }
         }
@@ -1070,7 +1066,7 @@ namespace HWBaseboardRadiator {
                     }
                 } else {
                     CheckZoneSizing(state, cCMO_BBRadiator_Water, hWBaseboard.Name);
-                    DesCoilLoad = RatedCapacityDes;
+                    DesCoilLoad = RatedCapacityUser;
                     if (DesCoilLoad >= HVAC::SmallLoad) {
                         Cp = hWBaseboard.plantLoc.loop->glycol->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);
                         rho = hWBaseboard.plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
@@ -1112,10 +1108,13 @@ namespace HWBaseboardRadiator {
                         }
                     }
                 }
-                if (hWBaseboard.WaterTempAvg > 0.0 && hWBaseboard.WaterMassFlowRateStd > 0.0 && hWBaseboard.RatedCapacity > 0.0) {
-                    DesCoilLoad = hWBaseboard.RatedCapacity;
+                // If the BB Heating Capacity is hard-sized then sizing uses the BB input for Rated Water Mass Flow Rate to calculate UA.
+                // If the BB is autosized then sizing uses the BB Maximum Water Flow Rate.
+                // The BB input for Heating Capacity is only > 0 when Heating Capacity is autosized and design method = Heating Capacity
+                if (hWBaseboard.ScaledHeatingCapacity > 0.0) {
+                    DesCoilLoad = RatedCapacityUser;
                     WaterMassFlowRateStd = hWBaseboard.WaterMassFlowRateStd;
-                } else if (hWBaseboard.RatedCapacity == DataSizing::AutoSize || hWBaseboard.RatedCapacity == 0.0) {
+                } else { // use zone NonAirSysDesHeatLoad load instead. It's either 0, or the zone heating load if sizing was requested.
                     DesCoilLoad = RatedCapacityDes;
                     rho = hWBaseboard.plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineNameFull);
                     WaterMassFlowRateStd = hWBaseboard.WaterVolFlowRateMax * rho;
@@ -1172,8 +1171,7 @@ namespace HWBaseboardRadiator {
                 ErrorsFound = true;
             }
             // calculate UA from rated capacities
-            hWBaseboard.RatedCapacity = RatedCapacityDes;
-            DesCoilLoad = RatedCapacityDes;
+            DesCoilLoad = RatedCapacityUser;
 
             if (DesCoilLoad >= HVAC::SmallLoad) {
                 WaterMassFlowRateStd = hWBaseboard.WaterMassFlowRateStd;
@@ -1215,6 +1213,29 @@ namespace HWBaseboardRadiator {
             }
             // Report an UA value
             BaseSizer::reportSizerOutput(state, cCMO_BBRadiator_Water, hWBaseboard.Name, "U-Factor times Area [W/C]", hWBaseboard.UA);
+        }
+        if (hWBaseboard.ScaledHeatingCapacity == DataSizing::AutoSize) {
+            BaseSizer::reportSizerOutput(state, cCMO_BBRadiator_Water, hWBaseboard.Name, "Design Size Heating Design Capacity [W]", RatedCapacityDes);
+            hWBaseboard.RatedCapacity = RatedCapacityDes;
+        } else {
+            if (RatedCapacityUser > 0.0 && RatedCapacityDes > 0.0) {
+                if ((std::abs(RatedCapacityDes - RatedCapacityUser) / RatedCapacityUser) > state.dataSize->AutoVsHardSizingThreshold) {
+                    BaseSizer::reportSizerOutput(state,
+                                                 cCMO_BBRadiator_Water,
+                                                 hWBaseboard.Name,
+                                                 "Design Size Heating Design Capacity [W]",
+                                                 RatedCapacityDes,
+                                                 "User-Specified Heating Design Capacity [W]",
+                                                 RatedCapacityUser);
+                } else {
+                    BaseSizer::reportSizerOutput(
+                        state, cCMO_BBRadiator_Water, hWBaseboard.Name, "User-Specified Heating Design Capacity [W]", RatedCapacityUser);
+                }
+            } else {
+                BaseSizer::reportSizerOutput(
+                    state, cCMO_BBRadiator_Water, hWBaseboard.Name, "User-Specified Heating Design Capacity [W]", RatedCapacityUser);
+            }
+            hWBaseboard.RatedCapacity = RatedCapacityUser;
         }
         // save the design water flow rate for use by the water loop sizing algorithms
         PlantUtilities::RegisterPlantCompDesignFlow(state, hWBaseboard.WaterInletNode, hWBaseboard.WaterVolFlowRateMax);
