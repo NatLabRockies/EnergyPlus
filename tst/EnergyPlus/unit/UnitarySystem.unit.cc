@@ -18897,9 +18897,9 @@ Dimensionless;	!- Output Unit Type
   AirLoopHVAC:OutdoorAirSystem:EquipmentList,
     Sys 1 Furnace DX Cool OA System Equipment,  !- Name
     CoilSystem:Cooling:DX,                      !- Component 1 Object Type
-    OA Sys Cooling Coil 1,                      !- Component 1 Name
+    Outermost OA Sys Cooling Coil,                      !- Component 1 Name
     CoilSystem:Cooling:DX,                      !- Component 2 Object Type
-    OA Sys Cooling Coil 2,                      !- Component 2 Name
+    Innermost OA Sys Cooling Coil,                      !- Component 2 Name
     OutdoorAir:Mixer,                           !- Component 3 Object Type
     Sys 1 Furnace DX Cool OA Mixing Box;        !- Component 3 Name
 
@@ -18911,7 +18911,7 @@ Dimensionless;	!- Output Unit Type
     Sys 1 Furnace DX Cool Air Loop Inlet;  !- Return Air Stream Node Name
 
   CoilSystem:Cooling:DX,
-    OA Sys Cooling Coil 1,                   !-Name
+    Outermost OA Sys Cooling Coil,                   !-Name
     HVACTemplate-Always 1,                   !-Availability Schedule Name
     Sys 1 Furnace DX Cool Outdoor Air Inlet, !-DX Cooling Coil System Inlet Node Name
     OA Sys 1 Cooling Coil Outlet,            !-DX Cooling Coil System Outlet Node Name
@@ -18940,7 +18940,7 @@ Dimensionless;	!- Output Unit Type
     Sys 1 Furnace DX Cool Cool Coil PLF;     !-Part Load Fraction Correlation Curve Name
 
   CoilSystem:Cooling:DX,
-    OA Sys Cooling Coil 2,                   !-Name
+    Innermost OA Sys Cooling Coil,                   !-Name
     HVACTemplate-Always 1,                   !-Availability Schedule Name
     OA Sys 1 Cooling Coil Outlet,            !-DX Cooling Coil System Inlet Node Name
     OA Sys 2 Cooling Coil Outlet,            !-DX Cooling Coil System Outlet Node Name
@@ -19146,18 +19146,25 @@ Dimensionless;	!- Output Unit Type
     ZoneTempPredictorCorrector::GetZoneAirSetPoints(*state);
 
     std::string compName = "SYS 1 FURNACE DX COOL UNITARY SYSTEM";
-    std::string OASys1Name = "OA Sys Cooling Coil 1";
-    std::string OASys2Name = "OA Sys Cooling Coil 2";
+    std::string OASys1Name = "Outermost OA Sys Cooling Coil";
+    std::string OASys2Name = "Innermost OA Sys Cooling Coil";
     bool zoneEquipment = false;
     HVAC::UnitarySysType compType = HVAC::UnitarySysType::Unitary_AnyCoilType;
     bool FirstHVACIteration = true;
     state->dataZoneEquip->ZoneEquipConfig(1).InletNodeAirLoopNum(1) = 1;
     UnitarySystems::UnitarySys::factory(*state, compType, compName, zoneEquipment, 0);
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[2];
+    // GetInput reads every CoilSystem:Cooling:DX instance alphabetically by name in one bulk pass
+    // (see the factory()/getInputOnceFlag mechanics discussed above), not in file or call order.
+    // "Innermost..." < "Outermost..." alphabetically, so despite being 2nd in the
+    // AirLoopHVAC:OutdoorAirSystem:EquipmentList, OASys2 ("Innermost...") lands at unitarySys[0],
+    // and OASys1 ("Outermost...", 1st in the equipment list) lands at unitarySys[1]. This mismatch
+    // between equipment-list position and unitarySys/m_EquipCompNum order is deliberate - see the
+    // CompIndex checks near the end of this test.
     UnitarySystems::UnitarySys::factory(*state, compType, OASys1Name, zoneEquipment, 0);
-    UnitarySystems::UnitarySys *OASys1 = &state->dataUnitarySystems->unitarySys[0];
+    UnitarySystems::UnitarySys *OASys1 = &state->dataUnitarySystems->unitarySys[1];
     UnitarySystems::UnitarySys::factory(*state, compType, OASys2Name, zoneEquipment, 0);
-    UnitarySystems::UnitarySys *OASys2 = &state->dataUnitarySystems->unitarySys[1];
+    UnitarySystems::UnitarySys *OASys2 = &state->dataUnitarySystems->unitarySys[0];
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
@@ -19321,9 +19328,9 @@ Dimensionless;	!- Output Unit Type
     // These should match if information is stored in the correct place according to the index used to store that information
     auto &outsideAirSys = state->dataAirLoop->OutsideAirSys(1);
     EXPECT_EQ(1, outsideAirSys.ComponentIndex(1));
-    EXPECT_EQ("OA SYS COOLING COIL 1", outsideAirSys.ComponentName(1));
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", outsideAirSys.ComponentName(1));
     EXPECT_EQ(2, outsideAirSys.ComponentIndex(2));
-    EXPECT_EQ("OA SYS COOLING COIL 2", outsideAirSys.ComponentName(2));
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", outsideAirSys.ComponentName(2));
 
     int OASys1Index = outsideAirSys.ComponentIndex(1); // <-- this here is the issue correction
     int OASys2Index = outsideAirSys.ComponentIndex(2); // <-- this here is the issue correction
@@ -19333,10 +19340,10 @@ Dimensionless;	!- Output Unit Type
     EnergyPlus::HVACSystemData *compPointer2 = outsideAirSys.compPointer[OASys2Index];
     UnitarySys *unitarySys2 = dynamic_cast<UnitarySys *>(compPointer2);
     assert(unitarySys2 != nullptr);
-    EXPECT_EQ("OA SYS COOLING COIL 1", OASys1->Name);      // UnitarySystems::UnitarySys *OASys1 = &state->dataUnitarySystems->unitarySys[0]
-    EXPECT_EQ("OA SYS COOLING COIL 1", unitarySys1->Name); // see above, data from the OA system, these match
-    EXPECT_EQ("OA SYS COOLING COIL 2", OASys2->Name);
-    EXPECT_EQ("OA SYS COOLING COIL 2", unitarySys2->Name);
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", OASys1->Name);      // UnitarySystems::UnitarySys *OASys1 = &state->dataUnitarySystems->unitarySys[1]
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", unitarySys1->Name); // see above, data from the OA system, these match
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", OASys2->Name);
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", unitarySys2->Name);
 
     // Now call the OA system to make sure the above data is not corrupted
     // The test here is if the index has changed
@@ -19370,15 +19377,15 @@ Dimensionless;	!- Output Unit Type
 
     // Now check to see if the index is the same as before
     EXPECT_EQ(1, outsideAirSys.ComponentIndex(1));
-    EXPECT_EQ("OA SYS COOLING COIL 1", outsideAirSys.ComponentName(OASys1Index));
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", outsideAirSys.ComponentName(OASys1Index));
     EXPECT_EQ(2, outsideAirSys.ComponentIndex(2));
-    EXPECT_EQ("OA SYS COOLING COIL 2", outsideAirSys.ComponentName(OASys2Index));
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", outsideAirSys.ComponentName(OASys2Index));
 
     // This checks the UnitarySystem objects as well as the state->dataAirLoop->OutsideAirSys(1).compPointer[] objects
-    EXPECT_EQ("OA SYS COOLING COIL 1", OASys1->Name);
-    EXPECT_EQ("OA SYS COOLING COIL 1", unitarySys1->Name);
-    EXPECT_EQ("OA SYS COOLING COIL 2", OASys2->Name);
-    EXPECT_EQ("OA SYS COOLING COIL 2", unitarySys2->Name);
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", OASys1->Name);
+    EXPECT_EQ("OUTERMOST OA SYS COOLING COIL", unitarySys1->Name);
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", OASys2->Name);
+    EXPECT_EQ("INNERMOST OA SYS COOLING COIL", unitarySys2->Name);
 
     // Check that coils did operate and target set point temperature
     EXPECT_NEAR(OACoil1OutletSP, OASysAirOutNode1.Temp, 0.0001);
@@ -19410,18 +19417,22 @@ Dimensionless;	!- Output Unit Type
     // The above simulate call to a UnitarySystem object would overwrite state->dataAirLoop->OutsideAirSys(1).ComponentIndex(1)
     // because CompIndex is a reference to state->dataAirLoop->OutsideAirSys(1).ComponentIndex(1)
     // Now CoilSystem:Cooling:DX, CoilSystem:Cooling:Water and AirloopHVAC:UnitarySystem are treated the same way.
+    // "Outermost..." is 2nd in GetInput/unitarySys order (see the factory() calls above), so m_EquipCompNum = 2 for it,
+    // while its AirLoopHVAC:OutdoorAirSystem:EquipmentList position (ComponentIndex(1)) is 1 - these are genuinely
+    // different index spaces, not a coincidence of this test's object count, so this divergence holds for real.
     EXPECT_NE(CompIndex, outsideAirSys.ComponentIndex(1)); // <-- would have corrupted index to compPointer
 
     // Previous methods used to get CompIndex for CoilSystem:Cooling:DX
-    // These match which is why issue 9785 was hard to track down
-    // These 2 CoilSystem:Cooling:DX are the only objects in this unit test and are used in the OA System and coincidentally
-    // have an index of 0 and 1, 0+1 is the index to the OA equipment list for the 1st unit, as is 1+1 for the 2nd unit.
-    // CoilSystem objects used elsewhere in the simulation would mean these unit indexes would not be 0 and 1
-    // and this call would fail: state->dataAirLoop->OutsideAirSys(OASysNum).compPointer[CompIndex]->simulate()
+    // These used to match by coincidence (both 0/1-based schemes happened to agree when the 2
+    // CoilSystem:Cooling:DX objects here were read in the same order as their equipment-list position),
+    // which is why issue 9785 was hard to track down. "Innermost"/"Outermost" are named specifically to sort
+    // alphabetically opposite their equipment-list order (see the factory() calls above), so these now diverge
+    // for real: state->dataAirLoop->OutsideAirSys(OASysNum).compPointer[CompIndex]->simulate() would use
+    // the wrong compPointer entry if CompIndex were obtained this way.
     int CompIndex1 = UnitarySystems::getUnitarySystemIndex(*state, OASys1->Name) + 1;
     int CompIndex2 = UnitarySystems::getUnitarySystemIndex(*state, OASys2->Name) + 1;
-    EXPECT_EQ(CompIndex1, outsideAirSys.ComponentIndex(1));
-    EXPECT_EQ(CompIndex2, outsideAirSys.ComponentIndex(2));
+    EXPECT_NE(CompIndex1, outsideAirSys.ComponentIndex(1));
+    EXPECT_NE(CompIndex2, outsideAirSys.ComponentIndex(2));
 }
 
 // This issue tests for GetInput with respect to Autosizing, especially for issue #7771 where
