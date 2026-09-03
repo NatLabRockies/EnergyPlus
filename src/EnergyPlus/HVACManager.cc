@@ -1807,7 +1807,14 @@ void SimSelectedEquipment(EnergyPlusData &state,
     }
     PlantUtilities::ResetAllPlantInterConnectFlags(state);
 
-    HeatBalanceSurfaceManager::ResimulateSurfaceHeatBalanceForPV(state);
+    if (state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
+        HeatBalanceSurfaceManager::ResimulateSurfaceHeatBalanceForPV(state);
+        ZoneTempPredictorCorrector::PredictSystemLoads(
+            state, state.dataHVACGlobal->ShortenTimeStepSys, state.dataHVACGlobal->UseZoneTimeStepHistory, state.dataGlobal->TimeStepZone);
+        // The updated demand must be consumed during this HVAC iteration, even when the PV surface request
+        // was the only flag keeping the iteration loop active.
+        SimZoneEquipment = true;
+    }
 
     if (state.dataGlobal->BeginEnvrnFlag && state.dataHVACMgr->MyEnvrnFlag2) {
         // Following comment is incorrect!  (LKL) Even the first time through this does more than read in data.

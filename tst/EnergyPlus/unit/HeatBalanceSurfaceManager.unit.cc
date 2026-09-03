@@ -3106,6 +3106,27 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
     EXPECT_NE(sourceHistoryBeforePV, state->dataHeatBalSurf->SurfQsrcHist(1, 1));
     EXPECT_NE(surfaceTemperatureBeforePV, state->dataHeatBalSurf->SurfTempOut(1));
+
+    // A source change on the first coupled pass followed by a stable second pass is converged and
+    // must not leave a stale request for another outer HVAC iteration.
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->NumPVs = 1;
+    auto &pv = state->dataPhotovoltaic->PVarray(1);
+    pv.PVModelType = DataPhotovoltaics::PVModel::Simple;
+    pv.CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    pv.SurfacePtr = 1;
+    pv.SimplePVModule.EfficencyInputMode = DataPhotovoltaics::Efficiency::Fixed;
+    pv.SimplePVModule.AreaCol = 1.0;
+    pv.SimplePVModule.PVEfficiency = 0.1;
+    pv.SurfaceCouplingSource = 0.0;
+    state->dataHeatBal->SurfQRadSWOutIncident(1) = 1000.0;
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+
+    ResimulateSurfaceHeatBalanceForPV(*state);
+
+    EXPECT_DOUBLE_EQ(100.0, pv.SurfaceCouplingSource);
+    EXPECT_FALSE(pv.SurfaceCouplingNeedsResim);
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestReportIntMovInsInsideSurfTemp)

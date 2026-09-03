@@ -255,12 +255,15 @@ void ResimulateSurfaceHeatBalanceForPV(EnergyPlusData &state)
         return;
     }
 
-    state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
     for (int pass = 1; pass <= 2; ++pass) {
+        state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
         CalcHeatBalanceOutsideSurf(state);
         CalcHeatBalanceInsideSurf(state);
         for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
             Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+        }
+        if (!state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
+            break;
         }
     }
 }
