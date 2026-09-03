@@ -192,8 +192,15 @@ namespace SingleDuct {
         std::string ZoneHVACUnitName; // name of Zone HVAC unit for air terminal mixer units
         int SecInNode;                // zone or zone unit air node number
         // warning variables
-        int IterationLimit;                                       // Used for RegulaFalsi error -1
-        int IterationFailed;                                      // Used for RegulaFalsi error -2
+        // VS VAV terminal: separate recurring-error indices per distinct message, since the supply air
+        // flow solve (cooling and heating) always runs regardless of reheat coil type, and can co-occur
+        // with the reheat-coil-specific solves below (which are themselves mutually exclusive by coil type).
+        int IterationLimit;                                       // Used for RegulaFalsi error -1, supply air flow solve
+        int IterationFailed;                                      // Used for RegulaFalsi error -2, supply air flow solve
+        int IterationLimitSteamCoil;                              // Used for RegulaFalsi error -1, steam heating coil control solve
+        int IterationFailedSteamCoil;                             // Used for RegulaFalsi error -2, steam heating coil control solve
+        int IterationLimitHeatingCoil;                            // Used for RegulaFalsi error -1, gas/electric heating coil control solve
+        int IterationFailedHeatingCoil;                           // Used for RegulaFalsi error -2, gas/electric heating coil control solve
         DataZoneEquipment::PerPersonVentRateMode OAPerPersonMode; // mode for how per person rates are determined, DCV or design.
         bool EMSOverrideAirFlow;                                  // if true, EMS is calling to override flow rate
         Real64 EMSMassFlowRateValue;                              // value EMS is directing to use for flow rate [kg/s]
@@ -224,7 +231,8 @@ namespace SingleDuct {
               DamperPosition(0.0), ADUNum(0), ErrCount1(0), ErrCount1c(0), ErrCount2(0), ZoneFloorArea(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0),
               MaxAirVolFlowRateDuringReheat(0.0), MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0),
               OutdoorAirFlowRate(0.0), NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWplantLoc{}, SecInNode(0),
-              IterationLimit(0), IterationFailed(0), OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false),
+              IterationLimit(0), IterationFailed(0), IterationLimitSteamCoil(0), IterationFailedSteamCoil(0), IterationLimitHeatingCoil(0),
+              IterationFailedHeatingCoil(0), OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false),
               EMSMassFlowRateValue(0.0), ZoneTurndownMinAirFrac(1.0), MyEnvrnFlag(true), MySizeFlag(true), GetGasElecHeatCoilCap(true),
               PlantLoopScanFlag(true), MassFlow1(0.0), MassFlow2(0.0), MassFlow3(0.0), MassFlowDiff(0.0)
         {

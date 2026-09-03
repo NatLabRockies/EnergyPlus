@@ -2990,11 +2990,12 @@ namespace HVACMultiSpeedHeatPump {
             }
         }
         if (useMaxedSpeed) {
-            MSHeatPump.CoilSpeedErrIndex++;
+            int &coilSpeedErrIndex =
+                (MSHeatPump.HeatCoolMode == ModeOfOperation::HeatingMode) ? MSHeatPump.CoilSpeedErrIndexHeating : MSHeatPump.CoilSpeedErrIndexCooling;
             ShowRecurringWarningErrorAtEnd(state,
                                            "Wrong coil speed EMS override value, for unit=\"" + useMaxedSpeedCoilName +
                                                "\". Exceeding maximum coil speed level. Speed level is set to the maximum coil speed level allowed.",
-                                           MSHeatPump.CoilSpeedErrIndex,
+                                           coilSpeedErrIndex,
                                            SpeedVal,
                                            SpeedVal,
                                            _,

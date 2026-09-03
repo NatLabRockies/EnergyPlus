@@ -4590,19 +4590,19 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                                                MaxHeatMassFlow,
                                                state.dataSingleDuct->sd_airterminal(this->SysNum).solveRootStats);
                 if (SolFlag == General::SOLVEROOT_ERROR_ITER) {
-                    if (this->IterationLimit == 0) {
+                    if (this->IterationLimitSteamCoil == 0) {
                         ShowWarningError(state, std::format("Steam heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating air flow rate");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Steam heating coil iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimit);
+                        state, "Steam heating coil iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimitSteamCoil);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
-                    if (this->IterationFailed == 0) {
+                    if (this->IterationFailedSteamCoil == 0) {
                         ShowWarningError(state, std::format("Steam heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Bad air flow limits");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Steam heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailed);
+                        state, "Steam heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailedSteamCoil);
                 }
             } else {
                 MassFlow = MaxHeatMassFlow;
@@ -4639,19 +4639,20 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                     state, UnitFlowToler, 50, SolFlag, f, 0.0, 1.0, state.dataSingleDuct->sd_airterminal(this->SysNum).solveRootStats);
                 MassFlow = state.dataLoopNodes->Node(SysInletNode).MassFlowRate;
                 if (SolFlag == General::SOLVEROOT_ERROR_ITER) {
-                    if (this->IterationLimit == 0) {
+                    if (this->IterationLimitHeatingCoil == 0) {
                         ShowWarningError(state, std::format("Heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating air flow rate");
                     }
-                    ShowRecurringWarningErrorAtEnd(
-                        state, "Heating coil control iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimit);
+                    ShowRecurringWarningErrorAtEnd(state,
+                                                   "Heating coil control iteration limit exceeded in VS VAV terminal unit " + this->SysName,
+                                                   this->IterationLimitHeatingCoil);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
-                    if (this->IterationFailed == 0) {
+                    if (this->IterationFailedHeatingCoil == 0) {
                         ShowWarningError(state, std::format("Heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Bad air flow limits");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailed);
+                        state, "Heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailedHeatingCoil);
                 }
             } else {
                 MassFlow = MaxHeatMassFlow;
