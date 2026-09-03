@@ -63,6 +63,7 @@ namespace DataErrorTracking {
     // constexpr std::array<ErrorSummaryInfo, static_cast<size_t>(ErrorSummaryType::Num)> ErrorSummaries
     enum class ErrorSummaryType
     {
+        // Enum Entry                      // "Search String" (used as a lookup in scripts/dev/check_error_summary_increment.py)
         InterZoneSurfaceAreaMismatch = 0,  // "InterZone Surface Areas"
         InterZoneSurfaceDifferentZones,    // "CAUTION -- Interzone"
         NodeConnectionErrors,              // "Node Connection Error"
