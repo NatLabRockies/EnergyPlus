@@ -2574,6 +2574,7 @@ namespace HeatBalFiniteDiffManager {
         if (!state.dataGlobal->WarmupFlag || s_hbfd->WarmupSurfTemp > 10 || state.dataGlobal->DisplayExtraWarnings) {
             if (CheckTemperature < DataHeatBalSurface::MinSurfaceTempLimit) {
                 if (state.dataSurface->SurfLowTempErrCount(SurfNum) == 0) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureLowOutOfBounds)];
                     ShowSevereMessage(state,
                                       std::format("Temperature (low) out of bounds [{:.2f}] for zone=\"{}\", for surface=\"{}\"",
                                                   CheckTemperature,
@@ -2629,6 +2630,7 @@ namespace HeatBalFiniteDiffManager {
                 }
             } else {
                 if (state.dataSurface->SurfHighTempErrCount(SurfNum) == 0) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureHighOutOfBounds)];
                     ShowSevereMessage(state,
                                       std::format("Temperature (high) out of bounds ({:.2f}] for zone=\"{}\", for surface=\"{}\"",
                                                   CheckTemperature,
