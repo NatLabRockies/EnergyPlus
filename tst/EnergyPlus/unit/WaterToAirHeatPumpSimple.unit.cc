@@ -507,6 +507,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).availSched = Sched::GetScheduleAlwaysOff(*state);
     InitSimpleWatertoAirHP(*state, HPNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, FirstHVACIteration, PartLoadRatio);
     CalcHPCoolingSimple(*state, HPNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadRatio, OnOffAirFlowRatio);
+    UpdateSimpleWatertoAirHP(*state, HPNum);
     EXPECT_FALSE(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).SimFlag);
     EXPECT_EQ(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).Power, 0.0);
     EXPECT_EQ(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).QLoadTotal, 0.0);
@@ -619,6 +620,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimple_TestAirFlow)
     state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).availSched = Sched::GetScheduleAlwaysOff(*state);
     InitSimpleWatertoAirHP(*state, HPNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, FirstHVACIteration, PartLoadRatio);
     CalcHPHeatingSimple(*state, HPNum, fanOp, SensLoad, compressorOp, PartLoadRatio, OnOffAirFlowRatio);
+    UpdateSimpleWatertoAirHP(*state, HPNum);
     EXPECT_FALSE(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).SimFlag);
     EXPECT_EQ(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).Power, 0.0);
     EXPECT_EQ(state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum).QLoadTotal, 0.0);

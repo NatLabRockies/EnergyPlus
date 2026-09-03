@@ -2902,9 +2902,6 @@ namespace WaterToAirHeatPumpSimple {
 
         if (simpleWAHP.availSched->getCurrentVal() <= 0.0) {
             simpleWAHP.SimFlag = false;
-            simpleWAHP.OutletAirDBTemp = simpleWAHP.InletAirDBTemp;
-            simpleWAHP.OutletAirHumRat = simpleWAHP.InletAirHumRat;
-            simpleWAHP.OutletAirEnthalpy = simpleWAHP.InletAirEnthalpy;
             return;
         }
 
@@ -3190,9 +3187,6 @@ namespace WaterToAirHeatPumpSimple {
 
         if (simpleWAHP.availSched->getCurrentVal() <= 0.0) {
             simpleWAHP.SimFlag = false;
-            simpleWAHP.OutletAirDBTemp = simpleWAHP.InletAirDBTemp;
-            simpleWAHP.OutletAirHumRat = simpleWAHP.InletAirHumRat;
-            simpleWAHP.OutletAirEnthalpy = simpleWAHP.InletAirEnthalpy;
             return;
         }
 

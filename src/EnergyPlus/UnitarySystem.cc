@@ -5065,8 +5065,7 @@ namespace UnitarySystems {
                         }
 
                     } else if (Util::SameString(ChildCoolingCoilType, "COIL:COOLING:DX:VARIABLESPEED")) {
-                        int childCCIndex =
-                            VariableSpeedCoils::GetCoilIndexVariableSpeed(state, ChildCoolingCoilType, ChildCoolingCoilName, errFlag);
+                        int childCCIndex = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, ChildCoolingCoilType, ChildCoolingCoilName, errFlag);
                         if (errFlag) {
                             ShowContinueError(state, std::format("Occurs in {} = {}", cCurrentModuleObject, thisObjectName));
                             errFlag = false;
