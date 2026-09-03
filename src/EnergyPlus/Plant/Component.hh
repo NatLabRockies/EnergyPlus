@@ -309,6 +309,7 @@ namespace DataPlant {
         DataPlant::HowMet HowLoadServed;                  // nature of component in terms of how it can meet load
         Real64 MinOutletTemp;                             // Component exit lower limit temperature
         Real64 MaxOutletTemp;                             // Component exit upper limit temperature
+        bool ModulatedFlow;                               // true if this component modulates its own flow to hold a leaving setpoint
         bool FreeCoolCntrlShutDown;                       // true if component was shut down because of free cooling
         Real64 FreeCoolCntrlMinCntrlTemp;                 // current control temp value for free cooling controls
         DataPlant::FreeCoolControlMode FreeCoolCntrlMode; // type of sensor used for free cooling controls
@@ -325,7 +326,7 @@ namespace DataPlant {
               FlowPriority(LoopFlowStatus::Invalid), ON(false), Available(false), NodeNumIn(0), NodeNumOut(0), MyLoad(0.0), MaxLoad(0.0),
               MinLoad(0.0), OptLoad(0.0), SizFac(0.0), CurOpSchemeType(DataPlant::OpScheme::Invalid), NumOpSchemes(0), CurCompLevelOpNum(0),
               EquipDemand(0.0), EMSLoadOverrideOn(false), EMSLoadOverrideValue(0.0), HowLoadServed(DataPlant::HowMet::Invalid), MinOutletTemp(0.0),
-              MaxOutletTemp(0.0), FreeCoolCntrlShutDown(false), FreeCoolCntrlMinCntrlTemp(0.0),
+              MaxOutletTemp(0.0), ModulatedFlow(false), FreeCoolCntrlShutDown(false), FreeCoolCntrlMinCntrlTemp(0.0),
               FreeCoolCntrlMode(DataPlant::FreeCoolControlMode::Invalid), FreeCoolCntrlNodeNum(0), IndexInLoopSidePumps(0), TempDesCondIn(0.0),
               TempDesEvapOut(0.0), compPtr(nullptr)
         {
