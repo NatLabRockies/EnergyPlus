@@ -1105,14 +1105,7 @@ void ShowWarningMessage(EnergyPlusData &state, std::string const &ErrorMessage, 
 
 void DetectIncorrectMsgIndex(EnergyPlusData &state, std::string const &lookup, int &MsgIndex)
 {
-    if (MsgIndex == 0) {
-        for (int Loop = 1; Loop <= state.dataErrTracking->NumRecurringErrors; ++Loop) {
-            if (Util::SameString(state.dataErrTracking->RecurringErrors(Loop).Message, lookup)) {
-                throw std::runtime_error(
-                    std::format("ShowRecurringWarningErrorAtEnd called with MsgIndex=0 but message already exists in RecurringErrors:\n{}", lookup));
-            }
-        }
-    } else {
+    if (MsgIndex != 0) {
         if (MsgIndex < 1 || MsgIndex > state.dataErrTracking->NumRecurringErrors) {
             throw std::runtime_error(std::format("ShowRecurringWarningErrorAtEnd called with invalid MsgIndex:\n{}", lookup));
         }
@@ -1328,7 +1321,19 @@ void StoreRecurringErrorMessage(EnergyPlusData &state,
     // for output at the end of the simulation with automatic tracking of number
     // of occurrences and optional tracking of associated min, max, and sum values
 
-    // If Index is zero, then assign next available index and reallocate array
+    // If Index is zero, look for an existing identical message. This lookup is only paid once
+    // per correctly retained caller index, while allowing independent objects that emit the same
+    // generic message to share the recurring-error entry.
+    if (ErrorMsgIndex == 0) {
+        for (int loop = 1; loop <= state.dataErrTracking->NumRecurringErrors; ++loop) {
+            if (Util::SameString(state.dataErrTracking->RecurringErrors(loop).Message, ErrorMessage)) {
+                ErrorMsgIndex = loop;
+                break;
+            }
+        }
+    }
+
+    // If the message is new, assign the next available index and reallocate the array
     if (ErrorMsgIndex == 0) {
         state.dataErrTracking->RecurringErrors.redimension(++state.dataErrTracking->NumRecurringErrors);
         ErrorMsgIndex = state.dataErrTracking->NumRecurringErrors;

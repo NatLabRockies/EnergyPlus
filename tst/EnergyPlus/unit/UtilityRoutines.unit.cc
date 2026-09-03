@@ -102,6 +102,14 @@ TEST_F(EnergyPlusFixture, RecurringWarningTest)
     EXPECT_EQ(" ** Warning ** " + myMessage2, state->dataErrTracking->RecurringErrors(ErrIndex2).Message);
     EXPECT_EQ(2, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
 
+    // Independent callers can own separate index variables while emitting the same generic
+    // message. The second zero index should reuse the existing recurring-error entry.
+    int ErrIndex2FromAnotherCaller = 0;
+    ShowRecurringWarningErrorAtEnd(*state, myMessage2, ErrIndex2FromAnotherCaller);
+    EXPECT_EQ(ErrIndex2, ErrIndex2FromAnotherCaller);
+    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors.size());
+    EXPECT_EQ(3, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
+
     // same message for different show message type (changed severe to warning) should result in an addition
     std::string myMessage3 = "Test message 3";
     int ErrIndex3AsError = 0;
@@ -129,13 +137,9 @@ TEST_F(EnergyPlusFixture, RecurringWarningTest)
     // improper call to ShowRecurringWarningErrorAtEnd: the Index exists, but the message doesn't match
     EXPECT_ANY_THROW(ShowRecurringWarningErrorAtEnd(*state, myMessage2, ErrIndex1));
 
-    // improper call to ShowRecurringWarningErrorAtEnd: index is passed as 0, but the message already exists in the array
-    int ZeroIndex = 0;
-    EXPECT_ANY_THROW(ShowRecurringWarningErrorAtEnd(*state, myMessage2, ZeroIndex));
-
     EXPECT_EQ(4, state->dataErrTracking->RecurringErrors.size());
     EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex1).Count);
-    EXPECT_EQ(2, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
+    EXPECT_EQ(3, state->dataErrTracking->RecurringErrors(ErrIndex2).Count);
     EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsError).Count);
     EXPECT_EQ(1, state->dataErrTracking->RecurringErrors(ErrIndex3AsWarning).Count);
 #endif
