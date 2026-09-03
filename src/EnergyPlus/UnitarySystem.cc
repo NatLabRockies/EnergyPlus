@@ -4527,7 +4527,7 @@ namespace UnitarySystems {
                 } else {
                     auto const &thisHeatCoil = state.dataVariableSpeedCoils->VarSpeedCoil(this->m_HeatingCoilIndex);
                     this->m_NumOfSpeedHeating = thisHeatCoil.NumOfSpeeds;
-                    this->m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                    this->m_heatingCoilAvailSched = thisHeatCoil.availSched;
                     this->m_MaxHeatAirVolFlow = thisHeatCoil.RatedAirVolFlowRate;
                     if (this->m_MaxHeatAirVolFlow == DataSizing::AutoSize) {
                         this->m_RequestAutoSize = true;
@@ -4695,7 +4695,7 @@ namespace UnitarySystems {
                     errFlag = false;
                 } else {
                     auto const &thisHeatCoil = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(this->m_HeatingCoilIndex);
-                    this->m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                    this->m_heatingCoilAvailSched = thisHeatCoil.availSched;
                     this->m_DesignHeatingCapacity = thisHeatCoil.RatedCapHeat;
                     this->m_MaxHeatAirVolFlow = thisHeatCoil.RatedAirVolFlowRate;
                     if (this->m_MaxHeatAirVolFlow == DataSizing::AutoSize) {
@@ -4721,7 +4721,7 @@ namespace UnitarySystems {
                     errFlag = false;
                 } else {
                     auto const &thisHeatCoil = state.dataWaterToAirHeatPump->WatertoAirHP(this->m_HeatingCoilIndex);
-                    this->m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                    this->m_heatingCoilAvailSched = thisHeatCoil.availSched;
                     this->m_DesignHeatingCapacity = thisHeatCoil.HeatingCapacity;
                     HeatingCoilInletNode = thisHeatCoil.AirInletNodeNum;
                     HeatingCoilOutletNode = thisHeatCoil.AirOutletNodeNum;
@@ -5065,7 +5065,15 @@ namespace UnitarySystems {
                         }
 
                     } else if (Util::SameString(ChildCoolingCoilType, "COIL:COOLING:DX:VARIABLESPEED")) {
-                        this->m_coolingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                        int childCCIndex =
+                            VariableSpeedCoils::GetCoilIndexVariableSpeed(state, ChildCoolingCoilType, ChildCoolingCoilName, errFlag);
+                        if (errFlag) {
+                            ShowContinueError(state, std::format("Occurs in {} = {}", cCurrentModuleObject, thisObjectName));
+                            errFlag = false;
+                            errorsFound = true;
+                        } else {
+                            this->m_coolingCoilAvailSched = state.dataVariableSpeedCoils->VarSpeedCoil(childCCIndex).availSched;
+                        }
                         this->m_MaxCoolAirVolFlow =
                             VariableSpeedCoils::GetCoilAirFlowRateVariableSpeed(state, ChildCoolingCoilType, ChildCoolingCoilName, errFlag);
                         if (errFlag) {
@@ -5225,7 +5233,7 @@ namespace UnitarySystems {
                         CoolingCoilInletNode = thisCoolCoil.AirInletNodeNum;
                         CoolingCoilOutletNode = thisCoolCoil.AirOutletNodeNum;
                         this->m_CondenserNodeNum = thisCoolCoil.CondenserInletNodeNum;
-                        this->m_coolingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                        this->m_coolingCoilAvailSched = thisCoolCoil.availSched;
                         this->m_NumOfSpeedCooling = thisCoolCoil.NumOfSpeeds;
                         if (this->m_NumOfSpeedCooling > 1) {
                             this->m_MultiOrVarSpeedCoolCoil = true;
@@ -5340,7 +5348,7 @@ namespace UnitarySystems {
                         errFlag = false;
                     } else {
                         auto const &thisCoolCoil = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(this->m_CoolingCoilIndex);
-                        this->m_coolingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                        this->m_coolingCoilAvailSched = thisCoolCoil.availSched;
                         this->m_DesignCoolingCapacity = thisCoolCoil.RatedCapCoolTotal;
 
                         // this isn't likely to work on getInput calls but is what happened before
@@ -5390,7 +5398,7 @@ namespace UnitarySystems {
                         errFlag = false;
                     } else {
                         auto const &thisCoolCoil = state.dataWaterToAirHeatPump->WatertoAirHP(this->m_CoolingCoilIndex);
-                        this->m_coolingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                        this->m_coolingCoilAvailSched = thisCoolCoil.availSched;
                         this->m_DesignCoolingCapacity = thisCoolCoil.CoolingCapacity;
                         CoolingCoilInletNode = thisCoolCoil.AirInletNodeNum;
                         CoolingCoilOutletNode = thisCoolCoil.AirOutletNodeNum;
@@ -5445,7 +5453,7 @@ namespace UnitarySystems {
                         errFlag = false;
                     } else {
                         auto const &thisCoolCoil = state.dataPackagedThermalStorageCoil->TESCoil(this->m_CoolingCoilIndex);
-                        this->m_coolingCoilAvailSched = Sched::GetScheduleAlwaysOn(state);
+                        this->m_coolingCoilAvailSched = thisCoolCoil.availSched;
                         this->m_MaxCoolAirVolFlow = thisCoolCoil.RatedEvapAirVolFlowRate;
                         if (thisCoolCoil.CoolingOnlyModeIsAvailable) {
                             this->m_DesignCoolingCapacity = thisCoolCoil.CoolingOnlyRatedTotCap;
