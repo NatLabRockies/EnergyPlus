@@ -1103,6 +1103,8 @@ namespace WaterToAirHeatPumpSimple {
         int WaterInletNode = simpleWAHP.WaterInletNodeNum;
 
         if ((SensLoad != 0.0 || LatentLoad != 0.0) && (state.dataLoopNodes->Node(AirInletNode).MassFlowRate > 0.0)) {
+/*         if ((SensLoad != 0.0 || LatentLoad != 0.0) && (state.dataLoopNodes->Node(AirInletNode).MassFlowRate > 0.0) &&
+            (simpleWAHP.availSched->getCurrentVal() > 0.0)) { */
             simpleWAHP.WaterMassFlowRate = simpleWAHP.DesignWaterMassFlowRate;
 
             simpleWAHP.AirMassFlowRate = state.dataLoopNodes->Node(AirInletNode).MassFlowRate;
@@ -2899,6 +2901,11 @@ namespace WaterToAirHeatPumpSimple {
 
         auto &simpleWAHP(state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum));
 
+/*         if (simpleWAHP.availSched->getCurrentVal() <= 0.0) {
+            simpleWAHP.SimFlag = false;
+            return;
+        } */
+
         TotalCapRated = simpleWAHP.RatedCapCoolTotal;
         SensCapRated = simpleWAHP.RatedCapCoolSens;
         CoolPowerRated = simpleWAHP.RatedPowerCool;
@@ -3178,6 +3185,11 @@ namespace WaterToAirHeatPumpSimple {
         //  LOAD LOCAL VARIABLES FROM DATA STRUCTURE (for code readability)
 
         auto &simpleWAHP(state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum));
+
+/*         if (simpleWAHP.availSched->getCurrentVal() <= 0.0) {
+            simpleWAHP.SimFlag = false;
+            return;
+        } */
 
         HeatCapRated = simpleWAHP.RatedCapHeat;
         HeatPowerRated = simpleWAHP.RatedPowerHeat;
