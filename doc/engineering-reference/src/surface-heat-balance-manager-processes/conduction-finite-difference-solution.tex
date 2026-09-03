@@ -162,9 +162,9 @@ Solver Loop Iterations'' and ``Heat Balance Inside Surfaces Calculation
 Iterations'' respectively.
 
 \begin{equation}
-T\textsubscript{$i$,new} = T\textsubscript{$i$,old}
-                         + \text{Relax}\left(T\textsubscript{$i$,new}
-                            - T\textsubscript{$i$,old} \right)
+T_{\text{$i$,new}} = T_{\text{$i$,old}}
+                         + \text{Relax}\left(T_{\text{$i$,new}}
+                            - T_{\text{$i$,old}} \right)
 \end{equation}
 
 Because of the iteration scheme used for CondFD, the node enthalpies get
@@ -176,8 +176,8 @@ For inputs with MaterialProperty:PhaseChange, the specific heat is calculated
 from the tabulated input data of temperature/enthalpy pairs:
 
 \begin{equation}
-Cp = \frac{h\textsubscript{$i$,new} - h\textsubscript{$i$,old}}
-          {T\textsubscript{$i$,new} - T\textsubscript{$i$,old}}
+Cp = \frac{h_{\text{$i$,new}} - h_{\text{$i$,old}}}
+          {T_{\text{$i$,new}} - T_{\text{$i$,old}}}
 \end{equation}
 
 For inputs with MaterialProperty:PhaseChangeHysteresis, the specific heat is not
@@ -185,9 +185,9 @@ only dependent on the current state, but also the previous state, as it captures
 the hysteresis physics present between the melting and freezing processes.
 
 \begin{equation}
-Cp = f\left(T\textsubscript{$i$,new}, T\textsubscript{$i$, prev},
-            \text{PhaseState}\textsubscript{new},
-            \text{PhaseState}\textsubscript{prev}\right)
+Cp = f\left(T_{\text{$i$,new}}, T_{\text{$i$, prev}},
+            \text{PhaseState}_{\text{new}},
+            \text{PhaseState}_{\text{prev}}\right)
 \end{equation}
 
 The hysteresis model also has inputs for solid and liquid state values for
@@ -345,7 +345,7 @@ heat fluxes (CondFD Surface Heat Flux Node \textless{} i \textgreater{} ) are
 calculated beginning with the inside face of the surface.
 
 \begin{equation}
-\text{QDreport}_N = Q\textsubscript{inside}
+\text{QDreport}_N = Q_{\text{inside}}
 \end{equation}
 %
 for the remaining nodes
@@ -353,11 +353,11 @@ for the remaining nodes
 \begin{align}
 \begin{split}
 \text{QDreport}_{i} = \text{QDreport}_{i+1}
-+&\text{HeatCap1}_{i+1}\frac{T\textsubscript{$i+1$,new} -
-T\textsubscript{$i+1$,old}}{\Delta t} \\
++&\text{HeatCap1}_{i+1}\frac{T_{\text{$i+1$,new}} -
+T_{\text{$i+1$,old}}}{\Delta t} \\
 - \text{QSource}_{i}
 +&\text{HeatCap2}_{i}
-\frac{T\textsubscript{$i$,new}-T\textsubscript{$i$,old}}{\Delta t}
+\frac{T_{\text{$i$,new}}-T_{\text{$i$,old}}}{\Delta t}
 \end{split}
 \end{align}
 %

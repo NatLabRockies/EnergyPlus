@@ -990,7 +990,7 @@ Although this input field may eventually affect all coils, the current implement
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{SystemLoad} - \textnormal{OutputOff}}{\textnormal{OutputFull} - \textnormal{OutputOff}}
+    \textrm{PLR} = \frac{\textrm{SystemLoad} - \textrm{OutputOff}}{\textrm{OutputFull} - \textrm{OutputOff}}
 \end{equation}
 
 where
@@ -1006,7 +1006,7 @@ OutputFull = System output at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{SystemLoad} - \textnormal{OutputFull}_{i-1}}{\textnormal{OutputFull}_{i} - \textnormal{OutputFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{SystemLoad} - \textrm{OutputFull}_{i-1}}{\textrm{OutputFull}_{i} - \textrm{OutputFull}_{i-1}}
 \end{equation}
 
 where
@@ -1026,7 +1026,7 @@ When coils of Coil:Cooling:DX:VariableSpeed, Coil:Heating:DX:SingleSpeed, and Co
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{DesOutTemp} - \textnormal{InletTemp}}{\textnormal{OutTempFull} - \textnormal{InletTemp}}
+    \textrm{PLR} = \frac{\textrm{DesOutTemp} - \textrm{InletTemp}}{\textrm{OutTempFull} - \textrm{InletTemp}}
 \end{equation}
 
 where
@@ -1042,7 +1042,7 @@ OutTemptFull = Outlet temperature at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{DesOutTemp} - \textnormal{OutTempFull}_{i-1}}{\textnormal{OutTempFull}_{i} - \textnormal{OutTempFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{DesOutTemp} - \textrm{OutTempFull}_{i-1}}{\textrm{OutTempFull}_{i} - \textrm{OutTempFull}_{i-1}}
 \end{equation}
 
 where

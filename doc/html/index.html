@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" class="h-100" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>EnergyPlus Documentation</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Bootstrap Icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- After header contents -->
+    <link rel="icon" href="https://energyplus.net/favicon.ico" type="image/x-icon">
+  </head>
+  <body class="d-flex flex-column h-100">
+    <header id="header">
+      <nav class="navbar bd-navbar navbar-expand-lg fixed-top">
+        <div class="container-xxl bd-gutter flex-wrap flex-lg-nowrap">
+          <!-- Brand -->
+          <a class="navbar-brand" href="index.html">
+            <img src="media/ep_nobg.png" alt="EnergyPlus Documentation" width="300" height="216"
+                 style="height: 30px; width: 100%;">
+          </a>
+
+          <!-- Toggler -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list fs-1"></i>
+          </button>
+
+          <!-- Navbar Content -->
+          <div class="collapse navbar-collapse scrollable-navbar" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://github.com/NatLabRockies/EnergyPlus">GitHub</a>
+              </li>
+            </ul>
+
+            <!-- Divider for larger screens -->
+            <div class="vr d-none d-lg-flex mx-2 my-1 nav-line"></div>
+
+            <!-- Divider for smaller screens -->
+            <hr class="d-lg-none nav-line">
+
+            <!-- Theme Dropdown -->
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <button class="btn btn-link nav-link dropdown-toggle" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-circle-half"></i>
+                  <span class="d-lg-none ms-2">Toggle theme</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
+                  <li>
+                    <a class="dropdown-item align-items-center" data-theme="light">
+                      <i class="bi bi-sun-fill me-2 opacity-50"></i> Light
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item align-items-center" data-theme="dark">
+                      <i class="bi bi-moon-stars-fill me-2 opacity-50"></i> Dark
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-xxl bd-gutter bd-layout mb-5">
+      <main class="bd-main order-1">
+
+        <header id="title-block-header" class="ps-lg-2 pt-2">
+          <h1 class="bd-intro" id="title">EnergyPlus Documentation</h1>
+        </header>
+
+        <!-- Main Content -->
+        <div class="bd-content ps-lg-2">
+          <div class="list-group">
+            <a href="input-output-reference/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Input Output Reference</div>
+              Encyclopedic reference to EnergyPlus input objects and output reports.
+            </a>
+            <a href="engineering-reference/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Engineering Reference</div>
+              Background and details on the calculations and calculation methods used throughout EnergyPlus.
+            </a>
+            <a href="output-details-and-examples/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Output Details and Examples</div>
+              Details on output files and example output for various reports.
+            </a>
+            <a href="getting-started/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Getting Started</div>
+              A guide to getting started with EnergyPlus.
+            </a>
+            <a href="using-energyplus-for-compliance/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Using EnergyPlus for Compliance</div>
+              Guidance on using EnergyPlus for compliance calculations.
+            </a>
+            <a href="plant-application-guide/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Plant Application Guide</div>
+              A guide to using the plant and condenser loop simulation in EnergyPlus.
+            </a>
+            <a href="external-interfaces-application-guide/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">External Interfaces Application Guide</div>
+              A guide to the external interfaces available for coupling EnergyPlus with other programs.
+            </a>
+            <a href="module-developer/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Module Developer</div>
+              A guide for developers adding new modules to EnergyPlus.
+            </a>
+            <a href="interface-developer/index.html" class="list-group-item list-group-item-action py-3">
+              <div class="fw-bold">Interface Developer</div>
+              A guide for developers building user interfaces on top of EnergyPlus.
+            </a>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- After body contents -->
+    <footer class="footer bd-footer bg-body-tertiary mt-auto py-md-3 py-4">
+      <div class="container text-body-secondary py-md-3 py-4" align="center">
+        EnergyPlus is funded by the U.S. Department of Energy and managed by the National Laboratory of the Rockies
+        (NLR).<br>
+        EnergyPlus is developed in collaboration with NLR, various DOE National Laboratories, academic institutions, and private firms.<br>
+        <a href="https://github.com/NatLabRockies/EnergyPlus/blob/develop/LICENSE.txt">EnergyPlus License.</a>
+      </div>
+    </footer>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Custom Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const htmlElement = document.documentElement;
+
+        // Function to set the theme
+        const setTheme = (theme) => {
+          htmlElement.setAttribute("data-bs-theme", theme);
+          localStorage.setItem("theme", theme); // Save the theme to localStorage
+        };
+
+        // Get saved theme from localStorage or fallback to default ("light")
+        const savedTheme = localStorage.getItem("theme") || "light";
+        setTheme(savedTheme);
+
+        // Event listener for theme dropdown
+        document.querySelectorAll(".dropdown-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const selectedTheme = item.getAttribute("data-theme");
+            setTheme(selectedTheme);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

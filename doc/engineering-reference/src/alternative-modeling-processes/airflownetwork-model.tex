@@ -418,7 +418,7 @@ $C_{Shape}$ &= Shape factor [dimensionless]\\
 \end{tabular}
 
 \begin{equation}
-C_{Shape} = \left\{ \begin{array}{l}0.754\;\;\;{\rm{for}}\;{\rm{a}}\;{\rm{circle}}\;{\rm{opening}}\\0.942(w/D)\;{\rm{for}}\;{\rm{a}}\;{\rm{rectangle}}\;{\rm{opening}}\end{array} \right\}
+C_{Shape} = \left\{ \begin{array}{l}0.754\;\;\;{\mathrm{for}}\;{\mathrm{a}}\;{\mathrm{circle}}\;{\mathrm{opening}}\\0.942(w/D)\;{\mathrm{for}}\;{\mathrm{a}}\;{\mathrm{rectangle}}\;{\mathrm{opening}}\end{array} \right\}
 \end{equation}
 
 where:
@@ -1007,7 +1007,7 @@ The revised coefficient (B) used in the zone humidity ratio calculation is shown
 B = \sum kg_{mass,sched-loads} + MW_{airflow} + \dot{m}_{sys,in} W_{sys} + \sum_{i = 1}^{surf_s} A_i h_{mi} \rho_{air_z} W_{surf_{s_i}} + QADS_{m,z}
 \end{equation}
 
-where MW\(_{airflow}\) is the sum of mass flow rate multiplied by humidity ratio for infiltration and mixing and Q\(_{ADS,m,z\\}\)is the added total latent (moisture) load in the zone due to Air Distribution System losses from the AirflowNetwork model described above. This coefficient is used in the prediction of moisture as described in the section ``Moisture Predictor-Corrector'' found elsewhere in this document.
+where MW\(_{airflow}\) is the sum of mass flow rate multiplied by humidity ratio for infiltration and mixing and Q\(_{ADS,m,z}\)is the added total latent (moisture) load in the zone due to Air Distribution System losses from the AirflowNetwork model described above. This coefficient is used in the prediction of moisture as described in the section ``Moisture Predictor-Corrector'' found elsewhere in this document.
 
 \subsection{Model Output}\label{model-output}
 
@@ -1023,13 +1023,13 @@ local flow $U_L$ parallel to the fa\c{c}ade (whose value depends on location, bu
 geometry and wind direction).
 
 Consider first the 2-aperture case, where air flows in through one opening of area
-$A_\textup{in}$ and exits through another of equal area. Let us denote the flow rate
+$A_\textrm{in}$ and exits through another of equal area. Let us denote the flow rate
 of ambient air into the room by $Q$, and define a dimensionless flow rate $Q'$ by
 \begin{equation}
-Q'=Q/(A_\textup{in} U_\textup{ref}),
+Q'=Q/(A_\textrm{in} U_\textrm{ref}),
 \end{equation}
-where $U_\textup{ref}$ is a reference velocity taken as the undisturbed wind speed
-$U(z_\textup{ref})$ at a reference height $z_\textup{ref} = 10 \textup{m}$. There is a
+where $U_\textrm{ref}$ is a reference velocity taken as the undisturbed wind speed
+$U(z_\textrm{ref})$ at a reference height $z_\textrm{ref} = 10 \textrm{m}$. There is a
 pressure difference $\Delta p(t)$ between the two opening locations, with time-averaged
 mean value $\overline{\Delta p}$ and standard deviation $\sigma_{\Delta p}$.
 
@@ -1060,14 +1060,14 @@ Q'=\left[a_p |\Delta c_p |+a_\sigma \sigma_{\Delta c_p} \right]^{1/2}+a_s U_L'
 where $a_p$, $a_\sigma$ and $a_s$ are constants, the mean and fluctuating pressure
 difference terms have been written as pressure coefficients
 \begin{equation}
-\Delta c_p=\frac{\overline{\Delta p}}{\frac{1}{2} \rho U_\textup{ref}^2},
+\Delta c_p=\frac{\overline{\Delta p}}{\frac{1}{2} \rho U_\textrm{ref}^2},
 \end{equation}
 \begin{equation}
-\sigma_{\Delta c_p}=\frac{\sigma_{\Delta p}}{\frac{1}{2} \rho U_\textup{ref}^2},
+\sigma_{\Delta c_p}=\frac{\sigma_{\Delta p}}{\frac{1}{2} \rho U_\textrm{ref}^2},
 \end{equation}
 $\rho$ being the ambient air density and
 \begin{equation}
-U_L'=\frac{U_L}{U_\textup{ref}}.
+U_L'=\frac{U_L}{U_\textrm{ref}}.
 \end{equation}
 
 The pressure-difference mechanisms \ref{ss-mean-mech} and \ref{ss-unsteady-mech} are
@@ -1125,7 +1125,7 @@ and
 \begin{equation}
 \sigma_{\Delta c_p}=g(s',\theta)
 \end{equation}
-where the dimensionless separation $s' = s/\textup{WB}$,
+where the dimensionless separation $s' = s/\textrm{WB}$,
 \begin{equation}
 f(s',\theta)=s'\cdot\Pi(\theta),
 \end{equation}
@@ -1319,7 +1319,7 @@ Step 4: Thermal comfort temperature calculation
 The thermal comfort check requires the thermal comfort temperature and the comfort band. The comfort temperature of Tcomf is calculated as a function of the outdoor dry-bulb temperature Tout. The comfort temperature calculation may be based on two curves and a boundary temperature point.
 
 \begin{equation}
-T_{comf} = \left\{ \begin{array}{ll} \rm{Low Temp Curve,} & \min T_{out} < x \leq \rm{Boundary Point} \\ \rm{High Temp Curve,} & \rm{Boundary Point} \leq x < \max T_{out}  \end{array}\right.
+T_{comf} = \left\{ \begin{array}{ll} \mathrm{Low Temp Curve,} & \min T_{out} < x \leq \mathrm{Boundary Point} \\ \mathrm{High Temp Curve,} & \mathrm{Boundary Point} \leq x < \max T_{out}  \end{array}\right.
 \end{equation}
 
 Step 5: Thermal band calculation
@@ -1327,7 +1327,7 @@ Step 5: Thermal band calculation
 The comfort band is calculated as a function of the design personal dissatisfaction PPD.
 
 \begin{equation}
-\theta = -0.0028 \left(100-\rm{PPD}\right)^2 + 0.3419 \left(100-\rm{PPD}\right) - 6.6275
+\theta = -0.0028 \left(100-\mathrm{PPD}\right)^2 + 0.3419 \left(100-\mathrm{PPD}\right) - 6.6275
 \end{equation}
 
 This equation is valid for PPD 0\% to 35\%
@@ -1349,7 +1349,7 @@ If the above logic check is false, no action is needed.
 If the opening probability check is true and upper boundary check is satisfied, a window will be opened, regardless of open/closed status at the previous time step. If the opening probability check is false and upper boundary check is satisfied, a window will remain at the status from the previous time step.
 
 \begin{equation}
-T_g > \left(T_{comf} + \theta\right)~~\&~~\rm{OpeningProbability}
+T_g > \left(T_{comf} + \theta\right)~~\&~~\mathrm{OpeningProbability}
 \end{equation}
 
 Step 7: Lower boundary check of thermal comfort
@@ -1367,7 +1367,7 @@ If the above logic check is false, no action is needed.
 If the closing probability check is true and lower boundary check is satisfied, a window will be closed, regardless of open/closed status at the previous time step. If the closing probability check is false and lower boundary check is satisfied, a window will remain at the status from the previous time step.
 
 \begin{equation}
-T_g < \left(T_{comf} - \theta\right)~~\&~~\rm{ClosingProbability}
+T_g < \left(T_{comf} - \theta\right)~~\&~~\mathrm{ClosingProbability}
 \end{equation}
 
 The output variables from the model are open status, opening probability status, and closing probability status. The detailed description of opening status is given in the Airflow Network Outputs section in the Input Output Reference.

@@ -534,11 +534,11 @@ The indirect cooler has the ability to overcool the air and therefore needs some
 \end{equation}
 
 \begin{equation}
-{\dot Q_{{\mathop{\rm Re}\nolimits} quired}} = \dot m\left( {{h_{out,desired}} - {h_{in,sys}}} \right)
+{\dot Q_{\operatorname{Re} quired}} = \dot m\left( {{h_{out,desired}} - {h_{in,sys}}} \right)
 \end{equation}
 
 \begin{equation}
-PLF = \frac{{{{\dot Q}_{{\mathop{\rm Re}\nolimits} quired}}}}{{{{\dot Q}_{Full}}}}
+PLF = \frac{{{{\dot Q}_{\operatorname{Re} quired}}}}{{{{\dot Q}_{Full}}}}
 \end{equation}
 
 where \(PLF\) is the Part Load Fraction.~ When PLF is less than 1.0, it is assumed that the cooler will deliver the desired temperature air (as long as it is less than the inlet; it doesn't need heating).~ The PLF is used along with secondary side flow fraction to modify the auxiliary fan power when the fan power modifier curve is not specified and find when the unit will overcool.
@@ -677,17 +677,17 @@ The wetbulb temperature of air leaving a direct cooler is the same as the wetbul
 The direct cooler sometimes has the ability to overcool the air and therefore some form of modulation is useful for analysis.~ The special research model includes a Part Load Fraction, PLF, used to model the implications of controlling the amount of cooling.~ It is assumed that through some sort of on/off cycling or wetness control that the cooling electric power can be varied to exactly meet the desired temperature when PLF is less than unity.~ The auxiliary water pump power is then derated using user specified pump power modifier curve or linearly using a Part Load Fraction and a fan flow fraction when the pump power modifier curve is not specified.
 
 \begin{equation}
-{\rm{FullOutput}} = {T_{db,out}} - {T_{db,in}}
+{\mathrm{FullOutput}} = {T_{db,out}} - {T_{db,in}}
 \label{eq:IECFullOutput}
 \end{equation}
 
 \begin{equation}
-{\rm{RequiredOutput}} = {T_{db,desired}} - {T_{db,in}}
+{\mathrm{RequiredOutput}} = {T_{db,desired}} - {T_{db,in}}
 \label{eq:IECRequiredOutput}
 \end{equation}
 
 \begin{equation}
-PLF = \frac{{{\rm{RequiredOutput}}}}{{{\rm{FullOutput}}}}
+PLF = \frac{{{\mathrm{RequiredOutput}}}}{{{\mathrm{FullOutput}}}}
 \label{eq:IECPLF}
 \end{equation}
 

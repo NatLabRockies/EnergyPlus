@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" class="h-100" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="generator" content="pandoc">
+    <!--
+      $if(author)$<meta name="author" content="$author$">$endif$
+      $if(description)$<meta name="description" content="$description$">$endif$
+      $if(title)$<title>$title$</title>$endif$
+    -->
+  $for(author-meta)$
+    <meta name="author" content="$author-meta$" />
+  $endfor$
+  $if(date-meta)$
+    <meta name="dcterms.date" content="$date-meta$" />
+  $endif$
+  $if(keywords)$
+    <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+  $endif$
+  $if(description-meta)$
+    <meta name="description" content="$description-meta$" />
+  $endif$
+    <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Bootstrap Icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+
+    <!-- Highlight.js Styles -->
+    <!-- <link rel="stylesheet" id="highlight-style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/stackoverflow-light.min.css"> -->
+    <link rel="stylesheet" id="highlight-style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+
+    <!-- Custom Styles -->
+  $for(css)$
+    <link rel="stylesheet" href="$css$" />
+  $endfor$
+
+    <!-- After header contents -->
+  $for(header-includes)$
+    $header-includes$
+  $endfor$
+
+  $if(math)$
+    $math$
+  $endif$
+
+  </head>
+  <body class="d-flex flex-column h-100" data-bs-spy="scroll" data-bs-target="#TableOfContents">
+    <header id="header">
+      <!-- Before body contents -->
+      $for(include-before)$
+      $include-before$
+      $endfor$
+    </header>
+
+    <div class="container-xxl bd-gutter bd-layout mb-5">
+      <main class="bd-main order-1">
+
+    <!-- Tiltle -->
+    $if(title)$<h1 class="bd-intro ps-lg-2 pt-2" id="title">$title$</h1>$endif$
+
+    $if(toc)$
+    <!-- Table of Contents -->
+    <div class="bd-toc mt-lg-0 mb-lg-5 mt-3 mb-5 px-sm-1 text-body-secondary">
+
+      <h2 id="toc-header">Table Of Content</h2>
+      <!-- <a class="" data-bs-toggle="collapse" href="#tocContents" role="button" aria-expanded="false" aria-controls="tocContents">
+        <strong class="d-md-block d-none h6 my-2 ms-3">Table of Content</strong>
+      </a> -->
+      <button id="toc-button" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#tocContents" aria-expanded="true" aria-controls="tocContents">
+        Table of Content
+      </button>
+      <div class="collapse" id="tocContents">
+        <hr class="d-md-block d-none my-2 ms-3">
+
+        <nav id="TableOfContents">
+          $toc$
+        </nav>
+      </div>
+    </div>
+    $endif$
+
+    <!-- Main Content -->
+    <div class="bd-content ps-lg-2">
+      $body$
+    </div>
+      </main>
+    </div>
+
+    <!-- After body contents -->
+    $for(include-after)$
+    $include-after$
+    $endfor$
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/gh/jmarrec/highlightjs-energyplus@0.1.1/dist/energyplus.min.js"></script>
+
+
+    $if(mathjax)$
+    <!-- Mathjax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js" defer></script>
+    $endif$
+
+    <!-- Custom Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const htmlElement = document.documentElement;
+        const highlightStyle = document.getElementById("highlight-style");
+
+        // Function to update Highlight.js style based on theme
+        const updateHighlightStyle = (theme) => {
+          const lightTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-light.min.css";
+          const darkTheme = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css";
+          highlightStyle.href = theme === "dark" ? darkTheme : lightTheme;
+        };
+
+        // Function to set the theme
+        const setTheme = (theme) => {
+          htmlElement.setAttribute("data-bs-theme", theme);
+          localStorage.setItem("theme", theme); // Save the theme to localStorage
+          updateHighlightStyle(theme);
+        };
+
+        // Get saved theme from localStorage or fallback to default ("light")
+        const savedTheme = localStorage.getItem("theme") || "light";
+        setTheme(savedTheme);
+
+        // Event listener for theme dropdown
+        document.querySelectorAll(".dropdown-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const selectedTheme = item.getAttribute("data-theme");
+            setTheme(selectedTheme);
+          });
+        });
+
+        // Classify h4 headings as inputs/outputs for color-coded badges
+        document.querySelectorAll(".bd-content h4").forEach((h4) => {
+          const text = h4.textContent.trim().toLowerCase();
+          if (text.startsWith("input")) h4.classList.add("heading-inputs");
+          else if (text.startsWith("output")) h4.classList.add("heading-outputs");
+        });
+
+        // Add anchor links to headings
+        document.querySelectorAll(".bd-content h1[id], .bd-content h2[id], .bd-content h3[id], .bd-content h4[id], .bd-content h5[id], .bd-content h6[id]").forEach((heading) => {
+          const link = document.createElement("a");
+          link.href = "#" + heading.id;
+          link.className = "anchor-link";
+          link.setAttribute("aria-label", "Link to this section");
+          link.innerHTML = '<i class="bi bi-link-45deg"></i>';
+          heading.appendChild(link);
+        });
+
+        // Initialize Highlight.js
+        hljs.highlightAll();
+      });
+    </script>
+  </body>
+</html>
