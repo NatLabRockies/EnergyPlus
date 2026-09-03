@@ -10,7 +10,7 @@ BUILDDIR      = _build
 # Root of the doc/ tree (source dir for the pandoc-based guides build), and where CMake
 # configures/builds it -- matches the paths .readthedocs.yml's post_build steps use (doc, doc/build).
 DOC_ROOT      = ../..
-DOC_BUILD_DIR = $(DOC_ROOT)/build
+DOC_BUILD_DIR = _build_pandoc
 
 # Put it first so that "make" without argument is like "make help".
 help:

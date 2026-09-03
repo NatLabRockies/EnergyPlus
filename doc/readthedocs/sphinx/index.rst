@@ -7,7 +7,7 @@ Over time, that scope may grow much further.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Contents
 
    quick_start/quick_start
    tips_and_tricks/tips_and_tricks
@@ -19,20 +19,23 @@ Over time, that scope may grow much further.
    ems-application-guide/ems-application-guide
    acknowledgments/acknowledgments
 
-User Guides
-===========
+----
 
 The following guides are built separately from LaTeX and published as static HTML:
 
-* `Engineering Reference <guides/engineering-reference/index.html>`_
-* `Input Output Reference <guides/input-output-reference/index.html>`_
-* `Getting Started <guides/getting-started/index.html>`_
-* `External Interfaces Application Guide <guides/external-interfaces-application-guide/index.html>`_
-* `Output Details and Examples <guides/output-details-and-examples/index.html>`_
-* `Plant Application Guide <guides/plant-application-guide/index.html>`_
-* `Module Developer <guides/module-developer/index.html>`_
-* `Interface Developer <guides/interface-developer/index.html>`_
-* `Using EnergyPlus for Compliance <guides/using-energyplus-for-compliance/index.html>`_
+.. toctree::
+   :maxdepth: 1
+   :caption: User Guides
+
+   guides/getting-started/index
+   guides/input-output-reference/index
+   guides/engineering-reference/index
+   guides/external-interfaces-application-guide/index
+   guides/output-details-and-examples/index
+   guides/plant-application-guide/index
+   guides/module-developer/index
+   guides/interface-developer/index
+   guides/using-energyplus-for-compliance/index
 
 Indices and tables
 ==================
