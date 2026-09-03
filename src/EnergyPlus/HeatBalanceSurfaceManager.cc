@@ -1332,20 +1332,20 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 computedNetArea(surface.BaseSurf) -= surface.GrossArea * mult;
             }
         }
-        int currSurfaceClass = int(surface.Class);
-        assert(currSurfaceClass < int(DataSurfaces::SurfaceClass::Num));
-        assert(currSurfaceClass > int(DataSurfaces::SurfaceClass::None));
-        ++numSurfaces(currSurfaceClass);
-        if (isExterior) {
-            ++numExtSurfaces(currSurfaceClass);
+
+        // Object Count Summary
+        // This is only for unit tests: on a real run, GetSurfaceData will unconditionally do OriginalClass = Class
+        assert(surface.OriginalClass < DataSurfaces::SurfaceClass::Num);
+        assert(surface.OriginalClass > DataSurfaces::SurfaceClass::None);
+
+        DataSurfaces::SurfaceClass currSurfaceClass = surface.OriginalClass;
+        if (currSurfaceClass == DataSurfaces::SurfaceClass::Window) {
+            currSurfaceClass = DataSurfaces::SurfaceClass::FixedWindow;
         }
-        if (surface.Class == DataSurfaces::SurfaceClass::Window) {
-            if (surface.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor || surface.OriginalClass == DataSurfaces::SurfaceClass::TDD_Diffuser) {
-                ++numSurfaces((int)surface.OriginalClass);
-                if (isExterior) {
-                    ++numExtSurfaces((int)surface.OriginalClass);
-                }
-            }
+        int const iCurrSurfaceClass = static_cast<int>(currSurfaceClass);
+        ++numSurfaces(iCurrSurfaceClass);
+        if (isExterior) {
+            ++numExtSurfaces(iCurrSurfaceClass);
         }
     }
     // for fins and overhangs just add them explicitly since not otherwise classified
@@ -1455,10 +1455,22 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Detached Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Detached Shading", numExtSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
+
+    // IDD Entry / OriginalClass == Window is kept for backward compatibility only and is treated as a FixedWindow
+    assert(numSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
+    assert(numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
     OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntTot, "Window", numSurfaces(int(DataSurfaces::SurfaceClass::Window)));
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Window", numSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
     OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntExt, "Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)));
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Operable Window", numSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Operable Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Skylight", numSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Skylight", numExtSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Door", numSurfaces(int(DataSurfaces::SurfaceClass::Door)));
     OutputReportPredefined::PreDefTableEntry(
@@ -1467,6 +1479,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Glass Door", numSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Glass Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Overhead Door", numSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Overhead Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Shading)));
     OutputReportPredefined::PreDefTableEntry(
