@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   push:
-    branches: [ develop, html_doc ]
+    branches: [ develop ]
   pull_request:
     branches: [ develop ]
 
