@@ -2103,7 +2103,7 @@ The spatial dependence is inserted to guarantee that the geometrical relations i
 \end{equation}
 
 \begin{equation}
-\int\limits_\Omega  {\delta ({{\mathbf{p}}^{{\mathrm{(2)}}}},{{\mathbf{p}}^{{\mathrm{(1)}}}})d{\Omega ^{{\mathrm{(1)}}}}}  = \left\{ {\begin{array}{*{20}{c}}1&{{{\mathbf{p}}^{{\mathrm{(2)}}}} \in \Omega }\\0&{{{\mathbf{p}}^{{\mathrm{(2)}}}} \notin \Omega }\end{array}} \right.
+\int\limits_\Omega  {\delta ({{\mathbf{p}}^{{\mathrm{(2)}}}},{{\mathbf{p}}^{{\mathrm{(1)}}}})d{\Omega ^{{\mathrm{(1)}}}}}  = \left\{ {\begin{array}{ccc}1&{{{\mathbf{p}}^{{\mathrm{(2)}}}} \in \Omega }\\0&{{{\mathbf{p}}^{{\mathrm{(2)}}}} \notin \Omega }\end{array}} \right.
 \label{eq:deltap2p1dOmega1Integral}
 \end{equation}
 
@@ -2112,7 +2112,7 @@ The spatial dependence is inserted to guarantee that the geometrical relations i
 \end{equation}
 
 \begin{equation}
-\int\limits_A {\delta ({{\mathbf{x}}^{{\mathrm{(2)}}}},{{\mathbf{x}}^{{\mathrm{(1)}}}})d{A^{{\mathrm{(1)}}}}}  = \left\{ {\begin{array}{*{20}{c}}1&{{{\mathbf{x}}^{{\mathrm{(2)}}}} \in A}\\0&{{{\mathbf{x}}^{{\mathrm{(2)}}}} \notin A}\end{array}} \right.
+\int\limits_A {\delta ({{\mathbf{x}}^{{\mathrm{(2)}}}},{{\mathbf{x}}^{{\mathrm{(1)}}}})d{A^{{\mathrm{(1)}}}}}  = \left\{ {\begin{array}{ccc}1&{{{\mathbf{x}}^{{\mathrm{(2)}}}} \in A}\\0&{{{\mathbf{x}}^{{\mathrm{(2)}}}} \notin A}\end{array}} \right.
 \end{equation}
 
 for an arbitrary function \emph{f}.~ {[}In Equations~\ref{eq:deltap2p1fp1dOmega1Equation} and~\ref{eq:deltap2p1dOmega1Integral}, the integration is assumed to be over all possible values of either direction or position, so that the vectors \textbf{\emph{p}}\(^{(2)}\) and \textbf{\emph{x}}\(^{(2)}\) are necessarily within the domain of integration.{]}
@@ -2141,7 +2141,7 @@ and Equation~\ref{eq:E2p2Equation} becomes:
 Referring to the definition of the propagation function in Equation~\ref{eq:ScriptLEquation} and properties of the \(\delta\)-distribution in Equation~\ref{eq:deltap2p1dOmega1Integral}, we see that the integrals in the summation will all be zero, except when \textbf{\emph{p}}\emph{\(_{j}\)}\(^{(2)}\) is contained in the solid angle element \(\Delta\)\(\Omega\)\emph{\(_{i}\)}.~ In that case the integration produces \textbf{\emph{p}}\emph{\(_{i}\)}\(^{(1)}\) = \textbf{\emph{p}}\emph{\(_{j}\)}\(^{(2)}\).~ We can retain the formal summation by utilizing the finite-dimensional form of the \(\delta\)-distribution, known as the Kronicker delta, \(\delta\)\emph{\(_{ij}\)}:
 
 \begin{equation}
-{\delta_{ij}} = \left\{ {\begin{array}{*{20}{c}}1&{i = j}\\0&{i \ne j}\end{array}} \right.
+{\delta_{ij}} = \left\{ {\begin{array}{ccc}1&{i = j}\\0&{i \ne j}\end{array}} \right.
 \end{equation}
 
 Then, the integral becomes:
@@ -2165,7 +2165,7 @@ The LBNL method, which focuses on glazing systems consisting of plane-parallel l
 Equations~\ref{eq:ScriptLx2pj2x1pi1S1pi1Integral} (without the delta distribution in \textbf{\emph{x}}) and~\ref{eq:lambdaspjEquation} are then considered to define the components of a diagonal matrix:
 
 \begin{equation}
-\begin{array}{*{20}{c}}{{\mathbf{\Lambda }^{{\mathrm{(s)}}}} = \left( {{\Lambda ^{{\mathrm{(s)}}}}_{ij}} \right)}&{{\mathrm{where}}}&{\Lambda_{ij}^{{\mathrm{(s)}}} = \left( {{{\mathbf{p}}_j}\cdot {{\mathbf{n}}^{{\mathrm{(s)}}}}} \right)\Delta {\Omega_j}{\delta_{ij}}}\end{array}
+\begin{array}{ccc}{{\mathbf{\Lambda }^{{\mathrm{(s)}}}} = \left( {{\Lambda ^{{\mathrm{(s)}}}}_{ij}} \right)}&{{\mathrm{where}}}&{\Lambda_{ij}^{{\mathrm{(s)}}} = \left( {{{\mathbf{p}}_j}\cdot {{\mathbf{n}}^{{\mathrm{(s)}}}}} \right)\Delta {\Omega_j}{\delta_{ij}}}\end{array}
 \label{eq:LambdasEquation}
 \end{equation}
 
@@ -2184,7 +2184,7 @@ Considering the radiance in the various basis directions to be the components of
 Equation~\ref{eq:SofPtotheTEquation} becomes:
 
 \begin{equation}
-\begin{array}{*{20}{c}}{{S^{{\mathrm{(T)}}}}_j = \sum\limits_i {{T_{ji}}} \sum\limits_k {{\Lambda_{ik}}} {S_k}}&{{\mathrm{where}}}&{{T_{ji}} = {\mathcal{T}} ({{\mathbf{p}}_j}^{{\mathrm{(T)}}},{{\mathbf{p}}_i}^{{\mathrm{(I)}}})}\end{array}
+\begin{array}{ccc}{{S^{{\mathrm{(T)}}}}_j = \sum\limits_i {{T_{ji}}} \sum\limits_k {{\Lambda_{ik}}} {S_k}}&{{\mathrm{where}}}&{{T_{ji}} = {\mathcal{T}} ({{\mathbf{p}}_j}^{{\mathrm{(T)}}},{{\mathbf{p}}_i}^{{\mathrm{(I)}}})}\end{array}
 \end{equation}
 
 which has the obvious character of a series of matrix multiplications.~ (Note that the superscript (T) here means transmitted, not the matrix operation transpose.)~ Similarly, the reflectance matrix elements are:

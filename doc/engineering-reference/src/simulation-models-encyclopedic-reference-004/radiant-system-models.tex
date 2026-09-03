@@ -94,16 +94,16 @@ The transformed equations are solved and then put in matrix form as shown below:
 
 \begin{equation}
 \left[
-    {\begin{array}{*{20}{c}}
+    {\begin{array}{ccc}
       {{T_1}\left( s \right)} \\ {{q_1}\left( s \right)}
     \end{array}}
   \right] = \left[
-    {\begin{array}{*{20}{c}}
+    {\begin{array}{ccc}
       {{A_1}\left( s \right)}&{{B_1}\left( s \right)} \\
       {{C_1}\left( s \right)}&{{D_1}\left( s \right)}
     \end{array}}
   \right] \left[
-    {\begin{array}{*{20}{c}}
+    {\begin{array}{ccc}
       {{T_2}\left( s \right)} \\
       {{q_2}\left( s \right)}
     \end{array}}
@@ -139,32 +139,32 @@ where:
 The 2 x 2 matrix consisting of \(A_1(s)\), \(B_1(s)\), \(C_1(s)\), and \(D_1(s)\) is called the transmission matrix and contains all of the thermophysical properties of the layer necessary to calculate transient conduction heat transfer through it.~ It can easily be shown that a second layer could be characterized in a similar way as:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 where \(A_2(s)\), \(B_2(s)\), \(C_2(s)\), and \(D_2(s)\) are calculated using the properties of the second layer.~ This can be substituted into Equation to provide insight how the extension to multilayered slabs is achieved.
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 Thus, for a multilayered element as shown in Figure~\ref{fig:multilayered-building-element}, each separate layer has a transmission matrix of \(A_i(s)\), \(B_i(s)\), \(C_i(s)\), and \(D_i(s)\) associated with it.~ The form of the matrix equation for the multilayered element is the same as the equation for a single layer:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right]
 \label{eq:LaplaceMultiLayerMatrix}
 \end{equation}
 
 but the transmission matrix is replaced by:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right] \cdots \left[ {\begin{array}{*{20}{c}}{{A_n}\left( s \right)}&{{B_n}\left( s \right)}\\ {{C_n}\left( s \right)}&{{D_n}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right] \cdots \left[ {\begin{array}{ccc}{{A_n}\left( s \right)}&{{B_n}\left( s \right)}\\ {{C_n}\left( s \right)}&{{D_n}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 Equation~\ref{eq:LaplaceMultiLayerMatrix} is typically rearranged as follows:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right]
 \label{eq:LaplaceTransformDeriv631}
 \end{equation}
 
@@ -187,11 +187,11 @@ where x is a vector of state variables, u is a vector of inputs, y is the output
 This formulation can be used to solve the transient heat conduction equation by enforcing a finite difference grid over the various layers in the building element being analyzed.~ In this case, the state variables are the nodal temperatures, the environmental temperatures (interior and exterior) are the inputs, and the resulting heat fluxes at both surfaces are the outputs.~ Thus, the state space representation with finite difference variables would take the following form:
 
 \begin{equation}
-\frac{{d\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right]}}{{dt}} = \left[ A \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ B \right]\left[ {\begin{array}{*{20}{c}}{{T_i}}\\ {{T_o}}\end{array}} \right]
+\frac{{d\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right]}}{{dt}} = \left[ A \right]\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ B \right]\left[ {\begin{array}{ccc}{{T_i}}\\ {{T_o}}\end{array}} \right]
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{*{20}{c}}{{T_i}}\\ {{T_o}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{ccc}{{T_i}}\\ {{T_o}}\end{array}} \right]
 \end{equation}
 
 where \(T_1\), \(T_2\), \ldots{}, \(T_{n-1}\), Tn~are the finite difference nodal temperatures, n is the number of nodes, Ti~and To~are the interior and exterior environmental temperatures, and \({q''_i}\) ~and \({q''_o}\) ~are the heat fluxes (desired output).
@@ -233,12 +233,12 @@ A is the area of the surface exposed to the environmental temperatures.
 In matrix format:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{\frac{{d{T_1}}}{{dt}}}\\ {\frac{{d{T_2}}}{{dt}}}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}&{\frac{1}{{RC}}}\\ {\frac{1}{{RC}}}&{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{\frac{{hA}}{C}}&0\\0&{\frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{\frac{{d{T_1}}}{{dt}}}\\ {\frac{{d{T_2}}}{{dt}}}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}&{\frac{1}{{RC}}}\\ {\frac{1}{{RC}}}&{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{ccc}{\frac{{hA}}{C}}&0\\0&{\frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\end{array}} \right]
 \label{eq:QTFDeriv640}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}0&{ - h}\\h&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0&h\\ { - h}&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ {\begin{array}{ccc}0&{ - h}\\h&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{ccc}0&h\\ { - h}&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\end{array}} \right]
 \end{equation}
 
 \begin{figure}[hbtp] % fig 268
@@ -268,55 +268,55 @@ The second method that will be analyzed in more detail involves the addition of 
 For the first layer, it was determined that in the Laplace domain:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 For the second layer:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 To link the two layers and include the heat source between them, the following substitution is made:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{T_{2 + }}\left( s \right)}\\ {{q_{2 + }}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_2}\left( s \right)}\\ {{q_2}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{T_{2 + }}\left( s \right)}\\ {{q_{2 + }}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 which results in:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left\{ {\left[ {\begin{array}{*{20}{c}}{{T_{2 + }}\left( s \right)}\\ {{q_{2 + }}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]} \right\}
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left\{ {\left[ {\begin{array}{ccc}{{T_{2 + }}\left( s \right)}\\ {{q_{2 + }}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]} \right\}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left\{ {\left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]} \right\}
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left\{ {\left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]} \right\}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{A_2}\left( s \right)}&{{B_2}\left( s \right)}\\ {{C_2}\left( s \right)}&{{D_2}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_3}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}{{A_1}\left( s \right)}&{{B_1}\left( s \right)}\\ {{C_1}\left( s \right)}&{{D_1}\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
 \label{eq:TwoLayerEquivalentQTFLaplaceForm}
 \end{equation}
 
 While Degiovanni concludes with this formula, some insight into what the generic equation for an element that has n layers might look like is gained by working with Equation~\ref{eq:TwoLayerEquivalentQTFLaplaceForm}.~ If a layer is added to the left of the first layer, the entire right hand side of Equation~\ref{eq:TwoLayerEquivalentQTFLaplaceForm} is multiplied by the transmission matrix of the new layer.~ Conversely, if a layer is added to the right of the second layer in Figure~\ref{fig:two-layer-example-for-deriving-the-laplace-transform-extension}, the vector containing the Laplace transform of the temperature and heat flux at interface 3 is replaced by the product of the transmission matrix of the new layer and the vector for temperature and heat flux at the next interface, and the term dealing with the heat source is not affected.~ The general equation for a building element with n layers and m layers between the left hand surface and the heat source can be derived as:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left( {\prod\limits_{i = 1}^n {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]} } \right)\left[ {\begin{array}{*{20}{c}}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] + \left( {\prod\limits_{i = 1}^m {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]} } \right)\left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left( {\prod\limits_{i = 1}^n {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]} } \right)\left[ {\begin{array}{ccc}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] + \left( {\prod\limits_{i = 1}^m {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]} } \right)\left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
 \end{equation}
 
 or in more compact form:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{q_1}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_{n + 1}}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right]\left[ {\begin{array}{ccc}0\\ {{q_{source}}\left( s \right)}\end{array}} \right]
 \label{eq:LaplaceTransformDerivation649}
 \end{equation}
 
-where:~ \(\left[ {\begin{array}{*{20}{c}}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^n {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}\) ~~and~ \(\left[ {\begin{array}{*{20}{c}}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^m {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}\) ~.
+where:~ \(\left[ {\begin{array}{ccc}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^n {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}\) ~~and~ \(\left[ {\begin{array}{ccc}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^m {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}\) ~.
 
 Next, Equation~\ref{eq:LaplaceTransformDerivation649} must be rearranged to match the form of Equation~\ref{eq:LaplaceTransformDeriv631}, which relates the heat flux at both sides of the element to the temperature at each side.~ The matrix equation that is obtained shows that:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{d\left( s \right) - \frac{{D\left( s \right)b\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{b\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
+\left[ {\begin{array}{ccc}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}{d\left( s \right) - \frac{{D\left( s \right)b\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{b\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
 \label{eq:LaplaceTransformDerivation650}
 \end{equation}
 
@@ -325,28 +325,28 @@ This equation bears a striking resemblance to Equation~\ref{eq:LaplaceTransformD
 While Equation~\ref{eq:LaplaceTransformDerivation650} is correct for any single or multilayered element, the first term in the heat source transmission matrix does not appear to match the compactness of the other terms in the matrix equation.~ It can be shown (see Strand 1995: Equations 32 through 42 which detail this derivation) that the heat source transmission term for a two-layer problem reduces to:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{q_1}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{T_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{\frac{{{B_2}\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{{B_1}\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
+\left[ {\begin{array}{ccc}{{q_1}\left( s \right)}\\ {{q_3}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{T_3}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}{\frac{{{B_2}\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{{B_1}\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
 \end{equation}
 
 If this is extended to a slab with n layers and a source between the m and m+1 layers, the general matrix equation for obtaining heat source transfer functions using the Laplace transform method is:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{\frac{{\bar b\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{b\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
+\left[ {\begin{array}{ccc}{{q_1}\left( s \right)}\\ {{q_{n + 1}}\left( s \right)}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{D\left( s \right)}}{{B\left( s \right)}}}&{\frac{{ - 1}}{{B\left( s \right)}}}\\ {\frac{1}{{B\left( s \right)}}}&{\frac{{ - A\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}\left( s \right)}\\ {{T_{n + 1}}\left( s \right)}\end{array}} \right] + \left[ {\begin{array}{ccc}{\frac{{\bar b\left( s \right)}}{{B\left( s \right)}}}\\ {\frac{{b\left( s \right)}}{{B\left( s \right)}}}\end{array}} \right]\left[ {{q_{source}}\left( s \right)} \right]
 \label{eq:LaplaceTransformDeriv652}
 \end{equation}
 
 where:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^n {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
+\left[ {\begin{array}{ccc}{A\left( s \right)}&{B\left( s \right)}\\ {C\left( s \right)}&{D\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^n {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^m {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
+\left[ {\begin{array}{ccc}{a\left( s \right)}&{b\left( s \right)}\\ {c\left( s \right)}&{d\left( s \right)}\end{array}} \right] = \prod\limits_{i = 1}^m {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{\bar a\left( s \right)}&{\bar b\left( s \right)}\\ {\bar c\left( s \right)}&{\bar d\left( s \right)}\end{array}} \right] = \prod\limits_{i = m + 1}^n {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
+\left[ {\begin{array}{ccc}{\bar a\left( s \right)}&{\bar b\left( s \right)}\\ {\bar c\left( s \right)}&{\bar d\left( s \right)}\end{array}} \right] = \prod\limits_{i = m + 1}^n {\left[ {\begin{array}{ccc}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
 \end{equation}
 
 At first glance, the terms in the heat source transmission matrix may appear to be reversed.~ It is expected that only the layers to the left of the source will affect \(q_1(s)\), but the presence of \(\bar b\left( s \right)\) ~in the element multiplied by \(q_{source}(s)\) to obtain \(q_1(s)\) seems to be contradictory.~ In fact, the entire term, \({\frac{{\bar b\left( s \right)}}{B\left( s \right)}}\) , must be analyzed to determine the effect of \(q_{source}(s)\) on \(q_1(s)\).~ In essence, the appearance of \(\bar b\left( s \right)\) ~removes the effects of the layers to the right of the source from B(s) leaving only the influence of the layers to the left of the source.~ The form displayed by Equation~\ref{eq:LaplaceTransformDeriv652} is, however, extremely convenient because the terms in the heat source transmission matrix have the same denominators, and thus roots, as the terms in the temperature transmission matrix.~ Thus, the same roots that are calculated for the CTFs can be used for the QTFs, saving a considerable amount of computer time during the calculation of the transfer functions.
@@ -391,12 +391,12 @@ C\frac{{d{T_2}}}{{dt}} = hA\left( {{T_i} - {T_2}} \right) + \frac{{{T_1} - {T_2}
 In obtaining the matrix equivalent for this set of equations, it should be noted that the source term is not a constant but rather an input that varies with time.~ Thus, it must be grouped with the environmental temperatures as inputs.~ The resulting matrix equations take the following form:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{\frac{{d{T_1}}}{{dt}}}\\ {\frac{{d{T_2}}}{{dt}}}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}&{\frac{1}{{RC}}}\\ {\frac{1}{{RC}}}&{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}{\frac{{hA}}{C}}&0&{\frac{A}{C}}\\0&{\frac{{hA}}{C}}&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{\frac{{d{T_1}}}{{dt}}}\\ {\frac{{d{T_2}}}{{dt}}}\end{array}} \right] = \left[ {\begin{array}{ccc}{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}&{\frac{1}{{RC}}}\\ {\frac{1}{{RC}}}&{\frac{{ - 1}}{{RC}} - \frac{{hA}}{C}}\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{ccc}{\frac{{hA}}{C}}&0&{\frac{A}{C}}\\0&{\frac{{hA}}{C}}&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
 \label{eq:QTFDeriv658}
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_1}}\\ {{{q''}_2}}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}0&{ - h}\\h&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0&h&0\\ { - h}&0&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_1}}\\ {{{q''}_2}}\end{array}} \right] = \left[ {\begin{array}{ccc}0&{ - h}\\h&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{ccc}0&h&0\\ { - h}&0&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
 \label{eq:LaplaceTransformDeriv659}
 \end{equation}
 
@@ -405,11 +405,11 @@ Equation~\ref{eq:LaplaceTransformDeriv659} appears to suggest that the source te
 If this analysis is extended to a finite difference network with n nodes, the corresponding matrix equations can be shown to be:
 
 \begin{equation}
-\frac{{d\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right]}}{{dt}} = \left[ A \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ B \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
+\frac{{d\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right]}}{{dt}} = \left[ A \right]\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ B \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
 \end{equation}
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{*{20}{c}}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_i}}\\ {{{q''}_o}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{ccc}{{T_o}}\\ {{T_i}}\\ {{q_{source}}}\end{array}} \right]
 \end{equation}
 
 The influence of the heat source is also confirmed by the final solution form, which is identical to the Laplace transform result shown in Equation~\ref{eq:LaplaceTransformDeriv653} As with the Laplace solution method, the state space method results in a set of QTFs that relate the heat source at the current time step and several previous time steps to the current heat flux at the surface of the element.
@@ -554,14 +554,14 @@ Consider again the state space example shown in Figure~\ref{fig:two-node-state-s
 When this equation for \(T_1\) is added to Equation~\ref{eq:LaplaceTransformDeriv659}, the resulting output matrix equation for the heat flux at both surfaces and the internal temperature is:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_i}}\\ {{{q''}_o}}\\ {{T_1}}\end{array}} \right] = \left[ {\begin{array}{*{20}{c}}0&{ - h}\\h&0\\1&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{*{20}{c}}0&h&0\\ { - h}&0&0\\0&0&0\end{array}} \right]\left[ {\begin{array}{*{20}{c}}{{T_i}}\\ {{T_o}}\\ {{q_{source}}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_i}}\\ {{{q''}_o}}\\ {{T_1}}\end{array}} \right] = \left[ {\begin{array}{ccc}0&{ - h}\\h&0\\1&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_1}}\\ {{T_2}}\end{array}} \right] + \left[ {\begin{array}{ccc}0&h&0\\ { - h}&0&0\\0&0&0\end{array}} \right]\left[ {\begin{array}{ccc}{{T_i}}\\ {{T_o}}\\ {{q_{source}}}\end{array}} \right]
 \label{eq:QTFDeriv670}
 \end{equation}
 
 The only difference between this relation and Equation~\ref{eq:LaplaceTransformDeriv659} is the presence of \(T_1\) on both the right and left hand side of the equation.~ The dual role of \(T_1\) as a state variable and an output parameter may seem to contradict the goal of the state space method of eliminating the state variables.~ However, due to the flexibility of the formulation, nodal temperatures can be extracted in the same manner that any other output quantity would be obtained.~ For an element with n layers, Equation~\ref{eq:QTFDeriv670} becomes:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{{{q''}_i}}\\ {{{q''}_o}}\\ {{T_s}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{*{20}{c}}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{*{20}{c}}{{T_i}}\\ {{T_o}}\\ {{q_{source}}}\end{array}} \right]
+\left[ {\begin{array}{ccc}{{{q''}_i}}\\ {{{q''}_o}}\\ {{T_s}}\end{array}} \right] = \left[ C \right]\left[ {\begin{array}{ccc}{{T_1}}\\ \vdots \\ {{T_n}}\end{array}} \right] + \left[ D \right]\left[ {\begin{array}{ccc}{{T_i}}\\ {{T_o}}\\ {{q_{source}}}\end{array}} \right]
 \label{eq:QTFDeriv671}
 \end{equation}
 
@@ -755,7 +755,7 @@ Knowledge of the flow conditions allows Equations~\ref{eq:RadSysHX675} through~\
 Knowing the inlet water temperature and water mass flow rate, the calculation procedure is somewhat involved and requires, in addition to Equations~\ref{eq:QTFDeriv672},~\ref{eq:RadSysHX673}, and~\ref{eq:RadSysHX674}, the use of a modified form of Equation~\ref{eq:LaplaceTransformDeriv653}.~ Equation~\ref{eq:LaplaceTransformDeriv653} is the standard conduction transfer function formula for a building element with an embedded source/sink of heat.~ In EnergyPlus, the surface flux on the left hand side of the equation is replaced with a surface heat balance:
 
 \begin{equation}
-\left[ {\begin{array}{*{20}{c}}{Surface}\\ {Heat}\\ {Balance}\end{array}} \right] = \sum\limits_{m = 1}^M {{X_{k,m}}{T_{1,t - m + 1}}}  - \sum\limits_{m = 1}^M {{Y_{k,m}}{T_{3,t - m + 1}}}  + \sum\limits_{m = 1}^k {{F_m}{{q''}_{1,t - m}}}  + \sum\limits_{m = 1}^M {{W_m}{q_{source,t - m + 1}}}
+\left[ {\begin{array}{ccc}{Surface}\\ {Heat}\\ {Balance}\end{array}} \right] = \sum\limits_{m = 1}^M {{X_{k,m}}{T_{1,t - m + 1}}}  - \sum\limits_{m = 1}^M {{Y_{k,m}}{T_{3,t - m + 1}}}  + \sum\limits_{m = 1}^k {{F_m}{{q''}_{1,t - m}}}  + \sum\limits_{m = 1}^M {{W_m}{q_{source,t - m + 1}}}
 \label{eq:RadSysHX682}
 \end{equation}
 
