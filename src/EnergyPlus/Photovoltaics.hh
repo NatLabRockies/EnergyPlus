@@ -99,6 +99,10 @@ namespace Photovoltaics {
 
     void CalcSimplePV(EnergyPlusData &state, int const thisPV);
 
+    void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum);
+
+    void UpdatePVIntegrationSource(EnergyPlusData &state, int const PVnum);
+
     void ReportPV(EnergyPlusData &state, int const PVnum);
 
     // *************

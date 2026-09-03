@@ -82,6 +82,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
 #include <EnergyPlus/DataMoistureBalanceEMPD.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
@@ -114,6 +115,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SolarShading.hh>
@@ -165,6 +167,17 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
         DisplayString(state, "Initializing Surfaces");
     }
     InitSurfaceHeatBalance(state); // Initialize all heat balance related parameters
+
+    // Surface-coupled PV must be initialized before its first temperature-dependent calculation.
+    if (state.dataPhotovoltaicState->GetInputFlag &&
+        state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Generator:Photovoltaic") > 0) {
+        Photovoltaics::GetPVInput(state);
+        state.dataPhotovoltaicState->GetInputFlag = false;
+    }
+
+    for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+        Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+    }
 
     // Solve the zone heat balance 'Detailed' solution
     // Call the outside and inside surface heat balances
@@ -233,6 +246,26 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
 
     state.dataHeatBalSurfMgr->ManageSurfaceHeatBalancefirstTime = false;
+}
+
+void ResimulateSurfaceHeatBalanceForPV(EnergyPlusData &state)
+{
+    // Repeat the coupled surface and PV calculations after electric simulation changes the PV heat sink.
+    if (!state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
+        return;
+    }
+
+    for (int pass = 1; pass <= 2; ++pass) {
+        state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+        CalcHeatBalanceOutsideSurf(state);
+        CalcHeatBalanceInsideSurf(state);
+        for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+            Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+        }
+        if (!state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
+            break;
+        }
+    }
 }
 
 // Beginning Initialization Section of the Module
@@ -7175,7 +7208,6 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     //    // Locals
     //    // SUBROUTINE ARGUMENT DEFINITIONS:
     //
-    //>>>>>>> origin/develop
     // SUBROUTINE PARAMETER DEFINITIONS:
     constexpr std::string_view RoutineNameGroundTemp("CalcHeatBalanceOutsideSurf:GroundTemp");
     constexpr std::string_view RoutineNameGroundTempFC("CalcHeatBalanceOutsideSurf:GroundTempFC");
