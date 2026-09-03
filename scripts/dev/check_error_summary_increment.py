@@ -86,7 +86,6 @@ from base_hook import (
     ErrorMessage,
     LogLevel,
     LogMessage,
-    WarningMessage,
     collect_files,
     exit_hook,
     flatten_list_of_lists,
@@ -252,7 +251,7 @@ def check_text(
         sites.append(IncrementSite(enum_name=enum_name, line_number=line_of(text, m.start()), matched=matched))
         if entry is not None and entry.search_string is not None and not matched:
             log_messages.append(
-                WarningMessage(
+                ErrorMessage(
                     tool="check_error_summary_increment",
                     filepath=filepath,
                     line_number=line_of(text, m.start()),
@@ -277,7 +276,7 @@ def check_text(
             if any(abs(occ - pos) <= WINDOW_CHARS for pos in increment_positions):
                 continue
             log_messages.append(
-                WarningMessage(
+                ErrorMessage(
                     tool="check_error_summary_increment",
                     filepath=filepath,
                     line_number=line_of(text, occ),
@@ -367,6 +366,7 @@ class TestCheckErrorSummaryIncrement(unittest.TestCase):
         sites, log_messages = check_text(text, self.dummy_file, self.enum_entries_by_name)
         self.assertEqual(sites, [])
         self.assertEqual(len(log_messages), 1)
+        self.assertEqual(log_messages[0].loglevel, LogLevel.ERROR)
         self.assertIn("BarError", log_messages[0].message)
         self.assertIn("forgot to add it", log_messages[0].message)
 
@@ -379,7 +379,29 @@ class TestCheckErrorSummaryIncrement(unittest.TestCase):
         self.assertEqual(len(sites), 1)
         self.assertFalse(sites[0].matched)
         self.assertEqual(len(log_messages), 1)
+        self.assertEqual(log_messages[0].loglevel, LogLevel.ERROR)
         self.assertIn("has no nearby ShowXXX() call", log_messages[0].message)
+
+    def test_wrong_enum_used_is_flagged(self) -> None:
+        # The increment uses FooError, but the ShowXXX() call right next to it is actually
+        # BarError's message - a copy/paste mistake picking the wrong enum value. This must
+        # surface as two separate Errors: FooError's increment has no matching call nearby,
+        # and BarError's call has no matching increment nearby - both real, silent counting bugs.
+        text = """
+        ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::FooError)];
+        ShowSevereError(state, "Bar happened here, not Foo");
+        """
+        sites, log_messages = check_text(text, self.dummy_file, self.enum_entries_by_name)
+        self.assertEqual(len(sites), 1)
+        self.assertEqual(sites[0].enum_name, "FooError")
+        self.assertFalse(sites[0].matched)
+
+        self.assertEqual(len(log_messages), 2)
+        self.assertTrue(all(msg.loglevel == LogLevel.ERROR for msg in log_messages))
+        foo_msg = next(msg for msg in log_messages if "FooError" in msg.message)
+        self.assertIn("has no nearby ShowXXX() call", foo_msg.message)
+        bar_msg = next(msg for msg in log_messages if "BarError" in msg.message)
+        self.assertIn("forgot to add it", bar_msg.message)
 
     def test_search_string_outside_a_show_call_is_ignored(self) -> None:
         # A plain string literal that happens to contain the search string (eg an object
