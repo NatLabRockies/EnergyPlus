@@ -18,12 +18,12 @@ Another complication of the inside heat balance relates to the presence of movea
 Applying the basic steady state heat balance equation at each of these interfaces results in the following two equations:
 
 \begin{equation}
-H_c \cdot \left( T_a - T_{mi} \right) + Q_{lw} + H_{mi} \cdot  \left( T_i - T_{mi} \right) + I_t \cdot  \left( T_{old} - T_{mi} \right) = 0
+H_c \cdot \left( T_a - T_{mi} \right) + Q_{lw} + Q_{sw} + H_{mi} \cdot \left( T_i - T_{mi} \right) + I_t \cdot \left( T_{mi,old} - T_{mi} \right) = 0
 \label{eq:InsideHBAirMovInsInterface}
 \end{equation}
 
 \begin{equation}
-H_{mi} \cdot \left( T_{mi} - T_i \right) + Q_{sw} + Q_{cond} = 0
+H_{mi} \cdot \left( T_{mi} - T_i \right) + Q_{cond} = 0
 \label{eq:InsideHBMovInsSurfInterface}
 \end{equation}
 
@@ -43,20 +43,20 @@ where:
 
 \(I_t\) is a damping constant for iterating to achieve a stable radiant exchange between zone surfaces
 
-\(T_{old}\) is the previous surface temperature at the last solution iteration
+\(T_{mi,old}\) is the previous air-moveable insulation interface temperature at the last solution iteration
 
-\(Q_{sw}\) is the short wavelength radiation incident on the interface between the moveable insulation and the surface
+\(Q_{sw}\) is the short wavelength radiation incident on the zone-facing surface of the moveable insulation
 
 \(Q_{cond}\) is the conduction heat transfer through the surface.
 
 Equation~\ref{eq:InsideHBAirMovInsInterface} is the heat balance at the air-moveable insulation interface and can be rearranged to solve for the temperature at this interface, T\(_{mi}\).  Equation~\ref{eq:InsideHBMovInsSurfInterface} is the heat balance at the moveable insulation-surface interface and provides a second equation for T\(_{mi}\).  Both equations leave T\(_{mi}\) as a function of T\(_{i}\) and other known quantities as shown below.
 
-It should be noted that there are some assumptions built into these equations.  First, all long wavelength radiation whether from other surfaces or other elements (such as heat sources which add radiation to the zone) is all assumed to be incident at and influence the air-moveable insulation interface.  This also means that no long wavelength radiation is transmitted through the moveable insulation to the moveable insulation-surface interface.  Second, all short wavelength radiation is assumed to be transmitted through the moveable insulation to the moveable-insulation interface.  This is a simplification that is consistent with transparent insulation and assumes that the moveable insulation material itself does not absorb any short wavelength as it passes through it.  Third, the term Q\(_{cond}\) includes several terms that all relate to the method for calculating heat conduction through the actual surface to which the moveable insulation is attached.  Finally, the moveable insulation material is sufficiently lightweight thermally that it has no thermal mass and it can be treated as an equivalent resistance.
+It should be noted that there are some assumptions built into these equations. First, all long wavelength radiation whether from other surfaces or other elements (such as heat sources which add radiation to the zone) is all assumed to be incident at and influence the air-moveable insulation interface. This also means that no long wavelength radiation is transmitted through the moveable insulation to the moveable insulation-surface interface. Second, interior moveable insulation is opaque, so all short wavelength radiation is absorbed at the zone-facing surface of the moveable insulation. Third, the term Q\(_{cond}\) includes several terms that all relate to the method for calculating heat conduction through the actual surface to which the moveable insulation is attached. Finally, the moveable insulation material is sufficiently lightweight thermally that it has no thermal mass and it can be treated as an equivalent resistance.
 
 Equation~\ref{eq:InsideHBAirMovInsInterface} can be rearranged to obtain:
 
 \begin{equation}
-\left( H_c + H_{mi} + I_t \right) \cdot T_m = H_c \cdot T_a + H_m \cdot T_i + Q_{lw} + I_t \cdot T_{old}
+\left( H_c + H_{mi} + I_t \right) \cdot T_{mi} = H_c \cdot T_a + H_{mi} \cdot T_i + Q_{lw} + Q_{sw} + I_t \cdot T_{mi,old}
 \label{eq:RearrangedHBAirMovIns}
 \end{equation}
 
@@ -68,10 +68,10 @@ The C++ code that is used to solve for \(T_i\) and \(T_{mi}\) for cases where mo
 F1 = HMovInsul / (HMovInsul + HConvIn_surf + IterDampConst);
 
 SurfTempIn(SurfNum) = (SurfCTFConstInPart(SurfNum) + SurfOpaqQRadSWInAbs(SurfNum) + construct.CTFCross(0) * TH11 +
-                       F1 * (SurfQRadThermInAbs(SurfNum) + HConvIn_surf * RefAirTemp(SurfNum) +
+                       F1 * (SurfQRadThermInAbs(SurfNum) + SurfOpaqQRadSWInAbs(SurfNum) + HConvIn_surf * RefAirTemp(SurfNum) +
                        SurfNetLWRadToSurf(SurfNum) + SurfQdotRadHVACInPerArea(SurfNum) +
                        QAdditionalHeatSourceInside(SurfNum) +
-                       IterDampConst * SurfTempInsOld(SurfNum)))
+                       IterDampConst * SurfTempInTmpOld(SurfNum)))
                        / (construct.CTFInside(0) + HMovInsul - F1 * HMovInsul);
 
 SurfTempInTmp(SurfNum) = (construct.CTFInside(0) * SurfTempIn(SurfNum) +
