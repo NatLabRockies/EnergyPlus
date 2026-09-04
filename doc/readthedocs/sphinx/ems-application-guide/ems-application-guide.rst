@@ -2361,19 +2361,27 @@ models for convection coefficients.
 Material Surface Properties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three actuators are available for controlling the surface properties
-material related to absorptance. Those material layers used in a
+Nine actuators are available for controlling the material surface
+properties related to absorptance. Those material layers used in a
 Construction object that lie at the outside and the inside of the
 assembly determine the surface properties of a heat transfer surface. 
-Actuators called “Material” are available with the control types
-“Surface Property Solar Absorptance,” “Surface Property Thermal
-Absorptance,” and “Surface Property Visible Absorptance.”  These are
-dimensionless parameters between 0.0 and 1.0.  These actuators are
-useful for modeling switchable coatings such as thermochromic paints.
-Note that for a single-layer construction, both the inside and outside
-properties will be overwritten. For overwriting outside properties
-alone, please use “MaterialProperty:VariableAbsorptance” (see
-InputOutputReference).
+The legacy “Material” actuator control types “Surface Property Solar
+Absorptance,” “Surface Property Thermal Absorptance,” and “Surface
+Property Visible Absorptance” control both faces. The control types
+“Surface Property Solar Absorptance Outside Face,” “Surface Property
+Thermal Absorptance Outside Face,” and “Surface Property Visible
+Absorptance Outside Face” control only the outside face. Likewise,
+“Surface Property Solar Absorptance Inside Face,” “Surface Property
+Thermal Absorptance Inside Face,” and “Surface Property Visible
+Absorptance Inside Face” control only the inside face. A face-specific
+actuator takes precedence over a legacy actuator when both are active
+for the same property. All these dimensionless parameters must be
+between 0.0 and 1.0.  These actuators are useful for modeling switchable
+coatings such as thermochromic paints but have other applications as
+well. Note that while this input allows more complex control of the
+surface absorptances via EMS, a simpler method for controlling both
+the inside and outside absorptances is available via the input object
+called “MaterialProperty:VariableAbsorptance” (see InputOutputReference).
 
 Surface Construction State
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
