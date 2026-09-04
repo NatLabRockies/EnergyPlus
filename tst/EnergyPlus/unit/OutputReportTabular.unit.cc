@@ -241,6 +241,16 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_unitsFromHeading)
     EXPECT_EQ(0, unitsFromHeading(*state, unitString));
     EXPECT_EQ("Fictional field {nonsense}", unitString);
 
+    // #11710 - Material CTF Summary table: Conductivity {W/m-K} and ThermalResistance {m2-K/W}
+    // headers (from HeatBalanceManager::ReportCTFs eio output) were not converted to IP
+    unitString = "Conductivity {W/m-K}";
+    EXPECT_EQ(119, unitsFromHeading(*state, unitString));
+    EXPECT_EQ("Conductivity {Btu-in/hr-ft2-F}", unitString);
+
+    unitString = "ThermalResistance {m2-K/W}";
+    EXPECT_EQ(120, unitsFromHeading(*state, unitString));
+    EXPECT_EQ("ThermalResistance {ft2-F-hr/Btu}", unitString);
+
     // Check a few report column headings too
     unitString = "Standard Rated Net Cooling Capacity [W]";
     indexUnitConv = unitsFromHeading(*state, unitString);
@@ -14784,8 +14794,10 @@ TEST_F(EnergyPlusFixture, ExteriorFenestrationShadedStateTest)
     mat1->Resistance = 1.25;
     mat1->Roughness = Material::SurfaceRoughness::VerySmooth;
     mat1->group = Material::Group::Glass;
-    mat1->AbsorpSolar = 0.75;
-    mat1->AbsorpThermal = 0.75;
+    mat1->AbsorpSolarOut = 0.75;
+    mat1->AbsorpThermalOut = 0.75;
+    mat1->AbsorpSolarIn = 0.75;
+    mat1->AbsorpThermalIn = 0.75;
     mat1->Trans = 0.25;
     mat1->ReflectSolBeamFront = 0.20;
 
@@ -14796,8 +14808,10 @@ TEST_F(EnergyPlusFixture, ExteriorFenestrationShadedStateTest)
     mat2->Resistance = 2.5;
     mat2->Roughness = Material::SurfaceRoughness::VerySmooth;
     mat2->group = Material::Group::Glass;
-    mat2->AbsorpSolar = 0.25;
-    mat2->AbsorpThermal = 0.25;
+    mat2->AbsorpSolarOut = 0.25;
+    mat2->AbsorpThermalOut = 0.25;
+    mat2->AbsorpSolarIn = 0.25;
+    mat2->AbsorpThermalIn = 0.25;
     mat2->Trans = 0.5;
     mat2->ReflectSolBeamFront = 0.20;
 

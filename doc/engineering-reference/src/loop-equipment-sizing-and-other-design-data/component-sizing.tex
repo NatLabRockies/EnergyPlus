@@ -1674,10 +1674,10 @@ The Loop Supply Side design flow rate, \({\dot V_{Sup,des}}\), is set equal to t
 {\dot V_{Sup,des}} = {\dot V_{loop,des}}*{f_{comp}}
 \end{equation}
 
-The Loop Demand Side design flow rate,\({\dot V_{Dmd,des}}\) , is set equal to the Loop Supply Side design flow rate.
+The Loop Demand Side design flow rate,\({\dot V_{Dmd,des}}\) , is set equal to the Loop Supply Side design flow rate multiplied by the supply to demand side ratio of the loop side specific heat (Cp), temperature (Dt), and density (rho) product. This ratio accounts for differences in plant design delta temperatures, fluid density, and fluid heat capacity (e.g., water versus glycol). If Sizing:Plant objects are not present for both loops connected to the heat exchanger then this ratio is equal to 1.
 
 \begin{equation}
-{\dot V_{Dmd,des}} = {\dot V_{Sup,des}}
+{\dot V_{Dmd,des}} = {\dot V_{Sup,des} * {((Cp,sup * Dt,sup * rho,sup) / (Cp,dem * Dt,dem * rho,dem))}}
 \end{equation}
 
 The design heat transfer capacity and UA for the heat exchanger are calculated using the design temperatures for the two plant loops. The loop design temperature difference for the Loop Supply Side, \(\Delta {T_{SupLoop,Des}}\) , is entered in a Sizing:Plant object and is used to determine a nominal capacity for autosized UA. For autosized UA, \(c_p\) and \(\rho\) are calculated at an initialization temperature of 5.05 C. When UA is not autosized, the reference capacity is based on the user-entered UA and the temperature difference between the loop set point temperatures, or the average of the loop high and low set point temperatures for DualSetpointDeadband control. The following equations are used to calculate the reference capacity for autosized UA and for user-entered UA:

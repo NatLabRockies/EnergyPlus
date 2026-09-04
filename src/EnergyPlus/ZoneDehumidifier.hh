@@ -127,6 +127,7 @@ namespace ZoneDehumidifier {
         Real64 OffCycleParasiticElecPower = 0.0; // Zone Dehumidifier Off-Cycle Parasitic Electric Power [W]
         Real64 OffCycleParasiticElecCons = 0.0;  // Zone Dehumidifier Off-Cycle Parasitic Electric Consumption [J]
         bool MyEnvrnFlag = true;
+        bool MySetPointCheckFlag = true;
         bool CheckEquipName = true;
         bool ZoneEquipmentListChecked = false;
     };
@@ -142,7 +143,7 @@ namespace ZoneDehumidifier {
 
     void GetZoneDehumidifierInput(EnergyPlusData &state);
 
-    void InitZoneDehumidifier(EnergyPlusData &state, int ZoneDehumNum); // Number of the current zone dehumidifier being simulated
+    void InitZoneDehumidifier(EnergyPlusData &state, int ZoneDehumNum, int ZoneNum); // Number of the current zone dehumidifier and serving zone
 
     void CalcZoneDehumidifier(EnergyPlusData &state,
                               int ZoneDehumNum,       // Index number of the current zone dehumidifier being simulated

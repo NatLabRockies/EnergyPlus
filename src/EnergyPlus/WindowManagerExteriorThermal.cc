@@ -590,8 +590,8 @@ namespace Window {
             auto const *matShade = dynamic_cast<Material::MaterialShade const *>(mat);
             assert(matShade != nullptr);
 
-            emissFront = matShade->AbsorpThermal;
-            emissBack = matShade->AbsorpThermal;
+            emissFront = matShade->AbsorpThermalOut;
+            emissBack = matShade->AbsorpThermalIn;
             transThermalFront = matShade->TransThermal;
             transThermalBack = matShade->TransThermal;
             thickness = matShade->Thickness;
@@ -612,8 +612,8 @@ namespace Window {
 
             // Simon: Existing code already takes into account geometry of Woven and scales down
             // emissivity for opening area.
-            emissFront = matScreen->AbsorpThermal;
-            emissBack = matScreen->AbsorpThermal;
+            emissFront = matScreen->AbsorpThermalOut;
+            emissBack = matScreen->AbsorpThermalIn;
             transThermalFront = matScreen->TransThermal;
             transThermalBack = matScreen->TransThermal;
             thickness = matScreen->Thickness;

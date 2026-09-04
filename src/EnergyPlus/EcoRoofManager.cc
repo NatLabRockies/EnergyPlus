@@ -194,8 +194,8 @@ namespace EcoRoofManager {
         auto const &thisConstruct = state.dataConstruction->Construct(ConstrNum);
         auto const *thisMaterial = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
         RoughSurf = thisMaterial->Roughness;
-        Real64 AbsThermSurf = thisMaterial->AbsorpThermal; // Thermal absorptance of the exterior surface
-        Real64 HMovInsul = 0.0;                            // "Convection" coefficient of movable insulation
+        Real64 AbsThermSurf = thisMaterial->AbsorpThermalOut; // Thermal absorptance of the exterior surface
+        Real64 HMovInsul = 0.0;                               // "Convection" coefficient of movable insulation
 
         if (state.dataSurface->Surface(SurfNum).ExtWind) {
             Convect::InitExtConvCoeff(state,
@@ -538,11 +538,11 @@ namespace EcoRoofManager {
         // ONLY READ ECOROOF PROPERTIES IN THE FIRST TIME
         thisEcoRoof->Zf = matER->HeightOfPlants;               // Plant height (m)
         thisEcoRoof->LAI = matER->LAI;                         // Leaf Area Index
-        thisEcoRoof->Alphag = 1.0 - matER->AbsorpSolar;        // albedo rather than absorptivity
+        thisEcoRoof->Alphag = 1.0 - matER->AbsorpSolarOut;     // albedo rather than absorptivity
         thisEcoRoof->Alphaf = matER->Lreflectivity;            // Leaf Reflectivity
         thisEcoRoof->epsilonf = matER->LEmissitivity;          // Leaf Emissivity
         thisEcoRoof->StomatalResistanceMin = matER->RStomata;  // Leaf min stomatal resistance
-        thisEcoRoof->epsilong = matER->AbsorpThermal;          // Soil Emissivity
+        thisEcoRoof->epsilong = matER->AbsorpThermalOut;       // Soil Emissivity
         thisEcoRoof->MoistureMax = matER->Porosity;            // Max moisture content in soil
         thisEcoRoof->MoistureResidual = matER->MinMoisture;    // Min moisture content in soil
         thisEcoRoof->Moisture = matER->InitMoisture;           // Initial moisture content in soil
@@ -696,7 +696,7 @@ namespace EcoRoofManager {
         if (state.dataGlobal->BeginEnvrnFlag || state.dataGlobal->WarmupFlag) {
             state.dataEcoRoofMgr->Moisture = matER->InitMoisture;                    // Initial moisture content in soil
             state.dataEcoRoofMgr->MeanRootMoisture = state.dataEcoRoofMgr->Moisture; // Start the root zone moisture at the same value as the surface.
-            state.dataEcoRoofMgr->Alphag = 1.0 - matER->AbsorpSolar;                 // albedo rather than absorptivity
+            state.dataEcoRoofMgr->Alphag = 1.0 - matER->AbsorpSolarOut;              // albedo rather than absorptivity
         }
 
         if (state.dataGlobal->BeginEnvrnFlag && state.dataEcoRoofMgr->CalcEcoRoofMyEnvrnFlag) {
@@ -802,7 +802,7 @@ namespace EcoRoofManager {
             // SET dry values that NEVER CHANGE
             state.dataEcoRoofMgr->DryCond = matER->Conductivity;
             state.dataEcoRoofMgr->DryDens = matER->Density;
-            state.dataEcoRoofMgr->DryAbsorp = matER->AbsorpSolar;
+            state.dataEcoRoofMgr->DryAbsorp = matER->AbsorpSolarOut;
             state.dataEcoRoofMgr->DrySpecHeat = matER->SpecHeat;
 
             // DETERMINE RELATIVE THICKNESS OF TWO LAYERS OF SOIL (also unchanging)

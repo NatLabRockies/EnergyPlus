@@ -1201,6 +1201,72 @@ F5-1 & FLOOR-SLAB-1 & 0.35 & 1.454 & 2.25 & 182.49 & 30.00 & 180.00 & ~ \tabular
 \bottomrule
 \end{longtable}}
 
+The Opaque Exterior table has been enhanced to show additional columns of data but an explicit example will not fit well on a page so instead the list of columns is shown below:
+
+\begin{itemize}
+\item
+  Surface Name
+\item
+  Construction
+\item
+  Construction Assignment Source
+\item
+  Zone
+\item
+  Space
+\item
+  Reflectance
+\item
+  U-Factor with Film [W/m2-K]
+\item
+  U-Factor no Film [W/m2-K]
+\item
+  Gross Area [m2]
+\item
+  Net Area [m2]
+\item
+  Azimuth [deg]
+\item
+  Tilt [deg]
+\item
+  Cardinal Direction
+\end{itemize}
+
+The Opaque Interior table has similarly been enhanced; its columns are:
+
+\begin{itemize}
+\item
+  Surface Name
+\item
+  Construction
+\item
+  Construction Assignment Source
+\item
+  Zone
+\item
+  Space
+\item
+  Adjacent Surface
+\item
+  Reflectance
+\item
+  U-Factor with Film [W/m2-K]
+\item
+  U-Factor no Film [W/m2-K]
+\item
+  Gross Area [m2]
+\item
+  Net Area [m2]
+\item
+  Azimuth [deg]
+\item
+  Tilt [deg]
+\item
+  Cardinal Direction
+\end{itemize}
+
+Each table in this report that lists individual surfaces or sub-surfaces (all but Exterior Fenestration Shaded State) includes a \emph{Construction Assignment Source} column, whose value is \emph{Explicit}, \emph{Space}, or \emph{Building} depending on whether the surface's construction was assigned directly or inherited from a ConstructionAssignmentSet referenced by its Space or by the Building (see the Input Output Reference for details). Surfaces using a Construction:AirBoundary report \emph{N/A}, since the concept does not apply to them.
+
 Exterior Fenestration
 
 {\scriptsize
@@ -1234,6 +1300,14 @@ The Exterior Fenestration table has been enhanced to show additional columns of 
   Window Name
 \item
   Construction
+\item
+  Construction Assignment Source
+\item
+  Zone
+\item
+  Space
+\item
+  Frame and Divider
 \item
   Glass Area [m2]
 \item
@@ -1295,6 +1369,58 @@ ELECTRO-CON-DARK & 2.560 & 0.710 & 0.113 & 2.742 & 0.207 & 0.108 \tabularnewline
 
 \bottomrule
 \end{longtable}}
+
+Interior Fenestration, Exterior Door, and Interior Door are reported in the same manner but are not shown as explicit examples. Their columns are:
+
+Interior Fenestration:
+
+\begin{itemize}
+\item
+  Window Name
+\item
+  Construction
+\item
+  Construction Assignment Source
+\item
+  Zone
+\item
+  Space
+\item
+  Area of One Opening [m2]
+\item
+  Area of Openings [m2]
+\item
+  Glass U-Factor [W/m2-K]
+\item
+  Glass SHGC
+\item
+  Glass Visible Transmittance
+\item
+  Parent Surface
+\end{itemize}
+
+Exterior Door and Interior Door:
+
+\begin{itemize}
+\item
+  Door Name
+\item
+  Construction
+\item
+  Construction Assignment Source
+\item
+  Zone
+\item
+  Space
+\item
+  U-Factor with Film [W/m2-K]
+\item
+  U-Factor no Film [W/m2-K]
+\item
+  Gross Area [m2]
+\item
+  Parent Surface
+\end{itemize}
 
 Opaque Construction Layers
 

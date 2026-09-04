@@ -28,7 +28,7 @@ if(NOT ${FORTRAN_STATIC_EXE})
 endif()
 install(FILES "convert.txt" DESTINATION "PostProcess/convertESOMTRpgm/")
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(convertESOMTR "PostProcess/convertESOMTRpgm" Unspecified)
 endif()

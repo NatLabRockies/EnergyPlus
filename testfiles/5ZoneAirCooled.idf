@@ -3425,6 +3425,8 @@
 
   Output:Variable,*,Boiler Heating Rate,hourly;
 
+  Output:Variable,*,Boiler Coefficient of Performance,hourly;
+
   Output:Variable,*,Chiller Electricity Rate,hourly;
 
   Output:Variable,*,Chiller Evaporator Cooling Rate,hourly;

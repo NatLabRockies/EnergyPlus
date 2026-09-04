@@ -65,6 +65,7 @@
 #include <EnergyPlus/DataZoneControls.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
+#include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HybridModel.hh>
 #include <EnergyPlus/ScheduleManager.hh>
@@ -738,4 +739,184 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
     EXPECT_NEAR(19.549478386, state->dataContaminantBalance->GCPredictedRate(1), 0.00001);
     EXPECT_NEAR(20.887992514, state->dataContaminantBalance->GCPredictedRate(2), 0.00001);
     EXPECT_NEAR(21.251538064, state->dataContaminantBalance->GCPredictedRate(3), 0.00001);
+}
+
+TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MissingGenericContaminantSchedules)
+{
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                                  !- Name",
+        "  0,                                      !- Direction of Relative North {deg}",
+        "  0,                                      !- X Origin {m}",
+        "  0,                                      !- Y Origin {m}",
+        "  0,                                      !- Z Origin {m}",
+        "  ,                                       !- Type",
+        "  1,                                      !- Multiplier",
+        "  ,                                       !- Ceiling Height {m}",
+        "  ,                                       !- Volume {m3}",
+        "  ,                                       !- Floor Area {m2}",
+        "  ,                                       !- Zone Inside Convection Algorithm",
+        "  ,                                       !- Zone Outside Convection Algorithm",
+        "  Yes;                                    !- Part of Total Floor Area",
+
+        "ZoneAirContaminantBalance,",
+        "  Yes,                                    !- Carbon Dioxide Concentration",
+        "  Always 400ppm,                          !- Outdoor Carbon Dioxide Schedule Name",
+        "  Yes,                                    !- Generic Contaminant Concentration",
+        "  Always Generic Outdoor;                 !- Outdoor Generic Contaminant Schedule Name",
+
+        "ZoneControl:ContaminantController,",
+        "  Zone1 Contaminant Controller,           !- Name",
+        "  Zone1,                                  !- Zone Name",
+        "  Always On,                              !- Carbon Dioxide Control Availability Schedule Name",
+        "  Always 1000ppm;                         !- Carbon Dioxide Setpoint Schedule Name",
+
+        "ScheduleTypeLimits,",
+        "  Fraction,                               !- Name",
+        "  0,                                      !- Lower Limit Value",
+        "  1,                                      !- Upper Limit Value",
+        "  Continuous;                             !- Numeric Type",
+
+        "ScheduleTypeLimits,",
+        "  Any Number;                             !- Name",
+
+        "Schedule:Constant,",
+        "  Always On,                              !- Name",
+        "  Fraction,                               !- Schedule Type Limits Name",
+        "  1.0;                                    !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always 1000ppm,                         !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  1000.0;                                 !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always 400ppm,                          !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  400.0;                                  !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always Generic Outdoor,                 !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  1.0;                                    !- Hourly Value",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    GetProjectControlData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_NO_THROW(GetZoneContaminantSetPoints(*state));
+    AllocateHeatBalArrays(*state);
+    EXPECT_THROW(InitZoneContSetPoints(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring("ZoneControl:ContaminantController", false));
+    EXPECT_TRUE(compare_err_stream_substring("Generic Contaminant Setpoint Schedule", false));
+    EXPECT_TRUE(compare_err_stream_substring("Program terminates for preceding reason(s).", true));
+}
+
+TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_EMSActuatesContaminantSetpointSchedules)
+{
+    // CO2 and generic contaminant setpoint schedules can be actuated through EMS Schedule Value actuators, so EMSOverrideCO2 and EMSOverrideGC are
+    // unnecessary.
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1;                                  !- Name",
+
+        "ZoneControl:ContaminantController,",
+        "  Zone1 Contaminant Controller,           !- Name",
+        "  Zone1,                                  !- Zone Name",
+        "  Always On,                              !- Carbon Dioxide Control Availability Schedule Name",
+        "  CO2 Setpoint Schedule,                  !- Carbon Dioxide Setpoint Schedule Name",
+        "  ,                                       !- Carbon Dioxide Minimum Setpoint Schedule Name",
+        "  ,                                       !- Carbon Dioxide Maximum Setpoint Schedule Name",
+        "  Always On,                              !- Generic Contaminant Control Availability Schedule Name",
+        "  Generic Contaminant Setpoint Schedule;  !- Generic Contaminant Setpoint Schedule Name",
+
+        "Schedule:Constant,",
+        "  Always On,                              !- Name",
+        "  ,                                       !- Schedule Type Limits Name",
+        "  1;                                      !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  CO2 Setpoint Schedule,                  !- Name",
+        "  ,                                       !- Schedule Type Limits Name",
+        "  1000;                                   !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Generic Contaminant Setpoint Schedule,  !- Name",
+        "  ,                                       !- Schedule Type Limits Name",
+        "  10;                                     !- Hourly Value",
+
+        "EnergyManagementSystem:Actuator,",
+        "  CO2SetpointScheduleActuator,            !- Name",
+        "  CO2 Setpoint Schedule,                  !- Actuated Component Unique Name",
+        "  Schedule:Constant,                      !- Actuated Component Type",
+        "  Schedule Value;                         !- Actuated Component Control Type",
+
+        "EnergyManagementSystem:Actuator,",
+        "  GenericContaminantSetpointScheduleActuator,  !- Name",
+        "  Generic Contaminant Setpoint Schedule,  !- Actuated Component Unique Name",
+        "  Schedule:Constant,                      !- Actuated Component Type",
+        "  Schedule Value;                         !- Actuated Component Control Type",
+
+        "EnergyManagementSystem:Program,",
+        "  SetContaminantSetpointSchedules,        !- Name",
+        "  SET CO2SetpointScheduleActuator = 900,  !- Program Line 1",
+        "  SET GenericContaminantSetpointScheduleActuator = 20;  !- Program Line 2",
+
+        "EnergyManagementSystem:ProgramCallingManager,",
+        "  SetContaminantSetpointSchedulesManager, !- Name",
+        "  BeginTimestepBeforePredictor,           !- EnergyPlus Model Calling Point",
+        "  SetContaminantSetpointSchedules;        !- Program Name 1",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EMSManager::CheckIfAnyEMS(*state);
+    EXPECT_TRUE(state->dataGlobal->AnyEnergyManagementSystemInModel);
+
+    state->dataGlobal->TimeStepsInHour = 4;
+    state->dataGlobal->MinutesInTimeStep = 15;
+    state->dataGlobal->TimeStepZone = 0.25;
+    state->dataHVACGlobal->TimeStepSys = 0.25;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
+    state->init_state(*state);
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+
+    auto *co2SetpointSchedule = Sched::GetSchedule(*state, "CO2 SETPOINT SCHEDULE");
+    auto *genericSetpointSchedule = Sched::GetSchedule(*state, "GENERIC CONTAMINANT SETPOINT SCHEDULE");
+    ASSERT_NE(co2SetpointSchedule, nullptr);
+    ASSERT_NE(genericSetpointSchedule, nullptr);
+
+    state->dataEnvrn->Month = 12;
+    state->dataEnvrn->DayOfMonth = 31;
+    state->dataEnvrn->DayOfYear_Schedule = 365;
+    state->dataEnvrn->DayOfWeek = 4;
+    state->dataEnvrn->DayOfWeekTomorrow = 5;
+    state->dataEnvrn->HolidayIndex = 0;
+    state->dataEnvrn->DSTIndicator = 0;
+    state->dataGlobal->HourOfDay = 24;
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->CurrentTime = 24.0;
+    Sched::UpdateScheduleVals(*state);
+
+    bool anyEMSRan = false;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::SetupSimulation, anyEMSRan, ObjexxFCL::Optional_int_const());
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, anyEMSRan, ObjexxFCL::Optional_int_const());
+    EXPECT_TRUE(anyEMSRan);
+    Sched::UpdateScheduleVals(*state);
+
+    EXPECT_TRUE(co2SetpointSchedule->EMSActuatedOn);
+    EXPECT_EQ(900.0, co2SetpointSchedule->EMSVal);
+    EXPECT_EQ(900.0, co2SetpointSchedule->getCurrentVal());
+    EXPECT_TRUE(genericSetpointSchedule->EMSActuatedOn);
+    EXPECT_EQ(20.0, genericSetpointSchedule->EMSVal);
+    EXPECT_EQ(20.0, genericSetpointSchedule->getCurrentVal());
 }

@@ -40,7 +40,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/getting-started/src/energy-meters/standard-energy-meters.tex
     ${PROJECT_SOURCE_DIR}/getting-started/src/energy-meters/custom-meters.tex
     ${PROJECT_SOURCE_DIR}/getting-started/src/standard-energyplus-units.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of included images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14

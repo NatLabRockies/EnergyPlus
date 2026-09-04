@@ -177,7 +177,17 @@ constexpr std::array<std::string_view, static_cast<int>(CtrlVarType::Num)> ctrlV
     "INVALID-NONE", "TEMPERATURE", "HUMIDITYRATIO", "TEMPERATUREANDHUMIDITYRATIO", "INVALID-FLOW"};
 constexpr std::array<std::string_view, static_cast<int>(ControllerAction::Num)> actionNamesUC = {"", "REVERSE", "NORMAL"};
 
-std::string ControlVariableTypes(CtrlVarType const &c)
+static bool isWaterCoilAirFlowActive(ControllerPropsType const &controllerProps, Real64 const sensedAirMassFlowRate)
+{
+    if (controllerProps.WaterCoilType == DataPlant::PlantEquipmentType::CoilWaterCooling ||
+        controllerProps.WaterCoilType == DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling) {
+        return sensedAirMassFlowRate >= WaterCoils::MinAirMassFlow;
+    }
+
+    return sensedAirMassFlowRate > 0.0;
+}
+
+static std::string ControlVariableTypes(CtrlVarType const &c)
 {
     switch (c) {
     case CtrlVarType::NoControlVariable:
@@ -1259,7 +1269,7 @@ void CalcSimpleController(EnergyPlusData &state,
 
     // Check to see if the component is running; if not converged and return.  This check will be done
     // by looking at the component mass flow rate at the sensed node.
-    if (state.dataLoopNodes->Node(controllerProps.SensedNode).MassFlowRate == 0.0) {
+    if (!isWaterCoilAirFlowActive(controllerProps, state.dataLoopNodes->Node(controllerProps.SensedNode).MassFlowRate)) {
         ExitCalcController(state, ControlNum, DataPrecisionGlobals::constant_zero, ControllerMode::Off, IsConvergedFlag, IsUpToDateFlag);
         return;
     }
@@ -1579,6 +1589,14 @@ void CheckSimpleController(EnergyPlusData &state, int const ControlNum, bool &Is
     // PRECONDITION: Setpoint must be known. See ControllerProps%IsSetPointDefinedFlag
 
     auto &controllerProps = state.dataHVACControllers->ControllerProps(ControlNum);
+
+    // If there is no active air flow through the sensed node then the controller must be Off with zero actuation to be considered converged.
+    // A warm restart may preserve a previous MaxActive solution which is invalid when air flow has dropped below the coil's operating threshold.
+    if (!isWaterCoilAirFlowActive(controllerProps, state.dataLoopNodes->Node(controllerProps.SensedNode).MassFlowRate)) {
+        IsConvergedFlag = (controllerProps.Mode == ControllerMode::Off) && (controllerProps.ActuatedValue == 0.0);
+        return;
+    }
+
     auto &rootFinders = state.dataHVACControllers->RootFinders(ControlNum);
 
     // Default initialization: assuming no convergence unless detected in the following code!
@@ -1768,21 +1786,14 @@ void SaveSimpleController(EnergyPlusData &state, int const ControlNum, bool cons
     // PURPOSE OF THIS SUBROUTINE:
     // Updates solution trackers if simple controller is converged.
 
-    auto &ControllerProps = state.dataHVACControllers->ControllerProps(ControlNum);
-
     // Save solution and mode for next call only if converged
     if (IsConvergedFlag) {
+        auto &ControllerProps = state.dataHVACControllers->ControllerProps(ControlNum);
         int PreviousSolutionIndex = FirstHVACIteration ? 1 : 2;
 
-        if (ControllerProps.Mode == ControllerMode::Active) {
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).DefinedFlag = true;
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).Mode = ControllerProps.Mode;
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).ActuatedValue = ControllerProps.NextActuatedValue;
-        } else {
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).DefinedFlag = false;
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).Mode = ControllerProps.Mode;
-            ControllerProps.SolutionTrackers(PreviousSolutionIndex).ActuatedValue = ControllerProps.NextActuatedValue;
-        }
+        ControllerProps.SolutionTrackers(PreviousSolutionIndex).DefinedFlag = (ControllerProps.Mode == ControllerMode::Active);
+        ControllerProps.SolutionTrackers(PreviousSolutionIndex).Mode = ControllerProps.Mode;
+        ControllerProps.SolutionTrackers(PreviousSolutionIndex).ActuatedValue = ControllerProps.NextActuatedValue;
     }
 }
 
@@ -2677,6 +2688,7 @@ void CheckCoilWaterInletNode(EnergyPlusData &state,
     for (auto const &ControllerProps : state.dataHVACControllers->ControllerProps) {
         if (ControllerProps.ActuatedNode == WaterInletNodeNum) {
             NodeNotFound = false;
+            break;
         }
     }
 }

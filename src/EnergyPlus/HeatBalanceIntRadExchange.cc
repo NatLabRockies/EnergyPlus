@@ -443,7 +443,7 @@ namespace HeatBalanceIntRadExchange {
         auto &movInsul = s_surf->intMovInsuls(SurfNum);
         if (movInsul.present != movInsul.presentPrevTS) {
             change = (std::abs(state.dataConstruction->Construct(s_surf->Surface(SurfNum).Construction).InsideAbsorpThermal -
-                               state.dataMaterial->materials(movInsul.matNum)->AbsorpThermal) > 0.01);
+                               state.dataMaterial->materials(movInsul.matNum)->AbsorpThermalIn) > 0.01);
         }
     }
 

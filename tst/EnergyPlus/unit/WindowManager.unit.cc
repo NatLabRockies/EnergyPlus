@@ -81,6 +81,7 @@
 #include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/WindowComplexManager.hh>
 #include <EnergyPlus/WindowManager.hh>
+#include <EnergyPlus/WindowManagerExteriorOptical.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -131,6 +132,61 @@ TEST_F(EnergyPlusFixture, W5InitGlassParameters_ClearsCoefficients)
     for (auto const &coeff : construct.TransVisBeamCoef) {
         EXPECT_EQ(0.0, coeff);
     }
+}
+
+TEST_F(EnergyPlusFixture, WindowManagerExteriorOptical_InteriorShadeUsesInsideThermalAbsorptance)
+{
+    // Skip the optical-layer setup so this test isolates the effective emissivity calculation below it.
+    state->dataHeatBal->TotConstructs = 0;
+    state->dataConstruction->Construct.allocate(2);
+
+    constexpr Real64 glassEmissivity = 0.84;
+    auto *glassMaterial = new Material::MaterialBase;
+    glassMaterial->Name = "GLASS MATERIAL";
+    glassMaterial->group = Material::Group::Glass;
+    glassMaterial->AbsorpThermalBack = glassEmissivity;
+    state->dataMaterial->materials.push_back(glassMaterial);
+
+    constexpr Real64 shadeTransmittance = 0.10;
+    constexpr Real64 outsideShadeEmissivity = 0.20;
+    constexpr Real64 insideShadeEmissivity = 0.60;
+    auto *shadeMaterial = new Material::MaterialShade;
+    shadeMaterial->Name = "INTERIOR SHADE MATERIAL";
+    shadeMaterial->TransThermal = shadeTransmittance;
+    shadeMaterial->AbsorpThermalOut = outsideShadeEmissivity;
+    shadeMaterial->AbsorpThermalIn = insideShadeEmissivity;
+    state->dataMaterial->materials.push_back(shadeMaterial);
+
+    auto &baseConstruction = state->dataConstruction->Construct(1);
+    baseConstruction.TypeIsWindow = true;
+    baseConstruction.TotLayers = 1;
+    baseConstruction.LayerPoint.allocate(1);
+    baseConstruction.LayerPoint(1) = 1;
+
+    auto &shadedConstruction = state->dataConstruction->Construct(2);
+    shadedConstruction.TotLayers = 2;
+    shadedConstruction.LayerPoint.allocate(2);
+    shadedConstruction.LayerPoint(1) = 1;
+    shadedConstruction.LayerPoint(2) = 2;
+
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    state->dataSurface->surfShades.allocate(1);
+    state->dataSurface->SurfWinWindowModelType.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.HeatTransSurf = true;
+    surface.Construction = 1;
+    surface.activeShadedConstruction = 2;
+    state->dataSurface->SurfWinWindowModelType(1) = DataSurfaces::WindowModel::Detailed;
+
+    InitWCE_SimplifiedOpticalData(*state);
+
+    Real64 const glassReflectance = 1.0 - glassEmissivity;
+    Real64 const shadeReflectance = 1.0 - shadeTransmittance - insideShadeEmissivity;
+    Real64 const denominator = 1.0 - glassReflectance * shadeReflectance;
+    EXPECT_NEAR(
+        state->dataSurface->surfShades(1).effShadeEmi, insideShadeEmissivity * (1.0 + glassReflectance * shadeTransmittance / denominator), 1.0e-12);
+    EXPECT_NEAR(state->dataSurface->surfShades(1).effGlassEmi, glassEmissivity * shadeTransmittance / denominator, 1.0e-12);
 }
 
 TEST_F(EnergyPlusFixture, WindowFrameTest)
@@ -7743,4 +7799,54 @@ TEST_F(EnergyPlusFixture, CFS_InteriorSolarDistribution_Test)
 
     EXPECT_EQ(state->dataSolarShading->SurfWinAbsBeam(1), 0.000);
     EXPECT_EQ(state->dataSolarShading->SurfWinAbsBeam(2), 0.000);
+}
+
+TEST_F(EnergyPlusFixture, WindowManager_WindowGasPropertiesAtTemp_GasMixture)
+{
+    auto &wm = state->dataWindowManager;
+    Real64 constexpr T = 273.15; // gap mean temperature [K]
+
+    // Case 1: two-gas mixture, 10% Air + 90% Argon
+    {
+        int constexpr iGap = 0;
+        auto &gap = wm->gaps[iGap];
+        gap.numGases = 2;
+
+        gap.gasFracts[0] = 0.10;
+        gap.gases[0].wght = 28.97;                    // air weight
+        gap.gases[0].vis = {3.723e-6, 4.940e-8, 0.0}; // air viscosity coefficients
+
+        gap.gasFracts[1] = 0.90;
+        gap.gases[1].wght = 39.948;                   // argon weight
+        gap.gases[1].vis = {3.379e-6, 6.451e-8, 0.0}; // argon viscosity coefficients
+
+        Real64 dens = 0.0;
+        Real64 visc = 0.0;
+        WindowGasPropertiesAtTemp(*state, T, iGap, dens, visc);
+
+        // Expected values from the corrected Wilke mixing (j < NMix).
+        EXPECT_NEAR(visc, 2.066268948946603e-05, 1.0e-11);
+        EXPECT_NEAR(dens, 1.710627281762915, 1.0e-9);
+    }
+
+    // Case 2: full five-gas mixture (NMix == maxMixGases == 5)
+    // The only case where old `j <= NMix` reads truly out of bounds (gases[5] in std::array<Material::Gas, Material::maxMixGases>, and
+    // fvis[5]/frct[5] in std::array<Real64, Material::maxMixGases>, all one past the end).
+    {
+        int constexpr iGap = 1;
+        auto &gap = wm->gaps[iGap];
+        gap.numGases = Material::maxMixGases; // 5
+        for (int k = 0; k < Material::maxMixGases; ++k) {
+            gap.gasFracts[k] = 1.0 / Material::maxMixGases;
+            gap.gases[k].wght = 28.97;
+            gap.gases[k].vis = {3.723e-6, 4.940e-8, 0.0};
+        }
+
+        Real64 dens = 0.0;
+        Real64 visc = 0.0;
+        WindowGasPropertiesAtTemp(*state, T, iGap, dens, visc);
+
+        Real64 const singleGasVisc = 3.723e-6 + 4.940e-8 * T; // = 1.721661e-05
+        EXPECT_NEAR(visc, singleGasVisc, 1.0e-11);
+    }
 }

@@ -234,6 +234,8 @@ set(SRC
     DaylightingDevices.hh
     DaylightingManager.cc
     DaylightingManager.hh
+    ConstructionAssignmentSet.cc
+    ConstructionAssignmentSet.hh
     DemandManager.cc
     DemandManager.hh
     DesiccantDehumidifiers.cc
@@ -1279,7 +1281,7 @@ if(UNIX AND NOT APPLE)
   endif()
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(energyplus "." Unspecified ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/python_entitlements.xml")
   register_install_codesign_target(energyplusapi "." Unspecified)

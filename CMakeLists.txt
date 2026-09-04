@@ -126,30 +126,7 @@ mark_as_advanced(BUILD_OBJEXXFCL_TESTING)
 
 #######################################################################
 
-# TODO: remove at next release
-# Temporary workaround to default the correct DOCUMENTATION_BUILD value if BUILD_DOCS existed in the cache or is passed via the command line
-# This warning will be triggered only once if it's from the Cache since I'm unsetting it
-# (such as when using the GUI or running `cmake .` instead of passing all command line arguments)
-if(DEFINED BUILD_DOCS)
-  if(NOT DEFINED DOCUMENTATION_BUILD)
-    if(BUILD_DOCS)
-      message(AUTHOR_WARNING "BUILD_DOCS (=ON) was deprecated in favor of the 'DOCUMENTATION_BUILD' choice, which was defaulted to 'BuildWithAll'")
-      set(DOCUMENTATION_BUILD
-          "BuildWithAll"
-          CACHE STRING "Build LaTeX-pdf documentation")
-    else()
-      message(AUTHOR_WARNING "BUILD_DOCS (=OFF) was deprecated in favor of the 'DOCUMENTATION_BUILD' choice, which was defaulted to 'DoNotBuild")
-    endif()
-  else()
-    message(AUTHOR_WARNING "DOCUMENTATION_BUILD is already defined and has value '${DOCUMENTATION_BUILD}', ignoring BUILD_DOCS")
-  endif()
-  unset(BUILD_DOCS CACHE)
-endif()
-# END TODO
-
-set(DocumentationBuildValues
-    "DoNotBuild;BuildWithAll;BuildOnlyWithPackage"
-    CACHE INTERNAL "List of possible values for the LaTeX-pdf documentation")
+set(DocumentationBuildValues "DoNotBuild;BuildWithAll;BuildOnlyWithPackage")
 set(DOCUMENTATION_BUILD
     "DoNotBuild"
     CACHE STRING "Build LaTeX-pdf documentation")
@@ -159,17 +136,6 @@ if(NOT DOCUMENTATION_BUILD IN_LIST DocumentationBuildValues)
   message(FATAL_ERROR "DOCUMENTATION_BUILD must be one of ${DocumentationBuildValues}")
 endif()
 
-# Local only variables for ease of use in if blocks
-set(BUILD_DOCS OFF)
-set(BUILD_DOCS_ONLY_WITH_PACKAGE OFF)
-
-if(DOCUMENTATION_BUILD STREQUAL "BuildWithAll")
-  set(BUILD_DOCS ON)
-  set(BUILD_DOCS_ONLY_WITH_PACKAGE OFF)
-elseif(DOCUMENTATION_BUILD STREQUAL "BuildOnlyWithPackage")
-  set(BUILD_DOCS ON)
-  set(BUILD_DOCS_ONLY_WITH_PACKAGE ON)
-endif()
 #######################################################################
 
 option(LINK_WITH_PYTHON "Link with Python Library for Python Plugin Builds" OFF)
@@ -185,7 +151,7 @@ if(APPLE AND BUILD_PACKAGE)
   # Otherwise, the register_install_codesign_target isn't added until you reconfigure cmake...
   include(cmake/CodeSigning.cmake)
 
-  # Defines CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
+  # Defines CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
   setup_macos_codesigning_variables()
 endif()
 
@@ -419,10 +385,8 @@ if(BUILD_PACKAGE)
   include(${PROJECT_SOURCE_DIR}/cmake/Install.cmake)
 endif()
 
-if(BUILD_DOCS)
-  set(DOCS_TESTING
-      ${BUILD_TESTING}
-      CACHE INTERNAL "" FORCE)
+if(NOT DOCUMENTATION_BUILD STREQUAL "DoNotBuild")
+  set(DOCS_TESTING ${BUILD_TESTING})
   add_subdirectory(doc)
 endif()
 

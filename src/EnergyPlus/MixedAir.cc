@@ -830,6 +830,8 @@ void SimOAController(EnergyPlusData &state, std::string const &CtrlName, int &Ct
                             "following types: Coil:Cooling:DX:MultiSpeed,"
                             " Coil:Cooling:DX:VariableSpeed, or Coil:Cooling:DX. EconomizerFirst will not be enforced.",
                             state.dataMixedAir->OAController(OAControllerNum).Name));
+                    state.dataMixedAir->OAController(OAControllerNum).EconomizerStagingType =
+                        HVAC::EconomizerStagingType::InterlockedWithMechanicalCooling;
                 }
             }
             primaryAirSystems.EconomizerStagingCheckFlag = true;
@@ -1033,8 +1035,10 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
                     // check outlet node is same as next components inlet node
                     if (OASys.ComponentType(CompNum) == "COILSYSTEM:COOLING:WATER" && CompNum < OASys.NumComponents) {
                         if (OASys.compPointer[CompNum] != nullptr) {
-                            int const equipIndex = OASys.compPointer[CompNum]->getEquipIndex();
-                            companionCoilAirInletNodeNum = state.dataUnitarySystems->unitarySys[equipIndex].m_HRcoolCoilAirInNode;
+                            // compPointer[CompNum] already points at the correct UnitarySys object (matched by name in UnitarySys::factory())
+                            if (auto *unitarySysPtr = dynamic_cast<UnitarySystems::UnitarySys *>(OASys.compPointer[CompNum])) {
+                                companionCoilAirInletNodeNum = unitarySysPtr->m_HRcoolCoilAirInNode;
+                            }
                         }
                     }
                     if (OASys.ComponentType(CompNum) == "SOLARCOLLECTOR:UNGLAZEDTRANSPIRED") {

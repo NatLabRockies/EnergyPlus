@@ -1,7 +1,7 @@
 # to get the list of input files, go to the root of the document folder, and:
 # grep -r '\\input{' * | cut -d ':' -f 2 | cut -c 8- | rev | cut -c 2- | rev | sed 's|^|  ${PROJECT_SOURCE_DIR}/acknowledgments/|g' | sed 's/$/.tex/g'
 set(INCLUDED_TEX
-    ${PROJECT_SOURCE_DIR}/title.tex
+    ${PROJECT_BINARY_DIR}/title.tex
     ${PROJECT_SOURCE_DIR}/using-energyplus-for-compliance/using-energyplus-for-compliance.tex
     ${PROJECT_SOURCE_DIR}/header.tex
     ${PROJECT_SOURCE_DIR}/using-energyplus-for-compliance/src/using-energyplus-for-compliance.tex

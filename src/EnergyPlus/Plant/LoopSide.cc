@@ -65,6 +65,7 @@
 #include <EnergyPlus/PlantPressureSystem.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Pumps.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
@@ -2173,6 +2174,7 @@ namespace DataPlant {
         Real64 ThisLoopSideFlow = ThisSideLoopFlowRequest;
         Real64 TotalPumpMinAvailFlow = 0.0;
         Real64 TotalPumpMaxAvailFlow = 0.0;
+        Real64 intermittentConstantSpeedInletPumpFlow = 0.0;
         if (allocated(this->Pumps)) {
 
             //~ Initialize pump values
@@ -2191,6 +2193,38 @@ namespace DataPlant {
                 TotalPumpMaxAvailFlow += e.CurrentMaxAvail;
             }
 
+            auto &loop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+            auto const otherSide = LoopSideOther[static_cast<int>(this->plantLoc.loopSideNum)];
+            bool const hasFixedFlowBypassPath =
+                this->BypassExists && (loop.LoopSide(otherSide).BypassExists || loop.CommonPipeType != DataPlant::CommonPipeType::No);
+            bool const pressureDeterminesPumpFlow =
+                loop.UsePressureForPumpCalcs && loop.PressureSimType == DataPlant::PressSimType::FlowCorrection && loop.PressureDrop > 0.0;
+
+            if (ThisSideLoopFlowRequest > DataConvergParams::PlantFlowRateToler && hasFixedFlowBypassPath && !pressureDeterminesPumpFlow) {
+                for (auto const &pumpInfo : this->Pumps) {
+                    if (pumpInfo.BranchNum != 1) {
+                        continue;
+                    }
+                    auto const &pumpBranch = this->Branch(pumpInfo.BranchNum);
+                    auto const &pumpComp = pumpBranch.Comp(pumpInfo.CompNum);
+                    if (pumpComp.Type != DataPlant::PlantEquipmentType::PumpConstantSpeed || pumpComp.CompNum <= 0) {
+                        continue;
+                    }
+                    auto const &pump = state.dataPumps->PumpEquip(pumpComp.CompNum);
+                    bool const supervisoryOff = (loop.EMSCtrl && loop.EMSValue <= 0.0) || (this->EMSCtrl && this->EMSValue <= 0.0) ||
+                                                (pumpBranch.EMSCtrlOverrideOn && pumpBranch.EMSCtrlOverrideValue <= 0.0) ||
+                                                (pumpComp.EMSLoadOverrideOn && pumpComp.EMSLoadOverrideValue == 0.0);
+                    if (pump.PumpControl != Pumps::PumpControlType::Intermittent || pump.EMSMassFlowOverrideOn || supervisoryOff ||
+                        pumpInfo.CurrentMaxAvail <= DataConvergParams::PlantFlowRateToler) {
+                        continue;
+                    }
+                    Real64 const scheduleFraction = (pump.flowRateSched != nullptr) ? std::clamp(pump.flowRateSched->getCurrentVal(), 0.0, 1.0) : 1.0;
+                    Real64 const scheduledPumpFlow = pump.MassFlowRateMax * scheduleFraction;
+                    Real64 const constrainedPumpFlow = min(scheduledPumpFlow, state.dataLoopNodes->Node(ThisSideInletNode).MassFlowRateMax);
+                    intermittentConstantSpeedInletPumpFlow = max(intermittentConstantSpeedInletPumpFlow, constrainedPumpFlow);
+                }
+            }
+
             // Use the pump min/max avail to attempt to constrain the loop side flow
             ThisLoopSideFlow = PlantUtilities::BoundValueToWithinTwoValues(ThisLoopSideFlow, TotalPumpMinAvailFlow, TotalPumpMaxAvailFlow);
         }
@@ -2198,6 +2232,15 @@ namespace DataPlant {
         // Now we check flow restriction from the other side, both min and max avail.
         // Doing this last basically means it wins, so the pump should pull down to meet the flow restriction
         ThisLoopSideFlow = PlantUtilities::BoundValueToNodeMinMaxAvail(state, ThisLoopSideFlow, ThisSideInletNode);
+
+        if (intermittentConstantSpeedInletPumpFlow > DataConvergParams::PlantFlowRateToler) {
+            // A constant-speed inlet pump operates at its scheduled fixed flow when on. The bypass path carries the
+            // difference between that fixed flow and the active branch requests. Restore only the maximum availability
+            // so the splitter can propagate the bypass capacity. Raising the minimum would latch the intermittent pump on.
+            ThisLoopSideFlow = intermittentConstantSpeedInletPumpFlow;
+            state.dataLoopNodes->Node(ThisSideInletNode).MassFlowRateMaxAvail = intermittentConstantSpeedInletPumpFlow;
+            TotalPumpMaxAvailFlow = intermittentConstantSpeedInletPumpFlow;
+        }
 
         // Final preparation of loop inlet min/max avail if pumps exist
         if (allocated(this->Pumps)) {
