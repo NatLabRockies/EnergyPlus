@@ -461,21 +461,20 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_UpdateMovableInsulationFlagT
     mat->AbsorpSolarOut = 0.25;
     mat->AbsorpSolarIn = 0.25;
 
-    // Test 1: Movable insulation present but wasn't in previous time step, also movable insulation emissivity different than base construction
-    //         This should result in a true value from the algorithm which will cause interior radiant exchange matrices to be recalculated
+    // Test 1: Movable insulation is absent in the current and previous time steps, so its presence has not changed.
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
     EXPECT_FALSE(DidMIChange);
 
-    // Test 2: Movable insulation present and was also present in previous time step.  This should result in a false value since nothing has changed.
+    // Test 2: Movable insulation was present in the previous time step but is absent now. Its inside thermal absorptance differs from
+    //         the base construction, so the interior radiant exchange matrices must be recalculated.
     state->dataSurface->intMovInsuls(1).presentPrevTS = true;
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
     EXPECT_TRUE(DidMIChange);
 
-    // Test 2: Movable insulation present but wasn't in previous time step.  However, the emissivity of the movable insulation and that of the
-    // 		   construction are the same so nothing has actually changed.  This should result in a false value.
+    // Test 3: Movable insulation was present in the previous time step but is absent now. Its inside thermal absorptance matches
+    //         the base construction, so the effective emissivity has not changed.
     state->dataSurface->intMovInsuls(1).presentPrevTS = true;
     mat->AbsorpThermalIn = state->dataConstruction->Construct(1).InsideAbsorpThermal;
-    mat->AbsorpThermalOut = state->dataConstruction->Construct(1).InsideAbsorpThermal;
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
     EXPECT_FALSE(DidMIChange);
 }

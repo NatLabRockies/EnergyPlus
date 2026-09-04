@@ -68,6 +68,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/ChilledCeilingPanelSimple.hh>
 #include <EnergyPlus/Construction.hh>
+#include <EnergyPlus/ConstructionAssignmentSet.hh>
 #include <EnergyPlus/ConvectionCoefficients.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -103,6 +104,7 @@
 #include <EnergyPlus/HeatBalanceHAMTManager.hh>
 #include <EnergyPlus/HeatBalanceIntRadExchange.hh>
 #include <EnergyPlus/HeatBalanceKivaManager.hh>
+#include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/HighTempRadiantSystem.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
@@ -298,9 +300,14 @@ void UpdateVariableAbsorptancesIn(EnergyPlusData &state)
             if (thisMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::SurfaceTemperature) {
                 triggerValue = state.dataHeatBalSurf->SurfTempIn(surfNum);
             } else if (thisMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::SurfaceReceivedSolarRadiation) {
-                triggerValue = state.dataHeatBal->SurfSWInAbsTotalReport(surfNum) /
-                               thisConstruct.InsideAbsorpThermal; // approximation of incident solar on inside
-            } else {                                              // controlled by heating cooling mode
+                auto const &surface = state.dataSurface->Surface(surfNum);
+                Real64 const solarAbsorptance = state.dataHeatBalSurf->SurfAbsSolarInt(surfNum);
+                if (surface.Area > 0.0 && solarAbsorptance > 0.0) {
+                    triggerValue = state.dataHeatBal->SurfSWInAbsTotalReport(surfNum) / (surface.Area * solarAbsorptance);
+                } else {
+                    triggerValue = 0.0;
+                }
+            } else { // controlled by heating cooling mode
                 int zoneNum = state.dataSurface->Surface(surfNum).Zone;
                 bool isCooling = (state.dataZoneEnergyDemand->ZoneSysEnergyDemand(zoneNum).TotalOutputRequired < 0);
                 triggerValue = static_cast<Real64>(isCooling);
@@ -669,6 +676,17 @@ void InitSurfaceHeatBalance(EnergyPlusData &state)
     state.dataHeatBalSurfMgr->InitSurfaceHeatBalancefirstTime = false;
 }
 
+// Maps SurfaceData::ConstructionAssignmentSource to the display string used in the EnvelopeSummary's
+// Construction Assignment Source column.
+std::string_view constructionAssignmentSourceString(ConstructionAssignments::SearchDistanceType constructionAssignmentSource)
+{
+    int const index = static_cast<int>(constructionAssignmentSource);
+    if (index < 0 || index >= static_cast<int>(ConstructionAssignments::SearchDistanceType::Num)) {
+        return "N/A";
+    }
+    return ConstructionAssignments::SearchDistanceTypeNames[index];
+}
+
 void GatherForPredefinedReport(EnergyPlusData &state)
 {
 
@@ -859,6 +877,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 mult = thisZone.Multiplier * thisZone.ListMultiplier;
                 auto const &thisSpace = state.dataHeatBal->space(surface.spaceNum);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchOpCons, surfName, construct.Name);
+                OutputReportPredefined::PreDefTableEntry(state,
+                                                         state.dataOutRptPredefined->pdchOpConsSource,
+                                                         surfName,
+                                                         constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchOpZone, surfName, thisZone.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchOpSpace, surfName, thisSpace.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchOpRefl, surfName, 1 - construct.OutsideAbsorpSolar);
@@ -892,6 +914,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 mult = thisZone.Multiplier * thisZone.ListMultiplier * surface.Multiplier;
                 auto const &thisSpace = state.dataHeatBal->space(surface.spaceNum);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFenCons, surfName, construct.Name);
+                OutputReportPredefined::PreDefTableEntry(state,
+                                                         state.dataOutRptPredefined->pdchFenConsSource,
+                                                         surfName,
+                                                         constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFenZone, surfName, thisZone.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchFenSpace, surfName, thisSpace.Name);
                 // if the construction report is requested the SummerSHGC is already calculated
@@ -1179,6 +1205,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 auto const &thisSpace = state.dataHeatBal->space(surface.spaceNum);
                 OutputReportPredefined::PreDefTableEntry(
                     state, state.dataOutRptPredefined->pdchDrCons, surfName, state.dataConstruction->Construct(surface.Construction).Name);
+                OutputReportPredefined::PreDefTableEntry(state,
+                                                         state.dataOutRptPredefined->pdchDrConsSource,
+                                                         surfName,
+                                                         constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchDrZone, surfName, thisZone.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchDrSpace, surfName, thisSpace.Name);
                 OutputReportPredefined::PreDefTableEntry(
@@ -1200,6 +1230,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 mult = thisZone.Multiplier * thisZone.ListMultiplier;
                 auto const &thisSpace = state.dataHeatBal->space(surface.spaceNum);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntOpCons, surfName, construct.Name);
+                OutputReportPredefined::PreDefTableEntry(state,
+                                                         state.dataOutRptPredefined->pdchIntOpConsSource,
+                                                         surfName,
+                                                         constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntOpZone, surfName, thisZone.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntOpSpace, surfName, thisSpace.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntOpAdjSurf, surfName, surface.ExtBoundCondName);
@@ -1236,6 +1270,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 if (!has_prefix(surface.Name,
                                 "iz-")) { // don't count created interzone surfaces that are mirrors of other surfaces
                     OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntFenCons, surfName, construct.Name);
+                    OutputReportPredefined::PreDefTableEntry(state,
+                                                             state.dataOutRptPredefined->pdchIntFenConsSource,
+                                                             surfName,
+                                                             constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                     OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntFenZone, surfName, thisZone.Name);
                     OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntFenSpace, surfName, thisSpace.Name);
                     // include the frame area if present
@@ -1281,6 +1319,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 mult = thisZone.Multiplier * thisZone.ListMultiplier;
                 auto const &thisSpace = state.dataHeatBal->space(surface.spaceNum);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntDrCons, surfName, construct.Name);
+                OutputReportPredefined::PreDefTableEntry(state,
+                                                         state.dataOutRptPredefined->pdchIntDrConsSource,
+                                                         surfName,
+                                                         constructionAssignmentSourceString(surface.ConstructionAssignmentSource));
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntDrZone, surfName, thisZone.Name);
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchIntDrSpace, surfName, thisSpace.Name);
                 OutputReportPredefined::PreDefTableEntry(
@@ -2134,34 +2176,66 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                                 surface.Name);
         }
         // Set up output variables for absorptances
-        SetupOutputVariable(state,
-                            "Surface Thermal Absorptance Outside Face",
-                            Constant::Units::None,
-                            state.dataHeatBalSurf->SurfAbsThermalExt(loop),
-                            OutputProcessor::TimeStepType::Zone,
-                            OutputProcessor::StoreType::Average,
-                            surface.Name);
-        SetupOutputVariable(state,
-                            "Surface Solar Absorptance Outside Face",
-                            Constant::Units::None,
-                            state.dataHeatBalSurf->SurfAbsSolarExt(loop),
-                            OutputProcessor::TimeStepType::Zone,
-                            OutputProcessor::StoreType::Average,
-                            surface.Name);
-        SetupOutputVariable(state,
-                            "Surface Thermal Absorptance Inside Face",
-                            Constant::Units::None,
-                            state.dataHeatBalSurf->SurfAbsThermalInt(loop),
-                            OutputProcessor::TimeStepType::Zone,
-                            OutputProcessor::StoreType::Average,
-                            surface.Name);
-        SetupOutputVariable(state,
-                            "Surface Solar Absorptance Inside Face",
-                            Constant::Units::None,
-                            state.dataHeatBalSurf->SurfAbsSolarInt(loop),
-                            OutputProcessor::TimeStepType::Zone,
-                            OutputProcessor::StoreType::Average,
-                            surface.Name);
+        auto const &construction = state.dataConstruction->Construct(surface.Construction);
+        assert(construction.TotLayers > 0);
+        if (!construction.TypeIsWindow) {
+            bool useInsideThermalAbsorptance = false;
+            bool useInsideSolarAbsorptance = false;
+            int const insideMaterialNum = construction.LayerPoint(construction.TotLayers);
+            if (insideMaterialNum > 0) {
+                auto const *insideMaterial = state.dataMaterial->materials(insideMaterialNum);
+                bool const insideVariableAbsorptanceAllowed = surface.ExtBoundCond == DataSurfaces::ExternalEnvironment &&
+                                                              insideMaterial->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid;
+                bool const useInsideThermalVariableAbsorptance =
+                    insideVariableAbsorptanceAllowed && (insideMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::Scheduled
+                                                             ? insideMaterial->absorpThermalVarSchedIn != nullptr
+                                                             : insideMaterial->absorpThermalVarCurveIn != nullptr);
+                bool const useInsideSolarVariableAbsorptance =
+                    insideVariableAbsorptanceAllowed && (insideMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::Scheduled
+                                                             ? insideMaterial->absorpSolarVarSchedIn != nullptr
+                                                             : insideMaterial->absorpSolarVarCurveIn != nullptr);
+                useInsideThermalAbsorptance = insideMaterial->hasAbsorpThermalInputIn || useInsideThermalVariableAbsorptance;
+                useInsideSolarAbsorptance = insideMaterial->hasAbsorpSolarInputIn || useInsideSolarVariableAbsorptance;
+            }
+
+            std::string_view const thermalAbsorptanceName =
+                useInsideThermalAbsorptance ? "Surface Thermal Absorptance Outside Face" : "Surface Thermal Absorptance";
+            SetupOutputVariable(state,
+                                thermalAbsorptanceName,
+                                Constant::Units::None,
+                                state.dataHeatBalSurf->SurfAbsThermalExt(loop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                surface.Name);
+            if (useInsideThermalAbsorptance) {
+                SetupOutputVariable(state,
+                                    "Surface Thermal Absorptance Inside Face",
+                                    Constant::Units::None,
+                                    state.dataHeatBalSurf->SurfAbsThermalInt(loop),
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    surface.Name);
+            }
+
+            std::string_view const solarAbsorptanceName =
+                useInsideSolarAbsorptance ? "Surface Solar Absorptance Outside Face" : "Surface Solar Absorptance";
+            SetupOutputVariable(state,
+                                solarAbsorptanceName,
+                                Constant::Units::None,
+                                state.dataHeatBalSurf->SurfAbsSolarExt(loop),
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                surface.Name);
+            if (useInsideSolarAbsorptance) {
+                SetupOutputVariable(state,
+                                    "Surface Solar Absorptance Inside Face",
+                                    Constant::Units::None,
+                                    state.dataHeatBalSurf->SurfAbsSolarInt(loop),
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    surface.Name);
+            }
+        }
 
         if (state.dataConstruction->Construct(surface.Construction).SourceSinkPresent) {
             SetupOutputVariable(state,
@@ -5697,6 +5771,7 @@ void CalculateZoneMRT(EnergyPlusData &state,
                 }
             }
         }
+        HeatBalanceManager::getZoneMRTCalculationData(state);
     }
 
     // Zero sumAET for applicable enclosures
@@ -5716,7 +5791,7 @@ void CalculateZoneMRT(EnergyPlusData &state,
             continue;
         }
         auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum);
-        if (state.dataHeatBalSurfMgr->ZoneAESum(ZoneNum) > 0.01) {
+        if (state.dataHeatBalSurfMgr->ZoneAESum(ZoneNum) > 0.01) { // Calculate standard area-emissivity weighted MRT
             Real64 zoneSumAET = 0.0;
             for (int spaceNum : state.dataHeatBal->Zone(ZoneNum).spaceIndexes) {
                 auto const &thisSpace = state.dataHeatBal->space(spaceNum);
@@ -5736,6 +5811,7 @@ void CalculateZoneMRT(EnergyPlusData &state,
             }
             thisZoneHB.MRT = state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum).MAT;
         }
+        thisZoneHB.stdMRT = thisZoneHB.MRT;
     }
     // Calculate MRT for applicable enclosures
     for (auto &thisEnclosure : state.dataViewFactor->EnclRadInfo) {
@@ -5777,7 +5853,37 @@ void CalculateZoneMRT(EnergyPlusData &state,
         }
     }
 
+    // Adjust the zone MRT based on the current conditions and the user defined split
+    for (int mrtNum = 1; mrtNum <= state.dataHeatBal->totZoneMRT; mrtNum++) { // set up and check zone and people indices
+        auto &thisZoneNum = state.dataHeatBal->zoneMRTCalc(mrtNum).zoneIndex;
+        if (state.dataHeatBal->Zone(thisZoneNum).useZoneMRTCalc) {
+            state.dataZoneTempPredictorCorrector->zoneHeatBalance(thisZoneNum).MRT = calcUserZoneMRT(state, mrtNum);
+        }
+    }
+
     state.dataHeatBalSurfMgr->CalculateZoneMRTfirstTime = false;
+}
+
+Real64 calcUserZoneMRT(EnergyPlusData &state, int mrtNum)
+{
+    // This Real64 calculates the user specified zone MRT based on input parameters and current conditions.
+    auto &thisZoneMRT = state.dataHeatBal->zoneMRTCalc(mrtNum);
+    auto &thisZoneNum = thisZoneMRT.zoneIndex;
+    auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(thisZoneNum);
+    Real64 sumMRTfracs = 0.0; // Calculate user defined zone MRT
+    Real64 stdMRTfrac = 0.0;
+    state.dataThermalComforts->ZoneNum = thisZoneMRT.zoneIndex;
+    if (thisZoneMRT.zoneIndex > 0) {
+        for (int pNum = 1; pNum <= thisZoneMRT.numPeople; ++pNum) {
+            auto &thisPeople = thisZoneMRT.zoneMRTPeople(pNum);
+            thisPeople.peopleMRT = ThermalComfort::CalcRadTemp(state, thisPeople.peopleIndex);
+            sumMRTfracs += thisPeople.fracMRT * thisPeople.peopleMRT;
+        }
+        stdMRTfrac = thisZoneMRT.fracZoneStdMRT;
+        return sumMRTfracs + stdMRTfrac * thisZoneHB.stdMRT;
+    } else {
+        return thisZoneHB.stdMRT;
+    }
 }
 
 // End of Record Keeping subroutines for the HB Module

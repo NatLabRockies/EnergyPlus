@@ -240,22 +240,25 @@ namespace Material {
         Real64 SpecHeat = 0.0;  // Layer specific heat (J/kgK)
         Real64 Thickness = 0.0; // Layer thickness (m)
 
-        Real64 AbsorpThermalOut = 0.0;      // Layer thermal absorptance outside face
-        Real64 AbsorpThermalInputOut = 0.0; // Layer thermal absorptance outside face input by user
-        Real64 AbsorpThermalIn = 0.0;       // Layer thermal absorptance inside face
-        Real64 AbsorpThermalInputIn = 0.0;  // Layer thermal absorptance inside face input by user
-        Real64 AbsorpThermalBack = 0.0;     // Infrared radiation back absorption
-        Real64 AbsorpThermalFront = 0.0;    // Infrared radiation front absorption
+        Real64 AbsorpThermalOut = 0.0;        // Layer thermal absorptance outside face
+        Real64 AbsorpThermalInputOut = 0.0;   // Layer thermal absorptance outside face input by user
+        Real64 AbsorpThermalIn = 0.0;         // Layer thermal absorptance inside face
+        Real64 AbsorpThermalInputIn = 0.0;    // Layer thermal absorptance inside face input by user
+        bool hasAbsorpThermalInputIn = false; // Optional inside-face thermal absorptance was explicitly input
+        Real64 AbsorpThermalBack = 0.0;       // Infrared radiation back absorption
+        Real64 AbsorpThermalFront = 0.0;      // Infrared radiation front absorption
 
-        Real64 AbsorpSolarOut = 0.0;      // Layer solar absorptance outside face
-        Real64 AbsorpSolarInputOut = 0.0; // Layer solar absorptance outside face input by user
-        Real64 AbsorpSolarIn = 0.0;       // Layer solar absorptance inside face
-        Real64 AbsorpSolarInputIn = 0.0;  // Layer solar absorptance inside face input by user
+        Real64 AbsorpSolarOut = 0.0;        // Layer solar absorptance outside face
+        Real64 AbsorpSolarInputOut = 0.0;   // Layer solar absorptance outside face input by user
+        Real64 AbsorpSolarIn = 0.0;         // Layer solar absorptance inside face
+        Real64 AbsorpSolarInputIn = 0.0;    // Layer solar absorptance inside face input by user
+        bool hasAbsorpSolarInputIn = false; // Optional inside-face solar absorptance was explicitly input
 
-        Real64 AbsorpVisibleOut = 0.0;      // Layer Visible Absorptance outside face
-        Real64 AbsorpVisibleInputOut = 0.0; // Layer Visible Absorptance outside face input by user
-        Real64 AbsorpVisibleIn = 0.0;       // Layer Visible Absorptance inside face
-        Real64 AbsorpVisibleInputIn = 0.0;  // Layer Visible Absorptance inside face input by user
+        Real64 AbsorpVisibleOut = 0.0;        // Layer Visible Absorptance outside face
+        Real64 AbsorpVisibleInputOut = 0.0;   // Layer Visible Absorptance outside face input by user
+        Real64 AbsorpVisibleIn = 0.0;         // Layer Visible Absorptance inside face
+        Real64 AbsorpVisibleInputIn = 0.0;    // Layer Visible Absorptance inside face input by user
+        bool hasAbsorpVisibleInputIn = false; // Optional inside-face visible absorptance was explicitly input
 
         // Radiation parameters // Are these for windows or for opaque materials also?
         bool AbsorpSolarOutEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance

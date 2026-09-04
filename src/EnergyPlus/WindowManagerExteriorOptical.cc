@@ -247,7 +247,7 @@ namespace Window {
                 Real64 EpsGlIR = s_mat->materials(constrSh.LayerPoint(TotLay - 1))->AbsorpThermalBack;
                 Real64 RhoGlIR = 1 - EpsGlIR;
                 Real64 TauShIR = matShade->TransThermal;
-                Real64 EpsShIR = matShade->AbsorpThermalOut;
+                Real64 EpsShIR = matShade->AbsorpThermalIn;
                 Real64 RhoShIR = max(0.0, 1.0 - TauShIR - EpsShIR);
                 surfShade.effShadeEmi = EpsShIR * (1.0 + RhoGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR));
                 surfShade.effGlassEmi = EpsGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR);

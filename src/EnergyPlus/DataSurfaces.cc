@@ -693,8 +693,20 @@ std::string cSurfaceClass(SurfaceClass const ClassNo)
     case SurfaceClass::Window: {
         ClassName = "Window";
     } break;
+    case SurfaceClass::FixedWindow: {
+        ClassName = "FixedWindow";
+    } break;
+    case SurfaceClass::OperableWindow: {
+        ClassName = "OperableWindow";
+    } break;
+    case SurfaceClass::Skylight: {
+        ClassName = "Skylight";
+    } break;
     case SurfaceClass::GlassDoor: {
         ClassName = "Glass Door";
+    } break;
+    case SurfaceClass::OverheadDoor: {
+        ClassName = "OverheadDoor";
     } break;
     case SurfaceClass::Door: {
         ClassName = "Door";
@@ -773,7 +785,7 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
                 ShowWarningError(state,
                                  std::format("MaterialProperty:VariableAbsorptance defined for the outside material of an interior surface, {}."
-                                             " This VariableAbsorptance property will be ignored here",
+                                             " This VariableAbsorptance property will be ignored here.",
                                              thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
@@ -785,7 +797,7 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
                 ShowWarningError(state,
                                  std::format("MaterialProperty:VariableAbsorptance defined for the inside material of an interior surface, {}."
-                                             " This VariableAbsorptance property will be ignored here",
+                                             " This VariableAbsorptance property will be ignored here.",
                                              thisSurface.Name));
             } else {
                 if (!pushedBack) {
@@ -805,7 +817,7 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (mat->absorpVarCtrlSignalOut != Material::VariableAbsCtrlSignal::Invalid) {
                 ShowWarningError(
                     state,
-                    std::format("MaterialProperty:VariableAbsorptance for the outside face defined on an inside-layer materials, {} in {}."
+                    std::format("MaterialProperty:VariableAbsorptance for the outside face defined on an inside-layer material, {} in {}."
                                 " This VariableAbsorptance property will be ignored here.",
                                 mat->Name,
                                 thisConstruct.Name));
@@ -819,7 +831,7 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (mat->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid) {
                 ShowWarningError(
                     state,
-                    std::format("MaterialProperty:VariableAbsorptance for the inside face defined on an outside-layer materials, {} in {}."
+                    std::format("MaterialProperty:VariableAbsorptance for the inside face defined on an outside-layer material, {} in {}."
                                 " This VariableAbsorptance property will be ignored here.",
                                 mat->Name,
                                 thisConstruct.Name));

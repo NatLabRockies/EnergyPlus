@@ -187,11 +187,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
                 "conductivity": 1.311,
                 "density": 2240.0,
                 "roughness": "Rough",
-                "solar_absorptance_outside_face": 0.7,
+                "solar_absorptance": 0.7,
                 "specific_heat": 836.8,
-                "thermal_absorptance_outside_face": 0.9,
+                "thermal_absorptance": 0.9,
                 "thickness": 0.1016,
-                "visible_absorptance_outside_face": 0.7
+                "visible_absorptance": 0.7
             }
         },
         "BuildingSurface:Detailed": {
@@ -636,11 +636,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
                 "conductivity": 1.311,
                 "density": 2240.0,
                 "roughness": "Rough",
-                "solar_absorptance_outside_face": 0.7,
+                "solar_absorptance": 0.7,
                 "specific_heat": 836.8,
-                "thermal_absorptance_outside_face": 0.9,
+                "thermal_absorptance": 0.9,
                 "thickness": 0.1016,
-                "visible_absorptance_outside_face": 0.7
+                "visible_absorptance": 0.7
             }
         },
         "BuildingSurface:Detailed": {
@@ -1037,11 +1037,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_MixingCapacitanceWarning_Test)
                 "conductivity": 1.311,
                 "density": 2240.0,
                 "roughness": "Rough",
-                "solar_absorptance_outside_face": 0.7,
+                "solar_absorptance": 0.7,
                 "specific_heat": 836.8,
-                "thermal_absorptance_outside_face": 0.9,
+                "thermal_absorptance": 0.9,
                 "thickness": 0.1016,
-                "visible_absorptance_outside_face": 0.7
+                "visible_absorptance": 0.7
             }
         },
         "BuildingSurface:Detailed": {

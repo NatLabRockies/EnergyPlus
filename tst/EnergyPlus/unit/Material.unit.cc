@@ -78,34 +78,34 @@ TEST_F(EnergyPlusFixture, GetMaterialDataReadVarAbsorptance)
         "MaterialProperty:VariableAbsorptance,",
         "variableSolar_wall_2,    !- Name",
         "WALL_2,                  !- Reference Material Name",
-        "SurfaceReceivedSolarRadiation, !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        ",                        !- Outside Face Thermal Absorptance Schedule Name",
-        "SOLAR_ABSORPTANCE_CURVE, !- Outside Face Solar Absorptance Function Name",
-        ";                        !- Outside Face Solar Absorptance Schedule Name",
+        "SurfaceReceivedSolarRadiation, !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        ",                        !- Thermal Absorptance Schedule Name",
+        "SOLAR_ABSORPTANCE_CURVE, !- Solar Absorptance Function Name",
+        ";                        !- Solar Absorptance Schedule Name",
 
         "MaterialProperty:VariableAbsorptance,",
         "variableBoth_wall_3,     !- Name",
         "WALL_3,                  !- Reference Material Name",
-        "Scheduled,               !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Thermal Absorptance Schedule Name",
-        ",                        !- Outside Face Solar Absorptance Function Name",
-        "ABS_SCH;                 !- Outside Face Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name",
+        ",                        !- Solar Absorptance Function Name",
+        "ABS_SCH;                 !- Solar Absorptance Schedule Name",
 
         "MaterialProperty:VariableAbsorptance,",
         "variableBoth_wall_4,     !- Name",
         "WALL_4,                  !- Reference Material Name",
-        "Scheduled,               !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Thermal Absorptance Schedule Name",
-        ",                        !- Outside Face Solar Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Solar Absorptance Schedule Name",
-        "SurfaceTemperature,      !- Inside Face Control Signal",
-        "THERMAL_ABSORPTANCE_TABLE, !- Inside Face Thermal Absorptance Function Name",
-        ",                        !- Inside Face Thermal Absorptance Schedule Name",
-        "SOLAR_ABSORPTANCE_CURVE, !- Inside Face Solar Absorptance Function Name",
-        ";                        !- Inside Face Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name",
+        ",                        !- Solar Absorptance Function Name",
+        "ABS_SCH,                 !- Solar Absorptance Schedule Name",
+        "SurfaceTemperature,      !- Control Signal Inside Face",
+        "THERMAL_ABSORPTANCE_TABLE, !- Thermal Absorptance Function Name Inside Face",
+        ",                        !- Thermal Absorptance Schedule Name Inside Face",
+        "SOLAR_ABSORPTANCE_CURVE, !- Solar Absorptance Function Name Inside Face",
+        ";                        !- Solar Absorptance Schedule Name Inside Face",
 
         "ScheduleTypeLimits,",
         "  Fraction,                 !- Name",
@@ -168,15 +168,16 @@ TEST_F(EnergyPlusFixture, GetMaterialDataReadVarAbsorptance)
     EXPECT_ENUM_EQ(mat3->absorpVarCtrlSignalOut, Material::VariableAbsCtrlSignal::Scheduled);
     EXPECT_NE(mat3->absorpThermalVarSchedOut, nullptr);
     EXPECT_NE(mat3->absorpSolarVarSchedOut, nullptr);
-    // Tests to see if these get written to the Inside when the user does not provide them.
-    EXPECT_ENUM_EQ(mat1->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::SurfaceTemperature);
-    EXPECT_EQ(mat1->absorpThermalVarCurveIn->Num, 1);
-    EXPECT_EQ(mat1->absorpSolarVarCurveIn->Num, 2);
-    EXPECT_ENUM_EQ(mat2->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::SurfaceReceivedSolarRadiation);
-    EXPECT_EQ(mat2->absorpSolarVarCurveOut->Num, 2);
-    EXPECT_ENUM_EQ(mat3->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::Scheduled);
-    EXPECT_NE(mat3->absorpThermalVarSchedIn, nullptr);
-    EXPECT_NE(mat3->absorpSolarVarSchedIn, nullptr);
+    // Blank inside-face fields preserve legacy behavior: only the outside face varies.
+    EXPECT_ENUM_EQ(mat1->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::Invalid);
+    EXPECT_EQ(mat1->absorpThermalVarCurveIn, nullptr);
+    EXPECT_EQ(mat1->absorpSolarVarCurveIn, nullptr);
+    EXPECT_ENUM_EQ(mat2->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::Invalid);
+    EXPECT_EQ(mat2->absorpThermalVarCurveIn, nullptr);
+    EXPECT_EQ(mat2->absorpSolarVarCurveIn, nullptr);
+    EXPECT_ENUM_EQ(mat3->absorpVarCtrlSignalIn, Material::VariableAbsCtrlSignal::Invalid);
+    EXPECT_EQ(mat3->absorpThermalVarSchedIn, nullptr);
+    EXPECT_EQ(mat3->absorpSolarVarSchedIn, nullptr);
     // Tests to see if different things get picked up at the outside and the inside (Case 4)
     EXPECT_ENUM_EQ(mat4->absorpVarCtrlSignalOut, Material::VariableAbsCtrlSignal::Scheduled);
     EXPECT_NE(mat4->absorpThermalVarSchedOut, nullptr);
@@ -208,16 +209,16 @@ TEST_F(EnergyPlusFixture, GetMaterialDataReadVarAbsorptance)
         "MaterialProperty:VariableAbsorptance,",
         "variableThermal_wall_1,  !- Name",
         "WALL_1,                  !- Reference Material Name",
-        "Scheduled,               !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Thermal Absorptance Schedule Name",
-        ",                        !- Outside Face Solar Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Solar Absorptance Schedule Name",
-        "SurfaceTemperature,      !- Inside Face Control Signal",
-        ",                        !- Inside Face Thermal Absorptance Function Name",
-        ",                        !- Inside Face Thermal Absorptance Schedule Name",
-        ",                        !- Inside Face Solar Absorptance Function Name",
-        ";                        !- Inside Face Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name",
+        ",                        !- Solar Absorptance Function Name",
+        "ABS_SCH,                 !- Solar Absorptance Schedule Name",
+        "SurfaceTemperature,      !- Control Signal Inside Face",
+        ",                        !- Thermal Absorptance Function Name Inside Face",
+        ",                        !- Thermal Absorptance Schedule Name Inside Face",
+        ",                        !- Solar Absorptance Function Name Inside Face",
+        ";                        !- Solar Absorptance Schedule Name Inside Face",
     });
 
     ASSERT_TRUE(process_idf(idf_objects_bad_inputs));
@@ -251,16 +252,16 @@ TEST_F(EnergyPlusFixture, GetMaterialDataReadVarAbsorptance)
         "MaterialProperty:VariableAbsorptance,",
         "variableThermal_wall_1,  !- Name",
         "WALL_1,                  !- Reference Material Name",
-        "Scheduled,               !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Thermal Absorptance Schedule Name",
-        ",                        !- Outside Face Solar Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Solar Absorptance Schedule Name",
-        "Scheduled,               !- Inside Face Control Signal",
-        ",                        !- Inside Face Thermal Absorptance Function Name",
-        ",                        !- Inside Face Thermal Absorptance Schedule Name",
-        ",                        !- Inside Face Solar Absorptance Function Name",
-        ";                        !- Inside Face Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name",
+        ",                        !- Solar Absorptance Function Name",
+        "ABS_SCH,                 !- Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal Inside Face",
+        ",                        !- Thermal Absorptance Function Name Inside Face",
+        ",                        !- Thermal Absorptance Schedule Name Inside Face",
+        ",                        !- Solar Absorptance Function Name Inside Face",
+        ";                        !- Solar Absorptance Schedule Name Inside Face",
     });
     ASSERT_TRUE(process_idf(idf_objects_bad_inputs));
     Material::GetVariableAbsorptanceInput(*state, errors_found);
@@ -292,16 +293,16 @@ TEST_F(EnergyPlusFixture, GetMaterialDataReadVarAbsorptance)
         "MaterialProperty:VariableAbsorptance,",
         "variableThermal_wall_1,  !- Name",
         "WALL_1,                  !- Reference Material Name",
-        "Scheduled,               !- Outside Face Control Signal",
-        ",                        !- Outside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Thermal Absorptance Schedule Name",
-        ",                        !- Outside Face Solar Absorptance Function Name",
-        "ABS_SCH,                 !- Outside Face Solar Absorptance Schedule Name",
-        "Scheduled,               !- Inside Face Control Signal",
-        ",                        !- Inside Face Thermal Absorptance Function Name",
-        "ABS_SCH,                 !- Inside Face Thermal Absorptance Schedule Name",
-        "SOLAR_ABSORPTANCE_CURVE, !- Inside Face Solar Absorptance Function Name",
-        ";                        !- Inside Face Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal",
+        ",                        !- Thermal Absorptance Function Name",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name",
+        ",                        !- Solar Absorptance Function Name",
+        "ABS_SCH,                 !- Solar Absorptance Schedule Name",
+        "Scheduled,               !- Control Signal Inside Face",
+        ",                        !- Thermal Absorptance Function Name Inside Face",
+        "ABS_SCH,                 !- Thermal Absorptance Schedule Name Inside Face",
+        "SOLAR_ABSORPTANCE_CURVE, !- Solar Absorptance Function Name Inside Face",
+        ";                        !- Solar Absorptance Schedule Name Inside Face",
     });
     ASSERT_TRUE(process_idf(idf_objects_bad_inputs));
     Material::GetVariableAbsorptanceInput(*state, errors_found);
@@ -356,9 +357,9 @@ TEST_F(EnergyPlusFixture, GetMaterialDataConstructAbsorpTest)
         "    0.1,          !- Conductivity {W/m-K}",
         "    1000,         !- Density {kg/m3}",
         "    800,          !- Specific Heat {J/kg-K}",
-        "    0.9,          !- Outside Face Thermal Absorptance",
-        "    0.8,          !- Outside Face Solar Absorptance",
-        "    0.7;          !- Outside Face Visible Absorptance",
+        "    0.9,          !- Thermal Absorptance",
+        "    0.8,          !- Solar Absorptance",
+        "    0.7;          !- Visible Absorptance",
 
         "  Material,",
         "    MatOaISet,    !- Name",
@@ -367,31 +368,31 @@ TEST_F(EnergyPlusFixture, GetMaterialDataConstructAbsorpTest)
         "    0.4,          !- Conductivity {W/m-K}",
         "    1000,         !- Density {kg/m3}",
         "    800,          !- Specific Heat {J/kg-K}",
-        "    0.6,          !- Outside Face Thermal Absorptance",
-        "    0.5,          !- Outside Face Solar Absorptance",
-        "    0.4,          !- Outside Face Visible Absorptance",
-        "    0.3,          !- Inside Face Thermal Absorptance",
-        "    0.2,          !- Inside Face Solar Absorptance",
-        "    0.1;          !- Inside Face Visible Absorptance",
+        "    0.6,          !- Thermal Absorptance",
+        "    0.5,          !- Solar Absorptance",
+        "    0.4,          !- Visible Absorptance",
+        "    0.3,          !- Thermal Absorptance Inside Face",
+        "    0.2,          !- Solar Absorptance Inside Face",
+        "    0.1;          !- Visible Absorptance Inside Face",
 
         "  Material:NoMass,",
         "    nmMatOutSet, !- Name",
         "    Rough,       !- Roughness",
         "    0.777,       !- Thermal Resistance {m2-K/W}",
-        "    0.95,        !- Outside Face Thermal Absorptance",
-        "    0.85,        !- Outside Face Solar Absorptance",
-        "    0.75;        !- Outside Face Visible Absorptance",
+        "    0.95,        !- Thermal Absorptance",
+        "    0.85,        !- Solar Absorptance",
+        "    0.75;        !- Visible Absorptance",
 
         "  Material:NoMass,",
         "    nmMatOaISet, !- Name",
         "    Rough,       !- Roughness",
         "    0.222,       !- Thermal Resistance {m2-K/W}",
-        "    0.65,        !- Outside Face Thermal Absorptance",
-        "    0.55,        !- Outside Face Solar Absorptance",
-        "    0.45,        !- Outside Face Visible Absorptance",
-        "    0.35,        !- Inside Face Thermal Absorptance",
-        "    0.25,        !- Inside Face Solar Absorptance",
-        "    0.15;        !- Inside Face Visible Absorptance",
+        "    0.65,        !- Thermal Absorptance",
+        "    0.55,        !- Solar Absorptance",
+        "    0.45,        !- Visible Absorptance",
+        "    0.35,        !- Thermal Absorptance Inside Face",
+        "    0.25,        !- Solar Absorptance Inside Face",
+        "    0.15;        !- Visible Absorptance Inside Face",
 
         "  Construction,",
         "    OneLayerReg1, !- Name",
@@ -412,16 +413,16 @@ TEST_F(EnergyPlusFixture, GetMaterialDataConstructAbsorpTest)
         "  Construction,",
         "    TwoLayerReg, !- Name",
         "    MatOutSet,   !- Outside Layer",
-        "    MatOaISet;   !- Inside Layer",
+        "    MatOaISet;   !- Layer 2",
 
         "  Construction,",
         "    TwoLayerNM,  !- Name",
         "    nmMatOutSet, !- Outside Layer",
-        "    nmMatOaISet; !- Outside Layer",
+        "    nmMatOaISet; !- Layer 2",
     });
 
     bool errorsFound = false;
-    Real64 const tolerance = 0.000001;
+    Real64 constexpr tolerance = 0.000001;
 
     ASSERT_TRUE(process_idf(idf_objects));
 
@@ -430,6 +431,8 @@ TEST_F(EnergyPlusFixture, GetMaterialDataConstructAbsorpTest)
     auto &dataMat = state->dataMaterial;
 
     // Test the reading in of the material data
+    EXPECT_EQ("NMMATOUTSET", dataMat->materials(3)->Name);
+    EXPECT_EQ("NMMATOAISET", dataMat->materials(4)->Name);
     EXPECT_NEAR(dataMat->materials(1)->AbsorpThermalOut, 0.9, tolerance);
     EXPECT_NEAR(dataMat->materials(1)->AbsorpSolarOut, 0.8, tolerance);
     EXPECT_NEAR(dataMat->materials(1)->AbsorpVisibleOut, 0.7, tolerance);
@@ -497,4 +500,123 @@ TEST_F(EnergyPlusFixture, GetMaterialDataConstructAbsorpTest)
     EXPECT_NEAR(dataCon->Construct(6).InsideAbsorpThermal, 0.35, tolerance);
     EXPECT_NEAR(dataCon->Construct(6).InsideAbsorpSolar, 0.25, tolerance);
     EXPECT_NEAR(dataCon->Construct(6).InsideAbsorpVis, 0.15, tolerance);
+}
+
+TEST_F(EnergyPlusFixture, GetMaterialDataTracksInsideFaceAbsorptanceInputPresence)
+{
+    std::string const idf_objects = delimited_string({
+        "Material,",
+        "  Bulk Only,           !- Name",
+        "  Rough,               !- Roughness",
+        "  0.1,                 !- Thickness {m}",
+        "  0.5,                 !- Conductivity {W/m-K}",
+        "  800,                 !- Density {kg/m3}",
+        "  900,                 !- Specific Heat {J/kg-K}",
+        "  0.9,                 !- Thermal Absorptance",
+        "  0.7,                 !- Solar Absorptance",
+        "  0.6;                 !- Visible Absorptance",
+
+        "Material,",
+        "  Equal Thermal,       !- Name",
+        "  Rough,               !- Roughness",
+        "  0.1,                 !- Thickness {m}",
+        "  0.5,                 !- Conductivity {W/m-K}",
+        "  800,                 !- Density {kg/m3}",
+        "  900,                 !- Specific Heat {J/kg-K}",
+        "  0.8,                 !- Thermal Absorptance",
+        "  0.6,                 !- Solar Absorptance",
+        "  0.5,                 !- Visible Absorptance",
+        "  0.8;                 !- Thermal Absorptance Inside Face",
+
+        "Material:NoMass,",
+        "  Equal Solar,         !- Name",
+        "  Rough,               !- Roughness",
+        "  0.5,                 !- Thermal Resistance {m2-K/W}",
+        "  0.85,                !- Thermal Absorptance",
+        "  0.65,                !- Solar Absorptance",
+        "  0.55,                !- Visible Absorptance",
+        "  ,                    !- Thermal Absorptance Inside Face",
+        "  0.65,                !- Solar Absorptance Inside Face",
+        "  0.55;                !- Visible Absorptance Inside Face",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    bool errorsFound = false;
+    Material::GetMaterialData(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    auto const *bulkOnly = state->dataMaterial->materials(Material::GetMaterialNum(*state, "BULK ONLY"));
+    EXPECT_FALSE(bulkOnly->hasAbsorpThermalInputIn);
+    EXPECT_FALSE(bulkOnly->hasAbsorpSolarInputIn);
+    EXPECT_FALSE(bulkOnly->hasAbsorpVisibleInputIn);
+
+    auto const *equalThermal = state->dataMaterial->materials(Material::GetMaterialNum(*state, "EQUAL THERMAL"));
+    EXPECT_TRUE(equalThermal->hasAbsorpThermalInputIn);
+    EXPECT_FALSE(equalThermal->hasAbsorpSolarInputIn);
+    EXPECT_FALSE(equalThermal->hasAbsorpVisibleInputIn);
+    EXPECT_DOUBLE_EQ(equalThermal->AbsorpThermalOut, equalThermal->AbsorpThermalIn);
+
+    auto const *equalSolar = state->dataMaterial->materials(Material::GetMaterialNum(*state, "EQUAL SOLAR"));
+    EXPECT_FALSE(equalSolar->hasAbsorpThermalInputIn);
+    EXPECT_TRUE(equalSolar->hasAbsorpSolarInputIn);
+    EXPECT_TRUE(equalSolar->hasAbsorpVisibleInputIn);
+    EXPECT_DOUBLE_EQ(equalSolar->AbsorpSolarOut, equalSolar->AbsorpSolarIn);
+    EXPECT_DOUBLE_EQ(equalSolar->AbsorpVisibleOut, equalSolar->AbsorpVisibleIn);
+}
+
+TEST_F(EnergyPlusFixture, GetMaterialDataWindowShadingFaceAbsorptances)
+{
+    std::string const idf_objects = delimited_string({
+        "WindowMaterial:Shade,",
+        "  Test Shade,              !- Name",
+        "  0.2,                     !- Solar Transmittance",
+        "  0.3,                     !- Solar Reflectance",
+        "  0.2,                     !- Visible Transmittance",
+        "  0.3,                     !- Visible Reflectance",
+        "  0.8,                     !- Infrared Hemispherical Emissivity",
+        "  0.0,                     !- Infrared Transmittance",
+        "  0.01,                    !- Thickness",
+        "  0.1,                     !- Conductivity",
+        "  0.05,                    !- Shade to Glass Distance",
+        "  0.0,                     !- Top Opening Multiplier",
+        "  0.0,                     !- Bottom Opening Multiplier",
+        "  0.0,                     !- Left-Side Opening Multiplier",
+        "  0.0,                     !- Right-Side Opening Multiplier",
+        "  0.0;                     !- Airflow Permeability",
+
+        "WindowMaterial:Screen,",
+        "  Test Screen,             !- Name",
+        "  ModelAsDiffuse,          !- Reflected Beam Transmittance Accounting Method",
+        "  0.2,                     !- Diffuse Solar Reflectance",
+        "  0.2,                     !- Diffuse Visible Reflectance",
+        "  0.8,                     !- Thermal Hemispherical Emissivity",
+        "  200.0,                   !- Conductivity",
+        "  0.002,                   !- Screen Material Spacing",
+        "  0.001,                   !- Screen Material Diameter",
+        "  0.025,                   !- Screen to Glass Distance",
+        "  0.0,                     !- Top Opening Multiplier",
+        "  0.0,                     !- Bottom Opening Multiplier",
+        "  0.0,                     !- Left Side Opening Multiplier",
+        "  0.0,                     !- Right Side Opening Multiplier",
+        "  5;                       !- Angle of Resolution for Screen Transmittance Output Map",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    bool errorsFound = false;
+    Material::GetMaterialData(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    auto const *shade = state->dataMaterial->materials(Material::GetMaterialNum(*state, "TEST SHADE"));
+    EXPECT_DOUBLE_EQ(0.5, shade->AbsorpSolarOut);
+    EXPECT_DOUBLE_EQ(shade->AbsorpSolarOut, shade->AbsorpSolarIn);
+    EXPECT_DOUBLE_EQ(shade->AbsorpSolarInputOut, shade->AbsorpSolarInputIn);
+
+    auto const *screen = state->dataMaterial->materials(Material::GetMaterialNum(*state, "TEST SCREEN"));
+    EXPECT_DOUBLE_EQ(0.6, screen->AbsorpThermalOut);
+    EXPECT_DOUBLE_EQ(screen->AbsorpThermalOut, screen->AbsorpThermalIn);
+    EXPECT_DOUBLE_EQ(screen->AbsorpThermalInputOut, screen->AbsorpThermalInputIn);
+    EXPECT_DOUBLE_EQ(screen->AbsorpSolarOut, screen->AbsorpSolarIn);
+    EXPECT_DOUBLE_EQ(screen->AbsorpSolarInputOut, screen->AbsorpSolarInputIn);
+    EXPECT_DOUBLE_EQ(screen->AbsorpVisibleOut, screen->AbsorpVisibleIn);
+    EXPECT_DOUBLE_EQ(screen->AbsorpVisibleInputOut, screen->AbsorpVisibleInputIn);
 }

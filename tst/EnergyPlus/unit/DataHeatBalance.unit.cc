@@ -1363,8 +1363,10 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_ComputeNominalUwithConvCoeffsTest)
     // in DataHeatBalance.cc
     int numTypesSurfaceClass = static_cast<int>(DataSurfaces::SurfaceClass::Num);
     bool surfClassOK = false;
-    if (numTypesSurfaceClass == 15) {
+    if (numTypesSurfaceClass == 19) {
         surfClassOK = true;
     }
-    EXPECT_TRUE(surfClassOK);
+    EXPECT_TRUE(surfClassOK)
+        << "If this test fails, it is likely that a new surface class has been added.  Please check to see if the new surface class should be "
+           "included in ComputeNominalUwithConvCoeffs in DataHeatBalance.cc and update this test to reflect the new number of surface classes.";
 }

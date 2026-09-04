@@ -270,14 +270,15 @@ jobs:
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'
       run: >
         python ./scripts/dev/build_regression_summary.py
-        ${{ github.workspace }}
-        ${{ matrix.os }}
-        ${{ github.sha }}
-        ${{ github.run_id }}
-        ${{ steps.upload_regressions.outputs.artifact-url }}
+        --os ${{ matrix.os }}
+        --sha ${{ github.sha }}
+        --run-id ${{ github.run_id }}
+        --artifact-url ${{ steps.upload_regressions.outputs.artifact-url }}
+        --repository ${{ github.repository }}
+        --regressions-dir ${{ github.workspace }}/regressions
 
     - uses: actions/github-script@v9
-      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == 'NatLabRockies/EnergyPlus'
+      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       with:
         script: |
           const path = require('path')
@@ -288,7 +289,7 @@ jobs:
     # - uses: lhotari/action-upterm@v1
 
     - name: Fail on Regressions from Forked Repository
-      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != 'NatLabRockies/EnergyPlus'
+      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       run: |
         echo "::error::Regressions detected in pull request from forked repository. Download regression results: ${{ steps.upload_regressions.outputs.artifact-url }}"
         exit 1

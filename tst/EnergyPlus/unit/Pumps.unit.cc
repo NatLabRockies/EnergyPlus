@@ -55,6 +55,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
@@ -802,6 +803,130 @@ TEST_F(EnergyPlusFixture, HeaderedVariableSpeedPumpEMSPressureTest)
     Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
 
     EXPECT_NEAR(state->dataPumps->PumpEquip(1).Power, 0.1563, 0.0001);
+
+    EXPECT_EQ(state->dataErrTracking->NumRecurringErrors, 0);
+}
+
+// Pump query must retain the off state; the loop resolver selects the rated flow only after a load turns the loop on.
+TEST_F(EnergyPlusFixture, IntermittentConstantSpeedPumpQueryAllowsOffOrRatedFlow)
+{
+    state->dataPumps->PumpEquip.allocate(1);
+    state->dataLoopNodes->Node.allocate(2);
+
+    auto &pump = state->dataPumps->PumpEquip(1);
+    pump.pumpType = Pumps::PumpType::ConSpeed;
+    pump.PumpControl = Pumps::PumpControlType::Intermittent;
+    pump.InletNodeNum = 1;
+    pump.OutletNodeNum = 2;
+    pump.MassFlowRateMax = 2.0;
+
+    auto &inletNode = state->dataLoopNodes->Node(pump.InletNodeNum);
+    inletNode.MassFlowRateMinAvail = 0.0;
+    inletNode.MassFlowRateMaxAvail = 2.0;
+
+    Pumps::SetupPumpMinMaxFlows(*state, 1, 1);
+
+    auto const &outletNode = state->dataLoopNodes->Node(pump.OutletNodeNum);
+    EXPECT_DOUBLE_EQ(0.0, outletNode.MassFlowRateMinAvail);
+    EXPECT_DOUBLE_EQ(2.0, outletNode.MassFlowRateMaxAvail);
+}
+
+// A non-pressure-based constant-speed pump uses its full-power model at the deliberately low requested flow, so it must warn.
+TEST_F(EnergyPlusFixture, IntermittentConstantSpeedPumpLowFlowFullPowerWarning)
+{
+    std::string const idf_objects = delimited_string({
+        "Pump:ConstantSpeed,",
+        "ChW_Loop Pump1,             !- Name",
+        "ChW_Loop Supply Side Inlet, !- Inlet Node Name",
+        "ChW_Loop Pump1 Outlet,      !- Outlet Node Name",
+        "0.260364,                   !- Design Flow Rate {m3/s}",
+        "300000,                     !- Design Pump Head {Pa}",
+        "AUTOSIZE,                   !- Design Power Consumption {W}",
+        "0.9,                        !- Motor Efficiency",
+        "0.0,                        !- Fraction of Motor Inefficiencies to Fluid Stream",
+        "Intermittent;               !- Pump Control Type",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    int thisBranchNum = 1;
+    DataPlant::LoopSideLocation thisLoopSideNum = DataPlant::LoopSideLocation::Supply;
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    state->dataPlnt->PlantLoop(1).LoopSide(thisLoopSideNum).Branch.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide(thisLoopSideNum).Branch(thisBranchNum).Comp.allocate(1);
+
+    Pumps::GetPumpInput(*state);
+    Pumps::SizePump(*state, 1);
+    Real64 massflowrate = 1.0;
+    state->dataPumps->PumpEquip(1).plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+    state->dataPumps->PumpEquip(1).plantLoc.loopNum = 1;
+    state->dataPumps->PumpEquip(1).plantLoc.branchNum = 1;
+    state->dataPumps->PumpEquip(1).plantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPumps->PumpEquip(1).plantLoc);
+    state->dataPumps->PumpEquip(1).MassFlowRateMax = massflowrate;
+    bool PumpRunning = true;
+
+    state->dataLoopNodes->Node(1).MassFlowRate = massflowrate;
+    state->dataLoopNodes->Node(1).MassFlowRateMinAvail = massflowrate;
+    state->dataLoopNodes->Node(1).MassFlowRateMin = massflowrate;
+    state->dataLoopNodes->Node(1).MassFlowRateMax = massflowrate;
+    state->dataLoopNodes->Node(2).MassFlowRateMaxAvail = massflowrate;
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = massflowrate;
+
+    state->dataPumps->PumpEquip(1).PumpEffic = 0.8;
+
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+
+    EXPECT_NEAR(state->dataPumps->PumpEquip(1).Power, 111266.79, 1.0);
+
+    EXPECT_EQ(state->dataErrTracking->NumRecurringErrors, 1);
+    EXPECT_NEAR(state->dataErrTracking->RecurringErrors[0].MinValue, 0.0010002, 0.001);
+    EXPECT_NEAR(state->dataErrTracking->RecurringErrors[0].MaxValue, 0.0010002, 0.001);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+    auto const &msg = state->dataErrTracking->RecurringErrors[0].Message;
+    EXPECT_NE(msg.find("pump has full power even at less than 25% nominal flow rate"), std::string::npos);
+    // Pressure overrides calculate power from the actual flow and pressure, so positive power is not necessarily full power.
+    state->dataPumps->PumpEquip(1).EMSPressureOverrideOn = true;
+    state->dataPumps->PumpEquip(1).EMSPressureOverrideValue = 200.0;
+
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+
+    EXPECT_NEAR(state->dataPumps->PumpEquip(1).Power, 0.2778, 0.0001);
+    EXPECT_EQ(state->dataErrTracking->NumRecurringErrors, 1);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+
+    state->dataPumps->PumpEquip(1).EMSPressureOverrideOn = false;
+    state->dataPumps->PumpEquip(1).plantLoc.loop->UsePressureForPumpCalcs = true;
+    state->dataPumps->PumpEquip(1).plantLoc.loop->PressureDrop = 200.0;
+
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+
+    EXPECT_NEAR(state->dataPumps->PumpEquip(1).Power, 0.2778, 0.0001);
+    EXPECT_EQ(state->dataErrTracking->NumRecurringErrors, 1);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+
+    state->dataPumps->PumpEquip(1).plantLoc.loop->UsePressureForPumpCalcs = false;
+
+    state->dataGlobal->WarmupFlag = true;
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+    state->dataGlobal->WarmupFlag = false;
+
+    state->dataGlobal->DoingSizing = true;
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+    state->dataGlobal->DoingSizing = false;
+
+    state->dataGlobal->KickOffSimulation = true;
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 1);
+    state->dataGlobal->KickOffSimulation = false;
+
+    Pumps::CalcPumps(*state, 1, massflowrate, PumpRunning);
+    EXPECT_EQ(state->dataErrTracking->RecurringErrors[0].Count, 2);
 }
 
 } // namespace EnergyPlus

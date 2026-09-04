@@ -53,6 +53,8 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataHVACGlobals.hh>
+#include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSurfaces.hh>
@@ -132,4 +134,34 @@ TEST_F(EnergyPlusFixture, PV_ReportPV_ZoneIndexNonZero)
     Photovoltaics::ReportPV(*state, 3);
     EXPECT_EQ(state->dataPhotovoltaic->PVarray(3).Zone, 0);
     EXPECT_NEAR(state->dataPhotovoltaic->PVarray(3).Report.DCPower, 1000.0, 0.1);
+}
+
+TEST_F(EnergyPlusFixture, PV_TRNSYSDynamicTimeStepIndependentOfPVOrder)
+{
+    state->dataPhotovoltaic->PVarray.allocate(2);
+    state->dataSurface->SurfOutDryBulbTemp.allocate(2);
+    state->dataHeatBalSurf->SurfTempOut.allocate(2);
+    state->dataGlobal->MinutesInTimeStep = 15;
+
+    // Reproduce the ordering introduced by the surface-coupled PV pass: an integrated TRNSYS array
+    // is evaluated before a decoupled dynamic TRNSYS array.
+    auto &integratedPV = state->dataPhotovoltaic->PVarray(1);
+    integratedPV.CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    integratedPV.SurfacePtr = 1;
+    state->dataSurface->SurfOutDryBulbTemp(1) = 20.0;
+    state->dataHeatBalSurf->SurfTempOut(1) = 25.0;
+    Photovoltaics::CalcTRNSYSPV(*state, 1, false);
+
+    auto &dynamicPV = state->dataPhotovoltaic->PVarray(2);
+    dynamicPV.CellIntegrationMode = DataPhotovoltaics::CellIntegration::DecoupledUllebergDynamic;
+    dynamicPV.SurfacePtr = 2;
+    dynamicPV.TRNSYSPVModule.HeatLossCoef = 30.0;
+    dynamicPV.TRNSYSPVModule.HeatCapacity = 50000.0;
+    dynamicPV.TRNSYSPVcalc.LastCellTempK = Constant::Kelvin + 40.0;
+    state->dataSurface->SurfOutDryBulbTemp(2) = 20.0;
+    Photovoltaics::CalcTRNSYSPV(*state, 2, false);
+
+    EXPECT_DOUBLE_EQ(900.0, state->dataPhotovoltaicState->PVTimeStep);
+    EXPECT_LT(dynamicPV.Report.CellTemp, 40.0);
+    EXPECT_GT(dynamicPV.Report.CellTemp, 20.0);
 }

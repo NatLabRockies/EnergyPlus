@@ -1243,12 +1243,11 @@ namespace Photovoltaics {
         Real64 CellTemp(0.0); // cell temperature in Kelvin
         Real64 CellTempC;     // cell temperature in degrees C
 
-        // if the cell temperature mode is 2, convert the timestep to seconds
-        if (state.dataPhotovoltaicState->firstTime &&
-            state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::DecoupledUllebergDynamic) {
+        // The dynamic model needs the zone timestep in seconds. Set it whenever this mode is evaluated so that
+        // initialization does not depend on another TRNSYS PV array having been simulated first.
+        if (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::DecoupledUllebergDynamic) {
             state.dataPhotovoltaicState->PVTimeStep = double(state.dataGlobal->MinutesInTimeStep) * 60.0; // Seconds per time step
         }
-        state.dataPhotovoltaicState->firstTime = false;
 
         // place the shunt resistance into its common block
         state.dataPhotovoltaic->ShuntResistance = state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.ShuntResistance;

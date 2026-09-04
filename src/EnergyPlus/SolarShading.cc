@@ -13072,7 +13072,8 @@ void CalcComplexWindowOverlap(EnergyPlusData &state,
             if (s_surf->SurfWinWindowModelType(BackSurfaceNumber) == WindowModel::BSDF) {
                 VisibleReflectance = state.dataConstruction->Construct(IConst).ReflectVisDiffBack;
             } else {
-                VisibleReflectance = (1.0 - s_mat->materials(InsideConLay)->AbsorpVisibleOut);
+                int const insideMaterialNum = state.dataConstruction->Construct(IConst).LayerPoint(InsideConLay);
+                VisibleReflectance = (1.0 - s_mat->materials(insideMaterialNum)->AbsorpVisibleIn);
             }
             Geom.ARhoVisOverlap(KBkSurf, IRay) = Geom.AOverlap(KBkSurf, IRay) * VisibleReflectance;
             TotAOverlap += Geom.AOverlap(KBkSurf, IRay);

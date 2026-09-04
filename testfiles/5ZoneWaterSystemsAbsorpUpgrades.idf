@@ -2,11 +2,12 @@
 !-Option OriginalOrderTop UseSpecialFormat
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
-! 5ZoneWaterSystems.idf
+! 5ZoneWaterSystemsAbsorpUpgrades.idf
 ! Basic file description:  1 story building divided into 4 exterior and one interior conditioned zones and return plenum.
 !
-! Highlights:              This input illustrates various uses of the water systems.
-!                          test file derived from 5ZoneBoilerOutsideReset.idf
+! Highlights:              Exercises bulk and independent inside-face material absorptances,
+!                          outside-only and two-face variable absorptance controls, and conditional report variables.
+!                          Test file derived from 5ZoneWaterSystems.idf.
 !
 ! Simulation Location/Run: CHICAGO_IL_USA TMY2-94846, 2 design days, 1 run periods,
 !                          Run Control executes the run periods using the weather file
@@ -1907,9 +1908,9 @@
     0.115,                   !- Conductivity {W/m-K}
     513,                     !- Density {kg/m3}
     1381,                    !- Specific Heat {J/kg-K}
-    0.9,                     !- Thermal Absorptance Outside Face
-    0.78,                    !- Solar Absorptance Outside Face
-    0.78;                    !- Visible Absorptance Outside Face
+    0.9,                     !- Thermal Absorptance
+    0.78,                    !- Solar Absorptance
+    0.78;                    !- Visible Absorptance
 
   Material,
     RG01,                    !- Name
@@ -1951,9 +1952,9 @@
     0.1150000,               !- Conductivity {W/m-K}
     513.0000,                !- Density {kg/m3}
     1381.000,                !- Specific Heat {J/kg-K}
-    0.9000000,               !- Thermal Absorptance Outside Face
-    0.7800000,               !- Solar Absorptance Outside Face
-    0.7800000,               !- Visible Absorptance Outside Face
+    0.9000000,               !- Thermal Absorptance
+    0.7800000,               !- Solar Absorptance
+    0.7800000,               !- Visible Absorptance
     0.2,                     !- Thermal Absorptance Inside Face
     0.15,                    !- Solar Absorptance Inside Face
     0.15;                    !- Visible Absorptance Inside Face
@@ -1965,9 +1966,9 @@
     0.1150000,               !- Conductivity {W/m-K}
     513.0000,                !- Density {kg/m3}
     1381.000,                !- Specific Heat {J/kg-K}
-    0.9000000,               !- Thermal Absorptance Outside Face
-    0.7800000,               !- Solar Absorptance Outside Face
-    0.7800000,               !- Visible Absorptance Outside Face
+    0.9000000,               !- Thermal Absorptance
+    0.7800000,               !- Solar Absorptance
+    0.7800000,               !- Visible Absorptance
     0.2,                     !- Thermal Absorptance Inside Face
     0.15,                    !- Solar Absorptance Inside Face
     0.15;                    !- Visible Absorptance Inside Face
@@ -2005,14 +2006,16 @@
     0.7500000,               !- Solar Absorptance
     0.7500000;               !- Visible Absorptance
 
+  ! Only the outside face varies; the inside face retains the constant GP01 values.
+
   MaterialProperty:VariableAbsorptance,
     variableGP01,           !- Name
     GP01,                   !- Reference Material Name
-    Scheduled,              !- Outside Face Control Signal
-    ,                       !- Outside Face Thermal Absorptance Function Name
-    OutAbsTherm,            !- Outside Face Thermal Absorptance Schedule Name
-    ,                       !- Outside Face Solar Absorptance Function Name
-    OutAbsSolar;            !- Outside Face Solar Absorptance Schedule Name
+    Scheduled,              !- Control Signal
+    ,                       !- Thermal Absorptance Function Name
+    OutAbsTherm,            !- Thermal Absorptance Schedule Name
+    ,                       !- Solar Absorptance Function Name
+    OutAbsSolar;            !- Solar Absorptance Schedule Name
 
   Material,
     GP02,                    !- Name
@@ -2036,19 +2039,21 @@
     0.6500000,               !- Solar Absorptance
     0.6500000;               !- Visible Absorptance
 
+  ! The outside and inside faces follow separate schedules.
+
   MaterialProperty:VariableAbsorptance,
     variableCC03,           !- Name
     CC03,                   !- Reference Material Name
-    Scheduled,              !- Outside Face Control Signal
-    ,                       !- Outside Face Thermal Absorptance Function Name
-    OutAbsTherm,            !- Outside Face Thermal Absorptance Schedule Name
-    ,                       !- Outside Face Solar Absorptance Function Name
-    OutAbsSolar,            !- Outside Face Solar Absorptance Schedule Name
-    Scheduled,              !- Inside Face Control Signal
-    ,                       !- Inside Face Thermal Absorptance Function Name
-    InAbsTherm,             !- Inside Face Thermal Absorptance Schedule Name
-    ,                       !- Inside Face Solar Absorptance Function Name
-    InAbsSolar;             !- Inside Face Solar Absorptance Schedule Name
+    Scheduled,              !- Control Signal
+    ,                       !- Thermal Absorptance Function Name
+    OutAbsTherm,            !- Thermal Absorptance Schedule Name
+    ,                       !- Solar Absorptance Function Name
+    OutAbsSolar,            !- Solar Absorptance Schedule Name
+    Scheduled,              !- Control Signal Inside Face
+    ,                       !- Thermal Absorptance Function Name Inside Face
+    InAbsTherm,             !- Thermal Absorptance Schedule Name Inside Face
+    ,                       !- Solar Absorptance Function Name Inside Face
+    InAbsSolar;             !- Solar Absorptance Schedule Name Inside Face
 
   Schedule:Compact,
     OutAbsTherm,  !- Name
@@ -2639,7 +2644,6 @@
     CLOTHING_SCH,            !- Clothing Insulation Schedule Name
     AIR_VELO_SCH,            !- Air Velocity Schedule Name
     FANGER;                  !- Thermal Comfort Model 1 Type
-
   Lights,
     SPACE1-1 Lights 1,       !- Name
     SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
@@ -6136,6 +6140,13 @@
 
   Output:Variable,*,Air System Simulation Iteration Count,timestep;
 
+  ! Request both schemes: each surface key reports either the generic bulk name or the face-specific pair.
+  ! Thermal and solar availability are determined independently.
+
+  Output:Variable,*,Surface Thermal Absorptance,timestep;
+
+  Output:Variable,*,Surface Solar Absorptance,timestep;
+
   Output:Variable,*,Surface Thermal Absorptance Outside Face,timestep;
 
   Output:Variable,*,Surface Thermal Absorptance Inside Face,timestep;
@@ -6175,4 +6186,3 @@
   Output:Meter:MeterFileOnly,NaturalGas:Facility,runperiod;
 
   Output:Meter:MeterFileOnly,NaturalGas:Plant,runperiod;
-

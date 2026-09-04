@@ -2001,81 +2001,6 @@
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:WEEK:DAILY ===========
 
   Schedule:Week:Daily,
-    trans schedule winter=0.85 summer=0.7 Week Rule - Jan1-Apr28,  !- Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Sunday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Monday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Tuesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Wednesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Thursday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Friday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Saturday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- Holiday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- SummerDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- WinterDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- CustomDay1 Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
-    trans schedule winter=0.85 summer=0.7 Week Rule - Apr29-May5,  !- Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Sunday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday1,  !- Monday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Tuesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Wednesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Thursday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Friday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Saturday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- Holiday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- SummerDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- WinterDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- CustomDay1 Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
-    trans schedule winter=0.85 summer=0.7 Week Rule - May6-Oct27,  !- Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Sunday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Monday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Tuesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Wednesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Thursday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Friday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Saturday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- Holiday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- SummerDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- WinterDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- CustomDay1 Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
-    trans schedule winter=0.85 summer=0.7 Week Rule - Oct28-Nov3,  !- Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Sunday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Monday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Tuesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday121,  !- Wednesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Thursday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Friday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Saturday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- Holiday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- SummerDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- WinterDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- CustomDay1 Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
-    trans schedule winter=0.85 summer=0.7 Week Rule - Nov4-Dec31,  !- Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Sunday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Monday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Tuesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Wednesday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Thursday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Friday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 allday305,  !- Saturday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- Holiday Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- SummerDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- WinterDesignDay Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day,  !- CustomDay1 Schedule:Day Name
-    trans schedule winter=0.85 summer=0.7 default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
     interior lighting schedule Week Rule - Jan1-Jan27,  !- Name
     interior lighting schedule allday1,  !- Sunday Schedule:Day Name
     interior lighting schedule allday1,  !- Monday Schedule:Day Name
@@ -2404,21 +2329,6 @@
     occupants schedule default day,  !- WinterDesignDay Schedule:Day Name
     occupants schedule default day,  !- CustomDay1 Schedule:Day Name
     occupants schedule default day;  !- CustomDay2 Schedule:Day Name
-
-  Schedule:Week:Daily,
-    clothes dryer schedule Week Rule - Jan1-Dec31,  !- Name
-    clothes dryer schedule allday1,  !- Sunday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Monday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Tuesday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Wednesday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Thursday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Friday Schedule:Day Name
-    clothes dryer schedule allday1,  !- Saturday Schedule:Day Name
-    clothes dryer schedule default day,  !- Holiday Schedule:Day Name
-    clothes dryer schedule default day,  !- SummerDesignDay Schedule:Day Name
-    clothes dryer schedule default day,  !- WinterDesignDay Schedule:Day Name
-    clothes dryer schedule default day,  !- CustomDay1 Schedule:Day Name
-    clothes dryer schedule default day;  !- CustomDay2 Schedule:Day Name
 
   Schedule:Week:Daily,
     clothes washer schedule Week Rule - Jan1-Dec31,  !- Name
@@ -2993,35 +2903,6 @@
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:YEAR ===========
 
   Schedule:Year,
-    trans schedule winter=0.85 summer=0.7,  !- Name
-    Fractional,              !- Schedule Type Limits Name
-    trans schedule winter=0.85 summer=0.7 Week Rule - Jan1-Apr28,  !- Schedule:Week Name 1
-    1,                       !- Start Month 1
-    1,                       !- Start Day 1
-    4,                       !- End Month 1
-    28,                      !- End Day 1
-    trans schedule winter=0.85 summer=0.7 Week Rule - Apr29-May5,  !- Schedule:Week Name 2
-    4,                       !- Start Month 2
-    29,                      !- Start Day 2
-    5,                       !- End Month 2
-    5,                       !- End Day 2
-    trans schedule winter=0.85 summer=0.7 Week Rule - May6-Oct27,  !- Schedule:Week Name 3
-    5,                       !- Start Month 3
-    6,                       !- Start Day 3
-    10,                      !- End Month 3
-    27,                      !- End Day 3
-    trans schedule winter=0.85 summer=0.7 Week Rule - Oct28-Nov3,  !- Schedule:Week Name 4
-    10,                      !- Start Month 4
-    28,                      !- Start Day 4
-    11,                      !- End Month 4
-    3,                       !- End Day 4
-    trans schedule winter=0.85 summer=0.7 Week Rule - Nov4-Dec31,  !- Schedule:Week Name 5
-    11,                      !- Start Month 5
-    4,                       !- Start Day 5
-    12,                      !- End Month 5
-    31;                      !- End Day 5
-
-  Schedule:Year,
     interior lighting schedule,  !- Name
     Fractional,              !- Schedule Type Limits Name
     interior lighting schedule Week Rule - Jan1-Jan27,  !- Schedule:Week Name 1
@@ -3134,15 +3015,6 @@
     occupants schedule,      !- Name
     Fractional,              !- Schedule Type Limits Name
     occupants schedule Week Rule - Jan1-Dec31,  !- Schedule:Week Name 1
-    1,                       !- Start Month 1
-    1,                       !- Start Day 1
-    12,                      !- End Month 1
-    31;                      !- End Day 1
-
-  Schedule:Year,
-    clothes dryer schedule,  !- Name
-    Fractional,              !- Schedule Type Limits Name
-    clothes dryer schedule Week Rule - Jan1-Dec31,  !- Schedule:Week Name 1
     1,                       !- Start Month 1
     1,                       !- Start Day 1
     12,                      !- End Month 1
@@ -4497,6 +4369,82 @@
     Through: 12/31,          !- <none>
     For: AllDays,            !- <none>
     Until: 24:00,10.1122222222222; !- <none>
+
+!-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:YEAR:RULES ===========
+
+  Schedule:Year:Rules,
+    trans schedule winter=0.85 summer=0.7,      !- Name
+    Fractional,                                 !- Schedule Type Limits Name
+    trans schedule winter=0.85 summer=0.7 default day; !- Default Day Schedule Name
+
+  Schedule:Week:Rule,
+    trans schedule winter=0.85 summer=0.7 rule, !- Name
+    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
+    2,                                          !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday1, !- Day Schedule Name
+    Yes,                                        !- Apply Sunday
+    Yes,                                        !- Apply Monday
+    Yes,                                        !- Apply Tuesday
+    Yes,                                        !- Apply Wednesday
+    Yes,                                        !- Apply Thursday
+    Yes,                                        !- Apply Friday
+    Yes,                                        !- Apply Saturday
+    1,                                          !- Start Month
+    1,                                          !- Start Day
+    4,                                          !- End Month
+    30;                                         !- End Day
+
+  Schedule:Week:Rule,
+    trans schedule winter=0.85 summer=0.7 rule 1, !- Name
+    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
+    1,                                          !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday121, !- Day Schedule Name
+    Yes,                                        !- Apply Sunday
+    Yes,                                        !- Apply Monday
+    Yes,                                        !- Apply Tuesday
+    Yes,                                        !- Apply Wednesday
+    Yes,                                        !- Apply Thursday
+    Yes,                                        !- Apply Friday
+    Yes,                                        !- Apply Saturday
+    5,                                          !- Start Month
+    1,                                          !- Start Day
+    10,                                         !- End Month
+    31;                                         !- End Day
+
+  Schedule:Week:Rule,
+    trans schedule winter=0.85 summer=0.7 rule 2, !- Name
+    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
+    0,                                          !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday305, !- Day Schedule Name
+    Yes,                                        !- Apply Sunday
+    Yes,                                        !- Apply Monday
+    Yes,                                        !- Apply Tuesday
+    Yes,                                        !- Apply Wednesday
+    Yes,                                        !- Apply Thursday
+    Yes,                                        !- Apply Friday
+    Yes,                                        !- Apply Saturday
+    11,                                         !- Start Month
+    1,                                          !- Start Day
+    12,                                         !- End Month
+    31;                                         !- End Day
+
+  Schedule:Year:Rules,
+    clothes dryer schedule,                     !- Name
+    Fractional,                                 !- Schedule Type Limits Name
+    clothes dryer schedule default day;         !- Default Day Schedule Name
+
+  Schedule:Week:Rule,
+    clothes dryer schedule rule,                !- Name
+    clothes dryer schedule,                     !- Schedule Year Rules Name
+    0,                                          !- Rule Priority Order
+    clothes dryer schedule allday1,             !- Day Schedule Name
+    Yes,                                        !- Apply Sunday
+    Yes,                                        !- Apply Monday
+    Yes,                                        !- Apply Tuesday
+    Yes,                                        !- Apply Wednesday
+    Yes,                                        !- Apply Thursday
+    Yes,                                        !- Apply Friday
+    Yes;                                        !- Apply Saturday
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:CONSTANT ===========
 

@@ -4410,7 +4410,7 @@ TEST_F(InputProcessorFixture, epJSONgetObjectItem_minfields)
 
     std::string obj_name2 = "Material:NoMass";
     std::string name2 = "Standard insulation_01";
-    json mat1 = {{"name", name2}, {"roughness", "MediumRough"}, {"thermal_resistance", 2.0}, {"solar_absorptance_outside_face", 0.5}};
+    json mat1 = {{"name", name2}, {"roughness", "MediumRough"}, {"thermal_resistance", 2.0}, {"solar_absorptance", 0.5}};
     EXPECT_TRUE(mat1.is_object());
     root[obj_name2][name2] = mat1;
 
@@ -4507,7 +4507,7 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_fromJSON)
 
     std::string obj_type2 = "Material";
     std::string name2 = "Standard insulation_01";
-    json mat1 = {{"name", name1}, {"roughness", "MediumRough"}, {"thickness", 0.2}, {"solar_absorptance_outside_face", 0.5}};
+    json mat1 = {{"name", name1}, {"roughness", "MediumRough"}, {"thickness", 0.2}, {"solar_absorptance", 0.5}};
     EXPECT_TRUE(mat1.is_object());
     root[obj_type2][name2] = mat1;
 
@@ -4548,13 +4548,13 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_fromJSON)
     EXPECT_EQ(alphaFieldValue, "MEDIUMROUGH");
     numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "thickness");
     EXPECT_NEAR(numericFieldValue, 0.2, 0.0001);
-    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "solar_absorptance_outside_face");
+    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "solar_absorptance");
     EXPECT_NEAR(numericFieldValue, 0.5, 0.0001);
     // Defaults from schema
-    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "thermal_absorptance_outside_face");
+    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "thermal_absorptance");
     EXPECT_NEAR(numericFieldValue, 0.9, 0.0001);
     // Fields beyond min-fields also return their default if they have one (unlike getObjectItem)
-    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "visible_absorptance_outside_face");
+    numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "visible_absorptance");
     EXPECT_NEAR(numericFieldValue, 0.7, 0.0001);
     // or zero if they don't have a default (in this case it's a required field, so it would have failed before now)
     numericFieldValue = ip->getRealFieldValue(mat1, objectSchemaProps, "specific_heat");

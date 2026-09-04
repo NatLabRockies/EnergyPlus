@@ -105,6 +105,7 @@ set(test_src
     Datasets.unit.cc
     DaylightingDevices.unit.cc
     DaylightingManager.unit.cc
+    ConstructionAssignmentSet.unit.cc
     DemandResponse.unit.cc
     DesiccantDehumidifiers.unit.cc
     DisplacementVentMgr.unit.cc
@@ -289,6 +290,7 @@ set(test_src
     WindowManager.unit.cc
     XingGroundTemperatureModel.unit.cc
     ZoneContaminantPredictorCorrector.unit.cc
+    ZoneDehumidifier.unit.cc
     ZoneEquipmentManager.unit.cc
     ZoneHVACEvaporativeCooler.unit.cc
     ZonePlenum.unit.cc

@@ -931,7 +931,11 @@ Real64 ComputeNominalUwithConvCoeffs(EnergyPlusData &state,
         0.0,       // Detached_B
         0.0,       // Detached_F
         0.1197548, // Window
+        0.1197548, // FixedWindow
+        0.1197548, // OperableWindow
+        0.1197548, // Skylight
         0.1197548, // GlassDoor
+        0.1197548, // OverheadDoor
         0.1197548, // Door
         0.0,       // Shading
         0.0,       // Overhang
