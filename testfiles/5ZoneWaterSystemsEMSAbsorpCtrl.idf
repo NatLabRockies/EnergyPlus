@@ -6172,13 +6172,13 @@
     CC03_Therm_Abs_Out,  !- Name
     CC03,    !- Actuated Component Unique Name
     Material,  !- Actuated Component Type
-    Surface Property Thermal Absorptance;          !- Actuated Component Control Type
+    Surface Property Thermal Absorptance Outside Face;          !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
     CC03_Solar_Abs_Out,  !- Name
     CC03,    !- Actuated Component Unique Name
     Material,  !- Actuated Component Type
-    Surface Property Solar Absorptance;          !- Actuated Component Control Type
+    Surface Property Solar Absorptance Outside Face;          !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
     CC03_Therm_Abs_In,  !- Name

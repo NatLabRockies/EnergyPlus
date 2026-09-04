@@ -261,6 +261,13 @@ namespace Material {
         bool hasAbsorpVisibleInputIn = false; // Optional inside-face visible absorptance was explicitly input
 
         // Radiation parameters // Are these for windows or for opaque materials also?
+        // Legacy EMS overrides apply to both faces for backward compatibility.
+        bool AbsorpSolarEMSOverrideOn = false;
+        Real64 AbsorpSolarEMSOverride = 0.0;
+        bool AbsorpThermalEMSOverrideOn = false;
+        Real64 AbsorpThermalEMSOverride = 0.0;
+        bool AbsorpVisibleEMSOverrideOn = false;
+        Real64 AbsorpVisibleEMSOverride = 0.0;
         bool AbsorpSolarOutEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
         Real64 AbsorpSolarOutEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
         bool AbsorpThermalOutEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance

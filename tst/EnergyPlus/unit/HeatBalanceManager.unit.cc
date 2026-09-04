@@ -2464,6 +2464,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSMaterialAbsorptanceUpdatesConstr
     mat->AbsorpSolarInEMSOverride = 0.55;
     mat->AbsorpVisibleOutEMSOverride = 0.45;
     mat->AbsorpVisibleInEMSOverride = 0.35;
+    mat->AbsorpThermalEMSOverride = 0.25;
+    mat->AbsorpSolarEMSOverride = 0.2;
+    mat->AbsorpVisibleEMSOverride = 0.15;
 
     // Test 1: Everything gets reset via EMS
     mat->AbsorpThermalOutEMSOverrideOn = true;
@@ -2610,6 +2613,26 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSMaterialAbsorptanceUpdatesConstr
     EXPECT_EQ(mat->AbsorpVisibleIn, mat->AbsorpVisibleInputIn);
     EXPECT_EQ(construction.OutsideAbsorpVis, mat->AbsorpVisibleInputOut);
     EXPECT_EQ(construction.InsideAbsorpVis, mat->AbsorpVisibleInputIn);
+
+    // Test 5: Legacy actuators continue to override both faces
+    mat->AbsorpThermalEMSOverrideOn = true;
+    mat->AbsorpSolarEMSOverrideOn = true;
+    mat->AbsorpVisibleEMSOverrideOn = true;
+
+    HeatBalanceSurfaceManager::InitEMSControlledSurfaceProperties(*state);
+
+    EXPECT_EQ(mat->AbsorpThermalOut, mat->AbsorpThermalEMSOverride);
+    EXPECT_EQ(mat->AbsorpThermalIn, mat->AbsorpThermalEMSOverride);
+    EXPECT_EQ(construction.OutsideAbsorpThermal, mat->AbsorpThermalEMSOverride);
+    EXPECT_EQ(construction.InsideAbsorpThermal, mat->AbsorpThermalEMSOverride);
+    EXPECT_EQ(mat->AbsorpSolarOut, mat->AbsorpSolarEMSOverride);
+    EXPECT_EQ(mat->AbsorpSolarIn, mat->AbsorpSolarEMSOverride);
+    EXPECT_EQ(construction.OutsideAbsorpSolar, mat->AbsorpSolarEMSOverride);
+    EXPECT_EQ(construction.InsideAbsorpSolar, mat->AbsorpSolarEMSOverride);
+    EXPECT_EQ(mat->AbsorpVisibleOut, mat->AbsorpVisibleEMSOverride);
+    EXPECT_EQ(mat->AbsorpVisibleIn, mat->AbsorpVisibleEMSOverride);
+    EXPECT_EQ(construction.OutsideAbsorpVis, mat->AbsorpVisibleEMSOverride);
+    EXPECT_EQ(construction.InsideAbsorpVis, mat->AbsorpVisibleEMSOverride);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceManager_GetSpaceData)
