@@ -1624,4 +1624,12 @@ void ASHRAE205ChillerSpecs::getDesignCapacities(
     }
 }
 
+void ASHRAE205ChillerSpecs::getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state, Real64 &capacity, bool &capacityIsKnown)
+{
+    // The RS0001 model does not use the EIR chiller's capacity curve or maximum part-load ratio.
+    // Preserve its established plant dispatch capacity until an RS0001-specific dynamic limit is available.
+    capacity = this->RefCap;
+    capacityIsKnown = true;
+}
+
 } // namespace EnergyPlus::ChillerElectricASHRAE205

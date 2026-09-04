@@ -90,9 +90,9 @@ public:
     {
     }
 
-    virtual Real64 getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state)
+    virtual void getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] Real64 &capacity, bool &capacityIsKnown)
     {
-        return 0.0;
+        capacityIsKnown = false;
     }
 
     virtual void getCurrentPower([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] Real64 &power)
