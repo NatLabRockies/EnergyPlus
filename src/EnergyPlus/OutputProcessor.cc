@@ -757,10 +757,11 @@ namespace OutputProcessor {
                     meterOrVarNameUC.erase(lbrackPos);
                 }
 
-                // A custom meter cannot reference another custom meter
+                // A Meter:Custom cannot reference another Meter:Custom
                 if (std::find(customMeterNames.begin(), customMeterNames.end(), meterOrVarNameUC) != customMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:Custom in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:Custom in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -768,10 +769,11 @@ namespace OutputProcessor {
                     break;
                 }
 
-                // A custom meter cannot reference another customDec meter
+                // A Meter:Custom cannot reference a Meter:CustomDecrement
                 if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), meterOrVarNameUC) != customDecMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -791,7 +793,8 @@ namespace OutputProcessor {
                     } else if (units != srcMeter->units) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", differing units in {}="{}".)",
+                                          std::format(R"({}="{}", differing units in {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -812,7 +815,8 @@ namespace OutputProcessor {
                     if (srcDDVar->storeType != StoreType::Sum) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", variable not summed variable {}="{}".)",
+                                          std::format(R"({}="{}", variable not summed variable {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -889,7 +893,8 @@ namespace OutputProcessor {
                 } else {
                     // Cannot use ShowWarningItemNotFound because this string appears in a unit test
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", invalid {}="{}".)",
+                                     std::format(R"({}="{}", invalid {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -901,10 +906,11 @@ namespace OutputProcessor {
 
             // Somehow, this meter is not linked to any variables either directly or via another meter
             if (!itemsAssigned) {
-                ShowWarningError(state, std::format("Meter:Custom=\"{}\", no items assigned ", ipsc->cAlphaArgs(1)));
+                ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another Meter:Custom.");
+                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being assigned to a "
+                    "Meter:Custom.");
                 continue;
             }
 
@@ -1084,10 +1090,11 @@ namespace OutputProcessor {
             }
             std::string decMeterNameUC = Util::makeUPPER(decMeterName);
 
-            // DecMeter cannot be a Meter:Custom
+            // Source Meter Name cannot be a Meter:CustomDecrement (it can be a Meter:Custom, though)
             if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), decMeterNameUC) != customDecMeterNames.end()) {
                 ShowWarningError(state,
-                                 std::format(R"(Meter:CustomDec="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                 std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                             ipsc->cCurrentModuleObject,
                                              ipsc->cAlphaArgs(1),
                                              ipsc->cAlphaFieldNames(3),
                                              ipsc->cAlphaArgs(3)));
@@ -1095,7 +1102,7 @@ namespace OutputProcessor {
                 continue;
             }
 
-            auto foundDecMeter = op->meterMap.find(decMeterName);
+            auto foundDecMeter = op->meterMap.find(decMeterNameUC);
             if (foundDecMeter == op->meterMap.end()) {
                 ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(3), decMeterName);
                 ErrorsFound = true;
@@ -1104,7 +1111,7 @@ namespace OutputProcessor {
 
             int decMeterNum = foundDecMeter->second;
             auto *decMeter = op->meters[decMeterNum];
-            assert(decMeter->type == MeterType::Normal);
+            assert(decMeter->type == MeterType::Normal || decMeter->type == MeterType::Custom);
 
             Constant::Units units = decMeter->units;
 
@@ -1130,10 +1137,11 @@ namespace OutputProcessor {
                     meterOrVarNameUC.erase(lbrackPos);
                 }
 
-                // A custom meter cannot reference another custom meter
+                // A Meter:CustomDecrement cannot reference another Meter:CustomDecrement (it can reference a Meter:Custom, though)
                 if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), meterOrVarNameUC) != customDecMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -1153,7 +1161,8 @@ namespace OutputProcessor {
                     } else if (units != srcMeter->units) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", differing units in {}="{}".)",
+                                          std::format(R"({}="{}", differing units in {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -1174,7 +1183,8 @@ namespace OutputProcessor {
                     if (srcDDVar->storeType != StoreType::Sum) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", variable not summed variable {}="{}".)",
+                                          std::format(R"({}="{}", variable not summed variable {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -1251,7 +1261,8 @@ namespace OutputProcessor {
                 } else {
                     // Cannot use ShowWarningItemNotFound because this string appears in a unit test
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", invalid {}="{}".)",
+                                     std::format(R"({}="{}", invalid {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -1262,12 +1273,15 @@ namespace OutputProcessor {
 
             } // for (fldIndex)
 
-            // Somehow, this meter is not linked to any variables either directly or via another meter
+            // Unreachable: itemsAssigned is set true above as soon as the Source Meter Name resolves, before this loop even runs, and nothing
+            // in the loop above ever resets it to false. A valid decrement meter only requires a valid Source Meter Name; bad/empty group
+            // fields are handled separately via foundBadSrc.
             if (!itemsAssigned) {
-                ShowWarningError(state, std::format("Meter:Custom=\"{}\", no items assigned ", ipsc->cAlphaArgs(1)));
+                ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another Meter:Custom.");
+                    "...will not be shown with the Meter results. This may be caused by a Meter:CustomDecrement being assigned to another "
+                    "Meter:CustomDecrement.");
                 continue;
             }
 

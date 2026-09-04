@@ -110052,7 +110052,7 @@ Meter:Custom,
    \memo Used to allow users to combine specific variables and/or meters into
    \memo "custom" meter configurations. To access these meters by name, one must
    \memo first run a simulation to generate the RDD/MDD files and names.
-   \memo A Meter:Custom cannot reference another Meter:Custom.
+   \memo A Meter:Custom cannot reference another Meter:Custom or a Meter:CustomDecrement.
    A1,  \field Name
         \required-field
    A2,  \field Resource Type
@@ -110179,6 +110179,9 @@ Meter:CustomDecrement,
    \memo Used to allow users to combine specific variables and/or meters into
    \memo "custom" meter configurations. To access these meters by name, one must
    \memo first run a simulation to generate the RDD/MDD files and names.
+   \memo A Meter:CustomDecrement cannot reference another Meter:CustomDecrement,
+   \memo either as the Source Meter Name or in the Key Name/Output Variable or Meter Name
+   \memo pairs, though it may reference a Meter:Custom.
    A1,  \field Name
         \required-field
    A2,  \field Resource Type
@@ -110200,6 +110203,7 @@ Meter:CustomDecrement,
         \key Generic
    A3,  \field Source Meter Name
         \required-field
+        \note Cannot reference another Meter:CustomDecrement.
    A4,  \field Key Name 1
         \begin-extensible
    A5,  \field Output Variable or Meter Name 1
