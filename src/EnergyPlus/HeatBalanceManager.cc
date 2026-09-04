@@ -2083,6 +2083,7 @@ namespace HeatBalanceManager {
 
         // allocate the array the holds the predefined report data
         state.dataHeatBal->ZonePreDefRep.allocate(state.dataGlobal->NumOfZones);
+        state.dataHeatBal->ZnAirRpt.allocate(state.dataGlobal->NumOfZones);
 
         // Now get Space data after Zones are set up, because Space is optional, Zones are not
         GetSpaceData(state, ErrorsFound);

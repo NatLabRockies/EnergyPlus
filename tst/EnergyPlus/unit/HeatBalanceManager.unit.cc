@@ -2465,6 +2465,58 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSMaterialThermalAbsorptanceUpdate
     EXPECT_EQ(construction.OutsideAbsorpThermal, emsThermalAbsorptance);
 }
 
+TEST_F(EnergyPlusFixture, GetZoneDataTest)
+{
+    // Testing of fix for bug #11733
+    std::string const idf_objects = delimited_string({
+        "  Zone,",
+        "    Shire,            !- Name",
+        "    0,                !- Direction of Relative North {deg}",
+        "    0,                !- X Origin {m}",
+        "    0,                !- Y Origin {m}",
+        "    0,                !- Z Origin {m}",
+        "    1,                !- Type",
+        "    1,                !- Multiplier",
+        "    2.5,              !- Ceiling Height {m}",
+        "    100.0;            !- Volume {m3}",
+
+        "  Zone,",
+        "    Rivendell,        !- Name",
+        "    0,                !- Direction of Relative North {deg}",
+        "    0,                !- X Origin {m}",
+        "    0,                !- Y Origin {m}",
+        "    0,                !- Z Origin {m}",
+        "    1,                !- Type",
+        "    2,                !- Multiplier",
+        "    3.0,              !- Ceiling Height {m}",
+        "    150.0;            !- Volume {m3}",
+
+        "  Zone,",
+        "    Gondor,           !- Name",
+        "    0,                !- Direction of Relative North {deg}",
+        "    0,                !- X Origin {m}",
+        "    0,                !- Y Origin {m}",
+        "    0,                !- Z Origin {m}",
+        "    1,                !- Type",
+        "    1,                !- Multiplier",
+        "    4.0,              !- Ceiling Height {m}",
+        "    200.0;            !- Volume {m3}",
+    });
+
+    bool errorsFound = false;
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    GetZoneData(*state, errorsFound);
+    EXPECT_FALSE(errorsFound);
+    EXPECT_EQ("SHIRE", state->dataHeatBal->Zone(1).Name);
+    EXPECT_EQ("RIVENDELL", state->dataHeatBal->Zone(2).Name);
+    EXPECT_EQ("GONDOR", state->dataHeatBal->Zone(3).Name);
+    EXPECT_EQ(size_t(3), state->dataHeatBal->ZonePreDefRep.size());
+    EXPECT_EQ(size_t(3), state->dataHeatBal->ZnAirRpt.size());
+}
+
 TEST_F(EnergyPlusFixture, HeatBalanceManager_GetSpaceData)
 {
     // Test input processing of Space object
