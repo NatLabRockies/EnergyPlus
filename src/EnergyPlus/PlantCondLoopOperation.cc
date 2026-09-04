@@ -3041,8 +3041,20 @@ void DistributePlantLoad(EnergyPlusData &state,
                 }
                 ++numAvail;
 
+                Real64 dynamicMaxLoad = 0.0;
+                bool hasDynamicMaxLoad = false;
+                this_component.getDynamicMaxCapacity(state, dynamicMaxLoad, hasDynamicMaxLoad);
+                if (hasDynamicMaxLoad) {
+                    this_component.MaxLoad = dynamicMaxLoad;
+                }
+
                 if (this_component.OptLoad > 0.0) {
                     ChangeInLoad = min(this_component.OptLoad, std::abs(RemLoopDemand));
+                    if (hasDynamicMaxLoad) {
+                        ChangeInLoad = min(ChangeInLoad, dynamicMaxLoad);
+                    }
+                } else if (hasDynamicMaxLoad) {
+                    ChangeInLoad = min(dynamicMaxLoad, std::abs(RemLoopDemand));
                 } else {
                     // this is for some components like cooling towers don't have well defined OptLoad
                     ChangeInLoad = std::abs(RemLoopDemand);
@@ -3090,7 +3102,6 @@ void DistributePlantLoad(EnergyPlusData &state,
                     }
 
                     NewLoad = this_component.MyLoad;
-                    this_component.MaxLoad = this_component.getDynamicMaxCapacity(state);
                     NewLoad = min(this_component.MaxLoad, std::abs(NewLoad) + DivideLoad);
                     ChangeInLoad = NewLoad - std::abs(this_component.MyLoad);
                     this_component.MyLoad = sign(NewLoad, RemLoopDemand);
@@ -3144,9 +3155,12 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                this_component.MaxLoad = this_component.getDynamicMaxCapacity(state);
-                if (this_component.MaxLoad > 0.0) { // apply known limit
-                    ChangeInLoad = min(this_component.MaxLoad, std::abs(RemLoopDemand));
+                Real64 dynamicMaxLoad = 0.0;
+                bool hasDynamicMaxLoad = false;
+                this_component.getDynamicMaxCapacity(state, dynamicMaxLoad, hasDynamicMaxLoad);
+                if (hasDynamicMaxLoad) { // apply known limit, including zero available capacity
+                    this_component.MaxLoad = dynamicMaxLoad;
+                    ChangeInLoad = min(dynamicMaxLoad, std::abs(RemLoopDemand));
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
                     ChangeInLoad = std::abs(RemLoopDemand);
@@ -3212,9 +3226,12 @@ void DistributePlantLoad(EnergyPlusData &state,
                 if (!this_component.Available) {
                     continue;
                 }
-                this_component.MaxLoad = this_component.getDynamicMaxCapacity(state);
-                if (this_component.MaxLoad > 0.0) {
-                    ChangeInLoad = min(this_component.MaxLoad, UniformLoad);
+                Real64 dynamicMaxLoad = 0.0;
+                bool hasDynamicMaxLoad = false;
+                this_component.getDynamicMaxCapacity(state, dynamicMaxLoad, hasDynamicMaxLoad);
+                if (hasDynamicMaxLoad) {
+                    this_component.MaxLoad = dynamicMaxLoad;
+                    ChangeInLoad = min(dynamicMaxLoad, UniformLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
                     ChangeInLoad = std::abs(RemLoopDemand);
@@ -3291,7 +3308,8 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                this_component.MaxLoad = this_component.getDynamicMaxCapacity(state);
+                bool capacityIsKnown = false;
+                this_component.getDynamicMaxCapacity(state, this_component.MaxLoad, capacityIsKnown);
                 PlantCapacity += this_component.MaxLoad;
 
                 if (this_component.MaxLoad < SmallLoad) {
@@ -3353,9 +3371,12 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                CompLoad = PlantPLR * this_component.MaxLoad;
-
-                if (this_component.MaxLoad > 0.0) {
+                Real64 dynamicMaxLoad = 0.0;
+                bool hasDynamicMaxLoad = false;
+                this_component.getDynamicMaxCapacity(state, dynamicMaxLoad, hasDynamicMaxLoad);
+                if (hasDynamicMaxLoad) {
+                    this_component.MaxLoad = dynamicMaxLoad;
+                    CompLoad = PlantPLR * dynamicMaxLoad;
                     ChangeInLoad = min(std::abs(RemLoopDemand), CompLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
@@ -3413,7 +3434,8 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                this_component.MaxLoad = this_component.getDynamicMaxCapacity(state);
+                bool capacityIsKnown = false;
+                this_component.getDynamicMaxCapacity(state, this_component.MaxLoad, capacityIsKnown);
                 PlantCapacity += this_component.MaxLoad;
 
                 if (this_component.MaxLoad < SmallLoad) {
@@ -3456,9 +3478,12 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                CompLoad = PlantPLR * this_component.MaxLoad;
-
-                if (this_component.MaxLoad > 0.0) {
+                Real64 dynamicMaxLoad = 0.0;
+                bool hasDynamicMaxLoad = false;
+                this_component.getDynamicMaxCapacity(state, dynamicMaxLoad, hasDynamicMaxLoad);
+                if (hasDynamicMaxLoad) {
+                    this_component.MaxLoad = dynamicMaxLoad;
+                    CompLoad = PlantPLR * dynamicMaxLoad;
                     ChangeInLoad = min(std::abs(RemLoopDemand), CompLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
@@ -3789,7 +3814,11 @@ void FindCompSPLoad(EnergyPlusData &state,
 
     // load local variables from the data structures
     CompMinLoad = this_component.MinLoad;
-    CompMaxLoad = this_component.getDynamicMaxCapacity(state);
+    bool capacityIsKnown = false;
+    this_component.getDynamicMaxCapacity(state, CompMaxLoad, capacityIsKnown);
+    if (capacityIsKnown) {
+        CompMinLoad = min(CompMinLoad, CompMaxLoad);
+    }
     CompOptLoad = this_component.OptLoad;
     DemandNode = plantLoc.loop->OpScheme(OpSchemePtr).EquipList(ListPtr).Comp(CompPtr).DemandNodeNum;
     SetPtNode = plantLoc.loop->OpScheme(OpSchemePtr).EquipList(ListPtr).Comp(CompPtr).SetPointNodeNum;

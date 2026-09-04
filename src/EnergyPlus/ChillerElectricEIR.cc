@@ -2617,7 +2617,7 @@ bool ElectricEIRChillerSpecs::thermosiphonDisabled(EnergyPlusData &state)
     return true;
 }
 
-Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state)
+void ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &capacity, bool &capacityIsKnown)
 {
     Real64 sourceInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
     if (this->HeatRecActive && (this->QHeatRecovered + this->QCondenser) > 0.0) {
@@ -2653,6 +2653,15 @@ Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state)
     } break;
     }
 
+    if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) && this->ModulatedFlowSetToLoop) {
+        auto const &loopSetpointNode = state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum);
+        if (state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
+            loadSideOutletSetpointTemp = loopSetpointNode.TempSetPoint;
+        } else {
+            loadSideOutletSetpointTemp = loopSetpointNode.TempSetPointHi;
+        }
+    }
+
     // If there is a fault of Chiller SWT Sensor
     if (this->FaultyChillerSWTFlag && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing) && (!state.dataGlobal->KickOffSimulation)) {
         int FaultIndex = this->FaultyChillerSWTIndex;
@@ -2666,13 +2675,19 @@ Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state)
                 min(state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp, EvapOutletTempSetPoint_ff - this->FaultyChillerSWTOffset));
         this->FaultyChillerSWTOffset = EvapOutletTempSetPoint_ff - loadSideOutletSetpointTemp;
     }
-    if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) && this->ModulatedFlowSetToLoop) {
-        loadSideOutletSetpointTemp = state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum).TempSetPoint;
+
+    Real64 referenceCapacity = this->RefCap;
+    if (this->FaultyChillerFoulingFlag && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing) &&
+        (!state.dataGlobal->KickOffSimulation)) {
+        this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(this->FaultyChillerFoulingIndex).CalFoulingFactor(state);
+        referenceCapacity *= this->FaultyChillerFoulingFactor;
     }
+
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp =
         (this->ChillerCapFTIndex > 0) ? Curve::CurveValue(state, this->ChillerCapFTIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
-    return this->RefCap * capacityModifierFuncTemp;
+    capacity = referenceCapacity * max(0.0, capacityModifierFuncTemp) * this->MaxPartLoadRat;
+    capacityIsKnown = true;
 }
 
 } // namespace EnergyPlus::ChillerElectricEIR

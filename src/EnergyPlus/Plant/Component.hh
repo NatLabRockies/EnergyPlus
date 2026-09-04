@@ -106,7 +106,7 @@ namespace DataPlant {
         false, //	"Coil:Cooling:Water:DetailedGeometry"
         false, //	"Coil:Heating:Water"
         false, //	"Coil:Heating:Steam"
-        false, //	"Solarcollector:Flatplate:Water"
+        false, //	"SolarCollector:FlatPlate:Water"
         false, //	"LoadProfile:Plant"
         false, //	"GroundHeatExchanger:System"
         false, //	"GroundHeatExchanger:Surface"
@@ -114,7 +114,7 @@ namespace DataPlant {
         false, //	"Generator:Microturbine"
         false, //	"Generator:InternalCombustionEngine"
         false, //	"Generator:CombustionTurbine"
-        false, //	"Generator:Microchp"
+        false, //	"Generator:MicroCHP"
         false, //	"Generator:Fuelcell:StackCooler"
         false, //	"FluidCooler:SingleSpeed"
         false, //	"FluidCooler:TwoSpeed"
@@ -161,11 +161,11 @@ namespace DataPlant {
         false, //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         false, //	"HeatPump:PlantLoop:EIR:Cooling"
         false, //	"HeatPump:PlantLoop:EIR:Heating"
-        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
-        false, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
-        false, // "HEATPUMP:AIRTOWATER:COOLING",
-        false, // "HEATPUMP:AIRTOWATER:HEATING",
-        false, // "HEATPUMP:AIRTOWATER",
+        false, //   "HeatPump:AirToWater:FuelFired:Cooling"
+        false, //   "HeatPump:AirToWater:FuelFired:Heating"
+        false, //   "HeatPump:AirToWater:Cooling"
+        false, //   "HeatPump:AirToWater:Heating"
+        false, //   "HeatPump:AirToWater"
         false  //   "DistrictHeating:Steam"
     };
 
@@ -214,7 +214,7 @@ namespace DataPlant {
         DataPlant::CtrlType::Invalid,   //	"Coil:Cooling:Water:DetailedGeometry"
         DataPlant::CtrlType::Invalid,   //	"Coil:Heating:Water"
         DataPlant::CtrlType::Invalid,   //	"Coil:Heating:Steam"
-        DataPlant::CtrlType::HeatingOp, //	"Solarcollector:Flatplate:Water"
+        DataPlant::CtrlType::HeatingOp, //	"SolarCollector:FlatPlate:Water"
         DataPlant::CtrlType::DualOp,    //	"LoadProfile:Plant"
         DataPlant::CtrlType::DualOp,    //	"GroundHeatExchanger:System"
         DataPlant::CtrlType::DualOp,    //	"GroundHeatExchanger:Surface"
@@ -222,7 +222,7 @@ namespace DataPlant {
         DataPlant::CtrlType::HeatingOp, //	"Generator:Microturbine"
         DataPlant::CtrlType::HeatingOp, //	"Generator:InternalCombustionEngine"
         DataPlant::CtrlType::HeatingOp, //	"Generator:CombustionTurbine"
-        DataPlant::CtrlType::HeatingOp, //	"Generator:Microchp"
+        DataPlant::CtrlType::HeatingOp, //	"Generator:MicroCHP"
         DataPlant::CtrlType::HeatingOp, //	"Generator:Fuelcell:StackCooler"
         DataPlant::CtrlType::CoolingOp, //	"FluidCooler:SingleSpeed"
         DataPlant::CtrlType::CoolingOp, //	"FluidCooler:TwoSpeed"
@@ -269,12 +269,12 @@ namespace DataPlant {
         DataPlant::CtrlType::Invalid,   //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         DataPlant::CtrlType::CoolingOp, //	"HeatPump:PlantLoop:EIR:Cooling"
         DataPlant::CtrlType::HeatingOp, //	"HeatPump:PlantLoop:EIR:Heating"
-        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
-        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
-        DataPlant::CtrlType::CoolingOp, // "HEATPUMP:AIRTOWATER:COOLING",
-        DataPlant::CtrlType::HeatingOp, // "HEATPUMP:AIRTOWATER:HEATING",
-        DataPlant::CtrlType::DualOp,    // "HEATPUMP:AIRTOWATER",
-        DataPlant::CtrlType::HeatingOp  //   "DistrictHeating:Steam"
+        DataPlant::CtrlType::CoolingOp, //  "HeatPump:AirToWater:FuelFired:Cooling"
+        DataPlant::CtrlType::HeatingOp, //  "HeatPump:AirToWater:FuelFired:Heating"
+        DataPlant::CtrlType::CoolingOp, //  "HeatPump:AirToWater:Cooling"
+        DataPlant::CtrlType::HeatingOp, //  "HeatPump:AirToWater:Heating"
+        DataPlant::CtrlType::DualOp,    //  "HeatPump:AirToWater"
+        DataPlant::CtrlType::HeatingOp  //  "DistrictHeating:Steam"
     };
 
     struct CompData
@@ -346,7 +346,7 @@ namespace DataPlant {
 
         static CompData &getPlantComponent(EnergyPlusData &state, PlantLocation const &plantLoc);
 
-        Real64 getDynamicMaxCapacity(EnergyPlusData &state) const;
+        void getDynamicMaxCapacity(EnergyPlusData &state, Real64 &capacity, bool &capacityIsKnown) const;
     };
 } // namespace DataPlant
 } // namespace EnergyPlus

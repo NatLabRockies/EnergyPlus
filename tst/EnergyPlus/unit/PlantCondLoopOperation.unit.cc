@@ -55,6 +55,7 @@
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantCondLoopOperation.hh>
@@ -62,6 +63,24 @@
 #include <EnergyPlus/SetPointManager.hh>
 
 using namespace EnergyPlus;
+
+class ZeroCapacityPlantComponent : public PlantComponent
+{
+public:
+    void simulate(EnergyPlusData &, const PlantLocation &, bool, Real64 &, bool) override
+    {
+    }
+
+    void oneTimeInit(EnergyPlusData &) override
+    {
+    }
+
+    void getDynamicMaxCapacity(EnergyPlusData &, Real64 &capacity, bool &capacityIsKnown) override
+    {
+        capacity = 0.0;
+        capacityIsKnown = true;
+    }
+};
 
 class DistributePlantLoadTest : public EnergyPlusFixture
 {
@@ -537,6 +556,91 @@ TEST_F(DistributePlantLoadTest, DistributePlantLoad_Optimal)
     EXPECT_EQ(thisBranch.Comp(1).MyLoad, 0.0);
     EXPECT_EQ(thisBranch.Comp(2).MyLoad, 0.0);
     EXPECT_EQ(remainingLoopDemand, 200.0);
+}
+
+TEST_F(DistributePlantLoadTest, DistributePlantLoad_OptimalHonorsZeroDynamicCapacity)
+{
+    auto &thisBranch(state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1));
+    state->dataPlnt->PlantLoop(1).LoadDistribution = DataPlant::LoadingScheme::Optimal;
+    state->dataPlnt->PlantLoop(1).OpScheme(1).EquipList(1).NumComps = 2;
+
+    ZeroCapacityPlantComponent zeroCapacityComponent;
+    thisBranch.Comp(1).compPtr = &zeroCapacityComponent;
+    thisBranch.Comp(1).OptLoad = 40.0;
+    thisBranch.Comp(1).MaxLoad = 100.0;
+    thisBranch.Comp(2).OptLoad = 40.0;
+    thisBranch.Comp(2).MaxLoad = 100.0;
+
+    Real64 remainingLoopDemand = 0.0;
+    Real64 loopDemand = 30.0;
+    PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+
+    EXPECT_EQ(0.0, thisBranch.Comp(1).MyLoad);
+    EXPECT_EQ(30.0, thisBranch.Comp(2).MyLoad);
+    EXPECT_EQ(0.0, remainingLoopDemand);
+}
+
+TEST_F(DistributePlantLoadTest, DistributePlantLoad_UniformPLRSchemesHonorZeroDynamicCapacity)
+{
+    auto &thisBranch(state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1));
+    state->dataPlnt->PlantLoop(1).OpScheme(1).EquipList(1).NumComps = 2;
+
+    ZeroCapacityPlantComponent zeroCapacityComponent;
+    thisBranch.Comp(1).compPtr = &zeroCapacityComponent;
+
+    for (auto const loadingScheme : {DataPlant::LoadingScheme::UniformPLR, DataPlant::LoadingScheme::SequentialUniformPLR}) {
+        SCOPED_TRACE(static_cast<int>(loadingScheme));
+        state->dataPlnt->PlantLoop(1).LoadDistribution = loadingScheme;
+
+        thisBranch.Comp(1).Available = true;
+        thisBranch.Comp(1).MinLoad = 0.0;
+        thisBranch.Comp(1).MaxLoad = 100.0;
+        thisBranch.Comp(1).MyLoad = 0.0;
+        thisBranch.Comp(2).Available = true;
+        thisBranch.Comp(2).MinLoad = 0.0;
+        thisBranch.Comp(2).MaxLoad = 100.0;
+        thisBranch.Comp(2).MyLoad = 0.0;
+
+        Real64 remainingLoopDemand = 0.0;
+        Real64 loopDemand = 30.0;
+        PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+
+        EXPECT_EQ(0.0, thisBranch.Comp(1).MyLoad);
+        EXPECT_EQ(30.0, thisBranch.Comp(2).MyLoad);
+        EXPECT_EQ(0.0, remainingLoopDemand);
+    }
+}
+
+TEST_F(DistributePlantLoadTest, FindCompSPLoad_ZeroDynamicMaxTakesPrecedenceOverStaticMin)
+{
+    auto &plantLoop = state->dataPlnt->PlantLoop(1);
+    auto &thisComponent = plantLoop.LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1);
+    auto &schemeComponent = plantLoop.OpScheme(1).EquipList(1).Comp(1);
+
+    ZeroCapacityPlantComponent zeroCapacityComponent;
+    thisComponent.compPtr = &zeroCapacityComponent;
+    thisComponent.MinLoad = 50.0;
+    thisComponent.MaxLoad = 100.0;
+    thisComponent.OpScheme(1).EquipList(1).CompPtr = 1;
+
+    state->dataLoopNodes->Node.allocate(2);
+    state->dataLoopNodes->Node(1).Temp = 10.0;
+    state->dataLoopNodes->Node(2).TempSetPoint = 20.0;
+
+    plantLoop.glycol = Fluid::GetWater(*state);
+    plantLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
+    schemeComponent.DemandNodeNum = 1;
+    schemeComponent.SetPointNodeNum = 2;
+    schemeComponent.SetPointFlowRate = 0.001;
+    schemeComponent.CtrlType = DataPlant::CtrlType::HeatingOp;
+
+    PlantLocation plantLoc{1, DataPlant::LoopSideLocation::Demand, 1, 1};
+    PlantUtilities::SetPlantLocationLinks(*state, plantLoc);
+    PlantCondLoopOperation::FindCompSPLoad(*state, plantLoc, 1);
+
+    EXPECT_TRUE(thisComponent.ON);
+    EXPECT_GT(thisComponent.EquipDemand, thisComponent.MinLoad);
+    EXPECT_EQ(0.0, thisComponent.MyLoad);
 }
 
 TEST_F(DistributePlantLoadTest, DistributePlantLoad_UniformPLR)
