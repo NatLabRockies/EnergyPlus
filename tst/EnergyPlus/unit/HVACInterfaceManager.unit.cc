@@ -63,6 +63,7 @@
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/Pumps.hh>
 
 namespace EnergyPlus {
 TEST_F(EnergyPlusFixture, ExcessiveHeatStorage_Test)
@@ -192,4 +193,225 @@ TEST_F(EnergyPlusFixture, UpdateHVACInterface_Test)
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACCO2NotConverged[2]);
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACGenContamNotConverged[2]);
 }
+
+TEST_F(EnergyPlusFixture, SetupCommonPipesCommonPipeVariablePrimaryPumpSetsVariableSupplyPumpType)
+{
+    using namespace DataPlant;
+    using namespace HVACInterfaceManager;
+
+    constexpr int loopNum = 1;
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(loopNum);
+    plantLoop.Name = "Test Plant Loop";
+    plantLoop.CommonPipeType = CommonPipeType::Single;
+
+    auto &supplySide = plantLoop.LoopSide(LoopSideLocation::Supply);
+    supplySide.TotalBranches = 1;
+    supplySide.Branch.allocate(1);
+    supplySide.Branch(1).TotalComponents = 1;
+    supplySide.Branch(1).Comp.allocate(1);
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpVariableSpeed;
+
+    auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpConstantSpeed;
+
+    SetupCommonPipes(*state);
+
+    auto const &commonPipe = state->dataHVACInterfaceMgr->PlantCommonPipe(loopNum);
+    EXPECT_EQ(CommonPipeType::Single, commonPipe.CommonPipeType);
+    EXPECT_EQ(FlowType::Variable, commonPipe.SupplySideInletPumpType);
+}
+
+TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpBankSetsVariableSupplyPumpType)
+{
+    using namespace DataPlant;
+    using namespace HVACInterfaceManager;
+
+    constexpr int loopNum = 1;
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(loopNum);
+    plantLoop.Name = "Test Plant Loop";
+    plantLoop.CommonPipeType = CommonPipeType::TwoWay;
+
+    auto &supplySide = plantLoop.LoopSide(LoopSideLocation::Supply);
+    supplySide.TotalBranches = 1;
+    supplySide.Branch.allocate(1);
+    supplySide.Branch(1).TotalComponents = 1;
+    supplySide.Branch(1).Comp.allocate(1);
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankVariableSpeed;
+
+    auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankConstantSpeed;
+
+    SetupCommonPipes(*state);
+
+    auto const &commonPipe = state->dataHVACInterfaceMgr->PlantCommonPipe(loopNum);
+    EXPECT_EQ(CommonPipeType::TwoWay, commonPipe.CommonPipeType);
+    EXPECT_EQ(FlowType::Variable, commonPipe.SupplySideInletPumpType);
+    EXPECT_EQ(FlowType::Constant, commonPipe.DemandSideInletPumpType);
+}
+
+TEST_F(EnergyPlusFixture, SetupLoopFlowRequestTwoWayVariablePrimaryPumpFollowsCommonPipeRequest)
+{
+    using namespace DataPlant;
+
+    constexpr int loopNum = 1;
+    constexpr int pumpNum = 1;
+    constexpr int primaryInletNode = 1;
+    constexpr Real64 pumpMaxMassFlow = 0.5;
+    constexpr Real64 commonPipeMassFlowRequest = 0.3;
+
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPumps->PumpEquip.allocate(1);
+    state->dataLoopNodes->Node.allocate(1);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(loopNum);
+    plantLoop.Name = "Test Plant Loop";
+    plantLoop.CommonPipeType = CommonPipeType::TwoWay;
+
+    auto &supplySide = plantLoop.LoopSide(LoopSideLocation::Supply);
+    supplySide.TotalBranches = 1;
+    supplySide.TotalPumps = 1;
+    supplySide.Branch.allocate(1);
+    supplySide.Branch(1).TotalComponents = 1;
+    supplySide.Branch(1).Comp.allocate(1);
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpVariableSpeed;
+    supplySide.Branch(1).Comp(1).CompNum = pumpNum;
+    supplySide.Branch(1).Comp(1).NodeNumIn = primaryInletNode;
+    supplySide.plantLoc = {loopNum, LoopSideLocation::Supply, 0, 0};
+
+    auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpConstantSpeed;
+    demandSide.plantLoc = {loopNum, LoopSideLocation::Demand, 0, 0};
+
+    auto &pump = state->dataPumps->PumpEquip(pumpNum);
+    pump.MassFlowRateMax = pumpMaxMassFlow;
+    pump.PumpControl = Pumps::PumpControlType::Intermittent;
+    pump.LoopSolverOverwriteFlag = true;
+
+    Real64 const noRequestLoopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
+    EXPECT_NEAR(0.0, noRequestLoopFlow, 0.0000001);
+    EXPECT_NEAR(0.0, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_TRUE(pump.LoopSolverOverwriteFlag);
+
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateMaxAvail = pumpMaxMassFlow;
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = commonPipeMassFlowRequest;
+    Real64 const loopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
+
+    EXPECT_NEAR(commonPipeMassFlowRequest, loopFlow, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestNeedIfOn, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_NEAR(0.0, demandSide.flowRequestFinal, 0.0000001);
+    EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
+
+    constexpr Real64 lowerCommonPipeMassFlowRequest = 0.1;
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = lowerCommonPipeMassFlowRequest;
+    pump.PumpControl = Pumps::PumpControlType::Continuous;
+    pump.LoopSolverOverwriteFlag = true;
+    Real64 const continuousLoopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
+
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, continuousLoopFlow, 0.0000001);
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
+
+    constexpr Real64 pumpMinMassFlow = 0.05;
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = 0.0;
+    pump.MassFlowRateMin = pumpMinMassFlow;
+    pump.LoopSolverOverwriteFlag = true;
+    Real64 const minimumLoopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
+
+    EXPECT_NEAR(pumpMinMassFlow, minimumLoopFlow, 0.0000001);
+    EXPECT_NEAR(pumpMinMassFlow, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_NEAR(0.0, supplySide.flowRequestNeedIfOn, 0.0000001);
+    EXPECT_NEAR(pumpMinMassFlow, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
+}
+
+TEST_F(EnergyPlusFixture, ManageTwoWayCommonPipeVariablePrimaryPumpBankVariesFlowToMeetPrimaryInletSetPoint)
+{
+    using namespace DataPlant;
+    using namespace HVACInterfaceManager;
+
+    constexpr int loopNum = 1;
+    constexpr int priInNode = 1;
+    constexpr int priOutNode = 2;
+    constexpr int secInNode = 3;
+    constexpr int secOutNode = 4;
+
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataLoopNodes->Node.allocate(4);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(loopNum);
+    plantLoop.Name = "Test Plant Loop";
+    plantLoop.CommonPipeType = CommonPipeType::TwoWay;
+
+    auto &supplySide = plantLoop.LoopSide(LoopSideLocation::Supply);
+    supplySide.NodeNumIn = priInNode;
+    supplySide.NodeNumOut = priOutNode;
+    supplySide.InletNodeSetPt = true;
+    supplySide.TotalBranches = 1;
+    supplySide.Branch.allocate(1);
+    supplySide.Branch(1).TotalComponents = 1;
+    supplySide.Branch(1).Comp.allocate(1);
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankVariableSpeed;
+    supplySide.Branch(1).Comp(1).NodeNumIn = priInNode;
+    supplySide.Branch(1).Comp(1).NodeNumOut = priOutNode;
+
+    auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
+    demandSide.NodeNumIn = secInNode;
+    demandSide.NodeNumOut = secOutNode;
+    demandSide.InletNodeSetPt = false;
+    demandSide.LoopSideInlet_TankTemp = 6.0;
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpConstantSpeed;
+
+    state->dataLoopNodes->Node(priInNode).TempSetPoint = 10.0;
+    state->dataLoopNodes->Node(priInNode).MassFlowRateMax = 10.0;
+    state->dataLoopNodes->Node(priInNode).MassFlowRateMaxAvail = 10.0;
+
+    PlantLocation plantLoc{loopNum, LoopSideLocation::Supply, 1, 0};
+
+    state->dataLoopNodes->Node(secOutNode).MassFlowRate = 0.4;
+    ManageTwoWayCommonPipe(*state, plantLoc, 12.0);
+
+    auto const &commonPipe = state->dataHVACInterfaceMgr->PlantCommonPipe(loopNum);
+    EXPECT_NEAR(0.6, state->dataLoopNodes->Node(priInNode).MassFlowRateRequest, 0.0000001);
+    EXPECT_NEAR(0.6, state->dataLoopNodes->Node(priInNode).MassFlowRate, 0.0000001);
+    EXPECT_NEAR(0.4, commonPipe.PriToSecFlow, 0.0000001);
+    EXPECT_NEAR(0.2, commonPipe.PriCPLegFlow, 0.0000001);
+    EXPECT_NEAR(10.0, state->dataLoopNodes->Node(priInNode).Temp, 0.0000001);
+
+    state->dataLoopNodes->Node(secOutNode).MassFlowRate = 1.0;
+    ManageTwoWayCommonPipe(*state, plantLoc, 12.0);
+
+    EXPECT_NEAR(1.5, state->dataLoopNodes->Node(priInNode).MassFlowRateRequest, 0.0000001);
+    EXPECT_NEAR(1.5, state->dataLoopNodes->Node(priInNode).MassFlowRate, 0.0000001);
+    EXPECT_NEAR(1.0, commonPipe.PriToSecFlow, 0.0000001);
+    EXPECT_NEAR(0.5, commonPipe.PriCPLegFlow, 0.0000001);
+    EXPECT_NEAR(10.0, state->dataLoopNodes->Node(priInNode).Temp, 0.0000001);
+}
+
 } // namespace EnergyPlus

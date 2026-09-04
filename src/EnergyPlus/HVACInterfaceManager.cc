@@ -839,9 +839,14 @@ void UpdateCommonPipe(EnergyPlusData &state,
         ManageSingleCommonPipe(state, LoopNum, TankOutletLoopSide, TankAverageTemp, MixedOutletTemp);
         // 2-way (controlled) common pipe simulation
     } else if (CommonPipeType == DataPlant::CommonPipeType::TwoWay) {
-        PlantLocation TankOutletPlantLoc = {LoopNum, TankOutletLoopSide, 0, 0};
+        if (!state.dataHVACInterfaceMgr->CommonPipeSetupFinished) {
+            SetupCommonPipes(state);
+        }
+        auto const &plantCommonPipe = state.dataHVACInterfaceMgr->PlantCommonPipe(LoopNum);
+        auto const &tankOutletPlantLoc = (TankOutletLoopSide == DataPlant::LoopSideLocation::Supply) ? plantCommonPipe.SupplySideInletPlantLoc
+                                                                                                     : plantCommonPipe.DemandSideInletPlantLoc;
 
-        ManageTwoWayCommonPipe(state, TankOutletPlantLoc, TankAverageTemp);
+        ManageTwoWayCommonPipe(state, tankOutletPlantLoc, TankAverageTemp);
         MixedOutletTemp = state.dataLoopNodes->Node(TankOutletNode).Temp;
     }
 
@@ -1010,6 +1015,7 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
 
     auto &plantCommonPipe(state.dataHVACInterfaceMgr->PlantCommonPipe(plantLoc.loopNum));
     auto &thisPlantLoop = state.dataPlnt->PlantLoop(plantLoc.loopNum);
+    bool const canRequestPrimaryInletFlow = plantCommonPipe.SupplySideInletPlantLoc.side->FlowLock != DataPlant::FlowLock::Locked;
 
     // fill local node indexes
     int const NodeNumPriIn = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Supply).NodeNumIn;
@@ -1117,19 +1123,23 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
 
             // eq. 3
             if ((plantCommonPipe.SupplySideInletPumpType == FlowType::Variable) && (curCallingCase == UpdateType::SupplyLedPrimaryInlet)) {
-                // MdotPri is a variable to be calculated and flow request needs to be made
-                if (std::abs(TempCPPrimaryCntrlSetPoint) > DataPlant::DeltaTempTol) {
-
-                    MdotPri = (MdotPriRCLeg * TempPriOutTankOut + MdotPriToSec * TempSecOutTankOut) / (TempCPPrimaryCntrlSetPoint);
-
-                    if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) {
-                        MdotPri = 0.0;
+                // Use the available secondary flow and request the primary recirculation needed to meet the primary inlet setpoint.
+                MdotPriToSec = MdotSec;
+                if (std::abs(TempCPPrimaryCntrlSetPoint - TempPriOutTankOut) > DataPlant::DeltaTempTol) {
+                    MdotPriRCLeg = MdotPriToSec * (TempSecOutTankOut - TempCPPrimaryCntrlSetPoint) / (TempCPPrimaryCntrlSetPoint - TempPriOutTankOut);
+                    if (MdotPriRCLeg < DataBranchAirLoopPlant::MassFlowTolerance) {
+                        MdotPriRCLeg = 0.0;
                     }
                 } else {
-                    MdotPri = MdotSec;
+                    MdotPriRCLeg = 0.0;
                 }
-                PlantLocation thisPlantLoc = {plantLoc.loopNum, DataPlant::LoopSideLocation::Supply, 1, 0};
-                PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, thisPlantLoc, false);
+                MdotPri = MdotPriToSec + MdotPriRCLeg;
+                if (MdotPri < DataBranchAirLoopPlant::MassFlowTolerance) {
+                    MdotPri = 0.0;
+                }
+                if (canRequestPrimaryInletFlow) {
+                    PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                }
             }
 
             // eq. 2
@@ -1177,8 +1187,9 @@ void ManageTwoWayCommonPipe(EnergyPlusData &state, PlantLocation const &plantLoc
                 } else {
                     MdotPri = MdotSec;
                 }
-                PlantLocation thisPlantLoc = {plantLoc.loopNum, DataPlant::LoopSideLocation::Supply, 1, 0};
-                PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, thisPlantLoc, false);
+                if (canRequestPrimaryInletFlow) {
+                    PlantUtilities::SetActuatedBranchFlowRate(state, MdotPri, NodeNumPriIn, plantCommonPipe.SupplySideInletPlantLoc, false);
+                }
             }
 
             // eq. 4
@@ -1232,6 +1243,10 @@ void SetupCommonPipes(EnergyPlusData &state)
         auto &thisCommonPipe = state.dataHVACInterfaceMgr->PlantCommonPipe(CurLoopNum);
         auto const &first_demand_component_type = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type;
         auto const &first_supply_component_type = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1).Type;
+        thisCommonPipe.SupplySideInletPlantLoc = {CurLoopNum, DataPlant::LoopSideLocation::Supply, 1, 0};
+        PlantUtilities::SetPlantLocationLinks(state, thisCommonPipe.SupplySideInletPlantLoc);
+        thisCommonPipe.DemandSideInletPlantLoc = {CurLoopNum, DataPlant::LoopSideLocation::Demand, 1, 0};
+        PlantUtilities::SetPlantLocationLinks(state, thisCommonPipe.DemandSideInletPlantLoc);
 
         switch (thisPlantLoop.CommonPipeType) {
         case DataPlant::CommonPipeType::No:
@@ -1261,12 +1276,12 @@ void SetupCommonPipes(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 thisPlantLoop.Name);
 
-            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
-                // If/when the model supports variable-pumping primary, this can be removed.
-                ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of CommonPipe plant loop");
-                ShowContinueError(state, std::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
-                ShowContinueError(state, "The common pipe model does not support varying the flow rate on the primary/supply side");
-                ShowContinueError(state, "The primary/supply side will operate as if constant speed, and the simulation continues");
+            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
+                thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
+            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
+                thisCommonPipe.SupplySideInletPumpType = FlowType::Variable;
             }
             break;
         case DataPlant::CommonPipeType::TwoWay: // Controlled ('two-way') common pipe
@@ -1301,20 +1316,19 @@ void SetupCommonPipes(EnergyPlusData &state)
                                 thisPlantLoop.Name);
 
             // check type of pump on supply side inlet
-            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
+            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
-            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
+            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Variable;
-                // If/when the model supports variable-pumping primary, this can be removed.
-                ShowWarningError(state, "SetupCommonPipes: detected variable speed pump on supply inlet of TwoWayCommonPipe plant loop");
-                ShowContinueError(state, std::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
-                ShowContinueError(state, "The common pipe model does not support varying the flow rate on the primary/supply side");
-                ShowContinueError(state, "The primary/supply side will operate as if constant speed, and the simulation continues");
             }
             // check type of pump on demand side inlet
-            if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
+            if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_demand_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
                 thisCommonPipe.DemandSideInletPumpType = FlowType::Constant;
-            } else if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
+            } else if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_demand_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                 thisCommonPipe.DemandSideInletPumpType = FlowType::Variable;
             }
             break;

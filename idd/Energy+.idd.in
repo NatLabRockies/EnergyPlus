@@ -85005,6 +85005,11 @@ PlantLoop,
         \note TwoWayCommonPipe = Primary-secondary with control of secondary supply temperature or
         \note primary return temperature (requires a setpoint be placed on the
         \note plant side or demand side inlet node).
+        \note If a variable speed pump is placed on the plant side inlet branch with
+        \note CommonPipe or TwoWayCommonPipe, EnergyPlus accepts it. For
+        \note CommonPipe, the primary flow remains governed by the pump and loop
+        \note controls. For TwoWayCommonPipe, the solver can request primary flow
+        \note through the pump as part of resolving the common pipe balance.
         \type choice
         \key CommonPipe
         \key TwoWayCommonPipe
