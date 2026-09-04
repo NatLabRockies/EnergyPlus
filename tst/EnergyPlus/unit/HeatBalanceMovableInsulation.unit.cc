@@ -199,6 +199,51 @@ TEST_F(EnergyPlusFixture, HeatBalanceMovableInsulation_EvalInsideMovableInsulati
     HeatBalanceSurfaceManager::EvalInsideMovableInsulation(*state);
     EXPECT_EQ(0.55, state->dataHeatBalSurf->SurfAbsSolarInt(1));
 }
+
+TEST_F(EnergyPlusFixture, HeatBalanceMovableInsulation_InsideSurfaceTemperatureBalance)
+{
+    constexpr int surfNum = 1;
+    constexpr Real64 hMovInsul = 0.8;
+    constexpr Real64 hConvIn = 3.0;
+    constexpr Real64 ctfInside = 2.0;
+    constexpr Real64 ctfCross = 0.5;
+    constexpr Real64 tempOutside = 5.0;
+
+    state->dataHeatBalSurf->SurfTempIn.allocate(surfNum);
+    state->dataHeatBalSurf->SurfTempInsOld.allocate(surfNum);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(surfNum);
+    state->dataHeatBalSurf->SurfTempInTmpOld.allocate(surfNum);
+    state->dataHeatBalSurf->SurfCTFConstInPart.allocate(surfNum);
+    state->dataHeatBalSurf->SurfOpaqQRadSWInAbs.allocate(surfNum);
+    state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea.allocate(surfNum);
+    state->dataHeatBalSurf->SurfQdotRadHVACInPerArea.allocate(surfNum);
+    state->dataHeatBalSurf->SurfQAdditionalHeatSourceInside.allocate(surfNum);
+    state->dataHeatBal->SurfQdotRadIntGainsInPerArea.allocate(surfNum);
+    state->dataHeatBalSurfMgr->RefAirTemp.allocate(surfNum);
+
+    state->dataHeatBalSurf->SurfCTFConstInPart(surfNum) = 10.0;
+    state->dataHeatBal->SurfQdotRadIntGainsInPerArea(surfNum) = 1.0;
+    state->dataHeatBalSurf->SurfOpaqQRadSWInAbs(surfNum) = 4.0;
+    state->dataHeatBalSurfMgr->RefAirTemp(surfNum) = 20.0;
+    state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea(surfNum) = 2.0;
+    state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) = 3.0;
+    state->dataHeatBalSurf->SurfQAdditionalHeatSourceInside(surfNum) = 4.0;
+    state->dataHeatBalSurf->SurfTempInsOld(surfNum) = -40.0;
+    state->dataHeatBalSurf->SurfTempInTmpOld(surfNum) = 18.0;
+
+    HeatBalanceSurfaceManager::CalcInsideSurfTempWithMovableInsulation(*state, surfNum, hMovInsul, hConvIn, ctfInside, ctfCross, tempOutside);
+
+    Real64 const tempInside = state->dataHeatBalSurf->SurfTempIn(surfNum);
+    Real64 const tempMovInsul = state->dataHeatBalSurf->SurfTempInTmp(surfNum);
+    Real64 const zoneSideRadiation = 1.0 + 4.0 + 2.0 + 3.0 + 4.0;
+    Real64 const zoneFaceResidual = hConvIn * (20.0 - tempMovInsul) + zoneSideRadiation + hMovInsul * (tempInside - tempMovInsul) +
+                                    DataHeatBalSurface::IterDampConst * (18.0 - tempMovInsul);
+    Real64 const constructionFaceResidual = hMovInsul * (tempMovInsul - tempInside) + 10.0 + ctfCross * tempOutside - ctfInside * tempInside;
+
+    EXPECT_NEAR(0.0, zoneFaceResidual, 1.0e-10);
+    EXPECT_NEAR(0.0, constructionFaceResidual, 1.0e-10);
+}
+
 TEST_F(EnergyPlusFixture, SurfaceControlMovableInsulation_InvalidWindowSimpleGlazingTest)
 {
 
