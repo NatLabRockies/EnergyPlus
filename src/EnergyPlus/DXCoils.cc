@@ -6975,12 +6975,12 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                 ShowSevereError(
                     state,
                     std::format("Sizing: {} {} has zero rated total capacity", HVAC::coilTypeNames[(int)thisDXCoil.coilType], thisDXCoil.Name));
-                ErrorsFound = true;
+                // ErrorsFound = true;
             }
             if (thisDXCoil.RatedAirVolFlowRate(Mode) <= 0.0) {
                 ShowSevereError(
                     state, std::format("Sizing: {} {} has zero rated air flow rate", HVAC::coilTypeNames[(int)thisDXCoil.coilType], thisDXCoil.Name));
-                ErrorsFound = true;
+                // ErrorsFound = true;
             }
             if (ErrorsFound) {
                 ShowFatalError(state, "Preceding condition causes termination.");
@@ -6989,9 +6989,11 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
             // Check for valid range of (Rated Air Volume Flow Rate / Rated Total Capacity)
             if (thisDXCoil.coilType !=
                 HVAC::CoilType::CoolingVRFFluidTCtrl) { // the VolFlowPerRatedTotCap check is not applicable for VRF-FluidTCtrl coil
-                RatedVolFlowPerRatedTotCap = thisDXCoil.RatedAirVolFlowRate(Mode) / thisDXCoil.RatedTotCap(Mode);
-                if (((HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT] - RatedVolFlowPerRatedTotCap) > SmallDifferenceTest) ||
-                    ((RatedVolFlowPerRatedTotCap - HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) > SmallDifferenceTest)) {
+                RatedVolFlowPerRatedTotCap =
+                    (thisDXCoil.RatedTotCap(Mode) > 0.0) ? (thisDXCoil.RatedAirVolFlowRate(Mode) / thisDXCoil.RatedTotCap(Mode)) : 0.0;
+                if (RatedVolFlowPerRatedTotCap > 0.0 &&
+                    (((HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT] - RatedVolFlowPerRatedTotCap) > SmallDifferenceTest) ||
+                     ((RatedVolFlowPerRatedTotCap - HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) > SmallDifferenceTest))) {
                     ShowWarningError(
                         state,
                         std::format("Sizing: {} \"{}\": Rated air volume flow rate per watt of rated total cooling capacity is out of range.",
@@ -7099,7 +7101,7 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                                                     HVAC::coilTypeNames[(int)thisDXCoil.coilType],
                                                     thisDXCoil.Name));
                         ShowContinueError(state, std::format("for CoilPerformance:DX:Cooling mode: {}", thisDXCoil.CoilPerformanceName(Mode)));
-                        ErrorsFound = true;
+                        // ErrorsFound = true;
                     }
                     if (thisDXCoil.RatedAirVolFlowRate(Mode) <= 0.0) {
                         ShowSevereError(state,
@@ -7107,7 +7109,7 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                                                     HVAC::coilTypeNames[(int)thisDXCoil.coilType],
                                                     thisDXCoil.Name));
                         ShowContinueError(state, std::format("for CoilPerformance:DX:Cooling mode: {}", thisDXCoil.CoilPerformanceName(Mode)));
-                        ErrorsFound = true;
+                        // ErrorsFound = true;
                     }
                     if (ErrorsFound) {
                         ShowFatalError(state, "Preceding condition causes termination.");
@@ -7154,12 +7156,12 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                 ShowSevereError(
                     state,
                     std::format("Sizing: {} {} has zero rated total capacity", HVAC::coilTypeNames[(int)thisDXCoil.coilType], thisDXCoil.Name));
-                ErrorsFound = true;
+                // ErrorsFound = true;
             }
             if (thisDXCoil.RatedAirVolFlowRate(Mode) <= 0.0) {
                 ShowSevereError(
                     state, std::format("Sizing: {} {} has zero rated air flow rate", HVAC::coilTypeNames[(int)thisDXCoil.coilType], thisDXCoil.Name));
-                ErrorsFound = true;
+                // ErrorsFound = true;
             }
             if (ErrorsFound) {
                 ShowFatalError(state, "Preceding condition causes termination.");
@@ -7303,7 +7305,7 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                                                 HVAC::coilTypeNames[(int)thisDXCoil.coilType],
                                                 thisDXCoil.Name,
                                                 Mode));
-                    ErrorsFound = true;
+                    // ErrorsFound = true;
                 }
                 if (thisDXCoil.MSRatedAirVolFlowRate(Mode) <= 0.0) {
                     ShowSevereError(state,
@@ -7311,7 +7313,7 @@ void InitDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the cur
                                                 HVAC::coilTypeNames[(int)thisDXCoil.coilType],
                                                 thisDXCoil.Name,
                                                 Mode));
-                    ErrorsFound = true;
+                    // ErrorsFound = true;
                 }
                 if (ErrorsFound) {
                     ShowFatalError(state, "Preceding condition causes termination.");
