@@ -12339,9 +12339,9 @@ Fan:OnOff,
   Zone Exhaust Node,      !- Air Inlet Node Name
   DX Cooling Coil Air Inlet Node;  !- Air Outlet Node Name
 
-   Coil:Cooling:WaterToAirHeatPump:EquationFit,
+Coil:Cooling:WaterToAirHeatPump:EquationFit,
   Sys 1 Heat Pump Cooling Mode,  !- Name
-  ,                              !- Availability Schedule Name
+  CoolingCoilAlwaysOffAvailSched,!- Availability Schedule Name
   Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
   Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
   DX Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12363,7 +12363,7 @@ Fan:OnOff,
 
 Coil:Heating:WaterToAirHeatPump:EquationFit,
   Sys 1 Heat Pump Heating Mode,  !- Name
-  ,                              !- Availability Schedule Name
+  HeatingCoilAlwaysOffAvailSched,!- Availability Schedule Name
   Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
   Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
   Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -12397,6 +12397,20 @@ Schedule:Compact,
   Through: 12/31,         !- Field 1
   For: AllDays,           !- Field 2
   Until: 24:00, 1.0;      !- Field 3
+
+Schedule:Compact,
+  CoolingCoilAlwaysOffAvailSched,  !- Name
+  Any Number,             !- Schedule Type Limits Name
+  Through: 12/31,         !- Field 1
+  For: AllDays,           !- Field 2
+  Until: 24:00, 0.0;      !- Field 3
+
+Schedule:Compact,
+  HeatingCoilAlwaysOffAvailSched,  !- Name
+  Any Number,             !- Schedule Type Limits Name
+  Through: 12/31,         !- Field 1
+  For: AllDays,           !- Field 2
+  Until: 24:00, 0.0;      !- Field 3
 
 Schedule:Compact,
   ContinuousFanSchedule,  !- Name
@@ -12606,6 +12620,17 @@ Curve:QuadLinear,
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
     EXPECT_FALSE(ErrorsFound);                                                           // expect no errors
+
+    auto &coolingCoil = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(thisSys->m_CoolingCoilIndex);
+    auto &heatingCoil = state->dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(thisSys->m_HeatingCoilIndex);
+    ASSERT_NE(nullptr, thisSys->m_coolingCoilAvailSched);
+    ASSERT_NE(nullptr, thisSys->m_heatingCoilAvailSched);
+    EXPECT_EQ(coolingCoil.availSched, thisSys->m_coolingCoilAvailSched);
+    EXPECT_EQ(heatingCoil.availSched, thisSys->m_heatingCoilAvailSched);
+    EXPECT_LE(thisSys->m_coolingCoilAvailSched->getCurrentVal(), 0.0);
+    EXPECT_LE(thisSys->m_heatingCoilAvailSched->getCurrentVal(), 0.0);
+    coolingCoil.availSched->currentVal = 1.0;
+    heatingCoil.availSched->currentVal = 1.0;
 
     ASSERT_EQ(1, state->dataUnitarySystems->numUnitarySystems); // only 1 unitary system above so expect 1 as number of unitary system objects
     EXPECT_EQ(thisSys->UnitType, HVAC::unitarySysTypeNames[(int)compType]); // compare UnitarySystem type string to valid type
