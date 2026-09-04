@@ -1,7 +1,7 @@
 name: Self-Hosted Build and Test
 
 on:
-  push:
+  pull_request:
     branches: [ develop ]
   workflow_dispatch:
     inputs:
