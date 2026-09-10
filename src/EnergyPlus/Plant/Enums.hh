@@ -216,6 +216,7 @@ enum class PlantEquipmentType
     HeatPumpAirToWaterHeating,
     HeatPumpAirToWater,
     PurchSteam,
+    CoilCoolingITEColdPlate,
     Num
 };
 // Adding a new item to the PlantEquipmentType enum (above) requires similar changes to

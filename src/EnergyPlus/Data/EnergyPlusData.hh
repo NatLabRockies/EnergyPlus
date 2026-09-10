@@ -187,6 +187,7 @@ struct IceThermalStorageData;
 struct IndoorGreenData;
 struct IntegratedHeatPumpGlobalData;
 struct InternalHeatGainsData;
+struct LiquidCooledITEColdPlatesData;
 struct LoopNodeData;
 struct LowTempRadiantSystemData;
 struct MaterialData;
@@ -445,6 +446,7 @@ struct EnergyPlusData : BaseGlobalStruct
     std::unique_ptr<IndoorGreenData> dataIndoorGreen;
     std::unique_ptr<IntegratedHeatPumpGlobalData> dataIntegratedHP;
     std::unique_ptr<InternalHeatGainsData> dataInternalHeatGains;
+    std::unique_ptr<LiquidCooledITEColdPlatesData> dataLiquidCooledITE;
     std::unique_ptr<LoopNodeData> dataLoopNodes;
     std::unique_ptr<LowTempRadiantSystemData> dataLowTempRadSys;
     std::unique_ptr<MaterialData> dataMaterial;
