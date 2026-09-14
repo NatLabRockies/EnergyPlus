@@ -1912,25 +1912,25 @@ namespace FanCoilUnits {
             CoolingCoilName = fanCoil.CCoilName;
             CoolingCoilType = fanCoil.CCoilType;
         }
-        if (state.dataSize->ZoneSizingRunDone) {
-            WaterCoils::SetCoilDesFlow(
-                state, CoolingCoilType, CoolingCoilName, state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow, ErrorsFound);
-            WaterCoils::SetCoilDesFlow(state,
-                                       fanCoil.HCoilType,
-                                       fanCoil.HCoilName,
-                                       state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow,
-                                       ErrorsFound);
-        } else {
-            WaterCoils::SetCoilDesFlow(state, CoolingCoilType, CoolingCoilName, fanCoil.MaxAirVolFlow, ErrorsFound);
-            WaterCoils::SetCoilDesFlow(state, fanCoil.HCoilType, fanCoil.HCoilName, fanCoil.MaxAirVolFlow, ErrorsFound);
-        }
         if (state.dataSize->CurZoneEqNum > 0) {
             zoneEqSizing.MaxHWVolFlow = fanCoil.MaxHotWaterVolFlow;
             zoneEqSizing.MaxCWVolFlow = fanCoil.MaxColdWaterVolFlow;
-            zoneEqSizing.AirVolFlow = fanCoil.MaxAirVolFlow;
             zoneEqSizing.DesCoolingLoad = fanCoil.DesCoolingLoad;
             zoneEqSizing.DesHeatingLoad = fanCoil.DesHeatingLoad;
+            if (state.dataSize->ZoneSizingRunDone) {
+                // the fan coil has a single input for Maximum Supply Air Flow Rate
+                // it is odd to use two airflows if autosizing and a single air flow when not autosizing
+                // however, this method does minimize water coil sizes instead of upsizing one of the coils to meet the maximum air flow rate
+                zoneEqSizing.CoolingAirFlow = true;
+                zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
+                zoneEqSizing.HeatingAirFlow = true;
+                zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+            }
+            // when DesignSizeFromParent is set, sizing will use MaxAirVolFlow in CoolingAirFlowSizing and HeatingAirFlowSizing
+            // if CoolingAirFlow and HeatingAirFlow are also set (as above), then sizing will use the CoolingAirVolFlow and HeatingAirVolFlow values
+            // instead of MaxAirVolFlow
             zoneEqSizing.DesignSizeFromParent = true;
+            zoneEqSizing.AirVolFlow = fanCoil.MaxAirVolFlow;
         }
 
         if (ErrorsFound) {

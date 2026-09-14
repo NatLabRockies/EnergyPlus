@@ -2490,8 +2490,10 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             // sizingHeatingAirFlow.setHVACSizingIndexData(FanCoil(FanCoilNum).HVACSizingIndex);
             sizingHeatingAirFlow.initializeWithinEP(state, CompType, CompName, bPRINT, RoutineName);
             TempSize = sizingHeatingAirFlow.size(state, TempSize, ErrorsFound);
-            // reset the design air volume flow rate for air loop coils only
-            if (state.dataSize->CurSysNum > 0) {
+            // reset the design air volume flow rate for air loop coils only or coils where airflow is not set by SetCoilDesFlow
+            if (state.dataSize->CurSysNum > 0 || waterCoil.DesAirVolFlowRate == 0.0) {
+                // Issue 7276 removed SetCoilDesFlow from FanCoils. This causes DesAirVolFlowRate to be 0, so allow sizing airflow for that case.
+                // The SetCoilDesFlow function should be removed from all components.
                 waterCoil.DesAirVolFlowRate = TempSize;
             }
             waterCoil.InletAirMassFlowRate = state.dataEnvrn->StdRhoAir * TempSize; // inlet air mass flow rate is not the autosized value
