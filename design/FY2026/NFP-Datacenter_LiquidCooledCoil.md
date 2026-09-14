@@ -40,7 +40,7 @@ _Figure 1 - Cross Section of a Cold Plate_ (source: [[7]][Martinez et al.])
 
 The maximum heat transfer rate at the nominal flow rate is therefore:
 
-$\dot{q}_{max} = \frac{T_{case,max} - T_f}{R_{th,nom}}$
+$$\dot{q}_{max} = \frac{T_{case,max} - T_f}{R_{th,nom}}$$
 
 where $T_{case,max}$ is the maximum allowable chip case temperature.
 
@@ -76,7 +76,7 @@ where:
 
 The maximum heat transfer rate at the nominal flow rate is therefore:
 
-$\dot{q}_{max} = \dot{m}_{nom} \cdot c_p \cdot \varepsilon_{nom} \cdot (T_{case,max} - T_{in})$
+$$\dot{q}_{max} = \dot{m}_{nom} \cdot c_p \cdot \varepsilon_{nom} \cdot (T_{case,max} - T_{in})$$
 
 where $T_{case,max}$ is the maximum allowable chip case temperature.
 
