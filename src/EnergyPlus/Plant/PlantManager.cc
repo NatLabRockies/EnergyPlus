@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -3610,15 +3611,17 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   April 2011
-    //       MODIFIED       na
+    //       MODIFIED       Sept. 2026 Joe Robertson
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
-    // setup the order that plant loops are to be called
+    // Setup the order that plant loop sides are to be called while preserving demand-before-supply for each loop.
 
     // METHODOLOGY EMPLOYED:
-    // simple rule-based allocation of which order to call the half loops
-    // Examine for interconnected components and rearrange to impose the following rules
+    // Start with the demand-before-supply order established by SetupInitialPlantCallingOrder, then rearrange
+    // loop sides to account for interconnected components. Existing interconnection rules also avoid moving a
+    // supply side before its own demand side. Because later shifts can otherwise disturb that relationship,
+    // restore demand-before-supply for every loop after processing the interconnections.
 
     // Using/Aliasing
     using PlantUtilities::ShiftPlantLoopSideCallingOrder;
@@ -3674,6 +3677,14 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
                     }
                 }
             }
+        }
+    }
+
+    for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
+        int demandIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Demand);
+        int supplyIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Supply);
+        if (demandIndex > supplyIndex) {
+            ShiftPlantLoopSideCallingOrder(state, demandIndex, supplyIndex);
         }
     }
 }
