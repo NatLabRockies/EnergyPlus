@@ -82,6 +82,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
 #include <EnergyPlus/DataMoistureBalanceEMPD.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
@@ -112,6 +113,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SolarShading.hh>
@@ -162,6 +164,17 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
         DisplayString(state, "Initializing Surfaces");
     }
     InitSurfaceHeatBalance(state); // Initialize all heat balance related parameters
+
+    // Surface-coupled PV must be initialized before its first temperature-dependent calculation.
+    if (state.dataPhotovoltaicState->GetInputFlag &&
+        state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Generator:Photovoltaic") > 0) {
+        Photovoltaics::GetPVInput(state);
+        state.dataPhotovoltaicState->GetInputFlag = false;
+    }
+
+    for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+        Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+    }
 
     // Solve the zone heat balance 'Detailed' solution
     // Call the outside and inside surface heat balances
@@ -5401,20 +5414,21 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Rick Strand
     //       DATE WRITTEN   December 2000
+    //       MODIFIED       Sept. 2026 Joe Robertson (surface-coupled PV)
 
     // PURPOSE OF THIS SUBROUTINE:
-    // If a radiant system is present and was on for part of the time step,
-    // then we probably need to make yet another pass through the heat balance.
-    // This is necessary because the heat source/sink to the surface that is
-    // the radiant system may have varied during the system time steps.
+    // If a radiant system is present and was on for part of the time step, or a surface-coupled
+    // PV generator changed its heat sink to a surface, then we probably need to make yet another
+    // pass through the heat balance.  This is necessary because the heat source/sink to the surface
+    // may have varied during the system time steps.
 
     // METHODOLOGY EMPLOYED:
-    // First, determine whether or not the radiant system was running.  If
-    // any of the Qsource terms are non-zero, then it was running.  Then,
-    // update the current source terms with the "average" value calculated
-    // by the radiant system algorithm.  This requires the "USE" of the
-    // radiant algorithm module.  Finally, using this source value, redo
-    // the inside and outside heat balances.
+    // First, determine whether or not a radiant system was running.  If any of the Qsource terms
+    // are non-zero, then it was running.  Then, update the current source terms with the "average"
+    // value calculated by the radiant system algorithm.  This requires the "USE" of the radiant
+    // algorithm module.  Also check whether a surface-coupled PV generator requested resimulation
+    // because its heat sink changed.  Finally, if any of these conditions occurred, redo the inside
+    // and outside heat balances (and the PV calculation, since its result depends on surface temperature).
 
     bool LowTempRadSysOn;     // .TRUE. if a low temperature radiant system is running
     bool HighTempRadSysOn;    // .TRUE. if a high temperature radiant system is running
@@ -5432,11 +5446,20 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
 
-    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn) {
+    // Surface-coupled PV may have changed its heat sink since the last surface heat balance; consume that request here.
+    bool const PVSurfaceHeatBalanceResim = state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag;
+    state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+
+    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
+        PVSurfaceHeatBalanceResim) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);
         CalcHeatBalanceInsideSurf(state);
+
+        for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+            Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+        }
     }
 }
 
@@ -7242,7 +7265,6 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     //    // Locals
     //    // SUBROUTINE ARGUMENT DEFINITIONS:
     //
-    //>>>>>>> origin/develop
     // SUBROUTINE PARAMETER DEFINITIONS:
     constexpr std::string_view RoutineNameGroundTemp("CalcHeatBalanceOutsideSurf:GroundTemp");
     constexpr std::string_view RoutineNameGroundTempFC("CalcHeatBalanceOutsideSurf:GroundTempFC");

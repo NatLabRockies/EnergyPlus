@@ -65,6 +65,7 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
@@ -80,6 +81,7 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SolarShading.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
@@ -2810,6 +2812,15 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
                           "    A1 - 1 IN STUCCO,        !- Outside Layer",
                           "    GP01;                    !- Layer 3",
 
+                          "  ConstructionProperty:InternalHeatSource,",
+                          "    PV Source,               !- Name",
+                          "    EXTWALL:LIVING,          !- Construction Name",
+                          "    1,                       !- Thermal Source Present After Layer Number",
+                          "    1,                       !- Temperature Calculation Requested After Layer Number",
+                          "    1,                       !- Dimensions for the CTF Calculation",
+                          "    0.1524,                  !- Tube Spacing {m}",
+                          "    0.0;                     !- Two-Dimensional Temperature Calculation Position",
+
                           "  Construction,",
                           "    FLOOR:LIVING,            !- Name",
                           "    CC03,                    !- Outside Layer",
@@ -2981,6 +2992,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
 
+    // IsUsedCTF is only set once surfaces are set up, so CTFs can only be calculated after SetupZoneGeometry.
+    HeatBalanceManager::InitConductionTransferFunctions(*state);
+
     // Clear schedule type warnings
     EXPECT_TRUE(has_err_output(true));
 
@@ -3081,6 +3095,52 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     EXPECT_EQ(-0.1, state->dataHeatBalSurf->SurfQAdditionalHeatSourceOutside(1));
     CalcHeatBalanceInsideSurf(*state);
     EXPECT_EQ(0.1, state->dataHeatBalSurf->SurfQAdditionalHeatSourceInside(6));
+
+    // Apply a PV sink after the initial surface pass, as happens when PV is recalculated during HVAC simulation.
+    auto const surfaceTemperatureBeforePV = state->dataHeatBalSurf->SurfTempOut(1);
+    state->dataHeatBal->AnyInternalHeatSourceInInput = true;
+    // SurfQsrcHist is only allocated when AnyInternalHeatSourceInInput is set, so allocate it before reading it below.
+    state->dataHeatBalSurf->SurfQsrcHist.dimension(state->dataSurface->TotSurfaces, Construction::MaxCTFTerms, 0.0);
+    auto const sourceHistoryBeforePV = state->dataHeatBalSurf->SurfQsrcHist(1, 1);
+    state->dataHeatBalFanSys->QPVSysSource.dimension(state->dataSurface->TotSurfaces, 0.0);
+    state->dataHeatBalFanSys->QPVSysSource(1) = -100.0;
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+
+    // UpdateFinalSurfaceHeatBalance must consume the request and incorporate the PV sink into the surface balance.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_NE(sourceHistoryBeforePV, state->dataHeatBalSurf->SurfQsrcHist(1, 1));
+    EXPECT_NE(surfaceTemperatureBeforePV, state->dataHeatBalSurf->SurfTempOut(1));
+
+    // A source change that isn't yet converged leaves a request for the next zone time step's
+    // final surface heat balance update rather than looping within this call.
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->NumPVs = 1;
+    auto &pv = state->dataPhotovoltaic->PVarray(1);
+    pv.PVModelType = DataPhotovoltaics::PVModel::Simple;
+    pv.CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    pv.SurfacePtr = 1;
+    pv.SimplePVModule.EfficencyInputMode = DataPhotovoltaics::Efficiency::Fixed;
+    pv.SimplePVModule.AreaCol = 1.0;
+    pv.SimplePVModule.PVEfficiency = 0.1;
+    pv.SurfaceCouplingSource = 0.0;
+    state->dataHeatBal->SurfQRadSWOutIncident(1) = 1000.0;
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+
+    // The first update consumes the resim request, but the PV sink changes from its initial value,
+    // so another update is requested for a later pass.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+
+    // A subsequent update under the same conditions converges: the PV output is stable and no
+    // further resimulation is requested.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_DOUBLE_EQ(100.0, pv.SurfaceCouplingSource);
+    EXPECT_FALSE(pv.SurfaceCouplingNeedsResim);
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestReportIntMovInsInsideSurfTemp)

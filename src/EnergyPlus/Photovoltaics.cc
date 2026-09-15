@@ -215,6 +215,13 @@ namespace Photovoltaics {
         } break;
         }
 
+        auto const cellIntegrationMode = state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode;
+        if (cellIntegrationMode == CellIntegration::SurfaceOutsideFace || cellIntegrationMode == CellIntegration::TranspiredCollector ||
+            cellIntegrationMode == CellIntegration::ExteriorVentedCavity || cellIntegrationMode == CellIntegration::PVTSolarCollector) {
+            // Surface coupling runs before the electric generator pass, so retain the current schedule state for the next coupling pass.
+            state.dataPhotovoltaic->PVarray(PVnum).SurfaceCouplingRunFlag = RunFlag;
+        }
+
         ReportPV(state, PVnum);
     }
 
@@ -841,7 +848,6 @@ namespace Photovoltaics {
 
         // Using/Aliasing
         Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
-        using TranspiredCollector::SetUTSCQdotSource;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int thisZone; // working index for zones
@@ -861,23 +867,84 @@ namespace Photovoltaics {
 
         switch (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode) {
             // SurfaceSink is not multiplied...
-        case CellIntegration::SurfaceOutsideFace: {
-            state.dataHeatBalFanSys->QPVSysSource(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) =
-                -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink;
-        } break;
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            UpdatePVIntegrationSource(state, PVnum);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
+    {
+        // Recalculate PV that depends on a surface or collector temperature before the heat balance uses its current sink.
+        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            break;
+        default:
+            return;
+        }
+
+        switch (pv.PVModelType) {
+        case PVModel::Simple:
+            CalcSimplePV(state, PVnum);
+            break;
+        case PVModel::TRNSYS:
+            InitTRNSYSPV(state, PVnum);
+            CalcTRNSYSPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        case PVModel::Sandia:
+            CalcSandiaPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        default:
+            break;
+        }
+
+        UpdatePVIntegrationSource(state, PVnum);
+    }
+
+    void UpdatePVIntegrationSource(EnergyPlusData &state, int const PVnum)
+    {
+        // Publish the PV sink to its coupled thermal model and request another pass when the sink changes materially.
+        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        Real64 const previousSource = pv.SurfaceCouplingSource;
+
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+            state.dataHeatBalFanSys->QPVSysSource(pv.SurfacePtr) = -pv.SurfaceSink;
+            break;
         case CellIntegration::TranspiredCollector: {
-            SetUTSCQdotSource(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(state, pv.UTSCPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
-            SetVentedModuleQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            SetVentedModuleQdotSource(state, pv.ExtVentCavPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::PVTSolarCollector: {
-            PhotovoltaicThermalCollectors::SetPVTQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).PVTPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            PhotovoltaicThermalCollectors::SetPVTQdotSource(state, pv.PVTPtr, -1.0 * pv.SurfaceSink);
         } break;
         default:
             break;
+        }
+
+        pv.SurfaceCouplingNeedsResim = std::abs(pv.SurfaceSink - previousSource) > 0.1;
+        pv.SurfaceCouplingSource = pv.SurfaceSink;
+        if (pv.SurfaceCouplingNeedsResim) {
+            state.dataHVACGlobal->SimElecCircuitsFlag = true;
+            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace || pv.CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
+                pv.CellIntegrationMode == CellIntegration::TranspiredCollector) {
+                state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+            }
+            if (pv.CellIntegrationMode == CellIntegration::TranspiredCollector || pv.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+                state.dataHVACGlobal->SimAirLoopsFlag = true;
+                state.dataHVACGlobal->SimPlantLoopsFlag = true;
+            }
         }
     }
 

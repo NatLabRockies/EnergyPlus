@@ -54,11 +54,14 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
+#include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSurfaces.hh>
+#include <EnergyPlus/PhotovoltaicThermalCollectors.hh>
 #include <EnergyPlus/Photovoltaics.hh>
+#include <EnergyPlus/TranspiredCollector.hh>
 
 using namespace EnergyPlus;
 
@@ -164,4 +167,88 @@ TEST_F(EnergyPlusFixture, PV_TRNSYSDynamicTimeStepIndependentOfPVOrder)
     EXPECT_DOUBLE_EQ(900.0, state->dataPhotovoltaicState->PVTimeStep);
     EXPECT_LT(dynamicPV.Report.CellTemp, 40.0);
     EXPECT_GT(dynamicPV.Report.CellTemp, 20.0);
+}
+
+// Demonstrates that a material change in an integrated PV heat sink is published
+// to the coupled thermal model and requests the appropriate resimulation passes.
+TEST_F(EnergyPlusFixture, PV_IntegrationSourceRequestsResimulation)
+{
+    // Start with a PV array coupled directly to a surface outside face. The PV
+    // sink is represented as a negative source in the surface heat balance.
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->NumPVs = 1;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    state->dataPhotovoltaic->PVarray(1).SurfacePtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 100.0;
+    state->dataHeatBalFanSys->QPVSysSource.allocate(1);
+
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    // A changed surface sink must request both a surface heat-balance pass and
+    // another electric-circuit simulation.
+    EXPECT_DOUBLE_EQ(state->dataHeatBalFanSys->QPVSysSource(1), -100.0);
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataPhotovoltaic->PVarray(1).SurfaceCouplingNeedsResim);
+
+    // Re-publishing the same sink is below the change threshold and should not
+    // schedule another round of coupled calculations.
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 100.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_FALSE(state->dataPhotovoltaic->PVarray(1).SurfaceCouplingNeedsResim);
+
+    // Exterior vented-cavity integration also requests a surface pass, but it
+    // does not require the air or plant loops to be repeated.
+    state->dataHeatBal->ExtVentedCavity.allocate(1);
+    state->dataHeatBal->ExtVentedCavity(1).ProjArea = 1.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::ExteriorVentedCavity;
+    state->dataPhotovoltaic->PVarray(1).ExtVentCavPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 50.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimPlantLoopsFlag);
+
+    // A transpired collector couples PV output to air and plant-side results,
+    // so all three relevant solver flags must be raised for a changed sink.
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataHeatBal->ExtVentedCavity(1).QdotSource = 0.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::TranspiredCollector;
+    state->dataPhotovoltaic->PVarray(1).UTSCPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 25.0;
+    state->dataTranspiredCollector->UTSC.allocate(1);
+    state->dataTranspiredCollector->UTSC(1).ProjArea = 1.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimPlantLoopsFlag);
+
+    // PVT collectors receive the sink through the collector source term. They
+    // need air, plant, and electric resimulation, but no separate surface pass.
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataHVACGlobal->SimAirLoopsFlag = false;
+    state->dataHVACGlobal->SimPlantLoopsFlag = false;
+    state->dataPhotovoltaicThermalCollector->PVT.allocate(1);
+    state->dataPhotovoltaicThermalCollector->PVT(1).AreaCol = 2.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::PVTSolarCollector;
+    state->dataPhotovoltaic->PVarray(1).PVTPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 40.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_DOUBLE_EQ(state->dataPhotovoltaicThermalCollector->PVT(1).QdotSource, -20.0);
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimPlantLoopsFlag);
 }
