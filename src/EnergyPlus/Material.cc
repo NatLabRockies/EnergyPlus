@@ -2857,6 +2857,48 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                              "[ ]",
                              mat->AbsorpVisibleEMSOverrideOn,
                              mat->AbsorpVisibleEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Solar Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpSolarOutEMSOverrideOn,
+                             mat->AbsorpSolarOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Thermal Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpThermalOutEMSOverrideOn,
+                             mat->AbsorpThermalOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Visible Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpVisibleOutEMSOverrideOn,
+                             mat->AbsorpVisibleOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Solar Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpSolarInEMSOverrideOn,
+                             mat->AbsorpSolarInEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Thermal Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpThermalInEMSOverrideOn,
+                             mat->AbsorpThermalInEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Visible Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpVisibleInEMSOverrideOn,
+                             mat->AbsorpVisibleInEMSOverride);
         }
     }
 

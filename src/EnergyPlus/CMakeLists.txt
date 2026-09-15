@@ -789,6 +789,11 @@ if(DEBUG_PYTHON_CONFIG)
   target_compile_definitions(energypluslib PUBLIC DEBUG_PYTHON_CONFIG=1)
 endif()
 
+# Detect incorrect recurring error MsgIndex usage (throw on every recurring error call). Always on for Debug configs.
+option(FORCE_DEBUG_MSG_INDEX "Force-enable detection of incorrect recurring error MsgIndex usage in non Debug mode" OFF)
+mark_as_advanced(FORCE_DEBUG_MSG_INDEX)
+target_compile_definitions(energypluslib PUBLIC $<$<OR:$<CONFIG:Debug>,$<BOOL:${FORCE_DEBUG_MSG_INDEX}>>:DEBUG_MSG_INDEX>)
+
 if(ENABLE_UNITY)
   set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
 endif()

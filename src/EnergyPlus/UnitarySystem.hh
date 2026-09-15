@@ -389,7 +389,12 @@ namespace UnitarySystems {
         Real64 m_EMSOverrideCoilSpeedNumValue = 0.0;
         bool m_EMSOverrideSuppCoilSpeedNumOn = false;
         Real64 m_EMSOverrideSuppCoilSpeedNumValue = 0.0;
-        int m_CoilSpeedErrIdx = 0;
+        // Recurring "wrong EMS-overridden coil speed" warnings: one index per distinct message text
+        // (previously a single shared m_CoilSpeedErrIdx, which corrupted the "shown once" gating between messages)
+        int m_CoilSpeedErrIdxHeating = 0;
+        int m_CoilSpeedErrIdxCooling = 0;
+        int m_CoilSpeedErrIdxSuppHeat = 0;
+        int m_CoilSpeedErrIdxCoolingBelowZero = 0;
 
         Real64 m_DehumidInducedHeatingDemandRate = 0.0;
 

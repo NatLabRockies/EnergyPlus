@@ -1928,6 +1928,8 @@ namespace SurfaceGeometry {
                                               state.dataSurface->Surface(SurfNum).Area * MultSurfNum) /
                                              state.dataSurface->Surface(Found).Area * MultFound) > 0.02) { // 2% difference in areas
                                     ++state.dataSurfaceGeometry->ErrCount4;
+                                    ++state.dataErrTracking
+                                          ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InterZoneSurfaceAreaMismatch)];
                                     if (state.dataSurfaceGeometry->ErrCount4 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                                         ShowWarningError(
                                             state,
@@ -1978,6 +1980,8 @@ namespace SurfaceGeometry {
                             // Check opposites Azimuth and Tilt
                             // Tilt
                             if (std::abs(std::abs(state.dataSurface->Surface(Found).Tilt + state.dataSurface->Surface(SurfNum).Tilt) - 180.0) > 1.0) {
+                                ++state.dataErrTracking
+                                      ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InterZoneSurfaceTiltMismatch)];
                                 ShowWarningError(state, std::format("{}InterZone Surface Tilts do not match as expected.", RoutineName));
                                 ShowContinueError(state,
                                                   std::format("  Tilt={:.1f} in Surface={}, Zone={}",
@@ -2039,6 +2043,8 @@ namespace SurfaceGeometry {
                                              180.0) > 1.0) {
                                     if (std::abs(state.dataSurface->Surface(SurfNum).SinTilt) > 0.5 || state.dataGlobal->DisplayExtraWarnings) {
                                         // if horizontal surfaces, then these are windows/doors/etc in those items.
+                                        ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(
+                                            DataErrorTracking::ErrorSummaryType::InterZoneSurfaceAzimuthMismatch)];
                                         ShowWarningError(state, std::format("{}InterZone Surface Azimuths do not match as expected.", RoutineName));
                                         ShowContinueError(state,
                                                           std::format("  Azimuth={:.1f}, Tilt={:.1f}, in Surface={}, Zone={}",
@@ -2819,6 +2825,7 @@ namespace SurfaceGeometry {
                 if (!state.dataConstruction->Construct(surf.Construction).TypeIsIRT) {
                     continue;
                 }
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InfraredTransparentUsage)];
                 if (!state.dataGlobal->DisplayExtraWarnings) {
                     ++iTmp1;
                 } else {
@@ -12948,6 +12955,7 @@ namespace SurfaceGeometry {
             Vectors::CalcCoPlanarNess(surf.Vertex, surf.Sides, IsCoPlanar, OutOfLine, LastVertexInError);
             if (!IsCoPlanar) {
                 if (OutOfLine > 0.01) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::NonPlanarSurfaces)];
                     ShowSevereError(state,
                                     std::format("{}Suspected non-planar surface:\"{}\", Max \"out of line\"={:.5f} at Vertex # {}",
                                                 RoutineName,

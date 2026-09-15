@@ -261,12 +261,25 @@ namespace Material {
         bool hasAbsorpVisibleInputIn = false; // Optional inside-face visible absorptance was explicitly input
 
         // Radiation parameters // Are these for windows or for opaque materials also?
-        bool AbsorpSolarEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
-        Real64 AbsorpSolarEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
-        bool AbsorpThermalEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance
-        Real64 AbsorpThermalEMSOverride = 0.0;   // value to use when EMS calling to override value for thermal absorptance
-        bool AbsorpVisibleEMSOverrideOn = false; // if true, then EMS calling to override value for visible absorptance
-        Real64 AbsorpVisibleEMSOverride = 0.0;   // value to use when EMS calling to override value for visible absorptance
+        // Legacy EMS overrides apply to both faces for backward compatibility.
+        bool AbsorpSolarEMSOverrideOn = false;
+        Real64 AbsorpSolarEMSOverride = 0.0;
+        bool AbsorpThermalEMSOverrideOn = false;
+        Real64 AbsorpThermalEMSOverride = 0.0;
+        bool AbsorpVisibleEMSOverrideOn = false;
+        Real64 AbsorpVisibleEMSOverride = 0.0;
+        bool AbsorpSolarOutEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
+        Real64 AbsorpSolarOutEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
+        bool AbsorpThermalOutEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance
+        Real64 AbsorpThermalOutEMSOverride = 0.0;   // value to use when EMS calling to override value for thermal absorptance
+        bool AbsorpVisibleOutEMSOverrideOn = false; // if true, then EMS calling to override value for visible absorptance
+        Real64 AbsorpVisibleOutEMSOverride = 0.0;   // value to use when EMS calling to override value for visible absorptance
+        bool AbsorpSolarInEMSOverrideOn = false;    // if true, then EMS calling to override value for solar absorptance
+        Real64 AbsorpSolarInEMSOverride = 0.0;      // value to use when EMS calling to override value for solar absorptance
+        bool AbsorpThermalInEMSOverrideOn = false;  // if true, then EMS calling to override value for thermal absorptance
+        Real64 AbsorpThermalInEMSOverride = 0.0;    // value to use when EMS calling to override value for thermal absorptance
+        bool AbsorpVisibleInEMSOverrideOn = false;  // if true, then EMS calling to override value for visible absorptance
+        Real64 AbsorpVisibleInEMSOverride = 0.0;    // value to use when EMS calling to override value for visible absorptance
 
         // dynamic thermal and solar absorptance coating parameters
         VariableAbsCtrlSignal absorpVarCtrlSignalOut = VariableAbsCtrlSignal::Invalid;

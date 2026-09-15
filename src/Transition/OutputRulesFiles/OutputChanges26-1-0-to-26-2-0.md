@@ -72,3 +72,14 @@ are replaced by six face-specific columns in the same location:
 For `Material` and `Material:NoMass`, the corresponding outside- and inside-face columns contain the same value when no independent inside-face value is entered. For other material types, including complex glazing, the columns report their existing front/back or derived face properties and may differ.
 
 See pull request [#11750](https://github.com/NatLabRockies/EnergyPlus/pull/11750)
+
+### Object Count Summary surface class rows
+
+PR #11778 changes the `Surfaces by Class` table in the `Object Count Summary` report to count surfaces by their original input class instead of the coarser class used for heat-transfer calculations. This removes double counting of `GlassDoor` and `TubularDaylightingDevice:Diffuser` objects.
+
+- The `Window` row is replaced by `Fixed Window`. Surfaces entered using the legacy `Window` object type are included in `Fixed Window`.
+- New `Operable Window`, `Skylight`, and `Overhead Door` rows are added.
+- `Glass Door` and `Tubular Daylighting Device Diffuser` surfaces are reported only in their respective rows and are no longer also included in a window count.
+- `Overhead Door` surfaces are reported separately and are no longer included in the `Door` row.
+
+See pull request [#11778](https://github.com/NatLabRockies/EnergyPlus/pull/11778) for more details.

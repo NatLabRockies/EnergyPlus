@@ -149,10 +149,10 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     state->dataSize->DataCapacityUsedForSizing = 0.0;
     sizer.initializeWithinEP(*this->state, HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingDXSingleSpeed], "MyDXCoil", printFlag, routineName);
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
-    EXPECT_ENUM_EQ(AutoSizingResultType::ErrorType1, sizer.errorType);
-    EXPECT_TRUE(errorsFound);
+    EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType); // no sizing error when capacity = 0
+    EXPECT_FALSE(errorsFound);
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(1.0, sizedValue, 0.01); // autosizing failed since Data* variables were not both > 0
+    EXPECT_NEAR(1.0, sizedValue, 0.01); // autosizing failed since Data* variables were not both > 0 where SHR is set = 1
 
     // Test #5 - Zone Equipment, flow to capacity ratio high
     state->dataSize->DataCapacityUsedForSizing = 10000.0;

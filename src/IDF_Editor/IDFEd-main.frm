@@ -1,6 +1,6 @@
 VERSION 5.00
-Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Begin VB.Form IDFEdit
    Caption         =   "IDF Edit"
@@ -3399,15 +3399,29 @@ If sizeValue > orgSize Then
   ReDim Preserve IDFValue(sizeValue)
   If Err.Number <> 0 Then
     MsgBox "Out of memory when resizing the IDFValue array" + _
-    vbCrLf + vbCrLf + "If you are using many Schedule:Compacts input objects in your file, one workaround so that you " + _
-    "can open the file in IDF Editor, is to reduce " + _
-    "the length of the Schedule:Compact that appears in the Energy+.idd file. Make a copy of the Energy+.idd file " + _
-    "called ORIGINAL-Energy+.idd so you can always go back to it if you have to. Then open the Energ+.idd file with " + _
-    "a text editor such as Notepad and find the section on Schedule:Compact. After A1000 change the comma to a " + _
-    "semi-colon and delete the lines that start with A1001 to A9981, the end of that Schedule:Compact input object" + _
-    "description. Save the modified Energy+.idd file and try opening the file in IDF Editor again. " + _
-    "If that doesn't fix the issue you might want to look at the issue where this was first uncovered:" + _
-    vbCrLf + vbCrLf + "https://github.com/NREL/EnergyPlus/issues/9010 ", vbCritical, "Critical Memory Error"
+    vbCrLf + vbCrLf + "If you are using many copies of extensible input objects in your file, one workaround" + _
+    "is to reduce the length of the extensible objects that appear " + _
+    "in the Energy+.idd file. Extensible objects having extra fields and used many " + _
+    "times take up memory. Example of " + _
+    "this type of input object include:" + _
+    vbCrLf + " - Schedule:Compact" + _
+    vbCrLf + " - BuildingSurface:Detailed" + _
+    vbCrLf + " - AirLoopHVAC:ZoneSplitter" + _
+    vbCrLf + " - AirLoopHVAC:ZoneMixer" + _
+    vbCrLf + " - BranchList" + _
+    vbCrLf + " - Connector:Splitter" + _
+    vbCrLf + " - Connector:Mixer" + _
+    vbCrLf + " - NodeList" + _
+    vbCrLf + " - OutdoorAirNodeList" + _
+    vbCrLf + " - EnergyManagementSystem:Program" + _
+    vbCrLf + "Make a copy of the Energy+.idd file " + _
+    "called ORIGINAL-Energy+.idd as a backup. Then open the Energ+.idd file " + _
+    "with a text editor and find the section on those objects. After a field well past the last one you are " + _
+    "using, change the comma to a semi-colon and delete the remaining lines of that input object. Save the " + _
+    "modified Energy+.idd file and try opening the file in IDF Editor again.", vbCritical, "Critical Memory Error"
+'    "If that doesn't fix the issue you might want to look at the issues related to this:" + _
+'    vbCrLf + vbCrLf + "https://github.com/NatLabRockies/EnergyPlus/issues/9010" + _
+'    vbCrLf + vbCrLf + "https://github.com/NatLabRockies/EnergyPlus/issues/10321", vbCritical, "Critical Memory Error"
     On Error GoTo 0
     Exit Sub
   End If

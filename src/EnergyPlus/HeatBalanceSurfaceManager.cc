@@ -63,7 +63,6 @@
 #include <WCECommon.hpp>
 #include <WCEMultiLayerOptics.hpp>
 #include <WCESingleLayerOptics.hpp>
-#include <WCETarcog.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/ChilledCeilingPanelSimple.hh>
@@ -76,13 +75,13 @@
 #include <EnergyPlus/DataDaylighting.hh>
 #include <EnergyPlus/DataDaylightingDevices.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
 #include <EnergyPlus/DataMoistureBalanceEMPD.hh>
-#include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
@@ -90,7 +89,6 @@
 #include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/DataWindowEquivalentLayer.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
-#include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/DaylightingDevices.hh>
 #include <EnergyPlus/DaylightingManager.hh>
 #include <EnergyPlus/DisplayRoutines.hh>
@@ -123,7 +121,6 @@
 #include <EnergyPlus/ThermalComfort.hh>
 #include <EnergyPlus/TranspiredCollector.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-#include <EnergyPlus/WindowComplexManager.hh>
 #include <EnergyPlus/WindowEquivalentLayer.hh>
 #include <EnergyPlus/WindowManager.hh>
 #include <EnergyPlus/WindowManagerExteriorData.hh>
@@ -1332,20 +1329,20 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 computedNetArea(surface.BaseSurf) -= surface.GrossArea * mult;
             }
         }
-        int currSurfaceClass = int(surface.Class);
-        assert(currSurfaceClass < int(DataSurfaces::SurfaceClass::Num));
-        assert(currSurfaceClass > int(DataSurfaces::SurfaceClass::None));
-        ++numSurfaces(currSurfaceClass);
-        if (isExterior) {
-            ++numExtSurfaces(currSurfaceClass);
+
+        // Object Count Summary
+        // This is only for unit tests: on a real run, GetSurfaceData will unconditionally do OriginalClass = Class
+        assert(surface.OriginalClass < DataSurfaces::SurfaceClass::Num);
+        assert(surface.OriginalClass > DataSurfaces::SurfaceClass::None);
+
+        DataSurfaces::SurfaceClass currSurfaceClass = surface.OriginalClass;
+        if (currSurfaceClass == DataSurfaces::SurfaceClass::Window) {
+            currSurfaceClass = DataSurfaces::SurfaceClass::FixedWindow;
         }
-        if (surface.Class == DataSurfaces::SurfaceClass::Window) {
-            if (surface.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor || surface.OriginalClass == DataSurfaces::SurfaceClass::TDD_Diffuser) {
-                ++numSurfaces((int)surface.OriginalClass);
-                if (isExterior) {
-                    ++numExtSurfaces((int)surface.OriginalClass);
-                }
-            }
+        int const iCurrSurfaceClass = static_cast<int>(currSurfaceClass);
+        ++numSurfaces(iCurrSurfaceClass);
+        if (isExterior) {
+            ++numExtSurfaces(iCurrSurfaceClass);
         }
     }
     // for fins and overhangs just add them explicitly since not otherwise classified
@@ -1455,10 +1452,22 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Detached Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Detached Shading", numExtSurfaces(int(DataSurfaces::SurfaceClass::Detached_F)));
+
+    // IDD Entry / OriginalClass == Window is kept for backward compatibility only and is treated as a FixedWindow
+    assert(numSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
+    assert(numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)) == 0);
     OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntTot, "Window", numSurfaces(int(DataSurfaces::SurfaceClass::Window)));
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Window", numSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
     OutputReportPredefined::PreDefTableEntry(
-        state, state.dataOutRptPredefined->pdchSurfCntExt, "Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)));
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Operable Window", numSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Operable Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Skylight", numSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Skylight", numExtSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Door", numSurfaces(int(DataSurfaces::SurfaceClass::Door)));
     OutputReportPredefined::PreDefTableEntry(
@@ -1467,6 +1476,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Glass Door", numSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Glass Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Overhead Door", numSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Overhead Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Shading)));
     OutputReportPredefined::PreDefTableEntry(
@@ -1697,6 +1710,16 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
     state.dataHeatBalSurf->SurfAbsThermalInt.dimension(state.dataSurface->TotSurfaces, 0.0);
 
     DisplayString(state, "Setting up Surface Reporting Variables");
+    auto materialUsesEMSActuator = [&state](Material::MaterialBase const *material, std::string_view controlType) {
+        return material != nullptr && std::any_of(state.dataRuntimeLang->EMSActuatorAvailable.begin(),
+                                                  state.dataRuntimeLang->EMSActuatorAvailable.end(),
+                                                  [material, controlType](auto const &actuator) {
+                                                      return actuator.handleCount > 0 && Util::SameString(actuator.ComponentTypeName, "Material") &&
+                                                             Util::SameString(actuator.UniqueIDName, material->Name) &&
+                                                             Util::SameString(actuator.ControlTypeName, controlType);
+                                                  });
+    };
+
     // Setup surface report variables CurrentModuleObject='Opaque Surfaces'
     for (int loop = 1; loop <= state.dataSurface->TotSurfaces; ++loop) {
         auto &surface = state.dataSurface->Surface(loop);
@@ -2181,6 +2204,8 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
         if (!construction.TypeIsWindow) {
             bool useInsideThermalAbsorptance = false;
             bool useInsideSolarAbsorptance = false;
+            int const outsideMaterialNum = construction.LayerPoint(1);
+            auto const *outsideMaterial = outsideMaterialNum > 0 ? state.dataMaterial->materials(outsideMaterialNum) : nullptr;
             int const insideMaterialNum = construction.LayerPoint(construction.TotLayers);
             if (insideMaterialNum > 0) {
                 auto const *insideMaterial = state.dataMaterial->materials(insideMaterialNum);
@@ -2194,8 +2219,12 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                     insideVariableAbsorptanceAllowed && (insideMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::Scheduled
                                                              ? insideMaterial->absorpSolarVarSchedIn != nullptr
                                                              : insideMaterial->absorpSolarVarCurveIn != nullptr);
-                useInsideThermalAbsorptance = insideMaterial->hasAbsorpThermalInputIn || useInsideThermalVariableAbsorptance;
-                useInsideSolarAbsorptance = insideMaterial->hasAbsorpSolarInputIn || useInsideSolarVariableAbsorptance;
+                bool const useThermalEMSActuator = materialUsesEMSActuator(outsideMaterial, "Surface Property Thermal Absorptance Outside Face") ||
+                                                   materialUsesEMSActuator(insideMaterial, "Surface Property Thermal Absorptance Inside Face");
+                bool const useSolarEMSActuator = materialUsesEMSActuator(outsideMaterial, "Surface Property Solar Absorptance Outside Face") ||
+                                                 materialUsesEMSActuator(insideMaterial, "Surface Property Solar Absorptance Inside Face");
+                useInsideThermalAbsorptance = insideMaterial->hasAbsorpThermalInputIn || useInsideThermalVariableAbsorptance || useThermalEMSActuator;
+                useInsideSolarAbsorptance = insideMaterial->hasAbsorpSolarInputIn || useInsideSolarVariableAbsorptance || useSolarEMSActuator;
             }
 
             std::string_view const thermalAbsorptanceName =
@@ -2384,11 +2413,14 @@ void InitThermalAndFluxHistories(EnergyPlusData &state)
 
     // First do the "bulk" initializations of arrays sized to NumOfZones
     for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+        // Save and restore the MsgIndex for Recurring errors
+        const int hmThermalMassMultErrIndex = state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum).hmThermalMassMultErrIndex;
         new (&state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum)) ZoneTempPredictorCorrector::ZoneHeatBalanceData();
         // Initialize the Zone Humidity Ratio here so that it is available for EMPD implementations
         auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(zoneNum);
         thisZoneHB.airHumRatAvg = state.dataEnvrn->OutHumRat;
         thisZoneHB.airHumRat = state.dataEnvrn->OutHumRat;
+        thisZoneHB.hmThermalMassMultErrIndex = hmThermalMassMultErrIndex;
         state.dataHeatBalFanSys->TempTstatAir(zoneNum) = DataHeatBalance::ZoneInitialTemp;
     }
     for (auto &thisEnclosure : state.dataViewFactor->EnclRadInfo) {
@@ -4817,16 +4849,19 @@ void InitEMSControlledSurfaceProperties(EnergyPlusData &state)
 
     auto &s_mat = state.dataMaterial;
 
-    state.dataGlobal->AnySurfPropOverridesInModel = false;
-    // first determine if anything needs to be done, once yes, then always init
-    for (auto const *mat : s_mat->materials) {
-        if (mat->group != Material::Group::Regular) {
-            continue;
-        }
+    // Once an override has been active, continue initializing so setting the last actuator to Null restores the input values.
+    if (!state.dataGlobal->AnySurfPropOverridesInModel) {
+        for (auto const *mat : s_mat->materials) {
+            if (mat->group != Material::Group::Regular) {
+                continue;
+            }
 
-        if ((mat->AbsorpSolarEMSOverrideOn) || (mat->AbsorpThermalEMSOverrideOn) || (mat->AbsorpVisibleEMSOverrideOn)) {
-            state.dataGlobal->AnySurfPropOverridesInModel = true;
-            break;
+            if ((mat->AbsorpSolarEMSOverrideOn) || (mat->AbsorpThermalEMSOverrideOn) || (mat->AbsorpVisibleEMSOverrideOn) ||
+                (mat->AbsorpSolarOutEMSOverrideOn) || (mat->AbsorpThermalOutEMSOverrideOn) || (mat->AbsorpVisibleOutEMSOverrideOn) ||
+                (mat->AbsorpSolarInEMSOverrideOn) || (mat->AbsorpThermalInEMSOverrideOn) || (mat->AbsorpVisibleInEMSOverrideOn)) {
+                state.dataGlobal->AnySurfPropOverridesInModel = true;
+                break;
+            }
         }
     }
 
@@ -4834,20 +4869,52 @@ void InitEMSControlledSurfaceProperties(EnergyPlusData &state)
         return; // quick return if nothing has ever needed to be done
     }
 
-    // first, loop over materials
-    // why is this a second loop?
+    auto const getEMSOverrideValue =
+        [](Real64 inputValue, bool legacyOverrideOn, Real64 legacyOverrideValue, bool faceOverrideOn, Real64 faceOverrideValue) {
+            if (faceOverrideOn) {
+                return std::clamp(faceOverrideValue, 0.0001, 0.9999);
+            }
+            if (legacyOverrideOn) {
+                return std::clamp(legacyOverrideValue, 0.0001, 0.9999);
+            }
+            return inputValue;
+        };
+
+    // First, loop over materials. Face-specific actuators take precedence over legacy both-face actuators.
     for (auto *mat : s_mat->materials) {
         if (mat->group != Material::Group::Regular) {
             continue;
         }
-        mat->AbsorpSolarOut = mat->AbsorpSolarEMSOverrideOn ? max(min(mat->AbsorpSolarEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputOut;
-        mat->AbsorpThermalOut =
-            mat->AbsorpThermalEMSOverrideOn ? max(min(mat->AbsorpThermalEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputOut;
-        mat->AbsorpVisibleOut =
-            mat->AbsorpVisibleEMSOverrideOn ? max(min(mat->AbsorpVisibleEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputOut;
-        mat->AbsorpSolarIn = mat->AbsorpSolarEMSOverrideOn ? max(min(mat->AbsorpSolarEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputIn;
-        mat->AbsorpThermalIn = mat->AbsorpThermalEMSOverrideOn ? max(min(mat->AbsorpThermalEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputIn;
-        mat->AbsorpVisibleIn = mat->AbsorpVisibleEMSOverrideOn ? max(min(mat->AbsorpVisibleEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputIn;
+        mat->AbsorpSolarOut = getEMSOverrideValue(mat->AbsorpSolarInputOut,
+                                                  mat->AbsorpSolarEMSOverrideOn,
+                                                  mat->AbsorpSolarEMSOverride,
+                                                  mat->AbsorpSolarOutEMSOverrideOn,
+                                                  mat->AbsorpSolarOutEMSOverride);
+        mat->AbsorpThermalOut = getEMSOverrideValue(mat->AbsorpThermalInputOut,
+                                                    mat->AbsorpThermalEMSOverrideOn,
+                                                    mat->AbsorpThermalEMSOverride,
+                                                    mat->AbsorpThermalOutEMSOverrideOn,
+                                                    mat->AbsorpThermalOutEMSOverride);
+        mat->AbsorpVisibleOut = getEMSOverrideValue(mat->AbsorpVisibleInputOut,
+                                                    mat->AbsorpVisibleEMSOverrideOn,
+                                                    mat->AbsorpVisibleEMSOverride,
+                                                    mat->AbsorpVisibleOutEMSOverrideOn,
+                                                    mat->AbsorpVisibleOutEMSOverride);
+        mat->AbsorpSolarIn = getEMSOverrideValue(mat->AbsorpSolarInputIn,
+                                                 mat->AbsorpSolarEMSOverrideOn,
+                                                 mat->AbsorpSolarEMSOverride,
+                                                 mat->AbsorpSolarInEMSOverrideOn,
+                                                 mat->AbsorpSolarInEMSOverride);
+        mat->AbsorpThermalIn = getEMSOverrideValue(mat->AbsorpThermalInputIn,
+                                                   mat->AbsorpThermalEMSOverrideOn,
+                                                   mat->AbsorpThermalEMSOverride,
+                                                   mat->AbsorpThermalInEMSOverrideOn,
+                                                   mat->AbsorpThermalInEMSOverride);
+        mat->AbsorpVisibleIn = getEMSOverrideValue(mat->AbsorpVisibleInputIn,
+                                                   mat->AbsorpVisibleEMSOverrideOn,
+                                                   mat->AbsorpVisibleEMSOverride,
+                                                   mat->AbsorpVisibleInEMSOverrideOn,
+                                                   mat->AbsorpVisibleInEMSOverride);
     } // loop over materials
 
     // second, loop over constructions
@@ -9474,6 +9541,7 @@ void TestSurfTempCalcHeatBalanceInsideSurf(EnergyPlusData &state, Real64 TH12, i
         }
         if (!state.dataGlobal->WarmupFlag || WarmupSurfTemp > 10 || state.dataGlobal->DisplayExtraWarnings) {
             if (TH12 < DataHeatBalSurface::MinSurfaceTempLimit) {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureLowOutOfBounds)];
                 if (state.dataSurface->SurfLowTempErrCount(SurfNum) == 0) {
                     ShowSevereMessage(
                         state, std::format(R"(Temperature (low) out of bounds [{:.2f}] for zone="{}", for surface="{}")", TH12, zone.Name, surfName));
@@ -9517,6 +9585,7 @@ void TestSurfTempCalcHeatBalanceInsideSurf(EnergyPlusData &state, Real64 TH12, i
                                                   "C");
                 }
             } else {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureHighOutOfBounds)];
                 if (state.dataSurface->SurfHighTempErrCount(SurfNum) == 0) {
                     ShowSevereMessage(
                         state,
@@ -9575,6 +9644,7 @@ void TestSurfTempCalcHeatBalanceInsideSurf(EnergyPlusData &state, Real64 TH12, i
     if ((TH12 > state.dataHeatBalSurf->MaxSurfaceTempLimitBeforeFatal) || (TH12 < DataHeatBalSurface::MinSurfaceTempLimitBeforeFatal)) {
         if (!state.dataGlobal->WarmupFlag) {
             if (TH12 < DataHeatBalSurface::MinSurfaceTempLimitBeforeFatal) {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureLowOutOfBounds)];
                 ShowSevereError(
                     state, std::format(R"(Temperature (low) out of bounds [{:.2f}] for zone="{}", for surface="{}")", TH12, zone.Name, surfName));
                 ShowContinueErrorTimeStamp(state, "");
@@ -9600,6 +9670,7 @@ void TestSurfTempCalcHeatBalanceInsideSurf(EnergyPlusData &state, Real64 TH12, i
                 }
                 ShowFatalError(state, "Program terminates due to preceding condition.");
             } else {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureHighOutOfBounds)];
                 ShowSevereError(
                     state, std::format(R"(Temperature (high) out of bounds [{:.2f}] for zone="{}", for surface="{}")", TH12, zone.Name, surfName));
                 ShowContinueErrorTimeStamp(state, "");

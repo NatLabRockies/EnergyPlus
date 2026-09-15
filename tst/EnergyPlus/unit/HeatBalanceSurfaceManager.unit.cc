@@ -58,12 +58,14 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
@@ -231,11 +233,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     EXPECT_TRUE(compare_err_stream(error_string01, true));
     EXPECT_TRUE(testZone.TempOutOfBoundsReported);
 
+    auto forceReissuingCompleteErrorMessages = [this]() {
+        state->dataErrTracking->NumRecurringErrors = 0;
+        state->dataErrTracking->RecurringErrors.clear();
+        state->dataSurface->SurfLowTempErrCount(1) = 0;
+        state->dataSurface->SurfHighTempErrCount(1) = 0;
+    };
+
     // to hot - subsequent times
     surfTemp = 201;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = true;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -250,8 +258,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     // to cold - first time
     surfTemp = -101;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = false;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -270,8 +277,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     // to cold - subsequent times
     surfTemp = -101;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = true;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -8646,8 +8652,8 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
 
     ASSERT_TRUE(process_idf(idf_objects));
 
-    constexpr int numSurfaces = 5;
-    constexpr int numConstructions = 4;
+    constexpr int numSurfaces = 6;
+    constexpr int numConstructions = 5;
     state->dataSurface->TotSurfaces = numSurfaces;
     state->dataSurface->Surface.allocate(numSurfaces);
     state->dataSurface->SurfaceWindow.allocate(numSurfaces);
@@ -8670,6 +8676,8 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
         construction.LayerPoint.allocate(1);
         construction.LayerPoint(1) = constructionNum;
     }
+    state->dataConstruction->Construct(4).LayerPoint(1) = 5;
+    state->dataConstruction->Construct(5).LayerPoint(1) = 4;
 
     auto *bulkMaterial = new Material::MaterialBase;
     bulkMaterial->Name = "BULK MATERIAL";
@@ -8690,22 +8698,40 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
     dynamicSolarMaterial->absorpSolarVarCurveIn = &solarCurve;
     state->dataMaterial->materials.push_back(dynamicSolarMaterial);
 
+    auto *emsMaterial = new Material::MaterialBase;
+    emsMaterial->Name = "EMS MATERIAL";
+    emsMaterial->group = Material::Group::Regular;
+    state->dataMaterial->materials.push_back(emsMaterial);
+
     auto *windowMaterial = new Material::MaterialBase;
     windowMaterial->Name = "WINDOW MATERIAL";
     windowMaterial->group = Material::Group::Glass;
     state->dataMaterial->materials.push_back(windowMaterial);
     state->dataConstruction->Construct(4).TypeIsWindow = true;
 
+    state->dataRuntimeLang->numEMSActuatorsAvailable = 2;
+    state->dataRuntimeLang->EMSActuatorAvailable.allocate(2);
+    auto &thermalActuator = state->dataRuntimeLang->EMSActuatorAvailable(1);
+    thermalActuator.ComponentTypeName = "Material";
+    thermalActuator.UniqueIDName = emsMaterial->Name;
+    thermalActuator.ControlTypeName = "Surface Property Thermal Absorptance Inside Face";
+    thermalActuator.handleCount = 1;
+    auto &solarActuator = state->dataRuntimeLang->EMSActuatorAvailable(2);
+    solarActuator.ComponentTypeName = "Material";
+    solarActuator.UniqueIDName = emsMaterial->Name;
+    solarActuator.ControlTypeName = "Surface Property Solar Absorptance Outside Face";
+    solarActuator.handleCount = 1;
+
     std::array<std::string_view, numSurfaces> const surfaceNames = {
-        "BULK SURFACE", "EXPLICIT THERMAL SURFACE", "DYNAMIC SOLAR SURFACE", "INTERIOR DYNAMIC SOLAR SURFACE", "WINDOW SURFACE"};
-    std::array<int, numSurfaces> const constructionNumbers = {1, 2, 3, 3, 4};
+        "BULK SURFACE", "EXPLICIT THERMAL SURFACE", "DYNAMIC SOLAR SURFACE", "INTERIOR DYNAMIC SOLAR SURFACE", "EMS SURFACE", "WINDOW SURFACE"};
+    std::array<int, numSurfaces> const constructionNumbers = {1, 2, 3, 3, 5, 4};
     for (int surfaceNum = 1; surfaceNum <= numSurfaces; ++surfaceNum) {
         auto &surface = state->dataSurface->Surface(surfaceNum);
         surface.Name = surfaceNames[surfaceNum - 1];
         surface.Class = surfaceNum == numSurfaces ? DataSurfaces::SurfaceClass::Window : DataSurfaces::SurfaceClass::Wall;
         surface.HeatTransSurf = true;
         surface.Construction = constructionNumbers[surfaceNum - 1];
-        surface.ExtBoundCond = surfaceNum == numSurfaces - 1 ? 1 : DataSurfaces::ExternalEnvironment;
+        surface.ExtBoundCond = surfaceNum == 4 ? 1 : DataSurfaces::ExternalEnvironment;
     }
 
     AllocateSurfaceHeatBalArrays(*state);
@@ -8746,6 +8772,13 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
     EXPECT_FALSE(outputIsRegistered("INTERIOR DYNAMIC SOLAR SURFACE", "Surface Thermal Absorptance Inside Face"));
     EXPECT_FALSE(outputIsRegistered("INTERIOR DYNAMIC SOLAR SURFACE", "Surface Solar Absorptance Outside Face"));
     EXPECT_FALSE(outputIsRegistered("INTERIOR DYNAMIC SOLAR SURFACE", "Surface Solar Absorptance Inside Face"));
+
+    EXPECT_FALSE(outputIsRegistered("EMS SURFACE", "Surface Thermal Absorptance"));
+    EXPECT_FALSE(outputIsRegistered("EMS SURFACE", "Surface Solar Absorptance"));
+    EXPECT_TRUE(outputIsRegistered("EMS SURFACE", "Surface Thermal Absorptance Outside Face"));
+    EXPECT_TRUE(outputIsRegistered("EMS SURFACE", "Surface Thermal Absorptance Inside Face"));
+    EXPECT_TRUE(outputIsRegistered("EMS SURFACE", "Surface Solar Absorptance Outside Face"));
+    EXPECT_TRUE(outputIsRegistered("EMS SURFACE", "Surface Solar Absorptance Inside Face"));
 
     EXPECT_FALSE(outputIsRegistered("WINDOW SURFACE", "Surface Thermal Absorptance"));
     EXPECT_FALSE(outputIsRegistered("WINDOW SURFACE", "Surface Solar Absorptance"));

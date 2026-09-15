@@ -559,6 +559,16 @@ TEST_F(EnergyPlusFixture, HeatBalanceKiva_setupKivaInstances_ThermalComfort)
         "  ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "  Core_bottom DualSPSched; !- Control 1 Name",
         " ",
+        "ZoneControl:Thermostat:OperativeTemperature,",
+        "  Core_bottom Thermostat,  !- Thermostat Name",
+        "  Constant,                !- Radiative Fraction Input Mode",
+        "  0.4;                     !- Fixed Radiative Fraction",
+        " ",
+        "Output:Variable,",
+        "  *,                       !- Key Value",
+        "  Zone Thermostat Operative Temperature,  !- Variable Name",
+        "  Hourly;                  !- Reporting Frequency",
+        " ",
         "ZoneControl:Thermostat:ThermalComfort,",
         "  Core_bottom Comfort,     !- Name",
         "  Core_bottom,             !- Zone or ZoneList Name",
@@ -709,6 +719,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceKiva_setupKivaInstances_ThermalComfort)
     state->dataGlobal->TimeStep = 1;          // must initialize this to get schedules initialized
 
     state->files.inputWeatherFilePath.filePath = configured_source_directory() / "tst/EnergyPlus/unit/Resources/HeatBalanceKivaManagerOSkyTest.epw";
+    state->dataWeather->WeatherFileExists = true;
+    state->dataHeatBal->AnyKiva = true; // Exercise Kiva's early thermostat-input path
     HeatBalanceManager::GetHeatBalanceInput(*state);
     EXPECT_FALSE(has_err_output());
 }
