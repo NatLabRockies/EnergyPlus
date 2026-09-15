@@ -450,11 +450,11 @@ The minimum hot water or steam volumetric flow rate in m\(^{3}\)/s through the u
 The control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. The model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically, this is the fraction:
 
 \begin{equation}
-  \frac{\left| Q_{\rm{unit, out}} - Q_{\rm{zone load}} \right|}{Q_{\rm{zone load}}} \le \rm{ConvergenceTolerance}
+  \frac{\left| Q_{\mathrm{unit, out}} - Q_{\mathrm{zone load}} \right|}{Q_{\mathrm{zone load}}} \le \mathrm{ConvergenceTolerance}
 \end{equation}
 
 % \begin{equation}
-%   \frac{\left| Q_{\rm{PIU, out}} - Q_{\rm{zone load}} \right|}{Q_{\rm{zone load}}} \le \rm{ConvergenceTolerance}
+%   \frac{\left| Q_{\mathrm{PIU, out}} - Q_{\mathrm{zone load}} \right|}{Q_{\mathrm{zone load}}} \le \mathrm{ConvergenceTolerance}
 % \end{equation}
 
 The default is 0.001.

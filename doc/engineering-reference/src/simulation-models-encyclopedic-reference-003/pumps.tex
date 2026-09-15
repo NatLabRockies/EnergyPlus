@@ -202,7 +202,7 @@ FlowProvided = NumPumpsON*IndividualPumpFlowRate
 The simulation starts by turning ON all pumps in the group. The pumps are then turned OFF one at a time until the flow provided is less than the flow requested. Finally the last pump is turned back ON to meet the remaining flow (FlowDifference) requested. The flow rate of the last pump depends on the pump bank type. For constant speed headered pumps, the last pump runs at the nominal flow rate, thereby giving a final headered pump flow which is equal to or greater than the flow requested. In a variable speed headered pump the last pump runs at part load so that the flow provided matches the flow requested. The power of the headered pump is then calculated as
 
 \begin{equation}
-Power = (P{R_{FL}}{\rm{*N}}{}_{{\rm{FL}}} + {\rm{P}}{{\rm{R}}_{{\rm{PL}}}}{\rm{*}}{{\rm{N}}_{{\rm{PL}}}}{\rm{)*}}{{\rm{P}}_{{\rm{Nom}}}}{\rm{  }}
+Power = (P{R_{FL}}{\mathrm{*N}}{}_{{\mathrm{FL}}} + {\mathrm{P}}{{\mathrm{R}}_{{\mathrm{PL}}}}{\mathrm{*}}{{\mathrm{N}}_{{\mathrm{PL}}}}{\mathrm{)*}}{{\mathrm{P}}_{{\mathrm{Nom}}}}{\mathrm{  }}
 \end{equation}
 
 where:

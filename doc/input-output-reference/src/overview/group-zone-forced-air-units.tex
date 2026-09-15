@@ -1409,7 +1409,7 @@ The convergence tolerance for the unit heating output. This field allows the use
 The unit is controlled by matching the unit output to the zone demand. For units with water coils, the model must be numerically inverted to obtain a specified output. The heating convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {{Q_{unit{\kern 1pt} heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
+\frac{{\left| {{Q_{unit heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
 \end{equation}
 
 \paragraph{Field: Availability Manager List Name}\label{field-availability-manager-list-name-2}
@@ -2040,7 +2040,7 @@ This input field defines the convergence tolerance for the unit's cooling output
 The window air conditioner is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX coil is frequently non-linear, the air conditioner model must call the DX coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2640,7 +2640,7 @@ This numeric field defines the convergence tolerance for the unit's heating outp
 The heat pump is controlled by matching its sensible (temperature) heating output to the zone sensible load (demand). Because the performance of the DX heating coil is frequently non-linear, the heat pump model must call the DX heating coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The heating convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2671,7 +2671,7 @@ This numeric field defines the convergence tolerance for the unit's cooling outp
 The heat pump is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX cooling coil is frequently non-linear, the heat pump model must call the DX cooling coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.

@@ -29,3 +29,34 @@ macro( CREATE_DOC_TARGET SOURCE_FILENAME OUTPUT_FILENAME )
       )
   endif()
 endmacro()
+
+# Add custom command, target, and dependencies for the HTML rendering of a documentation file.
+# OUTPUT_DIRNAME becomes the directory name under html/ in the build tree, eg html/${OUTPUT_DIRNAME}/index.html
+macro( CREATE_HTML_DOC_TARGET SOURCE_FILENAME OUTPUT_DIRNAME )
+  add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/html/${OUTPUT_DIRNAME}/index.html
+    COMMAND ${CMAKE_COMMAND} -DPANDOC=${PANDOC} -DINNAME=${SOURCE_FILENAME} -DOUTNAME=${OUTPUT_DIRNAME}
+            -DHTML_ASSETS_DIR=${PROJECT_SOURCE_DIR}/html
+            -DORIGINAL_CMAKE_SOURCE_DIR=${PROJECT_SOURCE_DIR} -DORIGINAL_CMAKE_BINARY_DIR=${PROJECT_BINARY_DIR}
+            -DPython_EXECUTABLE=${Python_EXECUTABLE}
+            -P ${PROJECT_SOURCE_DIR}/cmake/BuildHtmlDocumentation.cmake
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${SOURCE_FILENAME}
+    DEPENDS ${INCLUDED_TEX} ${INCLUDED_IMAGES}
+            ${PROJECT_SOURCE_DIR}/cmake/BuildHtmlDocumentation.cmake
+            ${PROJECT_SOURCE_DIR}/cmake/build_search_index.py
+            ${PROJECT_SOURCE_DIR}/html/bootstrap-tables.lua
+            ${PROJECT_SOURCE_DIR}/html/numbered-cross-references.lua
+            ${PROJECT_SOURCE_DIR}/html/object-index.lua
+            ${PROJECT_SOURCE_DIR}/html/template_chunked.html
+            ${PROJECT_SOURCE_DIR}/html/header.html
+            ${PROJECT_SOURCE_DIR}/html/footer.html
+            ${PROJECT_SOURCE_DIR}/html/style.css
+    )
+
+  add_custom_target( zHTML_${OUTPUT_DIRNAME}
+    DEPENDS ${PROJECT_BINARY_DIR}/html/${OUTPUT_DIRNAME}/index.html
+    )
+
+  add_dependencies(html_docs zHTML_${OUTPUT_DIRNAME})
+
+  set_target_properties(zHTML_${OUTPUT_DIRNAME} PROPERTIES FOLDER Documentation)
+endmacro()

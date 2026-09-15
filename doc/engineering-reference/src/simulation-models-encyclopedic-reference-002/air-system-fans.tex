@@ -478,7 +478,7 @@ where \(\omega_{fan}\) is the fan speed (rad/s). This parameter can be calculate
 The following equation describes the sigmoidal functional form for normalized \(\varphi\):
 
 \begin{equation}
-\frac{{\varphi \left( {{x_{fan}}} \right)}}{{{\varphi_{\max }}}} = ({A_{spd}} + {B_{spd}}/({(1 + {e^{\left[ {{{({C_{spd}} - {x_{spd}})} \mathord{\left/ {\vphantom {{({C_{spd}} - {x_{spd}})} {{D_{spd}}}}} \right. } {{D_{spd}}}}} \right]}})^{{E_{spd}}}})
+\frac{{\varphi \left( {{x_{fan}}} \right)}}{{{\varphi_{\max }}}} = ({A_{spd}} + {B_{spd}}/({(1 + {e^{\left[ {{\frac{{({C_{spd}} - {x_{spd}})}}{{D_{spd}}}}} \right]}})^{{E_{spd}}}})
 \label{eq:SigmoidalFunctionalFormForNormalized}
 \end{equation}
 
@@ -920,7 +920,7 @@ H_{t,ref}=\frac{H_{i,ref}}{\eta_{trans,ref}}
 The reference fan motor efficiency is calculated according to Equation~\ref{eq:eta_mtr_calculation} using the coefficients A–E found in Table~\ref{table:reference-motor-efficiency-coefficients}:
 
 \begin{equation}
-\eta_{mtr,ref} = A\cdot[log_{10} (H_{t,ref})]^4 + B\cdot[log_{10} (H_{t,ref})]^3 +C\cdot[log_{10} (H_{t,ref})]^2 +D\cdot[log_{10} (H_{t,ref})]^1 + E
+\eta_{mtr,ref} = A\cdot[log_{10} (H_{t,ref})]^4 + B\cdot[log_{10} (H_{t,ref})]^3 +C\cdot[log_{10} (H_{t,ref})]^2 +D\cdot[log_{10} (H_{t,ref})]^1 + {E}
 \label{eq:eta_mtr_calculation}
 \end{equation}
 

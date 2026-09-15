@@ -158,3 +158,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/plant-application-guide/media/image127.png)
 
 create_doc_target("plant-application-guide" "PlantApplicationGuide")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("plant-application-guide" "plant-application-guide")
+endif()

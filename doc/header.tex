@@ -55,18 +55,6 @@
   keepspaces=true,
 }
 
-% An environment for describing variables in equations
-\newcommand*\wherelistlabel[1]{\ensuremath{#1 =}}
-\newenvironment{wherelist}
-  {\begin{list}
-    {}
-    {\addtolength{\leftmargin}{2em}
-     \setlength{\itemsep}{0pt}
-     \let\makelabel=\wherelistlabel
-    }
-  }
-{\end{list} }
-
 % Provide better table spacing
 % From https://www.inf.ethz.ch/personal/markusp/teaching/guides/guide-tables.pdf
 \renewcommand{\arraystretch}{1.2}

@@ -2195,7 +2195,7 @@ The symbols \textbar{}\textbar{}~ \textbar{}\textbar{} and Arg denote the modulu
 Assuming a homogeneous soil of constant thermal diffusivity, the temperature at any depth z and time t can be estimated by the following expression:
 
 \begin{equation}
-{T_{z,t}} = {T_m} - {A_s}\exp \left[ { - z{{\left( {\frac{\pi }{{{\rm{365}}{\alpha_s}}}} \right)}^{1/2}}} \right]\cos \left\{ {\frac{{2\pi }}{{{\rm{365}}}}\left[ {t - {t_0} - \frac{z}{2}{{\left( {\frac{{{\rm{365}}}}{{\pi {\alpha_s}}}} \right)}^{1/2}}} \right]} \right\}
+{T_{z,t}} = {T_m} - {A_s}\exp \left[ { - z{{\left( {\frac{\pi }{{{\mathrm{365}}{\alpha_s}}}} \right)}^{1/2}}} \right]\cos \left\{ {\frac{{2\pi }}{{{\mathrm{365}}}}\left[ {t - {t_0} - \frac{z}{2}{{\left( {\frac{{{\mathrm{365}}}}{{\pi {\alpha_s}}}} \right)}^{1/2}}} \right]} \right\}
 \end{equation}
 
 In this expression, the unit of time, \emph{t}, and phase constant of the soil surface, \(t_{0}\), should be converted into days. Similarly, the unit of soil thermal diffusivity, \({\alpha_{s}}\), should also be converted into m\(^{2}\)/days.
@@ -2219,15 +2219,15 @@ By using the values of thermal conductivity of air, \emph{k\(_{air}\)}, and kine
 \end{equation}
 
 \begin{equation}
-Nu = \frac{{({f_a}/2)({\mathop{\rm Re}\nolimits}  - 1000)\Pr }}{{1 + 12.7{{({f_a}/2)}^{1/2}}({{\Pr }^{2/3}} - 1)}}
+Nu = \frac{{({f_a}/2)(\operatorname{Re}  - 1000)\Pr }}{{1 + 12.7{{({f_a}/2)}^{1/2}}({{\Pr }^{2/3}} - 1)}}
 \end{equation}
 
 \begin{equation}
-{f_a} = {(1.58\ln {\mathop{\rm Re}\nolimits}  - 3.28)^{ - 2}}
+{f_a} = {(1.58\ln \operatorname{Re}  - 3.28)^{ - 2}}
 \end{equation}
 
 \begin{equation}
-  \mathop{\rm Re}\nolimits  = \frac{{2{r_1}{V_a}}}{\nu }
+  \mathop\mathrm{Re}\nolimits  = \frac{{2{r_1}{V_a}}}{\nu }
 \end{equation}
 
 \begin{equation}
@@ -2800,7 +2800,7 @@ It should be noted that to avoid excessive iteration that the zone mean air temp
 \textbf{\emph{Temperature Control}}.~ If the user selects temperature control, the intent is to limit the outlet temperature of the unit for either heating or cooling or both or perhaps to provide unconditioned air to the space.~ The algorithm used to determine the outlet temperature of the unit is as follows.~ When the outdoor air temperature is at or below the low air temperature control schedule value, the outlet temperature is set to the low air temperature control schedule value and any heating equipment included in the unit description and available will attempt to provide enough heating to produce an outlet temperature equal to the low temperature schedule value.~ When the outdoor air temperature is at or above the high air temperature control schedule value, the outlet temperature of the unit is set to the high air temperature control schedule value and any cooling equipment included in the unit description and available will attempt to provide enough cooling to produce an outlet air temperature equal to the high temperature schedule value.~ When the outdoor air temperature is between the high and low temperature values, the unit will not provide any conditioning of outdoor air and will simply deliver it to the zone.~ Mathematically, this can be summarized as:
 
 \begin{equation}
-{T_{out}} = \left\{ {\begin{array}{*{20}{c}}{{T_{high}}~~~~if~{T_{oa}} \ge {T_{high}}}\\ {{T_{oa}}~~~~if~{T_{low}} < {T_{oa}} < {T_{high}}}\\ {{T_{low}}~~~~if~{T_{oa}} \le {T_{low}}}\end{array}} \right.
+{T_{out}} = \left\{ {\begin{array}{ccc}{{T_{high}}~~~~if~{T_{oa}} \ge {T_{high}}}\\ {{T_{oa}}~~~~if~{T_{low}} < {T_{oa}} < {T_{high}}}\\ {{T_{low}}~~~~if~{T_{oa}} \le {T_{low}}}\end{array}} \right.
 \end{equation}
 
 where:
@@ -2832,7 +2832,7 @@ The fan flow rate is either constant or variable depending on if the user input 
 The exhaust fan model is similar to, but simpler than, the models used for air system fans.~ The electric power calculation is simplified and uses a constant overall efficiency.~ All of the fan power is added to the air stream.
 
 \begin{equation}
-{\dot Q_{fan}} = \frac{{\dot m{\rm{}}\Delta P}}{{{e_{tot}}{\rho_{air}}}}
+{\dot Q_{fan}} = \frac{{\dot m{\mathrm{}}\Delta P}}{{{e_{tot}}{\rho_{air}}}}
 \end{equation}
 
 \begin{equation}

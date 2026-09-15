@@ -30,3 +30,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/external-interfaces-application-guide/media/image037.png)
 
 create_doc_target("external-interfaces-application-guide" "ExternalInterfacesApplicationGuide")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("external-interfaces-application-guide" "external-interfaces-application-guide")
+endif()
