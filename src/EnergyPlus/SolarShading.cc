@@ -4948,6 +4948,18 @@ void CalcPerSolarBeam(EnergyPlusData &state,
     if (state.dataGlobal->KickOffSizing || state.dataGlobal->KickOffSimulation) {
         return; // Skip solar calcs for these Initialization steps.
     }
+    if (state.dataSolarShading->updateTSArraysFlag && state.dataGlobal->updateTSArrays) {
+        state.dataSolarShading->updateTSArraysFlag = false;
+        state.dataSolarShading->SurfWinRevealStatus.dimension(24, state.dataGlobal->TimeStepsInHour, state.dataSurface->TotSurfaces, 0);
+        state.dataHeatBal->SurfSunlitFrac.dimension(Constant::iHoursInDay, state.dataGlobal->TimeStepsInHour, state.dataSurface->TotSurfaces, 0.0);
+        state.dataHeatBal->SurfSunlitFracWithoutReveal.dimension(
+            Constant::iHoursInDay, state.dataGlobal->TimeStepsInHour, state.dataSurface->TotSurfaces, 0.0);
+        state.dataHeatBal->SurfWinBackSurfaces.dimension(
+            Constant::iHoursInDay, state.dataGlobal->TimeStepsInHour, state.dataBSDFWindow->MaxBkSurf, state.dataSurface->TotSurfaces, 0);
+        state.dataHeatBal->SurfWinOverlapAreas.dimension(
+            Constant::iHoursInDay, state.dataGlobal->TimeStepsInHour, state.dataBSDFWindow->MaxBkSurf, state.dataSurface->TotSurfaces, 0.0);
+        state.dataHeatBal->SurfCosIncAng.dimension(Constant::iHoursInDay, state.dataGlobal->TimeStepsInHour, state.dataSurface->TotSurfaces, 0.0);
+    }
 
 #ifdef EP_Count_Calls
     ++state.dataTimingsData->NumCalcPerSolBeam_Calls;

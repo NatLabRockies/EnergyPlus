@@ -929,6 +929,8 @@ struct WeatherManagerData : BaseGlobalStruct
     // ProcessEPWHeader static vars
     std::string EPWHeaderTitle;
 
+    bool updateTSArraysFlag = true; // True if the TS data arrays need to be updated
+
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
