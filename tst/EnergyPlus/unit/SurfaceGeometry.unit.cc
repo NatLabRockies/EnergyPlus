@@ -5829,6 +5829,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     // SetupZoneGeometry calls SurfaceGeometry::SetupSolarEnclosuresAndAirBoundaries
     // SetupZoneGeometry calls SurfaceGeometry::SetupRadiantEnclosuresAndAirBoundaries
     EXPECT_FALSE(ErrorsFound); // expect no errors
+    state->dataHeatBalSurf->SurfAbsThermalInt.dimension(state->dataSurface->TotSurfaces, 0.9);
     HeatBalanceIntRadExchange::InitSolarViewFactors(*state);
     HeatBalanceIntRadExchange::InitInteriorRadExchange(*state);
 
@@ -5888,7 +5889,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     // Check MRT calculations
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(3);
     state->dataZoneTempPredictorCorrector->spaceHeatBalance.allocate(3);
-    state->dataHeatBalSurf->SurfTempIn.allocate(7);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(7);
     auto &zoneHB1 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(1);
     auto &zoneHB2 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(2);
     auto &zoneHB3 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(3);
@@ -5899,11 +5900,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     auto &encl2 = state->dataViewFactor->EnclRadInfo(2);
 
     // Case 1 - all surfaces the same temperature
-    state->dataHeatBalSurf->SurfTempIn(Zone1Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone1Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone3Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone3Floor) = 10.0;
 
     HeatBalanceSurfaceManager::CalculateZoneMRT(*state);
     EXPECT_NEAR(zoneHB1.MRT, 10.0, 0.001);
@@ -5916,11 +5917,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     EXPECT_EQ(spaceHB3.MRT, encl1.MRT);
 
     // Case 2 - all surfaces in each zone same temperature
-    state->dataHeatBalSurf->SurfTempIn(Zone1Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Surface1) = 20.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone1Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Floor) = 20.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone3Floor) = 30.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Surface1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Floor) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone3Floor) = 30.0;
 
     HeatBalanceSurfaceManager::CalculateZoneMRT(*state);
     EXPECT_NEAR(zoneHB1.MRT, 10.0, 0.001);

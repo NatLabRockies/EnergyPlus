@@ -337,7 +337,7 @@ namespace Convect {
 
     Real64 SetExtConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
 
-    Real64 SetIntConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
+    Real64 SetIntConvCoeff(EnergyPlusData &state, int SurfNum, Real64 SurfaceTemperature);
 
     Real64 CalcISO15099WindowIntConvCoeff(EnergyPlusData &state,
                                           Real64 SurfaceTemperature, // Temperature of surface for evaluation of HcIn
@@ -358,12 +358,12 @@ namespace Convect {
 
     void SetupAdaptiveConvRadiantSurfaceData(EnergyPlusData &state);
 
-    void ManageIntAdaptiveConvAlgo(EnergyPlusData &state, int SurfNum); // surface number for which coefficients are being calculated
+    void ManageIntAdaptiveConvAlgo(EnergyPlusData &state, int SurfNum, const Array1D<Real64> &SurfaceTemperatures);
 
     Real64 ManageExtAdaptiveConvAlgo(EnergyPlusData &state,
                                      int SurfNum); // surface number for which coefficients are being calculated
 
-    Real64 EvaluateIntHcModels(EnergyPlusData &state, int SurfNum, HcInt ConvModelEquationNum);
+    Real64 EvaluateIntHcModels(EnergyPlusData &state, int SurfNum, HcInt ConvModelEquationNum, Real64 SurfaceTemperature);
 
     Real64 EvaluateExtHcModels(EnergyPlusData &state, int SurfNum, HcExt NaturalConvModelEqNum, HcExt ForcedConvModelEqNum);
 
@@ -371,11 +371,11 @@ namespace Convect {
 
     void MapExtConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface number
 
-    void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int SurfNum); // surface number
+    void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int SurfNum, const Array1D<Real64> &SurfaceTemperatures);
 
     void MapIntConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface pointer index
 
-    Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
+    Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum, Real64 SurfaceTemperature);
 
     Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
 

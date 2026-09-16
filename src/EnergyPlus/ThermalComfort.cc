@@ -2086,10 +2086,9 @@ namespace ThermalComfort {
         auto &thisAngFacList(state.dataThermalComforts->AngleFactorList(AngleFacNum));
 
         for (int SurfNum = 1; SurfNum <= thisAngFacList.TotAngleFacSurfaces; ++SurfNum) {
-            Real64 SurfaceTemp = state.dataHeatBalSurf->SurfInsideTempHist(1)(thisAngFacList.SurfacePtr(SurfNum)) + Constant::Kelvin;
-            Real64 SurfEAF =
-                state.dataConstruction->Construct(state.dataSurface->Surface(thisAngFacList.SurfacePtr(SurfNum)).Construction).InsideAbsorpThermal *
-                thisAngFacList.AngleFactor(SurfNum);
+            int const surfaceNum = thisAngFacList.SurfacePtr(SurfNum);
+            Real64 SurfaceTemp = state.dataHeatBalSurf->SurfTempInTmp(surfaceNum) + Constant::Kelvin;
+            Real64 SurfEAF = state.dataHeatBalSurf->SurfAbsThermalInt(surfaceNum) * thisAngFacList.AngleFactor(SurfNum);
             SurfTempEmissAngleFacSummed += SurfEAF * pow_4(SurfaceTemp);
             SumSurfaceEmissAngleFactor += SurfEAF;
         }
@@ -2121,7 +2120,7 @@ namespace ThermalComfort {
             for (auto const &thisRadEnclosure : state.dataViewFactor->EnclRadInfo) {
                 for (int const SurfNum2 : thisRadEnclosure.SurfacePtr) {
                     auto &thisSurface2 = state.dataSurface->Surface(SurfNum2);
-                    thisSurface2.AE = thisSurface2.Area * state.dataConstruction->Construct(thisSurface2.Construction).InsideAbsorpThermal;
+                    thisSurface2.AE = thisSurface2.Area * state.dataHeatBalSurf->SurfAbsThermalInt(SurfNum2);
                 }
                 // Do NOT include the contribution of the Surface that is being surface weighted in this calculation since it will already be
                 // accounted for
@@ -2144,27 +2143,20 @@ namespace ThermalComfort {
 
         auto &thisSurface = state.dataSurface->Surface(SurfNum);
         auto &thisRadEnclosure = state.dataViewFactor->EnclRadInfo(thisSurface.RadEnclIndex);
-        // Recalc SurfaceEnclAESum only if needed due to window shades or EMS
-        if (thisRadEnclosure.radReCalc) {
-            thisSurface.enclAESum = 0.0;
-            for (int const SurfNum2 : thisRadEnclosure.SurfacePtr) {
-                if (SurfNum2 == SurfNum) {
-                    continue;
-                }
-                auto &thisSurface2 = state.dataSurface->Surface(SurfNum2);
-                thisSurface2.AE = thisSurface2.Area * state.dataConstruction->Construct(thisSurface2.Construction).InsideAbsorpThermal;
-                thisSurface.enclAESum += thisSurface2.AE;
-            }
-        }
+        // Recalculate each call because movable insulation and EMS can change zone-facing emissivity.
+        thisSurface.enclAESum = 0.0;
         for (int const SurfNum2 : thisRadEnclosure.SurfacePtr) {
             if (SurfNum2 == SurfNum) {
                 continue;
             }
-            sumAET += state.dataSurface->Surface(SurfNum2).AE * state.dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum2);
+            auto &thisSurface2 = state.dataSurface->Surface(SurfNum2);
+            thisSurface2.AE = thisSurface2.Area * state.dataHeatBalSurf->SurfAbsThermalInt(SurfNum2);
+            thisSurface.enclAESum += thisSurface2.AE;
+            sumAET += thisSurface2.AE * state.dataHeatBalSurf->SurfTempInTmp(SurfNum2);
         }
 
         // Now weight the MRT
-        auto &thisSurfaceTemp = state.dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum);
+        auto &thisSurfaceTemp = state.dataHeatBalSurf->SurfTempInTmp(SurfNum);
         if (thisSurface.enclAESum > 0.01) {
             CalcSurfaceWeightedMRT = sumAET / thisSurface.enclAESum;
             // if averaged with surface--half comes from the surface used for weighting (SurfNum) and the rest from the calculated MRT that excludes
