@@ -2899,6 +2899,9 @@ ModuleResult CentralHeatPumpSystem::solveSimultaneous(EnergyPlusData &state,
     Real64 condenserInletTemp = heatingInletTemp;
     Real64 condenserOutletTemp = heatingInletTemp;
     Real64 condenserMassFlowRate = 0.0;
+    Real64 temperatureRelaxation = 0.5;
+    std::array<Real64, 3> previousTemperatureResiduals{};
+    bool havePreviousTemperatureResiduals = false;
 
     for (int iteration = 0; iteration < maxOuterSolverIterations; ++iteration) {
         result.solver.outerIterations = iteration + 1;
@@ -2988,10 +2991,19 @@ ModuleResult CentralHeatPumpSystem::solveSimultaneous(EnergyPlusData &state,
             coolingMassFlowRate = coolingDelivered > HVAC::SmallLoad ? maximumCoolingMassFlowRate : 0.0;
             heatingMassFlowRate = heatingDelivered > HVAC::SmallLoad ? maximumHeatingMassFlowRate : 0.0;
         }
+        // Keep variable source flow continuous with residual source load so the blended curve temperatures do not jump at heat recovery.
         if (sourceExtraction > HVAC::SmallLoad) {
-            sourceMassFlowRate = maximumSourceEvaporatorMassFlowRate;
+            if (this->allModulesVariableFlow && sourceExtractionCapacity > HVAC::SmallLoad) {
+                sourceMassFlowRate = maximumSourceEvaporatorMassFlowRate * min(1.0, sourceExtraction / sourceExtractionCapacity);
+            } else {
+                sourceMassFlowRate = maximumSourceEvaporatorMassFlowRate;
+            }
         } else if (sourceRejection > HVAC::SmallLoad) {
-            sourceMassFlowRate = maximumSourceCondenserMassFlowRate;
+            if (this->allModulesVariableFlow && qCondenser > HVAC::SmallLoad) {
+                sourceMassFlowRate = maximumSourceCondenserMassFlowRate * min(1.0, sourceRejection / qCondenser);
+            } else {
+                sourceMassFlowRate = maximumSourceCondenserMassFlowRate;
+            }
         } else {
             sourceMassFlowRate = 0.0;
         }
@@ -3021,9 +3033,11 @@ ModuleResult CentralHeatPumpSystem::solveSimultaneous(EnergyPlusData &state,
             condenserOutletTemp = (heatingMassFlowRate * heatingOutletTemp + condenserSourceMassFlowRate * sourceOutletTemp) / condenserMassFlowRate;
         }
 
-        Real64 const temperatureResidual = max({std::abs(evaporatorOutletTemp - evaporatorCurveTempGuess),
-                                                std::abs(condenserInletTemp - condenserEnteringTempGuess),
-                                                std::abs(condenserOutletTemp - condenserLeavingTempGuess)});
+        std::array<Real64, 3> const temperatureResiduals = {evaporatorOutletTemp - evaporatorCurveTempGuess,
+                                                            condenserInletTemp - condenserEnteringTempGuess,
+                                                            condenserOutletTemp - condenserLeavingTempGuess};
+        Real64 const temperatureResidual =
+            max({std::abs(temperatureResiduals[0]), std::abs(temperatureResiduals[1]), std::abs(temperatureResiduals[2])});
         result.solver.temperatureResidual = temperatureResidual;
         if (!std::isfinite(temperatureResidual)) {
             result.solver.outerStatus = SolverConvergenceStatus::Invalid;
@@ -3033,9 +3047,28 @@ ModuleResult CentralHeatPumpSystem::solveSimultaneous(EnergyPlusData &state,
             result.solver.outerStatus = SolverConvergenceStatus::Converged;
             break;
         }
-        Real64 const nextEvaporatorCurveTempGuess = 0.5 * (evaporatorCurveTempGuess + evaporatorOutletTemp);
-        Real64 const nextCondenserEnteringTempGuess = 0.5 * (condenserEnteringTempGuess + condenserInletTemp);
-        Real64 const nextCondenserLeavingTempGuess = 0.5 * (condenserLeavingTempGuess + condenserOutletTemp);
+        // Vector Aitken relaxation accelerates slow coupling and damps oscillatory temperature updates.
+        if (havePreviousTemperatureResiduals) {
+            std::array<Real64, 3> const residualChange = {temperatureResiduals[0] - previousTemperatureResiduals[0],
+                                                          temperatureResiduals[1] - previousTemperatureResiduals[1],
+                                                          temperatureResiduals[2] - previousTemperatureResiduals[2]};
+            Real64 const residualChangeMagnitudeSquared =
+                residualChange[0] * residualChange[0] + residualChange[1] * residualChange[1] + residualChange[2] * residualChange[2];
+            if (residualChangeMagnitudeSquared > 0.0) {
+                Real64 const previousResidualProjection = previousTemperatureResiduals[0] * residualChange[0] +
+                                                          previousTemperatureResiduals[1] * residualChange[1] +
+                                                          previousTemperatureResiduals[2] * residualChange[2];
+                Real64 const acceleratedRelaxation = -temperatureRelaxation * previousResidualProjection / residualChangeMagnitudeSquared;
+                if (std::isfinite(acceleratedRelaxation) && acceleratedRelaxation > 0.0) {
+                    temperatureRelaxation = std::clamp(acceleratedRelaxation, 0.01, 1.0);
+                } else {
+                    temperatureRelaxation = max(0.01, 0.5 * temperatureRelaxation);
+                }
+            }
+        }
+        Real64 const nextEvaporatorCurveTempGuess = evaporatorCurveTempGuess + temperatureRelaxation * temperatureResiduals[0];
+        Real64 const nextCondenserEnteringTempGuess = condenserEnteringTempGuess + temperatureRelaxation * temperatureResiduals[1];
+        Real64 const nextCondenserLeavingTempGuess = condenserLeavingTempGuess + temperatureRelaxation * temperatureResiduals[2];
         if (nextEvaporatorCurveTempGuess == evaporatorCurveTempGuess && nextCondenserEnteringTempGuess == condenserEnteringTempGuess &&
             nextCondenserLeavingTempGuess == condenserLeavingTempGuess) {
             result.solver.outerStatus = SolverConvergenceStatus::Stagnated;
@@ -3044,6 +3077,8 @@ ModuleResult CentralHeatPumpSystem::solveSimultaneous(EnergyPlusData &state,
         evaporatorCurveTempGuess = nextEvaporatorCurveTempGuess;
         condenserEnteringTempGuess = nextCondenserEnteringTempGuess;
         condenserLeavingTempGuess = nextCondenserLeavingTempGuess;
+        previousTemperatureResiduals = temperatureResiduals;
+        havePreviousTemperatureResiduals = true;
     }
 
     if (result.solver.outerStatus == SolverConvergenceStatus::NotRequired && result.solver.outerIterations == maxOuterSolverIterations) {

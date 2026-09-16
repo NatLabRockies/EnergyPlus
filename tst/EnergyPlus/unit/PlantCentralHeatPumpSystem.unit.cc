@@ -1936,6 +1936,19 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_SingleModeSolversUseFinalSt
         "  -100.0,",
         "  100.0;",
 
+        "Curve:Biquadratic,",
+        "  Evaporator Temperature Capacity Modifier,",
+        "  0.56,",
+        "  0.05,",
+        "  0.0,",
+        "  0.0,",
+        "  0.0,",
+        "  0.0,",
+        "  -100.0,",
+        "  100.0,",
+        "  -100.0,",
+        "  100.0;",
+
         "Curve:Quadratic,",
         "  Linear Part Load EIR,",
         "  0.0,",
@@ -2101,6 +2114,7 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_SingleModeSolversUseFinalSt
     EXPECT_NEAR(1000.0, simultaneousResult.coolingDelivered, 1.0e-6);
     EXPECT_NEAR(600.0, simultaneousResult.heatingDelivered, 1.0e-6);
     EXPECT_NEAR(600.0, simultaneousResult.sourceHeatTransfer, 1.0e-6);
+    EXPECT_NEAR(0.5, simultaneousResult.sourceMassFlowRate, 1.0e-9);
     EXPECT_GT(simultaneousResult.capacityCurveCondenserTemp, 15.0);
     EXPECT_LT(simultaneousResult.capacityCurveCondenserTemp, 40.0);
     EXPECT_NEAR(0.0, simultaneousResult.moduleEnergyBalanceResidual(), 1.0e-9);
@@ -2124,8 +2138,8 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_SingleModeSolversUseFinalSt
     EXPECT_NEAR(500.0, simultaneousResult.coolingDelivered, 1.0e-6);
     EXPECT_NEAR(1200.0, simultaneousResult.heatingDelivered, 1.0e-6);
     EXPECT_NEAR(-500.0, simultaneousResult.sourceHeatTransfer, 1.0e-6);
-    EXPECT_GT(simultaneousResult.capacityCurveEvaporatorTemp, 7.0);
-    EXPECT_LT(simultaneousResult.capacityCurveEvaporatorTemp, 15.0);
+    EXPECT_GT(simultaneousResult.capacityCurveEvaporatorTemp, performance1.minimumEvaporatorOutletTemp);
+    EXPECT_LT(simultaneousResult.capacityCurveEvaporatorTemp, 7.0);
     EXPECT_NEAR(0.0, simultaneousResult.moduleEnergyBalanceResidual(), 1.0e-9);
     EXPECT_NEAR(0.0, simultaneousResult.routingEnergyBalanceResidual(), 1.0e-9);
     EXPECT_EQ(PlantCentralHeatPumpSystem::SolverConvergenceStatus::Converged, simultaneousResult.solver.outerStatus);
@@ -2136,6 +2150,22 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_SingleModeSolversUseFinalSt
     EXPECT_LE(simultaneousResult.solver.partLoadBracketWidth, 1.0e-12);
     EXPECT_LE(simultaneousResult.solver.loadResidual, 1.0e-7);
     EXPECT_GT(simultaneousResult.solver.curveEvaluations, 0);
+
+    int const constantHeatingCapacityCurveIndex = performance1.heatingCapacityTemperatureCurveIndex;
+    performance1.heatingCapacityTemperatureCurveIndex = Curve::GetCurveIndex(*state, "EVAPORATOR TEMPERATURE CAPACITY MODIFIER");
+    ASSERT_GT(performance1.heatingCapacityTemperatureCurveIndex, 0);
+    simultaneousResult = system.solveSimultaneous(*state, 0, 9000.0, 20000.0, 1.0, 1.0, 1.0, 12.0, 40.0, 5.2);
+    Real64 const boundarySourceCp = sourceGlycol->getSpecificHeat(*state, 5.2, "PlantCentralHeatPumpSystem solver test");
+    EXPECT_EQ(CurrentMode::HeatingDominant, simultaneousResult.currentMode);
+    EXPECT_EQ(PlantCentralHeatPumpSystem::SolverConvergenceStatus::Converged, simultaneousResult.solver.outerStatus);
+    EXPECT_LT(simultaneousResult.sourceHeatTransfer, -HVAC::SmallLoad);
+    EXPECT_GT(simultaneousResult.sourceMassFlowRate, 0.0);
+    EXPECT_LT(simultaneousResult.sourceMassFlowRate, 1.0);
+    EXPECT_NEAR(-simultaneousResult.sourceHeatTransfer, simultaneousResult.sourceMassFlowRate * boundarySourceCp * (5.2 - 5.0), 1.0e-6);
+    EXPECT_NEAR(5.0, simultaneousResult.sourceOutletTemp, 1.0e-9);
+    EXPECT_NEAR(0.0, simultaneousResult.moduleEnergyBalanceResidual(), 1.0e-9);
+    EXPECT_NEAR(0.0, simultaneousResult.routingEnergyBalanceResidual(), 1.0e-9);
+    performance1.heatingCapacityTemperatureCurveIndex = constantHeatingCapacityCurveIndex;
 
     system.allModulesVariableFlow = false;
     performance1.heatingCondenserTemperatureMode = PlantCentralHeatPumpSystem::CondenserTemperatureMode::LeavingCondenser;
