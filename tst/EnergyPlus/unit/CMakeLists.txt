@@ -209,7 +209,7 @@ set(test_src
     Pipes.unit.cc
     Plant/Branch.unit.cc
     Plant/Subcomponent.unit.cc
-    PlantCentralGSHP.unit.cc
+    PlantCentralHeatPumpSystem.unit.cc
     PlantChillers.unit.cc
     PlantComponentTemperatureSources.unit.cc
     PlantCondLoopOperation.unit.cc

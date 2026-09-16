@@ -199,7 +199,7 @@ enum class PlantEquipmentType
     GrndHtExchgHorizTrench,
     FluidToFluidPlantHtExchg,
     WaterSource,
-    CentralGroundSourceHeatPump,
+    CentralHeatPumpSystem,
     UnitarySysRecovery,
     PackagedTESCoolingCoil,
     CoolingTower_VarSpdMerkel,

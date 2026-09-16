@@ -1,153 +1,82 @@
-\section{CentralHeatPumpSystem }\label{centralheatpumpsystem}
+\section{CentralHeatPumpSystem }
+\label{centralheatpumpsystem}
 
-\subsection{Overview}\label{overview-007}
+\subsection{Overview}
+\label{overview-007}
 
-The CentralHeatPumpSystem object simulates the performance of a central heat pump system containing one or more chiller-heater objects. The main function of the object is to call relevant calculation methods for the chiller-heater objects depending on their operating modes, and to calculate temperatures at the outlet nodes and the total energy transfer. The object can be connected to plant loops and a source loop (see Input-Output Reference document), and the node connections are solely dependent on individual chiller-heaters' operating modes. The central system receives water flows from each plant and source loop and then distributes them to individual chiller-heaters as requested. The conditioned water flows leaving the chiller-heaters are then returned to the system, and in turn flow back to the plant loops and source loop to produce heating and cooling, or exchange heat with the source loop.
+The \emph{CentralHeatPumpSystem} object represents a bank of one or more \emph{ChillerHeaterPerformance:Electric:EIR} modules connected to chilled-water, hot-water, and source plant loops. The wrapper receives the three loop flows, stages available modules, allocates the remaining load and flow to each module, mixes module and bypass outlet streams, and reports the assembled useful loads, source transfer, and electric consumption.
 
-\subsection{Model Description}\label{model-description-004}
+The source connection may serve either side of the refrigerant cycle. It receives condenser heat during cooling-dominant operation and supplies evaporator heat during heating-dominant operation. In simultaneous operation a single module can exchange heat with all three loops; the source receives only the residual after useful heat recovery.
 
-The model first determines operating modes based on the cooling and heating loads on the system, and then decides which calculation algorithm is called. It calls the cooling calculation subroutine when cooling load is demanded, the heating calculation subroutine when heating load is demanded, and both cooling and heating calculation subroutines when both cooling and heating loads are demanded, i.e., simultaneous cooling-heating mode. It then calculates mass-weighed temperatures and heat transfer energy. Six different operating modes (0 through 5) are possible:
+\subsection{Operating Modes and Sequential Dispatch}
+\label{operating-modes-and-sequential-dispatch}
 
-0: off
+Six reported operating states are possible:
 
-1: cooling-only mode
+\begin{itemize}
+\item Mode 0: off.
+\item Mode 1: cooling only.
+\item Mode 2: heating only.
+\item Mode 3: balanced heat recovery with no source transfer.
+\item Mode 4: cooling-dominant simultaneous cooling and heating, with residual heat rejected to the source.
+\item Mode 5: heating-dominant simultaneous cooling and heating, with residual heat extracted from the source.
+\end{itemize}
 
-2: heating-only mode
+The wrapper caches the current cooling and heating requests from the two load-side plant connections. A single-mode solver is used when only one request is active. When both are active, the simultaneous solver resolves one refrigerant-cycle result and explicitly routes it among all three connections. Results are independent of whether the cooling or heating plant loop supplies the second request.
 
-3: heat recovery mode
+Modules are staged sequentially in the order entered. Each module schedule controls its availability. After a module is solved, its useful cooling and heating are subtracted from the remaining loads, and its actual connection flows are subtracted from the remaining wrapper flows. A later module therefore cannot consume load or flow already assigned to an earlier one. Different module capacities, performance curves, schedules, and design flows are retained when a bank is heterogeneous.
 
-4: cooling dominant simultaneous cooling-heating mode
+The mode of each simultaneous module and the cooling- or heating-dominant state of the wrapper are based on signed source heat transfer, not on a reference capacity ratio. Source heat transfer is positive when heat is rejected to the source and negative when heat is extracted from the source.
 
-5: heating dominant simultaneous cooling-heating mode.
+\subsection{Thermodynamic and Routing Balance}
+\label{thermodynamic-and-routing-balance}
 
-The model reads different node information over the operating mode so that outlet water conditions at each node of the system can be appropriately determined.
-
-In cooling-only mode (mode 1), the system is connected to the chilled water loop and source loop. It thus reads the evaporator outlet temperatures and mass flow rates of the chiller-heaters to calculate a mass-weighed chilled water temperature at the system outlet node, and the condenser outlet temperatures and mass flow rates of the chiller-heaters to calculate a mass-weighed source water temperature at the system outlet node. In heating-only mode (mode 2), the system is connected to the hot water loop and source loop. It thus reads the condenser temperatures and mass flow rates of the chiller-heaters to calculate a mass-weighed hot water temperature at the system outlet node, and the evaporator temperatures and mass flow rates of the chiller-heaters to calculate a mass-weighed source temperature at the system outlet node.
-
-In simultaneous cooling-heating mode, three different operating modes (mode 3 through 5) are possible. The model checks which simultaneous cooling-heating mode (3, 4, or 5) each chiller-heater is in, and calculates relevant mass-weighed temperatures. The system may be connected to three loops such as chilled water loop, hot water loop, and source water loop in mode 4 or mode 5.
-
-In heat recovery mode, both evaporator temperatures and condenser temperatures are read and a mass-weighed temperature for both chilled water and hot water is calculated. The chiller-heaters in mode 3 do not exchange heat with source water. At least one of the chiller-heaters within the system is in heat recovery mode during simultaneous cooling-heating mode. The system may be only connected to both chilled water loop and hot water loop if all operating chiller-heaters are in heat recovery mode.
-
-The following nomenclature is used in the equations for this model shown below:
-
-\({\dot m_{cw,bypass}}\) is the chilled water bypass mass flow rate in the system (kg/s)
-
-\({\dot m_{hw,bypass}}\) is the hot water bypass mass flow rate in the system (kg/s)
-
-\({\dot m_{src,bypass}}\) is the source water bypass mass flow rate in the system (kg/s)
-
-\({\dot m_{cw,CH}}\) is the chilled water mass flow rate of i\(^{th}\) chiller-heater's evaporator {[}kg/s{]}
-
-\({\dot m_{hw,CH}}\) is the hot water mass flow rate of i\(^{th}\) chiller-heater's condenser (kg/s)
-
-\({\dot m_{src,CH}}\) is the source water mass flow rate of i\(^{th}\) chiller-heater, which varies with operating modes (kg/s)
-
-\({\dot m_{cw,sys}}\) is the chilled water mass flow rate of the system (kg/s)
-
-\({\dot m_{hw,sys}}\) is the hot water mass flow rate of the system (kg/s)
-
-\({\dot m_{src,sys}}\) is the source water mass flow rate of the system (kg/s)
-
-\({T_{cw,sys}}\) is the chilled water outlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{hw,sys}}\) is the hot water outlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{src,sys}}\) is the source water outlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{cw,bypass}}\) is the mass-weighed bypass chilled water temperature in the system (\(^{\circ}\)C)
-
-\({T_{hw,bypass}}\) is the mass-weighed bypass hot water temperature in the system (\(^{\circ}\)C)
-
-\({T_{src,bypass}}\) is the mass-weighed bypass source water temperature in the system (\(^{\circ}\)C)
-
-\({T_{cw,CH}}\) is the mass-weighed chilled water outlet temperature from chiller-heaters (\(^{\circ}\)C)
-
-\({T_{hw,CH}}\) is the mass-weighed hot water outlet temperature from chiller-heaters (\(^{\circ}\)C)
-
-\({T_{src,CH}}\) is the mass-weighed source water outlet temperature from chiller-heaters (\(^{\circ}\)C)
-
-\({T_{cw,i}}\) is the chilled water inlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{hw,i}}\) is the hot water inlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{src,i}}\) is the source water inlet temperature of the system (\(^{\circ}\)C)
-
-\({T_{cw,out}}\) is the chilled water outlet temperature of i\(^{th}\) chiller-heater (\(^{\circ}\)C)
-
-\({T_{hw,out}}\) is the hot water outlet temperature of i\(^{th}\) chiller-heater (\(^{\circ}\)C)
-
-\({T_{src,out}}\) is the source water outlet temperature of i\(^{th}\) chiller-heater (\(^{\circ}\)C).
-
-The model reads node information and local variables of individual chiller-heaters. The nodes and local variables vary with the operating modes as described above in order to calculate mass-weighed temperatures. In the cooling-only mode, it calculates a mass-weighed chilled water temperature (\emph{T\(_{cw,CH}\)}) and a source water temperature (\emph{T\(_{src,CH}\)}) as follows:
+For each active module, compressor power delivered to the refrigerant, evaporator heat, false load, and condenser heat satisfy
 
 \begin{equation}
-{T_{cw,CH}} = \sum\limits_{CH = 1}^n {{T_{cw,out}}} \frac{{{{\dot m}_{cw,CH}}}}{{{m_{cw,sys}}}}
+\dot Q_{cond}=\dot Q_{evap}+\dot Q_{false}+\eta_{motor}P.
 \end{equation}
+
+The module result is then routed without altering those thermodynamic quantities. With the source sign convention above, every mode satisfies
 
 \begin{equation}
-{T_{src,CH}} = \sum\limits_{CH = 1}^n {{T_{src,out}}} \frac{{{{\dot m}_{src,CH}}}}{{{m_{src,sys}}}}
+\dot Q_{heat}+\dot Q_{source}=\dot Q_{cool}+\dot Q_{false}+\eta_{motor}P.
 \end{equation}
 
-In heating-only mode, it calculates a mass-weighed hot water temperature (\emph{T\(_{hw,CH}\)}) and a source water temperature (\emph{T\(_{src,CH}\)}) as follows:
+Cooling-only operation routes evaporator heat to chilled water and all condenser heat to the source. Heating-only operation routes all condenser heat to hot water and extracts evaporator heat from the source. In mode 3, chilled water receives the useful evaporator result and hot water receives the complete condenser result. In mode 4, hot water receives its requested useful heat and the rest of the condenser result goes to the source. In mode 5, chilled water retains its useful cooling while the source supplies the remaining evaporator heat required to produce the hot-water result.
+
+The wrapper reports the sums of module useful cooling, useful heating, signed source heat transfer, and compressor electric power. Ancillary power is added once according to its schedule. Heating-only and heating-dominant operation assign ancillary power to the heating end use; the remaining active modes assign it to cooling. A blank ancillary schedule means continuously available. All runtime values and cached simultaneous results are cleared when the plant does not run the component.
+
+\subsection{Connection Flow and Outlet Mixing}
+\label{connection-flow-and-outlet-mixing}
+
+The chilled-water connection uses each module's evaporator design flow, the hot-water connection uses its explicit hot-water design flow, and the source connection allows the larger of its source-extraction and source-rejection design flows. Each heat exchanger uses density and specific heat from its connected plant loop, so a glycol source loop is not evaluated with chilled-water or hot-water properties.
+
+If every module performance object in a wrapper specifies variable flow, the wrapper operates as variable flow. If any module specifies constant flow, the wrapper is constant flow. A legacy bank containing both types is accepted with a warning and every module in that bank uses the constant-flow fallback.
+
+For connection \(k\), let \(\dot m_{k,sys}\) be the plant flow through the wrapper and \(\dot m_{k,i}\) and \(T_{k,i,out}\) be the actual flow and outlet temperature of module \(i\). Sequential allocation ensures
 
 \begin{equation}
-{T_{hw,CH}} = \sum\limits_{CH = 1}^n {{T_{hw,out}}} \frac{{{{\dot m}_{hw,CH}}}}{{{m_{hw,sys}}}}
+\sum_i\dot m_{k,i}\leq\dot m_{k,sys}.
 \end{equation}
+
+The bypass flow is
 
 \begin{equation}
-{T_{src,CH}} = \sum\limits_{CH = 1}^n {{T_{src,out}}} \frac{{{{\dot m}_{src,CH}}}}{{{m_{src,sys}}}}
+\dot m_{k,bypass}=\dot m_{k,sys}-\sum_i\dot m_{k,i},
 \end{equation}
 
-When all chiller-heaters are in heat recovery mode, it calculates a mass-weighed chilled water temperature (\emph{T\(_{cw,CH}\)}) and hot water temperature (\emph{T\(_{hw,CH}\)}) as follows:
+and the wrapper outlet temperature is
 
 \begin{equation}
-{T_{cw,CH}} = \sum\limits_{CH = 1}^n {{T_{cw,out}}} \frac{{{{\dot m}_{cw,CH}}}}{{{m_{cw,sys}}}}
+T_{k,sys,out}=\frac{\sum_i\dot m_{k,i}T_{k,i,out}+\dot m_{k,bypass}T_{k,sys,in}}{\dot m_{k,sys}}.
 \end{equation}
 
-\begin{equation}
-{T_{hw,CH}} = \sum\limits_{CH = 1}^n {{T_{hw,out}}} \frac{{{{\dot m}_{hw,CH}}}}{{{m_{hw,sys}}}}
-\end{equation}
+When the connection has no flow or no active module flow, its outlet temperature remains at the inlet temperature. The same mixing calculation is applied independently to chilled water, hot water, and the source fluid using the final connection-specific module results.
 
-In cooling or heating dominant simultaneous cooling-heating mode (mode 4 and 5), at least one chiller-heater should be in heat recovery mode, and the other(s) are in either mode 4 or mode 5. The system is connected to three loops such as chilled water loop, hot water loop, and source water loop. The model thus calculates a mass-weighed chilled water temperature (\emph{T\(_{cw,CH}\)}), hot water temperature (\emph{T\(_{hw,CH}\)}), and source water temperature (\emph{T\(_{src,CH}\)}) as follows:
+\subsection{Plant Capacity and Design Flow Reporting}
+\label{plant-capacity-and-design-flow-reporting}
 
-\begin{equation}
-{T_{cw,CH}} = \sum\limits_{CH = 1}^n {{T_{cw,out}}} \frac{{{{\dot m}_{cw,CH}}}}{{{m_{cw,sys}}}}
-\end{equation}
+Plant design-capacity queries are connection specific. The chilled-water connection reports useful evaporator cooling capacity. The hot-water connection reports useful condenser heating capacity, including the compressor power fraction delivered to the refrigerant. The source connection reports a positive capacity-magnitude envelope that covers either cooling heat rejection or heating heat extraction; signed source transfer is used only for runtime reporting.
 
-\begin{equation}
-{T_{hw,CH}} = \sum\limits_{CH = 1}^n {{T_{hw,out}}} \frac{{{{\dot m}_{hw,CH}}}}{{{m_{hw,sys}}}}
-\end{equation}
-
-\begin{equation}
-{T_{src,CH}} = \sum\limits_{CH = 1}^n {{T_{src,out}}} \frac{{{{\dot m}_{src,CH}}}}{{{m_{src,sys}}}}
-\end{equation}
-
-The model then calculates a mass-weighed temperature for the by-pass flows remained in the system as follows:
-
-\begin{equation}
-{T_{cw,bypass}} = {T_{cw,i}}\frac{{{{\dot m}_{cw,bypass}}}}{{{m_{cw,sys}}}}
-\end{equation}
-
-\begin{equation}
-{T_{hw,bypass}} = {T_{hw,i}}\frac{{{{\dot m}_{hw,bypass}}}}{{{m_{hw,sys}}}}
-\end{equation}
-
-\begin{equation}
-{T_{src,bypass}} = {T_{src,i}}\frac{{{{\dot m}_{src,bypass}}}}{{{m_{src,sys}}}}
-\end{equation}
-
-The outlet temperatures at each outlet node of the system are then determined as it sums both mass-weighed temperatures up as follows:
-
-\begin{equation}
-{T_{cw,sys}} = {T_{cw,CH}} + {T_{cw,bypass}}
-\end{equation}
-
-\begin{equation}
-{T_{hw,sys}} = {T_{hw,CH}} + {T_{hw,bypass}}
-\end{equation}
-
-\begin{equation}
-{T_{src,sys}} = {T_{src,CH}} + {T_{src,bypass}}
-\end{equation}
-
-The total heat transfer energy of the system is also calculated in the same manner as the temperature calculations. The model simply sums all heat transfer energy of the chiller-heaters depending on their operating modes.
+Maximum and optimum capacities are bank totals. Minimum capacity is the smallest independently stageable module load rather than the sum of every module minimum. This preserves the actual staging behavior of identical and heterogeneous banks.

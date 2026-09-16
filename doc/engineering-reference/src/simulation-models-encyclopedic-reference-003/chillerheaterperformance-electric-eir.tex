@@ -1,386 +1,200 @@
-\section{ChillerHeaterPerformance:Electric:EIR }\label{chillerheaterperformanceelectriceir}
+\section{ChillerHeaterPerformance:Electric:EIR }
+\label{chillerheaterperformanceelectriceir}
 
-\subsection{Overview}\label{overview-008}
+\subsection{Overview}
+\label{overview-008}
 
-The object simulates the performance of a chiller-heater which can receive pre-cooled or pre-heated water from the source loop, and provide cooling, heating, or simultaneous cooling-heating. The object needs to work with the Central Heat Pump System object to be controlled properly. This model does not simulate the thermal performance or the power consumption of associated pumps or cooling towers. The Central Heat Pump System object holds the input/output nodes connection of the chiller-heater and its control scheme, once the chiller-heater is properly referred.
+The \emph{ChillerHeaterPerformance:Electric:EIR} object describes one electric vapor-compression module in a \emph{CentralHeatPumpSystem}. The module can provide chilled-water cooling, hot-water heating, or simultaneous cooling and heating while rejecting heat to or extracting heat from the source loop. Pump, ground heat exchanger, and cooling-tower power are not included in this performance model.
 
-\subsection{Model Description}\label{model-description-005}
+The model uses two sets of reference data and empirical curves. The cooling set applies to cooling-only operation. The heating set applies to heating-only and all simultaneous modes. Every active calculation produces one thermodynamic module result; the parent system then routes that result to the chilled-water, hot-water, and source connections without changing its heat balance.
 
-The model uses user-input performance information at design conditions along with three performance curves (curve objects) for cooling capacity and efficiency to determine chiller operation at off-design conditions. Three additional performance curves for heating capacity and efficiency are used when the chiller is operating in a heating-only mode or simultaneous cooling-heating mode.
+\subsection{Reference Performance and Curve Inputs}
+\label{reference-performance-and-curve-inputs}
 
-\subsubsection{Cooling-only mode}\label{cooling-only-mode}
-
-The following nomenclature is used in the cooling equations:
-
-\emph{CompMotorEffic} is the compressor motor efficiency
-
-\emph{CompPower\(_{clg}\)} is the compressor power (W)
-
-\emph{CompPower\(_{@PLRmin}\)} is the compressor power at the minimum part-load ratio (W)
-
-\({C_{p,cw}}\) is the chilled water specific heat (J/kg-K)
-
-\emph{CyclingRatio} is the compressor cycling ratio which is equal to \emph{PLR\(_{actual}\)} / \emph{PLR\(_{min}\)}
-
-\emph{EvapCapAvail\(_{clg}\)} is the available full-load cooling capacity at current conditions (W)
-
-\emph{EvapCapFT\(_{clg}\)} is the cooling capacity function of temperature curve
-
-\emph{EIRFT\(_{clg}\)} is the electric input to cooling output factor for temperature function curve
-
-\emph{EIRFPLR\(_{clg}\)} is the electric input to cooling output factor for part-load function curve
-
-\({\dot m_{cw}}\) is the chilled water mass flow rate (kg/s)
-
-\({\dot m_{avail,cw}}\) is the chilled water maximum available mass flow rate (kg/s)
-
-\emph{PLR\(_{clg}\)} is the cooling part-load ratio which is equal to \emph{CoolingLoad} / \emph{EvapCapAvail\(_{clg}\)}
-
-\emph{PLR\(_{actual}\)} is the actual part-load ratio at current conditions
-
-\emph{PLR\(_{min}\)} is the minimum part-load ratio
-
-\(QCon{d_{clg}}\) is the total condenser heat transfer energy (J)
-
-\(\dot QCon{d_{clg}}\) is the condenser heat transfer rate (W)
-
-\(QEva{p_{clg}}\) is the total evaporator heat transfer energy (J)
-
-\(\dot QEva{p_{clg}}\) is the evaporator heat transfer rate (W)
-
-\({\dot Q_{falseloading,clg}}\) is the false loading rate (W)
-
-\emph{RefCOP\(_{clg}\)} is the reference coefficient of performance (W/W)
-
-\emph{RefEvapCap\(_{clg}\)} is the reference evaporator capacity (W)
-
-\emph{FullLoadPwr\(_{clg}\)} is the reference full load power which is equal to \emph{EvapCapAvail\(_{clg}\)} / \emph{RefCOP\(_{clg}\)} (W)
-
-\emph{T\(_{cond}\)} is either the entering or the leaving condenser water temperature depending on user input for the condenser water independent variable: \emph{T\(_{cond,l}\)} if ``LeavingCondenser'' is chosen or \emph{T\(_{cond,e}\)} if ``EnteringCondenser'' is chosen.
-
-\emph{T\(_{cond,e}\)} is the entering condenser water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{cond,l}\)} is the leaving condenser water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{cw,e}\)} is the entering chilled water~ temperature (W)
-
-\emph{T\(_{cw,l}\)} is the leaving chilled water~ temperature (W)
-
-\(\Delta {T_{cw}}\) is the chilled water inlet and outlet temperature difference (\(^{\circ}\)C)
-
-\(\Delta {T_{cw}}_{,\max }\) is the maximum chilled water inlet and outlet temperature difference (\(^{\circ}\)C).
-
-The model sequentially calls each chiller-heater module in the order defined in the Central Heat Pump System object. It then determines cooling load that each chiller-heater needs to meet and water flow rates delivered to each chiller-heater. Once each chiller-heater is assumed to operate, it determines cooling capacity and efficiency using user-supplied performance information.
-
-Three performance curves are used in the calculation of cooling capacity and efficiency as follows:
-
-\begin{enumerate}
-\item Cooling mode cooling capacity function of temperature curve (\emph{EvapCapFT\(_{clg}\)})
-\item Cooling mode electric input to cooling output ratio function of temperature curve (\emph{EIRFT\(_{clg}\)})
-\item Cooling mode electric input to cooling output ratio function of part load ratio curve (\emph{EIRFPLR\(_{clg}\)})
-\end{enumerate}
-
-The Cooling Capacity Function of Temperature Curve (\emph{EvapCapFT\(_{clg}\)}) represents the fraction of the cooling capacity of the chiller-heater as it varies by temperature. The curve should have a value of 1.0 at the reference conditions. The output of a bi-quadratic curve with the input variables being the leaving chilled water temperature and either the entering or leaving condenser water temperature is given by:
+The reference cooling evaporator capacity and compressor power are
 
 \begin{equation}
-EvapCapF{T_{clg}} = a + b{T_{cw,l}} + c{T_{cw,l}}^2 + d{T_{Cond}} + e{T_{Cond}}^2 + f{T_{cw,l}}{T_{Cond}}
-\end{equation}
-
-The Cooling Mode Electric Input to Cooling Output Ratio Function of Temperature (EIRFT\(_{clg}\)) curve represents the fraction of electricity to the chiller-heater at full load as it varies by temperature. The output of a bi-quadratic curve with the input variables being the leaving chilled water temperature and either the entering or leaving condenser water temperature is given by:
-
-\begin{equation}
-EIRF{T_{clg}} = a + b{T_{cw,l}} + c{T_{cw,l}}^2 + d{T_{Cond}} + e{T_{Cond}}^2 + f{T_{cw,l}}{T_{Cond}}
-\end{equation}
-
-The Cooling Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio (EIRFPLR\(_{clg}\)) curve represents the fraction of electricity to the chiller-heater as the load on the chiller varies at a given set of operating temperatures. The curve is normalized so that at full load the value of the curve should be 1.0. Note that the bi-cubic formulation below is generally only valid when LeavingCondenser variable is chosen for the field of Cooling Mode Condenser Water Temperature Curve Input Variable whereas the quadratic curve can be used for both choices, i.e., LeavingCondenser and EnteringCondenser. Bi-cubic may also be used when the chiller-heater uses a variable-speed compressor motor drive. The output of this curve can be determined by one of the following three performance curves:
-
-\begin{equation}
-EIRFPL{R_{clg}} = a + b{T_{Cond,l}} + c{T_{Cond,l}}^2 + dPLR + ePL{R^2} + f{T_{Cond,l}}PLR + g \cdot 0 + hPL{R^3} + i \cdot 0 + j \cdot 0
+\dot Q_{evap,ref,c}=RefEvapCap_c
 \end{equation}
 
 \begin{equation}
-EIRFPL{R_{clg}} = a + bPLR + cPL{R^2}
+P_{ref,c}=\frac{RefEvapCap_c}{COP_{ref,c}}.
+\end{equation}
+
+The heating-mode inputs are ratios relative to the cooling reference point. They define the reference evaporator capacity, compressor power, and evaporator-based reference COP used by the heating curves:
+
+\begin{equation}
+\dot Q_{evap,ref,h}=R_Q RefEvapCap_c
 \end{equation}
 
 \begin{equation}
-EIRFPL{R_{clg}} = a + bPLR + cPL{R^2} + dPL{R^3}
-\end{equation}
-
-The full-load cooling capacity at specific temperature operating conditions (i.e., at temperatures different from the design temperatures) is then computed as follows:
-
-\begin{equation}
-EvapCapAvai{l_{clg}} = RefEvapCa{p_{clg}} \cdot EvapCapF{T_{clg}}
-\end{equation}
-
-The model then determines current chiller-heater's evaporator heat transfer rate based on the total cooling load required a central heat pump system to meet and the maximum available chiller-heater cooling capacity. The maximum evaporator temperature difference between the entering chilled water temperature (\emph{T\(_{cw,e}\)}) and the leaving chilled water temperature (\emph{T\(_{cw,l}\)}) obtained from the plant loop setpoint temperature can also be determined. It then calculates mass flow rate for variable flow control chiller-heaters and the temperature difference for constant flow control chiller-heaters, setting the cooling load each chiller-heater needs to meet equal to the evaporator heat transfer rate.
-
-As for variable flow control chiller-heaters, the chilled water mass flow rate is computed as follows:
-
-\begin{equation}
-{\dot m_{cw}} = \frac{{\dot QEva{p_{clg}}}}{{{C_{p,cw}}\Delta {T_{cw,max}}}}
-\end{equation}
-
-The chilled water mass flow rate calculated is then compared to the maximum available mass flow rate for individual chiller-heaters. If the calculated one is bigger than the maximum, the model sets the chilled water mass flow rate equal to the maximum. It then adjusts the temperature difference based on the evaporator heat transfer rate and the maximum mass flow rate. If the adjusted temperature difference also exceeds the maximum, the model finally adjusts the evaporator heat transfer rate at the maximum temperature difference and mass flow rate as follows:
-
-\begin{equation}
-\dot QEva{p_{clg}} = {\dot m_{avail,cw}}{C_{p,cw}}\Delta {T_{cw,max}}
-\end{equation}
-
-As for constant flow control chiller-heaters, the model calculates chilled water temperature difference as follows:
-
-\begin{equation}
-\Delta {T_{cw}} = \frac{{\dot QEva{p_{clg}}}}{{{{\dot m}_{avail,cw}}{C_{p,cw}}}}
-\end{equation}
-
-The temperature difference calculated is then compared to the maximum temperature difference allowed. If the calculated one is bigger than the maximum, the model sets the chilled water temperature difference equal the maximum, and then adjusts the evaporator heat transfer rate at the given conditions as follows:
-
-\begin{equation}
-\dot QEva{p_{clg}} = {\dot m_{avail,cw}}{C_{p,cw}}\Delta {T_{cw,max}}
-\end{equation}
-
-The model then calculates the part-load ratio as the ratio of the evaporator heat transfer rate to the available chiller-heater capacity as follows:
-
-\begin{equation}
-PL{R_{c\lg }} = \frac{{\dot QEva{p_{c\lg }}}}{{\dot QEvapAvai{l_{c\lg }}}}
-\end{equation}
-
-The part-load ratio calculated is set to be between the maximum of 1.0 and the minimum of 0.0 when it is out of the range. Once the part-load ratio is calculated the cycling ratio and false loading rate can be obtained as follows:
-
-\begin{equation}
-CyclingRatio = \frac{{PL{R_{{\rm{actual}}}}}}{{PL{R_{{\rm{min}}}}}}
+P_{ref,h}=R_P P_{ref,c}
 \end{equation}
 
 \begin{equation}
-{\dot Q_{falseloading,c\lg }} = EvapCapAvai{l_{{\rm{clg}}}} \cdot PL{R_{c\lg }} \cdot CyclingRatio - \dot QEva{p_{{\rm{clg}}}}
+COP_{ref,h}=\frac{\dot Q_{evap,ref,h}}{P_{ref,h}}.
 \end{equation}
 
-The compressor power demand is then computed by:
+For either curve set, denoted below by subscript \(m\), the capacity and EIR temperature modifiers are biquadratic functions of the evaporator leaving temperature and a selected condenser temperature:
 
 \begin{equation}
-CompPowe{r_{c\lg }} = RefFullLoadPowe{r_{{\rm{clg}}}} \cdot {\rm{ }}EIRF{T_{c\lg }}{\rm{ }} \cdot EIRFPL{R_{c\lg }} \cdot CyclingRatio
-\end{equation}
-
-The heat transfer rate for the chiller-heater condenser can then be computed as follows:
-
-\begin{equation}
-\dot QCon{d_{clg}} = ComPowe{r_{clg}} \cdot CompMotorEffic + \dot QEva{p_{clg}} + {\dot Q_{falseloading,clg}}
-\end{equation}
-
-The total heat transfer energy by the evaporator and condenser can be calculated as follows:
-
-\begin{equation}
-QEva{p_{clg}} = \dot QEva{p_{clg}} \cdot TimeStepSys \cdot 3600
+F_{Q,m}=a+bT_{evap,l}+cT_{evap,l}^{2}+dT_{cond}+eT_{cond}^{2}+fT_{evap,l}T_{cond}
 \end{equation}
 
 \begin{equation}
-QCon{d_{c\lg }} = \dot QCon{d_{c\lg }} \cdot TimeStepSys \cdot 3600
+F_{EIR,T,m}=a+bT_{evap,l}+cT_{evap,l}^{2}+dT_{cond}+eT_{cond}^{2}+fT_{evap,l}T_{cond}.
 \end{equation}
 
-Water consumption for the evaporative-cooled condenser is calculated using the difference in air humidity level across the evaporative media and the condenser air mass flow rate:
+The independent variable \(T_{cond}\) is the actual entering condenser temperature when \emph{EnteringCondenser} is selected and the actual leaving condenser temperature when \emph{LeavingCondenser} is selected. The cooling and heating selections are independent. Reference normalization checks use the corresponding reference entering or leaving temperature; reference temperatures are rating conditions, not operating setpoints or equipment cutoffs.
+
+The available full-load evaporator capacity at the current temperatures is
 
 \begin{equation}
-{V_{water}} = \frac{{{{\dot{m}_{air}}\left( {{\omega_{evapcond,out}} - {\omega_{evapcond,in}}} \right)}}}{{{\rho_{water}}}}\left( {PLR} \right)\left( {TimeStepSys} \right)\left( {3600} \right)
+\dot Q_{evap,avail,m}=\dot Q_{evap,ref,m}F_{Q,m}.
 \end{equation}
 
-where:
+The EIR part-load modifier may be a quadratic or cubic function of part-load ratio, or a bicubic function of condenser temperature and part-load ratio. The bicubic form is
 
-\({V_{water}}\) is the DX cooling coil evap condenser water consumption (m\(^{3}\))
+\begin{align}
+F_{EIR,PLR,m}={}&a+bT_{cond}+cT_{cond}^{2}+dPLR+ePLR^{2}+fT_{cond}PLR \\
+&+gT_{cond}^{3}+hPLR^{3}+iT_{cond}^{2}PLR+jT_{cond}PLR^{2}.
+\end{align}
 
-\({\dot{m}_{air}}\) is the evaporative condenser air mass flow rate (kg/s)
+For a bicubic curve, condenser temperature is the first independent variable and PLR is the second. Therefore, the model obtains the minimum and maximum PLR from the second curve domain. For a univariate curve it uses the only domain. The domain must have a nonnegative minimum, must include PLR 1.0, and must contain the applicable optimum PLR.
 
-\({\omega_{evapcond,in}}\) is the humidity ratio of outdoor air entering the evap condenser (kg/kg)
+\subsection{Part-Load Operation and Energy Balance}
+\label{part-load-operation-and-energy-balance}
 
-\({\omega_{evapcond,out}}\) is the humidity ratio of air leaving the evap condenser (kg/kg)
-
-\({\rho_{water}}\) is the density of water at the outdoor dry-bulb temperature (kg/m\(^{3}\))
-
-\emph{TimeStepSys} is the HVAC system simulation time step (hr).
-
-
-\subsubsection{Heating-only mode and Simultaneous cooling-heating mode}\label{heating-only-mode-and-simultaneous-cooling-heating-mode}
-
-The following nomenclature is used in the heating equations:
-
-\emph{CompMotorEffic} is the compressor motor efficiency
-
-\emph{CompPower\(_{htg}\)} is the compressor power demand (W)
-
-\emph{CompPower\(_{@PLRmin}\)} is the compressor power at the minimum part-load ratio (W)
-
-\({C_{p,evap}}\) is the evaporator water specific heat (J/kg-K)
-
-\({C_{p,hw}}\) is the hot water specific heat (J/kg-K)
-
-\emph{CyclingRatio} is the compressor cycling ratio which is equal to \emph{PLR\(_{actual}\)} / \emph{PLR\(_{min}\)}
-
-\emph{EvapCapAvail\(_{htg}\)} is the available full-load cooling capacity at current conditions (W)
-
-\emph{EvapCapFT\(_{htg}\)} is the heating mode cooling capacity function of temperature curve
-
-\emph{EIRFT\(_{htg}\)} is the electric input to cooling output factor for temperature function curve
-
-\emph{EIRFPLR\(_{htg}\)} is the electric input to cooling output factor for part-load function curve
-
-\({\dot m_{avail,evap}}\) is the evaporator water maximum available mass flow rate (kg/s)
-
-\({\dot m_{avail,hw}}\) is the condenser water maximum available mass flow rate (kg/s)
-
-\({\dot m_{hw}}\) is the hot water mass flow rate (kg/s)
-
-\emph{PLR\(_{htg}\)} is the cooling part-load ratio which is equal to \emph{RefCap} / \emph{EvapCapAvail\(_{htg}\)}
-
-\emph{PLR\(_{max}\)} is the maximum part-load ratio at current conditions
-
-\emph{PLR\(_{min}\)} is the minimum part-load ratio
-
-\(QCon{d_{htg}}\) is the total condenser heat transfer energy (J)
-
-\(\dot QCondAvai{l_{htg}}\) is the available full-load heating capacity at current conditions (W)
-
-\(\dot QCon{d_{htg}}\) is the condenser heat transfer rate (W)
-
-\(QEva{p_{htg}}\) is the total evaporator heat transfer energy (J)
-
-\(\dot QEva{p_{htg}}\) is the evaporator heat transfer rate (W)
-
-\({\dot Q_{falseloading,htg}}\) is the false loading rate (W)
-
-\emph{RefCOP\(_{htg}\)} is the reference coefficient of performance (W/W)
-
-\emph{RefEvapCap\(_{htg}\)} is the reference evaporator capacity (W)
-
-\emph{FullLoadPwr\(_{htg}\)} is the reference full load power which is equal to \emph{EvapCapAvail\(_{htg}\)}/ \emph{RefCOP\(_{htg}\)} (W)
-
-\emph{T\(_{cond}\)} is either entering or leaving condenser water temperature depending on user input for condenser water independent variable. \emph{T\(_{cond,l}\)} if ``LeavingCondenser'' is chosen or \emph{T\(_{cond,e}\)} if ``EnteringCondenser'' is chosen.
-
-\emph{T\(_{cond,e}\)} is the entering condenser water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{cond,l}\)} is the leaving condenser water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{cw,l}\)} is the leaving chilled water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{hw,e}\)} is the entering hot water temperature (\(^{\circ}\)C)
-
-\emph{T\(_{hw,l}\)} is the leaving hot water temperature (\(^{\circ}\)C)
-
-\(\Delta {T_{evap}}\) is the evaporator inlet and outlet water temperature difference (\(^{\circ}\)C)
-
-\(\Delta {T_{hw}}\) is the hot water inlet and outlet temperature difference (\(^{\circ}\)C)
-
-\(\Delta {T_{hw,max}}\) is the maximum hot water inlet and outlet temperature difference (\(^{\circ}\)C).
-
-The calculations for the evaporator side are similar to the cooling-only mode calculations. The evaporator capacity and efficiency is determined by a different set of three performance curves read in the cooling-only mode, and the performance curve set is used for both heating-only mode and simultaneous cooling-heating mode. During these modes, the evaporator side is not connected to the chilled water loop, but source water loop. The model thus assumes that each chiller-heater does not meet the plant loop chilled water setpoint temperature while the evaporator operates at the full load capacity to produce heating at a constant water flow rate.
-
-The model sequentially calls each chiller-heater module in the order of the definition in the central heat pump system. It then determines heating load that each chiller-heater needs to meet and water flow rates delivered to each chiller-heater. Once each chiller-heater is assumed to operate, it determines heating capacity and efficiency using the following performance curves:
-
-\begin{enumerate}
-\item Heating mode cooling capacity function of temperature curve (\emph{EvapCapFT\(_{htg}\)})
-\item Heating mode electric input to cooling output ratio function of temperature curve (\emph{EIRFT\(_{htg}\)})
-\item Heating mode electric input to cooling output ratio function of part load ratio curve (\emph{EIRFPLR\(_{htg}\)})
-\end{enumerate}
-
-The output of a Heating Mode Cooling Capacity Function of Temperature curve with the input variables being the leaving chilled water temperature and either the entering or leaving condenser water temperature is given by:
+The model reports the final operating PLR used to evaluate the EIRFPLR curve, the cycling ratio, and any false load from the same accepted operating point. For a cooling or simultaneous evaporator target, an unconstrained load ratio is
 
 \begin{equation}
-EvapCapF{T_{htg}} = a + b{T_{cw,l}} + c{T_{cw,l}}^2 + d{T_{Cond}} + e{T_{Cond}}^2 + f{T_{cw,l}}{T_{Cond}}
+r=\frac{\dot Q_{evap,target}}{\dot Q_{evap,avail,m}}.
 \end{equation}
 
-The output of a Heating Mode Cooling Output Ratio Function of Temperature curve with the input variables being the leaving chilled water temperature and either the entering or leaving condenser water temperature is given by:
+The operating PLR and cycling ratio are
 
 \begin{equation}
-EIRF{T_{htg}} = a + b{T_{cw,l}} + c{T_{cw,l}}^2 + d{T_{Cond}} + e{T_{Cond}}^2 + f{T_{cw,l}}{T_{Cond}}
-\end{equation}
-
-The output of Heating Mode Cooling Output Ratio Function of Part Load Ratio curve can be determined by one of the following three performance curves as follows:
-
-\begin{equation}
-EIRFPL{R_{htg}} = a + b{T_{Cond,l}} + c{T_{Cond,l}}^2 + dPLR + ePL{R^2} + f{T_{Cond,l}}PLR + g \cdot 0 + hPL{R^3} + i \cdot 0 + j \cdot 0
+PLR=\min\left(PLR_{max},\max\left(r,PLR_{min}\right)\right)
 \end{equation}
 
 \begin{equation}
-EIRFPL{R_{htg}} = a + bPLR + cPL{R^2}
+CR=\begin{cases}
+\min\left(1,r/PLR_{min}\right) & PLR_{min}>0 \\
+1 & PLR_{min}=0.
+\end{cases}
+\end{equation}
+
+The false-load rate is the portion of the cycled, unloaded evaporator capacity that is not useful evaporator heat transfer:
+
+\begin{equation}
+\dot Q_{false}=\max\left(0,\dot Q_{evap,avail,m}PLR\,CR-\dot Q_{evap}\right).
+\end{equation}
+
+Compressor electric power at the accepted point is
+
+\begin{equation}
+P=\frac{\dot Q_{evap,avail,m}}{COP_{ref,m}}F_{EIR,T,m}F_{EIR,PLR,m}CR.
+\end{equation}
+
+Let \(\eta_{motor}\) be the compressor motor efficiency input. The fraction \(\eta_{motor}P\) enters the refrigerant cycle; the remaining \((1-\eta_{motor})P\) is reported as external motor loss and is not added to the condenser water. The refrigerant-cycle balance is
+
+\begin{equation}
+\dot Q_{cond}=\dot Q_{evap}+\dot Q_{false}+\eta_{motor}P.
+\end{equation}
+
+Rate variables are converted to energy using the HVAC system time step in seconds. No heat-transfer quantity is overwritten to force a water outlet temperature. Flow or temperature limits reduce delivered load and leave the difference as unmet load.
+
+\subsection{Cooling-Only Mode}
+\label{cooling-only-mode}
+
+In cooling-only mode, the evaporator is connected to the chilled-water loop and the condenser is connected to the source loop. The model first establishes the chilled-water outlet target from the active plant setpoint, subject to the evaporator low-temperature limit. The load-side flow limit is
+
+\begin{equation}
+\dot Q_{flow,c}=\dot m_{cw,max}c_{p,cw}\left(T_{cw,in}-T_{cw,target}\right).
+\end{equation}
+
+The useful evaporator load cannot exceed the requested cooling load, the maximum curve-domain capacity, or this flow limit:
+
+\begin{equation}
+\dot Q_{evap}=\min\left(\dot Q_{cool,req},\dot Q_{evap,avail,c}PLR_{max},\dot Q_{flow,c}\right).
+\end{equation}
+
+A variable-flow bank requests the flow needed to meet the outlet target, limited by available module and wrapper flow. A constant-flow bank uses the allocated flow and calculates the resulting outlet temperature. Chilled-water and source specific heats are evaluated from their respective plant-loop fluids.
+
+Capacity, power, false load, evaporator outlet temperature, and condenser outlet temperature are iterated because a leaving-condenser curve depends on the heat rejection calculated from those same curves. All condenser heat is rejected to the source loop. The delivered cooling is \(\dot Q_{evap}\), and any flow- or capacity-limited remainder is reported as unmet cooling load.
+
+\subsection{Heating-Only Mode}
+\label{heating-only-mode}
+
+In heating-only mode, the evaporator extracts heat from the source loop and the condenser supplies the hot-water loop. The source-side evaporator heat is limited by allocated source flow, the source fluid specific heat, and the heating-mode evaporator leaving-temperature low limit:
+
+\begin{equation}
+\dot Q_{source,max}=\dot m_{source}c_{p,source}\left(T_{source,in}-T_{source,out,min}\right).
+\end{equation}
+
+The hot-water condenser load is limited by allocated flow and by the plant heating setpoint when one is present. The reference heating leaving temperature is a rating condition and is not treated as an equipment operating limit.
+
+At each temperature iteration the model solves for the PLR whose condenser heat matches the attainable heating target. For a target below the condenser heat at minimum PLR, the compressor operates at minimum PLR and cycles. Otherwise, a bounded bisection solve finds PLR between the minimum and the flow-limited maximum. Each candidate reevaluates EIRFPLR, compressor power, and
+
+\begin{equation}
+\dot Q_{cond}(PLR)=\dot Q_{evap,avail,h}PLR+\eta_{motor}P(PLR).
+\end{equation}
+
+The accepted evaporator extraction, power, condenser delivery, and outlet temperatures therefore belong to one operating point. A variable-flow bank may reduce hot-water flow to the flow needed at the active outlet limit; a constant-flow bank uses its allocation. The heating COP is useful condenser heat divided by compressor electric power.
+
+\subsection{Simultaneous Cooling and Heating Modes}
+\label{simultaneous-cooling-and-heating-modes}
+
+When cooling and heating are requested together, each staged module is solved as one refrigerant cycle using the heating curve set. The useful chilled-water load and source extraction share the evaporator result; useful hot-water heating and source rejection share the condenser result. The routing equations are
+
+\begin{equation}
+\dot Q_{cool}=\min\left(\dot Q_{cool,target},\dot Q_{evap}\right)
 \end{equation}
 
 \begin{equation}
-EIRFPL{R_{htg}} = a + bPLR + cPL{R^2} + dPL{R^3}
-\end{equation}
-
-The full-load evaporator capacity at specific temperature operating conditions is then given by:
-
-\begin{equation}
-EvapCapAvai{l_{htg}} = RefEvapCa{p_{htg}} \cdot EvapCapF{T_{htg}}
-\end{equation}
-
-The part-load ratio is set to be between zero and the maximum, and the evaporator heat transfer rate is computed by:
-
-\begin{equation}
-\dot QEva{p_{htg}} = EvapCapAvai{l_{htg}}PL{R_{htg}}
-\end{equation}
-
-The evaporator inlet and outlet temperature difference is then given by:
-
-\begin{equation}
-\Delta {T_{evap}} = \frac{{\dot QEva{p_{htg}}}}{{{{\dot m}_{avail,evap}}{C_{p,evap}}}}
-\end{equation}
-
-Once the part-load ratio is calculated the cycling ratio and false loading rate are computed by:
-
-\begin{equation}
-CyclingRatio = \frac{{PL{R_{{\rm{actual}}}}}}{{PL{R_{{\rm{min}}}}}}
+\dot Q_{source,extract}=\max\left(0,\dot Q_{evap}-\dot Q_{cool}\right)
 \end{equation}
 
 \begin{equation}
-{\dot Q_{falseloading,htg}} = EvapCapAvai{l_{{\rm{htg}}}} \cdot PL{R_{htg}} \cdot CyclingRatio - \dot QEva{p_{{\rm{htg}}}}
-\end{equation}
-
-The compressor power demand is then computed by:
-
-\begin{equation}
-CompPowe{r_{htg}} = FullLoadPowe{r_{htg}} \cdot EIRF{T_{htg}} \cdot EIRFPL{R_{htg}} \cdot CyclingRatio
-\end{equation}
-
-The heat transfer rate of the chiller-heater condenser is then computed as follows:
-
-\begin{equation}
-\dot QCondAvai{l_{htg}} = ComPowe{r_{htg}} \cdot CompMotorEffic + \dot QEva{p_{htg}} + {\dot Q_{falseloading,htg}}
-\end{equation}
-
-Once condenser available heating capacity is determined, the model calculates current chiller-heater's condenser heat transfer rate based on the total heating load required a central heat pump system to meet as well as available heating capacity of the chiller-heater. The maximum condenser temperature difference between the entering hot water temperature (\emph{T\(_{hw,e}\)}) and the leaving hot water temperature (\emph{T\(_{hw,l}\)}) obtained from the plant loop setpoint temperature can also be obtained. It then calculates condenser water mass flow rate for variable flow control chiller-heaters and the hot water temperature difference for constant flow control chiller-heaters, setting the cooling load that each chiller-heater needs to meet equal the evaporator heat transfer rate.
-
-As for variable flow control chiller-heaters, the condenser water mass flow rate is computed as follows:
-
-\begin{equation}
-{\dot m_{hw}} = \frac{{\dot QCon{d_{htg}}}}{{{C_{p,hw}}\Delta {T_{hw,max}}}}
-\end{equation}
-
-The condenser water mass flow rate calculated is then compared to the maximum available mass flow rate for individual chiller-heaters. If the calculated one is bigger than the maximum, the model sets the condenser water mass flow rate equal the maximum. It then adjusts the hot water temperature difference at the maximum mass flow rate. If the adjusted temperature difference also exceeds the maximum, the model finally adjusts the condenser heat transfer rate at the maximum allowable conditions as follows:
-
-\begin{equation}
-\dot QCon{d_{htg}} = {\dot m_{avail,hw}}{C_{p,hw}}\Delta {T_{hw,max}}
-\end{equation}
-
-As for constant flow control chiller-heaters, the model calculates condenser temperature difference as follows:
-
-\begin{equation}
-\Delta {T_{hw}} = \frac{{\dot QCon{d_{htg}}}}{{{{\dot m}_{avail,hw}}{C_{p,hw}}}}
-\end{equation}
-
-The temperature difference calculated is then compared to maximum hot water temperature difference. If the calculated one is bigger than the maximum, the model sets the hot water temperature difference equal the maximum, and then adjusts the condenser heat transfer rate at the given conditions as follows:
-
-\begin{equation}
-\dot QCon{d_{htg}} = {\dot m_{avail,hw}}{C_{p,hw}}\Delta {T_{hw,max}}
-\end{equation}
-
-Finally, the total heat transfer energy by the evaporator and condenser can then be calculated as follows:
-
-\begin{equation}
-QEva{p_{htg}} = \dot QEva{p_{htg}} \cdot TimeStepSys \cdot 3600
+\dot Q_{heat}=\min\left(\dot Q_{heat,target},\dot Q_{cond}\right)
 \end{equation}
 
 \begin{equation}
-QCon{d_{htg}} = \dot QCon{d_{htg}} \cdot TimeStepSys \cdot 3600
+\dot Q_{source,reject}=\max\left(0,\dot Q_{cond}-\dot Q_{heat}\right).
 \end{equation}
 
-\subsection{References}\label{references-008}
+Source heat transfer is positive for rejection and negative for extraction:
+
+\begin{equation}
+\dot Q_{source}=\dot Q_{source,reject}-\dot Q_{source,extract}.
+\end{equation}
+
+Combining this routing definition with the refrigerant balance gives the three-loop balance
+
+\begin{equation}
+\dot Q_{heat}+\dot Q_{source}=\dot Q_{cool}+\dot Q_{false}+\eta_{motor}P.
+\end{equation}
+
+The simultaneous modes are selected from the final signed source transfer:
+
+\begin{itemize}
+\item Mode 3, balanced heat recovery: \(\dot Q_{source}\) is zero within numerical tolerance. All condenser heat is useful hot-water heating and no source flow is required.
+\item Mode 4, cooling-dominant: \(\dot Q_{source}>0\). Hot water receives the useful heating target and all remaining condenser heat is rejected to the source.
+\item Mode 5, heating-dominant: \(\dot Q_{source}<0\). Useful chilled-water cooling is preserved and the remaining evaporator heat is extracted from the source.
+\end{itemize}
+
+If cooling operation alone would not produce enough condenser heat, the cycle evaporator load is increased, subject to source-extraction capacity, until the heating target or an operating limit is reached. If cooling would produce excess condenser heat and no source rejection is available, the cycle is reduced to an attainable balanced point and the remaining cooling request is unmet.
+
+When useful load and source duty share a heat exchanger, the curve temperature is the flow-weighted final refrigerant-side connection temperature. Thus the simultaneous temperature iteration updates the blended evaporator leaving temperature and blended condenser entering and leaving temperatures before reevaluating the capacity and EIR curves.
+
+\subsection{Iteration, Flow Allocation, and System Assembly}
+\label{iteration-flow-allocation-and-system-assembly}
+
+Cooling-only, heating-only, and simultaneous calculations under-relax their temperature estimates and stop when the largest temperature change is no greater than \(10^{-8}\) C or after 100 iterations. Heating and simultaneous load matching use up to 80 bounded bisection iterations. At convergence, the reported curve inputs, modifiers, power, heat transfer, and outlet temperatures describe the accepted state. The single-mode solvers explicitly reevaluate their final operating point after the temperature iteration.
+
+The parent \emph{CentralHeatPumpSystem} stages modules sequentially in input order. Each module receives no more than the remaining chilled-water, hot-water, and source flow. Heterogeneous modules retain their own capacities, curves, and connection-specific design flows. Bypass flow is mixed with the actual module outlet flows at the wrapper outlet. If all performance objects in a wrapper specify variable flow, the bank is variable flow. A constant-flow object or a legacy mixture of constant- and variable-flow objects makes the complete bank constant flow; mixed input produces a warning.
+
+\subsection{References}
+\label{references-008}
 
 Central Geothermal Systems, Applications Engineering Manual, Trane Company, April 2010, SYS-APM009-EN.
