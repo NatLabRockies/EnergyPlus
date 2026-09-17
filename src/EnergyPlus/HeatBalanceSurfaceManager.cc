@@ -2012,6 +2012,22 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                                 OutputProcessor::TimeStepType::Zone,
                                 OutputProcessor::StoreType::Average,
                                 surface.Name);
+            if (surface.SurfHasSurroundingSurfProperty) {
+                SetupOutputVariable(state,
+                                    "Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient",
+                                    Constant::Units::W_m2K,
+                                    state.dataHeatBalSurf->SurfHSrdSurfExt(loop),
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    surface.Name);
+                SetupOutputVariable(state,
+                                    "Surface Outside Face Surrounding Surfaces Average Temperature",
+                                    Constant::Units::C,
+                                    surface.SrdSurfTemp,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    surface.Name);
+            }
             SetupOutputVariable(state,
                                 "Surface Outside Face Thermal Radiation to Air Heat Transfer Rate",
                                 Constant::Units::W,
@@ -2054,7 +2070,6 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
         if (surface.Class == DataSurfaces::SurfaceClass::Floor || surface.Class == DataSurfaces::SurfaceClass::Wall ||
             surface.Class == DataSurfaces::SurfaceClass::IntMass || surface.Class == DataSurfaces::SurfaceClass::Roof ||
             surface.Class == DataSurfaces::SurfaceClass::Door) {
-            //      IF (DisplayAdvancedReportVariables) THEN  !CurrentModuleObject='Opaque Surfaces(Advanced)'
             SetupOutputVariable(state,
                                 "Surface Inside Face Conduction Heat Transfer Rate",
                                 Constant::Units::W,
@@ -2201,7 +2216,6 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                                     surface.Name);
             }
 
-            //      ENDIF
             // CurrentModuleObject='Opaque Surfaces'
 
             SetupOutputVariable(state,
@@ -2321,7 +2335,6 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 surface.Name);
         }
-        //    IF (DisplayAdvancedReportVariables) THEN  !CurrentModuleObject='Opaque Surfaces(Advanced)'
         SetupOutputVariable(state,
                             "Surface Inside Face Convection Classification Index",
                             Constant::Units::None,
@@ -2382,7 +2395,6 @@ void AllocateSurfaceHeatBalArrays(EnergyPlusData &state)
                             OutputProcessor::StoreType::Average,
                             surface.Name);
 
-        //     ENDIF
         if (state.dataGlobal->DisplayAdvancedReportVariables) {
             SetupOutputVariable(state,
                                 "Surface Construction Index",

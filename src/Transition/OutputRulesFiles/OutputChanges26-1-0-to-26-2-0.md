@@ -83,3 +83,15 @@ PR #11778 changes the `Surfaces by Class` table in the `Object Count Summary` re
 - `Overhead Door` surfaces are reported separately and are no longer included in the `Door` row.
 
 See pull request [#11778](https://github.com/NatLabRockies/EnergyPlus/pull/11778) for more details.
+
+### Surrounding-surface report variables
+
+PR #11796 restores two report variables that were documented but unavailable because their registrations were inadvertently removed:
+
+- `Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient`
+- `Surface Outside Face Surrounding Surfaces Average Temperature`
+
+The variables are available for exterior heat-transfer surfaces that use `SurfaceProperty:SurroundingSurfaces`. These are newly available
+report variables, not renames of existing variables, so no report-variable CSV transition is required.
+
+See pull request [#11796](https://github.com/NatLabRockies/EnergyPlus/pull/11796) for more details.
