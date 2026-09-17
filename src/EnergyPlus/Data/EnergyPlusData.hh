@@ -216,7 +216,7 @@ struct PhotovoltaicThermalCollectorsData;
 struct PhotovoltaicsData;
 struct PipeHeatTransferData;
 struct PipesData;
-struct PlantCentralGSHPData;
+struct PlantCentralHeatPumpSystemData;
 struct PlantChillersData;
 struct PlantCompTempSrcData;
 struct PlantCondLoopOperationData;
@@ -475,7 +475,7 @@ struct EnergyPlusData : BaseGlobalStruct
     std::unique_ptr<PhotovoltaicsData> dataPhotovoltaic;
     std::unique_ptr<PipeHeatTransferData> dataPipeHT;
     std::unique_ptr<PipesData> dataPipes;
-    std::unique_ptr<PlantCentralGSHPData> dataPlantCentralGSHP;
+    std::unique_ptr<PlantCentralHeatPumpSystemData> dataPlantCentralHeatPumpSystem;
     std::unique_ptr<PlantChillersData> dataPlantChillers;
     std::unique_ptr<PlantCompTempSrcData> dataPlantCompTempSrc;
     std::unique_ptr<PlantCondLoopOperationData> dataPlantCondLoopOp;

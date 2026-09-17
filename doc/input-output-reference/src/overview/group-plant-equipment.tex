@@ -7207,11 +7207,11 @@ The current heat transfer energy over the given reporting period of this compone
 
 \subsection{CentralHeatPumpSystem}\label{centralheatpumpsystem}
 
-This is a central geothermal application that contains one or more chiller-heaters centrally located in the building; the available chilled and/or hot water is then piped to the individual zones. Chiller-heaters used for this particular system can be of two types: 1) standard vapor-compression, non-reversible cycle chillers designed for heat recovery or 2) reversible-cycle, water-to-water heat pump chillers. Unlike a distributed ground source heat pump configuration where individual heat pumps are located in each zone, a centralized geothermal configuration has one or more chiller-heaters. Its function is to encapsulate the extra controls needed to turn individual chiller-heater modules on/off and whether they are to operate in cooling-only, heating-only or simultaneous cooling-heating mode and whether to connect the source water to the evaporator or condenser side. A variety of control schemes can be designed by setting schedules for both zone control types and individual chiller-heaters schedules.
+This central plant application contains one or more electric chiller-heater modules that serve chilled-water and hot-water loops and exchange residual heat with a source loop. Each module may operate in cooling-only, heating-only, balanced heat-recovery, cooling-dominant simultaneous, or heating-dominant simultaneous mode. In simultaneous operation one module may connect to all three loops: useful evaporator heat serves chilled water, useful condenser heat serves hot water, and only the residual is rejected to or extracted from the source.
 
-The fluid used in this central system is usually water, and there is no sharing of condenser or evaporator water between multiple machines. However, the control logic is such that the source water can be delivered to individual chiller-heaters depending on their operating mode, e.g., modules in simultaneous cooling-heating mode receive no source water, modules in heating-only mode can have source water directed to their evaporator, or modules in cooling-only mode can have source water directed to their condenser; the decision on which module(s) receives the source water dictated by the `smart' controls. The following figures illustrate node interconnections between this central geothermal application and plant and condenser loops in various situations.
+The source loop may contain water or another plant fluid such as glycol. Cooling-only operation connects the module condenser to the source. Heating-only operation connects the module evaporator to the source. Simultaneous operation connects the source only when the useful chilled-water and hot-water loads do not balance the refrigerant cycle. Source heat transfer is positive when heat is rejected to the source and negative when heat is extracted from it. The following figures illustrate representative loop connections and staging arrangements.
 
-The order of the multiple chiller-heaters' operation is assumed to be sequential. In other words, the very first chiller-heater will be called at first to see if it meets all loads that the central heat pump system should meet. If the chiller-heater meets all loads, the rest chiller-heaters are assumed to be turned off. If not, the following chiller-heater will be called to meet the remaining loads until all loads are met in the order as defined in the set of individual chiller-heater objects below. The order of individual chiller-heater modules needs to be carefully arranged in case users are intended to see the performance of various combinations of different sizes of chiller-heaters in a central heat pump system.
+Modules operate sequentially in input order. Each available module receives the remaining cooling and heating requests and no more than the remaining chilled-water, hot-water, and source flow. Its delivered loads and actual flows are subtracted before the next module is called. This preserves the capacities, curves, schedules, and connection-specific design flows of heterogeneous module banks.
 
 \begin{figure}[hbtp] % fig 76
     \centering
@@ -7231,7 +7231,7 @@ The order of the multiple chiller-heaters' operation is assumed to be sequential
     \caption{Diagram of a central heat pump system with one chiller-heater in heat recovery mode and two chiller-heaters in cooling-only mode \protect \label{fig:diagram-of-a-central-heat-pump-system-with-002}}
 \end{figure}
 
-In the above example, the cooling load needs 3 chiller-heaters and the heating load needs 1 chiller heater. Chiller 1 is in heat recovery mode and isolated from the ground source loop while chillers 2 and 3 are in cooling-only mode, their condensers rejecting heat to the ground source loop.
+In the above staging example, the cooling load needs three modules and the heating load needs one. The first module operates in balanced heat recovery while the remaining modules reject their condenser heat to the source. The production model can also route useful cooling, useful heating, and residual source rejection within a single cooling-dominant module.
 
 \begin{figure}[hbtp] % fig 79
     \centering
@@ -7239,7 +7239,7 @@ In the above example, the cooling load needs 3 chiller-heaters and the heating l
     \caption{Diagram of a central heat pump system with two chiller-heaters in heat recovery mode and one chiller-heater in heating-only mode \protect \label{fig:diagram-of-a-central-heat-pump-system-with-003}}
 \end{figure}
 
-In the above example, the heating load needs 3 chiller-heaters and the cooling load needs two chiller-heaters. Chillers 1 and 2 are in heat recovery mode and isolated from the ground source loop while chiller 3 is in heating-only mode, its evaporator extracting heat from the ground source loop.
+In the above staging example, the heating load needs three modules and the cooling load needs two. The first two modules operate in balanced heat recovery and the final module extracts evaporator heat from the source. The production model can also preserve useful chilled-water cooling and route the remaining evaporator heat to the source within a single heating-dominant module.
 
 Users are required to define three different nodes such as chilled water, hot water, and source water nodes. Only this central heat pump system will be metered, and individual chiller-heaters' energy will be available for reporting only, but not metered.
 
@@ -7275,11 +7275,11 @@ This alpha field contains the identifying name of the hot water outlet node.
 
 \paragraph{Field: Ancillary Power}\label{field-ancillary-power-000}
 
-This numeric field contains the ancillary power of the central heat pump system in watts.
+This numeric field contains the ancillary electric power of the central heat pump system in watts. It is added once while the system is active and is multiplied by the Ancillary Operation Schedule Name value.
 
 \paragraph{Field: Ancillary Operation Schedule Name}\label{field-ancillary-operation-schedule-name}
 
-This alpha field contains the identifying name of the ancillary power schedule.
+This optional alpha field contains the ancillary power schedule. A blank field means that ancillary power is continuously available. Heating-only and heating-dominant operation assign scheduled ancillary power to the heating electric end use; the remaining active modes assign it to cooling. An invalid nonblank schedule name is a fatal input error.
 
 \paragraph{Field Set: Individual Chiller-Heater Module Objects}\label{field-set-individual-chiller-heater-module-objects}
 
@@ -7313,7 +7313,7 @@ CentralHeatPumpSystem,
   HWInlet,                    !- Heating Loop Inlet Node Name
   HWOutlet,                   !- Heating Loop Outlet Node Name
   460,                        !- Ancillary Power {W}
-  ,                           !- Ancillary Operation Schedule Name
+  ,                           !- Ancillary Operation Schedule Name (blank = AlwaysOn)
   ChillerHeaterPerformance:Electric:EIR,  !- Chiller Heater Modules Object Type 1
   ChillerHeaterModule 1,      !- Chiller Heater Modules Performance Component Name 1
   ON,                         !- Chiller Heater Modules Control Schedule Name 1
@@ -7371,13 +7371,13 @@ CentralHeatPumpSystem,
 
 \paragraph{Chiller Heater System Cooling Electricity Energy {[}J{]}}\label{chiller-heater-system-cooling-electric-energy-j}
 
-These outputs are the sums of the cooling electric power consumption of the central heat pump system containing one or more child objects. Cooling Energy is metered on Cooling:Electricity, Electricity:Plant, and Electricity:Facility.
+These outputs are the sum of module cooling electric consumption and any scheduled ancillary power assigned to the cooling end use. Cooling Energy is metered on Cooling:Electricity, Electricity:Plant, and Electricity:Facility.
 
 \paragraph{Chiller Heater System Heating Electricity Rate {[}W{]}}\label{chiller-heater-system-heating-electric-power-w}
 
 \paragraph{Chiller Heater System Heating Electricity Energy {[}J{]}}\label{chiller-heater-system-heating-electric-energy-j}
 
-These outputs are the sums of the heating electric power consumption of the central heat pump system. Heating Energy is metered on Heating:Electricity, Electricity:Plant, and Electricity:Facility.
+These outputs are the sum of module heating electric consumption and any scheduled ancillary power assigned to the heating end use. Heating Energy is metered on Heating:Electricity, Electricity:Plant, and Electricity:Facility.
 
 \paragraph{Chiller Heater System Cooling Rate {[}W{]}}\label{chiller-heater-system-cooling-rate-w}
 
@@ -7395,7 +7395,7 @@ These outputs are the condenser heat transfer which is the heating delivered by 
 
 \paragraph{Chiller Heater System Source Heat Transfer Energy {[}J{]}}\label{chiller-heater-system-source-heat-transfer-energy-j}
 
-These outputs are heat transfer which is the heat rejected to a ground source loop or extracted from the source loop, depending on the operating modes of the chiller-heater modules. This is the sums of evaporator heat transfer of the chiller-heater modules in heating-only mode or heating dominant simultaneous cooling-heating mode while the sums of condenser heat transfer of the chiller-heater modules in cooling-only mode or cooling dominant simultaneous cooling-heating mode. Source Heat Transfer Energy is metered on HeatRejection:EnergyTransfer, EnergyTransfer:Plant, and EnergyTransfer:Facility.
+These outputs are the signed residual heat transfer at the source connection. A positive value is heat rejected to the source in cooling-only or cooling-dominant operation. A negative value is heat extracted from the source in heating-only or heating-dominant operation. Balanced heat recovery reports zero source transfer within numerical tolerance. Source Heat Transfer Energy is metered on HeatRejection:EnergyTransfer, EnergyTransfer:Plant, and EnergyTransfer:Facility.
 
 \paragraph{Chiller Heater System Cooling Inlet Temperature {[}C{]}}\label{chiller-heater-system-cooling-inlet-temperature-c}
 
@@ -7423,7 +7423,7 @@ These outputs are the source water inlet and outlet temperatures and flow rate.
 
 \subsection{ChillerHeaterPerformance:Electric:EIR}\label{chillerheaterperformancelectriceir}
 
-The performance of the chiller-heater will be defined by two sets of curves meant to describe unloading for: 1) cooling-only mode, and 2) heating-only mode or simultaneous cooling-heating mode. Reference conditions must be defined for both because each has its own set of three unloading curves based on their associated reference conditions. The cooling-mode curves are typically (but not always) based on condenser entering water temperature while the heating-only mode curves are typically based on condenser leaving water temperature. This chiller-heater object allows the user to specify whether to use condenser leaving or condenser entering as a dependent variable to differentiate, if necessary, the condenser temperature basis used to generate the cooling- and heating-only mode curves.
+The chiller-heater uses two sets of curves: one for cooling-only mode and one for heating-only and simultaneous cooling-heating modes. Each set contains capacity, EIR-temperature, and EIR-part-load curves with its own reference conditions. The selected EnteringCondenser or LeavingCondenser convention is applied independently to each curve set at both reference and operating conditions. Reference temperatures are rating conditions; they are not operating setpoints or equipment temperature limits.
 
 \subsubsection{Field: Name}\label{field-name-19-002}
 
@@ -7435,7 +7435,7 @@ This numeric field contains the reference cooling capacity of the evaporator in 
 
 \subsubsection{Field: Reference Cooling Mode COP}\label{field-reference-cooling-mode-cop}
 
-This numeric field contains the reference coefficient of performance of the evaporator for cooling. It must be based on the values of Reference Cooling Mode Leaving Chilled Water Temperature and Reference Cooling Mode Entering Condenser Water Temperature defined in the next two fields.
+This positive numeric field contains the reference evaporator cooling capacity divided by compressor electric power. It must be based on the Reference Cooling Mode Leaving Chilled Water Temperature and on either the reference entering or leaving condenser temperature selected by Cooling Mode Temperature Curve Condenser Water Independent Variable.
 
 \subsubsection{Field: Reference Cooling Mode Leaving Chilled Water Temperature}\label{field-reference-cooling-mode-leaving-chilled-water-temperature}
 
@@ -7451,45 +7451,43 @@ This numeric field contains the reference leaving condenser water temperature of
 
 \subsubsection{Field: Reference Heating Mode Cooling Capacity Ratio}\label{field-reference-heating-mode-cooling-capacity-ratio}
 
-This numeric field contains the evaporator's capacity during the reference heating-only or simultaneous cooling-heating mode as a ratio of reference cooling capacity. For example, the ratio may be expressed as follows:
+This positive numeric field is the reference evaporator capacity for heating-only and simultaneous modes divided by the Reference Cooling Mode Evaporator Capacity:
 
 \begin{equation}
-    Ratio = \frac{{EvapCapHt{g_{@Tchw,l = 6.67C,Tcond,l = 51.67C}}}}{{EvapCapC{{\lg }_{@Tchw,l = 6.67C,Tcond,l = 35.0C}}}}
+R_Q=\frac{\dot Q_{evap,ref,h}}{\dot Q_{evap,ref,c}}.
 \end{equation}
 
-where Tchw,l is the leaving chilled water temperature and Tcond,l is the leaving condenser water temperature representing the heating-mode and cooling-mode reference temperatures defined elsewhere in this object.
+The default is 0.75. The derived heating-mode reference evaporator capacity is used with the heating capacity curve. In heating-only operation the evaporator extracts heat from the source. In simultaneous operation the evaporator result is divided between useful chilled-water cooling and any residual source extraction.
 
-The default is 0.75. This field is used to determine evaporator capacity in heating-only mode or simultaneous cooling-heating mode, multiplying it by the value entered in the field of the Reference Cooling Mode Evaporator Capacity. Note that even when there is no cooling load, i.e., the machine is in heating-only mode, the evaporator must still run and extract heat from the source water. In heating-only mode, the leaving chilled water temperature (Tchw,l) may ~float depending on the evaporator water flow rate and the source water temperature. In simultaneous cooling and heating mode, the leaving chilled water temperature (Tchw,l) does not float but is determined by the chilled water setpoint controls. For both heating-only and simultaneous cooling and heating mode, the leaving condenser temperature (Tcond,l) is determined by the hot water supply setpoint controls. This value of Tchw,l, combined with Tcond,l is plugged into the CAPFT and EIRFT curves to determine the off-rated heating-mode evaporator capacity and associated compressor power.
+\subsubsection{Field: Reference Heating Mode Cooling Power Input Ratio}\label{field-reference-heating-mode-cooling-power-ratio}
 
-\subsubsection{Field: Reference Heating Mode Cooling Power Ratio}\label{field-reference-heating-mode-cooling-power-ratio}
-
-This numeric field contains the compressor power during simultaneous cooling-heating mode as a ratio of reference cooling compressor power. For example, the ratio may be expressed as follows:
+This positive numeric field is the heating-mode reference compressor power divided by the cooling-mode reference compressor power:
 
 \begin{equation}
-    Ratio = \frac{{Powe{r_{@Tchw,l = 6.67C,Tcond,l = 51.67C}}}}{{Powe{r_{@Tchw,l = 6.67C,Tcond,l = 35.0C}}}}
+R_P=\frac{P_{ref,h}}{P_{ref,c}}.
 \end{equation}
 
-The default value is 1.5. This field is used to determine full load compressor power at the simultaneous cooling-heating mode's reference chilled water leaving and condenser water leaving temperatures. Note: In heating-only mode, the chilled water leaving temperature floats so the EIRFT curve is used to modify the simultaneous cooling-heating full load compressor power value.
+The default value is 1.38. Together with the capacity ratio, it defines the heating curve set's evaporator-based reference COP. The heating EIR temperature and part-load curves modify this reference power at the final operating temperatures and PLR.
 
 \subsubsection{Field: Reference Heating Mode Leaving Chilled Water Temperature}\label{field-reference-heating-mode-leaving-chilled-water-temperature}
 
-This numeric field contains the reference leaving chilled water temperature of the evaporator in simultaneous cooling-heating mode in Celsius. This is typically the same as the reference cooling mode value and is used to create the heating-only mode and simultaneous cooling-heating mode unloading curves. The leaving chilled water temperature for the chiller-heater is not allowed to fall below this value during the heating-only mode and simultaneous cooling-heating mode. The default value is 6.67$^\circ$C.
+This numeric field contains the evaporator leaving temperature at which the heating and simultaneous curve set is normalized. It is typically the same as the cooling reference value. It is a rating temperature, not an operating low limit; the Heating Mode Entering Chilled Water Temperature Low Limit field provides the model's source-side low-temperature constraint. The default value is 6.67$^\circ$C.
 
 \subsubsection{Field: Reference Heating Mode Leaving Condenser Water Temperature}\label{field-reference-heating-mode-leaving-condenser-water-temperature}
 
-This numeric field contains the reference leaving condenser water temperature of the condenser in heating mode in Celsius. This field is typically controlled to the design hot water supply temperature, and used to create the heating-only mode and simultaneous cooling-heating mode unloading curves. The default value is 60.0$^\circ$C.
+This numeric field contains the condenser leaving temperature at which the heating and simultaneous curve set is normalized. It commonly corresponds to a manufacturer hot-water supply rating point. It does not impose an operating setpoint or maximum temperature. The default value is 60.0$^\circ$C.
 
 \subsubsection{Field: Reference Heating Mode Entering Condenser Water Temperature}\label{field-reference-heating-mode-entering-condenser-water-temperature}
 
-This numeric field contains the reference entering condenser water temperature of the condenser in heating mode in Celsius. This field typically represents the upper limit of the source water temperature. The default value is 29.44$^\circ$C.
+This numeric field contains the condenser entering temperature at which the heating and simultaneous curve set is normalized. In heating-only mode this is the hot-water return temperature. During simultaneous operation it is the flow-weighted refrigerant condenser entering temperature when hot-water flow and source-rejection flow share the condenser. The default value is 29.44$^\circ$C.
 
 \subsubsection{Field: Heating Mode Entering Chilled Water Temperature Low Limit}\label{field-heating-mode-entering-chilled-water-temperature-low-limit}
 
-This numeric field contains the low limit of the entering chilled water temperature in heating-only mode or simultaneous cooling-heating mode in Celsius. This field typically represents the lower limit of the source water temperature. If necessary, auxiliary heat will be activated to prevent source water temperature falling below the chilled water entering minimum. The default value is 12.2$^\circ$C.
+This numeric field supplies the source-side low-temperature constraint for heating-only and simultaneous operation. The model applies it as the minimum fluid temperature leaving the source-connected evaporator, despite the legacy field name. Source flow or load is limited so the outlet does not fall below this value; the object does not activate auxiliary heat. The default value is 12.2$^\circ$C.
 
 \subsubsection{Field: Chilled Water Flow Mode Type}\label{field-chilled-water-flow-mode-type}
 
-This alpha field contains the chilled water flow control mode. Valid water flow mode includes constant flow and variable flow, and the default water flow mode is constant flow.
+This alpha field selects ConstantFlow or VariableFlow for the module, with ConstantFlow as the default. Flow mode is resolved for the complete parent CentralHeatPumpSystem. A bank is variable flow only when every referenced performance object specifies VariableFlow. If the bank mixes constant- and variable-flow objects, EnergyPlus issues a warning and applies ConstantFlow consistently to every module in that wrapper.
 
 \subsubsection{Field: Design Chilled Water Flow Rate}\label{field-design-chilled-water-flow-rate-8}
 
@@ -7501,11 +7499,11 @@ This numeric field contains the design condenser water flow rate in m\(^{3}\)/s.
 
 \subsubsection{Field: Design Hot Water Flow Rate}\label{field-design-hot-water-flow-rate-2}
 
-This numeric field contains the design hot water flow rate in m\(^{3}\)/s. The minimum value and default value for this field are zero, and this field is autosizable.
+This numeric field contains the explicit design hot-water flow rate in m\(^{3}\)/s. The minimum and default are zero. This field is not autosizable. It supplies the module's hot-water connection flow limit and should be entered consistently with the intended heating capacity and temperature rise.
 
 \subsubsection{Field: Compressor Motor Efficiency}\label{field-compressor-motor-efficiency}
 
-This numeric field contains the fraction of efficiency of the compressor electrical energy consumption that must be rejected by the condenser. This value must be between 0.0 and 1.0, and the default value is 1.0.
+This numeric field is the fraction of compressor electric power delivered to the refrigerant cycle. The refrigerant condenser balance includes this fraction; the remaining motor loss is external to the modeled water-side cycle. The value must be from 0.0 through 1.0. A hermetic compressor normally uses 1.0, which is also the default.
 
 \subsubsection{Field: Cooling Mode Temperature Curve Condenser Water Independent Variable}\label{field-cooling-mode-temperature-curve-condenser-water-independent-variable}
 
@@ -7521,7 +7519,7 @@ This alpha field contains the name of a biquadratic performance curve (ref: Perf
 
 \subsubsection{Field: Cooling Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name}\label{field-cooling-mode-electric-input-to-cooling-output-ratio-function-of-part-load-ratio-curve-name}
 
-This alpha field contains the name of a performance curve (ref: Performance Curves) that parameterizes the variation of the energy input to cooling output ratio (EIR) as a function of the part-load ratio (EIRFPLR). The EIR is the inverse of the COP, and the part-load ratio is the actual cooling load divided by the available cooling capacity of the chiller-heater. This curve is generated by dividing the operating electric input power by the available full-load capacity at the specific operating temperatures. The curve output should decrease from 1 towards 0 as part-load ratio decreases from 1 to 0. Note that the bi-cubic formulation is generally only valid when LeavingCondenser variable is chosen for the field of Cooling Mode Condenser Water Temperature Curve Input Variable whereas the quadratic curve can be used both choices, i.e., LeavingCondenser and EnteringCondenser. The output of this curve is then multiplied by the reference full-load EIR and the EIRFT to give the EIR at the specific temperatures and part-load ratio at which the chiller-heater is operating. This curve should have a value of 1.0 when the part-load ratio equals 1.0. The curve should be valid for the range of part-load ratios anticipated for the simulation.
+This alpha field names the cooling EIR part-load modifier curve. It may be univariate in PLR or bicubic in condenser temperature and PLR. For a bicubic curve, the first independent variable is the configured entering or leaving condenser temperature and the second is PLR. Its PLR domain must have a nonnegative minimum, include 1.0, and contain the Cooling Mode Cooling Capacity Optimum Part Load Ratio. The curve should equal 1.0 at PLR 1.0 and the cooling reference condenser temperature. The model evaluates it at the final operating PLR and condenser temperature.
 
 \subsubsection{Field: Cooling Mode Cooling Capacity Optimum Part Load Ratio}\label{field-cooling-mode-cooling-capacity-optimum-part-load-ratio}
 
@@ -7529,7 +7527,7 @@ This numeric field contains the chiller-heater's optimum part-load ratio. This i
 
 \subsubsection{Field: Heating Mode Temperature Curve Condenser Water Independent Variable}\label{field-heating-mode-temperature-curve-condenser-water-independent-variable}
 
-This alpha field determines whether the entering or leaving condenser water temperature is used in the heating mode unloading performance curves that follow. Valid variables include EnteringCondenser and LeavingCondenser, and the default variable is EnteringCondenser. The condenser temperature used for the cooling mode unloading performance curves will be dependent on this field input. For example, leaving condenser water temperature will be used when the LeavingCondenser is chosen, otherwise entering condenser water temperature.
+This alpha field determines whether the actual entering or leaving refrigerant condenser temperature is used by the heating and simultaneous performance curves. Valid choices are EnteringCondenser and LeavingCondenser; the default is LeavingCondenser. During simultaneous operation, the selected temperature is the final flow-weighted condenser connection temperature when useful hot-water heating and source rejection share the condenser.
 
 \subsubsection{Field: Heating Mode Cooling Capacity Function of Temperature Curve Name}\label{field-heating-mode-cooling-capacity-function-of-temperature-curve-name}
 
@@ -7541,7 +7539,7 @@ This alpha field contains the name of a biquadratic performance curve (ref: Perf
 
 \subsubsection{Field: Heating Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name}\label{field-heating-mode-electric-input-to-cooling-output-ratio-function-of-part-load-ratio-curve-name}
 
-This alpha field contains the name of a performance curve (ref: Performance Curves) that parameterizes the variation of the energy input to cooling output ratio (EIR) as a function of the part-load ratio (EIRFPLR). The EIR is the inverse of the COP, and the part-load ratio is the actual evaporator load divided by the available evaporator capacity of the chiller-heater at the reference heating and simultaneous cooling-heating mode temperatures. This curve is generated by dividing the operating electric input power by the available full-load capacity (do not divide by load) at the specific operating temperatures. The curve output should decrease from 1 towards 0 as part-load ratio decreases from 1 to 0. Note that the bicubic formulation below can only be used when the chiller-heater uses a variable speed compressor motor drive. It is also generally valid only when LeavingCondenser variable is chosen for the field of Cooling Mode Condenser Water Temperature Curve Input Variable whereas the quadratic curve can be used both choices, i.e., LeavingCondenser and EnteringCondenser. The output of this curve is then multiplied by the reference full-load EIR (inverse of the reference COP) and the EIRFT to give the EIR at the specific temperatures and part-load ratio at which the chiller-heater is operating. This curve should have a value of 1.0 when the part-load ratio equals 1.0. The curve should be valid for the range of part-load ratios anticipated for the simulation.
+This alpha field names the heating and simultaneous EIR part-load modifier curve. It may be univariate in PLR or bicubic in condenser temperature and PLR. For a bicubic curve, the first independent variable is the heating mode's configured entering or leaving condenser temperature and the second is PLR. Its PLR domain must have a nonnegative minimum, include 1.0, and contain the Heating Mode Cooling Capacity Optimum Part Load Ratio. The curve should equal 1.0 at PLR 1.0 and the corresponding heating reference condenser temperature. Heating-only and simultaneous solvers reevaluate it at the final operating PLR and condenser temperature.
 
 \subsubsection{Field: Heating Mode Cooling Capacity Optimum Part Load Ratio}\label{field-heating-mode-cooling-capacity-optimum-part-load-ratio}
 
@@ -7549,7 +7547,7 @@ This numeric field contains the chiller-heater's optimum part-load ratio during 
 
 \subsubsection{Field: Sizing Factor}\label{field-sizing-factor-12}
 
-This optional numeric field allows the user to specify a sizing factor for this component. The Sizing Factor is a multiplier on the design plant chilled water loop flow rate associated with the chiller-heaters parent \hyperref[centralheatpumpsystem]{CentralHeatPumpSystem} object. The chiller-heater's modified chilled water flow can then be used to autocalculate the Design Condenser Water Flow Rate and Reference Cooling Mode Evaporator Capacity values. In general, it is best to autosize all three fields or set fixed values for all three fields.
+This optional positive numeric field multiplies the autosized Reference Cooling Mode Evaporator Capacity, Design Chilled Water Flow Rate, and Design Condenser Water Flow Rate for this performance object. It does not calculate or scale the explicit Design Hot Water Flow Rate. In general, use consistent hard-sized values or autosize all fields that support autosizing.
 
 An example of this statement in an IDF is:
 
@@ -7663,13 +7661,13 @@ This output represents the operating mode of the chiller-heater module. Two sing
     heating dominant simultaneous cooling-heating mode.
 \end{enumerate}
 
-The first mode 0 is reported when the chiller-heater is turned off. The next two modes 2 and 3 are reported when the chiller-heater provides only either cooling or heating, respectively. The last three modes 3 to 5 indicate when the chiller-heater is in a simultaneous cooling-heating mode. Mode 3 indicates the chiller-heaters provides simultaneous cooling and heating \textbf{\emph{without}} heat exchange with the ground source. Mode 4 denotes that at least one of the chiller-heater modules in the central heat pump system provides both cooling and heating, and the chiller-heater is meeting remaining cooling demand (see Figure~\ref{fig:diagram-of-a-central-heat-pump-system-with-002}. Diagram of a central heat pump system with one chiller-heater in heat recovery mode and two chiller-heaters in cooling-only mode) Similarly, mode 5 indicates that at least one of the chiller-heater modules in the central heat pump system is in the heat recovery mode, and the chiller-heater is meeting remaining heating demand (see Figure~\ref{fig:diagram-of-a-central-heat-pump-system-with-003}).
+Mode 0 is off. Modes 1 and 2 are cooling-only and heating-only, respectively. Modes 3 through 5 are simultaneous. Mode 3 is balanced heat recovery and has no source heat transfer within numerical tolerance. Mode 4 is cooling-dominant: the module serves useful cooling and heating and rejects all residual condenser heat to the source. Mode 5 is heating-dominant: the module preserves useful chilled-water cooling and extracts the remaining evaporator heat from the source. Thus a mode 4 or 5 module can have nonzero flow on all three connections.
 
 Note that the decision to operate individual chiller-heater modules is solely dependent on the chiller-heater schedule and loads. A fraction may appear in case the chiller-heater mode varies within a zone time step. In this particular case, users may define a detailed reporting frequency for this output variable.
 
 \subsubsection{Chiller Heater Part Load Ratio Unit \textless{}x\textgreater{} \protect\hyperlink{section-1}{~}}\label{chiller-heater-part-load-ratio-unit-x}
 
-This output is the ratio of the evaporator heat transfer rate plus the false load heat transfer rate (if applicable) to the available chiller-heater capacity. This value is used to determine ChillerEIRFPLR.
+This output is the final operating part-load ratio used to evaluate the EIRFPLR curve. Below the curve's minimum PLR, the reported PLR remains at the minimum and Cycling Ratio decreases to meet the load. It therefore corresponds to the same accepted operating point as the reported curve modifiers, power, heat transfer, and false load.
 
 \subsubsection{Chiller Heater Cycling Ratio Unit \textless{}x\textgreater{} \protect\hyperlink{section-1}{~}}\label{chiller-heater-cycling-ratio-unit-x}
 
@@ -7679,13 +7677,13 @@ The cycling ratio is the amount of time the chiller-heater operates during each 
 
 \subsubsection{Chiller Heater Cooling Electricity Energy Unit \textless{}x\textgreater{} {[}J{]}}\label{chiller-heater-cooling-electric-energy-unit-x-j}
 
-These outputs are the cooling electric power consumption of the chiller-heater.
+These outputs report the cooling-mode electric power and energy consumption of the chiller-heater.
 
 \subsubsection{Chiller Heater Heating Electricity Rate Unit \textless{}x\textgreater{} {[}W{]}}\label{chiller-heater-heating-electric-power-unit-x-w}
 
 \subsubsection{Chiller Heater Heating Electricity Energy Unit \textless{}x\textgreater{} {[}J{]}}\label{chiller-heater-heating-electric-energy-unit-x-j}
 
-These outputs are the heating electric power consumption of the chiller-heater.
+These outputs report the heating-mode electric power and energy consumption of the chiller-heater.
 
 \subsubsection{Chiller Heater Cooling Rate Unit \textless{}x\textgreater{} {[}W{]}}\label{chiller-heater-cooling-rate-unit-x-w}
 
@@ -7699,40 +7697,40 @@ These outputs are the evaporator heat transfer which is the cooling delivered by
 
 These outputs are the heat transfer rate and total heat transfer due to false loading of the chiller-heater. When the chiller-heater part-load ratio is below the minimum unloading ratio, the chiller-heater false loads (e.g.~hot-gas bypass) to further reduce capacity.
 
-\subsubsection{Chiller Heater Condenser Heat Transfer Rate Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-condenser-heat-transfer-rate-unit-x-c}
+\subsubsection{Chiller Heater Condenser Heat Transfer Rate Unit \textless{}x\textgreater{} {[}W{]}}\label{chiller-heater-condenser-heat-transfer-rate-unit-x-w}
 
-\subsubsection{Chiller Heater Condenser Heat Transfer Energy Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-condenser-heat-transfer-energy-unit-x-c}
+\subsubsection{Chiller Heater Condenser Heat Transfer Energy Unit \textless{}x\textgreater{} {[}J{]}}\label{chiller-heater-condenser-heat-transfer-energy-unit-x-j}
 
-These outputs are the heat transfer which is the heating delivered by the chiller-heater module in heating mode.
+These outputs are total refrigerant condenser heat transfer. In cooling-only mode it is rejected to the source. In heating-only mode it is delivered to hot water. In simultaneous modes it is divided between useful hot-water heating and any residual source rejection.
 
 \subsubsection{Chiller Heater Evaporator Inlet Temperature Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-evaporator-inlet-temperature-unit-x-c}
 
 \subsubsection{Chiller Heater Evaporator Outlet Temperature Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-evaporator-outlet-temperature-unit-x-c}
 
-\subsubsection{Chiller Heater Evaporator Mass Flow Rate Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-evaporator-mass-flow-rate-unit-x-c}
+\subsubsection{Chiller Heater Evaporator Mass Flow Rate Unit \textless{}x\textgreater{} {[}kg/s{]}}\label{chiller-heater-evaporator-mass-flow-rate-unit-x-kgs}
 
-These outputs are the evaporator water inlet and outlet temperatures and flow rate. Note that these represent the chilled water temperatures and flow rate in cooling mode or the source water temperature and flow rate in heating mode.
+These outputs are the final refrigerant evaporator inlet and outlet temperatures and total flow. They represent chilled water in cooling-only mode and source fluid in heating-only mode. In simultaneous operation they may be flow-weighted values combining useful chilled-water cooling with source extraction.
 
 \subsubsection{Chiller Heater Condenser Inlet Temperature Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-condenser-inlet-temperature-unit-x-c}
 
 \subsubsection{Chiller Heater Condenser Outlet Temperature Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-condenser-outlet-temperature-unit-x-c}
 
-\subsubsection{Chiller Heater Condenser Mass Flow Rate Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-condenser-mass-flow-rate-unit-x-c}
+\subsubsection{Chiller Heater Condenser Mass Flow Rate Unit \textless{}x\textgreater{} {[}kg/s{]}}\label{chiller-heater-condenser-mass-flow-rate-unit-x-kgs}
 
-These outputs are the condenser water inlet and outlet temperatures and flow rate. Note that these represent the hot water temperatures and flow rate in heating mode or the source water temperature and flow rate in cooling mode.
+These outputs are the final refrigerant condenser inlet and outlet temperatures and total flow. They represent source fluid in cooling-only mode and hot water in heating-only mode. In simultaneous operation they may be flow-weighted values combining useful hot-water heating with source rejection.
 
-\subsubsection{Chiller Heater COP Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-cop-unit-x-c}
+\subsubsection{Chiller Heater COP Unit \textless{}x\textgreater{} {[]}}\label{chiller-heater-cop-unit-x}
 
-This output is the coefficient of performance for the chiller-heater. It is calculated as the evaporator heat transfer rate divided by the chiller-heater electric power.
+This output is the coefficient of performance at the accepted operating point. In cooling-only mode it is evaporator heat including false load divided by compressor electric power. In heating-only and simultaneous modes it is total condenser heat divided by compressor electric power.
 
-\subsubsection{Chiller Heater Capacity Temperature Modifier Multiplier Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-capacity-temperature-modifier-multiplier-unit-x-c}
+\subsubsection{Chiller Heater Capacity Temperature Modifier Multiplier Unit \textless{}x\textgreater{} {[]}}\label{chiller-heater-capacity-temperature-modifier-multiplier-unit-x}
 
-This is the output of the curve object Cooling Capacity Function of Temperature Curve.
+This is the dimensionless output of the active Capacity Function of Temperature Curve at the final evaporator and configured condenser temperatures.
 
-\subsubsection{Chiller Heater EIR Temperature Modifier Multiplier Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-eir-temperature-modifier-multiplier-unit-x-c}
+\subsubsection{Chiller Heater EIR Temperature Modifier Multiplier Unit \textless{}x\textgreater{} {[]}}\label{chiller-heater-eir-temperature-modifier-multiplier-unit-x}
 
-This is the output of the curve object Electric Input to Cooling Output Ratio Function of Temperature Curve.
+This is the dimensionless output of the active Electric Input Ratio Function of Temperature Curve at the final temperatures.
 
-\subsubsection{Chiller Heater EIR Part Load Modifier Multiplier Unit \textless{}x\textgreater{} {[}C{]}}\label{chiller-heater-eir-part-load-modifier-multiplier-unit-x-c}
+\subsubsection{Chiller Heater EIR Part Load Modifier Multiplier Unit \textless{}x\textgreater{} {[]}}\label{chiller-heater-eir-part-load-modifier-multiplier-unit-x}
 
-This is the output of the curve object Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve.
+This is the dimensionless output of the active Electric Input Ratio Function of Part Load Ratio Curve at the final PLR and, for a bicubic curve, the final configured condenser temperature.

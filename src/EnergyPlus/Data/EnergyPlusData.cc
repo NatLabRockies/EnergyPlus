@@ -204,7 +204,7 @@ EnergyPlusData::EnergyPlusData()
     this->dataPhotovoltaicThermalCollector = std::make_unique<PhotovoltaicThermalCollectorsData>();
     this->dataPipeHT = std::make_unique<PipeHeatTransferData>();
     this->dataPipes = std::make_unique<PipesData>();
-    this->dataPlantCentralGSHP = std::make_unique<PlantCentralGSHPData>();
+    this->dataPlantCentralHeatPumpSystem = std::make_unique<PlantCentralHeatPumpSystemData>();
     this->dataPlantChillers = std::make_unique<PlantChillersData>();
     this->dataPlantCompTempSrc = std::make_unique<PlantCompTempSrcData>();
     this->dataPlantCondLoopOp = std::make_unique<PlantCondLoopOperationData>();
@@ -464,7 +464,7 @@ void EnergyPlusData::clear_state()
     this->dataPhotovoltaicThermalCollector->clear_state();
     this->dataPipeHT->clear_state();
     this->dataPipes->clear_state();
-    this->dataPlantCentralGSHP->clear_state();
+    this->dataPlantCentralHeatPumpSystem->clear_state();
     this->dataPlantChillers->clear_state();
     this->dataPlantCompTempSrc->clear_state();
     this->dataPlantCondLoopOp->clear_state();
@@ -740,7 +740,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataPhotovoltaicThermalCollector->init_constant_state(state);
     this->dataPipeHT->init_constant_state(state);
     this->dataPipes->init_constant_state(state);
-    this->dataPlantCentralGSHP->init_constant_state(state);
+    this->dataPlantCentralHeatPumpSystem->init_constant_state(state);
     this->dataPlantChillers->init_constant_state(state);
     this->dataPlantCompTempSrc->init_constant_state(state);
     this->dataPlantCondLoopOp->init_constant_state(state);
@@ -1005,7 +1005,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataPhotovoltaicThermalCollector->init_state(state);
     this->dataPipeHT->init_state(state);
     this->dataPipes->init_state(state);
-    this->dataPlantCentralGSHP->init_state(state);
+    this->dataPlantCentralHeatPumpSystem->init_state(state);
     this->dataPlantChillers->init_state(state);
     this->dataPlantCompTempSrc->init_state(state);
     this->dataPlantCondLoopOp->init_state(state);

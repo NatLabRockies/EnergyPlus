@@ -102,7 +102,7 @@
 #include <EnergyPlus/PipeHeatTransfer.hh>
 #include <EnergyPlus/Pipes.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
-#include <EnergyPlus/PlantCentralGSHP.hh>
+#include <EnergyPlus/PlantCentralHeatPumpSystem.hh>
 #include <EnergyPlus/PlantChillers.hh>
 #include <EnergyPlus/PlantComponentTemperatureSources.hh>
 #include <EnergyPlus/PlantHeatExchangerFluidToFluid.hh>
@@ -1342,8 +1342,8 @@ void GetPlantInput(EnergyPlusData &state)
                         this_comp.compPtr = PhotovoltaicThermalCollectors::PVTCollectorStruct::factory(state, CompNames(CompNum));
                         break;
                     }
-                    case PlantEquipmentType::CentralGroundSourceHeatPump: {
-                        this_comp.compPtr = PlantCentralGSHP::WrapperSpecs::factory(state, CompNames(CompNum));
+                    case PlantEquipmentType::CentralHeatPumpSystem: {
+                        this_comp.compPtr = PlantCentralHeatPumpSystem::CentralHeatPumpSystem::factory(state, CompNames(CompNum));
                         // now deal with demand components of the ZoneHVAC type served by ControlCompOutput
                         break;
                     }
@@ -4401,7 +4401,7 @@ void SetupBranchControlTypes(EnergyPlusData &state)
                             this_component.HowLoadServed = DataPlant::HowMet::PassiveCap;
                         }
                     } break;
-                    case DataPlant::PlantEquipmentType::CentralGroundSourceHeatPump: { // 86
+                    case DataPlant::PlantEquipmentType::CentralHeatPumpSystem: { // 86
                         this_component.FlowCtrl = DataBranchAirLoopPlant::ControlType::Active;
                         if (LoopSideCtr == LoopSideLocation::Demand) {
                             this_component.FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;

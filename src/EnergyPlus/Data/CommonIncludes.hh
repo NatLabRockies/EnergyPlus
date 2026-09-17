@@ -228,7 +228,7 @@
 #include <EnergyPlus/Pipes.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
-#include <EnergyPlus/PlantCentralGSHP.hh>
+#include <EnergyPlus/PlantCentralHeatPumpSystem.hh>
 #include <EnergyPlus/PlantChillers.hh>
 #include <EnergyPlus/PlantComponentTemperatureSources.hh>
 #include <EnergyPlus/PlantCondLoopOperation.hh>

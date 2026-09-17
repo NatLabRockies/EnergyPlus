@@ -510,8 +510,8 @@ set(SRC
     Plant/ReportLoopData.hh
     Plant/SplitterData.hh
     Plant/Subcomponents.hh
-    PlantCentralGSHP.cc
-    PlantCentralGSHP.hh
+    PlantCentralHeatPumpSystem.cc
+    PlantCentralHeatPumpSystem.hh
     PlantChillers.cc
     PlantChillers.hh
     PlantComponent.hh
