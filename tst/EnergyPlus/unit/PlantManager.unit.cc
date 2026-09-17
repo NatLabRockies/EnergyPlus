@@ -411,6 +411,139 @@ namespace PlantManager {
         }
     }
 
+    TEST_F(EnergyPlusFixture, PlantManager_RevisePlantCallingOrderHandlesGenuineCycle)
+    {
+        // Reproduces the mutual-heat-recovery pattern from
+        // PlantLoopHeatPump_EIR_Large-Office-2-AWHP-DedHR-AuxBoiler-Pri-Sec-HW.idf, where loop 2's supply side
+        // demands on loop 4's demand side, and loop 4's supply side demands on loop 2's demand side. Combined
+        // with each loop's own demand-before-supply requirement, this forms a genuine, unsatisfiable cycle:
+        // 2D -> 2S -> 4D -> 4S -> 2D. There is no ordering that honors every constraint, so the function should
+        // still terminate (bounded by TotNumHalfLoops revisions) and always leave demand-before-supply intact for
+        // every loop, even though the inter-loop constraints cannot all be satisfied simultaneously.
+        state->init_state(*state);
+        state->dataPlnt->TotNumLoops = 4;
+        state->dataPlnt->TotNumHalfLoops = 8;
+        state->dataPlnt->PlantLoop.allocate(4);
+        state->dataPlnt->PlantCallingOrderInfo.allocate(8);
+
+        auto connectLoopSides =
+            [&](int loopNum, LoopSideLocation loopSide, int connectedLoopNum, LoopSideLocation connectedLoopSide, bool loopDemandsOnRemote) {
+                auto &connected = state->dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
+                connected.TotalConnected = 1;
+                connected.Connected.allocate(1);
+                connected.Connected(1).LoopNum = connectedLoopNum;
+                connected.Connected(1).LoopSideNum = connectedLoopSide;
+                connected.Connected(1).LoopDemandsOnRemote = loopDemandsOnRemote;
+            };
+        auto addDependency = [&](int beforeLoopNum, LoopSideLocation beforeLoopSide, int afterLoopNum, LoopSideLocation afterLoopSide) {
+            connectLoopSides(beforeLoopNum, beforeLoopSide, afterLoopNum, afterLoopSide, true);
+            connectLoopSides(afterLoopNum, afterLoopSide, beforeLoopNum, beforeLoopSide, false);
+        };
+
+        // 2S -> 4D and 4S -> 2D, which together with 2D -> 2S and 4D -> 4S closes the cycle.
+        addDependency(2, LoopSideLocation::Supply, 4, LoopSideLocation::Demand);
+        addDependency(4, LoopSideLocation::Supply, 2, LoopSideLocation::Demand);
+
+        for (int loopNum = 1; loopNum <= state->dataPlnt->TotNumLoops; ++loopNum) {
+            state->dataPlnt->PlantCallingOrderInfo(loopNum).LoopIndex = loopNum;
+            state->dataPlnt->PlantCallingOrderInfo(loopNum).LoopSide = LoopSideLocation::Demand;
+            state->dataPlnt->PlantCallingOrderInfo(loopNum + state->dataPlnt->TotNumLoops).LoopIndex = loopNum;
+            state->dataPlnt->PlantCallingOrderInfo(loopNum + state->dataPlnt->TotNumLoops).LoopSide = LoopSideLocation::Supply;
+        }
+
+        ASSERT_NO_THROW(RevisePlantCallingOrder(*state));
+
+        EXPECT_TRUE(compare_err_stream_substring(
+            "RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side requirements"));
+
+        for (int loopNum = 1; loopNum <= state->dataPlnt->TotNumLoops; ++loopNum) {
+            EXPECT_LT(FindLoopSideInCallingOrder(*state, loopNum, LoopSideLocation::Demand),
+                      FindLoopSideInCallingOrder(*state, loopNum, LoopSideLocation::Supply));
+        }
+
+        // every half loop should still appear exactly once
+        std::array<bool, 8> seen = {};
+        for (int callingIndex = 1; callingIndex <= state->dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &callingOrderEntry = state->dataPlnt->PlantCallingOrderInfo(callingIndex);
+            int slot = (callingOrderEntry.LoopIndex - 1) * 2 + (callingOrderEntry.LoopSide == LoopSideLocation::Supply ? 1 : 0);
+            ASSERT_FALSE(seen[slot]);
+            seen[slot] = true;
+        }
+
+        // calling it again from the settled (but unresolved) state should be deterministic
+        std::array<std::pair<int, LoopSideLocation>, 8> firstResult;
+        for (int callingIndex = 1; callingIndex <= state->dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &callingOrderEntry = state->dataPlnt->PlantCallingOrderInfo(callingIndex);
+            firstResult[callingIndex - 1] = {callingOrderEntry.LoopIndex, callingOrderEntry.LoopSide};
+        }
+
+        RevisePlantCallingOrder(*state);
+
+        for (int callingIndex = 1; callingIndex <= state->dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &callingOrderEntry = state->dataPlnt->PlantCallingOrderInfo(callingIndex);
+            EXPECT_EQ(firstResult[callingIndex - 1].first, callingOrderEntry.LoopIndex);
+            EXPECT_EQ(firstResult[callingIndex - 1].second, callingOrderEntry.LoopSide);
+        }
+    }
+
+    TEST_F(EnergyPlusFixture, PlantManager_RevisePlantCallingOrderCycleUnaffectedByUnrelatedLoop)
+    {
+        // An unconnected loop appended to the same cyclic pair from
+        // PlantManager_RevisePlantCallingOrderHandlesGenuineCycle should not change the relative order the
+        // cyclic loops settle into.
+        auto runCycle = [](EnergyPlusFixture *self, int totNumLoops) {
+            self->state->init_state(*self->state);
+            self->state->dataPlnt->TotNumLoops = totNumLoops;
+            self->state->dataPlnt->TotNumHalfLoops = totNumLoops * 2;
+            self->state->dataPlnt->PlantLoop.allocate(totNumLoops);
+            self->state->dataPlnt->PlantCallingOrderInfo.allocate(totNumLoops * 2);
+
+            auto connectLoopSides = [&](int loopNum, LoopSideLocation loopSide, int connectedLoopNum, LoopSideLocation connectedLoopSide,
+                                         bool loopDemandsOnRemote) {
+                auto &connected = self->state->dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
+                connected.TotalConnected = 1;
+                connected.Connected.allocate(1);
+                connected.Connected(1).LoopNum = connectedLoopNum;
+                connected.Connected(1).LoopSideNum = connectedLoopSide;
+                connected.Connected(1).LoopDemandsOnRemote = loopDemandsOnRemote;
+            };
+            auto addDependency = [&](int beforeLoopNum, LoopSideLocation beforeLoopSide, int afterLoopNum, LoopSideLocation afterLoopSide) {
+                connectLoopSides(beforeLoopNum, beforeLoopSide, afterLoopNum, afterLoopSide, true);
+                connectLoopSides(afterLoopNum, afterLoopSide, beforeLoopNum, beforeLoopSide, false);
+            };
+
+            addDependency(2, LoopSideLocation::Supply, 4, LoopSideLocation::Demand);
+            addDependency(4, LoopSideLocation::Supply, 2, LoopSideLocation::Demand);
+
+            for (int loopNum = 1; loopNum <= totNumLoops; ++loopNum) {
+                self->state->dataPlnt->PlantCallingOrderInfo(loopNum).LoopIndex = loopNum;
+                self->state->dataPlnt->PlantCallingOrderInfo(loopNum).LoopSide = LoopSideLocation::Demand;
+                self->state->dataPlnt->PlantCallingOrderInfo(loopNum + totNumLoops).LoopIndex = loopNum;
+                self->state->dataPlnt->PlantCallingOrderInfo(loopNum + totNumLoops).LoopSide = LoopSideLocation::Supply;
+            }
+
+            RevisePlantCallingOrder(*self->state);
+
+            std::vector<std::pair<int, LoopSideLocation>> cyclicOrder;
+            for (int callingIndex = 1; callingIndex <= self->state->dataPlnt->TotNumHalfLoops; ++callingIndex) {
+                auto const &callingOrderEntry = self->state->dataPlnt->PlantCallingOrderInfo(callingIndex);
+                if (callingOrderEntry.LoopIndex == 2 || callingOrderEntry.LoopIndex == 4) {
+                    cyclicOrder.emplace_back(callingOrderEntry.LoopIndex, callingOrderEntry.LoopSide);
+                }
+            }
+            return cyclicOrder;
+        };
+
+        auto withoutUnrelatedLoop = runCycle(this, 4);
+        auto withUnrelatedLoop = runCycle(this, 5); // loop 5 is unconnected
+
+        ASSERT_EQ(withoutUnrelatedLoop.size(), withUnrelatedLoop.size());
+        for (std::size_t i = 0; i < withoutUnrelatedLoop.size(); ++i) {
+            EXPECT_EQ(withoutUnrelatedLoop[i].first, withUnrelatedLoop[i].first);
+            EXPECT_EQ(withoutUnrelatedLoop[i].second, withUnrelatedLoop[i].second);
+        }
+    }
+
     TEST_F(EnergyPlusFixture, PlantManager_CheckPlantEquipmentCtrlType)
     {
         // Check size and alignment of DataPlant::PlantEquipmentCtrlType
