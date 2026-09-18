@@ -52,6 +52,16 @@ These are new report variables, not renames of existing report variables, so no 
 
 See pull request [#11750](https://github.com/NatLabRockies/EnergyPlus/pull/11750)
 
+### Zone Standard Mean Radiant Temperature report variable
+
+PR #11718 adds the `Zone Standard Mean Radiant Temperature` report variable, reported in degrees Celsius as a zone timestep average with the zone name as the output key. It is available for zones that use the `ZoneMRTCalculation` object and reports the standard mean radiant temperature based on the zone's heat-transfer surfaces and current inside-face thermal absorptance weighting.
+
+This output remains the standard MRT even when `ZoneMRTCalculation` changes the `Zone Mean Radiant Temperature` used for controls and other reporting. If the weighting is negligible, it falls back to the zone mean air temperature and EnergyPlus issues a warning.
+
+This is a new report variable, not a rename of an existing report variable, so no report-variable CSV transition is required.
+
+See pull request [#11718](https://github.com/NatLabRockies/EnergyPlus/pull/11718)
+
 ### EIO Material Details absorptance columns
 
 PR #11750 expands the `Material Details` record in `eplusout.eio`. The three absorptance columns
