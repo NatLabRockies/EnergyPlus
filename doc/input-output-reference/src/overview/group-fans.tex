@@ -48,7 +48,7 @@ The name of an air system node at the outlet of the fan. This field is required.
 
 \paragraph{Field: Design Maximum Air Flow Rate}\label{field-design-air-flow-fansysmodel}
 
-This numeric field is the design volume flow rate of the fan as installed in the HVAC system, in m\(^{3}\)/s. This volume flow rate is converted to a mass flow rate using the altitude-adjusted standard density of dry air at 20~°C dry-bulb temperature. This is the full-speed flow rate and is the upper limit for fans that can vary their flow rate. This field can be autosized.
+This numeric field is the design volume flow rate of the fan as installed in the HVAC system, in m\(^{3}\)/s. This volume flow rate is converted to a mass flow rate using the altitude-adjusted standard density of dry air at \SI{20}{\celsius} dry-bulb temperature. This is the full-speed flow rate and is the upper limit for fans that can vary their flow rate. This field can be autosized.
 
 \paragraph{Field: Speed Control Method}\label{field-speed-method-fansysmodel}
 
@@ -300,15 +300,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-000}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency}
 
@@ -385,15 +387,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-1}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-1}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-1}
 
@@ -496,15 +500,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-2}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-2}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Fan Power Minimum Flow Rate Input Method}\label{field-fan-power-minimum-flow-rate-input-method}
 
@@ -546,37 +552,43 @@ The fraction of the motor heat that is added to the air stream. A value of 0 mea
 
 \paragraph{Field: Fan Power Coefficient 1}\label{field-fan-power-coefficient-1}
 
-The constant coefficient (C\(_{1}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The constant coefficient (\(C_1\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 2}\label{field-fan-power-coefficient-2}
 
-The linear coefficient (C\(_{2}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The linear coefficient (\(C_2\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 3}\label{field-fan-power-coefficient-3}
 
-The quadratic coefficient (C\(_{3}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The quadratic coefficient (\(C_3\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 4}\label{field-fan-power-coefficient-4}
 
-The cubic coefficient (C\(_{1}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The cubic coefficient (\(C_4\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-\begin{lstlisting}
-       PLF = C$_{1}$ + C$_{2}$$^{.}$ FF + C$_{3}$$^{.}$ FF$^{2 +}$ C$_{4}$$^{.}$ FF$^{3}$ + C$_{5}$$^{.}$ FF$^{4}$
-\end{lstlisting}
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 5}\label{field-fan-power-coefficient-5}
 
-The coefficient C\(_{5}\) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The quartic coefficient \(C_5\) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-\begin{lstlisting}
-       PLF = C$_{1}$ + C$_{2}$$^{.}$ FF + C$_{3}$$^{.}$ FF$^{2 +}$ C$_{4}$$^{.}$ FF$^{3}$ + C$_{5}$$^{.}$ FF$^{4}$
-\end{lstlisting}
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-2-000}
 
@@ -649,15 +661,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-3}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-3}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-3-000}
 
@@ -681,7 +695,7 @@ This field is optional. If it is not used then the exhaust fan is assumed to be 
 
 \paragraph{Field: Minimum Zone Temperature Limit Schedule Name}\label{field-minimum-zone-temperature-limit-schedule-name}
 
-This field is optional. If it is not used then there will be no temperature-related control over the operation of the exhaust fan. If the field is used, then enter the name of a schedule with values for zone temperature values (°C). The fan's control will be based on a comparison between the current zone air temperature and the schedule values. If the zone is warmer than the scheduled limit, then the fan will operate. When balancing with simple ventilation, this feature can be used to coordinate exhaust fan operation with ZoneVentilation:* controls for minimum indoor temperature.
+This field is optional. If it is not used then there will be no temperature-related control over the operation of the exhaust fan. If the field is used, then enter the name of a schedule with values for zone temperature values (\si{\celsius}). The fan's control will be based on a comparison between the current zone air temperature and the schedule values. If the zone is warmer than the scheduled limit, then the fan will operate. When balancing with simple ventilation, this feature can be used to coordinate exhaust fan operation with ZoneVentilation:* controls for minimum indoor temperature.
 
 \paragraph{Field: Balanced Exhaust Fraction Schedule Name}\label{field-balanced-exhaust-fraction-schedule-name}
 
@@ -804,7 +818,7 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-4}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa). This is a required field with no default.
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa). This is a required field with no default.
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-4}
 
@@ -873,11 +887,13 @@ The optional name of the schedule that determines whether the fan can run. A sch
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-5}
 
-The full-load volumetric airflow (m\(^{3}\)/sec) through the fan at standard temperature and pressure (dry air at 20 °C dry-bulb). To initialize the air systems being simulated, the program uses local barometric pressure adjusted for altitude, based on the equation for ``standard atmospheric'' pressure on p.6.1 of the 1997 ASHRAE Handbook of Fundamentals (SI edition):
+The full-load volumetric airflow (m\(^{3}\)/sec) through the fan at standard temperature and pressure (dry air at \SI{20}{\celsius} dry-bulb). To initialize the air systems being simulated, the program uses local barometric pressure adjusted for altitude, based on the equation for ``standard atmospheric'' pressure on p.6.1 of the 1997 ASHRAE Handbook of Fundamentals (SI edition):
 
-p = 101325 * (1 - 2.25577E-05 * Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m. Can be autosized.
+where \(p\) is pressure in Pa and \(Z\) is altitude in m. Can be autosized.
 
 Specified or autosized maximum airflow rate (including effects of scaling by Field: Fan Sizing Factor) along with corresponding fan static pressure rise and fan shaft power are reported in the .eio file as, respectively, Design Fan Airflow {[}m3/s{]}, Design Fan Static Pressure Rise {[}Pa{]}, and Design Fan Shaft Power {[}W{]}.
 
