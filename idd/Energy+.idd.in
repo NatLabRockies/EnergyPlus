@@ -109361,8 +109361,9 @@ Output:Table:Annual,
        \note Maximum and Minimum find the maximum and minimum value for the month and report it
        \note   along with the time that it first occurred. When Maximum or Minimum are selected a
        \note   column is automatically shown in the output report for the time that it occurred.
-       \note   When Maximum or Minimum are used with an average variable the value is divided
-       \note   by the length of the timestep.
+       \note   When Maximum or Minimum are used with a summed variable, the value is divided
+       \note   by the timestep length in seconds so that the reported result is a rate.
+       \note   Average variables are compared and reported without timestep conversion.
        \note ValueWhenMaxMin looks at the previous variable in the report that sets a maximum or minimum
        \note   and displays the value of the current variable at that same timestep.
        \note   Order of the variables in the report is important when using ValueWhenMaxMin.
