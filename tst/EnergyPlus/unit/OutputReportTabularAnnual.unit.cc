@@ -50,6 +50,8 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
+#include <format>
+
 #include "Fixtures/EnergyPlusFixture.hh"
 #include "Fixtures/SQLiteFixture.hh"
 
@@ -511,6 +513,79 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_invalidAggregationOrder)
     std::vector<AnnualTable>::iterator firstTable = state->dataOutputReportTabularAnnual->annualTables.begin();
 
     EXPECT_TRUE(firstTable->invalidAggregationOrder(*state));
+}
+
+TEST_F(SQLiteFixture, OutputReportTabularAnnual_SummaryRowsUseCorrectMinimumAndMaximum)
+{
+    using namespace OutputProcessor;
+
+    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+
+    std::string const idf_objects = delimited_string({
+        "Output:Table:Annual,",
+        "  Summary Row Order Test, !- Name",
+        "  ,                       !- Filter",
+        "  ,                       !- Schedule Name",
+        "  Test Power,             !- Variable or Meter 1 Name",
+        "  SumOrAverage,           !- Aggregation Type for Variable or Meter 1",
+        "  2,                      !- Digits After Decimal 1",
+        "  Test Power,             !- Variable or Meter 2 Name",
+        "  HoursNonZero,           !- Aggregation Type for Variable or Meter 2",
+        "  2;                      !- Digits After Decimal 2",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    Real64 lowValue = 0.0;
+    Real64 highValue = 0.0;
+    SetupOutputVariable(*state, "Test Power", Constant::Units::W, lowValue, TimeStepType::Zone, StoreType::Average, "Low Row");
+    SetupOutputVariable(*state, "Test Power", Constant::Units::W, highValue, TimeStepType::Zone, StoreType::Average, "High Row");
+
+    state->dataGlobal->DoWeathSim = true;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataGlobal->TimeStepZoneSec = Constant::rSecsInHour;
+
+    GetInputTabularAnnual(*state);
+    ASSERT_EQ(1u, state->dataOutputReportTabularAnnual->annualTables.size());
+
+    lowValue = 1.0;
+    highValue = 3.0;
+    GatherAnnualResultsForTimeStep(*state, TimeStepType::Zone);
+
+    lowValue = 0.0;
+    highValue = 4.0;
+    GatherAnnualResultsForTimeStep(*state, TimeStepType::Zone);
+
+    OutputReportTabular::setTabularReportStyles(*state);
+    WriteAnnualTables(*state);
+
+    auto querySummaryValue = [this](std::string const &rowName, std::string const &columnName) {
+        return queryResult(std::format(R"(SELECT Value FROM TabularDataWithStrings
+                                           WHERE ReportName = 'SUMMARY ROW ORDER TEST'
+                                             AND TableName = 'Custom Annual Report'
+                                             AND RowName = '{}'
+                                             AND ColumnName = '{}')",
+                                       rowName,
+                                       columnName),
+                           "TabularDataWithStrings");
+    };
+
+    auto result = querySummaryValue("Minimum of Rows", "Test Power");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(0.50, std::stod(result[0][0]));
+
+    result = querySummaryValue("Maximum of Rows", "Test Power");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(3.50, std::stod(result[0][0]));
+
+    result = querySummaryValue("Minimum of Rows", "Test Power {HOURS NON-ZERO}");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(1.00, std::stod(result[0][0]));
+
+    result = querySummaryValue("Maximum of Rows", "Test Power {HOURS NON-ZERO}");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(2.00, std::stod(result[0][0]));
 }
 
 TEST_F(SQLiteFixture, OutputReportTabularAnnual_CurlyBraces)

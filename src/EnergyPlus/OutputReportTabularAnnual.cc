@@ -783,10 +783,10 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
                 tableBody(columnRecount, rowSumAvg) = OutputReportTabular::RealToStr(style.formatReals, sumVal, fldSt.m_showDigits);
             }
             if (minVal != veryLarge) {
-                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
             }
             if (maxVal != verySmall) {
-                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
             }
             break;
         }
@@ -814,10 +814,10 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
             }
             tableBody(columnRecount, rowSumAvg) = OutputReportTabular::RealToStr(style.formatReals, sumVal, fldSt.m_showDigits);
             if (minVal != veryLarge) {
-                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
             }
             if (maxVal != verySmall) {
-                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
             }
             break;
         }
