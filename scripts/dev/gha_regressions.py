@@ -476,6 +476,43 @@ class RegressionManager:
 </details>"""
         (bundle_root / "summary.md").write_text(content)
 
+    @staticmethod
+    def read_csv_to_columns(file_path: Path) -> dict[str, list[str | float]]:
+        columns = {}
+        with open(file_path, 'r', newline='') as file:
+            reader = csv.reader(file)
+            header = next(reader)  # Read header row
+            for i, col_name in enumerate(header):
+                columns[col_name.strip()] = []
+            for row in reader:
+                for i, value in enumerate(row):
+                    value = value.strip()
+                    variable = header[i].strip()
+                    try:
+                        v = float(value)
+                        columns[variable].append(v)
+                    except ValueError:  # just take the string timestamp
+                        columns[variable].append(value)
+        return columns
+
+    @staticmethod
+    def generate_regression_plotter(bundle_root: Path, metadata_object: dict, results_object: dict, limit: bool):
+        metadata_string = "metadata = " + json.dumps(metadata_object, indent=4) + ';'
+        results_string = "results = " + json.dumps(results_object, indent=4) + ';'
+        limit_string = ""
+        if limit:
+            limit_string = r"""<div id="size-alert" class="alert alert-warning" role="alert">The regressions hit a size limit and were truncated, not all files may be represented here. Double check the full regression package.</div>"""
+        template_file = Path(__file__).resolve().parent / 'regression_plotter.in.html'
+        content = template_file.read_text()
+        patches = {
+            '<!--METADATA OVERRIDE-->': metadata_string,
+            '<!--RESULTS OVERRIDE-->': results_string,
+            '<!--LIMIT-->': limit_string
+        }
+        for key, value in patches.items():
+            content = content.replace(key, value)
+        (bundle_root / 'regression_plotter.html').write_text(content)
+
     def check_all_regressions(self, base_testfiles: Path, mod_testfiles: Path, bundle_root: Path) -> bool:
         any_diffs = False
         bundle_root.mkdir(exist_ok=True)
@@ -569,6 +606,12 @@ class RegressionManager:
         print(f"* Diffs by Type *:\n{json.dumps(self.diffs_by_type, indent=2, sort_keys=True)}\n")
         if any_diffs:
             self.generate_markdown_summary(bundle_root)
+            self.generate_regression_plotter(
+                bundle_root, metadata_object, results_object, hit_max_limit
+            )
+            self.generate_regression_plotter(
+                bundle_root.parent, metadata_object, results_object, hit_max_limit
+            )
             # print("::warning title=Regressions::Diffs Detected")
         return any_diffs
 
