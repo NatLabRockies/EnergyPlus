@@ -1,6 +1,6 @@
 \section{Output:Table:Annual}\label{outputtableannual}
 
-The Output:Table:Annual object provides a generic method of setting up tables of annual results with each row corresponding to an instance of an object. These tables are good for creating reports that broadly summarize the building performance. At the bottom of the tables, three rows are added for the sum or average depending on the type of variable, the maximum and the minimum of each column. The report produced has multiple columns that are each defined using a repeated group of fields. The fields for the variable name and the aggregation type can be repeated for any number of columns. If the variables from different type of objects are specified in a single Output:Table:Annual, all the object names for each type of objects will be shown as rows. Variables that don't apply for certain objects will be left blank for that cell.
+The Output:Table:Annual object creates a table of results for the simulation reporting period, with one row for each reporting key (usually an object name). It is useful for reports that broadly summarize building performance. The table includes summary rows for the annual sum or average, minimum of rows, and maximum of rows, as applicable to each data column. Each column is defined by a repeated group containing a variable name, aggregation type, and number of digits after the decimal point. If a table includes variables associated with different object types, the rows are the union of their reporting keys. A cell is blank when a variable does not apply to that row.
 
 \subsection{Inputs}\label{inputs-062}
 
@@ -10,15 +10,15 @@ The Name field allows the user to give the output table a label that is shown in
 
 \paragraph{Field: Filter}\label{field-filter}
 
-An optional text string that is compared to the names of the objects referenced by the variables and if they match are included in the table. A footnote will appear that indicates that the objects shown may not be all the objects that of that type that occur in the file.
+An optional text string used to limit table rows. A reporting key is included when its name contains this string; the comparison is case-insensitive. If this field is blank, all reporting keys associated with the selected columns are included.
 
 \paragraph{Field: Schedule Name}\label{field-schedule-name-008}
 
-Optional schedule name. If left blank, aggregation is performed for all hours simulated. If a schedule is specified, aggregation is performed for non-zero hours in the schedule.
+This optional schedule limits the timesteps included in the aggregations. If the field is blank, all simulated timesteps are included. If a schedule is specified, only timesteps when the schedule value is nonzero are included.
 
-\paragraph{Field: Variable or Meter \textless{}\#\textgreater{} Name}\label{field-variable-or-meter-name}
+\paragraph{Field: Variable or Meter or EMS Variable or Field \textless{}\#\textgreater{} Name}\label{field-variable-or-meter-name}
 
-The remainder of this input object consists of pairs of fields that can be repeatedVariable Or Meter Name fields contain the name of a variable (see \hyperref[outputvariable]{Output:Variable} and eplusout.rdd), meter (see \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} and eplusout.mdd), or schedule. This value is shown using the aggregation method specified. If the selected name is used for both a variable or a meter and a schedule name, the variable or meter will be used.
+This field contains the name of a registered report variable (see \hyperref[outputvariable]{Output:Variable} and eplusout.rdd), meter (see \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} and eplusout.mdd), or schedule. Registered report variables include EnergyManagementSystem:OutputVariable objects. Although the field name retains ``EMS Variable or Field,'' the current annual-table lookup does not directly resolve an EMS internal variable or an arbitrary IDF object field. The value is shown using the specified aggregation method. Lookup checks report variables first, then meters, then schedules.
 
 \paragraph{Field: Aggregation Type for Variable or Meter \textless{}\#\textgreater{}}\label{field-aggregation-type-for-variable-or-meter}
 
@@ -26,45 +26,45 @@ The aggregation type determines how the variable is aggregated in the table. The
 
 \emph{Simple Aggregation Types}
 
-\textbf{SumOrAverage} -- For ``sum'' type variables adds up the values for each timestep and reports the sum of the value. For ``average'' type variables, the value shown will be the average for the month. SumOrAverage is probably the most common choice for aggregation type.
+\textbf{SumOrAverage} -- For a ``sum'' type variable, adds the values for each included timestep. For an ``average'' type variable, reports the time-weighted average over the reporting period. This is the most commonly used aggregation type.
 
 \textbf{Maximum} -- Reports the maximum value and the time that the maximum value occurred. When the maximum option is used with a summed variable the value is divided by the length of the timestep in seconds. For example, the maximum for a variable in Joules is reported in Watts.
 
 \textbf{Minimum} -- Reports the minimum value and the time that the minimum value occurred. When the minimum option is used with a summed variable the value is divided by the length of the timestep in seconds. For example, the minimum for a variable in Joules is reported in Watts.
 
-\textbf{HoursNonZero} -- The HoursNonZero option adds up the elapsed time during the month that this variable is non-zero and would be appropriate to determine the number of hour that a fan operates.
+\textbf{HoursNonZero} -- Adds the elapsed time during the reporting period when the variable is nonzero. For example, this can determine the number of hours that a fan operates.
 
-\textbf{HoursZero} -- The HoursZero option adds up the elapsed time during the month that this variable has a zero value and would be appropriate to determine the number of hour that a fan does not operate.
+\textbf{HoursZero} -- Adds the elapsed time during the reporting period when the variable is zero. For example, this can determine the number of hours that a fan does not operate.
 
-\textbf{HoursPositive} -- The HoursPositive option adds up the elapsed time during the month that this variable has a positive value. Hours with a zero value are not included.
+\textbf{HoursPositive} -- Adds the elapsed time during the reporting period when the variable is positive. Timesteps with a zero value are not included.
 
-\textbf{HoursNonPositive} -- The HoursNonPositive option adds up the elapsed time during the month that this variable has non-positive value. Hours with a negative value and hours with a zero value are all included.
+\textbf{HoursNonPositive} -- Adds the elapsed time during the reporting period when the variable is nonpositive. Timesteps with negative or zero values are included.
 
-\textbf{HoursNegative} -- The HoursNegative option adds up the elapsed time during the month that this variable has a negative value. Hours with a zero value are not included.
+\textbf{HoursNegative} -- Adds the elapsed time during the reporting period when the variable is negative. Timesteps with a zero value are not included.
 
-\textbf{HoursNonNegative} -- The HoursNonNegative option adds up the elapsed time during the month that this variable has non-negative value. Hours with a positive value and hours with a zero value are all included.
+\textbf{HoursNonNegative} -- Adds the elapsed time during the reporting period when the variable is nonnegative. Timesteps with positive or zero values are included.
 
 \textbf{HourInTenBinsMinToMax} - Creates 10 columns for the specified variable and shows the number of hours in each of 10 bins based on the minimum and maximum value. The bin sizes will be rounded up to the next most significant digit value (if the min is 0 and the max is 28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
 
 \textbf{HourInTenBinsZeroToMax} - Creates 11 columns for the specified variable and shows the number of hours in each of 10 bins from zero to the maximum value and a bin for hours below zero. The bin sizes will be rounded up to the next most significant digit value (if the min is 0 and the max is 28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
 
-\textbf{HourInTenBinsMinToZero} - Creates 11 columns for the specified variable and shows the number of hours in each of 10 bins from zero to the minimum value and a bin for hours above zero. The bin sizes will be rounded up to the next most significant digit value (if the min is 0 and the min is -28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
+\textbf{HourInTenBinsMinToZero} -- Creates 11 columns for the specified variable: 10 bins from the minimum value to zero and one bin for values above zero. Bin sizes are rounded up to the next most significant digit (for example, if the maximum is 0 and the minimum is -28786.3, the bin size is 3000, not 2878.63). A table of the bin ranges is generated below the main table.
 
 \emph{Advanced Aggregation Types}
 
-The advanced aggregation types are described below. These aggregation types rely on doing an operation on the current variable but only during the time or times defined by a previously defined field. The ValueWhenMaxOrMin displays the value of one variable at the same time as the maximum or minimum is set on a previous field that is defined as either a maximum or minimum. The ``Hours---`` aggregation types (not including binning) display then number of hours that a variable meets a condition. The ``---DuringHoursShown'' aggregation types perform those aggregations but instead of for all the hours in the month, only for the hours that the previous ``Hours---`` entry applies. Multiple ``---DuringHoursShown'' after an ``Hours---`` will all be based on that single ``Hours---`` entry, in fact the ``---DuringHoursShown'' is based on the next column to the left that contains an ``Hours---`` entry even if other types of aggregations are used in intermediate columns. Order of the variables in the report is important when using the advanced aggregation types since they often depend on a previous entry.
+The advanced aggregation types depend on a previously defined column. ValueWhenMaximumOrMinimum uses the most recent preceding Maximum or Minimum column and reports the current variable at that column's selected timestep. A subsequent Maximum or Minimum column starts a new dependency group. The ``Hours---'' aggregation types (excluding the binning types) report the time for which a condition is met. A ``---DuringHoursShown'' type uses the most recent preceding ``Hours---'' column, even when other aggregation types appear between them; a subsequent ``Hours---'' column starts a new dependency group. Column order is therefore significant, and an advanced aggregation without the required preceding column is invalid.
 
-\textbf{ValueWhenMaximumOrMinimum} -- The ValueWhenMaximumOrMinimum option looks at the previous variable in the report that sets a maximum or minimum and displays the value of the current variable at that same timestep. Order of the variables in the report is important when using ValueWhenMaxMin. This can be used, for example, when an outdoor temperature should be reported for the time of the maximum cooling load.
+\textbf{ValueWhenMaximumOrMinimum} -- Reports the current variable at the timestep selected by the most recent preceding Maximum or Minimum column. For example, it can report outdoor temperature at the time of maximum cooling load.
 
-\textbf{SumOrAverageDuringHoursShown} -- Provides the sum or average of the named variable when during the hours that the previous variable displayed with any of the aggregation types starting with ``Hours''. For ``sum'' type variables adds up the values for each timestep and reports the sum of the value during the hours reported on the previous variable. For ``average'' type variables, the value shown will be the average for the month during the hours reported on the previous variable. Order of the variables in the report is important when using this aggregation type.
+\textbf{SumOrAverageDuringHoursShown} -- For a ``sum'' type variable, adds its values during the timesteps selected by the most recent preceding ``Hours---'' column. For an ``average'' type variable, reports the time-weighted average over those selected timesteps.
 
-\textbf{MaximumDuringHoursShown} -- Reports the maximum value and the time that the maximum value occurred but only during the hours reported with the previous ``hours-`` aggregation type. When the maximum option is used with a summed variable the value is divided by the length of the timestep in seconds. For example, the maximum for a variable in Joules is reported in Watts. Order of the variables in the report is important when using this aggregation type.
+\textbf{MaximumDuringHoursShown} -- Reports the maximum value and the time it occurred, using only the timesteps selected by the most recent preceding ``Hours---'' column. For a summed variable, the value is divided by the timestep length in seconds; for example, a variable in Joules is reported in Watts.
 
-\textbf{MinimumDuringHoursShown} - Reports the minimum value and the time that the minimum value occurred but only during the hours reported with the previous ``hours-`` aggregation type. When the minimum option is used with a summed variable the value is divided by the length of the timestep in seconds. For example, the minimum for a variable in Joules is reported in Watts. Order of the variables in the report is important when using this aggregation type.
+\textbf{MinimumDuringHoursShown} -- Reports the minimum value and the time it occurred, using only the timesteps selected by the most recent preceding ``Hours---'' column. For a summed variable, the value is divided by the timestep length in seconds; for example, a variable in Joules is reported in Watts.
 
 \paragraph{Field: Digits After Decimal for Variable or Meter \textless{}\#\textgreater{}}\label{field-digits-after-decimal-for-variable-or-meter}
 
-The Digits After Decimal field is a numeric value that indicates how many digits after the decimal point should be shown for that column.
+This integer field specifies the number of digits shown after the decimal point for the column. The value must be from 0 through 10; the default is 2.
 
 The VariableOrMeterName, AggregationType, and DigitsAfterDecimal fields may be repeated for each column desired in the annual report. These three fields define each column of the report.  These fields are extensible, so additional groups of these fields can be added to the end of this object.  An example of this object follows.
 
@@ -73,19 +73,19 @@ Output:Table:Annual,
   Custom Annual Window Report,!- Name
   ,                           !- Filter
   ,                           !- Schedule Name
-  SURFACE WINDOW TRANSMITTED SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 1
+  SURFACE WINDOW TRANSMITTED SOLAR RADIATION RATE,  !- Variable or Meter or EMS Variable or Field 1 Name
   SumOrAverage,               !- Aggregation Type for 1
   2,                          !- Digits After Decimal for 1
-  SURFACE WINDOW TRANSMITTED BEAM SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 2
+  SURFACE WINDOW TRANSMITTED BEAM SOLAR RADIATION RATE,  !- Variable or Meter or EMS Variable or Field 2 Name
   SumOrAverage,               !- Aggregation Type for 2
   2,                          !- Digits After Decimal for 2
-  SURFACE WINDOW TRANSMITTED DIFFUSE SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 3
+  SURFACE WINDOW TRANSMITTED DIFFUSE SOLAR RADIATION RATE,  !- Variable or Meter or EMS Variable or Field 3 Name
   SumOrAverage,               !- Aggregation Type for 3
   2,                          !- Digits After Decimal for 3
-  SURFACE WINDOW HEAT GAIN RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 4
+  SURFACE WINDOW HEAT GAIN RATE,  !- Variable or Meter or EMS Variable or Field 4 Name
   SumOrAverage,               !- Aggregation Type for 4
   2,                          !- Digits After Decimal for 4
-  ACE WINDOW HEAT LOSS RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 5
+  SURFACE WINDOW HEAT LOSS RATE,  !- Variable or Meter or EMS Variable or Field 5 Name
   SumOrAverage,               !- Aggregation Type for 5
   2;                          !- Digits After Decimal for 5
 \end{lstlisting}

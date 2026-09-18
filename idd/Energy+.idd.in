@@ -73749,7 +73749,8 @@ Pump:VariableSpeed,
   N9 , \field Coefficient 4 of the Part Load Performance Curve
        \default 0.0
   N10, \field Design Minimum Flow Rate
-        \note When autosized the scaling factor is the input field Design Minimum Flow Rate Fraction
+        \note When autosized, this is the Design Maximum Flow Rate multiplied by the
+        \note Design Minimum Flow Rate Fraction.
         \units m3/s
         \autosizable
         \default autosize
@@ -73842,7 +73843,8 @@ Pump:VariableSpeed,
         \minimum> 0
   N15,  \field Design Minimum Flow Rate Fraction
         \type real
-        \note Used to size Design Minimum Flow Rate
+        \note Used to autosize the Design Minimum Flow Rate as a fraction of the
+        \note Design Maximum Flow Rate.
         \default 0.0
         \minimum 0
         \maximum 1.0
