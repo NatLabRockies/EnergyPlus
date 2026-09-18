@@ -7912,17 +7912,21 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimFCU_ATMInletSideTest)
     // than 1/10th or even 1/100th of a percent needed on anything?
     // Also, the tolerance of finding water coil UA is 0.001, how
     // can this be lower?
-    EXPECT_NEAR(thisFanCoil.PLR, 0.76235, 0.001); // Was 0.78843
+    EXPECT_NEAR(thisFanCoil.PLR, 0.81386, 0.001);
+    EXPECT_NEAR(finalZoneSizing.DesHeatVolFlow, state->dataWaterCoils->WaterCoil(1).DesAirVolFlowRate, 0.000001);
+    EXPECT_ENUM_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilModel, WaterCoils::CoilModel::HeatingSimple);
+    EXPECT_NEAR(finalZoneSizing.DesCoolVolFlow, state->dataWaterCoils->WaterCoil(2).DesAirVolFlowRate, 0.000001);
+    EXPECT_ENUM_EQ(state->dataWaterCoils->WaterCoil(2).WaterCoilModel, WaterCoils::CoilModel::CoolingSimple);
 
     // check mass flow rates
     EXPECT_NEAR(PrimaryAirMassFlowRate, 0.2, 0.000001);
     // Tolerance here was 0.000001, why?  Why is tolerance of less
     // than 1/10th or even 1/100th of a percent needed on anything?
-    EXPECT_NEAR(SecondaryAirMassFlowRate, 0.350865, 0.001);
+    EXPECT_NEAR(SecondaryAirMassFlowRate, 0.388084, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.AirInNode).MassFlowRate, thisFan->inletAirMassFlowRate, 0.000001);
     EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.ATMixerPriNode).MassFlowRate, 0.2, 0.0001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.ATMixerSecNode).MassFlowRate, 0.350865, 0.0005); // Was 0.369714
-    EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.ATMixerOutNode).MassFlowRate, 0.550865, 0.0005); // Was 0.569714
+    EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.ATMixerSecNode).MassFlowRate, 0.388084, 0.0005); // Was 0.369714
+    EXPECT_NEAR(state->dataLoopNodes->Node(thisFanCoil.ATMixerOutNode).MassFlowRate, 0.588084, 0.0005); // Was 0.569714
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_FCU_NightCycleTest)
