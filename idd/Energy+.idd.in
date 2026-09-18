@@ -109333,9 +109333,10 @@ Output:Table:Annual,
        \begin-extensible
        \type external-list
        \external-list autoRDDvariableMeter
-       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter
-       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown
-       \note using the aggregation method specified.
+       \note Contains the name of a registered report variable (see Output:Variable and eplusout.rdd),
+       \note meter (see Output:Meter and eplusout.mdd), or schedule. EMS values must be exposed through
+       \note an EnergyManagementSystem:OutputVariable, which registers a report variable. The value is
+       \note shown using the aggregation method specified.
    A5, \field Aggregation Type for Variable or Meter 1
        \type choice
        \key SumOrAverage
