@@ -60,6 +60,7 @@
 #include <EnergyPlus/OutputReportData.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReportTabularAnnual.hh>
+#include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 using namespace EnergyPlus;
@@ -204,6 +205,59 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_SetupGathering)
     EXPECT_EQ(fieldSetParams[5], "3"); // m_keyCount
     EXPECT_EQ(fieldSetParams[6], "1"); // m_varAvgSum
     EXPECT_EQ(fieldSetParams[7], "0"); // m_varStepType
+}
+
+TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_FilterFootnote)
+{
+    std::string const idf_objects = delimited_string({
+        "Output:JSON,",
+        "TimeSeriesAndTabular;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+    state->dataResultsFramework->resultsFramework->setupOutputOptions(*state);
+
+    Real64 reportValue = 1.0;
+    SetupOutputVariable(*state,
+                        "Test Average Variable",
+                        Constant::Units::None,
+                        reportValue,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        "Zone One");
+
+    OutputReportTabular::tabularReportStyle style;
+    style.produceTabular = false;
+    style.produceSQLite = false;
+    style.produceJSON = true;
+
+    AnnualTable filteredTable(*state, "FILTERED REPORT", "Zone", "");
+    filteredTable.addFieldSet("Test Average Variable", AnnualFieldSet::AggregationKind::sumOrAvg, 2);
+    filteredTable.setupGathering(*state);
+    filteredTable.writeTable(*state, style);
+
+    AnnualTable unfilteredTable(*state, "UNFILTERED REPORT", "", "");
+    unfilteredTable.addFieldSet("Test Average Variable", AnnualFieldSet::AggregationKind::sumOrAvg, 2);
+    unfilteredTable.setupGathering(*state);
+    unfilteredTable.writeTable(*state, style);
+
+    auto const reports = state->dataResultsFramework->resultsFramework->TabularReportsCollection.getJSON();
+    bool foundFilteredReport = false;
+    bool foundUnfilteredReport = false;
+    for (auto const &report : reports) {
+        auto const &table = report["Tables"][0];
+        if (report["ReportName"] == "FILTERED REPORT") {
+            foundFilteredReport = true;
+            EXPECT_EQ(table["Footnote"],
+                      "Note: This table has been filtered; the objects shown may not include all objects of these types in the input file.");
+        } else if (report["ReportName"] == "UNFILTERED REPORT") {
+            foundUnfilteredReport = true;
+            EXPECT_FALSE(table.contains("Footnote"));
+        }
+    }
+    EXPECT_TRUE(foundFilteredReport);
+    EXPECT_TRUE(foundUnfilteredReport);
 }
 
 TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults)
