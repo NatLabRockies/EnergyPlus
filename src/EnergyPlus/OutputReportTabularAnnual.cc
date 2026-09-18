@@ -541,7 +541,7 @@ void AnnualTable::gatherForTimestep(EnergyPlusData &state, OutputProcessor::Time
                                     break; // for fldStRemainIt
                                 }
                                 if (fldStRemainIt->m_aggregate == AnnualFieldSet::AggregationKind::sumOrAverageHoursShown) {
-                                    if (fldStIt->m_varAvgSum == OutputProcessor::StoreType::Sum) { // if it is a summed variable
+                                    if (fldStRemainIt->m_varAvgSum == OutputProcessor::StoreType::Sum) { // if it is a summed variable
                                         fldStRemainIt->m_cell[row].result = oldScanValue + scanValue;
                                     } else {
                                         fldStRemainIt->m_cell[row].result =
