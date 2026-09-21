@@ -951,7 +951,16 @@ void GetFanInput(EnergyPlusData &state)
         }
 
         fan->nightVentPressureDelta = rNumericArgs(10);
-        fan->nightVentFlowFraction = rNumericArgs(11); // not used
+        if (!lNumericFieldBlanks(11)) {
+            fan->nightVentTotalEff = rNumericArgs(11);
+        }
+        if (!lNumericFieldBlanks(12)) {
+            fan->nightVentMotorEff = rNumericArgs(12);
+        }
+        if (!lNumericFieldBlanks(13)) {
+            fan->nightVentMotorInAirFrac = rNumericArgs(13);
+            fan->nightVentMotorInAirFracSpecified = true;
+        }
 
         if (lAlphaFieldBlanks(8)) {
             fan->heatLossDest = HeatLossDest::Outside;
@@ -963,15 +972,15 @@ void GetFanInput(EnergyPlusData &state)
             fan->heatLossDest = HeatLossDest::Zone;
         }
 
-        fan->zoneRadFract = rNumericArgs(12);
+        fan->zoneRadFract = rNumericArgs(14);
         if (!lAlphaFieldBlanks(9)) {
             fan->endUseSubcategoryName = cAlphaArgs(9);
         } else {
             fan->endUseSubcategoryName = "General";
         }
 
-        if (!lNumericFieldBlanks(13)) {
-            fan->numSpeeds = rNumericArgs(13);
+        if (!lNumericFieldBlanks(15)) {
+            fan->numSpeeds = rNumericArgs(15);
         } else {
             fan->numSpeeds = 1;
         }
@@ -982,17 +991,18 @@ void GetFanInput(EnergyPlusData &state)
             fan->flowFracAtSpeed.resize(fan->numSpeeds, 0.0);
             fan->powerFracAtSpeed.resize(fan->numSpeeds, 0.0);
             fan->powerFracInputAtSpeed.resize(fan->numSpeeds, false);
-            if (fan->numSpeeds == ((NumNums - 13) / 2) || fan->numSpeeds == ((NumNums + 1 - 13) / 2)) {
+            if (fan->numSpeeds == ((NumNums - 15) / 2) || fan->numSpeeds == ((NumNums + 1 - 15) / 2)) {
                 for (int loopSet = 0; loopSet < fan->numSpeeds; ++loopSet) {
-                    fan->flowFracAtSpeed[loopSet] = rNumericArgs(13 + loopSet * 2 + 1);
-                    if (!lNumericFieldBlanks(13 + loopSet * 2 + 2)) {
-                        fan->powerFracAtSpeed[loopSet] = rNumericArgs(13 + loopSet * 2 + 2);
+                    fan->flowFracAtSpeed[loopSet] = rNumericArgs(15 + loopSet * 2 + 1);
+                    if (!lNumericFieldBlanks(15 + loopSet * 2 + 2)) {
+                        fan->powerFracAtSpeed[loopSet] = rNumericArgs(15 + loopSet * 2 + 2);
                         fan->powerFracInputAtSpeed[loopSet] = true;
                     } else {
                         fan->powerFracInputAtSpeed[loopSet] = false;
                     }
                 }
             } else {
+
                 // field set input does not match number of speeds, throw warning
                 ShowSevereError(state, std::format("{}: {}=\"{}\", invalid entry.", routineName, cCurrentModuleObject, cAlphaArgs(1)));
                 ShowContinueError(state, "Fan with Discrete speed control does not have input for speed data that matches the number of speeds.");
@@ -2788,6 +2798,12 @@ void FanSystem::calcSimpleSystemFan(
     // Number of operating modes, 1 or 2 ( e.g. heating, ventilating, cooling)
     int _numModes = (present(_flowRatio2) && present(_runTimeFrac2)) ? 2 : 1;
 
+    // use alternate night ventilation performance if provided, otherwise fall back to normal performance
+    Real64 _localFanTotalEff = (state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) ? nightVentTotalEff : totalEff;
+    Real64 _localMotorEff = (state.dataHVACGlobal->NightVentOn && nightVentMotorEff > 0.0) ? nightVentMotorEff : motorEff;
+    Real64 _localMotorInAirFrac =
+        (state.dataHVACGlobal->NightVentOn && nightVentMotorInAirFracSpecified) ? nightVentMotorInAirFrac : motorInAirFrac;
+
     if (state.dataHVACGlobal->NightVentOn) {
         // assume if non-zero inputs for night data then this fan is to be used with that data
         if (nightVentPressureDelta > 0.0) {
@@ -2912,7 +2928,7 @@ void FanSystem::calcSimpleSystemFan(
                     Real64 _locLowSpeedRuntimeFrac = 0.0;
                     Real64 _locHiSpeedRuntimeFrac = 0.0;
                     if (numSpeeds == 1) { // CV or OnOff
-                        _localTotalEff = totalEff;
+                        _localTotalEff = _localFanTotalEff;
                         _locHiSpeedRuntimeFrac = _locRuntimeFrac * _locFlowRatio;
                         runtimeFracAtSpeed[0] += _locHiSpeedRuntimeFrac;
                         totalPower +=
@@ -2966,7 +2982,7 @@ void FanSystem::calcSimpleSystemFan(
                                                  : max(0.0, min(1.0, _localFlowFrac / state.dataHVACGlobal->OnOffFanPartLoadFraction));
 
                     if (numSpeeds == 1) { // CV or OnOff
-                        _localTotalEff = totalEff;
+                        _localTotalEff = _localFanTotalEff;
                         _locHiSpeedRuntimeFrac = _locRuntimeFrac;
                         runtimeFracAtSpeed[0] += _locHiSpeedRuntimeFrac;
                         totalPower +=
@@ -3011,11 +3027,11 @@ void FanSystem::calcSimpleSystemFan(
                         }
                     }
                 }
-                _localTotalEff = totalEff;
+                _localTotalEff = _localFanTotalEff;
             } break;
 
             case SpeedControl::Continuous: {
-                _localTotalEff = totalEff;
+                _localTotalEff = _localFanTotalEff;
                 Real64 _locFlowRatio(0.0);
                 Real64 _locRuntimeFrac(0.0);
                 if (_useFlowRatiosAndRunTimeFracs) {
@@ -3031,8 +3047,8 @@ void FanSystem::calcSimpleSystemFan(
                                              Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
                 Real64 _localFanPower =
                     max(0.0, _locRuntimeFrac * _localPowerFrac * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
-                Real64 _shaftPower = motorEff * _localFanPower;
-                Real64 _localPowerLossToAir = _shaftPower + (_localFanPower - _shaftPower) * motorInAirFrac;
+                Real64 _shaftPower = _localMotorEff * _localFanPower;
+                Real64 _localPowerLossToAir = _shaftPower + (_localFanPower - _shaftPower) * _localMotorInAirFrac;
                 outletAirEnthalpy = inletAirEnthalpy + _localPowerLossToAir / _localAirMassFlow[mode]; // this will get revised later
                 outletAirHumRat = inletAirHumRat;                                                      // this will get revised later
                 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);        // this will get revised later
@@ -3067,8 +3083,8 @@ void FanSystem::calcSimpleSystemFan(
         } // end of operating mode loop
 
         if (outletAirMassFlowRate > 0.0) {
-            Real64 _shaftPower = motorEff * totalPower; // power delivered to shaft
-            powerLossToAir = _shaftPower + (totalPower - _shaftPower) * motorInAirFrac;
+            Real64 _shaftPower = _localMotorEff * totalPower; // power delivered to shaft
+            powerLossToAir = _shaftPower + (totalPower - _shaftPower) * _localMotorInAirFrac;
             outletAirEnthalpy = inletAirEnthalpy + powerLossToAir / outletAirMassFlowRate;
             // This fan does not change the moisture or Mass Flow across the component
             outletAirHumRat = inletAirHumRat;
