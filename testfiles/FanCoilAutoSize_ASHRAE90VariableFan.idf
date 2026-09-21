@@ -1847,7 +1847,9 @@
     0.50,                    !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Night Ventilation Mode Fan Total Efficiency
+    ,                        !- Night Ventilation Mode Motor Efficiency
+    ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
     ,                        !- Motor Loss Radiative Fraction
     General;                 !- End-Use Subcategory
@@ -1971,7 +1973,9 @@
     0.50,                    !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Night Ventilation Mode Fan Total Efficiency
+    ,                        !- Night Ventilation Mode Motor Efficiency
+    ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
     ,                        !- Motor Loss Radiative Fraction
     General;                 !- End-Use Subcategory
@@ -2087,7 +2091,9 @@
     0.50,                    !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Night Ventilation Mode Fan Total Efficiency
+    ,                        !- Night Ventilation Mode Motor Efficiency
+    ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
     ,                        !- Motor Loss Radiative Fraction
     General;                 !- End-Use Subcategory

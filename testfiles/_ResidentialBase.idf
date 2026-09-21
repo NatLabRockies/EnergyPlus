@@ -6416,7 +6416,9 @@
     0.75,                    !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Night Ventilation Mode Fan Total Efficiency
+    ,                        !- Night Ventilation Mode Motor Efficiency
+    ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
     0,                       !- Motor Loss Radiative Fraction
     supply fan,              !- End-Use Subcategory
