@@ -44,26 +44,26 @@ C_p \rho \Delta x \frac{T_i^{j+1}-T_i^j}{\Delta t} =
 \end{equation}
 %
 where:
-\begin{wherelist}
-\item[T] node temperature
-\item[\Delta t] calculation time step
-\item[\Delta x] finite difference layer thickness (always less
+\begin{description}
+\item[\(T =\)] node temperature
+\item[\(\Delta t =\)] calculation time step
+\item[\(\Delta x =\)] finite difference layer thickness (always less
 than construction layer thickness)
-\item[C_p] specific heat of material
-\item[k_W] thermal conductivity for interface between node $i$ and node $i+1$
-\item[k_E] thermal conductivity for interface between node $i$ and node $i-1$
-\item[\rho] density of material
-\end{wherelist}
+\item[\(C_p =\)] specific heat of material
+\item[\(k_W =\)] thermal conductivity for interface between node $i$ and node $i+1$
+\item[\(k_E =\)] thermal conductivity for interface between node $i$ and node $i-1$
+\item[\(\rho =\)] density of material
+\end{description}
 %
 with superscripts and subscripts:
 %
-\begin{wherelist}
-\item[i] node being modeled
-\item[i+1] adjacent node to interior of construction
-\item[i-1] adjacent node to exterior of construction
-\item[j+1] new time step
-\item[j] previous time step
-\end{wherelist}
+\begin{description}
+\item[\(i =\)] node being modeled
+\item[\(i+1 =\)] adjacent node to interior of construction
+\item[\(i-1 =\)] adjacent node to exterior of construction
+\item[\(j+1 =\)] new time step
+\item[\(j =\)] previous time step
+\end{description}
 %
 Then, this equation is accompanied by a second equation that relates enthalpy
 and temperature.
@@ -145,7 +145,7 @@ less than 10.
 EnergyPlus also uses a separate, outer iteration loop across all the different
 inside surface heat balances so that internal long-wave radiation exchange can
 be properly solved. For CTF formulations, this iteration is controlled by a
-maximum allowable temperature difference of \SI{0.002}\celsius\ for inside face
+maximum allowable temperature difference of \SI{0.002}{\celsius} for inside face
 surface temperatures from one iteration to the next (or a limit of 100 iterations).
 CondFD uses the same default value for allowable temperature difference as CTF.
 However, this parameter was found to often need to be smaller for stability and
@@ -162,9 +162,9 @@ Solver Loop Iterations'' and ``Heat Balance Inside Surfaces Calculation
 Iterations'' respectively.
 
 \begin{equation}
-T\textsubscript{$i$,new} = T\textsubscript{$i$,old}
-                         + \text{Relax}\left(T\textsubscript{$i$,new}
-                            - T\textsubscript{$i$,old} \right)
+T_{\text{$i$,new}} = T_{\text{$i$,old}}
+                         + \text{Relax}\left(T_{\text{$i$,new}}
+                            - T_{\text{$i$,old}} \right)
 \end{equation}
 
 Because of the iteration scheme used for CondFD, the node enthalpies get
@@ -176,8 +176,8 @@ For inputs with MaterialProperty:PhaseChange, the specific heat is calculated
 from the tabulated input data of temperature/enthalpy pairs:
 
 \begin{equation}
-Cp = \frac{h\textsubscript{$i$,new} - h\textsubscript{$i$,old}}
-          {T\textsubscript{$i$,new} - T\textsubscript{$i$,old}}
+Cp = \frac{h_{\text{$i$,new}} - h_{\text{$i$,old}}}
+          {T_{\text{$i$,new}} - T_{\text{$i$,old}}}
 \end{equation}
 
 For inputs with MaterialProperty:PhaseChangeHysteresis, the specific heat is not
@@ -185,9 +185,9 @@ only dependent on the current state, but also the previous state, as it captures
 the hysteresis physics present between the melting and freezing processes.
 
 \begin{equation}
-Cp = f\left(T\textsubscript{$i$,new}, T\textsubscript{$i$, prev},
-            \text{PhaseState}\textsubscript{new},
-            \text{PhaseState}\textsubscript{prev}\right)
+Cp = f\left(T_{\text{$i$,new}}, T_{\text{$i$, prev}},
+            \text{PhaseState}_{\text{new}},
+            \text{PhaseState}_{\text{prev}}\right)
 \end{equation}
 
 The hysteresis model also has inputs for solid and liquid state values for
@@ -206,9 +206,9 @@ example only.  Using smaller or larger temperature differences would shrink or
 expand the freezing or melting regions accordingly.
 \item The total latent heat transferred during the phase transition process is
 set to 25000 J/kg
-\item The peak freezing temperature is set to \SI{23}\celsius, where the
+\item The peak freezing temperature is set to \SI{23}{\celsius}, where the
 freezing curve transition is centered.
-\item The peak melting temperature is set to \SI{27}\celsius, where the
+\item The peak melting temperature is set to \SI{27}{\celsius}, where the
 melting curve transition is centered.
 \end{itemize}
 
@@ -233,12 +233,12 @@ k = k_o + k_1\left( T_i - 20 \right)
 \end{equation}
 %
 where:
-\begin{wherelist}
-\item[k_o] is the \SI{20}\celsius\ value of thermal conductivity (normal IDF
+\begin{description}
+\item[\(k_o =\)] the \SI{20}{\celsius} value of thermal conductivity (normal IDF
 input)
-\item[k_1] is the change in conductivity per degree temperature difference from
-\SI{20}\celsius
-\end{wherelist}
+\item[\(k_1 =\)] the change in conductivity per degree temperature difference from
+\SI{20}{\celsius}
+\end{description}
 
 As of Version 7, the CondFD implementation was changed to evaluate the thermal
 conductivity at the interface between nodes, as shown below. In this case,
@@ -276,7 +276,7 @@ value for k1 and set of enthalpy temperature pairs that describe the enthalpy of
 the phase change material in straight line segments with respect to temperature.
 
 A graph showing the effect of a large PCM on the outside surface of a zone is
-shown below. The phase change temperature was \SI{30}\celsius, and the flat
+shown below. The phase change temperature was \SI{30}{\celsius}, and the flat
 temperature response during the phase change is obvious. This example was run
 with a zone time step of one minute to show that such small time steps can be
 done with the finite difference solution technique. It is more efficient to set
@@ -345,7 +345,7 @@ heat fluxes (CondFD Surface Heat Flux Node \textless{} i \textgreater{} ) are
 calculated beginning with the inside face of the surface.
 
 \begin{equation}
-\text{QDreport}_N = Q\textsubscript{inside}
+\text{QDreport}_N = Q_{\text{inside}}
 \end{equation}
 %
 for the remaining nodes
@@ -353,26 +353,26 @@ for the remaining nodes
 \begin{align}
 \begin{split}
 \text{QDreport}_{i} = \text{QDreport}_{i+1}
-+&\text{HeatCap1}_{i+1}\frac{T\textsubscript{$i+1$,new} -
-T\textsubscript{$i+1$,old}}{\Delta t} \\
++&\text{HeatCap1}_{i+1}\frac{T_{\text{$i+1$,new}} -
+T_{\text{$i+1$,old}}}{\Delta t} \\
 - \text{QSource}_{i}
 +&\text{HeatCap2}_{i}
-\frac{T\textsubscript{$i$,new}-T\textsubscript{$i$,old}}{\Delta t}
+\frac{T_{\text{$i$,new}}-T_{\text{$i$,old}}}{\Delta t}
 \end{split}
 \end{align}
 %
 where:
-\begin{wherelist}
-\item[\text{HeatCap1}_i] heat capacitance associated with a given outer half-node
-\item[\text{HeatCap2}_i] heat capacitance associated with a given inner half-node
-\item[\text{QDreport}_i] CondFD Surface Heat Flux Node \textless{} i
+\begin{description}
+\item[\(\text{HeatCap1}_i =\)] heat capacitance associated with a given outer half-node
+\item[\(\text{HeatCap2}_i =\)] heat capacitance associated with a given inner half-node
+\item[\(\text{QDreport}_i =\)] CondFD Surface Heat Flux Node \textless{} i
 \textgreater{}
-\item[\text{QSource}_i] internal source heat flux at node $i$
-\item[Q\textsubscript{inside}] Surface Inside Face Conduction Heat Transfer Rate
+\item[\(\text{QSource}_i =\)] internal source heat flux at node $i$
+\item[\(Q_{\text{inside}} =\)] Surface Inside Face Conduction Heat Transfer Rate
 per Area {[}W/m\(^{2}\){]}
-\item[N] total number of nodes in a surface including the surface inside face
+\item[\(N =\)] total number of nodes in a surface including the surface inside face
 node.
-\end{wherelist}
+\end{description}
 %
 Note that the variable \emph{TotNodes} used in the source code is actually N-1.
 The surface inside face node is referenced as \emph{TotNodes+1}.

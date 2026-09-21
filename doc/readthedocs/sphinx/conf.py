@@ -39,7 +39,7 @@ pygments_style = None
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
-html_logo = "../../../release/favicon_white_plus.png"
+html_logo = "../../../release/ep_nobg.svg"
 html_show_sphinx = False
 html_show_copyright = True
 html_extra_path = ["_build_c"]
@@ -50,12 +50,23 @@ html_css_files = [
 html_js_files = [
     "main.js",
 ]
-extra_nav_links = {"Blah": "https://energyplus.net"}
 templates_path = [".templates"]
 html_theme_options = {
     "titles_only": True,
 }
 numfig = True
+
+# Link contributor-facing documentation to the exact source revision used by Read the Docs.
+# Local builds fall back to develop, where this README normally lives.
+documentation_source_ref = os.environ.get("READTHEDOCS_GIT_COMMIT_HASH", "develop")
+repository_source_url = f"https://github.com/NatLabRockies/EnergyPlus/blob/{documentation_source_ref}"
+project_readme_url = f"{repository_source_url}/README.md"
+documentation_readme_url = f"{repository_source_url}/doc/readthedocs/README.md"
+rst_epilog = f"""
+.. _EnergyPlus project README: {project_readme_url}
+.. _documentation contributor guide: {documentation_readme_url}
+"""
+
 # html_sidebars = {
 #     '**': [
 #         'about.html',

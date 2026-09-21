@@ -584,21 +584,20 @@ The following rules apply to component sets:
 
 When any of these rules are violated, a warning is issued indicating a possible node connection error.
 
-** Warning ** Potential Node Connection Error for object PIPE, name = CW\_BYPASS
-
-~~ **~~ \textsubscript{\textasciitilde{}}~~ **~~ Node Types are still UNDEFINED -- See Branch/Node Details file for further information
-
-~~ **~~ \textsubscript{\textasciitilde{}}~~ **~~ Inlet Node : CW\_BYPASS\_INLET
-
-~~ **~~ \textsubscript{\textasciitilde{}}~~ **~~ Outlet Node: CW\_BYPASS\_OUTLET
+\begin{lstlisting}
+** Warning ** Potential Node Connection Error for object PIPE, name = CW_BYPASS
+**   ~~~   ** Node Types are still UNDEFINED -- See Branch/Node Details file for further information
+**   ~~~   ** Inlet Node : CW_BYPASS_INLET
+**   ~~~   ** Outlet Node: CW_BYPASS_OUTLET
+\end{lstlisting}
 
 The component sets are reported in the eplusout.bnd file:
 
-! \textless{}Component Set\textgreater{},\textless{}Component Set Count\textgreater{},\textless{}Parent Object Type\textgreater{},\textless{}Parent Object Name\textgreater{},\textless{}Component Type\textgreater{},\textless{}Component Name\textgreater{},\textless{}Inlet Node ID\textgreater{},\textless{}Outlet Node ID\textgreater{},\textless{}Description\textgreater{}
-
-~Component Set,1,BRANCH,COOLING SUPPLY INLET BRANCH,PUMP:VARIABLE SPEED,CHW CIRC PUMP,CHW SUPPLY INLET NODE,CHW PUMP OUTLET NODE,Water Nodes
-
+\begin{lstlisting}
+! <Component Set>,<Component Set Count>,<Parent Object Type>,<Parent Object Name>,<Component Type>,<Component Name>,<Inlet Node ID>,<Outlet Node ID>,<Description>
+Component Set,1,BRANCH,COOLING SUPPLY INLET BRANCH,PUMP:VARIABLE SPEED,CHW CIRC PUMP,CHW SUPPLY INLET NODE,CHW PUMP OUTLET NODE,Water Nodes
 Component Set,21,FAN COIL UNIT:4 PIPE,ZONE1FANCOIL,FAN:SIMPLE:CONSTVOLUME,ZONE1FANCOILFAN,ZONE1FANCOILOAMIXEROUTLETNODE,ZONE1FANCOILFANOUTLETNODE,Air Nodes
+\end{lstlisting}
 
 \subsubsection{SetUpCompSets}\label{setupcompsets}
 

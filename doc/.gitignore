@@ -53,3 +53,6 @@
 *.nlo
 
 # Texpad
+
+*/chunked/*
+*/single_dir/*

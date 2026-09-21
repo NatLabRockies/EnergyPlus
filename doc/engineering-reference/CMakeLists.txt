@@ -540,3 +540,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/engineering-reference/media/ankle_draft.png)
 
 create_doc_target("engineering-reference" "EngineeringReference")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("engineering-reference" "engineering-reference")
+endif()

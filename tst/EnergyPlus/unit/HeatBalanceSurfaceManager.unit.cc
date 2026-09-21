@@ -8699,7 +8699,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestUpdateVariableAbsorptanc
     EXPECT_NEAR(state->dataHeatBalSurf->SurfAbsSolarInt(1), 0.2, 1e-6);
 }
 
-TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorptanceOutputs)
+TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalOutputs)
 {
     std::string const idf_objects = delimited_string({
         "Output:Variable,*,Surface Thermal Absorptance,Timestep;",
@@ -8708,6 +8708,8 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
         "Output:Variable,*,Surface Thermal Absorptance Inside Face,Timestep;",
         "Output:Variable,*,Surface Solar Absorptance Outside Face,Timestep;",
         "Output:Variable,*,Surface Solar Absorptance Inside Face,Timestep;",
+        "Output:Variable,*,Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient,Timestep;",
+        "Output:Variable,*,Surface Outside Face Surrounding Surfaces Average Temperature,Timestep;",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -8792,6 +8794,7 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
         surface.HeatTransSurf = true;
         surface.Construction = constructionNumbers[surfaceNum - 1];
         surface.ExtBoundCond = surfaceNum == 4 ? 1 : DataSurfaces::ExternalEnvironment;
+        surface.SurfHasSurroundingSurfProperty = surfaceNum == 1;
     }
 
     AllocateSurfaceHeatBalArrays(*state);
@@ -8811,6 +8814,12 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Thermal Absorptance Inside Face"));
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Solar Absorptance Outside Face"));
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Solar Absorptance Inside Face"));
+
+    EXPECT_TRUE(outputIsRegistered("BULK SURFACE", "Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient"));
+    EXPECT_TRUE(outputIsRegistered("BULK SURFACE", "Surface Outside Face Surrounding Surfaces Average Temperature"));
+    EXPECT_FALSE(
+        outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient"));
+    EXPECT_FALSE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Outside Face Surrounding Surfaces Average Temperature"));
 
     EXPECT_FALSE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Thermal Absorptance"));
     EXPECT_TRUE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Thermal Absorptance Outside Face"));

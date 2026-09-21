@@ -116,7 +116,7 @@ This alpha field defines the cooling energy input ratio modifier (function of pa
 
 \paragraph{Field: Cooling Combination Ratio Correction Factor Curve Name}\label{field-cooling-combination-ratio-correction-factor-curve-name}
 
-This alpha field defines the cooling combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor terminal unit cooling capacity divided by this heat pump's gross rated total cooling capacity. The curve is a linear, quadratic or cubic equation and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x {[}CR{]} in the curve object must be ≥1). The output of this curve provides a multiplier (\textgreater{}1) which is applied to this heat pump's Gross Rated Total Cooling Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1 (i.e., the total indoor terminal unit capacity is less than this heat pump's rated total capacity), capacity is directly proportional to part-load ratio and this curve will not be used.
+This alpha field defines the cooling combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor terminal unit cooling capacity divided by this heat pump's gross rated total cooling capacity. The curve is a linear, quadratic or cubic equation and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x {[}CR{]} in the curve object must be \(\ge 1\)). The output of this curve provides a multiplier (\textgreater{}1) which is applied to this heat pump's Gross Rated Total Cooling Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1 (i.e., the total indoor terminal unit capacity is less than this heat pump's rated total capacity), capacity is directly proportional to part-load ratio and this curve will not be used.
 
 \paragraph{Field: Cooling Part-Load Fraction Correlation Curve Name}\label{field-cooling-part-load-fraction-correlation-curve-name}
 
@@ -181,7 +181,7 @@ This alpha field defines the heating energy input ratio modifier (function of pa
 
 \paragraph{Field: Heating Combination Ratio Correction Factor Curve Name}\label{field-heating-combination-ratio-correction-factor-curve-name}
 
-This alpha field defines the heating combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor heating capacity divided by the rated heat pump heating capacity. The curve is either quadratic or cubic and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x in the curve object must be ≥1). The output of this curve provides a multiplier (\textgreater{}1) which is applied to the Nominal Heat Pump Heating Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1, capacity is directly proportional to part-load ratio and this curve will not be used. If this field is left blank, the Cooling Combination Ratio Correction factor will be used.
+This alpha field defines the heating combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor heating capacity divided by the rated heat pump heating capacity. The curve is either quadratic or cubic and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x in the curve object must be \(\ge 1\)). The output of this curve provides a multiplier (\textgreater{}1) which is applied to the Nominal Heat Pump Heating Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1, capacity is directly proportional to part-load ratio and this curve will not be used. If this field is left blank, the Cooling Combination Ratio Correction factor will be used.
 
 \paragraph{Field: Heating Part-Load Fraction Correlation Curve Name}\label{field-heating-part-load-fraction-correlation-curve-name}
 
@@ -307,7 +307,7 @@ Tcond\,inlet = \,\left( {Twb,o} \right)\,\, + \,\,\left( {1 - EvapCondEffectiven
 
 where
 
-\emph{T\(_{cond\\ inlet}\)} = the temperature of the air entering the condenser coil ($^\circ$C)
+\emph{T\(_{cond inlet}\)} = the temperature of the air entering the condenser coil ($^\circ$C)
 
 \emph{T\(_{wb,o}\)} = the wet-bulb temperature of the outdoor air ($^\circ$C)
 

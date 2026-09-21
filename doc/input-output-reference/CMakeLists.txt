@@ -317,3 +317,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/HW_reset.png)
 
 create_doc_target("input-output-reference" "InputOutputReference")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("input-output-reference" "input-output-reference")
+endif()

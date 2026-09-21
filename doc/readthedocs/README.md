@@ -1,7 +1,11 @@
-# ReadTheDocs Stuff
+# Read the Docs development guide
 
-OK, so we are going to start pushing a little of the more dynamic documentation out into ReadTheDocs.
-We have a bit of a mixed bag of stuff to document, including Python, C, and Freeform documentation.
+This README covers building, contributing to, and publishing the EnergyPlus documentation site.
+For the reader-facing documentation, visit the
+[EnergyPlus documentation home](https://energyplus.readthedocs.io/en/latest/).
+
+The site combines Sphinx documentation, Doxygen-generated C API documentation, and LaTeX user
+guides converted to HTML with Pandoc.
 
 ## Building the Doxygen (C) Documentation
 The C documentation is built with Doxygen, which is available on Debian with `apt install doxygen`.
@@ -15,6 +19,22 @@ Also, this process will build the Doxygen based C documentation, so you'll need 
 Move into the Python API doc folder: `cd doc/readthedocs/sphinx/`.
 Run the Sphinx built Makefile: `make html`.
 Browse the built docs at: `doc/readthedocs/sphinx/_build/html/index.html`
+
+To build the complete local Read the Docs site, including the LaTeX guides converted via Pandoc,
+run `make -j $(nproc) guides`. The target builds Sphinx first so the guide landing pages are copied last.
+
+### Previewing the site locally
+
+From the repository root, build the complete site and start a local HTTP server:
+
+```bash
+make -C doc/readthedocs/sphinx -j 23 guides
+python3 -m http.server 8000 --directory doc/readthedocs/sphinx/_build/html
+```
+
+Open <http://127.0.0.1:8000/> in a browser. Keep the terminal running while viewing the site and
+press `Ctrl+C` to stop the server. After changing the documentation, rerun the `make` command and
+refresh the browser.
 
 ## Adding Documentation
 The Python and C API documentation are generated directly from the API sources (.py files and .h files) in the api source directory: `src/EnergyPlus/api`.

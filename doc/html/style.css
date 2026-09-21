@@ -1,0 +1,351 @@
+/* Global Variables */
+:root {
+    --navbar-padding: 8px;
+    --navbar-height: calc(42px + 2 * var(--navbar-padding));
+    --navbar-font-color: 255, 255, 255;
+    --navbar-bg-color: 41, 128, 185;
+    --bd-toc-color: #404040;
+    --bd-pre-bg: #f3f6f6;
+    --ep-content-bg: #fcfcfc;
+    --ep-heading-color: #404040;
+    --ep-link-color: #2980b9;
+    --ep-link-hover-color: #1f618d;
+    --bs-primary: var(--ep-link-color);
+    --bs-primary-rgb: 41, 128, 185;
+    --bs-link-color: var(--ep-link-color);
+    --bs-link-color-rgb: 41, 128, 185;
+    --bs-link-hover-color: var(--ep-link-hover-color);
+    --bs-link-hover-color-rgb: 31, 97, 141;
+}
+
+/* Offset anchor scroll for fixed navbar */
+html {
+    scroll-padding-top: calc(var(--navbar-height) + 1rem);
+}
+
+body {
+    color: #404040;
+    background-color: var(--ep-content-bg);
+    font-family: Lato, proxima-nova, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--ep-heading-color);
+    font-family: "Roboto Slab", ff-tisa-web-pro, Georgia, Arial, sans-serif;
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 1.75rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+}
+
+h4 {
+    font-size: 1.15rem;
+}
+
+h5 {
+    font-size: 1.1rem;
+}
+
+/* General Link Styles */
+a {
+    color: var(--ep-link-color);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus {
+    color: var(--ep-link-hover-color);
+    text-decoration: underline;
+}
+
+/* Layout Styles */
+.bd-layout {
+    margin-top: calc(var(--navbar-height) + 1.5rem);
+    max-width: 1500px;
+    padding-right: 3.236rem;
+    padding-left: 3.236rem;
+}
+
+/* Code Block Styles */
+.bd-content pre {
+    margin: 1rem 0;
+    padding: 1.25rem 1em;
+    overflow-x: auto;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bd-pre-bg);
+    font-size: 0.875em;
+    line-height: 1.45;
+}
+
+.bd-content pre code,
+.bd-content pre code.hljs {
+    display: block;
+    padding: 0 !important;
+    border: 0;
+    border-radius: 0;
+    color: inherit;
+    background: transparent;
+    font-size: inherit;
+    white-space: pre;
+}
+
+/* Heading Anchor Links */
+.anchor-link {
+    opacity: 0;
+    margin-left: 0.25rem;
+    font-size: 0.75em;
+    transition: opacity 0.15s;
+}
+
+h1:hover .anchor-link,
+h2:hover .anchor-link,
+h3:hover .anchor-link,
+h4:hover .anchor-link,
+h5:hover .anchor-link,
+h6:hover .anchor-link {
+    opacity: 0.5;
+}
+
+.anchor-link:hover {
+    opacity: 1 !important;
+}
+
+/* I/O Reference heading hierarchy: h2 Group, h3 Object, h4 Inputs/Outputs, h5 Field */
+.doc-input-output-reference .bd-content h2 {
+    border-bottom: 2px solid var(--bs-primary);
+    padding-bottom: 0.5rem;
+    margin-top: 2.5rem;
+}
+
+.doc-input-output-reference .bd-content h3 {
+    border-left: 4px solid var(--bs-primary);
+    padding-left: 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding-bottom: 0.4rem;
+    margin-top: 2rem;
+}
+
+.doc-input-output-reference .bd-content h4 {
+    display: inline-block;
+    padding: 0.2rem 0.75rem;
+    border-radius: var(--bs-border-radius);
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+.doc-input-output-reference .bd-content h4.heading-inputs {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+    border-color: rgba(var(--bs-success-rgb), 0.3);
+}
+
+.doc-input-output-reference .bd-content h4.heading-outputs {
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+    border-color: rgba(var(--bs-info-rgb), 0.3);
+}
+
+.doc-input-output-reference .bd-content h5 {
+    border-left: 3px solid rgba(var(--bs-secondary-rgb), 0.4);
+    padding-left: 0.6rem;
+    font-size: 1rem;
+    margin-top: 1.25rem;
+}
+
+/* Blockquote Styles */
+blockquote {
+    font-size: 1rem;
+    color: #606060;
+    margin: 1rem 0 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--bs-secondary-border-subtle);
+}
+
+/* Center documentation figures and keep them from dominating wide screens. */
+figure {
+    text-align: center;
+}
+
+figure img {
+    display: block;
+    width: auto !important;
+    height: auto !important;
+    max-width: min(100%, 7in);
+    max-height: 7in;
+    margin-inline: auto;
+}
+
+/* Center tables that are narrower than the available content width. */
+table {
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+}
+
+/* Numbered display equations */
+.equation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    column-gap: 1rem;
+    margin: 1rem 0;
+}
+
+.equation-math {
+    align-self: center;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+    text-align: center;
+}
+
+.equation-math math[display="block"] {
+    margin: 0 auto;
+}
+
+.equation-numbers {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-width: max-content;
+}
+
+.equation-numbers > p {
+    margin: 0;
+}
+
+.equation-number:target {
+    background-color: rgba(var(--bs-warning-rgb), 0.35);
+}
+
+.equation-inline {
+    display: grid;
+    margin: 1rem 0;
+    text-align: initial;
+    width: 100%;
+}
+
+/* Pagination Styles */
+.pagination {
+    margin-top: 3rem;
+}
+
+/* Footer Styles */
+.footer {
+    font-size: 0.875rem;
+}
+
+/* Navbar Styles */
+.navbar,
+.navbar::after {
+    padding-top: var(--navbar-padding);
+    padding-bottom: var(--navbar-padding);
+    background-image: linear-gradient(rgba(var(--navbar-bg-color), 1), rgba(var(--navbar-bg-color), 0.95));
+}
+
+/* Navbar Brand Styles */
+.navbar .navbar-brand,
+.navbar .navbar-brand:hover {
+    color: rgba(var(--navbar-font-color), 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    transform: none;
+    text-decoration: none;
+}
+
+/* Navbar Items Styles */
+.navbar .nav-link,
+.navbar .nav-line,
+.navbar .navbar-toggler {
+    color: rgba(var(--navbar-font-color), 0.85);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active,
+.navbar .nav-link.show,
+.navbar .navbar-toggler:hover {
+    color: rgba(var(--navbar-font-color), 1);
+}
+
+/* Navbar Dropdown Menu Styles */
+.navbar .dropdown-menu {
+    --bs-dropdown-link-active-bg: unset;
+    --bs-dropdown-link-hover-bg: var(--bs-tertiary-bg);
+}
+
+/* Navbar Toggler Styles */
+.navbar .navbar-toggler {
+    border: none;
+}
+
+/* Search trigger button */
+.search-trigger {
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.search-trigger kbd {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Search modal */
+#searchModal .modal-body {
+    max-height: 60vh;
+}
+
+#searchModal .search-result {
+    padding: 0.6rem 1rem;
+    border-left: 3px solid transparent;
+}
+
+#searchModal .search-result.active {
+    border-left-color: var(--bs-primary);
+}
+
+#searchModal .search-result mark {
+    padding: 0;
+    background-color: rgba(var(--bs-warning-rgb), 0.35);
+    border-radius: 2px;
+}
+
+/* Scrollable Navbar for Small Screens */
+@media (max-width: 992px) {
+    .bd-layout {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .scrollable-navbar {
+        max-height: calc(100vh - var(--navbar-height));
+        overflow-y: auto;
+	scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+    /* Hide scrollbar in Chrome, Edge, Safari */
+    .scrollable-navbar::-webkit-scrollbar {
+	display: none;
+    }
+}
