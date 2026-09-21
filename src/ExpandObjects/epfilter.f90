@@ -24224,7 +24224,9 @@ IF (.NOT. isBaseboardNone) THEN
     CALL AddToObjFld('Electric Power Function of Flow Fraction Curve Name', base + fczNameOff,' Fan Power Curve')
   END IF
   CALL AddToObjStr('Night Ventilation Mode Pressure Rise {Pa}','')
-  CALL AddToObjStr('Night Ventilation Mode Flow Fraction','')
+  CALL AddToObjStr('Night Ventilation Mode Fan Total Efficiency','')
+  CALL AddToObjStr('Night Ventilation Mode Motor Efficiency','')
+  CALL AddToObjStr('Night Ventilation Mode Motor In Air Stream Fraction','')
   CALL AddToObjStr('Motor Loss Zone Name','')
   CALL AddToObjStr('Motor Loss Radiative Fraction','')
   CALL AddToObjStr('End-Use Subcategory','General')
