@@ -413,6 +413,26 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with F, insert the rules here
 
+              CASE('FAN:SYSTEMMODEL')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  IF (CurArgs <= 17) THEN
+                    ! record does not reach the old Night Ventilation Mode Flow Fraction field, nothing to do
+                    OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+                  ELSEIF (CurArgs == 18) THEN
+                    ! old field 18, Night Ventilation Mode Flow Fraction, is dropped; nothing follows it
+                    OutArgs(1:17)=InArgs(1:17)
+                    CurArgs = 17
+                  ELSE
+                    OutArgs(1:17)=InArgs(1:17)
+                    OutArgs(18) = ''  ! new Night Ventilation Mode Fan Total Efficiency field (blank)
+                    OutArgs(19) = ''  ! new Night Ventilation Mode Motor Efficiency field (blank)
+                    OutArgs(20) = ''  ! new Night Ventilation Mode Motor In Air Stream Fraction field (blank)
+                    ! old field 18, Night Ventilation Mode Flow Fraction, is dropped; shift remaining fields
+                    OutArgs(21:CurArgs+2)=InArgs(19:CurArgs)
+                    CurArgs = CurArgs + 2
+                  ENDIF
+
               ! If your original object starts with G, insert the rules here
 
               ! If your original object starts with H, insert the rules here
