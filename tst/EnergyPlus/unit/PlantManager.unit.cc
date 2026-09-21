@@ -498,15 +498,15 @@ namespace PlantManager {
             self->state->dataPlnt->PlantLoop.allocate(totNumLoops);
             self->state->dataPlnt->PlantCallingOrderInfo.allocate(totNumLoops * 2);
 
-            auto connectLoopSides = [&](int loopNum, LoopSideLocation loopSide, int connectedLoopNum, LoopSideLocation connectedLoopSide,
-                                         bool loopDemandsOnRemote) {
-                auto &connected = self->state->dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
-                connected.TotalConnected = 1;
-                connected.Connected.allocate(1);
-                connected.Connected(1).LoopNum = connectedLoopNum;
-                connected.Connected(1).LoopSideNum = connectedLoopSide;
-                connected.Connected(1).LoopDemandsOnRemote = loopDemandsOnRemote;
-            };
+            auto connectLoopSides =
+                [&](int loopNum, LoopSideLocation loopSide, int connectedLoopNum, LoopSideLocation connectedLoopSide, bool loopDemandsOnRemote) {
+                    auto &connected = self->state->dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
+                    connected.TotalConnected = 1;
+                    connected.Connected.allocate(1);
+                    connected.Connected(1).LoopNum = connectedLoopNum;
+                    connected.Connected(1).LoopSideNum = connectedLoopSide;
+                    connected.Connected(1).LoopDemandsOnRemote = loopDemandsOnRemote;
+                };
             auto addDependency = [&](int beforeLoopNum, LoopSideLocation beforeLoopSide, int afterLoopNum, LoopSideLocation afterLoopSide) {
                 connectLoopSides(beforeLoopNum, beforeLoopSide, afterLoopNum, afterLoopSide, true);
                 connectLoopSides(afterLoopNum, afterLoopSide, beforeLoopNum, beforeLoopSide, false);

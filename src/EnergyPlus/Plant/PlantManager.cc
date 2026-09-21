@@ -3775,10 +3775,10 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
         // two loops) that cannot all be satisfied at once. Demand-before-supply is still guaranteed for every loop,
         // but the inter-loop calling order may not reflect every interconnection.
         ShowWarningError(state,
-                          "RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side "
-                          "requirements; a cyclic dependency likely exists between two or more interconnected loops (e.g., reciprocal heat "
-                          "recovery equipment). Demand-before-supply ordering is preserved for every loop, but some inter-loop calling order "
-                          "constraints may not be honored.");
+                         "RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side "
+                         "requirements; a cyclic dependency likely exists between two or more interconnected loops (e.g., reciprocal heat "
+                         "recovery equipment). Demand-before-supply ordering is preserved for every loop, but some inter-loop calling order "
+                         "constraints may not be honored.");
     }
 }
 
