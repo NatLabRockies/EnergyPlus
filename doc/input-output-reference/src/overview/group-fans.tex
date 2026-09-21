@@ -102,9 +102,17 @@ This field is the name of performance curve or table that describes how electric
 
 This optional numeric field is the total system pressure rise experienced by the fan when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}, in Pascals. This field allows modeling the fan device with a different system pressure that might occur when implementing a special strategy to precool a building at night using outdoor air with dampers fully open. This field is only used when an \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} object is used that specifies the fan's availability schedule. This field and the next one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
 
-\paragraph{Field: Night Ventilation Mode Flow Fraction}\label{field-nite-vent-flow-fraction-fansysmodel}
+\paragraph{Field: Night Ventilation Mode Fan Total Efficiency}\label{field-nite-vent-total-eff-fansysmodel}
 
-This numeric field is the air flow fraction for the fan speed used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. This field corresponds to the input field called Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object and, as is the case there, this field is not currently used by the night ventilation manager (which has its own flow fraction field at present). This is a fraction between 0 and 1 and describes the speed level for the fan relative to the Design Maximum Air Flow Rate. This field and the previous one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
+This optional numeric field is the fan total efficiency used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank the Fan Total Efficiency field described above is used instead. The night venting flow rate itself is established by the \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} object's Night Venting Flow Fraction field, not by this fan object.
+
+\paragraph{Field: Night Ventilation Mode Motor Efficiency}\label{field-nite-vent-motor-eff-fansysmodel}
+
+This optional numeric field is the fan motor efficiency used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank the Motor Efficiency field described above is used instead.
+
+\paragraph{Field: Night Ventilation Mode Motor In Air Stream Fraction}\label{field-nite-vent-motor-air-frac-fansysmodel}
+
+This optional numeric field is the fraction of fan motor heat that is added to the air stream when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank the Motor In Air Stream Fraction field described above is used instead. A value of 0 means fan motor is located completely outside of air stream and none of the motor's heat is added to the air stream. A value of 1.0 means the motor is located completely inside of air stream and all of the motor's heat is added to the air stream.
 
 \paragraph{Field: Motor Loss Zone Name}\label{field-loss-zone-name-fansysmodel}
 
@@ -155,7 +163,9 @@ Fan:SystemModel,
   0.6045,                     !- Fan Total Efficiency
   VAV Fan Curve,              !- Electric Power Function of Flow Fraction Curve Name
   ,                           !- Night Ventilation Mode Pressure Rise
-  ,                           !- Night Ventilation Mode Flow Fraction
+  ,                           !- Night Ventilation Mode Fan Total Efficiency
+  ,                           !- Night Ventilation Mode Motor Efficiency
+  ,                           !- Night Ventilation Mode Motor In Air Stream Fraction
   ,                           !- Motor Loss Zone Name
   ,                           !- Motor Loss Radiative Fraction
   Fan Energy;                 !- End-Use Subcategory
@@ -209,7 +219,9 @@ Fan:SystemModel,
   0.50,                       !- Fan Total Efficiency
   ,                           !- Electric Power Function of Flow Fraction Curve Name
   ,                           !- Night Ventilation Mode Pressure Rise
-  ,                           !- Night Ventilation Mode Flow Fraction
+  ,                           !- Night Ventilation Mode Fan Total Efficiency
+  ,                           !- Night Ventilation Mode Motor Efficiency
+  ,                           !- Night Ventilation Mode Motor In Air Stream Fraction
   ,                           !- Motor Loss Zone Name
   ,                           !- Motor Loss Radiative Fraction
   Fan Energy,                 !- End-Use Subcategory
