@@ -687,6 +687,19 @@ This field is optional. If it is not used then there will be no temperature-rela
 
 This field is optional. If it is not used, then all the exhaust air flow is assumed to be unbalanced by any simple airflows, such as infiltration, ventilation, or zone mixing. Unbalanced exhaust is then modeled as being provided by the outdoor air system in the central air system. The modeling of unbalanced will reduce the flow rates at the zone's return air node by the flow rate that is being exhausted and will ensure that the outdoor air flow rate is sufficient to serve the exhaust. If this field is used, then enter the name of a schedule with fractional values between 0.0 and 1.0, inclusive. This fraction is applied to the exhaust fan flow rate and the model tracks the portion of the exhaust that is balanced. Balanced exhaust is then modeled as being provided by simple airflows and does not impact the central air system return air or outdoor air flow rates. For example, consider a kitchen zone with an exhaust fan designed to draw 70\% of its make-up air from a neighboring dining room (via zone mixing or infiltration) and the remaining 30\% from the central outdoor air system. Because this field specifies the \emph{balanced} fraction (i.e., the portion supplied by simple airflows rather than the central OA system), a schedule value of 0.7 would be used here. This input field must be blank when the zone air flow balance is enforced. If user specifies a schedule and zone air flow balance is enforced, then EnergyPlus throws a warning error message, ignores the schedule and simulation continues.
 
+\paragraph{Field: Motor Loss Location}\lable{field-motor-loss-location}
+
+Valid choices are Zone, Outside and AirStream. If Zone is selected then a valid zone name must be entered in the Motor Loss Zone Name field below. The motor's thermal losses that are not added to the air stream are added to the surrounding thermal zone as internal heat gains. If Outside is selected then motor losses that are not added to the air stream are directed to outdoors. If AirStream is selected then motor losses are directed to the fan exhaust air stream. In all cases, the amount of motor heat added to the air stream is determined using the following field for Motor in Airstream Fraction which has a default value of 1.0. When AirStream is selected and Motor in Airstream Fraction is less than 1, the motor's thermal losses that are not added to the air stream are directed to outdoors.
+
+\paragraph{Field: Motor in Airstream Fraction}\label{field-motor-in-airstream-fraction-31}
+
+The fraction of the motor heat that is added to the air stream. A value of 0 means that the motor is completely outside the air stream. A value of 1 means that all of the motor heat loss will go into the air stream and act to cause a temperature rise. Must be between 0 and 1. The default is 1.0.
+
+\paragraph{Field: Motor Loss Zone Name}\label{field-loss-zone-name-fanzoneexhaustl}
+
+This optional field can be used to input the name of the Zone in which the fan motor is located.  If the fan is outdoors, or the motor's thermal losses are not to be modeled then leave this field blank.  If a valid Zone name is entered then the portion of the motor's thermal losses that are not added to the air stream are added to the surrounding thermal zone as internal heat gains.
+
+
 \subsubsection{Outputs}\label{outputs-3-007}
 
 \begin{itemize}
