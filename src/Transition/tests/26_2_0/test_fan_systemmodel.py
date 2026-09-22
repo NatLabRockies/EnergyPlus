@@ -104,8 +104,8 @@ def test_fan_systemmodel_no_trailing_fields(run_transition_test):
 
 def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(run_transition_test):
     """Fan:SystemModel with the (now removed) Night Ventilation Mode Flow Fraction populated
-    and trailing fields present: the old flow fraction value is dropped, three blank fields
-    are inserted in its place, and the remaining fields shift down by two positions."""
+    and trailing fields present: the old flow fraction value is dropped, four blank fields
+    are inserted in its place, and the remaining fields shift down by three positions."""
     idf_text = """
   Fan:SystemModel,
     Supply Fan,              !- Name
@@ -150,6 +150,7 @@ def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(run_transition_t
     0.7,                     !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
     250.0,                   !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
@@ -163,7 +164,7 @@ def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(run_transition_t
 
 def test_fan_systemmodel_with_multispeed_fields(run_transition_test):
     """Fan:SystemModel with Number of Speeds and speed field sets present: all fields after
-    Night Ventilation Mode Pressure Rise shift down by two positions."""
+    Night Ventilation Mode Pressure Rise shift down by three positions."""
     idf_text = """
   Fan:SystemModel,
     Supply Fan,              !- Name
@@ -213,6 +214,7 @@ def test_fan_systemmodel_with_multispeed_fields(run_transition_test):
     0.7,                     !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction

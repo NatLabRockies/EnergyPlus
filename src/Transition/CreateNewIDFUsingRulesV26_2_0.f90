@@ -425,12 +425,13 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                     CurArgs = 17
                   ELSE
                     OutArgs(1:17)=InArgs(1:17)
-                    OutArgs(18) = ''  ! new Night Ventilation Mode Fan Total Efficiency field (blank)
-                    OutArgs(19) = ''  ! new Night Ventilation Mode Motor Efficiency field (blank)
-                    OutArgs(20) = ''  ! new Night Ventilation Mode Motor In Air Stream Fraction field (blank)
+                    OutArgs(18) = ''  ! new Night Ventilation Mode Maximum Air Flow Rate field (blank)
+                    OutArgs(19) = ''  ! new Night Ventilation Mode Fan Total Efficiency field (blank)
+                    OutArgs(20) = ''  ! new Night Ventilation Mode Motor Efficiency field (blank)
+                    OutArgs(21) = ''  ! new Night Ventilation Mode Motor In Air Stream Fraction field (blank)
                     ! old field 18, Night Ventilation Mode Flow Fraction, is dropped; shift remaining fields
-                    OutArgs(21:CurArgs+2)=InArgs(19:CurArgs)
-                    CurArgs = CurArgs + 2
+                    OutArgs(22:CurArgs+3)=InArgs(19:CurArgs)
+                    CurArgs = CurArgs + 3
                   ENDIF
 
               ! If your original object starts with G, insert the rules here
