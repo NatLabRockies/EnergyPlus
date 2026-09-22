@@ -256,11 +256,12 @@ enum class FlowMode
     NotModulated,
     LeavingSetpointModulated,
     VariableSpeedPump,
+    Variable,
     Num
 };
 
 constexpr std::array<std::string_view, static_cast<int>(FlowMode::Num)> FlowModeNamesUC{
-    "CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED", "VARIABLESPEEDPUMPING"};
+    "CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED", "VARIABLESPEEDPUMPING", "VARIABLEFLOW"};
 
 enum class CondenserFlowControl
 {

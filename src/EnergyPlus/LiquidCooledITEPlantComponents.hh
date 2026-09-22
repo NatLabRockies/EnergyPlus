@@ -49,14 +49,15 @@
 #define LiquidCooledITEPlantComponents_hh_INCLUDED
 
 // C++ headers
-#include <functional>
 #include <string>
 #include <vector>
 
 // EnergyPlus headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -74,30 +75,51 @@ namespace LiquidCooledITEPlantComponents {
 
     struct CoilCoolingITEColdPlateData : public EnergyPlus::PlantComponent
     {
+        // --- Identity / location ---
         std::string name;
         PlantLocation plantLoc;
+
+        // --- Input parameters ---
+        Sched::Schedule *availabilitySchedule = nullptr;
         ThermalResistanceMethod thermalResistanceMethod = ThermalResistanceMethod::Standard;
-        Real64 thermalResistance;
-        Real64 maximumCaseTemperature;
-        Real64 targetCaseOperatingTemperature;
-        Real64 nominalFlowRate;
-        Real64 maximumFlowRate;
-        Real64 auxPower;
-        int inletNode;
-        int outletNode;
-        int thermalResistanceModifierCurveIndex;
+        DataPlant::FlowMode flowMode = DataPlant::FlowMode::Constant;
+        Real64 thermalResistance = 0.0;                        // nominal cold-plate thermal resistance [K/W]
+        Real64 maximumCaseTemperature = 0.0;                   // maximum allowable chip case temperature [C]
+        Real64 targetCaseOperatingTemperature = 0.0;           // target chip case temperature used for sizing and variable-flow control [C]
+        Real64 nominalFlowRate = 0.0;                          // nominal volumetric coolant flow rate [m3/s]
+        Real64 maximumFlowRate = 0.0;                          // maximum volumetric coolant flow rate [m3/s]
+        Real64 auxPower = 0.0;                                 // rated auxiliary electric power [W]
+        std::string endUseSubcategory = "General";             // ABUPS end-use sub-category label
+        int inletNode = 0;
+        int outletNode = 0;
+        int thermalResistanceModifierCurveIndex = 0;
+
+        Real64 actualLoad = 0.0;               // IT load requested by the paired ITE object [W]
+        Real64 heatRemovedByFluid = 0.0;       // heat actually transferred to the coolant [W]
+        Real64 heatRemovedByFluidEnergy = 0.0; // [J]
+        Real64 zoneHeatGainRate = 0.0;         // unmet load returned to zone heat balance [W]
+        Real64 zoneHeatGainEnergy = 0.0;       // [J]
+        Real64 caseTemperature = 0.0;          // computed chip case temperature [C]
+        Real64 inletTemp = 0.0;                // coolant inlet temperature [C]
+        Real64 outletTemp = 0.0;               // coolant outlet temperature [C]
+        Real64 massFlowRate = 0.0;             // coolant mass flow rate [kg/s]
+        Real64 auxElecPower = 0.0;             // auxiliary electric power (0 when unavailable) [W]
+        Real64 auxElecEnergy = 0.0;            // [J]
 
         virtual ~CoilCoolingITEColdPlateData() = default;
         CoilCoolingITEColdPlateData() = default;
 
         void simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
+        void onInitLoopEquip(EnergyPlusData &state, const PlantLocation &calledFromLocation) override;
         void oneTimeInit(EnergyPlusData &state) override;
         void sizeColdPlate(EnergyPlusData &state);
-        void doPhysics(EnergyPlusData &state, Real64 currentLoad);
+        void doPhysics(EnergyPlusData &state);
         void report(EnergyPlusData &state);
         static void processInputForCoilCoolingITEColdPlate(EnergyPlusData &state);
         static PlantComponent *factory(EnergyPlusData &state, const std::string &objectName);
-
+        Real64 getDesignLoad(EnergyPlusData &state, Real64 inletFluidTemperature, Real64 outletFluidTemperature);
+        Real64 getThermalResistanceModifier(EnergyPlusData &state, Real64 flowRatio) const;
+        void setupOutputVariables(EnergyPlusData &state);
     };
 
 } // namespace LiquidCooledITEPlantComponents
