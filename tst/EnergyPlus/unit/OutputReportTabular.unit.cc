@@ -9817,6 +9817,7 @@ TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
     0.524386048,             !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
@@ -10767,6 +10768,7 @@ TEST_F(SQLiteFixture, UpdateSizing_EndSysSizingCalc)
     0.524386048,             !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction

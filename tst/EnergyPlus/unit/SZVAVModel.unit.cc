@@ -1058,6 +1058,7 @@ TEST_F(EnergyPlusFixture, SZVAV_UnitarySys_VarSpeed_Testing)
         "    0.7,                                        !- Fan Total Efficiency",
         "    fan_curve,                                  !- Electric Power Function of Flow Fraction Curve Name",
         "    ,                                           !- Night Ventilation Mode Pressure Rise {Pa}",
+        "    ,                                           !- Night Ventilation Mode Maximum Air Flow Rate",
         "    ,                                           !- Night Ventilation Mode Fan Total Efficiency",
         "    ,                                           !- Night Ventilation Mode Motor Efficiency",
         "    ,                                           !- Night Ventilation Mode Motor In Air Stream Fraction",
