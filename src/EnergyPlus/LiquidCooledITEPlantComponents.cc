@@ -55,6 +55,7 @@
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -168,32 +169,58 @@ void CoilCoolingITEColdPlateData::setupOutputVariables(EnergyPlusData &state)
 void CoilCoolingITEColdPlateData::simulate(EnergyPlusData &state,
                                            [[maybe_unused]] const PlantLocation &calledFromLocation,
                                            [[maybe_unused]] bool FirstHVACIteration,
-                                           Real64 &CurLoad,
+                                           [[maybe_unused]] Real64 &CurLoad,
                                            [[maybe_unused]] bool RunFlag)
 {
     if (this->oneTimeInitFlag) {
         this->oneTimeInit(state);
     }
+
+    if (this->myEnvrnFlag && state.dataGlobal->BeginEnvrnFlag && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+        static constexpr std::string_view routineName("CoilCoolingITEColdPlateData::simulate");
+        Real64 const rho = this->plantLoc.loop->glycol->getDensity(state, state.dataLoopNodes->Node(this->inletNode).Temp, routineName);
+        Real64 const maxMdot = (this->maximumFlowRate > 0.0 ? this->maximumFlowRate : this->nominalFlowRate) * rho;
+        PlantUtilities::InitComponentNodes(state, 0.0, maxMdot, this->inletNode, this->outletNode);
+        this->heatRemovedByFluid = 0.0;
+        this->heatRemovedByFluidEnergy = 0.0;
+        this->zoneHeatGainRate = 0.0;
+        this->zoneHeatGainEnergy = 0.0;
+        this->caseTemperature = 0.0;
+        this->outletTemp = state.dataLoopNodes->Node(this->inletNode).Temp;
+        this->massFlowRate = 0.0;
+        this->auxElecPower = 0.0;
+        this->auxElecEnergy = 0.0;
+        this->myEnvrnFlag = false;
+    }
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->myEnvrnFlag = true;
+    }
+
     this->doPhysics(state);
     this->report(state);
 }
 
 void CoilCoolingITEColdPlateData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
 {
-    this->sizeColdPlate(state);
+    if (this->myPlantScanFlag) {
+        bool errFlag = false;
+        PlantUtilities::ScanPlantLoopsForObject(state, this->name, DataPlant::PlantEquipmentType::CoilCoolingITEColdPlate, this->plantLoc, errFlag);
+        if (errFlag) {
+            ShowFatalError(state, std::format("Coil:Cooling:ITE:ColdPlate: plant loop scan failed for object \"{}\"", this->name));
+        }
+        this->myPlantScanFlag = false;
+    }
+    if (this->mySizingFlag) {
+        this->sizeColdPlate(state);
+        if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+            this->mySizingFlag = false;
+        }
+    }
 }
 
 void CoilCoolingITEColdPlateData::oneTimeInit(EnergyPlusData &state)
 {
     this->oneTimeInitFlag = false;
-    bool errFlag = false;
-    PlantUtilities::ScanPlantLoopsForObject(state, this->name, DataPlant::PlantEquipmentType::CoilCoolingITEColdPlate, this->plantLoc, errFlag);
-
-    if (errFlag) {
-        ShowFatalError(state, std::format("Coil:Cooling:ITE:ColdPlate: plant loop scan failed for object \"{}\"", this->name));
-    }
-
-    DataPlant::CompData::getPlantComponent(state, this->plantLoc).FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
     this->setupOutputVariables(state);
 }
 
@@ -207,7 +234,10 @@ Real64 CoilCoolingITEColdPlateData::getDesignLoad(EnergyPlusData &state, Real64 
     Real64 adjustedThermalResistance = this->thermalResistance * this->getThermalResistanceModifier(state, 1.0);
 
     if (adjustedThermalResistance <= 0.0) {
-        ShowFatalError(state, std::format("Thermal resistance for the Coil:Cooling:ITE:ColdPlate \"{}\" is 0 for a flow ratio of 1.0", this->name));
+        ShowFatalError(state,
+                       std::format("Thermal resistance for the Coil:Cooling:ITE:ColdPlate \"{}\" is 0 or negative for a flow ratio of 1.0. "
+                                   "Check the nominal thermal resistance and the thermal resistance modifier curve.",
+                                   this->name));
     }
 
     if (this->thermalResistanceMethod == ThermalResistanceMethod::Standard) {
@@ -215,6 +245,20 @@ Real64 CoilCoolingITEColdPlateData::getDesignLoad(EnergyPlusData &state, Real64 
     }
 
     if (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD) {
+        if (outletFluidTemperature <= inletFluidTemperature) {
+            ShowFatalError(state,
+                           std::format("Coil:Cooling:ITE:ColdPlate \"{}\": Plant loop design temperature rise must be greater than 0 when using "
+                                       "the LMTD method. Check the PlantSizing object.",
+                                       this->name));
+        }
+        if (this->targetCaseOperatingTemperature <= outletFluidTemperature) {
+            ShowFatalError(state,
+                           std::format("Coil:Cooling:ITE:ColdPlate \"{}\": Target Case Operating Temperature ({:.2f} C) must be greater than "
+                                       "the plant loop design outlet temperature ({:.2f} C) when using the LMTD method.",
+                                       this->name,
+                                       this->targetCaseOperatingTemperature,
+                                       outletFluidTemperature));
+        }
         Real64 logMeanTemperatureDifference =
             (outletFluidTemperature - inletFluidTemperature) / std::log((this->targetCaseOperatingTemperature - inletFluidTemperature) /
                                                                         (this->targetCaseOperatingTemperature - outletFluidTemperature));
@@ -234,6 +278,10 @@ void CoilCoolingITEColdPlateData::sizeColdPlate(EnergyPlusData &state)
 
         if (plantSizingNum > 0) {
             auto &plantSizing = state.dataSize->PlantSizData(plantSizingNum);
+            if (plantSizing.DeltaT <= 0.0) {
+                ShowFatalError(state,
+                               std::format("sizeColdPlate: Plant loop design temperature rise must be greater than 0 for object=\"{}\"", this->name));
+            }
             Real64 const cp = this->plantLoc.loop->glycol->getSpecificHeat(state, plantSizing.ExitTemp, routineName);
             Real64 const rho = this->plantLoc.loop->glycol->getDensity(state, plantSizing.ExitTemp, routineName);
             // ExitTemp is the loop supply (inlet to cold plate); ExitTemp+DeltaT is the return (outlet from cold plate)
@@ -251,10 +299,10 @@ void CoilCoolingITEColdPlateData::sizeColdPlate(EnergyPlusData &state)
         } else {
             ShowFatalError(state, std::format("sizeColdPlate: Missing plant sizing data for object=\"{}\"", this->name));
         }
+    }
 
-        if (this->maximumFlowRate == DataSizing::AutoSize) {
-            this->maximumFlowRate = this->nominalFlowRate;
-        }
+    if (this->maximumFlowRate == DataSizing::AutoSize) {
+        this->maximumFlowRate = this->nominalFlowRate;
     }
 
     PlantUtilities::RegisterPlantCompDesignFlow(state, this->inletNode, this->nominalFlowRate);
@@ -275,6 +323,9 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
         this->heatRemovedByFluid = 0.0;
         this->zoneHeatGainRate = 0.0;
         this->massFlowRate = 0.0;
+        this->caseTemperature = 0.0;
+        this->inletTemp = state.dataLoopNodes->Node(this->inletNode).Temp;
+        this->outletTemp = this->inletTemp;
         PlantUtilities::SetComponentFlowRate(state, massFlowRate, this->inletNode, this->outletNode, this->plantLoc);
         return;
     }
@@ -370,16 +421,12 @@ void CoilCoolingITEColdPlateData::processInputForCoilCoolingITEColdPlate(EnergyP
     const std::string cCurrentModuleObject = "Coil:Cooling:ITE:ColdPlate";
     auto *ip = state.dataInputProcessing->inputProcessor.get();
 
-    if (ip->getNumObjectsFound(state, cCurrentModuleObject) <= 0) {
-        ShowSevereError(state, std::format("No {} specified in input file", cCurrentModuleObject));
-        return;
-    }
-
     auto const instances = ip->epJSON.find(cCurrentModuleObject);
     if (instances == ip->epJSON.end()) {
         return;
     }
     auto const &schemaProps = ip->getObjectSchemaProps(state, cCurrentModuleObject);
+    state.dataLiquidCooledITE->coldPlates.reserve(instances.value().size());
 
     for (auto instance = instances.value().begin(); instance != instances.value().end(); ++instance) {
         auto const &fields = instance.value();

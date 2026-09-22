@@ -83,17 +83,20 @@ namespace LiquidCooledITEPlantComponents {
         Sched::Schedule *availabilitySchedule = nullptr;
         ThermalResistanceMethod thermalResistanceMethod = ThermalResistanceMethod::Standard;
         DataPlant::FlowMode flowMode = DataPlant::FlowMode::Constant;
-        Real64 thermalResistance = 0.0;                        // nominal cold-plate thermal resistance [K/W]
-        Real64 maximumCaseTemperature = 0.0;                   // maximum allowable chip case temperature [C]
-        Real64 targetCaseOperatingTemperature = 0.0;           // target chip case temperature used for sizing and variable-flow control [C]
-        Real64 nominalFlowRate = 0.0;                          // nominal volumetric coolant flow rate [m3/s]
-        Real64 maximumFlowRate = 0.0;                          // maximum volumetric coolant flow rate [m3/s]
-        Real64 auxPower = 0.0;                                 // rated auxiliary electric power [W]
-        std::string endUseSubcategory = "General";             // ABUPS end-use sub-category label
+        Real64 thermalResistance = 0.0;              // nominal cold-plate thermal resistance [K/W]
+        Real64 maximumCaseTemperature = 0.0;         // maximum allowable chip case temperature [C]
+        Real64 targetCaseOperatingTemperature = 0.0; // target chip case temperature used for sizing and variable-flow control [C]
+        Real64 nominalFlowRate = 0.0;                // nominal volumetric coolant flow rate [m3/s]
+        Real64 maximumFlowRate = 0.0;                // maximum volumetric coolant flow rate [m3/s]
+        Real64 auxPower = 0.0;                       // rated auxiliary electric power [W]
+        std::string endUseSubcategory = "General";   // ABUPS end-use sub-category label
         int inletNode = 0;
         int outletNode = 0;
         int thermalResistanceModifierCurveIndex = 0;
 
+        bool myPlantScanFlag = true;           // false once ScanPlantLoopsForObject has run
+        bool mySizingFlag = true;              // false once sizeColdPlate has finalized
+        bool myEnvrnFlag = true;               // reset to true each BeginEnvrnFlag cycle
         Real64 actualLoad = 0.0;               // IT load requested by the paired ITE object [W]
         Real64 heatRemovedByFluid = 0.0;       // heat actually transferred to the coolant [W]
         Real64 heatRemovedByFluidEnergy = 0.0; // [J]
@@ -109,7 +112,8 @@ namespace LiquidCooledITEPlantComponents {
         virtual ~CoilCoolingITEColdPlateData() = default;
         CoilCoolingITEColdPlateData() = default;
 
-        void simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
+        void
+        simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
         void onInitLoopEquip(EnergyPlusData &state, const PlantLocation &calledFromLocation) override;
         void oneTimeInit(EnergyPlusData &state) override;
         void sizeColdPlate(EnergyPlusData &state);
