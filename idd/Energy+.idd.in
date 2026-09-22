@@ -53050,6 +53050,10 @@ FanPerformance:NightVentilation,
        \units m3/s
        \minimum 0.0
        \autosizable
+       \note Maximum standard-density volumetric air flow rate when the fan operates in night ventilation mode.
+       \note If autosized, this field is set to the fan object's maximum flow rate.
+       \note AvailabilityManager:NightVentilation Night Venting Flow Fraction requests a fraction of the fan object's design flow rate.
+       \note This field is then used as an upper limit on the resulting night ventilation fan flow rate.
   N4 , \field Motor Efficiency
        \type real
        \required-field
