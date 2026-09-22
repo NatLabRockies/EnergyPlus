@@ -55,12 +55,15 @@ In `Fan:SystemModel`, `Night Ventilation Mode Flow Fraction` is removed and repl
        \units Pa
        \ip-units inH2O
   N11, \field Night Ventilation Mode Maximum Air Flow Rate
-       \note Maximum air flow rate to use when in night mode using AvailabilityManager:NightVentilation
-       \note If left blank the Design Maximum Air Flow Rate field above is used, i.e. no additional flow cap is applied.
        \type real
        \units m3/s
        \minimum 0.0
        \autosizable
+       \default autosize
+       \note Maximum standard-density volumetric air flow rate when the fan operates in night ventilation mode.
+       \note If left blank or autosized, this field is set to the fan's Design Maximum Air Flow Rate.
+       \note AvailabilityManager:NightVentilation Night Venting Flow Fraction requests a fraction of the fan's Design Maximum Air Flow Rate.
+       \note This field is then used as an upper limit on the resulting night ventilation fan flow rate.
   N12, \field Night Ventilation Mode Fan Total Efficiency
        \note Fan total efficiency to use when in night mode using AvailabilityManager:NightVentilation
        \note If left blank the Fan Total Efficiency field above is used.
@@ -86,8 +89,7 @@ In `Fan:SystemModel`, `Night Ventilation Mode Flow Fraction` is removed and repl
 
 `FanSystem` (the `Fan:SystemModel` implementation class) gains:
 ```cpp
-Real64 nightVentMaxAirFlowRate = 0.0;            // 0.0 means not specified
-bool nightVentMaxAirFlowRateIsAutosized = false;
+Real64 nightVentMaxAirFlowRate = 0.0;
 Real64 nightVentMaxAirMassFlowRate = 0.0;        // [kg/s]
 Real64 nightVentTotalEff = 0.0;                  // 0.0 means not specified
 Real64 nightVentMotorEff = 0.0;                  // 0.0 means not specified
@@ -95,11 +97,11 @@ Real64 nightVentMotorInAirFrac = 0.0;
 bool nightVentMotorInAirFracSpecified = false;
 ```
 
-`GetFanInput` parses the four new/changed numeric fields, using `lNumericFieldBlanks` to distinguish "not specified" (fall back to the normal, non-night-vent field) from an explicit value of zero.
+`GetFanInput` parses the four new/changed numeric fields. The IDD's `\default autosize` causes a blank maximum flow rate to be read as `DataSizing::AutoSize`; an explicit `0.0` remains a zero-flow cap.
 
 `FanSystem::set_size` resolves the night-vent maximum flow rate once the fan's normal `maxAirFlowRate` has been sized:
 ```cpp
-if (nightVentMaxAirFlowRateIsAutosized || nightVentMaxAirFlowRate <= 0.0) {
+if (nightVentMaxAirFlowRate == DataSizing::AutoSize) {
     nightVentMaxAirFlowRate = maxAirFlowRate;
 }
 nightVentMaxAirMassFlowRate = nightVentMaxAirFlowRate * rhoAirStdInit;
