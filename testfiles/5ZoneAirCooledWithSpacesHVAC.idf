@@ -2594,7 +2594,7 @@
   SpaceHVAC:EquipmentConnections,
     Space 5 Office,          !- Space Name
     Space 5 Office In Node,  !- Space Air Inlet Node or NodeList Name
-    Space 5 Office Exhaust Node, !- Space Air Exhaust Node or NodeList Name
+    ,                        !- Space Air Exhaust Node or NodeList Name
     Space 5 Office Node,     !- Space Air Node Name
     Space 5 Office Return Node;  !- Space Return Air Node or NodeList Name
 
