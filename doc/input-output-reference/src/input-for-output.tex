@@ -2503,13 +2503,13 @@ OutputControl:Files,
 Controls the format of the timestamp used in the native CSV and JSON outputs when requested using \hyperref[outputcontrolfiles]{OutputControl:Files}. The default timestamp is formatted
 as ``$MM$/$DD$ $hh$:$mm$:$ss$'', where
 
-\begin{wherelist}
-\item[MM] the two-digit month,
-\item[DD] the two-digit day of the month,
-\item[hh] the two-digit hours since the beginning of the day,
-\item[mm] the two-digit minutes since the beginning of the last hour, and
-\item[ss] the two-digit seconds (which is always ``00'').
-\end{wherelist}
+\begin{description}
+\item[\(MM =\)] the two-digit month,
+\item[\(DD =\)] the two-digit day of the month,
+\item[\(hh =\)] the two-digit hours since the beginning of the day,
+\item[\(mm =\)] the two-digit minutes since the beginning of the last hour, and
+\item[\(ss =\)] the two-digit seconds (which is always ``00'').
+\end{description}
 %
 The time portion of this timestamp has traditionally been the elapsed time since the beginning of the day and associates values
 with the elapsed time at the end of the interval of interest.  For example, the timestamp for the interval from 1~AM to 2~AM on
@@ -2519,14 +2519,14 @@ associate values with the elapsed time at the beginning of the interval of inter
 2~AM on December 7 is written as ``12/07 01:00:00'' and 24 will never appear as the hours value (but 00 will). The ISO 8601
 timestamp format is ``$YYYY$-$MM$-$DD$T$hh$:$mm$:$ss$'' where
 
-\begin{wherelist}
-\item[YYYY] the four-digit year,
-\item[MM] the two-digit month,
-\item[DD] the two-digit day of the month,
-\item[hh] the two-digit hours since the beginning of the day,
-\item[mm] the two-digit minutes since the beginning of the last hour,
-\item[ss] the two-digit seconds (which is always ``00''),
-\end{wherelist}
+\begin{description}
+\item[\(YYYY =\)] the four-digit year,
+\item[\(MM =\)] the two-digit month,
+\item[\(DD =\)] the two-digit day of the month,
+\item[\(hh =\)] the two-digit hours since the beginning of the day,
+\item[\(mm =\)] the two-digit minutes since the beginning of the last hour,
+\item[\(ss =\)] the two-digit seconds (which is always ``00''),
+\end{description}
 %
 and a capital letter ``T'' separates the time portion of the timestamp from the date portion. The timestamp for the interval from
 1~AM to 2~AM on December 7, 2022 is written either as

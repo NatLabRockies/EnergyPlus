@@ -142,6 +142,7 @@ namespace Pumps {
         int NumPumpsInBank = 0;                       // Node number on the inlet side of the plant
         int PowerErrIndex1 = 0;                       // for recurring errors
         int PowerErrIndex2 = 0;                       // for recurring errors
+        int PLRErrIndex = 0;                          // for recurring errors
         Real64 MinVolFlowRateFrac = 0.0;              // minimum schedule value fraction modifier
         Real64 NomVolFlowRate = 0.0;                  // design nominal capacity of Pump
         bool NomVolFlowRateWasAutoSized = false;      // true if previous was autosize on input

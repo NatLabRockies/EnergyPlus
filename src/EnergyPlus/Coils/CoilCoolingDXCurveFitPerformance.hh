@@ -84,7 +84,6 @@ struct CoilCoolingDXCurveFitPerformanceInputSpecification
 struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
 {
     static constexpr std::string_view object_name = "Coil:Cooling:DX:CurveFit:Performance";
-    std::string parentName;
 
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXCurveFitPerformanceInputSpecification &input_data);
 
@@ -248,7 +247,6 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
     Real64 evapCondBasinHeatSetpoint = 0.0;
     Sched::Schedule *evapCondBasinHeatSched = nullptr;
     bool oneTimeEIOHeaderWrite = true;
-    Real64 wasteHeatRate = 0.0;
 
     CoilCoolingDXCurveFitOperatingMode normalMode;
     CoilCoolingDXCurveFitOperatingMode alternateMode;  // enhanced dehumidifcation or Subcool mode

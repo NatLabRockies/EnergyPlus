@@ -81,7 +81,7 @@ Begin VB.Form About
       Begin VB.Label lblVersion
          Alignment       =   1  'Right Justify
          AutoSize        =   -1  'True
-         Caption         =   "Version 1.56"
+         Caption         =   "Version 1.56a"
          BeginProperty Font
             Name            =   "Arial"
             Size            =   12
@@ -92,10 +92,10 @@ Begin VB.Form About
             Strikethrough   =   0   'False
          EndProperty
          Height          =   285
-         Left            =   1680
+         Left            =   1545
          TabIndex        =   1
          Top             =   960
-         Width           =   1410
+         Width           =   1545
       End
       Begin VB.Label lblProductName
          AutoSize        =   -1  'True

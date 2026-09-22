@@ -1568,9 +1568,11 @@ void CalcSeriesPIU(EnergyPlusData &state,
         if (!PriOn) {
             // no primary air flow
             thisPIU.PriAirMassFlow = 0.0;
+            state.dataLoopNodes->Node(thisPIU.PriAirInNode).MassFlowRateMinAvail = 0.0;
             // PIU fan off if there is no heating load, also reset fan flag if fan should be off
             if (QZnReq <= SmallLoad) {
                 thisPIU.SecAirMassFlow = 0.0;
+                state.dataLoopNodes->Node(thisPIU.SecAirInNode).MassFlowRateMinAvail = 0.0;
                 state.dataHVACGlobal->TurnFansOn = false;
             } else {
                 if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
@@ -1647,6 +1649,8 @@ void CalcSeriesPIU(EnergyPlusData &state,
         // unit is off ; no flow
         thisPIU.PriAirMassFlow = 0.0;
         thisPIU.SecAirMassFlow = 0.0;
+        state.dataLoopNodes->Node(thisPIU.PriAirInNode).MassFlowRateMinAvail = 0.0;
+        state.dataLoopNodes->Node(thisPIU.SecAirInNode).MassFlowRateMinAvail = 0.0;
     }
     // set inlet node flowrates
     state.dataLoopNodes->Node(thisPIU.PriAirInNode).MassFlowRate = thisPIU.PriAirMassFlow;

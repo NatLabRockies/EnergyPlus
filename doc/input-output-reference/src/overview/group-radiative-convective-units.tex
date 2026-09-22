@@ -58,7 +58,7 @@ This field is the rated average water temperature for the baseboard heater which
 
 \paragraph{Field: Rated Water Mass Flow Rate}
 
-This field is the rated standard water flow rate in kg/s which is published as part of the manufacturer's literature. It is used by the manufacturers when determining the rated capacity (see next field). The default value is 0.063kg/s. If it is blank or zero, the default values is assumed.
+This field is the rated standard water flow rate in kg/s which is published as part of the manufacturer's literature. It is used by the manufacturers when determining the rated capacity (see next field). The default value is 0.063kg/s. If it is blank or zero, the default value is assumed. This input is used to calculate UA when the heating capacity is determined from a positive Heating Design Capacity, Capacity Per Floor Area, or Fraction of Autosized Heating Design Capacity. When Heating Design Capacity is autosized, the Maximum Water Flow Rate is used instead.
 
 \paragraph{Field: Heating Design Capacity \{W\}}\label{field-heating-design-capacity-w-000}
 
@@ -210,7 +210,7 @@ Enter the heating capacity as a fraction of the autosized heating capacity of ra
 This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For hot water baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence Tolerance
 \end{equation}
 
 The default is 0.001.
@@ -408,7 +408,7 @@ Enter the heating capacity as a fraction of the autosized heating capacity of a 
 This field is the control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For steam baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence Tolerance
 \end{equation}
 
 The default is 0.001.
@@ -858,7 +858,7 @@ The overall heat transfer coefficient for the baseboard heater in watts per degr
 q = UA \times ({T_{water,avg}} - {T_{air,avg}})
 \end{equation}
 
-where q is the heat transferred from water to the air in watts; T\(_{water,\\ avg}\) is the average water temperature in degrees C; and T\(_{air,\\ avg}\) is the average air temperature in degrees C. Or the LMTD temperature difference can be used.
+where q is the heat transferred from water to the air in watts; T\(_{water, avg}\) is the average water temperature in degrees C; and T\(_{air, avg}\) is the average air temperature in degrees C. Or the LMTD temperature difference can be used.
 
 \paragraph{Field: Maximum Water Flow Rate}\label{field-maximum-water-flow-rate-1-000}
 
@@ -869,7 +869,7 @@ The maximum hot water volumetric flow rate in m\(^{3}\)/sec.
 The control tolerance for the unit heating output. The unit is controlled by matching the unit output to the zone demand. For hot water baseboards, the model must be numerically inverted to obtain a specified output. The convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{bb,out}} - {Q_{ZoneLoad}})} \right|}}{{{Q_{ZoneLoad}}}} \le Convergence Tolerance
 \end{equation}
 
 The default is 0.001.

@@ -603,6 +603,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdrEnvelope = 0;
     int pdstOpaque = 0;
     int pdchOpCons = 0;
+    int pdchOpConsSource = 0;
     int pdchOpZone = 0;
     int pdchOpSpace = 0;
     int pdchOpRefl = 0;
@@ -615,6 +616,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOpDir = 0;
     int pdstIntOpaque = 0;
     int pdchIntOpCons = 0;
+    int pdchIntOpConsSource = 0;
     int pdchIntOpZone = 0;
     int pdchIntOpSpace = 0;
     int pdchIntOpAdjSurf = 0;
@@ -628,6 +630,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchIntOpDir = 0;
     int pdstFen = 0;
     int pdchFenCons = 0;
+    int pdchFenConsSource = 0;
     int pdchFenZone = 0;
     int pdchFenSpace = 0;
     int pdchFenFrameDivName = 0;
@@ -663,6 +666,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     int pdstDoor = 0;
     int pdchDrCons = 0;
+    int pdchDrConsSource = 0;
     int pdchDrZone = 0;
     int pdchDrSpace = 0;
     int pdchDrUfactFilm = 0;
@@ -671,6 +675,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDrParent = 0;
     int pdstIntDoor = 0;
     int pdchIntDrCons = 0;
+    int pdchIntDrConsSource = 0;
     int pdchIntDrZone = 0;
     int pdchIntDrSpace = 0;
     int pdchIntDrUfactFilm = 0;
@@ -679,6 +684,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchIntDrParent = 0;
     int pdstIntFen = 0;
     int pdchIntFenCons = 0;
+    int pdchIntFenConsSource = 0;
     int pdchIntFenZone = 0;
     int pdchIntFenSpace = 0;
     int pdchIntFenAreaOf1 = 0;

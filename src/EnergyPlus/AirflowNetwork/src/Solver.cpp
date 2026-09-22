@@ -139,6 +139,8 @@ namespace AirflowNetwork {
     using DataSurfaces::ExternalEnvironment;
     using DataSurfaces::OtherSideCoefNoCalcExt;
     using DataSurfaces::SurfaceClass;
+    using DataSurfaces::SurfaceClassIsDoor;
+    using DataSurfaces::SurfaceClassIsWindow;
     using Fans::GetFanIndex;
     using Psychrometrics::PsyCpAirFnW;
     using Psychrometrics::PsyHFnTdbW;
@@ -3486,8 +3488,6 @@ namespace AirflowNetwork {
 
         // Write wind pressure coefficients in the EIO file
         if (!simulation_control.DuctLoss) {
-            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction>, Wind Direction #1 to n (degree)\n");
-            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction, ");
 
             int numWinDirs = 11;
             Real64 angleDelta = 30.0;
@@ -3496,13 +3496,23 @@ namespace AirflowNetwork {
                 angleDelta = 10.0;
             }
 
-            for (int i = 0; i < numWinDirs; ++i) {
-                print(m_state.files.eio, "{:.1f},", i * angleDelta);
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction (degrees)>");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Wind Direction #{}", j);
             }
-            print(m_state.files.eio, "{:.1f}\n", numWinDirs * angleDelta);
+            print(m_state.files.eio, ", Wind Direction #{}\n", numWinDirs + 1);
 
-            print(m_state.files.eio,
-                  "! <AirflowNetwork Model:Wind Pressure Coefficients>, Name, Wind Pressure Coefficients #1 to n (dimensionless)\n");
+            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction (degrees)");
+            for (int j = 0; j < numWinDirs; ++j) {
+                print(m_state.files.eio, ",{:.2f}", j * angleDelta);
+            }
+            print(m_state.files.eio, ",{:.2f}\n", numWinDirs * angleDelta);
+
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Pressure Coefficients (dimensionless)>, Name");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Coefficient #{}", j);
+            }
+            print(m_state.files.eio, ", Coefficient #{}\n", numWinDirs + 1);
 
             // The old version used to write info with single-sided natural ventilation specific labeling, this version no longer does that.
             std::set<int> curves;
@@ -3510,8 +3520,8 @@ namespace AirflowNetwork {
                 curves.insert(MultizoneExternalNodeData(i).curve);
             }
             for (auto index : curves) {
-                print(m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients, {}, ", Curve::GetCurveName(m_state, index));
-
+                print(
+                    m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients (dimensionless), {}, ", Curve::GetCurveName(m_state, index));
                 for (int j = 0; j < numWinDirs; ++j) {
                     print(m_state.files.eio, "{:.2f},", Curve::CurveValue(m_state, index, j * angleDelta));
                 }
@@ -3630,8 +3640,7 @@ namespace AirflowNetwork {
         for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
             int j = MultizoneSurfaceData(i).SurfNum;
             auto const &surf = m_state.dataSurface->Surface(j);
-            if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                surf.OriginalClass == SurfaceClass::GlassDoor) {
+            if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) {
                 for (n = 1; n <= AirflowNetworkNumOfZones; ++n) {
                     if (MultizoneZoneData(n).ZoneNum == m_state.dataSurface->Surface(j).Zone) {
                         if (MultizoneZoneData(n).OccupantVentilationControlNum > 0 && MultizoneSurfaceData(i).OccupantVentilationControlNum == 0) {
@@ -4717,8 +4726,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "10 deg of being horizontal. Airflows through large horizontal openings are poorly");
                         ShowContinueError(m_state, "modeled in the AirflowNetwork model resulting in only one-way airflow.");
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -4726,7 +4734,7 @@ namespace AirflowNetwork {
                         ErrorsFound = true;
                     }
 
-                    if (surf.OriginalClass == SurfaceClass::Door || surf.OriginalClass == SurfaceClass::GlassDoor) {
+                    if (SurfaceClassIsDoor(surf.OriginalClass)) {
                         if (MultizoneCompDetOpeningData(AirflowNetworkCompData(compnum).TypeNum).LVOType == 2) {
                             ShowSevereError(m_state,
                                             std::format(RoutineName) +
@@ -4748,8 +4756,7 @@ namespace AirflowNetwork {
                         ErrorsFound = true;
                     }
 
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -4796,8 +4803,7 @@ namespace AirflowNetwork {
                                           "with the object of AirflowNetwork:Multizone:Component:HorizontalOpening = " +
                                               AirflowNetworkCompData(compnum).Name);
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -6582,8 +6588,7 @@ namespace AirflowNetwork {
             }
             j = MultizoneSurfaceData(i).SurfNum;
             auto const &surf = m_state.dataSurface->Surface(j);
-            if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                surf.OriginalClass == SurfaceClass::GlassDoor || surf.IsAirBoundarySurf) {
+            if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf) {
                 if (MultizoneSurfaceData(i).OccupantVentilationControlNum > 0) {
                     if (MultizoneSurfaceData(i).OpeningStatus == OpenStatus::FreeOperation) {
                         if (MultizoneSurfaceData(i).OpeningProbStatus == ProbabilityCheck::ForceChange) {
@@ -6670,8 +6675,7 @@ namespace AirflowNetwork {
                 }
                 j = MultizoneSurfaceData(i).SurfNum;
                 auto const &surf = m_state.dataSurface->Surface(j);
-                if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                    surf.OriginalClass == SurfaceClass::GlassDoor) {
+                if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) {
                     if (MultizoneSurfaceData(i).HybridCtrlGlobal) {
                         MultizoneSurfaceData(i).OpenFactor = GlobalOpenFactor;
                     }
@@ -11707,8 +11711,7 @@ namespace AirflowNetwork {
                                 if (ControlType == GlobalCtrlType) {
                                     MultizoneSurfaceData(ANSurfaceNum).HybridCtrlGlobal = true;
                                     if (hybridVentMgr.Master == ActualZoneNum) {
-                                        if ((surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                                             surf.OriginalClass == SurfaceClass::GlassDoor) &&
+                                        if ((SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) &&
                                             surf.ExtBoundCond == ExternalEnvironment) {
                                             MultizoneSurfaceData(ANSurfaceNum).HybridCtrlMaster = true;
                                             Found = true;

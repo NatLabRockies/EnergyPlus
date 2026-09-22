@@ -297,6 +297,7 @@ TEST_F(AutoSizingFixture, HeatingAirflowUASizingGauntlet)
 
     // Test 11 - Airloop Equipment - CurDuctType not set
     state->dataSize->CurSysNum = 1;
+    state->dataSize->UnitarySysEqSizing.allocate(1);
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataSize->NumSysSizInput = 1;
     state->dataSize->SysSizingRunDone = true;

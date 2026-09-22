@@ -50,6 +50,7 @@
 
 // C++ Headers
 #include <span>
+#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -57,6 +58,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 
@@ -91,12 +93,105 @@ namespace InternalHeatGains {
         int numOfSpaces = 0;
         int spaceStartPtr = 0;
         bool spaceListActive = false;
+        bool isInstance = false;     // True if this is an <objectType>:Instance object (references an <objectType>:Definition)
         EPVector<int> spaceNums;     // Indexes to spaces associated with this input object
         EPVector<std::string> names; // Names for each instance created from this input object
     };
 
+    struct ZoneEquipDefinitionData // Electric, Gas, HotWater, Steam, Other Equipment Definitions
+    {
+        // Members
+        std::string Name;                                                 // Definition object name
+        DesignLevelMethod designLevelMethod = DesignLevelMethod::Invalid; // Method used to determine design level
+        Real64 levelValue = 0.0;      // design level for internal gain definition (read based on designLevelMethod, could be W, W/m2, etc.)
+        bool levelIsBlank = false;    // True if design level field is blank in input
+        std::string levelField;       // Name of the field used to determine the design level (used for error messages)
+        Real64 FractionLatent = 0.0;  // Percentage (fraction 0.0-1.0) of sensible heat gain that is latent
+        Real64 FractionRadiant = 0.0; // Percentage (fraction 0.0-1.0) of sensible heat gain that is radiant
+        Real64 FractionLost = 0.0;    // Percentage (fraction 0.0-1.0) of sensible heat gain that is lost
+        Real64 CO2RateFactor = 0.0;   // CO2 rate factor [m3/s/W], only for Gas and OtherEquipment
+    };
+
+    struct PeopleDefinitionData // People:Definition
+    {
+        // Members
+        std::string Name;                                                 // Definition object name
+        DesignLevelMethod designLevelMethod = DesignLevelMethod::Invalid; // People, PeoplePerArea, or AreaPerPerson
+        Real64 levelValue = 0.0;                                          // level value read from the matched field
+        bool levelIsBlank = false;                                        // True if design level field is blank in input
+        std::string levelField;                                           // Schema field name used for the level (for error messages)
+        Real64 FractionRadiant = 0.3;                                     // Fraction of sensible gain that is radiant (default 0.3)
+        Real64 UserSpecSensFrac = Constant::AutoCalculate;                // User-specified sensible fraction; default autocalculate
+        Real64 CO2RateFactor = 3.82e-8;                                   // CO2 generation rate [m3/s-W] (default per ASHRAE Std 62.1)
+        bool Show55Warning = false;                                       // True: emit ASHRAE 55 comfort warnings
+        DataHeatBalance::CalcMRT MRTCalcType = DataHeatBalance::CalcMRT::EnclosureAveraged;
+        bool Fanger = false;
+        bool Pierce = false;
+        bool KSU = false;
+        bool AdaptiveASH55 = false;
+        bool AdaptiveCEN15251 = false;
+        bool CoolingEffectASH55 = false;
+        bool AnkleDraftASH55 = false;
+        bool usingThermalComfort = false; // True if any thermal comfort model is enabled
+    };
+
+    struct LightsDefinitionData // Lights:Definition
+    {
+        // Members
+        std::string Name;                                                 // Definition object name
+        DesignLevelMethod designLevelMethod = DesignLevelMethod::Invalid; // LightingLevel, WattsPerArea, or WattsPerPerson
+        Real64 levelValue = 0.0;                                          // design level read from the matched field
+        bool levelIsBlank = false;                                        // True if design level field is blank in input
+        std::string levelField;                                           // Schema field name used for the level (for error messages)
+        Real64 FractionReturnAir = 0.0;                                   // Fraction of sensible heat that goes to return air
+        Real64 FractionRadiant = 0.0;                                     // Fraction of sensible heat that is radiant
+        Real64 FractionShortWave = 0.0;                                   // Fraction of sensible heat that is short-wave (visible)
+        bool FractionReturnAirIsCalculated = false;                       // True if return-air fraction is calculated from plenum temperature
+        Real64 FractionReturnAirPlenTempCoeff1 = 0.0;
+        Real64 FractionReturnAirPlenTempCoeff2 = 0.0;
+    };
+
+    struct ITEquipDefinitionData // ElectricEquipment:ITE:AirCooled:Definition
+    {
+        // Field names mirror ITEquipData members in DataHeatBalance.hh where they correspond.
+        std::string Name;
+        bool FlowControlWithApproachTemps = false;                         // matches ITEquipData::FlowControlWithApproachTemps
+        DesignLevelMethod designLevelMethod = DesignLevelMethod::Invalid;  // EquipmentLevel (Watts per Unit) or WattsPerArea
+        Real64 levelValue = 0.0;                                           // watts/unit or watts/m2 depending on designLevelMethod
+        bool levelIsBlank = false;                                         // True if the design level field was blank
+        std::string levelField;                                            // Schema field name used (for error messages)
+        int CPUPowerFLTCurve = 0;                                          // matches ITEquipData::CPUPowerFLTCurve
+        Real64 DesignFanPowerFrac = 0.0;                                   // matches ITEquipData::DesignFanPowerFrac
+        Real64 DesignFanAirFlowPerPower = 0.0;                             // [m3/s-W]; DesignAirVolFlowRate = this * DesignTotalPower
+        int AirFlowFLTCurve = 0;                                           // matches ITEquipData::AirFlowFLTCurve
+        int FanPowerFFCurve = 0;                                           // matches ITEquipData::FanPowerFFCurve
+        Real64 DesignTAirIn = 15.0;                                        // matches ITEquipData::DesignTAirIn
+        DataHeatBalance::ITEClass Class = DataHeatBalance::ITEClass::None; // matches ITEquipData::Class
+        DataHeatBalance::ITEInletConnection AirConnectionType =
+            DataHeatBalance::ITEInletConnection::AdjustedSupply; // matches ITEquipData::AirConnectionType
+        Real64 DesignRecircFrac = 0.0;                           // matches ITEquipData::DesignRecircFrac
+        int RecircFLTCurve = 0;                                  // matches ITEquipData::RecircFLTCurve
+        Real64 DesignUPSEfficiency = 1.0;                        // matches ITEquipData::DesignUPSEfficiency
+        int UPSEfficFPLRCurve = 0;                               // matches ITEquipData::UPSEfficFPLRCurve
+        Real64 UPSLossToZoneFrac = 1.0;                          // matches ITEquipData::UPSLossToZoneFrac
+        Real64 SupplyApproachTemp = 0.0;                         // matches ITEquipData::SupplyApproachTemp
+        bool supplyApproachTempProvided = false;                 // True if Supply Temperature Difference was explicitly given
+        Sched::Schedule *supplyApproachTempSched = nullptr;      // matches ITEquipData::supplyApproachTempSched
+        Real64 ReturnApproachTemp = 0.0;                         // matches ITEquipData::ReturnApproachTemp
+        bool returnApproachTempProvided = false;                 // True if Return Temperature Difference was explicitly given
+        Sched::Schedule *returnApproachTempSched = nullptr;      // matches ITEquipData::returnApproachTempSched
+    };
+
     void ManageInternalHeatGains(EnergyPlusData &state,
                                  ObjexxFCL::Optional_bool_const InitOnly = _); // when true, just calls the get input, if appropriate and returns.
+
+    std::vector<ZoneEquipDefinitionData> GetSpaceLoadDefinition(EnergyPlusData &state, const std::string &objectType);
+
+    std::vector<PeopleDefinitionData> GetPeopleDefinition(EnergyPlusData &state);
+
+    std::vector<LightsDefinitionData> GetLightsDefinition(EnergyPlusData &state);
+
+    std::vector<ITEquipDefinitionData> GetITEAirCooledDefinition(EnergyPlusData &state, bool &ErrorsFound);
 
     void GetInternalHeatGainsInput(EnergyPlusData &state);
 
@@ -106,7 +201,8 @@ namespace InternalHeatGains {
                                 int &numInputObjects,
                                 int &numGainInstances,
                                 bool &errors,
-                                const bool zoneListNotAllowed = false);
+                                const bool zoneListNotAllowed = false,
+                                const std::string &instanceObjectType = "");
 
     Real64 setDesignLevel(EnergyPlusData &state,
                           bool &ErrorsFound,

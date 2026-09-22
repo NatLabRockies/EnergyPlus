@@ -18798,7 +18798,7 @@ void SetupUnitConversions(EnergyPlusData &state)
     //    na
     auto &ort = state.dataOutRptTab;
 
-    ort->UnitConvSize = 118;
+    ort->UnitConvSize = 120;
     ort->UnitConv.allocate(ort->UnitConvSize);
     ort->UnitConv(1).siName = "%";
     ort->UnitConv(2).siName = "°C";
@@ -18918,6 +18918,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).siName = "MM";
     ort->UnitConv(117).siName = "MM";
     ort->UnitConv(118).siName = "°C·hr";
+    ort->UnitConv(119).siName = "W/M-K";
+    ort->UnitConv(120).siName = "M2-K/W";
 
     ort->UnitConv(1).ipName = "%";
     ort->UnitConv(2).ipName = "F";
@@ -19037,6 +19039,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).ipName = "in";
     ort->UnitConv(117).ipName = "ft";
     ort->UnitConv(118).ipName = "°F·hr";
+    ort->UnitConv(119).ipName = "Btu-in/hr-ft2-F";
+    ort->UnitConv(120).ipName = "ft2-F-hr/Btu";
 
     ort->UnitConv(1).mult = 1.0;
     ort->UnitConv(2).mult = 1.8;
@@ -19156,6 +19160,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).mult = 0.03937;
     ort->UnitConv(117).mult = 0.003281;
     ort->UnitConv(118).mult = 1.8;
+    ort->UnitConv(119).mult = 6.933471;
+    ort->UnitConv(120).mult = 5.678263;
 
     ort->UnitConv(2).offset = 32.0;
     ort->UnitConv(11).offset = 32.0;

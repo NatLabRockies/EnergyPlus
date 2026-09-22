@@ -129,12 +129,45 @@
   Schedule:Day:Hourly,
     On,                      !- Name
     On/Off,                  !- Schedule Type Limits Name
-    1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,
-    1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.;
+    1.,                      !- Hour 1
+    1.,                      !- Hour 2
+    1.,                      !- Hour 3
+    1.,                      !- Hour 4
+    1.,                      !- Hour 5
+    1.,                      !- Hour 6
+    1.,                      !- Hour 7
+    1.,                      !- Hour 8
+    1.,                      !- Hour 9
+    1.,                      !- Hour 10
+    1.,                      !- Hour 11
+    1.,                      !- Hour 12
+    1.,                      !- Hour 13
+    1.,                      !- Hour 14
+    1.,                      !- Hour 15
+    1.,                      !- Hour 16
+    1.,                      !- Hour 17
+    1.,                      !- Hour 18
+    1.,                      !- Hour 19
+    1.,                      !- Hour 20
+    1.,                      !- Hour 21
+    1.,                      !- Hour 22
+    1.,                      !- Hour 23
+    1.;                      !- Hour 24
 
   Schedule:Week:Daily,
     On Weeks,                !- Name
-    On,On,On,On,On,On,On,On,On,On,On,On;
+    On,                      !- Sunday Schedule:Day Name
+    On,                      !- Monday Schedule:Day Name
+    On,                      !- Tuesday Schedule:Day Name
+    On,                      !- Wednesday Schedule:Day Name
+    On,                      !- Thursday Schedule:Day Name
+    On,                      !- Friday Schedule:Day Name
+    On,                      !- Saturday Schedule:Day Name
+    On,                      !- Holiday Schedule:Day Name
+    On,                      !- SummerDesignDay Schedule:Day Name
+    On,                      !- WinterDesignDay Schedule:Day Name
+    On,                      !- CustomDay1 Schedule:Day Name
+    On;                      !- CustomDay2 Schedule:Day Name
 
   Schedule:Year,
     AlwaysOn,                !- Name
@@ -148,7 +181,7 @@
 !-   ===========  ALL OBJECTS IN CLASS: MATERIAL ===========
 
   Material,
-    C5 - 4 IN HW CONCRETE,  !- Name
+    C5 - 4 IN HW CONCRETE,   !- Name
     MediumRough,             !- Roughness
     0.1014984,               !- Thickness {m}
     1.729577,                !- Conductivity {W/m-K}
@@ -176,11 +209,11 @@
 
   Construction,
     FLOOR,                   !- Name
-    C5 - 4 IN HW CONCRETE;  !- Outside Layer
+    C5 - 4 IN HW CONCRETE;   !- Outside Layer
 
   Construction,
     ROOF_CONCRETE,           !- Name
-    C5 - 4 IN HW CONCRETE;  !- Outside Layer
+    C5 - 4 IN HW CONCRETE;   !- Outside Layer
 
 !-   ===========  ALL OBJECTS IN CLASS: GLOBALGEOMETRYRULES ===========
 
@@ -331,7 +364,7 @@
     AllSummary;              !- Report 1 Name
 
   OutputControl:Table:Style,
-    Comma;                   !- Column Separator (CSV for post-processing)
+    Comma;                   !- Column Separator
 
   Output:SQLite,
     SimpleAndTabular;        !- Option Type
@@ -340,28 +373,42 @@
     DisplayAdvancedReportVariables;  !- Key 1
 
 ! --- Environment ---
+
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,timestep;
+
   Output:Variable,*,Site Sky Temperature,timestep;
 
 ! --- Zone ---
+
   Output:Variable,*,Zone Mean Air Temperature,timestep;
+
   Output:Variable,*,Zone Mean Radiant Temperature,timestep;
 
 ! --- Surface temperatures ---
+
   Output:Variable,*,Surface Inside Face Temperature,timestep;
+
   Output:Variable,*,Surface Outside Face Temperature,timestep;
 
 ! --- Conduction through wall ---
+
   Output:Variable,*,Surface Inside Face Conduction Heat Transfer Rate per Area,timestep;
+
   Output:Variable,*,Surface Outside Face Conduction Heat Transfer Rate per Area,timestep;
 
 ! --- LW radiation ---
+
   Output:Variable,*,Surface Outside Face Net Thermal Radiation Heat Gain Rate per Area,timestep;
 
 ! --- CondFD node temperatures ---
+
   Output:Variable,*,CondFD Surface Temperature Node 1,timestep;
+
   Output:Variable,*,CondFD Surface Temperature Node 2,timestep;
+
   Output:Variable,*,CondFD Surface Temperature Node 3,timestep;
 
 ! --- EMS Sky LW override output ---
+
   Output:Variable,*,CondFD EMS Sky Longwave Radiation Override Heat Flux,timestep;
+

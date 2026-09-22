@@ -404,6 +404,51 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
     EXPECT_EQ(29.4, state->dataHeatBalFanSys->zoneTstatSetpts(1).setptHi);                           // 29.4C is the unoccupied cooling setpoint
 }
 
+TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStartFanScheduleBounds)
+{
+    std::string const idf_objects = delimited_string({
+        "Timestep,",
+        "  6;                      !- Number of Timesteps per Hour",
+
+        "Schedule:Compact,",
+        "  Fan Schedule,           !- Name",
+        "  Fraction,               !- Schedule Type Limits Name",
+        "  Through: 12/31,         !- Field 1",
+        "  For: AllDays,           !- Field 2",
+        "  Until: 24:00, 0.0;      !- Field 3",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    state->dataEnvrn->DayOfYear = 1;
+    state->dataEnvrn->DayOfYear_Schedule = 1;
+    state->dataEnvrn->DayOfWeek = 1;
+    state->dataEnvrn->DayOfWeekTomorrow = 2;
+    state->dataEnvrn->HolidayIndex = 0;
+    state->dataEnvrn->DSTIndicator = 0;
+    state->dataGlobal->KickOffSimulation = false;
+    state->dataGlobal->BeginDayFlag = false;
+
+    state->dataAvail->OptimumStartData.allocate(1);
+    state->dataAvail->OptStart.allocate(1);
+    auto &optimumStart = state->dataAvail->OptimumStartData(1);
+    optimumStart.fanSched = Sched::GetSchedule(*state, "FAN SCHEDULE");
+    ASSERT_NE(nullptr, optimumStart.fanSched);
+    optimumStart.controlAlgorithm = Avail::ControlAlgorithm::ConstantStartTime;
+    optimumStart.optimumStartControlType = Avail::OptimumStartControlType::Off;
+
+    auto &dayVals = const_cast<std::vector<Real64> &>(optimumStart.fanSched->getDayVals(*state));
+    ASSERT_EQ(Constant::iHoursInDay * state->dataGlobal->TimeStepsInHour, dayVals.size());
+
+    // A correct scan only examines the contractual 24 hours of schedule values. This canary makes
+    // the old <= timestep bound fail deterministically instead of relying on an out-of-bounds read.
+    dayVals.push_back(1.0);
+
+    EXPECT_EQ(Avail::Status::NoAction, Avail::CalcOptStartSysAvailMgr(*state, 1, 0, 1));
+    EXPECT_EQ(0.0, state->dataAvail->OptStart(1).OccStartTime);
+}
+
 TEST_F(EnergyPlusFixture, SysAvailManager_NightCycle_ZoneOutOfTolerance)
 {
     int NumZones(4);

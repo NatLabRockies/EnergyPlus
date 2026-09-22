@@ -61,6 +61,7 @@
 using ObjexxFCL::Vector4;
 
 // EnergyPlus Headers
+#include <EnergyPlus/ConstructionAssignmentSet.hh>
 #include <EnergyPlus/ConvectionConstants.hh>
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
@@ -157,7 +158,11 @@ namespace DataSurfaces {
         Detached_B,
         Detached_F,
         Window,
+        FixedWindow,
+        OperableWindow,
+        Skylight,
         GlassDoor,
+        OverheadDoor,
         Door,
         Shading,
         Overhang,
@@ -166,6 +171,25 @@ namespace DataSurfaces {
         TDD_Diffuser,
         Num // The counter representing the total number of surface class, always stays at the bottom
     };
+
+    // Window-like surface classes
+    constexpr bool SurfaceClassIsWindow(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::Window || surfClass == SurfaceClass::FixedWindow || surfClass == SurfaceClass::OperableWindow ||
+                surfClass == SurfaceClass::Skylight);
+    }
+
+    // Glazed surfaces include windows and glazed doors
+    constexpr bool SurfaceClassIsGlazed(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::GlassDoor || SurfaceClassIsWindow(surfClass));
+    }
+
+    // Door surfaces include opaque doors, overhead doors, and glass doors
+    constexpr bool SurfaceClassIsDoor(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::Door || surfClass == SurfaceClass::OverheadDoor || surfClass == SurfaceClass::GlassDoor);
+    }
 
     // A coarse grain version of SurfaceClass
     enum class FWC
@@ -700,6 +724,8 @@ namespace DataSurfaces {
 
         std::vector<int> ConstituentSurfaceNums; // A vector of surface numbers which reference this surface for representative calculations
         int ConstructionStoredInputValue;        // holds the original value for Construction per surface input
+        // Reported as the "Construction Assignment Source" column in the EnvelopeSummary report.
+        ConstructionAssignments::SearchDistanceType ConstructionAssignmentSource = ConstructionAssignments::SearchDistanceType::Invalid;
         SurfaceClass Class;
         SurfaceClass OriginalClass;
 

@@ -3907,6 +3907,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
                 NonAirSysOutput = SysOutputProvided;
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::BaseboardSteam: { // 'ZoneHVAC:Baseboard:RadiantConvective:Steam'
@@ -3919,6 +3920,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
                 NonAirSysOutput = SysOutputProvided;
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::BaseboardConvectiveWater: { // 'ZoneHVAC:Baseboard:Convective:Water'
@@ -3931,6 +3933,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
                 NonAirSysOutput = SysOutputProvided;
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::BaseboardConvectiveElectric: { // 'ZoneHVAC:Baseboard:Convective:Electric'
@@ -3942,6 +3945,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
                 NonAirSysOutput = SysOutputProvided;
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::CoolingPanel: { // 'ZoneHVAC:CoolingPanel:RadiantConvective:Water'
@@ -3953,7 +3957,8 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                                                     zoneEquipList.EquipIndex(EquipPtr));
 
                 NonAirSysOutput = SysOutputProvided;
-                LatOutputProvided = 0.0; // This cooling panel does not add/remove any latent heat
+                LatOutputProvided = 0.0;                                         // This cooling panel does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided != 0.0; // I assume negative SysOutputProvided but being careful
             } break;
 
             case ZoneEquipType::HighTemperatureRadiant: { // 'ZoneHVAC:HighTemperatureRadiant'
@@ -3964,6 +3969,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                                                                 zoneEquipList.EquipIndex(EquipPtr));
                 LatOutputProvided = 0.0; // This baseboard currently sends its latent heat gain directly to predictor/corrector
                                          // via SumLatentHTRadSys... so setting LatOutputProvided = 0.0
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::LowTemperatureRadiantConstFlow:
@@ -3975,6 +3981,8 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                                                               SysOutputProvided,
                                                               zoneEquipList.EquipIndex(EquipPtr));
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                // ConvectionCoefficients::DynamicIntConvSurfaceClassification does not use this flag??
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided != 0.0;
             } break;
 
             case ZoneEquipType::ExhaustFan: { // 'Fan:ZoneExhaust'
@@ -4033,6 +4041,8 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                                                   SysOutputProvided,
                                                   LatOutputProvided,
                                                   zoneEquipList.EquipIndex(EquipPtr));
+                // ConvectionCoefficients::DynamicIntConvSurfaceClassification does not use this flag??
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided != 0.0;
             } break;
 
             case ZoneEquipType::OutdoorAirUnit: { // 'ZoneHVAC:OutdoorAirUnit'
@@ -4055,6 +4065,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
 
                 NonAirSysOutput = SysOutputProvided;
                 LatOutputProvided = 0.0; // This baseboard does not add/remove any latent heat
+                zoneEquipList.EquipData(EquipPtr).ON = SysOutputProvided > 0.0;
             } break;
 
             case ZoneEquipType::RefrigerationChillerSet: { // 'ZoneHVAC:RefrigerationChillerSet'

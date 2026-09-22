@@ -57,6 +57,7 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
@@ -2411,6 +2412,96 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
     testFirstHVACIteration = false;
     state->dataPlantHXFluidToFluid->FluidHX(1).control(*state, -1000.0, testFirstHVACIteration);
     EXPECT_NEAR(state->dataLoopNodes->Node(2).MassFlowRate, 0.0, 0.001);
+
+    // test proportional sizing of HX based on Sizing:Plant differences in Plants connected to Fluid-to-Fluid HX
+    // HX Dem side volume flow rate = HX Sup side volume flow rate * (Cp_HXsup * DeltaT_HXsup) / (Cp_HXdem * DeltaT_HXdem)
+
+    state->dataSize->PlantSizData.allocate(2);
+    auto &supSizData = state->dataSize->PlantSizData(1);
+    supSizData.ExitTemp = 7.0;
+    supSizData.DeltaT = 7.0;           // supply side plant delta T
+    supSizData.DesVolFlowRate = 0.001; // represents Plant 2 data on HX supply side initialized from demand components (Load Profile in figure)
+    auto &demSizData = state->dataSize->PlantSizData(2);
+    demSizData.ExitTemp = 7.0;
+    demSizData.DeltaT = 7.0;         // demand side plant delta T
+    demSizData.DesVolFlowRate = 0.0; // initial value of Plant 1 data until components (e.g., HX Dem side) register their flow rate request
+
+    auto &hx = state->dataPlantHXFluidToFluid->FluidHX(1);
+    hx.SupplySideLoop.loop->PlantSizNum = 1; // this side of HX "supplies" energy to components on demand side of Plant 2
+    hx.SupplySideLoop.loop->glycol = Fluid::GetWater(*state);
+    hx.DemandSideLoop.loop->PlantSizNum = 2; // this side of HX "demands" energy from components on supply side of Plant 1
+    hx.DemandSideLoop.loop->glycol = Fluid::GetWater(*state);
+
+    hx.SupplySideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;
+    hx.SupplySideLoop.DesignVolumeFlowRateWasAutoSized = true;
+    hx.DemandSideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;
+    hx.DemandSideLoop.DesignVolumeFlowRateWasAutoSized = true;
+
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true; // sets sizing data to plant loop variables
+
+    // if Sizing:Plant DeltaTs are the same then HX sizes volume flow rate the same on both sides
+    EXPECT_NEAR(demSizData.DesVolFlowRate, 0.0, 0.00001); // 0 before sizing, and HX registered non-zero value after sizing in CompDesWaterFlow
+    hx.size(*state);
+    EXPECT_NEAR(hx.DemandSideLoop.DesignVolumeFlowRate, 0.001, 0.00001); // Dem side flow rate same as Sup side
+    EXPECT_NEAR(hx.SupplySideLoop.DesignVolumeFlowRate, 0.001, 0.00001);
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(1).DesVolFlowRate, 0.001, 0.00001); // HX Sup side registered flow rate in CompDesWaterFlow
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(2).DesVolFlowRate, 0.001, 0.00001); // HX Dem side registered flow rate in CompDesWaterFlow
+    demSizData.DesVolFlowRate = 0.0;                                                  // reset for next test
+    hx.SupplySideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;                    // reset for next test
+    hx.DemandSideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;                    // reset for next test
+
+    // if Sizing:Plant DeltaT on Dem side of HX is larger than HX Sup side, then HX Dem side plant has smaller flow rate for equal heat transfer
+    demSizData.DeltaT = supSizData.DeltaT * 1.25; // Plant 1 Sizing:Plant DetlaT larger than Plant 2 DeltaT, so HX Dem flow is smaller than HX Sup
+    hx.size(*state);
+    EXPECT_NEAR(hx.DemandSideLoop.DesignVolumeFlowRate, supSizData.DesVolFlowRate / 1.25, 0.00001);
+    EXPECT_LT(hx.DemandSideLoop.DesignVolumeFlowRate, hx.SupplySideLoop.DesignVolumeFlowRate); // Dem side flow rate smaller than Sup side
+    EXPECT_NEAR(hx.SupplySideLoop.DesignVolumeFlowRate, 0.001, 0.00001);
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(1).DesVolFlowRate, 0.001, 0.00001);                            // HX Sup side registered flow rate
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(2).DesVolFlowRate, supSizData.DesVolFlowRate / 1.25, 0.00001); // HX Dem side registered flow rate
+    demSizData.DesVolFlowRate = 0.0;                                                                             // reset for next test
+    hx.SupplySideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;                                               // reset for next test
+    hx.DemandSideLoop.DesignVolumeFlowRate = DataSizing::AutoSize;                                               // reset for next test
+
+    // if Sizing:Plant DeltaT on Dem side of HX is smaller than HX Sup side, then HX Dem side plant has larger flow rate for equal heat transfer
+    demSizData.DeltaT = supSizData.DeltaT * 0.75; // Plant 1 Sizing:Plant DetlaT smaller than Plant 2 DeltaT, so HX Dem flow is larger than HX Sup
+    hx.size(*state);
+    EXPECT_NEAR(hx.DemandSideLoop.DesignVolumeFlowRate, supSizData.DesVolFlowRate / 0.75, 0.00001);
+    EXPECT_GT(hx.DemandSideLoop.DesignVolumeFlowRate, hx.SupplySideLoop.DesignVolumeFlowRate); // Dem side flow rate larger than Sup side
+    EXPECT_NEAR(hx.SupplySideLoop.DesignVolumeFlowRate, 0.001, 0.00001);
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(1).DesVolFlowRate, 0.001, 0.00001);                            // HX Sup side registered flow rate
+    EXPECT_NEAR(state->dataSize->CompDesWaterFlow(2).DesVolFlowRate, supSizData.DesVolFlowRate / 0.75, 0.00001); // HX Dem side registered flow rate
+}
+
+TEST_F(EnergyPlusFixture, PlantHXCalculateReadsCurrentNodeTemperatures)
+{
+    // Verify that each calculation reads the current inlet node temperatures and updates both outlet nodes.
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(4);
+    state->dataPlnt->PlantLoop.allocate(2);
+
+    state->dataPlantHXFluidToFluid->FluidHX.allocate(1);
+    auto &fluidHX = state->dataPlantHXFluidToFluid->FluidHX(1);
+    fluidHX.HeatExchangeModelType = PlantHeatExchangerFluidToFluid::FluidHXType::Ideal;
+    fluidHX.SupplySideLoop.inletNodeNum = 1;
+    fluidHX.SupplySideLoop.outletNodeNum = 3;
+    fluidHX.DemandSideLoop.inletNodeNum = 2;
+    fluidHX.DemandSideLoop.outletNodeNum = 4;
+    fluidHX.SupplySideLoop.loop = &state->dataPlnt->PlantLoop(1);
+    fluidHX.DemandSideLoop.loop = &state->dataPlnt->PlantLoop(2);
+    fluidHX.SupplySideLoop.loop->glycol = Fluid::GetWater(*state);
+    fluidHX.DemandSideLoop.loop->glycol = Fluid::GetWater(*state);
+
+    state->dataLoopNodes->Node(1).Temp = 20.0;
+    state->dataLoopNodes->Node(2).Temp = 10.0;
+    fluidHX.calculate(*state, 1.0, 1.0);
+    EXPECT_NEAR(state->dataLoopNodes->Node(3).Temp, 10.0, 0.05);
+    EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, 20.0, 0.05);
+
+    state->dataLoopNodes->Node(1).Temp = 18.0;
+    state->dataLoopNodes->Node(2).Temp = 12.0;
+    fluidHX.calculate(*state, 1.0, 1.0);
+    EXPECT_NEAR(state->dataLoopNodes->Node(3).Temp, 12.0, 0.05);
+    EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, 18.0, 0.05);
 }
 
 TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverride)

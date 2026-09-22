@@ -195,13 +195,13 @@
     0.005,                   !- Maximum Loop Flow Rate {m3/s}
     0,                       !- Minimum Loop Flow Rate {m3/s}
     1,                       !- Plant Loop Volume {m3}
-    Heating Coil Load Loop Supply Inlet Node,   !- Plant Side Inlet Node Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Plant Side Inlet Node Name
     Heating Coil Load Loop Supply Outlet Pipe Outlet Node,  !- Plant Side Outlet Node Name
-    Heating Coil Load Loop Supply Branches,     !- Plant Side Branch List Name
-    Heating Coil Load Loop Supply Connectors,   !- Plant Side Connector List Name
-    Heating Coil Load Loop Demand Inlet Node,   !- Demand Side Inlet Node Name
+    Heating Coil Load Loop Supply Branches,  !- Plant Side Branch List Name
+    Heating Coil Load Loop Supply Connectors,  !- Plant Side Connector List Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Demand Side Inlet Node Name
     Heating Coil Load Loop Demand Outlet Node,  !- Demand Side Outlet Node Name
-    Heating Coil Load Loop Demand Branches,     !- Demand Side Branch List Name
+    Heating Coil Load Loop Demand Branches,  !- Demand Side Branch List Name
     ,                        !- Demand Side Connector List Name
     Optimal;                 !- Load Distribution Scheme
 
@@ -220,31 +220,31 @@
   PlantEquipmentOperation:HeatingLoad,
     Heating Coil Load Loop Heating Operation,  !- Name
     0,                       !- Load Range 1 Lower Limit {W}
-    26000,                !- Load Range 1 Upper Limit {W}
+    26000,                   !- Load Range 1 Upper Limit {W}
     Heating Coil Load Loop Heating Equipment 1,  !- Range 1 Equipment List Name
-    26000,                       !- Load Range 2 Lower Limit {W}
+    26000,                   !- Load Range 2 Lower Limit {W}
     10000000,                !- Load Range 2 Upper Limit {W}
     Heating Coil Load Loop Heating Equipment 2;  !- Range 2 Equipment List Name
 
   PlantEquipmentList,
     Heating Coil Load Loop Heating Equipment 1,  !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
-    Heating Coil 1;            !- Equipment 1 Name
+    Heating Coil 1;          !- Equipment 1 Name
 
   PlantEquipmentList,
     Heating Coil Load Loop Heating Equipment 2,  !- Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
-    Heating Coil 1,            !- Equipment 1 Name
+    Heating Coil 1,          !- Equipment 1 Name
     HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
-    Heating Coil 2;            !- Equipment 2 Name
+    Heating Coil 2;          !- Equipment 2 Name
 
   BranchList,
-    Heating Coil Load Loop Supply Branches,      !- Name
+    Heating Coil Load Loop Supply Branches,  !- Name
     Heating Coil Load Loop Supply Inlet Branch,  !- Branch 1 Name
-    Heating Coil 1 Branch,                       !- Branch 2 Name
-    Heating Coil 2 Branch,                       !- Branch 3 Name
-    Heating Coil Bypass Branch,                  !- Branch 4 Name
-    Heating Coil Load Loop Supply Outlet Branch; !- Branch 5 Name
+    Heating Coil 1 Branch,   !- Branch 2 Name
+    Heating Coil 2 Branch,   !- Branch 3 Name
+    Heating Coil Bypass Branch,  !- Branch 4 Name
+    Heating Coil Load Loop Supply Outlet Branch;  !- Branch 5 Name
 
   Branch,
     Heating Coil Load Loop Supply Inlet Branch,  !- Name
@@ -255,60 +255,60 @@
     Heating Coil Load Loop Intermediate Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    Heating Coil 1 Branch,           !- Name
-    ,                                !- Pressure Drop Curve Name
+    Heating Coil 1 Branch,   !- Name
+    ,                        !- Pressure Drop Curve Name
     HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
-    Heating Coil 1,                  !- Component 1 Name
-    Heating Coil 1 Inlet Node,            !- Component 1 Inlet Node Name
-    Heating Coil 1 Outlet Node;           !- Component 1 Outlet Node Name
+    Heating Coil 1,          !- Component 1 Name
+    Heating Coil 1 Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil 1 Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    Heating Coil 2 Branch,           !- Name
-    ,                                !- Pressure Drop Curve Name
+    Heating Coil 2 Branch,   !- Name
+    ,                        !- Pressure Drop Curve Name
     HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
-    Heating Coil 2,                  !- Component 1 Name
-    Heating Coil 2 Inlet Node,            !- Component 1 Inlet Node Name
-    Heating Coil 2 Outlet Node;           !- Component 1 Outlet Node Name
+    Heating Coil 2,          !- Component 1 Name
+    Heating Coil 2 Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil 2 Outlet Node;  !- Component 1 Outlet Node Name
 
   Connector:Splitter,
-    Heating Coil Load Loop Splitter,      !- Name
-    Heating Coil Load Loop Supply Inlet Branch, !- Inlet Branch Name
-    Heating Coil 1 Branch,                !- Outlet Branch 1 Name
-    Heating Coil 2 Branch,                !- Outlet Branch 2 Name
-    Heating Coil Bypass Branch;           !- Outlet Branch 3 Name
+    Heating Coil Load Loop Splitter,  !- Name
+    Heating Coil Load Loop Supply Inlet Branch,  !- Inlet Branch Name
+    Heating Coil 1 Branch,   !- Outlet Branch 1 Name
+    Heating Coil 2 Branch,   !- Outlet Branch 2 Name
+    Heating Coil Bypass Branch;  !- Outlet Branch 3 Name
 
   Connector:Mixer,
-    Heating Coil Load Loop Mixer,      !- Name
-    Heating Coil Load Loop Supply Outlet Branch, !- Inlet Branch Name
-    Heating Coil 1 Branch,                !- Outlet Branch 1 Name
-    Heating Coil 2 Branch,                !- Outlet Branch 2 Name
-    Heating Coil Bypass Branch;           !- Outlet Branch 3 Name
+    Heating Coil Load Loop Mixer,  !- Name
+    Heating Coil Load Loop Supply Outlet Branch,  !- Outlet Branch Name
+    Heating Coil 1 Branch,   !- Inlet Branch 1 Name
+    Heating Coil 2 Branch,   !- Inlet Branch 2 Name
+    Heating Coil Bypass Branch;  !- Inlet Branch 3 Name
 
   ConnectorList,
-    Heating Coil Load Loop Supply Connectors,
+    Heating Coil Load Loop Supply Connectors,  !- Name
     Connector:Splitter,      !- Connector 1 Object Type
     Heating Coil Load Loop Splitter,  !- Connector 1 Name
     Connector:Mixer,         !- Connector 2 Object Type
     Heating Coil Load Loop Mixer;  !- Connector 2 Name
 
   Pipe:Adiabatic,
-    Heating Coil Bypass,  !- Name
+    Heating Coil Bypass,     !- Name
     Heating Coil Bypass Inlet Node,  !- Inlet Node Name
     Heating Coil Bypass Outlet Node;  !- Outlet Node Name
 
   Branch,
-    Heating Coil Bypass Branch, !- Name
-    ,                           !- Pressure Drop Curve Name
-    Pipe:Adiabatic,             !- Component 1 Object Type
-    Heating Coil Bypass,        !- Component 1 Name
+    Heating Coil Bypass Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Heating Coil Bypass,     !- Component 1 Name
     Heating Coil Bypass Inlet Node,  !- Component 1 Inlet Node Name
     Heating Coil Bypass Outlet Node;  !- Component 1 Outlet Node Name
 
   Branch,
-    Heating Coil Load Loop Supply Outlet Branch, !- Name
-    ,                           !- Pressure Drop Curve Name
-    Pipe:Adiabatic,             !- Component 1 Object Type
-    Heating Coil Load Loop Supply Outlet Pipe,        !- Component 1 Name
+    Heating Coil Load Loop Supply Outlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    Heating Coil Load Loop Supply Outlet Pipe,  !- Component 1 Name
     Heating Coil Load Loop Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
     Heating Coil Load Loop Supply Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
 
@@ -334,7 +334,7 @@
     INTERMITTENT;            !- Pump Control Type
 
   HeatPump:PlantLoop:EIR:Heating,
-    Heating Coil 1,            !- Name
+    Heating Coil 1,          !- Name
     Heating Coil 1 Inlet Node,  !- Load Side Inlet Node Name
     Heating Coil 1 Outlet Node,  !- Load Side Outlet Node Name
     AirSource,               !- Condenser Type
@@ -354,12 +354,12 @@
     EIRCurveFuncPLR;         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
 
   HeatPump:PlantLoop:EIR:Heating,
-    Heating Coil 2,            !- Name
+    Heating Coil 2,          !- Name
     Heating Coil 2 Inlet Node,  !- Load Side Inlet Node Name
     Heating Coil 2 Outlet Node,  !- Load Side Outlet Node Name
     AirSource,               !- Condenser Type
-    Outdoor Air 2 Inlet Node,  !- Source Side Inlet Node Name
-    Outdoor Air 2 Outlet Node, !- Source Side Outlet Node Name
+    Outdoor Air 2 Inlet Node,!- Source Side Inlet Node Name
+    Outdoor Air 2 Outlet Node,  !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
     ,                        !- Heat Recovery Outlet Node Name
     ,                        !- Companion Heat Pump Name
@@ -521,8 +521,8 @@
     Cooling Coil Load Loop Intermediate Node,  !- Load Side Inlet Node Name
     Cooling Coil Load Loop Supply Outlet Node,  !- Load Side Outlet Node Name
     AirSource,               !- Condenser Type
-    Outdoor Air 3 Inlet Node,  !- Source Side Inlet Node Name
-    Outdoor Air 3 Outlet Node, !- Source Side Outlet Node Name
+    Outdoor Air 3 Inlet Node,!- Source Side Inlet Node Name
+    Outdoor Air 3 Outlet Node,  !- Source Side Outlet Node Name
     ,                        !- Heat Recovery Inlet Node Name
     ,                        !- Heat Recovery Outlet Node Name
     Heating Coil 1,          !- Companion Heat Pump Name
@@ -605,13 +605,13 @@
     Outdoor Air Inlet Node;  !- Name
 
   OutdoorAir:Node,
-    Outdoor Air 3 Inlet Node;  !- Name
+    Outdoor Air 3 Inlet Node;!- Name
 
   OutdoorAir:Node,
-    Outdoor Air 2 Inlet Node;  !- Name
+    Outdoor Air 2 Inlet Node;!- Name
 
   OutdoorAir:Node,
-    Outdoor Air Outlet Node;  !- Name
+    Outdoor Air Outlet Node; !- Name
 
   OutdoorAir:Node,
     Outdoor Air 3 Outlet Node;  !- Name

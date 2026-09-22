@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  CMAKE_Fortran_COMPILER: "/c/msys64/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
+  MINGW_GFORTRAN: "/c/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILD_TYPE: Release
 
@@ -153,7 +153,8 @@ jobs:
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
               -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
               -DPython_ROOT_DIR:PATH="$(dirname "$Python_EXECUTABLE")" \
-              -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
+              -DBUILD_FORTRAN:BOOL=ON -DMINGW_GFORTRAN=${{ env.MINGW_GFORTRAN }} \
+              -DBUILD_PACKAGE:BOOL=ON \
               -DENABLE_HARDENED_RUNTIME:BOOL=${{ matrix.enable_hardened_runtime }} \
               -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" \
               ../

@@ -84,13 +84,24 @@ namespace DataPlant {
         int const BranchOutletNodeNum = this->NodeNumOut;
         Real64 OverallFlowRequest = 0.0;
 
-        if (this->controlType != DataBranchAirLoopPlant::ControlType::SeriesActive) {
-            OverallFlowRequest = state.dataLoopNodes->Node(BranchInletNodeNum).MassFlowRateRequest;
-        } else { // is series active, so take largest request of all the component inlet nodes
+        if (this->controlType == DataBranchAirLoopPlant::ControlType::SeriesActive) {
+            // Take largest request of all the component inlet nodes
             for (int CompCounter = 1; CompCounter <= this->TotalComponents; ++CompCounter) {
                 int const CompInletNode = this->Comp(CompCounter).NodeNumIn;
                 OverallFlowRequest = max(OverallFlowRequest, state.dataLoopNodes->Node(CompInletNode).MassFlowRateRequest);
             }
+        } else if (this->controlType == DataBranchAirLoopPlant::ControlType::Active) {
+            // Take the request of the actual active component
+            int ActiveCompInletNode = BranchInletNodeNum;
+            for (int CompCounter = 1; CompCounter <= this->TotalComponents; ++CompCounter) {
+                if (this->Comp(CompCounter).FlowCtrl == DataBranchAirLoopPlant::ControlType::Active) {
+                    ActiveCompInletNode = this->Comp(CompCounter).NodeNumIn;
+                    break;
+                }
+            }
+            OverallFlowRequest = state.dataLoopNodes->Node(ActiveCompInletNode).MassFlowRateRequest;
+        } else { // Passive/Bypass
+            OverallFlowRequest = state.dataLoopNodes->Node(BranchInletNodeNum).MassFlowRateRequest;
         }
 
         //~ Now use a worker to bound the value to outlet min/max avail

@@ -1198,7 +1198,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction; // index of construction in main construction structure
-            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             TscollK = state.dataTranspiredCollector->UTSC(UTSCNum).TcollLast + Constant::Kelvin;
             HPlenARR(ThisSurf) = Sigma * AbsExt * AbsThermSurf * (pow_4(TscollK) - pow_4(TsoK)) / (TscollK - TsoK);
@@ -1809,7 +1809,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction;
-            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             Real64 TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             Real64 TsBaffK = TmpTsBaf + Constant::Kelvin;
             if (TsBaffK == TsoK) {        // avoid divide by zero

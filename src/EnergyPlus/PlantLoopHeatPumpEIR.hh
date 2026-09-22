@@ -206,7 +206,7 @@ namespace EIRPlantLoopHeatPumps {
         int recurringConcurrentOperationWarningIndex = 0;
 
         // logic flags
-        bool oneTimeInitFlag = true;
+        bool oneTimeInitFlagPLHP = true;
         bool envrnInit = true;
 
         // recurrent warning messages index integers
@@ -388,7 +388,6 @@ namespace EIRPlantLoopHeatPumps {
         // New additions for GAHP only
         Constant::eFuel fuelType = Constant::eFuel::Invalid; // Fuel type assignment
         std::string endUseSubcat;
-        DataPlant::FlowMode flowMode = DataPlant::FlowMode::Invalid;
         Real64 desSupplyTemp = 60.0;
         Real64 desTempLift = 11.1;
         OATempCurveVar oaTempCurveInputVar = OATempCurveVar::DryBulb;
@@ -417,9 +416,6 @@ namespace EIRPlantLoopHeatPumps {
         Real64 loadSideVolumeFlowRate = 0.0;
         Real64 fuelRate = 0.0;   // Unit in W
         Real64 fuelEnergy = 0.0; // Unit in J
-        int capModFTErrorIndex = 0;
-        int eirModFTErrorIndex = 0;
-        int eirModFPLRErrorIndex = 0;
         int eirDefrostFTErrorIndex = 0;
         int eirAuxElecFTErrorIndex = 0;
         int eirAuxElecFPLRErrorIndex = 0;
@@ -463,7 +459,14 @@ namespace EIRPlantLoopHeatPumps {
         };
 
         // additional variables
-        HeatPumpAirToWater *companionHeatPumpCoil = nullptr;
+        // Deliberately NOT named companionHeatPumpCoil: the base class's own EIRPlantLoopHeatPump::companionHeatPumpCoil
+        // must stay null for HeatPumpAirToWater objects, because EIRPlantLoopHeatPump::sizeLoadSide() (and other base
+        // sizing methods) branch on it being non-null to size off a companion coil using logic that was written for,
+        // and only checks for, the plain PlantLoopHeatPump:EIR:Heating/Cooling pair (DataPlant::PlantEquipmentType::
+        // HeatPumpEIRHeating/Cooling), not HeatPumpAirToWater. This member is used instead by
+        // HeatPumpAirToWater::pairUpCompanionCoils() and HeatPumpAirToWater::calcOpMode().
+        HeatPumpAirToWater *companionAWHPCoil = nullptr;
+
         std::string availSchedName;            // availability schedule
         Sched::Schedule *availSched = nullptr; // availability schedule
         OperatingModeControlMethod operatingModeControlMethod = OperatingModeControlMethod::Load;
@@ -488,9 +491,9 @@ namespace EIRPlantLoopHeatPumps {
         //        adding 1 to account for booster mode curves
         std::array<Real64, maxNumSpeeds + 1> ratedCapacity = {};
         std::array<Real64, maxNumSpeeds + 1> ratedCOP = {};
-        std::array<int, maxNumSpeeds + 1> capFuncTempCurveIndex = {};
-        std::array<int, maxNumSpeeds + 1> powerRatioFuncTempCurveIndex = {};
-        std::array<int, maxNumSpeeds + 1> powerRatioFuncPLRCurveIndex = {};
+        std::array<int, maxNumSpeeds + 1> capFuncTempCurveIndices = {};
+        std::array<int, maxNumSpeeds + 1> powerRatioFuncTempCurveIndices = {};
+        std::array<int, maxNumSpeeds + 1> powerRatioFuncPLRCurveIndices = {};
         // 0-indexing, if it's fixed speed, it's integer; if it's variable speed, it's continuous
         Real64 speedLevel = 0.0; // 1-indexing
         Real64 speedRatio = 0.0;

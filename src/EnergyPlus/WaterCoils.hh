@@ -49,16 +49,13 @@
 #define WaterCoils_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACControllers.hh>
-#include <EnergyPlus/Plant/DataPlant.hh>
 
 namespace EnergyPlus {
 

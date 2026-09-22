@@ -1430,7 +1430,7 @@
     2.778,                   !- Temperature Rise Coefficient
     6.67,                    !- Design Chilled Water Outlet Temperature {C}
     0.0011,                  !- Design Chilled Water Flow Rate {m3/s}
-    0.002,                   !- Design Condenser Fluid Flow Rate {m3/s}
+    11.4,                    !- Design Condenser Fluid Flow Rate {m3/s}
     0.9949,                  !- Coefficient 1 of Capacity Ratio Curve
     -0.045954,               !- Coefficient 2 of Capacity Ratio Curve
     -0.0013543,              !- Coefficient 3 of Capacity Ratio Curve

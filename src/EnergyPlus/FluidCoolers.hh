@@ -120,7 +120,7 @@ namespace FluidCoolers {
         int WMFRGreaterThanMaxAvailErrCount;          // Counter when water mass flow rate is greater than minimum available
         int WMFRGreaterThanMaxAvailErrIndex;          // Index for water mass flow rate > minavail recurring message
         PlantLocation plantLoc;                       // loop topology variables
-        bool oneTimeInitFlag;
+        // bool oneTimeInitFlag; // Defined in PlantComponent.hh
         bool beginEnvrnInit;
 
         // Report vars
@@ -155,8 +155,8 @@ namespace FluidCoolers {
               OutdoorAirInletNodeNum(0), HighMassFlowErrorCount(0), HighMassFlowErrorIndex(0), OutletWaterTempErrorCount(0),
               OutletWaterTempErrorIndex(0), SmallWaterMassFlowErrorCount(0), SmallWaterMassFlowErrorIndex(0), WMFRLessThanMinAvailErrCount(0),
               WMFRLessThanMinAvailErrIndex(0), WMFRGreaterThanMaxAvailErrCount(0), WMFRGreaterThanMaxAvailErrIndex(0), plantLoc{},
-              oneTimeInitFlag(true), beginEnvrnInit(true), InletWaterTemp(0.0), OutletWaterTemp(0.0), WaterMassFlowRate(0.0), Qactual(0.0),
-              FanPower(0.0), FanEnergy(0.0), WaterTemp(0.0), AirTemp(0.0), AirHumRat(0.0), AirPress(0.0), AirWetBulb(0.0), indexInArray(0)
+              beginEnvrnInit(true), InletWaterTemp(0.0), OutletWaterTemp(0.0), WaterMassFlowRate(0.0), Qactual(0.0), FanPower(0.0), FanEnergy(0.0),
+              WaterTemp(0.0), AirTemp(0.0), AirHumRat(0.0), AirPress(0.0), AirWetBulb(0.0), indexInArray(0)
         {
         }
 

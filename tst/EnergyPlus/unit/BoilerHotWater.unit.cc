@@ -317,11 +317,17 @@ TEST_F(EnergyPlusFixture, Boiler_HotWater_BoilerEfficiency)
     state->dataGlobal->BeginEnvrnFlag = true;
     thisBoiler.InitBoiler(*state);
     thisBoiler.CalcBoilerModel(*state, MyLoad, RunFlag, DataBranchAirLoopPlant::ControlType::SeriesActive);
+    thisBoiler.UpdateBoilerRecords(*state, MyLoad, RunFlag);
 
     // check boiler part load ratio and the resultant boiler efficiency
     EXPECT_NEAR(thisBoiler.BoilerPLR, 0.24, 0.01);
     Real64 ExpectedBoilerEff = (0.5887682 + 0.7888184 * thisBoiler.BoilerPLR - 0.3862498 * pow(thisBoiler.BoilerPLR, 2)) * thisBoiler.NomEffic;
     EXPECT_NEAR(thisBoiler.BoilerEff, ExpectedBoilerEff, 0.01);
+    EXPECT_NEAR(thisBoiler.BoilerLoad, 1000000.0, 0.01);
+    EXPECT_NEAR(thisBoiler.FuelUsed, 1649811.37, 0.01);
+    EXPECT_NEAR(thisBoiler.ParasiticElecPower, 0.0, 0.01);
+    EXPECT_NEAR(thisBoiler.ParasiticFuelRate, 0.0, 0.01);
+    EXPECT_NEAR(thisBoiler.BoilerCOP, 0.61, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, Boiler_HotWater_Factory)

@@ -631,8 +631,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
             state.dataPipeHT->PipeHT(Item).SoilDepth = matSoil->Thickness;
             state.dataPipeHT->PipeHT(Item).SoilCp = matSoil->SpecHeat;
             state.dataPipeHT->PipeHT(Item).SoilConductivity = matSoil->Conductivity;
-            state.dataPipeHT->PipeHT(Item).SoilThermAbs = matSoil->AbsorpThermal;
-            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = matSoil->AbsorpSolar;
+            state.dataPipeHT->PipeHT(Item).SoilThermAbs = matSoil->AbsorpThermalOut;
+            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = matSoil->AbsorpSolarOut;
             state.dataPipeHT->PipeHT(Item).SoilRoughness = matSoil->Roughness;
             state.dataPipeHT->PipeHT(Item).PipeDepth = state.dataPipeHT->PipeHT(Item).SoilDepth + state.dataPipeHT->PipeHT(Item).PipeID / 2.0;
             state.dataPipeHT->PipeHT(Item).DomainDepth = state.dataPipeHT->PipeHT(Item).PipeDepth * 2.0;

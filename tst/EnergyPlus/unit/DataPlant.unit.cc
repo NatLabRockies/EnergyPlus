@@ -54,6 +54,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
+#include <EnergyPlus/Pumps.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
@@ -221,4 +222,131 @@ TEST_F(EnergyPlusFixture, PlantLoopSide_PlantLoopBranchPumpStillDisabledEvenWith
 
     // the new exception is scoped to condenser loops only
     EXPECT_TRUE(supply.Branch(2).disableOverrideForCSBranchPumping);
+}
+
+// A valid bypass does not turn an intermittent inlet pump on without load.
+// Once load exists, the pump runs at rated flow and the bypass carries any excess flow.
+TEST_F(EnergyPlusFixture, IntermittentConstantSpeedInletPumpWithBypassIsOffWithoutLoad)
+{
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &loop = state->dataPlnt->PlantLoop(1);
+    loop.FluidName = "WATER";
+    loop.glycol = Fluid::GetWater(*state);
+
+    auto &supply = loop.LoopSide(LoopSideLocation::Supply);
+    supply.plantLoc.loopNum = 1;
+    supply.plantLoc.loopSideNum = LoopSideLocation::Supply;
+    supply.BypassExists = true;
+    loop.LoopSide(LoopSideLocation::Demand).BypassExists = true;
+    supply.TotalPumps = 1;
+    supply.Branch.allocate(1);
+    supply.Branch(1).TotalComponents = 1;
+    supply.Branch(1).Comp.allocate(1);
+    supply.Pumps.allocate(1);
+
+    state->dataLoopNodes->Node.allocate(2);
+    state->dataLoopNodes->Node(1).MassFlowRateMin = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRateMax = 2.0;
+    state->dataLoopNodes->Node(1).MassFlowRateMinAvail = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 2.0;
+
+    state->dataPumps->GetInputFlag = false;
+    state->dataPumps->NumPumps = 1;
+    state->dataPumps->PumpEquip.allocate(1);
+    state->dataPumps->PumpEquipReport.allocate(1);
+    auto &pump = state->dataPumps->PumpEquip(1);
+    pump.Name = "Test Pump";
+    pump.pumpType = Pumps::PumpType::ConSpeed;
+    pump.PumpControl = Pumps::PumpControlType::Intermittent;
+    pump.InletNodeNum = 1;
+    pump.OutletNodeNum = 2;
+    pump.NomVolFlowRate = 0.002;
+    pump.NomPowerUse = 100.0;
+    pump.MotorEffic = 1.0;
+    pump.PartLoadCoef[0] = 1.0;
+    pump.MassFlowRateMax = 2.0;
+    pump.PumpOneTimeFlag = false;
+    pump.PumpInitFlag = false;
+    pump.plantLoc.loopNum = 1;
+    pump.plantLoc.loopSideNum = LoopSideLocation::Supply;
+    pump.plantLoc.branchNum = 1;
+    pump.plantLoc.compNum = 1;
+
+    auto &pumpComp = supply.Branch(1).Comp(1);
+    pumpComp.Type = PlantEquipmentType::PumpConstantSpeed;
+    pumpComp.CompNum = 1;
+    pumpComp.NodeNumIn = 1;
+    pumpComp.NodeNumOut = 2;
+    PlantUtilities::SetPlantLocationLinks(*state, pump.plantLoc);
+
+    auto &pumpInfo = supply.Pumps(1);
+    pumpInfo.PumpName = pump.Name;
+    pumpInfo.BranchNum = 1;
+    pumpInfo.CompNum = 1;
+    pumpInfo.PumpOutletNode = 2;
+
+    // A valid bypass does not run an intermittent pump without a load; it only carries excess flow after the pump turns on.
+    EXPECT_DOUBLE_EQ(0.0, supply.DetermineLoopSideFlowRate(*state, 1, 0.0));
+    supply.FlowLock = FlowLock::Unlocked;
+    bool pumpRunning = true;
+    int pumpIndex = 0;
+    Real64 pumpHeat = 0.0;
+    Pumps::SimPumps(*state, pump.Name, 1, 0.0, pumpRunning, pumpIndex, pumpHeat);
+    EXPECT_FALSE(pumpRunning);
+    EXPECT_DOUBLE_EQ(0.0, pump.Power);
+
+    // A stale maximum availability from the prior branch simulation must not clamp a fixed-flow pump. Restoring the
+    // maximum lets the splitter send excess flow through the bypass without raising the minimum and latching the pump on.
+    state->dataLoopNodes->Node(1).MassFlowRateMinAvail = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 0.25;
+    EXPECT_DOUBLE_EQ(2.0, supply.DetermineLoopSideFlowRate(*state, 1, 1.0));
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRateMinAvail);
+    EXPECT_DOUBLE_EQ(2.0, state->dataLoopNodes->Node(1).MassFlowRateMaxAvail);
+    supply.FlowLock = FlowLock::Unlocked;
+    Pumps::SimPumps(*state, pump.Name, 1, 2.0, pumpRunning, pumpIndex, pumpHeat);
+    EXPECT_TRUE(pumpRunning);
+    EXPECT_DOUBLE_EQ(100.0, pump.Power);
+
+    // A transient request must not latch the pump on after a later solver pass removes the request.
+    EXPECT_DOUBLE_EQ(0.0, supply.DetermineLoopSideFlowRate(*state, 1, 0.0));
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRateMinAvail);
+    EXPECT_DOUBLE_EQ(2.0, state->dataLoopNodes->Node(1).MassFlowRateMaxAvail);
+
+    // The pump's scheduled fixed flow cannot exceed the inlet node's physical limit.
+    state->dataLoopNodes->Node(1).MassFlowRateMax = 1.5;
+    state->dataLoopNodes->Node(1).MassFlowRateMinAvail = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 1.5;
+    EXPECT_DOUBLE_EQ(1.5, supply.DetermineLoopSideFlowRate(*state, 1, 1.0));
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRateMinAvail);
+    EXPECT_DOUBLE_EQ(1.5, state->dataLoopNodes->Node(1).MassFlowRateMaxAvail);
+
+    auto expectSupervisoryOffDoesNotForcePumpFlow = [&]() {
+        state->dataLoopNodes->Node(1).MassFlowRateMax = 2.0;
+        state->dataLoopNodes->Node(1).MassFlowRateMinAvail = 0.0;
+        state->dataLoopNodes->Node(1).MassFlowRateMaxAvail = 2.0;
+        EXPECT_DOUBLE_EQ(1.0, supply.DetermineLoopSideFlowRate(*state, 1, 1.0));
+        EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRateMinAvail);
+        EXPECT_DOUBLE_EQ(2.0, state->dataLoopNodes->Node(1).MassFlowRateMaxAvail);
+    };
+
+    // EMS supervisory shutdowns at every supported scope take precedence over the pump's fixed flow.
+    loop.EMSCtrl = true;
+    loop.EMSValue = -1.0;
+    expectSupervisoryOffDoesNotForcePumpFlow();
+    loop.EMSCtrl = false;
+
+    supply.EMSCtrl = true;
+    supply.EMSValue = 0.0;
+    expectSupervisoryOffDoesNotForcePumpFlow();
+    supply.EMSCtrl = false;
+
+    supply.Branch(1).EMSCtrlOverrideOn = true;
+    supply.Branch(1).EMSCtrlOverrideValue = 0.0;
+    expectSupervisoryOffDoesNotForcePumpFlow();
+    supply.Branch(1).EMSCtrlOverrideOn = false;
+
+    pumpComp.EMSLoadOverrideOn = true;
+    pumpComp.EMSLoadOverrideValue = 0.0;
+    expectSupervisoryOffDoesNotForcePumpFlow();
 }

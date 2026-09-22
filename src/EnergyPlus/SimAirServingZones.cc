@@ -1107,8 +1107,8 @@ void GetAirPathData(EnergyPlusData &state)
                                 WaterCoilNodeNum = GetCoilWaterInletNode(state, CompType, OutsideAirSys(OANum).ComponentName(OACompNum), ErrorsFound);
                                 if (WaterCoilNodeNum == ActuatorNodeNum) {
                                     nonLockoutCoilFound = true;
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }

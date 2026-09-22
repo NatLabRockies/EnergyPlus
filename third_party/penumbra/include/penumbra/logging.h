@@ -37,8 +37,8 @@ protected:
 
 class PenumbraException : public Courierr::CourierrException {
 public:
-  explicit PenumbraException(const std::string &message, Courierr::Courierr &logger)
-      : CourierrException(message, logger) {}
+  explicit PenumbraException(const std::string &t_message, Courierr::Courierr &logger)
+      : CourierrException(t_message, logger) {}
 };
 
 class SurfaceException : public PenumbraException {

@@ -172,7 +172,7 @@ jobs:
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DDOCUMENTATION_BUILD:STRING=$DOCUMENTATION_BUILD -DTEX_INTERACTION:STRING="batchmode" \
               -DENABLE_OPENMP:BOOL=OFF \
-              -DCPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION:STRING="Developer ID Application: National Renewable Energy Laboratory (K7JYVQJL7R)" \
+              -DCPACK_CODESIGNING_DEVELOPER_ID_APPLICATION:STRING="Developer ID Application: National Renewable Energy Laboratory (K7JYVQJL7R)" \
               -DCPACK_CODESIGNING_NOTARY_PROFILE_NAME:STRING=EnergyPlus \
               ../
 

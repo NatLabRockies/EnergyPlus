@@ -3873,7 +3873,7 @@ namespace HeatRecovery {
                                                                "equation is out of range error continues...",
                                                                state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).PerfType,
                                                                state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).Name),
-                                                   state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).T_ProcInHumRatError.index,
+                                                   state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.index,
                                                    state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.last,
                                                    state.dataHeatRecovery->BalDesDehumPerfData(this->PerfDataIndex).H_ProcInHumRatError.last);
                 }

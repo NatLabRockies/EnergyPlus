@@ -7949,8 +7949,8 @@
     SET SumReliefMCT = SumReliefMCT + (h_Relief_4 * mdotRelief_4 );  !- <none>
 
   EnergyManagementSystem:Program,
-    InitializeRoofTemperature, !- Name
-    Set Troof = 0.0;           !- Program Line 1
+    InitializeRoofTemperature,  !- Name
+    Set Troof = 0.0;         !- Program Line 1
 
   EnergyManagementSystem:Program,
     InitializeParameters,    !- Name
@@ -8103,9 +8103,9 @@
     Set NatBouyMCT = NatBouyMC * Ta;  !- <none>
 
   EnergyManagementSystem:ProgramCallingManager,
-    InitializeRoofTemperatureOnBeginNewEnvironment, !- Name
-    BeginNewEnvironment,          !- EnergyPlus Model Calling Point
-    InitializeRoofTemperature;    !- Program Name 1
+    InitializeRoofTemperatureOnBeginNewEnvironment,  !- Name
+    BeginNewEnvironment,     !- EnergyPlus Model Calling Point
+    InitializeRoofTemperature;  !- Program Name 1
 
   EnergyManagementSystem:ProgramCallingManager,
     Model Flat Roof Microclimate,  !- Name

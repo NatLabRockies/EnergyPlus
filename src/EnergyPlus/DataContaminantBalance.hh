@@ -82,8 +82,6 @@ namespace DataContaminantBalance {
         int ActualZoneNum = 0;
         Sched::Schedule *availSched = nullptr;      // Availability schedule
         Sched::Schedule *setptSched = nullptr;      // Setpoint schedule
-        bool EMSOverrideCO2SetPointOn = false;      // EMS is calling to override CO2 setpoint
-        Real64 EMSOverrideCO2SetPointValue = 0.0;   // value EMS is directing to use for CO2 setpoint
         int NumOfZones = 0;                         // Number of controlled zones in the same airloop
         Array1D_int ControlZoneNum;                 // Controlled zone number
         Sched::Schedule *zoneMinCO2Sched = nullptr; // Minimum CO2 concentration schedule
@@ -92,8 +90,6 @@ namespace DataContaminantBalance {
         Sched::Schedule *zoneContamControllerSched = nullptr; // Index for this schedule
         Sched::Schedule *genericContamAvailSched = nullptr;   // Availability Schedule name for generic contamiant
         Sched::Schedule *genericContamSetptSched = nullptr;   // Schedule which determines the generic contaminant setpoint
-        bool EMSOverrideGCSetPointOn = false;                 // EMS is calling to override generic contaminant setpoint
-        Real64 EMSOverrideGCSetPointValue = 0.0;              // value EMS is directing to use for generic contaminant setpoint
     };
 
     struct ZoneSystemContaminantDemandData // Contaminent loads to be met (kg air per second)

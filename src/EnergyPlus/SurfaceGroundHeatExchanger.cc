@@ -492,12 +492,12 @@ namespace SurfaceGroundHeatExchanger {
                     auto const *thisMaterialLayer = s_mat->materials(state.dataConstruction->Construct(Cons).LayerPoint(LayerNum));
                     assert(thisMaterialLayer != nullptr);
                     this->BtmRoughness = thisMaterialLayer->Roughness;
-                    this->TopThermAbs = thisMaterialLayer->AbsorpThermal;
+                    this->BtmThermAbs = thisMaterialLayer->AbsorpThermalIn;
                     auto const *thisMaterial1 = s_mat->materials(state.dataConstruction->Construct(Cons).LayerPoint(1));
                     assert(thisMaterial1 != nullptr);
                     this->TopRoughness = thisMaterial1->Roughness;
-                    this->TopThermAbs = thisMaterial1->AbsorpThermal;
-                    this->TopSolarAbs = thisMaterial1->AbsorpSolar;
+                    this->TopThermAbs = thisMaterial1->AbsorpThermalOut;
+                    this->TopSolarAbs = thisMaterial1->AbsorpSolarOut;
                 }
             }
             // set one-time flag

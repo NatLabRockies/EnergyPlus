@@ -29,7 +29,7 @@ jobs:
 #          nproc: 3
 #          pretty: "Standard Build on Mac x64"
 #          alternate: false
-#          build-type: release
+#          build-type: Release
 #          run-tests: true
         - os: macos-14
           macos_dev_target: 14.0
@@ -39,7 +39,7 @@ jobs:
           nproc: 3
           pretty: "Standard Build on Mac arm64"
           alternate: false
-          build-type: release
+          build-type: Release
           run-tests: true
           link-with-python: true
 #        - os: ubuntu-24.04
@@ -49,7 +49,7 @@ jobs:
 #          nproc: 4
 #          pretty: "Standard Build on Ubuntu 24.04"
 #          alternate: false
-#          build-type: release
+#          build-type: Release
 #          run-tests: true
 #          link-with-python: true
         - os: windows-2022
@@ -59,7 +59,7 @@ jobs:
           nproc: 4
           pretty: "Standard Build on Windows VS 2022 - Debug"
           alternate: false
-          build-type: debug
+          build-type: Debug
           run-tests: false
           link-with-python: true
         - os: windows-2022
@@ -69,7 +69,7 @@ jobs:
           nproc: 4
           pretty: "Standard Build on Windows VS 2022 - Debug, No Python"
           alternate: false
-          build-type: debug
+          build-type: Debug
           run-tests: false
           link-with-python: false
         - os: ubuntu-24.04
@@ -79,7 +79,7 @@ jobs:
           nproc: 4
           pretty: "Alternate Build on Ubuntu 24.04"
           alternate: true
-          build-type: release
+          build-type: Release
           run-tests: false
           link-with-python: false
 

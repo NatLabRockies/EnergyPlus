@@ -33,7 +33,7 @@ if(NOT ${FORTRAN_STATIC_EXE})
   install_target_prereqs(ExpandObjects "./")
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(ExpandObjects "." Unspecified)
 endif()

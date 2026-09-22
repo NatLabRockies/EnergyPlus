@@ -671,6 +671,8 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
     Real64 sumVal;
     Real64 sumDuration;
     bool createBinRangeTable = false;
+    std::string const footnote =
+        m_filter.empty() ? "" : "Note: This table has been filtered; the objects shown may not include all objects of these types in the input file.";
 
     aggString = setupAggString();
     Real64 energyUnitsConversionFactor = AnnualTable::setEnergyUnitStringAndFactor(style.unitsStyle, energyUnitsString);
@@ -974,12 +976,12 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
     if (style.produceTabular) {
         OutputReportTabular::WriteReportHeaders(state, m_name, "Entire Facility", OutputProcessor::StoreType::Average);
         OutputReportTabular::WriteSubtitle(state, "Custom Annual Report");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth, true); // transpose annual XML tables.
+        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth, true, footnote); // transpose annual XML tables.
     }
     if (style.produceJSON) {
         if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
             state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, m_name, "Entire Facility", "Custom Annual Report");
+                tableBody, rowHead, columnHead, m_name, "Entire Facility", "Custom Annual Report", footnote);
         }
     }
     if (style.produceSQLite) {

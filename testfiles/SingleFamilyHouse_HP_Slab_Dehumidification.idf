@@ -157,6 +157,12 @@
     200,                     !- Upper Limit Value
     Continuous;              !- Numeric Type
 
+  ScheduleTypeLimits,
+    Humidity,                !- Name
+    0,                       !- Lower Limit Value
+    100,                     !- Upper Limit Value
+    CONTINUOUS;              !- Numeric Type
+
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:DAY:HOURLY ===========
 
   Schedule:Day:Hourly,
@@ -1495,6 +1501,19 @@
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
     Until: 24:00,0;          !- Field 3
+
+  Schedule:Compact,
+    SEASONAL RELATIVE HUMIDITY SCH,  !- Name
+    Humidity,                !- Schedule Type Limits Name
+    Through: 3/31,           !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,50.00,      !- Field 3
+    Through: 9/30,           !- Field 5
+    For: AllDays,            !- Field 6
+    Until: 24:00,55.00,      !- Field 7
+    Through: 12/31,          !- Field 9
+    For: AllDays,            !- Field 10
+    Until: 24:00,50.00;      !- Field 11
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:CONSTANT ===========
 
@@ -3436,6 +3455,13 @@
     10.0,                    !- Minimum Dry-Bulb Temperature for Dehumidifier Operation {C}
     32.0,                    !- Maximum Dry-Bulb Temperature for Dehumidifier Operation {C}
     0.0;                     !- Off-Cycle Parasitic Electric Load {W}
+
+!-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:HUMIDISTAT ===========
+
+  ZoneControl:Humidistat,
+    Zone 3 Humidistat,       !- Name
+    living_unit1,            !- Zone Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:ENERGYRECOVERYVENTILATOR ===========
 

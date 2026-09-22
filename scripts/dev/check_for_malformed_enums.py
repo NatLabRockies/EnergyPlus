@@ -140,6 +140,7 @@ def process_enum_str(input_str: str, filepath: Path, line_no: int) -> list[LogMe
             "DataHeatBalance.hh:PERptVars",
             "EconomicTariff.hh:StepType",
             "LowTempRadiantSystem.hh:OpMode",
+            "DataErrorTracking.hh:ErrorSummaryType",
         ]
         if f"{file_name}:{name}" not in exceptions:
             log_messages.append(

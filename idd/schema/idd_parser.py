@@ -535,6 +535,10 @@ def parse_field(data, token):
                     root["type"] = "integer"
             elif match_string(data, NODE_STR):
                 root["type"] = "string"
+                if "data_type" not in root:
+                    root["data_type"] = "node"
+                else:
+                    raise RuntimeError(r"two \type node?")
             else:
                 bad_type = parse_line(data)
                 raise RuntimeError('Invalid \\type: "%s"' % bad_type)
