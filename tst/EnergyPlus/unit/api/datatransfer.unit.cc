@@ -623,6 +623,50 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestResetActuators)
     EXPECT_EQ(1, apiErrorFlag((void *)this->state));
 }
 
+TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_CallbackCountsAsRunOnlyWhenItActuates)
+{
+    // a registered callback must not report that it ran unless it wrote an actuator: at InsideHVACSystemIterationLoop,
+    // reporting that it ran forces additional air loop iterations and changes the results of a read-only callback (#8164)
+    this->preRequestActuator("a", "b", "c", ActuatorType::REAL);
+    this->setupActuatorsOnceAllAreRequested();
+    int hActuator = getActuatorHandle((void *)this->state, "a", "b", "c");
+    EXPECT_GT(hActuator, -1);
+
+    enum class Action
+    {
+        Read,
+        Set,
+        Reset
+    };
+    Action action = Action::Read;
+    int numCalls = 0;
+    PluginManagement::registerNewCallback(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, [&](void *s) {
+        ++numCalls;
+        getActuatorValue(s, hActuator);
+        if (action == Action::Set) {
+            setActuatorValue(s, hActuator, 1.0);
+        } else if (action == Action::Reset) {
+            resetActuator(s, hActuator);
+        }
+    });
+
+    bool anyRan = false;
+    PluginManagement::runAnyRegisteredCallbacks(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(1, numCalls);
+    EXPECT_FALSE(anyRan);
+
+    action = Action::Set;
+    PluginManagement::runAnyRegisteredCallbacks(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(2, numCalls);
+    EXPECT_TRUE(anyRan);
+
+    anyRan = false;
+    action = Action::Reset;
+    PluginManagement::runAnyRegisteredCallbacks(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(3, numCalls);
+    EXPECT_TRUE(anyRan);
+}
+
 TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestAccessingInternalVariables)
 {
     // we can't really test that the actuator is being recalculated by E+ again, but we can make sure the call works anyway
