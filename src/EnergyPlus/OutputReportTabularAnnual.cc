@@ -541,7 +541,7 @@ void AnnualTable::gatherForTimestep(EnergyPlusData &state, OutputProcessor::Time
                                     break; // for fldStRemainIt
                                 }
                                 if (fldStRemainIt->m_aggregate == AnnualFieldSet::AggregationKind::sumOrAverageHoursShown) {
-                                    if (fldStIt->m_varAvgSum == OutputProcessor::StoreType::Sum) { // if it is a summed variable
+                                    if (fldStRemainIt->m_varAvgSum == OutputProcessor::StoreType::Sum) { // if it is a summed variable
                                         fldStRemainIt->m_cell[row].result = oldScanValue + scanValue;
                                     } else {
                                         fldStRemainIt->m_cell[row].result =
@@ -671,6 +671,8 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
     Real64 sumVal;
     Real64 sumDuration;
     bool createBinRangeTable = false;
+    std::string const footnote =
+        m_filter.empty() ? "" : "Note: This table has been filtered; the objects shown may not include all objects of these types in the input file.";
 
     aggString = setupAggString();
     Real64 energyUnitsConversionFactor = AnnualTable::setEnergyUnitStringAndFactor(style.unitsStyle, energyUnitsString);
@@ -783,10 +785,10 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
                 tableBody(columnRecount, rowSumAvg) = OutputReportTabular::RealToStr(style.formatReals, sumVal, fldSt.m_showDigits);
             }
             if (minVal != veryLarge) {
-                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
             }
             if (maxVal != verySmall) {
-                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
             }
             break;
         }
@@ -814,10 +816,10 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
             }
             tableBody(columnRecount, rowSumAvg) = OutputReportTabular::RealToStr(style.formatReals, sumVal, fldSt.m_showDigits);
             if (minVal != veryLarge) {
-                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, minVal, fldSt.m_showDigits);
             }
             if (maxVal != verySmall) {
-                tableBody(columnRecount, rowMin) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
+                tableBody(columnRecount, rowMax) = OutputReportTabular::RealToStr(style.formatReals, maxVal, fldSt.m_showDigits);
             }
             break;
         }
@@ -974,12 +976,12 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
     if (style.produceTabular) {
         OutputReportTabular::WriteReportHeaders(state, m_name, "Entire Facility", OutputProcessor::StoreType::Average);
         OutputReportTabular::WriteSubtitle(state, "Custom Annual Report");
-        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth, true); // transpose annual XML tables.
+        OutputReportTabular::WriteTable(state, tableBody, rowHead, columnHead, columnWidth, true, footnote); // transpose annual XML tables.
     }
     if (style.produceJSON) {
         if (state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled()) {
             state.dataResultsFramework->resultsFramework->TabularReportsCollection.addReportTable(
-                tableBody, rowHead, columnHead, m_name, "Entire Facility", "Custom Annual Report");
+                tableBody, rowHead, columnHead, m_name, "Entire Facility", "Custom Annual Report", footnote);
         }
     }
     if (style.produceSQLite) {

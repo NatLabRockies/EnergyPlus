@@ -50,6 +50,8 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
+#include <format>
+
 #include "Fixtures/EnergyPlusFixture.hh"
 #include "Fixtures/SQLiteFixture.hh"
 
@@ -60,6 +62,7 @@
 #include <EnergyPlus/OutputReportData.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReportTabularAnnual.hh>
+#include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 using namespace EnergyPlus;
@@ -204,6 +207,59 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_SetupGathering)
     EXPECT_EQ(fieldSetParams[5], "3"); // m_keyCount
     EXPECT_EQ(fieldSetParams[6], "1"); // m_varAvgSum
     EXPECT_EQ(fieldSetParams[7], "0"); // m_varStepType
+}
+
+TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_FilterFootnote)
+{
+    std::string const idf_objects = delimited_string({
+        "Output:JSON,",
+        "TimeSeriesAndTabular;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+    state->dataResultsFramework->resultsFramework->setupOutputOptions(*state);
+
+    Real64 reportValue = 1.0;
+    SetupOutputVariable(*state,
+                        "Test Average Variable",
+                        Constant::Units::None,
+                        reportValue,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Average,
+                        "Zone One");
+
+    OutputReportTabular::tabularReportStyle style;
+    style.produceTabular = false;
+    style.produceSQLite = false;
+    style.produceJSON = true;
+
+    AnnualTable filteredTable(*state, "FILTERED REPORT", "Zone", "");
+    filteredTable.addFieldSet("Test Average Variable", AnnualFieldSet::AggregationKind::sumOrAvg, 2);
+    filteredTable.setupGathering(*state);
+    filteredTable.writeTable(*state, style);
+
+    AnnualTable unfilteredTable(*state, "UNFILTERED REPORT", "", "");
+    unfilteredTable.addFieldSet("Test Average Variable", AnnualFieldSet::AggregationKind::sumOrAvg, 2);
+    unfilteredTable.setupGathering(*state);
+    unfilteredTable.writeTable(*state, style);
+
+    auto const reports = state->dataResultsFramework->resultsFramework->TabularReportsCollection.getJSON();
+    bool foundFilteredReport = false;
+    bool foundUnfilteredReport = false;
+    for (auto const &report : reports) {
+        auto const &table = report["Tables"][0];
+        if (report["ReportName"] == "FILTERED REPORT") {
+            foundFilteredReport = true;
+            EXPECT_EQ(table["Footnote"],
+                      "Note: This table has been filtered; the objects shown may not include all objects of these types in the input file.");
+        } else if (report["ReportName"] == "UNFILTERED REPORT") {
+            foundUnfilteredReport = true;
+            EXPECT_FALSE(table.contains("Footnote"));
+        }
+    }
+    EXPECT_TRUE(foundFilteredReport);
+    EXPECT_TRUE(foundUnfilteredReport);
 }
 
 TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_GatherResults)
@@ -511,6 +567,79 @@ TEST_F(EnergyPlusFixture, OutputReportTabularAnnual_invalidAggregationOrder)
     std::vector<AnnualTable>::iterator firstTable = state->dataOutputReportTabularAnnual->annualTables.begin();
 
     EXPECT_TRUE(firstTable->invalidAggregationOrder(*state));
+}
+
+TEST_F(SQLiteFixture, OutputReportTabularAnnual_SummaryRowsUseCorrectMinimumAndMaximum)
+{
+    using namespace OutputProcessor;
+
+    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+
+    std::string const idf_objects = delimited_string({
+        "Output:Table:Annual,",
+        "  Summary Row Order Test, !- Name",
+        "  ,                       !- Filter",
+        "  ,                       !- Schedule Name",
+        "  Test Power,             !- Variable or Meter 1 Name",
+        "  SumOrAverage,           !- Aggregation Type for Variable or Meter 1",
+        "  2,                      !- Digits After Decimal 1",
+        "  Test Power,             !- Variable or Meter 2 Name",
+        "  HoursNonZero,           !- Aggregation Type for Variable or Meter 2",
+        "  2;                      !- Digits After Decimal 2",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    Real64 lowValue = 0.0;
+    Real64 highValue = 0.0;
+    SetupOutputVariable(*state, "Test Power", Constant::Units::W, lowValue, TimeStepType::Zone, StoreType::Average, "Low Row");
+    SetupOutputVariable(*state, "Test Power", Constant::Units::W, highValue, TimeStepType::Zone, StoreType::Average, "High Row");
+
+    state->dataGlobal->DoWeathSim = true;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataGlobal->TimeStepZoneSec = Constant::rSecsInHour;
+
+    GetInputTabularAnnual(*state);
+    ASSERT_EQ(1u, state->dataOutputReportTabularAnnual->annualTables.size());
+
+    lowValue = 1.0;
+    highValue = 3.0;
+    GatherAnnualResultsForTimeStep(*state, TimeStepType::Zone);
+
+    lowValue = 0.0;
+    highValue = 4.0;
+    GatherAnnualResultsForTimeStep(*state, TimeStepType::Zone);
+
+    OutputReportTabular::setTabularReportStyles(*state);
+    WriteAnnualTables(*state);
+
+    auto querySummaryValue = [this](std::string const &rowName, std::string const &columnName) {
+        return queryResult(std::format(R"(SELECT Value FROM TabularDataWithStrings
+                                           WHERE ReportName = 'SUMMARY ROW ORDER TEST'
+                                             AND TableName = 'Custom Annual Report'
+                                             AND RowName = '{}'
+                                             AND ColumnName = '{}')",
+                                       rowName,
+                                       columnName),
+                           "TabularDataWithStrings");
+    };
+
+    auto result = querySummaryValue("Minimum of Rows", "Test Power");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(0.50, std::stod(result[0][0]));
+
+    result = querySummaryValue("Maximum of Rows", "Test Power");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(3.50, std::stod(result[0][0]));
+
+    result = querySummaryValue("Minimum of Rows", "Test Power {HOURS NON-ZERO}");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(1.00, std::stod(result[0][0]));
+
+    result = querySummaryValue("Maximum of Rows", "Test Power {HOURS NON-ZERO}");
+    ASSERT_EQ(1u, result.size());
+    EXPECT_DOUBLE_EQ(2.00, std::stod(result[0][0]));
 }
 
 TEST_F(SQLiteFixture, OutputReportTabularAnnual_CurlyBraces)

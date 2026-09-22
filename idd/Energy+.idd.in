@@ -52716,12 +52716,15 @@ Fan:SystemModel,
        \units Pa
        \ip-units inH2O
   N11, \field Night Ventilation Mode Maximum Air Flow Rate
-       \note Maximum air flow rate to use when in night mode using AvailabilityManager:NightVentilation
-       \note If left blank the Design Maximum Air Flow Rate field above is used, i.e. no additional flow cap is applied.
        \type real
        \units m3/s
        \minimum 0.0
        \autosizable
+       \default autosize
+       \note Maximum standard-density volumetric air flow rate when the fan operates in night ventilation mode.
+       \note If left blank or autosized, this field is set to the fan's Design Maximum Air Flow Rate.
+       \note AvailabilityManager:NightVentilation Night Venting Flow Fraction requests a fraction of the fan's Design Maximum Air Flow Rate.
+       \note This field is then used as an upper limit on the resulting night ventilation fan flow rate.
   N12, \field Night Ventilation Mode Fan Total Efficiency
        \note Fan total efficiency to use when in night mode using AvailabilityManager:NightVentilation
        \note If left blank the Fan Total Efficiency field above is used.

@@ -2346,6 +2346,20 @@
     ;                        !- Digits After Decimal 4
 
   Output:Table:Annual,
+    Zone Lights During Hours Shown Annual Report,  !- Name
+    ,                        !- Filter
+    ,                        !- Schedule Name
+    Zone Mean Air Temperature,  !- Variable or Meter or EMS Variable or Field 1 Name
+    HoursNonNegative,        !- Aggregation Type for Variable or Meter 1
+    2,                       !- Digits After Decimal 1
+    Zone Lights Electricity Energy,  !- Variable or Meter or EMS Variable or Field 2 Name
+    SumOrAverageDuringHoursShown,  !- Aggregation Type for Variable or Meter 2
+    2,                       !- Digits After Decimal 2
+    Zone Lights Electricity Energy,  !- Variable or Meter or EMS Variable or Field 3 Name
+    SumOrAverage,            !- Aggregation Type for Variable or Meter 3
+    2;                       !- Digits After Decimal 3
+
+  Output:Table:Annual,
     Window Annual Report,    !- Name
     ,                        !- Filter
     ,                        !- Schedule Name
