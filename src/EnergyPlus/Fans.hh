@@ -426,8 +426,7 @@ namespace Fans {
         Real64 elecPowerPerFlowRate = 0.0;                    // scaling factor for PowerPerFlow method
         Real64 elecPowerPerFlowRatePerPressure = 0.0;         // scaling factor for PowerPerFlowPerPressure
         Real64 nightVentPressureDelta = 0.0;                  // fan pressure rise during night ventilation mode
-        Real64 nightVentMaxAirFlowRate = 0.0;                 // fan max air flow rate cap during night ventilation mode, 0.0 means not specified
-        bool nightVentMaxAirFlowRateIsAutosized = false;      // true if the night ventilation maximum air flow rate is autosized
+        Real64 nightVentMaxAirFlowRate = 0.0;                 // fan max air flow rate cap during night ventilation mode
         Real64 nightVentMaxAirMassFlowRate = 0.0;             // fan max air mass flow rate cap during night ventilation mode [kg/s]
         Real64 nightVentTotalEff = 0.0;                       // fan total efficiency during night ventilation mode, 0.0 means not specified
         Real64 nightVentMotorEff = 0.0;                       // fan motor efficiency during night ventilation mode, 0.0 means not specified

@@ -951,12 +951,7 @@ void GetFanInput(EnergyPlusData &state)
         }
 
         fan->nightVentPressureDelta = rNumericArgs(10);
-        if (!lNumericFieldBlanks(11)) {
             fan->nightVentMaxAirFlowRate = rNumericArgs(11);
-            if (fan->nightVentMaxAirFlowRate == DataSizing::AutoSize) {
-                fan->nightVentMaxAirFlowRateIsAutosized = true;
-            }
-        }
         if (!lNumericFieldBlanks(12)) {
             fan->nightVentTotalEff = rNumericArgs(12);
         }
@@ -2670,8 +2665,7 @@ void FanSystem::set_size(EnergyPlusData &state)
     rhoAirStdInit = state.dataEnvrn->StdRhoAir;
     maxAirMassFlowRate = maxAirFlowRate * rhoAirStdInit;
 
-    // night ventilation mode flow cap: if not specified, or autosized, defaults to the design maximum air flow rate
-    if (nightVentMaxAirFlowRateIsAutosized || nightVentMaxAirFlowRate <= 0.0) {
+    if (nightVentMaxAirFlowRate == DataSizing::AutoSize) {
         nightVentMaxAirFlowRate = maxAirFlowRate;
     }
     nightVentMaxAirMassFlowRate = nightVentMaxAirFlowRate * rhoAirStdInit;
@@ -2893,10 +2887,10 @@ void FanSystem::calcSimpleSystemFan(
             _localAirMassFlow[mode] = min(_localAirMassFlow[mode], _localFaultMaxAirMassFlow);
             _localPressureRise[mode] = _localFaultPressureRise;
         }
-        _localFlowFrac = _localAirMassFlow[0] / _localMaxAirMassFlowRate;
+        _localFlowFrac = (_localMaxAirMassFlowRate > 0.0) ? _localAirMassFlow[0] / _localMaxAirMassFlowRate : 0.0;
         _localFlowFrac = min(1.0, _localFlowFrac);
 
-        if (_localRuntimeFrac[mode] > 0.0) {
+        if (_localMaxAirMassFlowRate > 0.0 && _localRuntimeFrac[mode] > 0.0) {
             _localFlowRatio[mode] = _localAirMassFlow[mode] / (_localMaxAirMassFlowRate * _localRuntimeFrac[mode]);
         }
         _localFlowRatio[mode] = min(1.0, _localFlowRatio[mode]);
