@@ -3599,7 +3599,7 @@
     Supply Fan 1,            !- Fan Name
     0.7,                     !- Fan Total Efficiency
     67.0,                    !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
+    ,                        !- Maximum Flow Rate {m3/s}
     0.9,                     !- Motor Efficiency
     1.0;                     !- Motor in Airstream Fraction
 
