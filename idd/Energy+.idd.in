@@ -64063,7 +64063,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note rates and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)
@@ -64233,7 +64233,7 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \note and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)

@@ -1086,7 +1086,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     West Zone Supply Fan Outlet Node,  !- Air Inlet Node Name
     West Zone DEC Outlet Node,  !- Air Outlet Node Name
@@ -1106,7 +1106,7 @@
     0.72,                    !- Cooler Drybulb Design Effectiveness
     IECEffDBFlowMod,         !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Recirculating Water Pump Design Power {W}
-    150.0,                   !- Water Pump Power Sizing Factor {W/(m3/s)}
+    150.0,                   !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     IECPumpPowerMod,         !- Water Pump Power Modifier Curve Name
     autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.4,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -1772,7 +1772,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     East Zone Supply Fan Outlet Node,  !- Air Inlet Node Name
     East Zone DEC Outlet Node,  !- Air Outlet Node Name
@@ -1792,7 +1792,7 @@
     0.72,                    !- Cooler Drybulb Design Effectiveness
     IECEffDBFlowMod,         !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Recirculating Water Pump Design Power {W}
-    150.0,                   !- Water Pump Power Sizing Factor {W/(m3/s)}
+    150.0,                   !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     IECPumpPowerMod,         !- Water Pump Power Modifier Curve Name
     autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.4,                     !- Secondary Air Flow Scaling Factor {dimensionless}

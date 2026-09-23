@@ -733,7 +733,7 @@ void GetEvapInput(EnergyPlusData &state)
             thisEvapCooler.DryCoilMaxEfficiency = state.dataIPShortCut->rNumericArgs(2);
         }
         thisEvapCooler.IndirectRecircPumpPower = state.dataIPShortCut->rNumericArgs(3);
-        thisEvapCooler.RecircPumpSizingFactor = state.dataIPShortCut->rNumericArgs(4);
+        thisEvapCooler.RecircPumpPowerPerUnitFlowRate = state.dataIPShortCut->rNumericArgs(4);
         thisEvapCooler.IndirectVolFlowRate = state.dataIPShortCut->rNumericArgs(5);
         thisEvapCooler.IndirectVolFlowScalingFactor = state.dataIPShortCut->rNumericArgs(6);
         thisEvapCooler.IndirectFanPower = state.dataIPShortCut->rNumericArgs(7);
@@ -891,7 +891,7 @@ void GetEvapInput(EnergyPlusData &state)
 
         thisEvapCooler.DesVolFlowRate = state.dataIPShortCut->rNumericArgs(2);
         thisEvapCooler.RecircPumpPower = state.dataIPShortCut->rNumericArgs(3);
-        thisEvapCooler.RecircPumpSizingFactor = state.dataIPShortCut->rNumericArgs(4);
+        thisEvapCooler.RecircPumpPowerPerUnitFlowRate = state.dataIPShortCut->rNumericArgs(4);
         if (state.dataIPShortCut->lNumericFieldBlanks(5)) {
             thisEvapCooler.DriftFraction = 0.0;
         } else {
@@ -1657,7 +1657,7 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
         }
         // recirculating water pump sizing: Secondary flow Rate (m3/s) * Pump Sizing Factor (W/(m3/s)
         if (thisEvapCond.IndirectRecircPumpPower == DataSizing::AutoSize) {
-            thisEvapCond.IndirectRecircPumpPower = thisEvapCond.IndirectVolFlowRate * thisEvapCond.RecircPumpSizingFactor;
+            thisEvapCond.IndirectRecircPumpPower = thisEvapCond.IndirectVolFlowRate * thisEvapCond.RecircPumpPowerPerUnitFlowRate;
             BaseSizer::reportSizerOutput(state,
                                          "EvaporativeCooler:Indirect:ResearchSpecial",
                                          thisEvapCond.Name,
@@ -1669,7 +1669,7 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     if (thisEvapCond.evapCoolerType == EvapCoolerType::DirectResearchSpecial) {
         // recirculating water pump sizing: Primary Air Design flow Rate (m3/s) * Pump Sizing Factor (W/(m3/s)
         if (thisEvapCond.RecircPumpPower == DataSizing::AutoSize) {
-            thisEvapCond.RecircPumpPower = thisEvapCond.DesVolFlowRate * thisEvapCond.RecircPumpSizingFactor;
+            thisEvapCond.RecircPumpPower = thisEvapCond.DesVolFlowRate * thisEvapCond.RecircPumpPowerPerUnitFlowRate;
             BaseSizer::reportSizerOutput(
                 state, "EvaporativeCooler:Direct:ResearchSpecial", thisEvapCond.Name, "Recirculating Pump Power [W]", thisEvapCond.RecircPumpPower);
         }

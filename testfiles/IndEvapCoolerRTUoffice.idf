@@ -4135,7 +4135,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4492,7 +4492,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.0,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4849,7 +4849,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.4,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5206,7 +5206,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5563,7 +5563,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.1,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5920,7 +5920,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.9,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6277,7 +6277,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.2,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6634,7 +6634,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.5,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6991,7 +6991,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.9,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -7348,7 +7348,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}

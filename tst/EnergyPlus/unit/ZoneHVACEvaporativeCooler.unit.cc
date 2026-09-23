@@ -308,7 +308,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "    ,                            !- Effectiveness Flow Ratio Modifier Curve Name",
         "    1.0,                         !- Primary Air Design Flow Rate {m3/s}",
         "    55,                          !- Recirculating Water Pump Power Consumption {W}",
-        "    ,                            !- Water Pump Power Sizing Factor {W/(m3/s)}",
+        "    ,                            !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}",
         "    ,                            !- Water Pump Power Modifier Curve Name",
         "    ZoneEvapCool Fan outlet,     !- Air Inlet Node Name",
         "    ZoneEvapCool Inlet Node,     !- Air Outlet Node Name",

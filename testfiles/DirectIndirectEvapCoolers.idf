@@ -4107,7 +4107,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4133,7 +4133,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:1_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:1_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:1_OADirect Evap Cooler-FURNACE_PACU_CAV:1_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -4439,7 +4439,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:2_OAInlet Node,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:2_OADirect Evap Cooler-FURNACE_PACU_CAV:2_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -4748,7 +4748,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4770,7 +4770,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:3_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:3_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:3_OADirect Evap Cooler-FURNACE_PACU_CAV:3_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -5079,7 +5079,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5101,7 +5101,7 @@
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:4_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:4_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:4_OADirect Evap Cooler-FURNACE_PACU_CAV:4_OAMixing BoxNode,  !- Air Outlet Node Name

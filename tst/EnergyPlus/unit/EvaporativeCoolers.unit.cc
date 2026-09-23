@@ -202,7 +202,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeIndEvapCoolerTest)
         "	,					 !- Cooler Drybulb Design Effectiveness",
         "	,					 !- Drybulb Effectiveness Flow Ratio Modifier Curve Name",
         "	30.0,				 !- Recirculating Water Pump Design Power { W }",
-        "	,					 !- Water Pump Power Sizing Factor",
+        "	,					 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	autosize,			 !- Secondary Air Design Flow Rate { m3 / s }",
         "	1.2,				 !- Secondary Air Flow Sizing Factor",
@@ -294,7 +294,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	autosize,			 !- Primary Air Design Flow Rate",
         "	autosize,			 !- Recirculating Water Pump Power Consumption { W }",
-        "	55.0,				 !- Water Pump Power Sizing Factor",
+        "	55.0,				 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
@@ -314,7 +314,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).Comp(1).Name = EvapCond(EvapCoolNum).Name;
     state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow = 0.50;
     PrimaryAirDesignFlow = state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow;
-    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // Test Direct Evaporative Cooler Primary Air Design Flow Rate sizing
     SizeEvapCooler(*state, 1);
@@ -590,7 +590,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
         "	,					 !- Cooler Drybulb Design Effectiveness",
         "	,					 !- Drybulb Effectiveness Flow Ratio Modifier Curve Name",
         "	,   				 !- Recirculating Water Pump Design Power { W }",
-        "	,					 !- Water Pump Power Sizing Factor",
+        "	,					 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	,        			 !- Secondary Air Design Flow Rate { m3 / s }",
         "	1.2,				 !- Secondary Air Flow Sizing Factor",
@@ -640,7 +640,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
     EXPECT_EQ(SecondaryAirDesignFlow, EvapCond(EvapCoolNum).IndirectVolFlowRate);
     // Test Secondary Fan Power and reciculating water pump power
     SecondaryFanPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).FanSizingSpecificPower;
-    RecirculatingWaterPumpPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirculatingWaterPumpPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // SizeEvapCooler(*state,  EvapCoolNum );
     EXPECT_EQ(SecondaryFanPower, EvapCond(EvapCoolNum).IndirectFanPower);
@@ -685,7 +685,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	,          			 !- Primary Air Design Flow Rate",
         "	,               	 !- Recirculating Water Pump Power Consumption { W }",
-        "	55.0,				 !- Water Pump Power Sizing Factor",
+        "	55.0,				 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
@@ -709,7 +709,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).Comp(1).Name = EvapCond(EvapCoolNum).Name;
     state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow = 0.50;
     PrimaryAirDesignFlow = state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow;
-    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // Test Direct Evaporative Cooler Primary Air Design Flow Rate sizing
     SizeEvapCooler(*state, 1);
@@ -845,7 +845,7 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerAutosizeWithoutSysSizingRunDone)
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	,          			 !- Primary Air Design Flow Rate",
         "	440,               	 !- Recirculating Water Pump Power Consumption { W }",
-        "	1.0,     			 !- Water Pump Power Sizing Factor",
+        "	1.0,     			 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
