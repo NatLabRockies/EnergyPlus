@@ -39004,10 +39004,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \required-field
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A12, \field First Evaporative Cooler Object Name
         \required-field
         \type object-list
@@ -39017,10 +39017,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \note second cooler must be immediately downstream of first cooler, if present
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A14, \field Second Evaporative Cooler Name
         \note optional, used for direct/indirect configurations
         \type object-list
@@ -64005,7 +64005,7 @@ EvaporativeCooler:Indirect:WetCoil,
        \type node
        \note Enter the name of an outdoor air node
 
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
        \memo Indirect evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or wetted coil), recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
@@ -64189,7 +64189,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note limits then specify very high maximum drybulb temperature limit value (e.g. 99.0 C).
 
 
-EvaporativeCooler:Direct:ResearchSpecial,
+EvaporativeCooler:Direct:UserEffectiveness,
        \memo Direct evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or similar media), and recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.

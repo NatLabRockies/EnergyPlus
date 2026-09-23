@@ -1457,7 +1457,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
     Real64 ZoneVolCapMultpGenContam = 1.0;
 
     // Get the Zone Air Capacitance Multiplier for use in the Predictor-Corrector Procedure
-    s_ipsc->cCurrentModuleObject = "ZoneCapacitanceMultiplier:ResearchSpecial";
+    s_ipsc->cCurrentModuleObject = "ZoneCapacitanceMultiplier:UserEffectiveness";
     int NumZoneCapaMultiplier = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject); // Number of ZonesCapacityMultiplier object
     if (NumZoneCapaMultiplier == 0) {
         // Assign default multiplier values to all zones
@@ -1470,7 +1470,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
 
     } else {
 
-        // Allow user to specify ZoneCapacitanceMultiplier:ResearchSpecial at zone level
+        // Allow user to specify ZoneCapacitanceMultiplier:UserEffectiveness at zone level
         // Added by S. Lee and R. Zhang in Oct. 2016.
         // Assign the user inputted multipliers to specified zones
         for (int ZoneCapNum = 1; ZoneCapNum <= NumZoneCapaMultiplier; ZoneCapNum++) {

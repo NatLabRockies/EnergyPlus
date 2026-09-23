@@ -16,16 +16,16 @@
 ! HVAC:         Zone Evaporative Coolers, Electric Baseboards
 !
 ! Evap Units:   Zone       Description
-!               LGstore1   Component VS Fan, blow through, zone load VS fan, autosize, 1)Indirect CelDekPad 2)Direct ResearchSpecial
+!               LGstore1   Component VS Fan, blow through, zone load VS fan, autosize, 1)Indirect CelDekPad 2)Direct UserEffectiveness
 !               LGstore2   On/Off Fan,   Blow through, thermostat on/off, hardsize, Direct CelDekPad,
 !               SMstore1   Constant Fan, draw through, zone load on/off,  hardsize, Direct CelDekPad,
 !               SMstore2   Constant Fan, draw through, zone load on/off,  autosize, Direct CelDekPad,
 !               SMStore3   Variable Fan, draw through, zone load VS fan,  autosize, Direct CelDekPad,
-!               SMStore4   Variable Fan, blow through, zone load VS fan,  autosize, Direct ResearchSpecial
-!               SMStore5   Variable Fan, blow through, zone load VS fan,  autosize, Indirect ResearchSpecial
+!               SMStore4   Variable Fan, blow through, zone load VS fan,  autosize, Direct UserEffectiveness
+!               SMStore5   Variable Fan, blow through, zone load VS fan,  autosize, Indirect UserEffectiveness
 !               SMstore6   Constant Fan, draw through, thermostat on/off, hardsize, Indirect WetCoil
 !               SMstore7   Constant Fan, draw through, thermostat on/off, hardsize, 1)Indirect WetCoil 2)Direct CelDekPad
-!               SMstore8   Variable Fan, blow through, zone load VS fan,  autosize, 1)Indirect ResearchSpecial 2)Direct ResearchSpecial
+!               SMstore8   Variable Fan, blow through, zone load VS fan,  autosize, 1)Indirect UserEffectiveness 2)Direct UserEffectiveness
 !
 ! Int. gains:   W/m2 (W/ft2)            lights          elec plug     gas plug
 !               High LPD (2 stores):    23.99 (2.23)    4.3 (0.4)     0
@@ -4155,7 +4155,7 @@
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
     EvaporativeCooler:Indirect:CelDekPad,  !- First Evaporative Cooler Object Type
     LGstore1 Indirect Evaporative Cooler,  !- First Evaporative Cooler Object Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Second Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Second Evaporative Cooler Object Type
     LGstore1 Direct Evaporative Cooler;  !- Second Evaporative Cooler Name
 
   OutdoorAir:Node,
@@ -4358,7 +4358,7 @@
   OutdoorAir:Node,
     LGstore1 Evap Cooler OA node;  !- Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     LGstore1 Direct Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
@@ -4568,7 +4568,7 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Direct:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore4 Evaporative Cooler,  !- First Evaporative Cooler Object Name
     ,                        !- Second Evaporative Cooler Object Type
     ;                        !- Second Evaporative Cooler Name
@@ -4595,7 +4595,7 @@
     SMstore4 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore4 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     SMstore4 Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
@@ -4625,7 +4625,7 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore5 Evaporative Cooler,  !- First Evaporative Cooler Object Name
     ,                        !- Second Evaporative Cooler Object Type
     ;                        !- Second Evaporative Cooler Name
@@ -4652,7 +4652,7 @@
     SMstore5 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore5 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     SMstore5 Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4808,9 +4808,9 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore8 Indirect Evaporative Cooler,  !- First Evaporative Cooler Object Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Second Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Second Evaporative Cooler Object Type
     SMstore8 Direct Evaporative Cooler;  !- Second Evaporative Cooler Name
 
   OutdoorAir:Node,
@@ -4835,7 +4835,7 @@
     SMstore8 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore8 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     SMstore8 Indirect Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4865,7 +4865,7 @@
   OutdoorAir:Node,
     SMstore8 Evap Cooler OA node;  !- Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     SMstore8 Direct Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness

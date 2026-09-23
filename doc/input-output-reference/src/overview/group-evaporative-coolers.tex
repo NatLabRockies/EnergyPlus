@@ -712,7 +712,7 @@ This numeric field defines the secondary air inlet node drybulb temperature limi
 An IDF example is shown below:
 
 \begin{lstlisting}
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
   DataC_IndirectEvapCooler,   !- Name
   ALWAYS_ON,                  !- Availability Schedule Name
   0.75,                       !- Cooler Wetbulb Design Effectiveness
@@ -740,7 +740,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
 
 \subsubsection{Outputs}\label{outputs-4-004}
 
-The output variables that are available for the EvaporativeCooler:Indirect:ResearchSpecial object are shown below:
+The output variables that are available for the EvaporativeCooler:Indirect:UserEffectiveness object are shown below:
 
 \begin{itemize}
 \item
@@ -773,11 +773,11 @@ This output variable provides the operating modes or status of the indirect evap
 
 \paragraph{Evaporative Cooler Part Load Ratio {[]}}\label{evaporative-cooler-part-load-ratio}
 
-This output variable provides the part load fraction of the indirect cooler. The ResearchSpecial cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
+This output variable provides the part load fraction of the indirect cooler. The UserEffectiveness cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
 
 \paragraph{Evaporative Cooler Dewpoint Bound Status {[]}}\label{evaporative-cooler-dewpoint-bound-status}
 
-This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The ResearchSpecial model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
+This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The UserEffectiveness model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
 
 \paragraph{Evaporative Cooler Electricity Rate {[}W{]}}\label{evaporative-cooler-electric-power-w-1}
 

@@ -105,8 +105,8 @@ namespace EvaporativeCoolers {
         DirectCELDEKPAD,
         IndirectCELDEKPAD,
         IndirectWETCOIL,
-        IndirectRDDSpecial,
-        DirectResearchSpecial,
+        IndirectUserEffectiveness,
+        DirectUserEffectiveness,
         Num
     };
 
@@ -341,21 +341,21 @@ namespace EvaporativeCoolers {
 
     void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 PartLoadRatio);
 
-    void CalcResearchSpecialPartLoad(EnergyPlusData &state, int EvapCoolNum);
+    void CalcUserEffectivenessPartLoad(EnergyPlusData &state, int EvapCoolNum);
 
-    void CalcIndirectResearchSpecialEvapCoolerAdvanced(EnergyPlusData &state,
-                                                       int EvapCoolNum,
-                                                       Real64 InletDryBulbTempSec,
-                                                       Real64 InletWetBulbTempSec,
-                                                       Real64 InletDewPointTempSec,
-                                                       Real64 InletHumRatioSec);
+    void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
+                                                         int EvapCoolNum,
+                                                         Real64 InletDryBulbTempSec,
+                                                         Real64 InletWetBulbTempSec,
+                                                         Real64 InletDewPointTempSec,
+                                                         Real64 InletHumRatioSec);
 
-    OperatingMode IndirectResearchSpecialEvapCoolerOperatingMode(EnergyPlusData &state,
-                                                                 int EvapCoolNum,
-                                                                 Real64 InletDryBulbTempSec,
-                                                                 Real64 InletWetBulbTempSec,
-                                                                 Real64 TdbOutSysWetMin,
-                                                                 Real64 TdbOutSysDryMin);
+    OperatingMode IndirectUserEffectivenessEvapCoolerOperatingMode(EnergyPlusData &state,
+                                                                   int EvapCoolNum,
+                                                                   Real64 InletDryBulbTempSec,
+                                                                   Real64 InletWetBulbTempSec,
+                                                                   Real64 TdbOutSysWetMin,
+                                                                   Real64 TdbOutSysDryMin);
 
     void CalcSecondaryAirOutletCondition(EnergyPlusData &state,
                                          int EvapCoolNum,
@@ -381,9 +381,9 @@ namespace EvaporativeCoolers {
                               Real64 FlowRatio          // secondary air flow fraction
     );
 
-    void CalcIndirectResearchSpecialEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
+    void CalcIndirectUserEffectivenessEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
 
-    void CalcDirectResearchSpecialEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
+    void CalcDirectUserEffectivenessEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
 
     void UpdateEvapCooler(EnergyPlusData &state, int EvapCoolNum);
 
