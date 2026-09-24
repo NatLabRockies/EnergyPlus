@@ -3972,7 +3972,7 @@
     OA Sys ZN1,              !- Component 1 Name
     Air Loop Inlet Node ZN1, !- Component 1 Inlet Node Name
     Mixed Air Node ZN1,      !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN1,       !- Component 2 Name
     Mixed Air Node ZN1,      !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN1,  !- Component 2 Outlet Node Name
@@ -4127,7 +4127,7 @@
     Heating Coil Air Outlet Node ZN1,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN1;!- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN1,       !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -4135,7 +4135,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4329,7 +4329,7 @@
     OA Sys ZN3,              !- Component 1 Name
     Air Loop Inlet Node ZN3, !- Component 1 Inlet Node Name
     Mixed Air Node ZN3,      !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN3,       !- Component 2 Name
     Mixed Air Node ZN3,      !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN3,  !- Component 2 Outlet Node Name
@@ -4484,7 +4484,7 @@
     Heating Coil Air Outlet Node ZN3,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN3;!- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN3,       !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -4492,7 +4492,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.0,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4686,7 +4686,7 @@
     OA Sys ZN5,              !- Component 1 Name
     Air Loop Inlet Node ZN5, !- Component 1 Inlet Node Name
     Mixed Air Node ZN5,      !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN5,       !- Component 2 Name
     Mixed Air Node ZN5,      !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN5,  !- Component 2 Outlet Node Name
@@ -4841,7 +4841,7 @@
     Heating Coil Air Outlet Node ZN5,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN5;!- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN5,       !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -4849,7 +4849,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.4,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5043,7 +5043,7 @@
     OA Sys ZN7,              !- Component 1 Name
     Air Loop Inlet Node ZN7, !- Component 1 Inlet Node Name
     Mixed Air Node ZN7,      !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN7,       !- Component 2 Name
     Mixed Air Node ZN7,      !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN7,  !- Component 2 Outlet Node Name
@@ -5198,7 +5198,7 @@
     Heating Coil Air Outlet Node ZN7,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN7;!- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN7,       !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -5206,7 +5206,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5400,7 +5400,7 @@
     OA Sys ZN9,              !- Component 1 Name
     Air Loop Inlet Node ZN9, !- Component 1 Inlet Node Name
     Mixed Air Node ZN9,      !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN9,       !- Component 2 Name
     Mixed Air Node ZN9,      !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN9,  !- Component 2 Outlet Node Name
@@ -5555,7 +5555,7 @@
     Heating Coil Air Outlet Node ZN9,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN9;!- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN9,       !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -5563,7 +5563,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.1,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5757,7 +5757,7 @@
     OA Sys ZN11,             !- Component 1 Name
     Air Loop Inlet Node ZN11,!- Component 1 Inlet Node Name
     Mixed Air Node ZN11,     !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN11,      !- Component 2 Name
     Mixed Air Node ZN11,     !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN11,  !- Component 2 Outlet Node Name
@@ -5912,7 +5912,7 @@
     Heating Coil Air Outlet Node ZN11,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN11;  !- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN11,      !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -5920,7 +5920,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.9,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6114,7 +6114,7 @@
     OA Sys ZN13,             !- Component 1 Name
     Air Loop Inlet Node ZN13,!- Component 1 Inlet Node Name
     Mixed Air Node ZN13,     !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN13,      !- Component 2 Name
     Mixed Air Node ZN13,     !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN13,  !- Component 2 Outlet Node Name
@@ -6269,7 +6269,7 @@
     Heating Coil Air Outlet Node ZN13,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN13;  !- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN13,      !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -6277,7 +6277,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.2,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6471,7 +6471,7 @@
     OA Sys ZN15,             !- Component 1 Name
     Air Loop Inlet Node ZN15,!- Component 1 Inlet Node Name
     Mixed Air Node ZN15,     !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN15,      !- Component 2 Name
     Mixed Air Node ZN15,     !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN15,  !- Component 2 Outlet Node Name
@@ -6626,7 +6626,7 @@
     Heating Coil Air Outlet Node ZN15,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN15;  !- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN15,      !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -6634,7 +6634,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.5,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -6828,7 +6828,7 @@
     OA Sys ZN17,             !- Component 1 Name
     Air Loop Inlet Node ZN17,!- Component 1 Inlet Node Name
     Mixed Air Node ZN17,     !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN17,      !- Component 2 Name
     Mixed Air Node ZN17,     !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN17,  !- Component 2 Outlet Node Name
@@ -6983,7 +6983,7 @@
     Heating Coil Air Outlet Node ZN17,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN17;  !- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN17,      !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -6991,7 +6991,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     0.9,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -7185,7 +7185,7 @@
     OA Sys ZN19,             !- Component 1 Name
     Air Loop Inlet Node ZN19,!- Component 1 Inlet Node Name
     Mixed Air Node ZN19,     !- Component 1 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 2 Object Type
     Indirect Evap ZN19,      !- Component 2 Name
     Mixed Air Node ZN19,     !- Component 2 Inlet Node Name
     Evap Cooler Outlet Node ZN19,  !- Component 2 Outlet Node Name
@@ -7340,7 +7340,7 @@
     Heating Coil Air Outlet Node ZN19,  !- Air Outlet Node Name
     Air Loop Outlet Node ZN19;  !- Temperature Setpoint Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     Indirect Evap ZN19,      !- Name
     On_Except_Winter_Night,  !- Availability Schedule Name
     0.7,                     !- Cooler Wetbulb Design Effectiveness
@@ -7348,7 +7348,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30,                      !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.8,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}

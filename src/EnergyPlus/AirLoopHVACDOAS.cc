@@ -589,8 +589,8 @@ namespace AirLoopHVACDOAS {
                     case MixedAir::ValidEquipListType::EvaporativeCoolerDirectCeldekPad:
                     case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectCeldekPad:
                     case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectWetCoil:
-                    case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectResearchSpecial:
-                    case MixedAir::ValidEquipListType::EvaporativeCoolerDirectResearchSpecial:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectUserEffectiveness:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerDirectUserEffectiveness:
                         break;
 
                     case MixedAir::ValidEquipListType::ZoneHVACTerminalUnitVariableRefrigerantFlow:
