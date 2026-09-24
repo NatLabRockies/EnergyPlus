@@ -2876,6 +2876,10 @@ void CalcSimpleHeatingCoil(EnergyPlusData &state,
 
     if (fanOp == HVAC::FanOp::Cycling) {
         HeatingCoilLoad *= PartLoadRatio;
+        if (CapacitanceWater > 0 &&
+            state.dataPlnt->PlantLoop(waterCoil.WaterPlantLoc.loopNum).LoopSide(DataPlant::LoopSideLocation::Supply).FlowRequest > 0) {
+            TempWaterOut = TempWaterIn - HeatingCoilLoad / CapacitanceWater;
+        }
     }
 
     // Set the outlet conditions
