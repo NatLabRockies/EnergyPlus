@@ -352,6 +352,16 @@ if("Ninja" STREQUAL ${CMAKE_GENERATOR})
   endif()
 endif()
 
+# Embeds the compiler command line into the binary (.GCC.command.line section), so the exact flags used can be recovered later with:
+#   `readelf --string-dump=.GCC.command.line energyplus`
+# ELF-only, so excludes AppleClang (Mach-O). Applied to the energyplus executable target only, see src/EnergyPlus/CMakeLists.txt.
+set(ENERGYPLUS_RECORD_SWITCHES_FLAGS "")
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(ENERGYPLUS_RECORD_SWITCHES_FLAGS -frecord-gcc-switches)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(ENERGYPLUS_RECORD_SWITCHES_FLAGS -frecord-command-line)
+endif()
+
 # Xcode/Ninja generators undefined MAKE
 if(CMAKE_GENERATOR MATCHES "Make")
   set(MAKE "$(MAKE)")

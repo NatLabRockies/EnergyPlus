@@ -898,6 +898,7 @@ else() # windows
   add_executable(energyplus main.cc "${CMAKE_CURRENT_BINARY_DIR}/energyplus.rc")
 endif()
 target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
+target_compile_options(energyplus PRIVATE ${ENERGYPLUS_RECORD_SWITCHES_FLAGS})
 
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})
