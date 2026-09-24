@@ -7767,8 +7767,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
         mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
         EXPECT_EQ(1.005, thisSys.m_DesignFanVolFlowRate);
-        EXPECT_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
-        EXPECT_EQ(1.005, thisSys.m_MaxHeatAirVolFlow);
+        EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
+        EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxHeatAirVolFlow);
         EXPECT_EQ(1.005, thisSys.m_MaxNoCoolHeatAirVolFlow);
         EXPECT_NEAR(16192.5, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad, 1.0);
     }
@@ -7786,10 +7786,10 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
     mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
     EXPECT_EQ(1.005, thisSys.m_DesignFanVolFlowRate);
-    EXPECT_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
+    EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
     EXPECT_EQ(0.0, thisSys.m_MaxHeatAirVolFlow);
     EXPECT_EQ(1.005, thisSys.m_MaxNoCoolHeatAirVolFlow);
-    EXPECT_EQ(16192.574019749998, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad);
+    EXPECT_DOUBLE_EQ(16192.574019749998, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad);
 
     // continue with unit testing of heating only system
     thisSys.m_CoolCoilExists = false;
