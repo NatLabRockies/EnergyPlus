@@ -596,6 +596,8 @@ set(SRC
     SolarReflectionManager.hh
     SolarShading.cc
     SolarShading.hh
+    SpawnHelpers.cc
+    SpawnHelpers.hh
     SplitterComponent.cc
     SplitterComponent.hh
     StandardRatings.cc
