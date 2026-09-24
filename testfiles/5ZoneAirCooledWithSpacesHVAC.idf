@@ -2754,7 +2754,12 @@
     Zone 5 Exhaust Fan Outlet,  !- Air Outlet Node Name
     General,                 !- End-Use Subcategory
     ,                        !- Flow Fraction Schedule Name
-    Coupled;                 !- System Availability Manager Coupling Mode
+    Coupled,                 !- System Availability Manager Coupling Mode
+    ,                        !- Minimum Zone Temperature Limit Schedule Name
+    ,                        !- Balanced Exhaust Fraction Schedule Name
+    Zone,                    !- Fan Heat Rejection Location
+    0.7,                     !- Motor in Airstream Fraction
+    PLENUM-1;                !- Fan Heat Rejection Zone or Space Name
 
   ZoneHVAC:AirDistributionUnit,
     Zone 1 ATU,              !- Name
