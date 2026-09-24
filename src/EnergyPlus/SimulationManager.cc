@@ -290,6 +290,13 @@ namespace SimulationManager {
         // OutputReportPredefined::SetPredefinedTables(state); // this is being called via init_constant_state now
         SetPreConstructionInputParameters(state); // establish array bounds for constructions early
 
+        if (state.dataGlobal->SimTSSizingTS) {
+            state.dataGlobal->TimeStepsInHour = state.dataGlobal->SizingTimeStepsInHour;
+            state.dataGlobal->TimeStepZone = 1.0 / double(state.dataGlobal->TimeStepsInHour);
+            state.dataGlobal->MinutesInTimeStep = state.dataGlobal->TimeStepZone * 60;
+            state.dataGlobal->TimeStepZoneSec = state.dataGlobal->TimeStepZone * Constant::rSecsInHour;
+        }
+
         OutputProcessor::SetupTimePointers(
             state, OutputProcessor::TimeStepType::Zone, state.dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
         OutputProcessor::SetupTimePointers(state, OutputProcessor::TimeStepType::System, state.dataHVACGlobal->TimeStepSys);
@@ -440,6 +447,13 @@ namespace SimulationManager {
         if (!state.dataGlobal->DoPureLoadCalc) {
             ShowMessage(state, "Beginning Simulation");
             DisplayString(state, "Beginning Primary Simulation");
+            if (state.dataGlobal->SimTSSizingTS) {
+                state.dataGlobal->updateTSArrays = true;
+                state.dataGlobal->TimeStepsInHour = state.dataGlobal->SimTimeStepsInHour;
+                state.dataGlobal->TimeStepZone = 1.0 / double(state.dataGlobal->TimeStepsInHour);
+                state.dataGlobal->MinutesInTimeStep = state.dataGlobal->TimeStepZone * 60;
+                state.dataGlobal->TimeStepZoneSec = state.dataGlobal->TimeStepZone * Constant::rSecsInHour;
+            }
         }
         Weather::ResetEnvironmentCounter(state);
 
@@ -947,6 +961,25 @@ namespace SimulationManager {
         } else {
             ShowSevereError(state, std::format("Too many {} Objects found.", CurrentModuleObject));
             ErrorsFound = true;
+        }
+        state.dataGlobal->SimTimeStepsInHour = state.dataGlobal->TimeStepsInHour;
+        if (Num > 0) {
+            if (state.dataIPShortCut->lNumericFieldBlanks(2)) {
+                state.dataGlobal->SizingTimeStepsInHour = state.dataGlobal->TimeStepsInHour;
+            } else {
+                state.dataGlobal->SizingTimeStepsInHour = Number(2);
+                if (state.dataGlobal->SimTimeStepsInHour != state.dataGlobal->SizingTimeStepsInHour) {
+                    state.dataGlobal->SimTSSizingTS = true;
+                }
+            }
+            // test for existing example files, and probably unit tests, to see if there are other TS arrays that need to be updated
+            if (state.dataGlobal->TimeStepsInHour == 1) {
+                state.dataGlobal->SizingTimeStepsInHour = 4;
+            } else {
+                state.dataGlobal->SizingTimeStepsInHour = 1;
+            }
+            state.dataGlobal->SimTSSizingTS = true;
+            // end test for existing example files, and probably unit tests, to see if there are other TS arrays that need to be updated
         }
 
         state.dataGlobal->TimeStepZone = 1.0 / double(state.dataGlobal->TimeStepsInHour);

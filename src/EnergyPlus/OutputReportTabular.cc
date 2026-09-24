@@ -15278,6 +15278,32 @@ void WriteLoadComponentSummaryTables(EnergyPlusData &state)
     Array1D<CompLoadTablesType> FacilityZonesHeatCompLoadTables; // zone results used for facility report - never directly output
     Array1D<CompLoadTablesType> FacilityZonesCoolCompLoadTables;
 
+    if (ort->updateTSArraysFlag && state.dataGlobal->updateTSArrays) {
+        int const tsInDay = state.dataGlobal->TimeStepsInHour * Constant::rHoursInDay;
+        for (auto &day : ort->surfCompLoads) {
+            day.ts.resize(tsInDay);
+            for (auto &ts : day.ts) {
+                ts.surf.resize(state.dataSurface->TotSurfaces);
+            }
+        }
+        for (auto &day : ort->enclCompLoads) {
+            day.ts.resize(tsInDay);
+            for (auto &ts : day.ts) {
+                ts.encl.resize(state.dataViewFactor->NumOfRadiantEnclosures);
+            }
+        }
+        for (auto &day : ort->znCompLoads) {
+            day.ts.resize(tsInDay);
+            for (auto &ts : day.ts) {
+                ts.spacezone.resize(state.dataGlobal->NumOfZones);
+            }
+        }
+        ort->decayCurveCool.allocate(state.dataGlobal->TimeStepsInHour * Constant::rHoursInDay, state.dataSurface->TotSurfaces);
+        ort->decayCurveCool = 0.0;
+        ort->decayCurveHeat.allocate(state.dataGlobal->TimeStepsInHour * Constant::rHoursInDay, state.dataSurface->TotSurfaces);
+        ort->decayCurveHeat = 0.0;
+    }
+
     // Jan 2021: The following variable is redundant in the original code, deleting the line
     // CompLoadTablesType curCompLoadTable; // active component load table
 
