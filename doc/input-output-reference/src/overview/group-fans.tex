@@ -808,7 +808,7 @@ The pressure rise in Pascals at full flow and standard (sea level) conditions (2
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-4}
 
-The design volumetric flow rate of the fan (m\(^{3}\)/sec) at standard conditions. This input is not currently used by the night ventilation manager. The flow rate during night ventilation is specified using the \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} ``Night Venting Flow Fraction'' field. This fraction is multiplied by the fan object's design flow rate.
+The maximum standard-density volumetric air flow rate of the fan (m\(^{3}\)/sec) when operating in night ventilation mode. If this field is left blank or autosized, it is set to the fan object's maximum flow rate. During night ventilation, the \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} ``Night Venting Flow Fraction'' requests a fraction of the fan object's design flow rate. This field is then used by the fan model as an upper limit on the resulting night ventilation fan flow rate.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-3}
 
