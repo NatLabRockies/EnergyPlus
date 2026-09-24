@@ -4001,7 +4001,19 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                     zoneEquipList.EquipIndex(EquipPtr) = Fans::GetFanIndex(state, zoneEquipList.EquipName(EquipPtr));
                 }
 
+                bool nightVentOn = false;
+                for (int inletNodeNum = 1; inletNodeNum <= zoneEquipConfig.NumInletNodes; ++inletNodeNum) {
+                    int const airLoopNum = zoneEquipConfig.InletNodeAirLoopNum(inletNodeNum);
+                    if (airLoopNum > 0 && state.dataAirLoop->AirLoopControlInfo(airLoopNum).NightVent) {
+                        nightVentOn = true;
+                        break;
+                    }
+                }
+                // NightVentOn is global, so restore it after applying the zone-specific value to this fan.
+                bool const savedNightVentOn = state.dataHVACGlobal->NightVentOn;
+                state.dataHVACGlobal->NightVentOn = nightVentOn;
                 state.dataFans->fans(zoneEquipList.EquipIndex(EquipPtr))->simulate(state, FirstHVACIteration);
+                state.dataHVACGlobal->NightVentOn = savedNightVentOn;
 
             } break;
 

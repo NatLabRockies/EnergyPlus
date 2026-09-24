@@ -2120,7 +2120,8 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
     // For a Constant Volume Simple Fan the Max Flow Rate is the Flow Rate for the fan
     Real64 _Tin = inletAirTemp;
     Real64 _rhoAir = rhoAirStdInit;
-    Real64 _massFlow = min(inletAirMassFlowRate, _maxAirMassFlowRate);
+    inletAirMassFlowRate = min(inletAirMassFlowRate, _maxAirMassFlowRate);
+    Real64 _massFlow = inletAirMassFlowRate;
 
     if (EMSPressureOverrideOn) {
         _deltaPress = EMSPressureValue;
