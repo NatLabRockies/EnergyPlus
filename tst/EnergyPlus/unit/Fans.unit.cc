@@ -183,9 +183,9 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
 
     fan1->simulateConstant(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
+    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
 }
 
 TEST_F(EnergyPlusFixture, Fans_OnOff_EMSPressureRiseResetTest)
@@ -274,9 +274,9 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
 
     fan1->simulateOnOff(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
+    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
 }
 
 TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
@@ -316,9 +316,9 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
 
     fan1->simulateZoneExhaust(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
+    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
 }
 
 TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
