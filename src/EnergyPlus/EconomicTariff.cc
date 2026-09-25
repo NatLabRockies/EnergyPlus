@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <format>
 
@@ -2728,7 +2729,7 @@ void ComputeTariff(EnergyPlusData &state)
                     a = 0.0;
                     for (int kStack = 1, kStack_end = s_econ->topOfStack; kStack <= kStack_end; ++kStack) { // popStack modifies topOfStack
                         popStack(state, b, bPt);
-                        a += b;
+                        std::transform(a.begin(), a.end(), b.begin(), a.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
                     }
                     pushStack(state, a, noVar);
                 } break;
@@ -2736,13 +2737,15 @@ void ComputeTariff(EnergyPlusData &state)
                 case Op::MULTIPLY: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, a * b, noVar);
+                    std::transform(a.begin(), a.end(), b.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::SUBTRACT: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, b - a, noVar);
+                    std::transform(b.begin(), b.end(), a.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs - rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::DIVIDE: {
@@ -3028,7 +3031,8 @@ void ComputeTariff(EnergyPlusData &state)
                 case Op::ADD: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, a + b, noVar);
+                    std::transform(a.begin(), a.end(), b.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::NOOP: {
@@ -3218,7 +3222,8 @@ void evaluateChargeSimple(EnergyPlusData &state, int const usingVariable)
     }
 
     // finally perform calculations
-    resultChg = sourceVals * costPer * seasonMask;
+    std::transform(sourceVals.begin(), sourceVals.end(), costPer.begin(), resultChg.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
+    std::transform(resultChg.begin(), resultChg.end(), seasonMask.begin(), resultChg.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
     // store the cost in the name of the variable
     s_econ->econVar(usingVariable).values = resultChg;
     // set the flag that it has been evaluated so it won't be evaluated multiple times
@@ -3612,9 +3617,12 @@ void addMonthlyCharge(EnergyPlusData &state, int const usingVariable)
         ShowContinueError(state, std::format("       And: {}", s_econ->tariff(tariff.cats[(int)Cat::ServiceCharges]).tariffName));
     }
     if (tariff.monthChgPt != 0) {
-        s_econ->econVar(usingVariable).values += s_econ->econVar(tariff.monthChgPt).values;
+        auto &values = s_econ->econVar(usingVariable).values;
+        auto const &monthChgValues = s_econ->econVar(tariff.monthChgPt).values;
+        std::transform(values.begin(), values.end(), monthChgValues.begin(), values.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
     } else {
-        s_econ->econVar(usingVariable).values += tariff.monthChgVal;
+        auto &values = s_econ->econVar(usingVariable).values;
+        std::transform(values.begin(), values.end(), values.begin(), [&tariff](Real64 v) { return v + tariff.monthChgVal; });
     }
     // zero out months with no energy consumption
     // curTotalEnergy = tariff.nativeTotalEnergy

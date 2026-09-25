@@ -10990,7 +10990,9 @@ void WriteCompCostTable(EnergyPlusData &state)
         }
         tableBody(2, 10) = RealToStr(currentStyle.formatReals, TableBodyData(2, 10), 2);
 
-        TableBodyData(3, {1, 10}) = TableBodyData(2, {1, 10}) - TableBodyData(1, {1, 10});
+        for (int col = 1; col <= 10; ++col) {
+            TableBodyData(3, col) = TableBodyData(2, col) - TableBodyData(1, col);
+        }
         tableBody(3, 1) = RealToStr(currentStyle.formatReals, TableBodyData(3, 1), 2);
         tableBody(3, 2) = RealToStr(currentStyle.formatReals, TableBodyData(3, 2), 2);
         tableBody(3, 3) = RealToStr(currentStyle.formatReals, TableBodyData(3, 3), 2);

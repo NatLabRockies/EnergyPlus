@@ -2454,12 +2454,15 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
 
                         if (thisIndex <= state.dataRuntimeLang->TrendVariable(thisTrend).LogDepth) {
                             // closed form solution for slope of linear least squares fit
-                            thisSlope = (sum(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex})) *
-                                             sum(state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})) -
-                                         thisIndex * sum((state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}) *
-                                                          state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})))) /
-                                        (pow_2(sum(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}))) -
-                                         thisIndex * sum(pow(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}), 2)));
+                            auto &thisTrendVar = state.dataRuntimeLang->TrendVariable(thisTrend);
+                            Real64 dotTimeTrendVal = 0.0;
+                            for (int i = 1; i <= thisIndex; ++i) {
+                                dotTimeTrendVal += thisTrendVar.TimeARR(i) * thisTrendVar.TrendValARR(i);
+                            }
+                            thisSlope =
+                                (sum(thisTrendVar.TimeARR({1, thisIndex})) * sum(thisTrendVar.TrendValARR({1, thisIndex})) -
+                                 thisIndex * dotTimeTrendVal) /
+                                (pow_2(sum(thisTrendVar.TimeARR({1, thisIndex}))) - thisIndex * sum(pow(thisTrendVar.TimeARR({1, thisIndex}), 2)));
                             ReturnValue = SetErlValueNumber(thisSlope, Operand(1)); // rate of change per hour
                         } else {
                             ReturnValue.Type = Value::Error;

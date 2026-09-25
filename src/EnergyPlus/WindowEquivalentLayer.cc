@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -576,27 +577,12 @@ void CalcEQLWindowSHGCAndTransNormal(EnergyPlusData &state,
     TransNormal = Abs1(1, NL + 1);
 
     // Calculate SHGC using net radiation method (ASHWAT Model)
-    bool CFSSHGC = ASHWAT_ThermalRatings(state,
-                                         FS,
-                                         TIN,
-                                         TOUT,
-                                         HCIN,
-                                         HCOUT,
-                                         TRMOUT,
-                                         TRMIN,
-                                         BeamSolarInc,
-                                         BeamSolarInc * Abs1(1, {1, NL + 1}),
-                                         TOL,
-                                         QOCF,
-                                         QOCFRoom,
-                                         T,
-                                         Q,
-                                         JF,
-                                         JB,
-                                         H,
-                                         UCG,
-                                         SHGC,
-                                         true);
+    Array1D<Real64> sourceAbs1(NL + 1);
+    for (int i = 1; i <= NL + 1; ++i) {
+        sourceAbs1(i) = BeamSolarInc * Abs1(1, i);
+    }
+    bool CFSSHGC = ASHWAT_ThermalRatings(
+        state, FS, TIN, TOUT, HCIN, HCOUT, TRMOUT, TRMIN, BeamSolarInc, sourceAbs1, TOL, QOCF, QOCFRoom, T, Q, JF, JB, H, UCG, SHGC, true);
 
     if (!CFSSHGC) {
         ShowWarningMessage(state, std::format("{}Solar heat gain coefficient calculation failed for {}", RoutineName, FS.Name));
@@ -4501,7 +4487,7 @@ void ASHWAT_ThermalCalc(EnergyPlusData &state,
             } //  end scan through gaps
 
             // total OCF gain to each layer
-            QOCF = QOCF_F + QOCF_B;
+            std::transform(QOCF_F.begin(), QOCF_F.end(), QOCF_B.begin(), QOCF.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
 
         } //  end IF (NL .GE. 2)
 
@@ -4986,7 +4972,7 @@ bool ASHWAT_ThermalRatings(EnergyPlusData &state,
             } //  end scan through gaps
 
             // total OCF gain to each layer
-            QOCF = QOCF_F + QOCF_B;
+            std::transform(QOCF_F.begin(), QOCF_F.end(), QOCF_B.begin(), QOCF.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
 
         } //  end IF (NL .GE. 2)
 
