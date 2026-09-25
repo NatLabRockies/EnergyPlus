@@ -122,6 +122,8 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       project_options INTERFACE $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-UNDEBUG>
     )
   endif()
+  # Keep frame pointers around in RelWithDebInfo so profilers (perf, gprof, ...) can unwind the stack reliably
+  target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-fno-omit-frame-pointer>)
   if(CMAKE_COMPILER_IS_GNUCXX) # g++
     # Suppress unused-but-set warnings until more serious ones are addressed
     target_compile_options(project_warnings INTERFACE -Wno-unused-but-set-parameter -Wno-unused-but-set-variable)
