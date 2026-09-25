@@ -464,31 +464,6 @@ TEST( Array1Test, ConstArgConstruct )
 	EXPECT_TRUE( eq( Array1D_int( 10, 22 ), a ) );
 }
 
-TEST( Array1Test, Operators )
-{
-	Array1D_int A( 3, 33 );
-	Array1A_int B( A );
-	Array1D_int const C( A );
-	A += B;
-	EXPECT_TRUE( eq( Array1D_int( 3, 66 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 66 ), B ) );
-	A += 1;
-	EXPECT_TRUE( eq( Array1D_int( 3, 67 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 67 ), B ) );
-	A -= 1;
-	EXPECT_TRUE( eq( Array1D_int( 3, 66 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 66 ), B ) );
-	A -= C;
-	EXPECT_TRUE( eq( Array1D_int( 3, 33 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 33 ), B ) );
-	A /= 3;
-	EXPECT_TRUE( eq( Array1D_int( 3, 11 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 11 ), B ) );
-	A *= 3;
-	EXPECT_TRUE( eq( Array1D_int( 3, 33 ), A ) );
-	EXPECT_TRUE( eq( Array1D_int( 3, 33 ), B ) );
-}
-
 TEST( Array1Test, Index )
 {
 	Array1D_int A( 3, 6 );

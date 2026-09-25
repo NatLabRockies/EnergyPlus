@@ -218,63 +218,6 @@ public: // Assignment: Array
 	}
 
 
-	// += Array Template
-	template< template< typename > class A, typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2S &
-	operator +=( A< U > const & a )
-	{
-		assert( conformable( a ) );
-		for ( int i1 = 1, j1 = a.l1(); i1 <= u1_; ++i1, ++j1 ) {
-			for ( int i2 = 1, j2 = a.l2(); i2 <= u2_; ++i2, ++j2 ) {
-				operator ()( i1, i2 ) += a( j1, j2 );
-			}
-		}
-		return *this;
-	}
-
-	// -= Array Template
-	template< template< typename > class A, typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2S &
-	operator -=( A< U > const & a )
-	{
-		assert( conformable( a ) );
-		for ( int i1 = 1, j1 = a.l1(); i1 <= u1_; ++i1, ++j1 ) {
-			for ( int i2 = 1, j2 = a.l2(); i2 <= u2_; ++i2, ++j2 ) {
-				operator ()( i1, i2 ) -= a( j1, j2 );
-			}
-		}
-		return *this;
-	}
-
-	// *= Array Template
-	template< template< typename > class A, typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2S &
-	operator *=( A< U > const & a )
-	{
-		assert( conformable( a ) );
-		for ( int i1 = 1, j1 = a.l1(); i1 <= u1_; ++i1, ++j1 ) {
-			for ( int i2 = 1, j2 = a.l2(); i2 <= u2_; ++i2, ++j2 ) {
-				operator ()( i1, i2 ) *= a( j1, j2 );
-			}
-		}
-		return *this;
-	}
-
-	// /= Array Template
-	template< template< typename > class A, typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2S &
-	operator /=( A< U > const & a )
-	{
-		assert( conformable( a ) );
-		for ( int i1 = 1, j1 = a.l1(); i1 <= u1_; ++i1, ++j1 ) {
-			for ( int i2 = 1, j2 = a.l2(); i2 <= u2_; ++i2, ++j2 ) {
-				assert( a( j1, j2 ) != T( 0 ) );
-				operator ()( i1, i2 ) /= a( j1, j2 );
-			}
-		}
-		return *this;
-	}
-
 public: // Assignment: Value
 
 	// = Value
@@ -284,71 +227,6 @@ public: // Assignment: Value
 		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
 			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
 				operator ()( i1, i2 ) = t;
-			}
-		}
-		return *this;
-	}
-
-	// += Value
-	Array2S &
-	operator +=( T const & t )
-	{
-		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
-			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
-				operator ()( i1, i2 ) += t;
-			}
-		}
-		return *this;
-	}
-
-	// -= Value
-	Array2S &
-	operator -=( T const & t )
-	{
-		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
-			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
-				operator ()( i1, i2 ) -= t;
-			}
-		}
-		return *this;
-	}
-
-	// *= Value
-	Array2S &
-	operator *=( T const & t )
-	{
-		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
-			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
-				operator ()( i1, i2 ) *= t;
-			}
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type >
-	Array2S &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		U const inv_u( U( 1 ) / u );
-		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
-			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
-				operator ()( i1, i2 ) *= inv_u;
-			}
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< ! std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type, typename = void >
-	Array2S &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		for ( int i1 = 1; i1 <= u1_; ++i1 ) {
-			for ( int i2 = 1; i2 <= u2_; ++i2 ) {
-				operator ()( i1, i2 ) /= u;
 			}
 		}
 		return *this;

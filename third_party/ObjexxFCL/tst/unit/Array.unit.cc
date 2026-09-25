@@ -173,18 +173,6 @@ TEST( ArrayTest, Assignment2DOverlapProxyVarying )
 	EXPECT_EQ( 3, A( 2, 2 ) );
 }
 
-TEST( ArrayTest, Operators2D )
-{
-	Array2D_int A( 3, 3, 33 );
-	Array2A_int B( A );
-	A += B;
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 66 ), A ) );
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 66 ), B ) );
-	A += 1;
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 67 ), A ) );
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 67 ), B ) );
-}
-
 TEST( ArrayTest, Swap3D )
 {
 	Array3D_int A( 4, 4, 4, 44 );

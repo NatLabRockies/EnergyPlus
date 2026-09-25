@@ -389,78 +389,6 @@ public: // Assignment: Array
 		return *this;
 	}
 
-	// += Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator +=( Array2< U > const & a )
-	{
-		Super::operator +=( a );
-		return *this;
-	}
-
-	// -= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator -=( Array2< U > const & a )
-	{
-		Super::operator -=( a );
-		return *this;
-	}
-
-	// *= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator *=( Array2< U > const & a )
-	{
-		Super::operator *=( a );
-		return *this;
-	}
-
-	// /= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator /=( Array2< U > const & a )
-	{
-		Super::operator /=( a );
-		return *this;
-	}
-
-	// += Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator +=( Array2S< U > const & a )
-	{
-		Super::operator +=( a );
-		return *this;
-	}
-
-	// -= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator -=( Array2S< U > const & a )
-	{
-		Super::operator -=( a );
-		return *this;
-	}
-
-	// *= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator *=( Array2S< U > const & a )
-	{
-		Super::operator *=( a );
-		return *this;
-	}
-
-	// /= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array2D &
-	operator /=( Array2S< U > const & a )
-	{
-		Super::operator /=( a );
-		return *this;
-	}
-
 public: // Assignment: Value
 
 	// = Value
@@ -468,38 +396,6 @@ public: // Assignment: Value
 	operator =( T const & t )
 	{
 		Base::operator =( t );
-		return *this;
-	}
-
-	// += Value
-	Array2D &
-	operator +=( T const & t )
-	{
-		Base::operator +=( t );
-		return *this;
-	}
-
-	// -= Value
-	Array2D &
-	operator -=( T const & t )
-	{
-		Base::operator -=( t );
-		return *this;
-	}
-
-	// *= Value
-	Array2D &
-	operator *=( T const & t )
-	{
-		Base::operator *=( t );
-		return *this;
-	}
-
-	// /= Value
-	Array2D &
-	operator /=( T const & t )
-	{
-		Base::operator /=( t );
 		return *this;
 	}
 

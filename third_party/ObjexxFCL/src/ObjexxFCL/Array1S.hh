@@ -163,54 +163,6 @@ public: // Assignment: Array
 		return *this;
 	}
 
-	// += Array Template
-	template< template< typename > class A >
-	Array1S &
-	operator +=( A< T > const & a )
-	{
-		assert( conformable( a ) );
-		if ( overlap( a ) ) { // Overlap-safe
-			CArray< T > c( size_ );
-			for ( int i = 1, j = a.l(); i <= u_; ++i, ++j ) {
-				c( i ) = a( j );
-			}
-			for ( int i = 1; i <= u_; ++i ) {
-				operator ()( i ) += c( i );
-			}
-		} else { // Not overlap-safe
-			for ( int i = 1, j = a.l(); i <= u_; ++i, ++j ) {
-				operator ()( i ) += a( j );
-			}
-		}
-		return *this;
-	}
-
-	// *= std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1S &
-	operator *=( std::array< U, s > const & a )
-	{
-		assert( size_ == s );
-		auto r( a.begin() );
-		for ( int i = 1; i <= u_; ++i, ++r ) {
-			operator ()( i ) *= *r;
-		}
-		return *this;
-	}
-
-	// += std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1S &
-	operator +=( std::array< U, s > const & a )
-	{
-		assert( size_ == s );
-		auto r( a.begin() );
-		for ( int i = 1; i <= u_; ++i, ++r ) {
-			operator ()( i ) += *r;
-		}
-		return *this;
-	}
-
 public: // Assignment: Value
 
 	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
@@ -246,40 +198,6 @@ public: // Assignment: Value
 		return *this;
 	}
 
-       	// *= Value
-	Array1S &
-	operator *=( T const & t )
-	{
-		for ( int i = 1; i <= u_; ++i ) {
-			operator ()( i ) *= t;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type >
-	Array1S &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		U const inv_u( U( 1 ) / u );
-		for ( int i = 1; i <= u_; ++i ) {
-			operator ()( i ) *= inv_u;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< ! std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type, typename = void >
-	Array1S &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		for ( int i = 1; i <= u_; ++i ) {
-			operator ()( i ) /= u;
-		}
-		return *this;
-	}
 public: // Subscript
 
 	// array( i ) const
