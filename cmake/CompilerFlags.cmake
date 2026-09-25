@@ -1,9 +1,5 @@
 option(ENABLE_NATIVE_OPTIMIZATION "Enable native architecture optimizations (e.g. -march=native). Produces non-portable binaries." OFF)
 mark_as_advanced(ENABLE_NATIVE_OPTIMIZATION)
-# MSVC has no compiler-time CPU auto-detection equivalent to -march=native; the user must pick the level.
-set(MSVC_NATIVE_ARCH "AVX2" CACHE STRING "MSVC /arch: level used when ENABLE_NATIVE_OPTIMIZATION=ON (SSE2, SSE4.2, AVX, AVX2, AVX512, AVX10.1, AVX10.2)")
-set_property(CACHE MSVC_NATIVE_ARCH PROPERTY STRINGS "SSE2" "SSE4.2" "AVX" "AVX2" "AVX512" "AVX10.1" "AVX10.2")
-mark_as_advanced(MSVC_NATIVE_ARCH)
 
 # Compiler-agnostic compiler flags first
 target_compile_definitions(project_options INTERFACE -DOBJEXXFCL_ALIGN=64) # Align ObjexxFCL arrays to 64B
@@ -66,6 +62,11 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   #    ADD_CXX_DEFINITIONS("-d2SSAOptimizer-") # this disables this optimizer which has known major issues
 
   if(ENABLE_NATIVE_OPTIMIZATION)
+    # MSVC has no compiler-time CPU auto-detection equivalent to -march=native; the user must pick the level.
+    set(MSVC_NATIVE_ARCH "AVX2" CACHE STRING "MSVC /arch: level used when ENABLE_NATIVE_OPTIMIZATION=ON (SSE2, SSE4.2, AVX, AVX2, AVX512, AVX10.1, AVX10.2)")
+    set_property(CACHE MSVC_NATIVE_ARCH PROPERTY STRINGS "SSE2" "SSE4.2" "AVX" "AVX2" "AVX512" "AVX10.1" "AVX10.2")
+    mark_as_advanced(MSVC_NATIVE_ARCH)
+
     message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling /arch:${MSVC_NATIVE_ARCH}")
     target_compile_options(project_options INTERFACE /arch:${MSVC_NATIVE_ARCH})
   endif()
