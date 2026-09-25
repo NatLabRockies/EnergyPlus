@@ -111,6 +111,18 @@ repos:
     files: "^testfiles/.*"
     pass_filenames: false
 
+  - id: find-unused-global-struct-members
+    name: find unused global struct members
+    entry: python scripts/dev/find_unused_global_struct_members.py
+    args: ['--verbose']
+    language: python
+    # Only .hh matters: the script filters args to header files.
+    # Note: If you touch a .cc file and remove the last usage of a member, it won't be caught here by regular pre-commit,
+    # but the push to develop runs with --all-files and will catch it, which is good enough
+    files: '^(src|tst)/EnergyPlus/.*\.(hh|h|hpp)$'
+    pass_filenames: true
+    require_serial: true
+
   - id: find-byref-bool-override
     name: find byref bool override
     entry: python scripts/dev/find_byref_bool_override.py
