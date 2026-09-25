@@ -542,8 +542,7 @@ namespace Material {
         Real64 SlatWidth = 0.0;                                                                                   // Slat width (m)
         Real64 SlatSeparation = 0.0;                                                                              // Slat separation (m)
         Real64 SlatThickness = 0.0;                                                                               // Slat thickness (m)
-        Real64 SlatCrown = 0.0;        // the height of the slate (length from the chord to the curve)
-        Real64 SlatAngle = 0.0;        // Slat angle (deg)
+        Real64 SlatAngle = 0.0;                                                                                   // Slat angle (deg)
         Real64 MinSlatAngle = 0.0;     // Minimum slat angle for variable-angle slats (deg) (user input)
         Real64 MaxSlatAngle = 0.0;     // Maximum slat angle for variable-angle slats (deg) (user input)
         Real64 SlatConductivity = 0.0; // Slat conductivity (W/m-K)
@@ -652,13 +651,10 @@ namespace Material {
     {
         struct
         {
-            Real64 Tra = 0.0;
         } Bm;
         struct
         {
-            Real64 Tra = 0.0;
         } Df;
-        Real64 Abs = 0.0;
         Real64 Ref = 0.0;
     };
 
@@ -859,20 +855,13 @@ namespace Material {
         // Window-related radiation parameters
         Real64 GlassTransDirtFactor = 1.0; // Multiplier on glass transmittance due to dirt
         bool SolarDiffusing = false;       // True if glass diffuses beam solar radiation
-        Real64 ReflectSolDiffBack = 0.0;   // Solar back diffuse reflectance
-        Real64 ReflectSolDiffFront = 0.0;  // Solar front diffuse reflectance
         Real64 ReflectVisBeamBack = 0.0;   // Visible back reflectance (beam to everything)
         Real64 ReflectVisBeamFront = 0.0;  // Visible front reflectance (beam to everything)
-        Real64 ReflectVisDiffBack = 0.0;   // Visible back diffuse reflectance
-        Real64 ReflectVisDiffFront = 0.0;  // Visible front diffuse reflectance
-        Real64 TransSolBeam = 0.0;         // Solar transmittance (beam to everything)
-        Real64 TransVisBeam = 0.0;         // Visible transmittance (beam to everything)
         // Complex fenestration parameters
         Real64 YoungModulus = 0.0;  // Young's modulus (Pa) - used in window deflection calculations
         Real64 PoissonsRatio = 0.0; // Poisson's ratio - used in window deflection calculations
 
         // Added 12/22/2008 for thermochromic window glazing material
-        Real64 SpecTemp = 0.0;                          // Temperature corresponding to the specified material properties
         int TCParentMatNum = 0;                         // Reference to the parent object WindowMaterial:Glazing:Thermochromic
         int GlassSpectralDataPtr = 0;                   // Number of a spectral data set associated with a window glass material
         Curve::Curve *GlassSpecAngTransCurve = nullptr; // Transmittance as a function of spectral and angle associated with a glass material

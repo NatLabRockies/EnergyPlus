@@ -95,7 +95,6 @@ namespace RuntimeLanguageProcessor {
         int Variable;       // points to a variable in ErlVariable structure
         Token Parenthesis;  // identifies if token is left or right parenthesis
         int Expression;     // points to an expression in ErlExpression structure
-        std::string Error;  // holds token processing error message content
 
         // Default Constructor
         TokenType() : Type(Token::Invalid), Number(0.0), Operator(ErlFunc::Invalid), Variable(0), Parenthesis(Token::Invalid), Expression(0)

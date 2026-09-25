@@ -65,48 +65,6 @@ struct EnergyPlusData;
 
 namespace SystemReports {
 
-    struct Energy
-    {
-        // Members
-        Real64 TotDemand;
-        Real64 Elec;
-        Real64 Gas;
-        Real64 Purch;
-        Real64 Other;
-
-        // Default Constructor
-        Energy() : TotDemand(0.0), Elec(0.0), Gas(0.0), Purch(0.0), Other(0.0)
-        {
-        }
-    };
-
-    struct CoilType
-    {
-        // Members
-        Energy DecreasedCC; // LoadMetByVent
-        Energy DecreasedHC; // LoadMetByVent
-        Energy IncreasedCC; // LoadIncreasedVent
-        Energy IncreasedHC; // LoadAddedByVent
-        Energy ReducedByCC; // LoadAddedByVent
-        Energy ReducedByHC; // LoadAddedByVent
-
-        // Default Constructor
-        CoilType() = default;
-    };
-
-    struct SummarizeLoads
-    {
-        // Members
-        CoilType Load;             // LoadMetByVent
-        CoilType NoLoad;           // LoadMetByVentNoLoad
-        CoilType ExcessLoad;       // LoadAddedByVentOvercool
-        CoilType PotentialSavings; // LoadAddedByVentCoolLost
-        CoilType PotentialCost;    // LoadAddedByVentHeatLost
-
-        // Default Constructor
-        SummarizeLoads() = default;
-    };
-
     struct CompTypeError
     {
         // Members
@@ -392,7 +350,6 @@ struct SystemReportsData : BaseGlobalStruct
     int MaxLoopArraySize = 100;
     int MaxCompArraySize = 500;
 
-    EPVector<SystemReports::SummarizeLoads> Vent;
     EPVector<SystemReports::ZoneVentReportVariables> ZoneVentRepVars;
     EPVector<SystemReports::SysVentReportVariables> SysVentRepVars;
     EPVector<SystemReports::SysLoadReportVariables> SysLoadRepVars;
@@ -445,7 +402,6 @@ struct SystemReportsData : BaseGlobalStruct
         this->TotalLoopConnects = 0;
         this->MaxLoopArraySize = 100;
         this->MaxCompArraySize = 500;
-        this->Vent.deallocate();
         this->ZoneVentRepVars.deallocate();
         this->SysVentRepVars.deallocate();
         this->SysLoadRepVars.deallocate();

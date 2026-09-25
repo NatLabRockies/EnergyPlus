@@ -487,9 +487,7 @@ namespace Node {
         Real64 EMSValueForOutAirWindDir = 0.0;   // value EMS is directing to use for outdoor air node's wind directio {degree}
         // Contaminant
         Real64 CO2 = 0.0;                  // {ppm}
-        Real64 CO2SetPoint = 0.0;          // {ppm}
         Real64 GenContam = 0.0;            // {ppm}
-        Real64 GenContamSetPoint = 0.0;    // {ppm}
         bool SPMNodeWetBulbRepReq = false; // Set to true when node has SPM which follows wetbulb
 
         // error message flag

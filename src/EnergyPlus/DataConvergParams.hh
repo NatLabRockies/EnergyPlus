@@ -117,7 +117,6 @@ namespace DataConvergParams {
 
     struct HVACZoneInletConvergenceStruct
     {
-        std::string ZoneName;
         int NumInletNodes = 0; // number of inlet nodes for zone
         Array1D<HVACNodeConvergLogStruct> InletNode;
     };

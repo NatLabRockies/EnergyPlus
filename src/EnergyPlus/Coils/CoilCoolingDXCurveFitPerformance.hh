@@ -246,7 +246,6 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
 
     Real64 evapCondBasinHeatSetpoint = 0.0;
     Sched::Schedule *evapCondBasinHeatSched = nullptr;
-    bool oneTimeEIOHeaderWrite = true;
 
     CoilCoolingDXCurveFitOperatingMode normalMode;
     CoilCoolingDXCurveFitOperatingMode alternateMode;  // enhanced dehumidifcation or Subcool mode

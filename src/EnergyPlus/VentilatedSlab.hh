@@ -172,7 +172,6 @@ namespace VentilatedSlab {
         DataPlant::PlantEquipmentType heatingCoilType;
 
         Fluid::RefrigProps *heatingCoil_fluid = nullptr;
-        Sched::Schedule *heatingCoilSched = nullptr; // index to schedule
 
         Real64 heatingCoilSchedValue;
         Real64 MaxVolHotWaterFlow; // m3/s
@@ -205,7 +204,6 @@ namespace VentilatedSlab {
         HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid; // type of cooling coil:
         // 'Coil:Cooling:Water:DetailedGeometry' or
         // 'CoilSystem:Cooling:Water:HeatExchangerAssisted'
-        Sched::Schedule *coolingCoilSched = nullptr;
         Real64 coolingCoilSchedValue;
         Real64 MaxVolColdWaterFlow;                    // m3/s
         Real64 MaxColdWaterFlow;                       // kg/s

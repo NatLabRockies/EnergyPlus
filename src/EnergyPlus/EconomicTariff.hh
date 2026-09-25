@@ -338,7 +338,6 @@ namespace EconomicTariff {
         Sched::Schedule *chargeSched = nullptr;  // index to the charge schedule
         Sched::Schedule *baseUseSched = nullptr; // index to the baseline use schedule
         std::string groupName;                   // name of the group
-        std::string monetaryUnit;                // text string representing monetary unit, usually $
         BuySell buyOrSell;                       // enumerated choice index of the buy or sell options
         // index to the first and last category variables
         int firstCategory; // first category referenced

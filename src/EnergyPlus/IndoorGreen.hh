@@ -79,7 +79,6 @@ namespace IndoorGreen {
     struct IndoorGreenParams
     {
         std::string Name;
-        std::string ZoneName;
         std::string SurfName;
         Sched::Schedule *sched = nullptr;
         Sched::Schedule *ledSched = nullptr;
@@ -102,15 +101,12 @@ namespace IndoorGreen {
         Real64 LEDActualEleP = 0.0;   // LED operational power (W)
         Real64 LEDActualEleCon = 0.0; // LED operational electricity consumption (J)
         int SurfPtr = 0;
-        int ZoneListPtr = 0;
         int ZonePtr = 0;                         // point to the zone where the indoor greenery system is located
         int SpacePtr = 0;                        // point to the space where the indoor greenery system is located
         ETCalculationMethod etCalculationMethod; // Enum for ETCalculationMethod
         LightingMethod lightingMethod;           // Enum for LightingMethod
-        bool CheckIndoorGreenName = true;
         Real64 EMSET = 0.0;
         bool EMSETCalOverrideOn = false;
-        Array1D_string FieldNames;
     };
 
     void SimIndoorGreen(EnergyPlusData &state);

@@ -314,7 +314,6 @@ struct ThermalComfortsData : BaseGlobalStruct
     Real64 SkinWetSweat = 0.0;              // Skin wettedness required to evaporate regulatory sweat
     Real64 SkinWetTot = 0.0;                // Total skin wettedness
     Real64 SkinVapPress = 0.0;              // Vapor pressure at skin
-    Real64 SurfaceTemp = 0.0;               // Surface temperature when MRTType is 'SurfaceWeighted'
     Real64 AvgBodyTemp = 0.0;               // Weighted average body temperature considering core and skin temperature
     Real64 ThermCndct = 0.0;                // Thermal conductance of skin
     Real64 ThermSensTransCoef = 0.0;        // Theraml sensation coefficient for PMV

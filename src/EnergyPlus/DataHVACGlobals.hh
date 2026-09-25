@@ -417,19 +417,6 @@ namespace HVAC {
 
     int constexpr MaxSpeedLevels = 10;
 
-    struct ComponentSetPtData
-    {
-        // Members
-        std::string EquipmentType;
-        std::string EquipmentName;
-        int NodeNumIn = 0;
-        int NodeNumOut = 0;
-        Real64 EquipDemand = 0.0;
-        Real64 DesignFlowRate = 0.0;
-        std::string HeatOrCool;
-        int OpType = 0;
-    };
-
     // Compressor operation
     enum class CompressorOp
     {

@@ -94,7 +94,6 @@ namespace BranchInputManager {
         // Members
         std::string CType;          // Component Type (Cannot be SPLITTER or MIXER)
         std::string Name;           // Component Name
-        int CtrlType = 0;           // Active, Passive, Bypass (1,2,3)
         std::string InletNodeName;  // Inlet Node ID
         int InletNode = 0;          // Inlet Node Number
         std::string OutletNodeName; // Outlet Node ID

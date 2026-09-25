@@ -7904,21 +7904,6 @@ namespace Window {
         // "Solar-Thermal Window Blind Model for DOE-2," H. Simmler, U. Fischer and
         // F. Winkelmann, Lawrence Berkeley National Laboratory, Jan. 1996.
 
-        struct BlindInputs
-        {
-            Real64 slatWidth;
-            Real64 slatSeparation;
-            Real64 BmDfTrans;
-            Real64 BmDfRefFront;
-            Real64 BmDfRefBack;
-            Real64 DfDfTrans;
-            Real64 DfDfRefFront;
-            Real64 DfDfRefBack;
-            Real64 DfDfTransIR;
-            Real64 DfEmissFront;
-            Real64 DfEmissBack;
-        };
-
         // The slat input properties are:
         // c(1)    0. (unused)
         // c(2)    Slat width (m)
@@ -7937,27 +7922,6 @@ namespace Window {
         // c(13)   trans diff-diff
         // c(14)   emiss front diff
         // c(15)   emiss back diff
-
-        struct BlindOutputs
-        {
-            Real64 BmBmTransFront;
-            Real64 BmBmRefFront;
-            Real64 BmBmTransBack;
-            Real64 BmBmRefBack;
-            Real64 BmDfTransFront;
-            Real64 BmDfRefFront;
-            Real64 BmDfTransBack;
-            Real64 BmDfRefBack;
-            Real64 DfDfTransFront;
-            Real64 DfDfRefFront;
-            Real64 DfDfTransBack;
-            Real64 DfDfRefBack;
-
-            Real64 TransFrontIR;
-            Real64 TransBackIR;
-            Real64 EmissFrontIR;
-            Real64 EmissBackIR;
-        };
 
         // The calculated blind properties are:
         //      The following are solar or visible properties

@@ -279,7 +279,6 @@ namespace Fans {
         int motorMaxEffCurveNum = 0;                 // Motor maximum efficiency curve index
         int plMotorEffCurveNum = 0;                  // Motor part-load efficiency curve index
         int vfdEffCurveNum = 0;                      // VFD efficiency curve index
-        Real64 deltaPressTot = 0.0;                  // Total pressure rise across fan [N/m2]
         Real64 airPower = 0.0;                       // Air power for fan being Simulated [W]
         Real64 fanSpeed = 0.0;                       // Fan shaft rotational speed [rpm]
         Real64 fanTorque = 0.0;                      // Fan shaft torque [N-m]
@@ -448,7 +447,6 @@ struct FansData : BaseGlobalStruct
 {
     int NumNightVentPerf = 0;    // number of FAN:NIGHT VENT PERFORMANCE objects found in the input
     bool GetFanInputFlag = true; // Flag set to make sure you get input once
-    bool MyOneTimeFlag = true;
     bool ZoneEquipmentListChecked = false;
 
     Array1D<Fans::NightVentPerfData> NightVentPerf;

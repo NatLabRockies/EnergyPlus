@@ -91,13 +91,11 @@ namespace PCMStorage {
         Sched::Schedule *AvailabilitySchedule = nullptr;
 
         // Dynamic State Variables
-        Real64 PCM_TankTemp = 0.0;       // C, estimated from enthalpy
-        Real64 EnergyStored = 0.0;       // J
-        Real64 PercentCapacity = 0.0;    // %
-        Real64 HeatLossRate_W = 0.0;     // W
-        Real64 useheatTransfer = 0.0;    // W
-        Real64 plantheatTransfer = 0.0;  // W
-        Real64 DesignMassFlowRate = 0.0; // kg/s
+        Real64 PCM_TankTemp = 0.0;      // C, estimated from enthalpy
+        Real64 EnergyStored = 0.0;      // J
+        Real64 PercentCapacity = 0.0;   // %
+        Real64 useheatTransfer = 0.0;   // W
+        Real64 plantheatTransfer = 0.0; // W
         Real64 UseSideDesignFlowRate = 0.0;
         Real64 PlantSideDesignFlowRate = 0.0;
         Real64 UseSideMassFlowRate = 0.0;

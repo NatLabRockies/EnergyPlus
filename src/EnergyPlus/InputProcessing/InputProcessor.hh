@@ -83,8 +83,6 @@ class InputProcessor
 public:
     using json = nlohmann::json;
 
-    json::parser_callback_t callback;
-
     InputProcessor();
 
     static std::unique_ptr<InputProcessor> factory();

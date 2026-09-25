@@ -318,7 +318,6 @@ namespace ResultsFramework {
 
     protected:
         std::unordered_map<std::string, Report> reportsMap;
-        Report rpt;
     };
 
     class CSVWriter : public BaseResultObject

@@ -87,18 +87,15 @@ namespace DataContaminantBalance {
         Sched::Schedule *zoneMinCO2Sched = nullptr; // Minimum CO2 concentration schedule
         Sched::Schedule *zoneMaxCO2Sched = nullptr; // Maximum CO2 concentration schedule
 
-        Sched::Schedule *zoneContamControllerSched = nullptr; // Index for this schedule
-        Sched::Schedule *genericContamAvailSched = nullptr;   // Availability Schedule name for generic contamiant
-        Sched::Schedule *genericContamSetptSched = nullptr;   // Schedule which determines the generic contaminant setpoint
+        Sched::Schedule *genericContamAvailSched = nullptr; // Availability Schedule name for generic contamiant
+        Sched::Schedule *genericContamSetptSched = nullptr; // Schedule which determines the generic contaminant setpoint
     };
 
     struct ZoneSystemContaminantDemandData // Contaminent loads to be met (kg air per second)
     {
         // Members
-        Real64 OutputRequiredToCO2SP = 0.0;     // Load required to meet CO2 setpoint
-        Real64 RemainingOutputReqToCO2SP = 0.0; // Remaining load required to meet CO2 setpoint
-        Real64 OutputRequiredToGCSP = 0.0;      // Load required to meet generic contaminant setpoint
-        Real64 RemainingOutputReqToGCSP = 0.0;  // Remaining load required to meet generic contaminant setpoint
+        Real64 OutputRequiredToCO2SP = 0.0; // Load required to meet CO2 setpoint
+        Real64 OutputRequiredToGCSP = 0.0;  // Load required to meet generic contaminant setpoint
     };
 
     struct ZoneContamGenericDataConstant
