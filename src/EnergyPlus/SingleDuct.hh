@@ -360,7 +360,6 @@ struct SingleDuctData : BaseGlobalStruct
     int NumSDAirTerminal = 0;              // The Number of single duct air terminals found in the Input
     bool GetInputFlag = true;              // Flag set to make sure you get input once
     bool GetATMixerFlag = true;            // Flag set to make sure you get input once
-    bool InitATMixerFlag = true;           // Flag set to make sure you do begin simulation initializaztions once for mixer
     bool ZoneEquipmentListChecked = false; // True after the Zone Equipment List has been checked for items
 
     int SysNumGSI = 0;   // The Sys that you are currently loading input into

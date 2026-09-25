@@ -420,7 +420,6 @@ struct SystemReportsData : BaseGlobalStruct
     int ArrayCounter_UpdateAirSysSubSubCompPtrArray = 1;
     int NumCompTypes = 0;
     Array1D<SystemReports::CompTypeError> CompTypeErrors = Array1D<SystemReports::CompTypeError>(100);
-    Array1D<SystemReports::IdentifyLoop> LoopStack;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

@@ -1887,7 +1887,6 @@ struct HeatBalanceData : BaseGlobalStruct
     int TotRefDoorMixing = 0;  // Total RefrigerationDoor Mixing Statements in input
     int TotBBHeat = 0;         // Total BBHeat Statements instances after expansion to spaces
     int TotConstructs = 0;     // Total number of unique constructions in this simulation
-    int TotSpectralData = 0;   // Total window glass spectral data sets
     int TotZoneAirBalance = 0; // Total Zone Air Balance Statements in input
     int TotFrameDivider = 0;   // Total number of window frame/divider objects
     bool AirFlowFlag = false;

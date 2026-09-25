@@ -1256,7 +1256,6 @@ struct SizingData : BaseGlobalStruct
     int CurBranchNum = 0;                                       // Index of branch being simulated (or 0 if not air loop)
     HVAC::AirDuctType CurDuctType = HVAC::AirDuctType::Invalid; // Duct type of current branch
     int CurLoopNum = 0;                                         // the current plant loop index
-    int CurCondLoopNum = 0;                                     // the current condenser loop number
     int CurEnvirNumSimDay = 0;                                  // current environment number for day simulated
     int CurOverallSimDay = 0;                                   // current day of simulation
     int NumTimeStepsInAvg = 0;                                  // number of time steps in the averaging window for the design flow and load sequences
