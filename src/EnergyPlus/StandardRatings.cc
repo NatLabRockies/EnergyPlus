@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <cmath>
 #include <format>
 #include <string>
 
@@ -2629,25 +2630,25 @@ namespace StandardRatings {
                 ratioArray.push_back(ratioAtithSpeed);
             }
             for (int i = 1; i <= nsp; ++i) {
-                if ((int)(ratioArray(i)) == 100.0) {
+                if (std::lround(ratioArray(i)) == 100) {
                     speedsForA.push_back(i);
                     continue;
                 }
-                if ((int)(ratioArray(i)) == 75.0) {
+                if (std::lround(ratioArray(i)) == 75) {
                     speedsForB.push_back(i);
                     bFound = true;
                     smallerThanSpeedB = 0;
                     largerThanSpeedB = 0;
                     continue;
                 }
-                if ((int)(ratioArray(i)) == 50.0) {
+                if (std::lround(ratioArray(i)) == 50) {
                     speedsForC.push_back(i);
                     cFound = true;
                     smallerThanSpeedC = 0;
                     largerThanSpeedC = 0;
                     continue;
                 }
-                if ((int)(ratioArray(i)) == 25.0) {
+                if (std::lround(ratioArray(i)) == 25) {
                     speedsForD.push_back(i);
                     dFound = true;
                     smallerThanSpeedD = 0;

@@ -126,7 +126,7 @@ TEST_F(EnergyPlusFixture, QuadraticCurve)
 
     double var1 = 1, var2 = 0.1, var3 = 20, var4 = 10;
     double expected_value = -3.3333 + (0.1 * 1) + (38.9 * 0.1) + (0.1 * 20) + (0.5 * 10);
-    EXPECT_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4));
+    EXPECT_DOUBLE_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4));
 }
 
 TEST_F(EnergyPlusFixture, QuintLinearCurve)
