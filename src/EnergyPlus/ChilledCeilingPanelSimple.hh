@@ -103,8 +103,6 @@ namespace CoolingPanelSimple {
         int WaterInletNode = 0;
         int WaterOutletNode = 0;
         int TotSurfToDistrib = 0;
-        int ControlCompTypeNum = 0;
-        int CompErrIndex = 0;
         ClgPanelCtrlType controlType = ClgPanelCtrlType::Invalid;
         std::string ColdSetptSchedName;
         Sched::Schedule *coldSetptSched = nullptr;
@@ -116,15 +114,12 @@ namespace CoolingPanelSimple {
         int CoolingCapMethod = 0;
         Real64 ScaledCoolingCapacity = 0.0;
         Real64 UA = 0.0;
-        Real64 Offset = 0.0;
         Real64 WaterMassFlowRate = 0.0;
         Real64 WaterMassFlowRateMax = 0.0;
         Real64 RatedWaterFlowRate = 0.0;
         Real64 WaterVolFlowRateMax = 0.0;
-        Real64 WaterInletTempStd = 0.0;
         Real64 WaterInletTemp = 0.0;
         Real64 WaterInletEnthalpy = 0.0;
-        Real64 WaterOutletTempStd = 0.0;
         Real64 WaterOutletTemp = 0.0;
         Real64 WaterOutletEnthalpy = 0.0;
         Real64 RatedZoneAirTemp = 0.0;
@@ -141,9 +136,6 @@ namespace CoolingPanelSimple {
         Real64 ConvEnergy = 0.0;
         Real64 RadEnergy = 0.0;
         PlantLocation plantLoc;
-        int CoolingPanelLoadReSimIndex = 0;
-        int CoolingPanelMassFlowReSimIndex = 0;
-        int CoolingPanelInletTempFlowReSimIndex = 0;
         bool MyEnvrnFlag = true;
         Real64 ZeroCPSourceSumHATsurf = 0.0;
         Real64 CoolingPanelSource = 0.0;

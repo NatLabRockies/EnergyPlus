@@ -110,12 +110,9 @@ namespace HeatingCoils {
         Real64 Efficiency = 0.0;      // HeatingCoil Efficiency Value
         Real64 NominalCapacity = 0.0; // Nominal Capacity of Coil [W]
         Real64 DesiredOutletTemp = 0.0;
-        Real64 DesiredOutletHumRat = 0.0;
-        Real64 AvailTemperature = 0.0; // Used in heat recovery test [C]
         int AirInletNodeNum = 0;
         int AirOutletNodeNum = 0;
-        int TempSetPointNodeNum = 0; // If applicable this is the node number that the temp setpoint exists.
-        int Control = 0;
+        int TempSetPointNodeNum = 0;           // If applicable this is the node number that the temp setpoint exists.
         int PLFCurveIndex = 0;                 // Index for part-load factor curve index for gas heating coil
         Real64 ParasiticElecLoad = 0.0;        // parasitic electric load associated with the gas heating coil
         Real64 ParasiticFuelConsumption = 0.0; // parasitic fuel consumption associated with the gas heating coil (standing pilot light) [J]

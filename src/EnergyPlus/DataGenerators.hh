@@ -266,31 +266,24 @@ namespace DataGenerators {
         // Members
         // user input data
         std::string Name;
-        Real64 PelMin = 0.0;              // minimum operating point for electrical power Pel
-        Real64 PelMax = 0.0;              // maximum operating point for electrical power Pel
-        Real64 UpTranLimit = 0.0;         // power up transient limit W/s
-        Real64 DownTranLimit = 0.0;       // power down tran limit  W/s
-        Real64 UpTranLimitFuel = 0.0;     // fuel up transient limit kg/s
-        Real64 DownTranLimitFuel = 0.0;   // fuel down transient limit kg/s
-        bool WarmUpByTimeDelay = false;   // Warm up mode control
-        bool WarmUpByEngineTemp = true;   // Warm up mode control
-        Real64 StartUpTimeDelay = 0.0;    // time for start up [hours]
-        Real64 WarmUpDelay = 0.0;         // time for warm up delay [s]
-        Real64 StartUpFuel = 0.0;         // fuel use during start up
-        Real64 StartUpElectConsum = 0.0;  // electricity used during start up
-        Real64 StartUpElectProd = 0.0;    // electricity produced during start up
-        Real64 ShutDownFuel = 0.0;        // fuel consumed during shut down
-        Real64 ShutDownElectConsum = 0.0; // Elect consumed during shut down
-        Real64 PcoolDown = 0.0;           // power during cool down
-        Real64 CoolDownDelay = 0.0;       // time for cool down delay [hours]
-        int NumCyclesInit = 0;            // number of start stop cycles at beginning
-        Real64 NumRunHoursInit = 0.0;     // number of hours of operation beginning
-        Real64 Pstandby = 0.0;            // standby power [w]
-        Real64 MCeng = 0.0;               // aggregated thermal mass of engine [  ]
-        Real64 MCcw = 0.0;                // aggregated thermal mass of heat recovery [   ]
-        Real64 kf = 0.0;                  // coefficient k_f for warmup fuel flow rate
-        Real64 TnomEngOp = 0.0;           // nominal engine operating temperature [C]
-        Real64 kp = 0.0;                  // coefficient k_p for warmup power
+        Real64 PelMin = 0.0;            // minimum operating point for electrical power Pel
+        Real64 PelMax = 0.0;            // maximum operating point for electrical power Pel
+        Real64 UpTranLimit = 0.0;       // power up transient limit W/s
+        Real64 DownTranLimit = 0.0;     // power down tran limit  W/s
+        Real64 UpTranLimitFuel = 0.0;   // fuel up transient limit kg/s
+        Real64 DownTranLimitFuel = 0.0; // fuel down transient limit kg/s
+        bool WarmUpByTimeDelay = false; // Warm up mode control
+        bool WarmUpByEngineTemp = true; // Warm up mode control
+        Real64 StartUpTimeDelay = 0.0;  // time for start up [hours]
+        Real64 WarmUpDelay = 0.0;       // time for warm up delay [s]
+        Real64 PcoolDown = 0.0;         // power during cool down
+        Real64 CoolDownDelay = 0.0;     // time for cool down delay [hours]
+        Real64 Pstandby = 0.0;          // standby power [w]
+        Real64 MCeng = 0.0;             // aggregated thermal mass of engine [  ]
+        Real64 MCcw = 0.0;              // aggregated thermal mass of heat recovery [   ]
+        Real64 kf = 0.0;                // coefficient k_f for warmup fuel flow rate
+        Real64 TnomEngOp = 0.0;         // nominal engine operating temperature [C]
+        Real64 kp = 0.0;                // coefficient k_p for warmup power
         bool MandatoryFullCoolDown = false;
         bool WarmRestartOkay = true;
         Sched::Schedule *availSched = nullptr;
@@ -305,13 +298,11 @@ namespace DataGenerators {
         Real64 FuelMdotLastTimestep = 0.0;
         Real64 PelLastTimeStep = 0.0;
         int NumCycles = 0;
-        Real64 PLRforSubtimestepStartUp = 0.0;
-        Real64 PLRforSubtimestepShutDown = 0.0; // part load for not in shut down, shut down part is (1 - PLR)
-        Real64 ElectEffNom = 0.0;               // efficiency to use for control decisions
-        Real64 ThermEffNom = 0.0;               // thermal efficiency to use fo control decisions
-        Real64 QdotHXMax = 0.0;                 // Thermal power max
-        Real64 QdotHXMin = 0.0;                 // thermal power min
-        Real64 QdotHXOpt = 0.0;                 // thermal power nominal/optimal
+        Real64 ElectEffNom = 0.0; // efficiency to use for control decisions
+        Real64 ThermEffNom = 0.0; // thermal efficiency to use fo control decisions
+        Real64 QdotHXMax = 0.0;   // Thermal power max
+        Real64 QdotHXMin = 0.0;   // thermal power min
+        Real64 QdotHXOpt = 0.0;   // thermal power nominal/optimal
     };
 
 } // namespace DataGenerators

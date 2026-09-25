@@ -292,7 +292,6 @@ namespace DataZoneEquipment {
         int TermUnitSizingIndex;       // Pointer to TermUnitSizing and TermUnitFinalZoneSizing data for this terminal unit
         int SupplyAirPathIndex;        // Pointer to SupplyAirPath serving this terminal unit
         int SupplyAirPathOutNodeIndex; // Pointer to SupplyAirPath OutletNode serving this terminal unit
-        Array1D<SubSubEquipmentData> Coil;
 
         // Default Constructor
         AirIn()
@@ -508,8 +507,6 @@ namespace DataZoneEquipment {
         // Members
         std::string Name;
         int NumOfControls;
-        Array1D_string ControlType;
-        Array1D_string ControlName;
 
         // Default Constructor
         ControlList() : NumOfControls(0)

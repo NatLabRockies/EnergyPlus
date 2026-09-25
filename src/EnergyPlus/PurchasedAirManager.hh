@@ -164,27 +164,26 @@ namespace PurchasedAirManager {
         //      OccupancySchedule, or CO2SetPoint
         Econ EconomizerType; // Outdoor air economizer type - NoEconomizer,
         //      DifferentialDryBulb, or DifferentialEnthalpy
-        bool OutdoorAir;                            // Is there outdoor air?
-        int OutdoorAirNodeNum;                      // Node number of the outdoor air inlet node
-        HeatRecovery HtRecType;                     // Outdoor air heat recovery type - None, Sensible, Enthalpy
-        Real64 HtRecSenEff;                         // Sensible heat recovery effectiveness
-        Real64 HtRecLatEff;                         // Latent heat recovery effectiveness
-        Sched::Schedule *oaFlowFracSched = nullptr; // Fraction schedule applied to total OA requirement
-        Real64 MaxHeatMassFlowRate;                 // The maximum heating air mass flow rate [kg/s]
-        Real64 MaxCoolMassFlowRate;                 // The maximum cooling air mass flow rate [kg/s]
-        bool EMSOverrideMdotOn;                     // if true, then EMS is calling to override supply mass flow rate
-        Real64 EMSValueMassFlowRate;                // Value EMS is directing to use for supply mass flow rate [kg/s]
-        bool EMSOverrideOAMdotOn;                   // if true, then EMS is calling to override OA mass flow rate
-        Real64 EMSValueOAMassFlowRate;              // Value EMS is directing to use for OA mass flow rate [kg/s]
-        bool EMSOverrideSupplyTempOn;               // if true, then EMS is calling to override supply temperature
-        Real64 EMSValueSupplyTemp;                  // Value EMS is directing to use for supply temperature [C]
-        bool EMSOverrideSupplyHumRatOn;             // if true, then EMS is calling to override supply humidity ratio
-        Real64 EMSValueSupplyHumRat;                // Value EMS is directing to use for supply humidity ratio [kgWater/kgDryAir]
-        Real64 MinOAMassFlowRate;                   // The minimum required outdoor air mass flow rate [kg/s]
-        Real64 OutdoorAirMassFlowRate;              // The outdoor air mass flow rate [kg/s]
-        Real64 OutdoorAirVolFlowRateStdRho;         //  The outdoor air volume flow rate using standard density  [m3/s]
-        Real64 SupplyAirMassFlowRate;               // Supply air mass flow rate [kg/s]
-        Real64 SupplyAirVolFlowRateStdRho;          // supply air volume flow using standard density [m3/s]
+        bool OutdoorAir;                    // Is there outdoor air?
+        int OutdoorAirNodeNum;              // Node number of the outdoor air inlet node
+        HeatRecovery HtRecType;             // Outdoor air heat recovery type - None, Sensible, Enthalpy
+        Real64 HtRecSenEff;                 // Sensible heat recovery effectiveness
+        Real64 HtRecLatEff;                 // Latent heat recovery effectiveness
+        Real64 MaxHeatMassFlowRate;         // The maximum heating air mass flow rate [kg/s]
+        Real64 MaxCoolMassFlowRate;         // The maximum cooling air mass flow rate [kg/s]
+        bool EMSOverrideMdotOn;             // if true, then EMS is calling to override supply mass flow rate
+        Real64 EMSValueMassFlowRate;        // Value EMS is directing to use for supply mass flow rate [kg/s]
+        bool EMSOverrideOAMdotOn;           // if true, then EMS is calling to override OA mass flow rate
+        Real64 EMSValueOAMassFlowRate;      // Value EMS is directing to use for OA mass flow rate [kg/s]
+        bool EMSOverrideSupplyTempOn;       // if true, then EMS is calling to override supply temperature
+        Real64 EMSValueSupplyTemp;          // Value EMS is directing to use for supply temperature [C]
+        bool EMSOverrideSupplyHumRatOn;     // if true, then EMS is calling to override supply humidity ratio
+        Real64 EMSValueSupplyHumRat;        // Value EMS is directing to use for supply humidity ratio [kgWater/kgDryAir]
+        Real64 MinOAMassFlowRate;           // The minimum required outdoor air mass flow rate [kg/s]
+        Real64 OutdoorAirMassFlowRate;      // The outdoor air mass flow rate [kg/s]
+        Real64 OutdoorAirVolFlowRateStdRho; //  The outdoor air volume flow rate using standard density  [m3/s]
+        Real64 SupplyAirMassFlowRate;       // Supply air mass flow rate [kg/s]
+        Real64 SupplyAirVolFlowRateStdRho;  // supply air volume flow using standard density [m3/s]
         // Intermediate results
         Real64 HtRecSenOutput;        // Sensible heating/cooling rate from heat recovery (<0 means cooling) [W]
         Real64 HtRecLatOutput;        // Latent heating/cooling rate from heat recovery (<0 means cooling or dehumidfying) [W]

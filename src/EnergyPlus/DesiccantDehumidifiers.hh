@@ -178,7 +178,6 @@ namespace DesiccantDehumidifiers {
         std::string HXType;                                    // type of desiccant heat exchanger
         std::string HXName;                                    // name of desiccant heat exchanger
         int HXTypeNum;                                         // parameter number of desiccant heat exchanger
-        std::string ExhaustFanCurveObject;                     // exhaust fan curve object
         std::string CoolingCoilType;                           // type of cooling coil used with desiccant heat exchanger
         std::string CoolingCoilName;                           // name of cooling coil used with desiccant heat exchanger
         HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid; // type of cooling coil, DataHVACGlobals coil type constants

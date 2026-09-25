@@ -203,7 +203,6 @@ namespace SetPointManager {
     struct SPMSingleZoneReheat : SPMBase // Derived type for the Single Zone Reheat Setpoint Manager data
     {
         // Members
-        std::string ctrlZoneName; // name of the control zone (zone with main thermostat)
         int ctrlZoneNum = 0;      // number (index into Zone array) of control zone
         int zoneNodeNum = 0;      // zone node number
         int zoneInletNodeNum = 0; // inlet node number for the SZRH air
@@ -221,7 +220,6 @@ namespace SetPointManager {
     struct SPMSingleZoneTemp : SPMBase
     {
         // Members
-        std::string ctrlZoneName; // name of the control zone (zone with main thermostat)
         int ctrlZoneNum = 0;      // number (index into Zone array) of control zone
         int zoneNodeNum = 0;      // zone node number
         int zoneInletNodeNum = 0; // inlet node number for the supply air

@@ -94,8 +94,6 @@ namespace DataStringGlobals {
 struct DataStringGlobalsData : BaseGlobalStruct
 {
 
-    fs::path outputMddFilePath = "eplusout.mdd";
-    fs::path outputRddFilePath = "eplusout.rdd";
     fs::path outputShdFilePath = "eplusout.shd";
     fs::path outputTblCsvFilePath = "eplustbl.csv";
     fs::path outputTblHtmFilePath = "eplustbl.htm";
@@ -109,8 +107,6 @@ struct DataStringGlobalsData : BaseGlobalStruct
     fs::path outputPerfLogFilePath = "eplusout_perflog.csv";
     fs::path outputSqlFilePath = "eplusout.sql";
     fs::path outputSqliteErrFilePath = "eplussqlite.err";
-    fs::path outputCsvFilePath = "eplusout.csv";
-    fs::path outputMtrCsvFilePath = "eplusmtr.csv";
     fs::path outputRvauditFilePath = "eplusout.rvaudit";
 
     fs::path outputErrFilePath;

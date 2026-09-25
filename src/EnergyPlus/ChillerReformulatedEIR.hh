@@ -77,7 +77,6 @@ namespace ChillerReformulatedEIR {
     {
         // Members
         std::string Name;        // User identifier
-        int TypeNum = 0;         // plant loop type identifier
         std::string CAPFTName;   // CAPFT curve name
         std::string EIRFTName;   // EIRFT curve name
         std::string EIRFPLRName; // EIRPLR curve name
@@ -213,7 +212,6 @@ namespace ChillerReformulatedEIR {
         Real64 HeatRecInletTemp = 0.0;            // Heat reclaim inlet temperature [C]
         Real64 HeatRecMassFlow = 0.0;             // Heat reclaim mass flow rate [kg/s]
         int ChillerCondLoopFlowFLoopPLRIndex = 0; // Condenser loop flow rate fraction function of loop PLR
-        int CondDT = 0;                           // Temperature difference across condenser
         Sched::Schedule *condDTSched = nullptr;   // Temperature difference across condenser schedule
         Real64 MinCondFlowRatio = 0.2;            // Minimum condenser flow fraction
         DataBranchAirLoopPlant::ControlType EquipFlowCtrl = DataBranchAirLoopPlant::ControlType::Invalid;

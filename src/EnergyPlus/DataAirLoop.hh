@@ -168,7 +168,6 @@ namespace DataAirLoop {
         Real64 MinOutAir = 0.0;             // minimum outside air mass flow rate [kg/s]
         Real64 MaxOutAir = 0.0;             // current maximum available outside air mass flow rate [kg/s]
         Real64 OAMinFrac = 0.0;             // minimum outside air flow fraction this time step
-        Real64 Previous = 0.0;              // Previous mass air flow rate for this loop [kg/s]
         Real64 SupFlow = 0.0;               // supply air flow rate (includes LeakFlow) [kg/s]
         Real64 ZoneRetFlow = 0.0;           // return air flow rate at all zone return air nodes (includes RecircFlow, excludes LeakFlow) [kg/s]
         Real64 ZoneRetFlowRatio = 1.0;      // ratio for adjusting zone return flows for excess zone exhaust

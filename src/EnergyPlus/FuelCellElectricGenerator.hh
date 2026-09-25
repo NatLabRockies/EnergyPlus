@@ -110,11 +110,10 @@ namespace FuelCellElectricGenerator {
         Real64 QdotSkin;
         Real64 UAskin;
         Curve::Curve *SkinLossCurve = nullptr;
-        Curve::Curve *WaterSupplyCurve = nullptr; // pointer to curve for water use in reforming
-        Real64 NdotDilutionAir;                   // user defined constant flow of dilution air (kmol/sec)
-        Real64 StackHeatLossToDilution;           // (watts)
-        std::string DilutionInletNodeName;        // dilution -> AirHR ?? added air heat recovery path
-        int DilutionInletNode;                    // pointer to node for inlet
+        Real64 NdotDilutionAir;            // user defined constant flow of dilution air (kmol/sec)
+        Real64 StackHeatLossToDilution;    // (watts)
+        std::string DilutionInletNodeName; // dilution -> AirHR ?? added air heat recovery path
+        int DilutionInletNode;             // pointer to node for inlet
         std::string DilutionExhaustNodeName;
         int DilutionExhaustNode; // pointer to node getting exhaust
         Real64 PelMin;           // minimum operating point for FCPM electrical power Pel
@@ -311,28 +310,6 @@ namespace FuelCellElectricGenerator {
         }
     };
 
-    struct BatteryDichargeDataStruct
-    {
-        std::string Name; // name of this battery data set
-        Real64 NumInSeries;
-        Real64 NumInParallel;
-        Real64 NominalVoltage;
-        Real64 LowVoltsDischarged; // not used
-        int NumTablePairs;
-        Array1D<Real64> DischargeCurrent; // amps
-        Array1D<Real64> DischargeTime;    // hours
-        // calculated variables
-        Real64 k;    // parameter in Manwell McGowan model
-        Real64 c;    // parameter in Manwell McGowan model
-        Real64 qmax; // parameter in Manwell McGowan model
-
-        // Default Constructor
-        BatteryDichargeDataStruct()
-            : NumInSeries(0.0), NumInParallel(0.0), NominalVoltage(0.0), LowVoltsDischarged(0.0), NumTablePairs(0), k(0.0), c(0.0), qmax(0.0)
-        {
-        }
-    };
-
     struct FCElecStorageDataStruct
     {
         std::string Name; // name of this electrical storage module
@@ -353,9 +330,6 @@ namespace FuelCellElectricGenerator {
         Real64 IfromStorage;   // current this timestepm
         Real64 PelIntoStorage;
         Real64 QairIntake; // heat into intake air
-        // nested structures
-        BatteryDichargeDataStruct Battery;
-
         // Default Constructor
         FCElecStorageDataStruct()
             : StorageModelMode(DataGenerators::ElectricalStorage::Invalid), StartingEnergyStored(0.0), EnergeticEfficCharge(0.0),

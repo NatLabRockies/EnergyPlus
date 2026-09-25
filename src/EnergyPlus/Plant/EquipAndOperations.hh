@@ -154,10 +154,6 @@ struct PlantOpsData
     int NumCoolingOnlyEquipLists = 0;
     int NumSimultHeatCoolHeatingEquipLists = 0;
     int NumSimultHeatCoolCoolingEquipLists = 0;
-    int EquipListNumForLastCoolingOnlyStage = 0;
-    int EquipListNumForLastHeatingOnlyStage = 0;
-    int EquipListNumForLastSimultHeatCoolCoolingStage = 0;
-    int EquipListNumForLastSimultHeatCoolHeatingStage = 0;
     bool SimultHeatCoolOpAvailable = false;
     bool SimultHeatCoolHeatingOpInput = false;
     bool SimulHeatCoolCoolingOpInput = false;
@@ -165,10 +161,7 @@ struct PlantOpsData
     bool DedicatedHR_HWRetControl_Input = false;
     bool DedicatedHR_Present = false;
     Real64 DedicatedHR_SecChW_DesignCapacity = 0.0;             // design (sizing) capacity for cooling side of dedicated heat recovery WWHP, Watts
-    Real64 DedicatedHR_SecChW_CurrentCapacity = 0.0;            // current capacity for cooling side of dedicated heat recovery WWHP, Watts
     Real64 DedicatedHR_SecHW_DesignCapacity = 0.0;              // design (sizing) capacity for heating side of dedicated heat recovery WWHP, Watts
-    Real64 DedicatedHR_SecHW_CurrentCapacity = 0.0;             // current capacity for heating side of dedicated heat recovery WWHP, Watts
-                                                                //   Real64 DedicatedHR_CapacityControlFactor = 0.0;
     bool AirSourcePlantHeatingOnly = false;                     // operation mode, if true primary plant appears to only need heating
     bool AirSourcePlantCoolingOnly = false;                     // operation mode, if true primary plant appears to only need cooling
     bool AirSourcePlantSimultaneousHeatingAndCooling = false;   // operation mode, if true primary plant appears to need both heating and cooling

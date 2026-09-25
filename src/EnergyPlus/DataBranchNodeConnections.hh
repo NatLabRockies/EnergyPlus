@@ -95,7 +95,6 @@ namespace Node {
         std::string ComponentName;                                                      // Component Name
         std::string InletNodeName;                                                      // Inlet Node ID
         std::string OutletNodeName;                                                     // Outlet Node ID
-        std::string Description;                                                        // Description of Component List Type
     };
 
     struct EqNodeConnectionDef

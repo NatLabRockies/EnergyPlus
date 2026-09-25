@@ -152,7 +152,6 @@ namespace FaultsManager {
         Sched::Schedule *availSched = nullptr;
         Sched::Schedule *severitySched = nullptr;
         Real64 Offset = 0.0; // offset, + means sensor reading is higher than actual value
-        bool Status = false; // for future use
 
         // Virtual Destructor
         virtual ~FaultProperties() = default;
@@ -247,8 +246,6 @@ namespace FaultsManager {
         HVAC::FanType fanType = HVAC::FanType::Invalid; // The type of the fan corresponding to the fouled air filter
         int fanCurveNum = 0;                            // The index to the curve
         Sched::Schedule *pressFracSched = nullptr;      // The pointer to the schedule
-        Real64 fanPressInc = 0.0;                       // The increase of the fan pressure due to fouled air filter
-        Real64 fanFlowDec = 0.0;                        // The decrease of the fan airflow rate due to fouled air filter
 
         // Destructor
         virtual ~FaultPropertiesAirFilter() = default;

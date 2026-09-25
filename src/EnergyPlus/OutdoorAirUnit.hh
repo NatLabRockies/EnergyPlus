@@ -172,13 +172,11 @@ namespace OutdoorAirUnit {
     {
         // Members
         // Input data
-        std::string Name;                      // name of unit
-        Sched::Schedule *availSched = nullptr; // availability
-        std::string ZoneName;                  // Name of zone the system is serving
-        int ZonePtr;                           // Point to this zone in the Zone derived type
-        int ZoneNodeNum;                       // index of zone air node in node structure
-        std::string UnitControlType;           // Control type for the system
-        // (Neutral and setpoint temperatrue)
+        std::string Name;                            // name of unit
+        Sched::Schedule *availSched = nullptr;       // availability
+        std::string ZoneName;                        // Name of zone the system is serving
+        int ZonePtr;                                 // Point to this zone in the Zone derived type
+        int ZoneNodeNum;                             // index of zone air node in node structure
         OAUnitCtrlType controlType;                  // Unit Control type indicator
         int AirInletNode;                            // inlet air node number
         int AirOutletNode;                           // outlet air node number
@@ -309,8 +307,7 @@ namespace OutdoorAirUnit {
 
 struct OutdoorAirUnitData : BaseGlobalStruct
 {
-    int NumOfOAUnits = 0;        // Number of outdoor air unit in the input file
-    Real64 OAMassFlowRate = 0.0; // Outside air mass flow rate for the zone outdoor air unit
+    int NumOfOAUnits = 0; // Number of outdoor air unit in the input file
     Array1D_bool MyOneTimeErrorFlag;
     bool GetOutdoorAirUnitInputFlag = true; // Flag set to make sure you get input once
     Array1D_bool MySizeFlag;

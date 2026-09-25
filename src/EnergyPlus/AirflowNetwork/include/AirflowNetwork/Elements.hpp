@@ -753,17 +753,16 @@ namespace AirflowNetwork {
     struct ZoneExhaustFan : public AirflowElement // Zone exhaust fan component
     {
         // Members
-        Real64 FlowRate;                  // mass flow rate
-        Sched::Schedule *sched = nullptr; // Schedule pointer
-        Real64 FlowCoef;                  // Air Mass Flow Coefficient [kg/s at 1Pa]
-        Real64 FlowExpo;                  // Air Mass Flow exponent [dimensionless]
-        Real64 StandardT;                 // Standard temperature for crack data
-        Real64 StandardP;                 // Standard barometric pressure for crack data
-        Real64 StandardW;                 // Standard humidity ratio for crack data
-        int InletNode;                    // Inlet node number
-        int OutletNode;                   // Outlet node number
-        int EPlusZoneNum;                 // Zone number
-        int PressCtrlNum;                 // pressure control number
+        Real64 FlowRate;  // mass flow rate
+        Real64 FlowCoef;  // Air Mass Flow Coefficient [kg/s at 1Pa]
+        Real64 FlowExpo;  // Air Mass Flow exponent [dimensionless]
+        Real64 StandardT; // Standard temperature for crack data
+        Real64 StandardP; // Standard barometric pressure for crack data
+        Real64 StandardW; // Standard humidity ratio for crack data
+        int InletNode;    // Inlet node number
+        int OutletNode;   // Outlet node number
+        int EPlusZoneNum; // Zone number
+        int PressCtrlNum; // pressure control number
 
         // Default Constructor
         ZoneExhaustFan()
@@ -1314,8 +1313,7 @@ namespace AirflowNetwork {
     struct DisSysLinkageProp : public AirflowNetworkLinkage // Distribution system linkage data
     {
         // Members
-        std::string ZoneName; // Name of zone
-        int ZoneNum;          // Zone Number
+        int ZoneNum; // Zone Number
 
         // Default Constructor
         DisSysLinkageProp() : AirflowNetworkLinkage(), ZoneNum(0)
@@ -1326,15 +1324,12 @@ namespace AirflowNetwork {
     struct AirflowNetworkNodeProp // AirflowNetwork nodal data
     {
         // Members
-        std::string Name;      // Provide a unique node name
-        std::string NodeType;  // Provide node type "External", "Thermal Zone" or "Other"
-        std::string EPlusNode; // EnergyPlus node name
-        Real64 NodeHeight;     // Node height [m]
-        int NodeNum;           // Node number
-        int NodeTypeNum;       // Node type with integer number
+        std::string Name;  // Provide a unique node name
+        Real64 NodeHeight; // Node height [m]
+        int NodeNum;       // Node number
+        int NodeTypeNum;   // Node type with integer number
         // 0: Calculated, 1: Given pressure;
-        std::string EPlusZoneName; // EnergyPlus node name
-        int EPlusZoneNum;          // E+ zone number
+        int EPlusZoneNum; // E+ zone number
         int EPlusNodeNum;
         int ExtNodeNum;
         int OutAirNodeNum;
@@ -1415,16 +1410,15 @@ namespace AirflowNetwork {
     struct OutdoorAirFan : public AirflowElement // OA fan component
     {
         // Members
-        Sched::Schedule *sched = nullptr; // Schedule pointer
-        Real64 FlowCoef;                  // Air Mass Flow Coefficient [kg/s at 1Pa]
-        Real64 FlowExpo;                  // Air Mass Flow exponent [dimensionless]
-        Real64 StandardT;                 // Standard temperature for crack data [C]
-        Real64 StandardP;                 // Standard barometric pressure for crack data [Pa]
-        Real64 StandardW;                 // Standard humidity ratio for crack data [kg/kg]
-        int InletNode;                    // Inlet node number
-        int OutletNode;                   // Outlet node number
-        int OAMixerNum;                   // OA Mixer number
-        int PressCtrlNum;                 // Pressure control number
+        Real64 FlowCoef;  // Air Mass Flow Coefficient [kg/s at 1Pa]
+        Real64 FlowExpo;  // Air Mass Flow exponent [dimensionless]
+        Real64 StandardT; // Standard temperature for crack data [C]
+        Real64 StandardP; // Standard barometric pressure for crack data [Pa]
+        Real64 StandardW; // Standard humidity ratio for crack data [kg/kg]
+        int InletNode;    // Inlet node number
+        int OutletNode;   // Outlet node number
+        int OAMixerNum;   // OA Mixer number
+        int PressCtrlNum; // Pressure control number
 
         // Default Constructor
         OutdoorAirFan()

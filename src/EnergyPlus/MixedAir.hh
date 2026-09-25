@@ -273,7 +273,6 @@ namespace MixedAir {
         Real64 RelLatentLossRate = 0.0;
         Real64 RelTotalLossRate = 0.0;
 
-        int ZoneEquipZoneNum = 0;
         std::string VentilationMechanicalName;   // Name of ventilation:mechanical object used for DCV
         int VentMechObjectNum = 0;               // Index to VENTILATION:MECHANICAL object for this controller
         int HumidistatZoneNum = 0;               // zone number where humidistat is located
@@ -384,11 +383,10 @@ namespace MixedAir {
     {
         // Members
         std::string Name;
-        int MixerIndex = 0; // Set on first call...
-        int MixNode = 0;    // Outlet node - mixed air
-        int InletNode = 0;  // Inlet node for outside air stream (Nov. 2004 BTG was OANode )
-        int RelNode = 0;    // Outlet node - relief air
-        int RetNode = 0;    // Inlet node - return air
+        int MixNode = 0;   // Outlet node - mixed air
+        int InletNode = 0; // Inlet node for outside air stream (Nov. 2004 BTG was OANode )
+        int RelNode = 0;   // Outlet node - relief air
+        int RetNode = 0;   // Inlet node - return air
         Real64 MixTemp = 0.0;
         Real64 MixHumRat = 0.0;
         Real64 MixEnthalpy = 0.0;
@@ -572,7 +570,6 @@ struct MixedAirData : BaseGlobalStruct
     std::unordered_map<std::string, std::string> OAControllerUniqueNames;
     std::string CompType;
     std::string CompName;
-    std::string CtrlName;
     Array1D_bool OAControllerMyOneTimeFlag;
     Array1D_bool OAControllerMyEnvrnFlag;
     Array1D_bool OAControllerMySizeFlag;

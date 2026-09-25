@@ -189,8 +189,7 @@ namespace Dayltg {
         int enclIndex = 0;    // Index to enclosure where the daylighting:controls object is located
         Dayltg::DaylightingMethod DaylightMethod = DaylightingMethod::None; // Type of Daylighting (1=SplitFlux, 2=DElight)
         Sched::Schedule *availSched = nullptr;                              // availability schedule if present
-        int TotalExtWindows = 0;
-        int TotalDaylRefPoints = 0; // Number of daylighting reference points for this control
+        int TotalDaylRefPoints = 0;                                         // Number of daylighting reference points for this control
 
         Array1D<DaylRefPt> refPts;                              // Points 1 and 2 are the control reference points
         Real64 sumFracLights = 0.0;                             // Sum of lighting control fractions for this daylighting control

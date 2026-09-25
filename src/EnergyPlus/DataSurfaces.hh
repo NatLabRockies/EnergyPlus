@@ -905,9 +905,8 @@ namespace DataSurfaces {
 
     struct SurfaceWindowRefPt
     {
-        Real64 solidAng = 0.0;    // Solid angle subtended by window from daylit ref points 1 and 2
-        Real64 solidAngWtd = 0.0; // Solid angle subtended by window from ref pts weighted by glare pos factor
-        std::array<std::array<Real64, (int)WinCover::Num>, (int)Lum::Num> lums = {{{0.0, 0.0}}};
+        Real64 solidAng = 0.0;        // Solid angle subtended by window from daylit ref points 1 and 2
+        Real64 solidAngWtd = 0.0;     // Solid angle subtended by window from ref pts weighted by glare pos factor
         Real64 illumFromWinRep = 0.0; // Illuminance from window at reference point N [lux]
         Real64 lumWinRep = 0.0;       // Window luminance as viewed from reference point N [cd/m2]
     };
@@ -953,9 +952,6 @@ namespace DataSurfaces {
         std::array<Real64, (int)FWC::Num> EnclAreaReflProdMinusThisSurf = {0.0, 0.0, 0.0};
 
         BSDFWindowDescript ComplexFen; // Data for complex fenestration, see DataBSDFWindow.cc for declaration
-        bool hasShade = false;
-        bool hasBlind = false;
-        bool hasScreen = false;
     };
 
     struct SurfaceShade
@@ -1230,7 +1226,6 @@ namespace DataSurfaces {
         Real64 SurfFilmCoef;                       // Combined convective/radiative film coefficient if >0, else use other coefficients
         Real64 WindSpeedCoef;                      // Coefficient modifying the wind speed term (s/m)
         Real64 ZoneAirTempCoef;                    // Coefficient modifying the zone air temperature part of the equation
-        std::string ConstTempScheduleName;         // Schedule name for scheduled outside temp
         Sched::Schedule *constTempSched = nullptr; // Index for scheduled outside temp.
         bool SinusoidalConstTempCoef;              // If true then ConstTempCoef varies by sine wave
         Real64 SinusoidPeriod;                     // period of sine wave variation  (hr)

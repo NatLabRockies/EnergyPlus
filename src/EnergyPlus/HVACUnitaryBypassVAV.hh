@@ -108,7 +108,6 @@ namespace HVACUnitaryBypassVAV {
     {
         std::string Name;                       // Name of unit
         std::string UnitType;                   // Type of unit
-        std::string availSchedName;             // Availability schedule name
         Sched::Schedule *availSched = nullptr;  // availability schedule
         Real64 MaxCoolAirVolFlow = 0.0;         // System air volumetric flow rate during cooling operation [m3/s]
         Real64 MaxHeatAirVolFlow = 0.0;         // System air volumetric flow rate during heating operation [m3/s]
@@ -160,7 +159,6 @@ namespace HVACUnitaryBypassVAV {
         int HotWaterCoilMaxIterIndex = 0;         // Index to recurring warning message
         int HotWaterCoilMaxIterIndex2 = 0;        // Index to recurring warning message
         Real64 MaxHeatCoilFluidFlow = 0.0;        // water or steam mass flow rate for heating coil [kg/s]
-        Real64 DesignHeatingCapacity = 0.0;       // design heating capacity of the heating coil
         Real64 DesignSuppHeatingCapacity = 0.0;   // Operating capacity of supplemental Heating Coil [W]
         Real64 MinOATCompressor = 0.0;            // Minimum OAT for compressor operation [C]
         Real64 MinLATCooling = 0.0;               // Minimum leaving air temp for compressor cooling operation [C]
@@ -184,7 +182,6 @@ namespace HVACUnitaryBypassVAV {
         Real64 CompPartLoadRatio = 0.0;                            // Compressor part-load ratio for time step
         int LastMode = 0;                                          // Last mode of operation, coolingmode or heatingmode
         AirFlowCtrlMode AirFlowControl = AirFlowCtrlMode::Invalid; // Fan control mode, UseCompressorOnFlow or UseCompressorOffFlow
-        Real64 CompPartLoadFrac = 0.0;                             // Compressor part load ratio
         int AirLoopNumber = 0;                                     // Air loop served by the CBVAV system
         int NumControlledZones = 0;
         Array1D_int ControlledZoneNum;                                // Index to controlled zones
@@ -195,8 +192,6 @@ namespace HVACUnitaryBypassVAV {
         PriorityCtrlMode PriorityControl = PriorityCtrlMode::Invalid; // Control mode - CoolingPriority, HeatingPriority, ZonePriority or LoadPriority
         int NumZonesCooled = 0;                                       // Number of zones requesting cooling
         int NumZonesHeated = 0;                                       // Number of zones requesting heating
-        int PLRMaxIter = 0;                                           // Counter for recurring warning message
-        int PLRMaxIterIndex = 0;                                      // Index to recurring warning message
         int DXCoilInletNode = 0;                                      // Inlet node number of DX cooling coil
         int DXCoilOutletNode = 0;                                     // Outlet node number of DX cooling coil
         int HeatingCoilInletNode = 0;                                 // Inlet node of heating coil
@@ -240,7 +235,6 @@ namespace HVACUnitaryBypassVAV {
         int CRDXIterationExceeded = 0;                                 // Counter for cool reheat multimode DX coil messages
         int CRDXIterationExceededIndex = 0;                            // Counter for cool reheat multimode DX coil messages
         int CRDXIterationFailed = 0;                                   // Counter for cool reheat multimode DX coil messages
-        int CRDXIterationFailedIndex = 0;                              // Counter for cool reheat multimode DX coil messages
         bool FirstPass = true;                                         // used to determine when first call is made
         int plenumIndex = 0;                                           // index to AirloopHVAC:ReturnPlenum
         int mixerIndex = 0;                                            // index to AirloopHVAC:ZoneMixer

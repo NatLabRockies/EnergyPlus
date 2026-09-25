@@ -93,8 +93,6 @@ namespace ChillerAbsorption {
     {
         // Members
         std::string Name;                                            // user identifier
-        bool Available = false;                                      // need an array of logicals--load identifiers of available equipment
-        bool ON = false;                                             // simulate the machine at it's operating part load ratio
         Real64 NomCap = 0.0;                                         // W - design nominal capacity of Absorber
         bool NomCapWasAutoSized = false;                             // true if Nominal capacity was autosize on input
         Real64 NomPumpPower = 0.0;                                   // W - design nominal capacity of Absorber

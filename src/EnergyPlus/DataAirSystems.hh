@@ -77,9 +77,6 @@ namespace DataAirSystems {
 
     // DefinePrimaryAirSystem contains the data for a primary air HVAC system
 
-    // The ConnectionPoint derived type is used to link quickly between loops at connection points
-    // and avoids the need for repetitive searches.
-
     // INTERFACE BLOCK SPECIFICATIONS
     // None
 
@@ -97,31 +94,14 @@ namespace DataAirSystems {
         SimAirServingZones::CompType CompType_Num = SimAirServingZones::CompType::Invalid; // Numeric designator for CompType (TypeOf)
         int CompIndex = 0;                                                                 // Component Index in whatever is using this component
         HVACSystemData *compPointer = nullptr;                                             // pointer to HVAC system
-        int FlowCtrl = 0;                                                                  // Component flow control (ACTIVE/PASSIVE)
-        bool ON = true;          // When true, the designated component or operation scheme is available
         bool Parent = false;     // When true, the designated component is made up of sub-components
         std::string NodeNameIn;  // Component inlet node name
         std::string NodeNameOut; // Component outlet node name
         int NodeNumIn = 0;       // Component inlet node number
         int NodeNumOut = 0;      // Component outlet node number
-        bool MeteredVarsFound = false;
         int NumMeteredVars = 0;
         int NumSubComps = 0;
-        int EnergyTransComp = 0; // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
-        Real64 Capacity = 0.0;   // ventilation load factor
-        int OpMode = 0;
-        Real64 TotPlantSupplyElec = 0.0;
-        Real64 PlantSupplyElecEff = 0.0;
-        Real64 PeakPlantSupplyElecEff = 0.0;
-        Real64 TotPlantSupplyGas = 0.0;
-        Real64 PlantSupplyGasEff = 0.0;
-        Real64 PeakPlantSupplyGasEff = 0.0;
-        Real64 TotPlantSupplyPurch = 0.0;
-        Real64 PlantSupplyPurchEff = 0.0;
-        Real64 PeakPlantSupplyPurchEff = 0.0;
-        Real64 TotPlantSupplyOther = 0.0;
-        Real64 PlantSupplyOtherEff = 0.0;
-        Real64 PeakPlantSupplyOtherEff = 0.0;
+        int EnergyTransComp = 0;           // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
         int AirSysToPlantPtr = 0;          // =0 No plant loop connection, >0 index to AirSysToPlant array
         Array1D<MeterData> MeteredVar;     // Index of energy output report data
         Array1D<SubcomponentData> SubComp; // Component list
@@ -133,8 +113,6 @@ namespace DataAirSystems {
         std::string Name;                                        // Name of the branch
         std::string ControlType;                                 // Control type for the branch (not used)
         int TotalComponents = 0;                                 // Total number of high level components on the branch
-        Array1D_int FirstCompIndex;                              // Gives the component index in AllComp that corresponds to Comp
-        Array1D_int LastCompIndex;                               // Gives comp index in AllComp that corresponds to last subcomponent
         int NodeNumIn = 0;                                       // Branch inlet node number
         int NodeNumOut = 0;                                      // Branch outlet node number
         HVAC::AirDuctType DuctType = HVAC::AirDuctType::Invalid; // 1=main, 2=cooling, 3=heating, 4=other
@@ -218,15 +196,6 @@ namespace DataAirSystems {
         int retFanNum = 0;                       // index of the return fan in the Fan data structure when model type is StructArrayLegacyFanModels
         Real64 FanDesCoolLoad = 0.0;             // design fan heat gain for the air loop [W]
         bool EconomizerStagingCheckFlag = false; // flag to indicate that the applicability of the selected economizer staging operation mode is valid
-    };
-
-    struct ConnectionPoint
-    {
-        // Members
-        int LoopType = 0;
-        int LoopNum = 0;
-        int BranchNum = 0;
-        int CompNum = 0;
     };
 
     struct ConnectZoneComp
@@ -324,7 +293,6 @@ struct AirSystemsData : BaseGlobalStruct
 {
 
     EPVector<DataAirSystems::DefinePrimaryAirSystem> PrimaryAirSystems;
-    Array1D<DataAirSystems::ConnectionPoint> DemandSideConnect;               // Connections between loops
     Array1D<DataAirSystems::ConnectZoneComp> ZoneCompToPlant;                 // Connections between loops
     Array1D<DataAirSystems::ConnectZoneSubComp> ZoneSubCompToPlant;           // Connections between loops
     Array1D<DataAirSystems::ConnectZoneSubSubComp> ZoneSubSubCompToPlant;     // Connections between loops

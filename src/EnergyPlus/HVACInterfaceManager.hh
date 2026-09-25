@@ -90,19 +90,10 @@ namespace HVACInterfaceManager {
         Real64 Flow = 0.0; // Flow in the Common Pipe
         Real64 Temp = 0.0;
         // Following report variables are used in two-way common pipe
-        Real64 SecCPLegFlow = 0.0;       // Mass flow in the secondary side Common pipe leg
-        Real64 PriCPLegFlow = 0.0;       // Mass flow in the primary side Common pipe leg
-        Real64 SecToPriFlow = 0.0;       // Mass flow in the pipe from Secondary to primary side
-        Real64 PriToSecFlow = 0.0;       // Mass flow in the pipe from primary to Secondary side
-        Real64 PriInTemp = 0.0;          // Temperature at primary inlet node
-        Real64 PriOutTemp = 0.0;         // Temperature at primary outlet node
-        Real64 SecInTemp = 0.0;          // Temperature at secondary inlet node
-        Real64 SecOutTemp = 0.0;         // Temperature at secondary outlet node
-        Real64 PriInletSetPoint = 0.0;   // Setpoint at Primary inlet node
-        Real64 SecInletSetPoint = 0.0;   // Setpoint at Secondary inlet node
-        bool PriInletControlled = false; // True if Primary inlet node is controlled
-        bool SecInletControlled = false; // True if secondary inlet is controlled
-        Real64 PriFlowRequest = 0.0;     // total flow request on supply side.
+        Real64 SecCPLegFlow = 0.0; // Mass flow in the secondary side Common pipe leg
+        Real64 PriCPLegFlow = 0.0; // Mass flow in the primary side Common pipe leg
+        Real64 SecToPriFlow = 0.0; // Mass flow in the pipe from Secondary to primary side
+        Real64 PriToSecFlow = 0.0; // Mass flow in the pipe from primary to Secondary side
         bool MyEnvrnFlag = true;
     };
 

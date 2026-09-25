@@ -187,10 +187,8 @@ namespace SingleDuct {
         bool NoOAFlowInputFromUser;           // avoids OA calculation if no input specified by user
         int OARequirementsPtr;                // - Index to DesignSpecification:OutdoorAir object
         int AirLoopNum;
-        PlantLocation HWplantLoc;     // plant topology, Component location
-        std::string ZoneHVACUnitType; // type of Zone HVAC unit for air terminal mixer units
-        std::string ZoneHVACUnitName; // name of Zone HVAC unit for air terminal mixer units
-        int SecInNode;                // zone or zone unit air node number
+        PlantLocation HWplantLoc; // plant topology, Component location
+        int SecInNode;            // zone or zone unit air node number
         // warning variables
         // VS VAV terminal: separate recurring-error indices per distinct message, since the supply air
         // flow solve (cooling and heating) always runs regardless of reheat coil type, and can co-occur
@@ -292,7 +290,6 @@ namespace SingleDuct {
         Real64 MixedAirMassFlowRate = 0.0;               // mixed air in mass flow rate
         Real64 MassFlowRateMaxAvail = 0.0;               // maximum air mass flow rate allowed through component
         int ADUNum = 0;                                  // index of Air Distribution Unit
-        int TermUnitSizingIndex = 0;                     // Pointer to TermUnitSizing and TermUnitFinalZoneSizing data for this terminal unit
         bool OneTimeInitFlag = true;                     // true if one-time inits should be done
         bool OneTimeInitFlag2 = true;                    // true if more one-time inits should be done
         int CtrlZoneInNodeIndex = 0;                     // which controlled zone inlet node number corresponds with this unit
@@ -360,7 +357,6 @@ struct SingleDuctData : BaseGlobalStruct
     int NumSDAirTerminal = 0;              // The Number of single duct air terminals found in the Input
     bool GetInputFlag = true;              // Flag set to make sure you get input once
     bool GetATMixerFlag = true;            // Flag set to make sure you get input once
-    bool InitATMixerFlag = true;           // Flag set to make sure you do begin simulation initializaztions once for mixer
     bool ZoneEquipmentListChecked = false; // True after the Zone Equipment List has been checked for items
 
     int SysNumGSI = 0;   // The Sys that you are currently loading input into
@@ -385,7 +381,6 @@ struct SingleDuctData : BaseGlobalStruct
     int CoilWaterOutletNodeSS = 0;
     int CoilSteamInletNodeSS = 0;
     int CoilSteamOutletNodeSS = 0;
-    Fluid::GlycolProps *water = nullptr;
     Real64 UserInputMaxHeatAirVolFlowRateSS = 0.0; // user input for MaxHeatAirVolFlowRate
     Real64 MinAirMassFlowRevActSVAV = 0.0;         // minimum air mass flow rate used in "reverse action" air mass flow rate calculation
     Real64 MaxAirMassFlowRevActSVAV = 0.0;         // maximum air mass flow rate used in "reverse action" air mass flow rate calculation

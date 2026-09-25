@@ -84,7 +84,6 @@ namespace CoolTower {
     {
         // Members
         std::string Name;                                                  // The component name
-        std::string CompType;                                              // Type of component
         Sched::Schedule *availSched = nullptr;                             // schedule
         int ZonePtr = 0;                                                   // Index to zone
         int spacePtr = 0;                                                  // Index to space (if applicable)
