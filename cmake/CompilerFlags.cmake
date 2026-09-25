@@ -1,3 +1,9 @@
+# RelWithDebInfo (foremost), Release and MinSizeRel all define NDEBUG by default, which disables assert().
+# For profiling builds, the overhead of assert() is preponderant and renders results useless.
+# But keeping asserts enabled in RelWithDebInfo lets CI catch things like array bounds violations, but still run much faster than Debug.
+option(FORCE_ENABLE_ASSERTS "Keep assertions enabled in optimized builds such as RelWithDebInfo by undefining NDEBUG" OFF)
+mark_as_advanced(FORCE_ENABLE_ASSERTS)
+
 # Compiler-agnostic compiler flags first
 target_compile_definitions(project_options INTERFACE -DOBJEXXFCL_ALIGN=64) # Align ObjexxFCL arrays to 64B
 target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:-DOBJEXXFCL_ARRAY_INIT_DEBUG>) # Initialize ObjexxFCL arrays to aid debugging
@@ -110,6 +116,12 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   target_compile_options(project_warnings INTERFACE -Wno-attributes) # Don't warn on attributes Clang doesn't know
   target_compile_options(project_warnings INTERFACE -Wno-delete-non-virtual-dtor)
   target_compile_options(project_warnings INTERFACE -Wno-missing-braces)
+  # for optimized builds, lets turn OFF NDEBUG, which will re-enable assert statements
+  if(FORCE_ENABLE_ASSERTS)
+    target_compile_options(
+      project_options INTERFACE $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-UNDEBUG>
+    )
+  endif()
   if(CMAKE_COMPILER_IS_GNUCXX) # g++
     # Suppress unused-but-set warnings until more serious ones are addressed
     target_compile_options(project_warnings INTERFACE -Wno-unused-but-set-parameter -Wno-unused-but-set-variable)
@@ -129,8 +141,6 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
       target_compile_options(project_warnings INTERFACE -Wno-restrict)
     endif()
-    # for RelWithDebInfo builds, lets turn OFF NDEBUG, which will re-enable assert statements
-    target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-UNDEBUG>)
     target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     target_compile_options(project_warnings INTERFACE -Wshadow-field) # Equivalent to MSVC's C4458 (declaration of 'identifier' hides class member); narrower than -Wshadow
