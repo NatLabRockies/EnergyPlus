@@ -588,8 +588,6 @@ struct FluidData : BaseGlobalStruct
 
     int SatErrCountGetSupHeatEnthalpyRefrig = 0;
     int SatErrCountGetSupHeatDensityRefrig = 0;
-    int TempLoRangeErrIndexGetQualityRefrig = 0;
-    int TempHiRangeErrIndexGetQualityRefrig = 0;
     int TempRangeErrCountGetInterpolatedSatProp = 0;
     int TempRangeErrIndexGetInterpolatedSatProp = 0;
 

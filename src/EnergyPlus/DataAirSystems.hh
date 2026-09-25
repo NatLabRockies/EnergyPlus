@@ -324,7 +324,6 @@ struct AirSystemsData : BaseGlobalStruct
 {
 
     EPVector<DataAirSystems::DefinePrimaryAirSystem> PrimaryAirSystems;
-    Array1D<DataAirSystems::ConnectionPoint> DemandSideConnect;               // Connections between loops
     Array1D<DataAirSystems::ConnectZoneComp> ZoneCompToPlant;                 // Connections between loops
     Array1D<DataAirSystems::ConnectZoneSubComp> ZoneSubCompToPlant;           // Connections between loops
     Array1D<DataAirSystems::ConnectZoneSubSubComp> ZoneSubSubCompToPlant;     // Connections between loops

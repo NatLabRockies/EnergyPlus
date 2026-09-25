@@ -121,8 +121,6 @@ struct SolarReflectionManagerData : BaseGlobalStruct
 {
 
     int TotSolReflRecSurf = 0; // Total number of exterior surfaces that can receive reflected solar
-    int TotPhiReflRays = 0;    // Number of rays in altitude angle (-90 to 90 deg) for diffuse refl calc
-    int TotThetaReflRays = 0;  // Number of rays in azimuth angle (0 to 180 deg) for diffuse refl calc
 
     Array1D<SolarReflectionManager::SolReflRecSurfData> SolReflRecSurf;
 

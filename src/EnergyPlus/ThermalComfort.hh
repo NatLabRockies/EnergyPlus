@@ -297,7 +297,6 @@ struct ThermalComfortsData : BaseGlobalStruct
     Real64 IntHeatProd = 0.0;               // Internal heat production
     int IterNum = 0;                        // Number of iteration
     Real64 LatRespHeatLoss = 0.0;           // Latent respiration heat loss
-    int MaxZoneNum = 0;                     // Number of zones
     Real64 OpTemp = 0.0;                    // Operative temperature
     Real64 EffTemp = 0.0;                   // Effective temperature
     int PeopleNum = 0;                      // People number
@@ -307,8 +306,6 @@ struct ThermalComfortsData : BaseGlobalStruct
     Real64 RespHeatLoss = 0.0;              // The rate of respiratory heat loss
     Real64 SatSkinVapPress = 0.0;           // Saturated vapor pressure at skin temperature
     Real64 ShivResponse = 0.0;              // Metalbolic heat production due to shivering
-    Real64 SkinComfTemp = 0.0;              // Skin temperature required to achieve thermal comfort; C
-    Real64 SkinComfVPress = 0.0;            // Saturated water vapor pressure at required skin temperature; Torr
     Real64 SkinTemp = 0.0;                  // Skin temperature
     Real64 SkinTempChange = 0.0;            // Temperature change of skin in 1 minute
     Real64 SkinTempNeut = 0.0;              // Skin temperature at neutral state

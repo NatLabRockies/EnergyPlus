@@ -1125,7 +1125,6 @@ struct OutputReportTabularData : BaseGlobalStruct
         OutputReportTabular::maxNumStyles, OutputReportTabular::TableStyle::Invalid); // see list of parameters
 
     Real64 timeInYear = 0.0;
-    int defaultSigDigits = 2;
     bool formatReals_Tabular = true;
     bool formatReals_JSON = true;
     bool formatReals_SQLite = true;

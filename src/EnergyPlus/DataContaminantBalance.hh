@@ -214,7 +214,6 @@ struct ContaminantBalanceData : BaseGlobalStruct
     Array1D<Real64> CO2ZoneTimeMinus1Temp; // Zone air CO2 at previous timestep
     Array1D<Real64> CO2ZoneTimeMinus2Temp; // Zone air CO2 at timestep T-2
     Array1D<Real64> CO2ZoneTimeMinus3Temp; // Zone air CO2 at timestep T-3
-    Array1D<Real64> ZoneAirCO2Old;         // Last Time Steps Zone AIR Humidity Ratio
 
     Array1D<Real64> ZoneCO2MX; // TEMPORARY ZONE CO2 TO TEST CONVERGENCE in Exact and Euler method
     Array1D<Real64> ZoneCO2M2; // TEMPORARY ZONE CO2 at timestep t-2 in Exact and Euler method
@@ -251,7 +250,6 @@ struct ContaminantBalanceData : BaseGlobalStruct
     Array1D<Real64> GCZoneTimeMinus1Temp; // Zone air generic contaminant at previous timestep
     Array1D<Real64> GCZoneTimeMinus2Temp; // Zone air generic contaminant at timestep T-2
     Array1D<Real64> GCZoneTimeMinus3Temp; // Zone air generic contaminant at timestep T-3
-    Array1D<Real64> ZoneAirGCOld;         // Last Time Steps Zone AIR generic contaminant
 
     Array1D<Real64> ZoneGCMX; // TEMPORARY ZONE CO2 TO TEST CONVERGENCE in Exact and Euler method
     Array1D<Real64> ZoneGCM2; // TEMPORARY ZONE CO2 at timestep t-2 in Exact and Euler method

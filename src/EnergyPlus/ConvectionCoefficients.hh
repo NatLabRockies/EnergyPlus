@@ -783,7 +783,6 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;
-    bool FirstRoofSurf = true;
 
     // Object Data
     Convect::IntAdaptiveConvAlgo intAdaptiveConvAlgo; // stores rules for Hc model equations
