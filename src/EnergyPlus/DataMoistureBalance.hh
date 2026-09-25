@@ -50,9 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Array3D.hh>
-#include <ObjexxFCL/Array4D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -65,20 +62,11 @@ struct MoistureBalanceData : BaseGlobalStruct
     // This is more or less the traditional value from BLAST.
     // static constexpr Real64 Lam = 2500000.0; // heat of adsorption for building materials
     // Public Variables that will also be used in the Moisture Surface Balance
-    Array3D<Real64> FluxH; // transfer function coeff for calculating the CPF Flux history term
-    Array4D<Real64> Icoef; // transfer function coeff for calculating the CPF history term
-    Array2D<Real64> DiffC; // Thermal Diffusivity in combined potential formulation (CPF)
-    // for each equation
-    Array2D<Real64> mtinc; // # of Moisture transfer function time increment for each equation
-    Array1D<Real64> S1;    // Thermal Diffusivity in combined potential formulation (CPF)
+    Array1D<Real64> S1; // Thermal Diffusivity in combined potential formulation (CPF)
     // for each equation
     Array1D<Real64> R2; // Thermal Diffusivity in combined potential formulation (CPF)
     // for each equation
     Array1D<Real64> TempOutsideAirFD; // Temperature outside air for the FD surface
-
-    Array2D_int mhstry; // # of FD History terms for each equation
-    Array1D_int CMTF;   // Type of material layer
-    Array2D_int Nmrf;   // # of Moisture Response Factors for CPF Solution
 
     // variables used for MTF moisture implementation
     Array1D<Real64> RhoVaporAirOut; // Vapor Density outside surface
