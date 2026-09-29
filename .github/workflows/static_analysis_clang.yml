@@ -22,7 +22,10 @@ permissions:
 
 # A new commit (or a re-label) supersedes the run in progress for the same PR / branch
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # A run for an unrelated label is skipped by the job's `if`, but must not cancel a real run: give it its own group
+  group: >-
+    ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{
+    (github.event.action == 'labeled' && github.event.label.name != 'Staged') && github.run_id || '' }}
   cancel-in-progress: true
 
 jobs:
