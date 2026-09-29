@@ -233,10 +233,12 @@ namespace RoomAir {
         std::string_view cCMO = (model == RoomAirModel::UFADExt) ? "RoomAirSettings:UnderFloorAirDistributionExterior"
                                                                  : "RoomAirSettings:UnderFloorAirDistributionInterior";
 
-        Real64 const NumberOfOccupants =
-            std::accumulate(state.dataHeatBal->People.begin(), state.dataHeatBal->People.end(), 0.0, [ZoneNum](Real64 total, auto const &people) {
-                return (people.ZonePtr == ZoneNum) ? total + people.NumberOfPeople : total;
-            });
+        Real64 NumberOfOccupants = 0.0;
+        for (auto const &people : state.dataHeatBal->People) {
+            if (people.ZonePtr == ZoneNum) {
+                NumberOfOccupants += people.NumberOfPeople;
+            }
+        }
 
         if (model == RoomAirModel::UFADExt) {
             // calculate total window width in zone

@@ -4744,9 +4744,10 @@ void GetDaylightingControls(EnergyPlusData &state, bool &ErrorsFound)
             ErrorsFound = true;
         }
 
-        Real64 const sumFracs = std::accumulate(daylightControl.refPts.begin(), daylightControl.refPts.end(), 0.0, [](Real64 sum, auto const &refPt) {
-            return sum + refPt.fracZoneDaylit;
-        });
+        Real64 sumFracs = 0.0;
+        for (auto const &refPt : daylightControl.refPts) {
+            sumFracs += refPt.fracZoneDaylit;
+        }
 
         daylightControl.sumFracLights = sumFracs;
         if ((1.0 - sumFracs) > FractionTolerance) {
@@ -5155,16 +5156,6 @@ inline WinCover findWinShadingStatus(EnergyPlusData &state, int const IWin)
                : WinCover::Bare;
 }
 
-Real64 glareIndex(Real64 const glareConstant)
-{
-    if (glareConstant <= 0.0) {
-        return 0.0;
-    }
-
-    // The offset retains the legacy result while protecting log10 from a zero argument.
-    return max(0.0, 10.0 * std::log10(glareConstant + 0.000001));
-}
-
 Real64 DayltgGlare(EnergyPlusData &state,
                    int IL,                   // Reference point index: 1=first ref pt, 2=second ref pt
                    Real64 BLUM,              // Window background (surround) luminance (cd/m2)
@@ -5210,8 +5201,8 @@ Real64 DayltgGlare(EnergyPlusData &state,
         GTOT += GTOT1 / (GTOT2 + 0.000001);
     }
 
-    // Glare index
-    return glareIndex(GTOT);
+    // Glare index (adding 0.000001 prevents LOG10 (0))
+    return max(0.0, 10.0 * std::log10(GTOT + 0.000001));
 }
 
 void DayltgGlareWithIntWins(EnergyPlusData &state,
@@ -5261,7 +5252,7 @@ void DayltgGlareWithIntWins(EnergyPlusData &state,
         }
 
         // Glare index
-        refPt.glareIndex = glareIndex(GTOT);
+        refPt.glareIndex = max(0.0, 10.0 * std::log10(GTOT + 0.000001));
     } // for (IL)
 } // DaylGlareWithIntWins()
 

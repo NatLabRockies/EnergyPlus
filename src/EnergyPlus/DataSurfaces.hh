@@ -50,7 +50,6 @@
 
 // C++ Headers
 #include <cstddef>
-#include <numeric>
 #include <unordered_map>
 #include <vector>
 
@@ -673,9 +672,11 @@ namespace DataSurfaces {
         std::size_t get_hash() const
         {
             auto hash_list = get_hash_list();
-            return std::accumulate(hash_list.begin(), hash_list.end(), std::size_t{0}, [this](std::size_t combined_hash, std::size_t hash) {
-                return hash_combine(combined_hash, hash);
-            });
+            std::size_t combined_hash = 0u;
+            for (auto hash : hash_list) {
+                combined_hash = hash_combine(combined_hash, hash);
+            }
+            return combined_hash;
         }
 
         bool operator==(const SurfaceCalcHashKey &other) const
