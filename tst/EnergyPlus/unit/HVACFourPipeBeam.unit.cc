@@ -763,6 +763,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 
@@ -2334,6 +2335,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 
@@ -3823,6 +3825,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 

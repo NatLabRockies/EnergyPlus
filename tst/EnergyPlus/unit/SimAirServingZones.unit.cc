@@ -2042,6 +2042,7 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
         "  Zone1 Thermostat,                       !- Name",
         "  Zone1,                                  !- Zone or ZoneList Name",
         "  Zone1 Thermostat Schedule,              !- Control Type Schedule Name",
+        "  ,                                       !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,        !- Control 1 Object Type",
         "  Thermostat Setpoint Dual Setpoint 1;    !- Control 1 Name",
 

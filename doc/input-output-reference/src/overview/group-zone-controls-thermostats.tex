@@ -140,15 +140,15 @@ An example of a global thermostat:
 ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
 ZoneControl:Thermostat,
   AllControlledZones Thermostat,  !- Name
-  AllControlledZones,         !- Zone Name
-  Zone Control Type Sched,    !- Control Type Schedule Name
-  ,                                        !- Temperature Difference Between Cutout And Setpoint
+  AllControlledZones,              !- Zone Name
+  Zone Control Type Sched,         !- Control Type Schedule Name
+  ,                                !- Temperature Difference Between Cutout And Setpoint
   ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
-  CoolingSetPoint,            !- Control 1 Name
+  CoolingSetPoint,                   !- Control 1 Name
   ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
-  HeatingSetpoint,            !- Control 2 Name
+  HeatingSetpoint,                   !- Control 2 Name
   ThermostatSetpoint:DualSetpoint,  !- Control 3 Object Type
-  DualSetPoint;               !- Control 3 Name
+  DualSetPoint;                      !- Control 3 Name
 \end{lstlisting}
 
 A complete zone thermostat example showing this statement and all of the objects it must reference is:
