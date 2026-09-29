@@ -977,6 +977,8 @@ Coil:Heating:Electric,
   HVAC,Sum,Heating Coil Electricity Energy {[}J{]}
 \item
   HVAC,Average,Heating Coil Electricity Rate {[}W{]}
+\item
+  HVAC,Average,Heating Coil Runtime Fraction {[]}
 \end{itemize}
 
 \paragraph{Heating Coil Heating Energy (J)}\label{heating-coil-heating-energy-j-2}
@@ -994,6 +996,10 @@ Heating Coil electric consumption after the efficiency of the coil has been take
 \paragraph{Heating Coil Electricity Rate {[}W{]}}\label{heating-coil-electric-power-w}
 
 This field is the average Heating Coil electric power after the efficiency of the coil has been taken into account in Watts for the timestep reported.
+
+\paragraph{Heating Coil Runtime Fraction {[]}}\label{heating-coil-runtime-fraction-electric}
+
+With no startup degradation modeled for this coil, the runtime fraction is the effective part-load ratio (heating output divided by nominal capacity).
 
 \subsection{Coil:Heating:Electric:MultiStage}\label{coilheatingelectricmultistage}
 
@@ -1082,6 +1088,8 @@ Coil:Heating:Electric:MultiStage,
   HVAC,Sum,Heating Coil Electric Consumption {[}J{]}
 \item
   HVAC,Average,Heating Coil Electricity Rate {[}W{]}
+\item
+  HVAC,Average,Heating Coil Runtime Fraction {[]}
 \end{itemize}
 
 \paragraph{Heating Coil Heating Energy (J)}\label{heating-coil-energy-j}
@@ -1099,6 +1107,10 @@ Heating Coil electric consumption after the efficiency of the coil has been take
 \paragraph{Heating Coil Electricity Rate {[}W{]}}\label{heating-coil-electric-power-w-1}
 
 This field is the average Heating Coil electric power after the efficiency of the coil has been taken into account in Watts for the timestep reported.
+
+\paragraph{Heating Coil Runtime Fraction {[]}}\label{heating-coil-runtime-fraction-electric-multistage}
+
+This is the fraction of the system timestep that the electric heating coil operates. The runtime fraction is 1 when operating above stage 1, equal to the cycling ratio when operating at stage 1, and 0 when the coil is off.
 
 \subsection{Coil:Heating:Desuperheater}\label{coilheatingdesuperheater}
 
