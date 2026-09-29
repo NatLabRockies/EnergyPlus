@@ -1,0 +1,127 @@
+name: EnergyPlus Static Analysis
+
+# Runs on every push to develop, and on pull requests carrying the "Staged" label:
+# adding the label starts a run, and new commits on a staged PR re-run it.
+#
+# There is no secret and no write permission involved: the result is simply the status of
+# the job, which shows up natively in the PR's checks. (For PRs from forks GitHub gives the
+# workflow a read-only token and no secrets, which is all that is needed here.)
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    types: [labeled, synchronize]
+  workflow_dispatch:
+
+env:
+  CC: clang-22
+  CXX: clang++-22
+
+permissions:
+  contents: read
+
+# A new commit (or a re-label) supersedes the run in progress for the same PR / branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Static analysis
+    if: >-
+      github.event_name != 'pull_request' ||
+      (contains(github.event.pull_request.labels.*.name, 'Staged') &&
+       (github.event.action != 'labeled' || github.event.label.name == 'Staged'))
+    runs-on: ubuntu-26.04
+
+    steps:
+
+    - name: Download latest EnergyPlus-clang-tools release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        begin_group "Downloading EnergyPlus-clang-tools"
+        # Not in the workspace: actions/checkout below wipes the workspace if it isn't a git repo yet
+        CLANG_TOOLS_DIR="${RUNNER_TEMP}/clang-tools"
+        mkdir -p "${CLANG_TOOLS_DIR}"
+        gh release download --repo jmarrec/EnergyPlus-clang-tools --pattern '*-Linux-*-x86_64.tar.gz' --dir "${CLANG_TOOLS_DIR}" --clobber
+        tar -xzf "${CLANG_TOOLS_DIR}"/*.tar.gz -C "${CLANG_TOOLS_DIR}" --strip-components=1
+        echo "${CLANG_TOOLS_DIR}/bin" >> "$GITHUB_PATH"
+        echo "::endgroup::"
+
+        begin_group "Checking EnergyPlusTidyModule.so"
+        TIDY_MODULE="${CLANG_TOOLS_DIR}/lib/EnergyPlusTidyModule.so"
+        echo "TIDY_MODULE=${TIDY_MODULE}" >> "$GITHUB_ENV"
+        echo "Listing available energyplus-* checks:"
+        clang-tidy-22 --load=${TIDY_MODULE} --list-checks -checks='-*,energyplus-*'
+        echo "::endgroup::"
+
+    - uses: actions/checkout@v7
+
+    - name: Configure EnergyPlus
+      run: |
+        mkdir build && cd build
+        echo "BUILD_DIR=$(pwd)" >> "$GITHUB_ENV"
+        cmake -G Ninja -DCMAKE_BUILD_TYPE:STRING=Release \
+          -DENABLE_PCH:BOOL=ON \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
+          -DLINK_WITH_PYTHON:BOOL=OFF -DPYTHON_CLI:BOOL=OFF -DBUILD_TESTING:BOOL=OFF \
+          -DBUILD_FORTRAN:BOOL=OFF -DDOCUMENTATION_BUILD:STRING=DoNotBuild \
+          -DENABLE_OPENMP:BOOL=OFF \
+          ..
+        # Build the PCH
+        ninja src/EnergyPlus/CMakeFiles/energypluslib.dir/cmake_pch.hxx.pch
+
+    # Running the individual executables is slower than running both of them at the same time via clang-tidy
+    # (mixed_indexing_check took 9m41s, recurring_static_message_check 9m37s. Running both via clang-tidy took 4min2s)
+    # In addition, we add some unambiguous built-in checkers, which costs a lot but should be worth it
+    - name: Run energyplus-* clang-tidy checks
+      id: clang_tidy_checks
+      continue-on-error: true
+      run: |
+        # I should add clang-analyzer-deadcode.DeadStores but there's a ton of offenses right now
+        run-clang-tidy-22 \
+          -load="${TIDY_MODULE}" \
+          -checks='-*,energyplus-*' \
+          -use-color \
+          -export-fixes=clang-tidy-findings.yaml \
+          -p "${BUILD_DIR}" \
+          -j "$(nproc)" \
+          src/EnergyPlus/
+
+    - name: Upload clang-tidy findings
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: clang-tidy-findings
+        path: clang-tidy-findings.yaml
+        if-no-files-found: ignore
+
+    - name: Run find_unused_members
+      id: find_unused_members
+      continue-on-error: true
+      run: |
+        find_unused_members -p ${BUILD_DIR} -j $(nproc)
+
+    - name: Summarize
+      if: always()
+      env:
+        CLANG_TIDY_OUTCOME: ${{ steps.clang_tidy_checks.outcome }}
+        FIND_UNUSED_MEMBERS_OUTCOME: ${{ steps.find_unused_members.outcome }}
+      run: |
+        {
+          echo "### EnergyPlus Static Analysis"
+          echo "- energyplus-* clang-tidy checks: ${CLANG_TIDY_OUTCOME}"
+          echo "- find_unused_members: ${FIND_UNUSED_MEMBERS_OUTCOME}"
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    # Both checks above are continue-on-error so that they all get to run; fail the job here
+    - name: Fail if any check found something
+      if: |
+        steps.clang_tidy_checks.outcome == 'failure' ||
+        steps.find_unused_members.outcome == 'failure'
+      run: |
+        echo "One or more checks reported findings; see the failed steps above."
+        exit 1
