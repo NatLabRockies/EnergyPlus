@@ -2014,6 +2014,9 @@
   OutputControl:Table:Style,
     HTML;                    !- Column Separator
 
+  OutputControl:Files,
+    Yes;                     !- Output CSV
+
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
 
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,timestep;
@@ -2121,6 +2124,8 @@
   Output:Variable,*,Heating Coil Heating Rate,timestep;
 
   Output:Variable,*,Heating Coil Heating Energy,timestep;
+
+  Output:Variable,*,Heating Coil Runtime Fraction,timestep;
 
   Output:Variable,Outside Air Inlet Node,System Node Mass Flow Rate,timestep;
 
