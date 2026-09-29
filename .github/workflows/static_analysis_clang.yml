@@ -102,11 +102,32 @@ jobs:
         path: clang-tidy-findings.yaml
         if-no-files-found: ignore
 
+    # The findings file is only written when run-clang-tidy got as far as exporting fixes
+    - name: Summarize clang-tidy findings
+      if: always() && hashFiles('clang-tidy-findings.yaml') != ''
+      run: |
+        sudo apt-get install -y --no-install-recommends python3-yaml python3-tabulate
+        summarize_clang_tidy_findings.py clang-tidy-findings.yaml --title "energyplus-* clang-tidy checks"
+
     - name: Run find_unused_members
       id: find_unused_members
       continue-on-error: true
       run: |
-        find_unused_members -p ${BUILD_DIR} -j $(nproc)
+        find_unused_members -p ${BUILD_DIR} -j $(nproc) --export-fixes unused-members-findings.yaml
+
+    - name: Upload find_unused_members findings
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: unused-members-findings
+        path: unused-members-findings.yaml
+        if-no-files-found: ignore
+
+    - name: Summarize find_unused_members findings
+      if: always() && hashFiles('unused-members-findings.yaml') != ''
+      run: |
+        sudo apt-get install -y --no-install-recommends python3-yaml python3-tabulate
+        summarize_clang_tidy_findings.py unused-members-findings.yaml --title "find_unused_members"
 
     - name: Summarize
       if: always()
