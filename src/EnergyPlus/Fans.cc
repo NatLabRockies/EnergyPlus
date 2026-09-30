@@ -3054,7 +3054,7 @@ void FanSystem::calcSimpleSystemFan(
                 Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn) ? 1.0 : // not sure why, but legacy fan had this for night ventilation
                                              Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
                 Real64 _localFanPower =
-                    max(0.0, _locRuntimeFrac * _localPowerFrac * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
+                    max(0.0, _locRuntimeFrac * _localPowerFrac * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
                 Real64 _shaftPower = _localMotorEff * _localFanPower;
                 Real64 _localPowerLossToAir = _shaftPower + (_localFanPower - _shaftPower) * _localMotorInAirFrac;
                 outletAirEnthalpy = inletAirEnthalpy + _localPowerLossToAir / _localAirMassFlow[mode]; // this will get revised later
@@ -3069,11 +3069,11 @@ void FanSystem::calcSimpleSystemFan(
                     Real64 _fanPowerAtLowMinimum = 0.0;
                     if (_localFlowFracForPower < _minFlowFracLimitFanHeat) {
                         _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
-                        _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
+                        _fanPowerAtLowMinimum = _powerFracAtLowMin * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _localFlowFracForPower * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     } else if (_locFlowRatio < _minFlowFracLimitFanHeat) {
                         _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
-                        _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
+                        _fanPowerAtLowMinimum = _powerFracAtLowMin * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _locFlowRatio * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     }
                 }
