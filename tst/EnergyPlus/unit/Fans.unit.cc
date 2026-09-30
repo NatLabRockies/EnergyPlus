@@ -153,7 +153,7 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
     fan1->Name = "Test Fan";
     fan1->type = HVAC::FanType::Constant;
     fan1->deltaPress = 300.0;
-    fan1->totalEff = 1.0;
+    fan1->totalEff = 0.7;
     fan1->motorEff = 0.8;
     fan1->motorInAirFrac = 1.0;
     fan1->availSched = Sched::GetScheduleAlwaysOff(*state);
@@ -170,7 +170,7 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
     nightVentPerf.FanName = fan1->Name;
     nightVentPerf.FanEff = 0.5;
     nightVentPerf.DeltaPress = 100.0;
-    nightVentPerf.MaxAirMassFlowRate = 0.5;
+    nightVentPerf.MaxAirMassFlowRate = 0.75;
     nightVentPerf.MotEff = 0.6;
     nightVentPerf.MotInAirFrac = 0.25;
 
@@ -179,13 +179,23 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
 
     state->dataHVACGlobal->TurnFansOn = true;
     state->dataHVACGlobal->TurnFansOff = false;
-    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->NightVentOn = false;
+
+    Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
     fan1->simulateConstant(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower); // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
+    EXPECT_DOUBLE_EQ(1.0, fan1->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s inlet flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->totalPower); // normal power equals design power at full flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
+
+    state->dataHVACGlobal->NightVentOn = true;
+    fan1->simulateConstant(*state);
+
+    EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
+    EXPECT_DOUBLE_EQ(150.0, fan1->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
+    EXPECT_DOUBLE_EQ(105.0, fan1->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
 }
 
 TEST_F(EnergyPlusFixture, Fans_OnOff_EMSPressureRiseResetTest)
@@ -244,7 +254,7 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
     fan1->Name = "Test Fan";
     fan1->type = HVAC::FanType::OnOff;
     fan1->deltaPress = 300.0;
-    fan1->totalEff = 1.0;
+    fan1->totalEff = 0.7;
     fan1->motorEff = 0.8;
     fan1->motorInAirFrac = 1.0;
     fan1->availSched = Sched::GetScheduleAlwaysOff(*state);
@@ -261,7 +271,7 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
     nightVentPerf.FanName = fan1->Name;
     nightVentPerf.FanEff = 0.5;
     nightVentPerf.DeltaPress = 100.0;
-    nightVentPerf.MaxAirMassFlowRate = 0.5;
+    nightVentPerf.MaxAirMassFlowRate = 0.75;
     nightVentPerf.MotEff = 0.6;
     nightVentPerf.MotInAirFrac = 0.25;
 
@@ -270,13 +280,23 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
 
     state->dataHVACGlobal->TurnFansOn = true;
     state->dataHVACGlobal->TurnFansOff = false;
-    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->NightVentOn = false;
+
+    Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
     fan1->simulateOnOff(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower); // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
+    EXPECT_DOUBLE_EQ(1.0, fan1->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s inlet flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->totalPower); // normal power equals design power at full flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
+
+    state->dataHVACGlobal->NightVentOn = true;
+    fan1->simulateOnOff(*state);
+
+    EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
+    EXPECT_DOUBLE_EQ(150.0, fan1->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
+    EXPECT_DOUBLE_EQ(105.0, fan1->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
 }
 
 TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
@@ -288,7 +308,7 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
     fan1->Name = "Test Fan";
     fan1->type = HVAC::FanType::Exhaust;
     fan1->deltaPress = 300.0;
-    fan1->totalEff = 1.0;
+    fan1->totalEff = 0.7;
     fan1->availSched = Sched::GetScheduleAlwaysOn(*state);
     fan1->maxAirFlowRate = 2.0;
     fan1->maxAirMassFlowRate = 2.0;
@@ -303,7 +323,7 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
     nightVentPerf.FanName = fan1->Name;
     nightVentPerf.FanEff = 0.5;
     nightVentPerf.DeltaPress = 100.0;
-    nightVentPerf.MaxAirMassFlowRate = 0.5;
+    nightVentPerf.MaxAirMassFlowRate = 0.75;
     nightVentPerf.MotEff = 0.6;
     nightVentPerf.MotInAirFrac = 0.25;
 
@@ -312,13 +332,23 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
 
     state->dataHVACGlobal->TurnFansOn = true;
     state->dataHVACGlobal->TurnFansOff = false;
-    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->NightVentOn = false;
+
+    Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
     fan1->simulateZoneExhaust(*state);
 
-    EXPECT_DOUBLE_EQ(0.5, fan1->outletAirMassFlowRate); // Without night ventilation: 1.0 kg/s
-    EXPECT_DOUBLE_EQ(100.0, fan1->totalPower);          // Without night ventilation: 300 W
-    EXPECT_DOUBLE_EQ(70.0, fan1->powerLossToAir);       // Without night ventilation: 300 W
+    EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower); // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
+    EXPECT_DOUBLE_EQ(1.0, fan1->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s inlet flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->totalPower); // normal power equals design power at full flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // normal mode puts all design power into the air.
+
+    state->dataHVACGlobal->NightVentOn = true;
+    fan1->simulateZoneExhaust(*state);
+
+    EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
+    EXPECT_DOUBLE_EQ(150.0, fan1->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
+    EXPECT_DOUBLE_EQ(105.0, fan1->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
 }
 
 TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
