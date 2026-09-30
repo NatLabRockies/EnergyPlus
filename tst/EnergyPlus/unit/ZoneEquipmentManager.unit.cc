@@ -5567,7 +5567,9 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServin
         "1.0,                       !- Maximum Flow Rate{m3/s}",
         "Zone 2 Fan Inlet Node,     !- Air Inlet Node Name",
         "Zone 2 Fan Outlet Node,    !- Air Outlet Node Name",
-        "Zone Exhaust Fans;         !- End - Use Subcategory",
+        "Zone Exhaust Fans,         !- End - Use Subcategory",
+        ",                          !- Flow Fraction Schedule Name",
+        "Decoupled;                 !- System Availability Manager Coupling Mode",
 
         "FanPerformance:NightVentilation,",
         "Zone 1 Exhaust Fan,        !- Fan Name",
@@ -5611,6 +5613,11 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServin
     ASSERT_GT(fan2Num, 0);
     auto &fan1 = *state->dataFans->fans(fan1Num);
     auto &fan2 = *state->dataFans->fans(fan2Num);
+    auto *fan2Component = dynamic_cast<Fans::FanComponent *>(state->dataFans->fans(fan2Num));
+    ASSERT_NE(fan2Component, nullptr);
+    EXPECT_EQ(fan2Component->availManagerMode, Fans::AvailManagerMode::Decoupled);
+    // Keep the first two simulations coupled so they isolate serving-loop state from decoupled behavior.
+    fan2Component->availManagerMode = Fans::AvailManagerMode::Coupled;
 
     // Minimum zone equipment manager state needed by SimZoneEquipment
     int const numZones = state->dataGlobal->NumOfZones;
@@ -5665,11 +5672,12 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServin
     state->dataHVACGlobal->NightVentOn = false;
     SimZoneEquipment(*state, true, simAir);
 
+    // Zone 1 follows its night-ventilating loop; zone 2 keeps its design settings.
     EXPECT_NEAR(fan1.outletAirMassFlowRate, nightVentMassFlow, 0.0001);
     EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
     EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
-    // The per-zone override must not leak back out to the global flag
+    // The per-zone override must not leak back out to the global flag.
     EXPECT_FALSE(state->dataHVACGlobal->NightVentOn);
 
     // The global flag is on, but zone 2's air loop is not night ventilating, so zone 2's fan must use its design
@@ -5677,9 +5685,24 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServin
     state->dataHVACGlobal->NightVentOn = true;
     SimZoneEquipment(*state, true, simAir);
 
+    // A true global flag does not give zone 2 night settings because its serving loop is not ventilating.
     EXPECT_NEAR(fan1.outletAirMassFlowRate, nightVentMassFlow, 0.0001);
     EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
     EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    // The original global flag is restored after both fans are simulated.
+    EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
+
+    // A decoupled fan ignores the night-ventilation mode of its serving air loop.
+    fan2Component->availManagerMode = Fans::AvailManagerMode::Decoupled;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = true;
+    SimZoneEquipment(*state, true, simAir);
+
+    // Both loops ventilate, but only the coupled zone 1 fan uses night performance.
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, nightVentMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    // The caller's global flag remains unchanged after the per-zone overrides.
     EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
 }

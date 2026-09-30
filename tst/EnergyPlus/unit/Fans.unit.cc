@@ -56,7 +56,10 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
+#include <EnergyPlus/CurveManager.hh>
+#include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/Fans.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataSizing;
@@ -183,6 +186,7 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
 
     Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
+    // With night ventilation off, design performance governs the inlet flow, power, and fan heat.
     fan1->simulateConstant(*state);
 
     EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower);          // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
@@ -191,6 +195,7 @@ TEST_F(EnergyPlusFixture, Fans_ConstantVolume_NightVentilationPerformance)
     EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
 
     state->dataHVACGlobal->NightVentOn = true;
+    // Night mode selects the alternate performance and limits flow to the lower night maximum.
     fan1->simulateConstant(*state);
 
     EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
@@ -284,6 +289,7 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
 
     Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
+    // With night ventilation off, the on/off fan should use its design performance.
     fan1->simulateOnOff(*state);
 
     EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower);          // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
@@ -292,6 +298,7 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_NightVentilationPerformance)
     EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
 
     state->dataHVACGlobal->NightVentOn = true;
+    // Night mode selects the alternate performance and limits flow to the lower night maximum.
     fan1->simulateOnOff(*state);
 
     EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
@@ -336,6 +343,7 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
 
     Real64 const designElecPower = fan1->inletAirMassFlowRate * fan1->deltaPress / fan1->totalEff;
 
+    // A coupled zone exhaust fan should use design performance normally and its alternate settings in night mode.
     fan1->simulateZoneExhaust(*state);
 
     EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower);          // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
@@ -344,11 +352,89 @@ TEST_F(EnergyPlusFixture, Fans_ZoneExhaust_NightVentilationPerformance)
     EXPECT_DOUBLE_EQ(designElecPower, fan1->powerLossToAir); // normal mode puts all design power into the air.
 
     state->dataHVACGlobal->NightVentOn = true;
+    // Night mode selects the alternate pressure, efficiency, and 0.75 kg/s flow cap.
     fan1->simulateZoneExhaust(*state);
 
     EXPECT_DOUBLE_EQ(0.75, fan1->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
     EXPECT_DOUBLE_EQ(150.0, fan1->totalPower);           // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
     EXPECT_DOUBLE_EQ(105.0, fan1->powerLossToAir);       // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
+}
+
+TEST_F(EnergyPlusFixture, Fans_NightVentilationFlowCapWithFouledFilter)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+    state->dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
+
+    auto *curve = Curve::AddCurve(*state, "Fouled Filter Fan Curve");
+    curve->curveType = Curve::CurveType::Cubic;
+    curve->coeff[0] = 1151.1;
+    curve->coeff[1] = 13.509;
+    curve->coeff[2] = -0.9105;
+    curve->coeff[3] = -0.0129;
+    curve->inputLimits[0].min = 7.0;
+    curve->inputLimits[0].max = 21.0;
+
+    Sched::ScheduleConstant faultAvailableSchedule;
+    faultAvailableSchedule.currentVal = 1.0;
+    Sched::ScheduleConstant pressureFractionSchedule;
+    pressureFractionSchedule.currentVal = 1.1;
+
+    state->dataFaultsMgr->FaultsFouledAirFilters.allocate(1);
+    auto &fault = state->dataFaultsMgr->FaultsFouledAirFilters(1);
+    fault.availSched = &faultAvailableSchedule;
+    fault.pressFracSched = &pressureFractionSchedule;
+    fault.fanCurveNum = 1;
+
+    state->dataFans->NumNightVentPerf = 1;
+    state->dataFans->NightVentPerf.allocate(1);
+    state->dataFans->NightVentPerf(1).DeltaPress = 100.0;
+    state->dataFans->NightVentPerf(1).FanEff = 0.5;
+    state->dataFans->NightVentPerf(1).MaxAirMassFlowRate = 5.0;
+    state->dataFans->NightVentPerf(1).MotEff = 0.8;
+    state->dataFans->NightVentPerf(1).MotInAirFrac = 1.0;
+
+    auto configureFan = [&](Fans::FanComponent &fan, HVAC::FanType type) {
+        fan.Name = "Test Fan";
+        fan.type = type;
+        fan.deltaPress = 1017.59;
+        fan.totalEff = 0.7;
+        fan.motorEff = 0.8;
+        fan.motorInAirFrac = 1.0;
+        fan.availSched = Sched::GetScheduleAlwaysOn(*state);
+        fan.maxAirFlowRate = 18.194;
+        fan.maxAirMassFlowRate = 18.194;
+        fan.minAirMassFlowRate = 0.0;
+        fan.inletAirMassFlowRate = 18.194;
+        fan.inletAirTemp = 20.0;
+        fan.inletAirEnthalpy = 40000.0;
+        fan.inletAirHumRat = 0.008;
+        fan.rhoAirStdInit = 1.0;
+        fan.nightVentPerfNum = 1;
+        fan.faultyFilterFlag = true;
+        fan.faultyFilterIndex = 1;
+    };
+
+    // The active filter fault leaves the design maximum above 5 kg/s, so the night cap must remain the tighter limit.
+    Fans::FanComponent constantFan;
+    configureFan(constantFan, HVAC::FanType::Constant);
+    constantFan.simulateConstant(*state);
+    EXPECT_DOUBLE_EQ(5.0, constantFan.outletAirMassFlowRate);
+
+    Fans::FanComponent onOffFan;
+    configureFan(onOffFan, HVAC::FanType::OnOff);
+    onOffFan.simulateOnOff(*state);
+    EXPECT_DOUBLE_EQ(5.0, onOffFan.outletAirMassFlowRate);
+
+    Fans::FanComponent vavFan;
+    configureFan(vavFan, HVAC::FanType::VAV);
+    vavFan.simulateVAV(*state);
+    EXPECT_DOUBLE_EQ(5.0, vavFan.outletAirMassFlowRate);
+
+    // Fan:ZoneExhaust is not a supported fan type for FaultModel:Fouling:AirFilter.
 }
 
 TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
