@@ -43,6 +43,22 @@ fi
 HEADER="=============== ReadVarsESO ================="
 # Name of executable
 PRG_N=ReadVarsESO
+
+# ReadVarsESO is installed by pip under python_lib/bin. Resolve the installation
+# directory from this script when ENERGYPLUS_DIR was not supplied, including
+# when the script was reached through its /usr/local/bin symlink.
+READVARS_ROOT="$ENERGYPLUS_DIR"
+if $auto_eplus_dir; then
+  READVARS_SCRIPT="$0"
+  if [ -n "`readlink "$0"`" ]; then
+    READVARS_SCRIPT=`readlink "$0"`
+  fi
+  READVARS_ROOT=$(cd "$(dirname "$READVARS_SCRIPT")"; pwd)
+fi
+
+run_readvars() {
+  PYTHONPATH="$READVARS_ROOT/python_lib${PYTHONPATH:+:$PYTHONPATH}" "$READVARS_ROOT/python_lib/bin/$PRG_N" "$@"
+}
 # Output files extension
 OUT_EXT="csv"
 
@@ -135,20 +151,12 @@ case $EXT in
     if [ $BASE == eplusout ]; then
       echo $HEADER
       rm -f eplusout.csv
-      if $auto_eplus_dir; then
-        $ENERGYPLUS_DIR/bin/$PRG_N;
-      else
-        $ENERGYPLUS_DIR/PostProcess/$PRG_N;
-      fi
+      run_readvars
     else
       echo $HEADER
       rm -f eplusout.eso $BASE.csv eplusout.csv;
       ln -s $1 eplusout.eso;
-      if $auto_eplus_dir; then
-        $ENERGYPLUS_DIR/bin/$PRG_N;
-      else
-        $ENERGYPLUS_DIR/PostProcess/$PRG_N;
-      fi
+      run_readvars
       rm -f eplusout.eso;
       mv -f eplusout.csv $BASE.csv;
     fi
@@ -156,11 +164,7 @@ case $EXT in
     ;;
   rvi | mvi)
     echo $HEADER
-    if $auto_eplus_dir; then
-      $ENERGYPLUS_DIR/bin/$PRG_N $1
-    else
-      $ENERGYPLUS_DIR/PostProcess/$PRG_N  $1
-    fi
+    run_readvars "$1"
     exit 0;
     ;;*)
     Usage; ExitWithError;

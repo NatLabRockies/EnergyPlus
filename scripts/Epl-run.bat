@@ -137,6 +137,7 @@
 
  SET program_path=%~dp0
  IF "%epPath%" NEQ "" SET program_path=%epPath%
+ SET "PYTHONPATH=%program_path%python_lib;%PYTHONPATH%"
 
 : Set flag if the current directory is the same directory that EnergyPlus and the 
 : batch file are located.
@@ -386,12 +387,12 @@ IF EXIST ip.err DEL ip.err
 IF EXIST convert.txt DEL convert.txt
 :skipConv
 
-IF EXIST eplusout.inp "%program_path%postprocess\ReadVarsESO.bat" eplusout.inp %rvset%
-IF NOT EXIST eplusout.inp "%program_path%postprocess\ReadVarsESO.bat" " " %rvset%
-IF EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.bat" eplusmtr.inp %rvset%
+IF EXIST eplusout.inp "%program_path%python_lib\bin\ReadVarsESO.exe" eplusout.inp %rvset%
+IF NOT EXIST eplusout.inp "%program_path%python_lib\bin\ReadVarsESO.exe" " " %rvset%
+IF EXIST eplusmtr.inp "%program_path%python_lib\bin\ReadVarsESO.exe" eplusmtr.inp %rvset%
 IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
 IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
-IF NOT EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.bat" test.mvi %rvset%
+IF NOT EXIST eplusmtr.inp "%program_path%python_lib\bin\ReadVarsESO.exe" test.mvi %rvset%
 :skipReadVars
 
 "%program_path%postprocess\HVAC-Diagram.exe"
