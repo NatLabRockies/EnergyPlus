@@ -1156,11 +1156,11 @@ if(BUILD_TESTING)
     "API.TestFunctionalPython" PROPERTIES ENVIRONMENT
                                            "PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS};ENERGYPLUS_USE_PSYCH_ERRORS=$<BOOL:${USE_PSYCH_ERRORS}>")
 
-  # Runtime tests need a folder to be created for output files, if we are building fortran, let's test that the python API properly sets the E+ install root by passing "-r"
+  # Runtime tests need a folder to be created for output files. When the Python auxiliary tools are available, test that the Python API
+  # properly sets the E+ install root by passing "-r".
   set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtime_python")
   file(MAKE_DIRECTORY ${TEST_DIR})
-  if(BUILD_FORTRAN)
-    # TODO: This should depend on a completed build of readvars
+  if(PYTHON_CLI)
     add_test(NAME "API.TestRuntimePython" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntime.py" -r -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")
   else()
     add_test(NAME "API.TestRuntimePython" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntime.py" -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")

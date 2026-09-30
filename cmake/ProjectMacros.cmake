@@ -95,14 +95,13 @@ function(ADD_SIMULATION_TEST)
     set(ENERGYPLUS_FLAGS "${ADD_SIM_TEST_ENERGYPLUS_FLAGS} -D")
   endif()
 
-  # Preserve the historical test behavior: when auxiliary Fortran tools are enabled,
-  # also ask EnergyPlus to produce CSV output through ReadVarsESO.
-  if(BUILD_FORTRAN)
+  # Ask EnergyPlus to produce CSV output through ReadVarsESO when the Python auxiliary tools are available.
+  if(PYTHON_CLI)
     set(ENERGYPLUS_FLAGS "${ENERGYPLUS_FLAGS} -r")
   else()
     if(ADD_SIM_TEST_PERFORMANCE)
       # For performance testing, changing whether ReadVarsESO is included changes the measured time.
-      message(WARNING "BUILD_FORTRAN=FALSE, preserving historical behavior and skipping automatic ReadVarsESO execution.")
+      message(WARNING "PYTHON_CLI=FALSE, skipping automatic ReadVarsESO execution.")
     endif()
   endif()
 
