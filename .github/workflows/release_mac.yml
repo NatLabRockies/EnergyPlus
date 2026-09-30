@@ -32,13 +32,13 @@ jobs:
         os: [macos-15-intel, macos-15]
         include:
         - os: macos-15-intel
-          macos_dev_target: 13.3
+          macos_dev_target: '13.3'
           allow_failure: false
           arch: x86_64
           python-arch: x64
           pretty: "Mac x64"
         - os: macos-15
-          macos_dev_target: 14.0
+          macos_dev_target: '14.0'
           allow_failure: false
           arch: arm64
           python-arch: arm64
@@ -287,12 +287,12 @@ jobs:
         os: [macos-15-intel, macos-15]
         include:
           - os: macos-15-intel
-            macos_dev_target: 13.3
+            macos_dev_target: '13.3'
             arch: x86_64
             python-arch: x64
             test_key: mac12
           - os: macos-15
-            macos_dev_target: 14.0
+            macos_dev_target: '14.0'
             arch: arm64
             python-arch: arm64
             test_key: mac14-arm64

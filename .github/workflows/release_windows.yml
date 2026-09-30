@@ -29,6 +29,8 @@ jobs:
           os: windows-2022
           arch: x86_64
           python-arch: x64
+          cmake-generator: "Visual Studio 17 2022"
+          cmake-toolset: v143
           vs-generator: x64
           package-arch: x86_64
           enable_hardened_runtime: OFF
@@ -46,6 +48,8 @@ jobs:
           os: windows-2022
           arch: x86_64
           python-arch: x64
+          cmake-generator: "Visual Studio 17 2022"
+          cmake-toolset: v143
           vs-generator: x64
           package-arch: x86_64-HardenedRuntime
           enable_hardened_runtime: ON
@@ -54,15 +58,17 @@ jobs:
           allow_failure: false
 
         - name: arm64
-          os: windows-11-arm
+          os: windows-11-vs2026-arm
           arch: arm64
           python-arch: arm64
+          cmake-generator: "Visual Studio 18 2026"
+          cmake-toolset: v143
           vs-generator: ARM64
           package-arch: arm64
           enable_hardened_runtime: OFF
           pretty: "Windows arm64"
           python-version: 3.12.10
-          allow_failure: true
+          allow_failure: false
 
     permissions:
       # Needed permission to upload the release asset
@@ -148,7 +154,7 @@ jobs:
         set -x
         Python_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}"
         Python_EXECUTABLE="${Python_EXECUTABLE//\\//}"
-        cmake -G "Visual Studio 17 2022" -A ${{ matrix.vs-generator }} \
+        cmake -G "${{ matrix.cmake-generator }}" -A ${{ matrix.vs-generator }} -T "${{ matrix.cmake-toolset }}" \
               -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
               -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
@@ -211,16 +217,18 @@ jobs:
           pretty: "Windows x64"
           python-version: 3.12.2
           python-arch: x64
+          msvc-version: 2022
           allow_failure: false
 
         - name: arm64
-          os: windows-11-arm
+          os: windows-11-vs2026-arm
           test_config: win-arm64
           package-arch: arm64
           pretty: "Windows arm64"
           python-version: 3.12.10
           python-arch: arm64
-          allow_failure: true
+          msvc-version: 2026
+          allow_failure: false
 
     steps:
       - uses: actions/checkout@v7  # Still need E+ checked out to get testing scripts
@@ -250,4 +258,4 @@ jobs:
         run: ls
 
       - name: Run Package Tests
-        run: python checkout/scripts/package_tests/runner.py --verbose --msvc 2022 ${{ matrix.test_config }} package/
+        run: python checkout/scripts/package_tests/runner.py --verbose --msvc ${{ matrix.msvc-version }} ${{ matrix.test_config }} package/
