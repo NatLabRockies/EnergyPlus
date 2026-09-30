@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   check:
-    name: Static analysis
+    name: Clang Static Analysis
     if: >-
       github.event_name != 'pull_request' ||
       (contains(github.event.pull_request.labels.*.name, 'Staged') &&
@@ -63,6 +63,14 @@ jobs:
 
     - uses: actions/checkout@v7
 
+    # LINK_WITH_PYTHON=ON so that the code gated behind it (PluginManager.cc...) is analyzed. We never link or run anything,
+    # but the Python headers are needed
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v7
+      id: setup-python
+      with:
+        python-version: '3.12'
+
     - name: Configure EnergyPlus
       run: |
         mkdir build && cd build
@@ -70,8 +78,10 @@ jobs:
         cmake -G Ninja -DCMAKE_BUILD_TYPE:STRING=Release \
           -DENABLE_PCH:BOOL=ON \
           -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-          -DLINK_WITH_PYTHON:BOOL=OFF -DPYTHON_CLI:BOOL=OFF -DBUILD_TESTING:BOOL=OFF \
-          -DBUILD_FORTRAN:BOOL=OFF -DDOCUMENTATION_BUILD:STRING=DoNotBuild \
+          -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=OFF \
+          -DPython_ROOT_DIR:PATH="$(dirname "$(dirname "${{ steps.setup-python.outputs.python-path }}")")" \
+          -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
+          -DBUILD_TESTING:BOOL=OFF -DBUILD_FORTRAN:BOOL=OFF -DDOCUMENTATION_BUILD:STRING=DoNotBuild \
           -DENABLE_OPENMP:BOOL=OFF \
           ..
         # Build the PCH
@@ -106,7 +116,7 @@ jobs:
     - name: Summarize clang-tidy findings
       if: always() && hashFiles('clang-tidy-findings.yaml') != ''
       run: |
-        sudo apt-get install -y --no-install-recommends python3-yaml python3-tabulate
+        python -m pip install pyyaml tabulate
         summarize_clang_tidy_findings.py clang-tidy-findings.yaml --title "energyplus-* clang-tidy checks"
 
     - name: Run find_unused_members
@@ -126,7 +136,6 @@ jobs:
     - name: Summarize find_unused_members findings
       if: always() && hashFiles('unused-members-findings.yaml') != ''
       run: |
-        sudo apt-get install -y --no-install-recommends python3-yaml python3-tabulate
         summarize_clang_tidy_findings.py unused-members-findings.yaml --title "find_unused_members"
 
     - name: Summarize
