@@ -55,6 +55,7 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/Fans.hh>
@@ -157,6 +158,136 @@ TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
     state->dataSize->DataNonZoneNonAirloopValue = 0.0;
 }
 
+TEST_F(EnergyPlusFixture, VariableVolumeFan_NightVentilationPerformance)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+
+    auto *fan = new Fans::FanComponent;
+    fan->Name = "Test Fan";
+    fan->type = HVAC::FanType::VAV;
+    fan->deltaPress = 300.0;
+    fan->totalEff = 0.7;
+    fan->motorEff = 0.8;
+    fan->motorInAirFrac = 1.0;
+    fan->coeffs[1] = 1.0;
+    fan->availSched = Sched::GetScheduleAlwaysOn(*state);
+    fan->maxAirFlowRate = 1.0;
+    fan->minAirMassFlowRate = 0.0;
+    fan->maxAirMassFlowRate = 1.0;
+    fan->inletAirMassFlowRate = 1.0;
+    fan->rhoAirStdInit = state->dataEnvrn->StdRhoAir;
+    fan->nightVentPerfNum = 1;
+
+    state->dataFans->NumNightVentPerf = 1;
+    state->dataFans->NightVentPerf.allocate(1);
+    auto &nightVentPerf = state->dataFans->NightVentPerf(1);
+    nightVentPerf.FanName = fan->Name;
+    nightVentPerf.FanEff = 0.5;
+    nightVentPerf.DeltaPress = 100.0;
+    nightVentPerf.MaxAirFlowRate = 0.75;
+    nightVentPerf.MaxAirMassFlowRate = 0.75;
+    nightVentPerf.MotEff = 0.6;
+    nightVentPerf.MotInAirFrac = 0.25;
+
+    state->dataFans->fans.push_back(fan);
+    state->dataFans->fanMap.insert_or_assign(fan->Name, state->dataFans->fans.size());
+
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->NightVentOn = false;
+
+    Real64 const designElecPower = fan->maxAirFlowRate * fan->deltaPress / fan->totalEff;
+
+    fan->simulateVAV(*state);
+
+    EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower); // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
+    EXPECT_DOUBLE_EQ(1.0, fan->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s design maximum
+    EXPECT_DOUBLE_EQ(designElecPower, fan->totalPower); // normal power equals design power at full flow
+    EXPECT_DOUBLE_EQ(designElecPower, fan->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
+
+    state->dataHVACGlobal->NightVentOn = true;
+    fan->simulateVAV(*state);
+
+    EXPECT_DOUBLE_EQ(0.75, fan->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
+    EXPECT_DOUBLE_EQ(150.0, fan->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
+    EXPECT_DOUBLE_EQ(105.0, fan->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
+}
+
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
+{
+    std::string const idf_objects = delimited_string({
+
+        "  Fan:SystemModel,",
+        "    Test Fan,                    !- Name",
+        "    ,                            !- Availability Schedule Name",
+        "    TestFanAirInletNode,         !- Air Inlet Node Name",
+        "    TestFanOutletNode,           !- Air Outlet Node Name",
+        "    1.0,                         !- Design Maximum Air Flow Rate",
+        "    Continuous,                  !- Speed Control Method",
+        "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
+        "    300.0,                       !- Design Pressure Rise",
+        "    0.8,                         !- Motor Efficiency",
+        "    1.0,                         !- Motor In Air Stream Fraction",
+        "    AUTOSIZE,                    !- Design Electric Power Consumption",
+        "    TotalEfficiencyAndPressure,  !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
+        "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                            !- Fan Total Efficiency",
+        "    simple cubic,                !- Electric Power Function of Flow Fraction Curve Name",
+        "    100.0,                       !- Night Ventilation Mode Pressure Rise",
+        "    0.75,                        !- Night Ventilation Mode Maximum Air Flow Rate",
+        "    0.5,                         !- Night Ventilation Mode Fan Total Efficiency",
+        "    0.6,                         !- Night Ventilation Mode Motor Efficiency",
+        "    0.25;                        !- Night Ventilation Mode Motor In Air Stream Fraction",
+
+        "  Curve:Cubic,",
+        "    simple cubic,                !- Name",
+        "    0.0,                         !- Coefficient1 Constant",
+        "    0.0,                         !- Coefficient2 x",
+        "    0.0,                         !- Coefficient3 x**2",
+        "    1.0,                         !- Coefficient4 x**3",
+        "    0.0,                         !- Minimum Value of x",
+        "    1.0,                         !- Maximum Value of x",
+        "    0.0,                         !- Minimum Curve Output",
+        "    1.0;                         !- Maximum Curve Output",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->NightVentOn = false;
+
+    Fans::GetFanInput(*state);
+    state->dataSize->CurZoneEqNum = 0;
+    state->dataSize->CurSysNum = 0;
+    state->dataSize->CurOASysNum = 0;
+
+    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state->dataFans->fans(1));
+    ASSERT_NE(fanSystem, nullptr);
+
+    auto &inletNode = state->dataLoopNodes->Node(fanSystem->inletNodeNum);
+    auto &outletNode = state->dataLoopNodes->Node(fanSystem->outletNodeNum);
+    inletNode.MassFlowRate = 1.0;
+    inletNode.MassFlowRateMaxAvail = 1.0;
+    outletNode.MassFlowRateMax = 1.0;
+    outletNode.MassFlowRateMaxAvail = 1.0;
+    fanSystem->simulate(*state, false, _, _);
+
+    EXPECT_DOUBLE_EQ(300.0 / 0.7, fanSystem->designElecPower); // normal design power: 1.0 kg/s * 300 Pa / default 0.7 total efficiency
+    EXPECT_DOUBLE_EQ(1.0, fanSystem->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s design maximum
+    EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->totalPower); // normal power equals design power at full flow
+    EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
+
+    state->dataHVACGlobal->NightVentOn = true;
+    fanSystem->simulate(*state, false, _, _);
+
+    EXPECT_DOUBLE_EQ(0.75, fanSystem->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
+    EXPECT_DOUBLE_EQ(150.0, fanSystem->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
+    EXPECT_DOUBLE_EQ(105.0, fanSystem->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
+}
+
 TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
 {
     // this unit test checks the power averaging when cycling between a hi and low speed
@@ -174,25 +305,25 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
         "    100.0,                       !- Design Pressure Rise",
         "    0.9 ,                        !- Motor Efficiency",
         "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
+        "    100.0,                       !- Design Electric Power Consumption",
+        "    ,                            !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  , !- Electric Power Function of Flow Fraction Curve Name",
-        "  , !- Night Ventilation Mode Pressure Rise",
-        "  , !- Night Ventilation Mode Maximum Air Flow Rate",
-        "  , !- Night Ventilation Mode Fan Total Efficiency",
-        "  , !- Night Ventilation Mode Motor Efficiency",
-        "  , !- Night Ventilation Mode Motor In Air Stream Fraction",
-        "  , !- Motor Loss Zone Name",
-        "  , !- Motor Loss Radiative Fraction ",
-        "  Fan Energy, !- End-Use Subcategory",
-        "  2, !- Number of Speeds",
-        "  0.5, !- Speed 1 Flow Fraction",
-        "  0.125, !- Speed 1 Electric Power Fraction",
-        "  1.0, !- Speed 2 Flow Fraction",
-        "  1.0; !- Speed 2 Electric Power Fraction",
+        "    ,                            !- Fan Total Efficiency",
+        "    ,                            !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
+        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
+        "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
+        "    ,                            !- Motor Loss Zone Name",
+        "    ,                            !- Motor Loss Radiative Fraction ",
+        "    Fan Energy,                  !- End-Use Subcategory",
+        "    2,                           !- Number of Speeds",
+        "    0.5,                         !- Speed 1 Flow Fraction",
+        "    0.125,                       !- Speed 1 Electric Power Fraction",
+        "    1.0,                         !- Speed 2 Flow Fraction",
+        "    1.0;                         !- Speed 2 Electric Power Fraction",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -241,32 +372,32 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc2)
         "    100.0,                       !- Design Pressure Rise",
         "    0.9 ,                        !- Motor Efficiency",
         "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
+        "    100.0,                       !- Design Electric Power Consumption",
+        "    ,                            !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  simple cubic, !- Electric Power Function of Flow Fraction Curve Name",
-        "  , !- Night Ventilation Mode Pressure Rise",
-        "  , !- Night Ventilation Mode Maximum Air Flow Rate",
-        "  , !- Night Ventilation Mode Fan Total Efficiency",
-        "  , !- Night Ventilation Mode Motor Efficiency",
-        "  , !- Night Ventilation Mode Motor In Air Stream Fraction",
-        "  , !- Motor Loss Zone Name",
-        "  , !- Motor Loss Radiative Fraction ",
-        "  Fan Energy, !- End-Use Subcategory",
-        "  2, !- Number of Speeds",
-        "  0.5, !- Speed 1 Flow Fraction",
-        "  , !- Speed 1 Electric Power Fraction",
-        "  1.0, !- Speed 2 Flow Fraction",
-        "  ; !- Speed 2 Electric Power Fraction",
+        "    ,                            !- Fan Total Efficiency",
+        "    simple cubic,                !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
+        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
+        "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
+        "    ,                            !- Motor Loss Zone Name",
+        "    ,                            !- Motor Loss Radiative Fraction ",
+        "    Fan Energy,                  !- End-Use Subcategory",
+        "    2,                           !- Number of Speeds",
+        "    0.5,                         !- Speed 1 Flow Fraction",
+        "    ,                            !- Speed 1 Electric Power Fraction",
+        "    1.0,                         !- Speed 2 Flow Fraction",
+        "    ;                            !- Speed 2 Electric Power Fraction",
 
         "  Curve:Cubic,",
         "    simple cubic,  !- Name",
-        "    0.0,                    !- Coefficient1 Constant",
+        "    0.0,                     !- Coefficient1 Constant",
         "    0.0,                     !- Coefficient2 x",
         "    0.0,                     !- Coefficient3 x**2",
-        "    1.0,                    !- Coefficient4 x**3",
+        "    1.0,                     !- Coefficient4 x**3",
         "    0.0,                     !- Minimum Value of x",
         "    1.0,                     !- Maximum Value of x",
         "    0.0,                     !- Minimum Curve Output",
@@ -321,25 +452,25 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc3)
         "    100.0,                       !- Design Pressure Rise",
         "    0.9 ,                        !- Motor Efficiency",
         "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
+        "    100.0,                       !- Design Electric Power Consumption",
+        "    ,                            !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  , !- Electric Power Function of Flow Fraction Curve Name",
-        "  , !- Night Ventilation Mode Pressure Rise",
-        "  , !- Night Ventilation Mode Maximum Air Flow Rate",
-        "  , !- Night Ventilation Mode Fan Total Efficiency",
-        "  , !- Night Ventilation Mode Motor Efficiency",
-        "  , !- Night Ventilation Mode Motor In Air Stream Fraction",
-        "  , !- Motor Loss Zone Name",
-        "  , !- Motor Loss Radiative Fraction ",
-        "  Fan Energy, !- End-Use Subcategory",
-        "  2, !- Number of Speeds",
-        "  0.5, !- Speed 1 Flow Fraction",
-        "  0.125, !- Speed 1 Electric Power Fraction",
-        "  1.0, !- Speed 2 Flow Fraction",
-        "  1.0; !- Speed 2 Electric Power Fraction",
+        "    ,                            !- Fan Total Efficiency",
+        "    ,                            !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
+        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
+        "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor Efficiency",
+        "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
+        "    ,                            !- Motor Loss Zone Name",
+        "    ,                            !- Motor Loss Radiative Fraction ",
+        "    Fan Energy,                  !- End-Use Subcategory",
+        "    2,                           !- Number of Speeds",
+        "    0.5,                         !- Speed 1 Flow Fraction",
+        "    0.125,                       !- Speed 1 Electric Power Fraction",
+        "    1.0,                         !- Speed 2 Flow Fraction",
+        "    1.0;                         !- Speed 2 Electric Power Fraction",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -420,24 +551,24 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
         "    TestFanAirInletNode,         !- Air Inlet Node Name",
         "    TestFanOutletNode,           !- Air Outlet Node Name",
         "    1.0 ,                        !- Design Maximum Air Flow Rate",
-        "    Continuous ,                   !- Speed Control Method",
+        "    Continuous ,                 !- Speed Control Method",
         "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
         "    100.0,                       !- Design Pressure Rise",
         "    0.9 ,                        !- Motor Efficiency",
         "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
+        "    100.0,                       !- Design Electric Power Consumption",
+        "    ,                            !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  simple cubic; !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                            !- Fan Total Efficiency",
+        "  simple cubic;                  !- Electric Power Function of Flow Fraction Curve Name",
 
         "  Curve:Cubic,",
         "    simple cubic,  !- Name",
-        "    0.0,                    !- Coefficient1 Constant",
+        "    0.0,                     !- Coefficient1 Constant",
         "    0.0,                     !- Coefficient2 x",
         "    0.0,                     !- Coefficient3 x**2",
-        "    1.0,                    !- Coefficient4 x**3",
+        "    1.0,                     !- Coefficient4 x**3",
         "    0.0,                     !- Minimum Value of x",
         "    1.0,                     !- Maximum Value of x",
         "    0.0,                     !- Minimum Curve Output",
