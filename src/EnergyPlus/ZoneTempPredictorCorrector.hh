@@ -160,7 +160,6 @@ namespace ZoneTempPredictorCorrector {
         Real64 SumHmAW = 0.0;   // SUM OF ZONE AREA*Moist CONVECTION COEFF*INSIDE Humidity Ratio
         Real64 SumHmARa = 0.0;  // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air
         Real64 SumHmARaW = 0.0; // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air* Inside Humidity Ration
-        Real64 SumHmARaZ = 0.0;
 
         Real64 TempDepCoef = 0.0; // Temperature dependent coefficient
         Real64 TempIndCoef = 0.0; // Temperature ndependent coefficient

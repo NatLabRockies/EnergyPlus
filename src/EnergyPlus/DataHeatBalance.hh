@@ -584,14 +584,13 @@ namespace DataHeatBalance {
         // 2=Plenum Zone, 11=Solar Wall, 12=Roof Pond
         Real64 UserEnteredFloorArea = Constant::AutoCalculate; // User input floor area for this zone
         // Calculated after input
-        Real64 geometricFloorArea = 0.0;   // Calculated floor area including air boundary surfaces
-        Real64 CeilingArea = 0.0;          // Ceiling area excluding air boundary surfaces
-        Real64 geometricCeilingArea = 0.0; // Ceiling area area including air boundary surfaces
-        bool ceilingHeightEntered = false; // True is user input ceiling height
-        bool HasFloor = false;             // Has "Floor" surface
-        bool HasRoof = false;              // Has "Roof" or "Ceiling" Surface
-        bool HasWindow = false;            // Window(s) present in this zone
-        Real64 AirCapacity = 0.0;
+        Real64 geometricFloorArea = 0.0;          // Calculated floor area including air boundary surfaces
+        Real64 CeilingArea = 0.0;                 // Ceiling area excluding air boundary surfaces
+        Real64 geometricCeilingArea = 0.0;        // Ceiling area area including air boundary surfaces
+        bool ceilingHeightEntered = false;        // True is user input ceiling height
+        bool HasFloor = false;                    // Has "Floor" surface
+        bool HasRoof = false;                     // Has "Roof" or "Ceiling" Surface
+        bool HasWindow = false;                   // Window(s) present in this zone
         Real64 ExtWindowArea = 0.0;               // Exterior Window Area for Zone
         Real64 ExtWindowArea_Multiplied = 0.0;    // Exterior Window Area for Zone with multipliers
         Real64 ExtGrossWallArea_Multiplied = 0.0; // Exterior Wall Area for Zone (Gross) with multipliers
@@ -692,7 +691,6 @@ namespace DataHeatBalance {
         Real64 InfilOAAirChangeRateHM = 0.0;                // Calculated infiltration air change per hour by hybrid model
         Real64 NumOccHM = 0.0;                              // Inversely solved people count
         Real64 delta_T = 0.0;                               // Indoor and outdoor temperature
-        Real64 delta_HumRat = 0.0;                          // Indoor and outdoor humidity ratio delta
 
         bool zoneOAQuadratureSum = false; // True when zone OA balance method is Quadrature
         int zoneOABalanceIndex = 0;       // Index to ZoneAirBalance for this zone, if any
@@ -916,7 +914,6 @@ namespace DataHeatBalance {
         Real64 LostEnergy = 0.0;                                       // Lost energy (converted to work) [J]
         Real64 TotGainEnergy = 0.0;                                    // Total heat gain [J]
         std::string EndUseSubcategory;                                 // user defined name for the end use category
-        std::string otherEquipFuelTypeString;                          // Fuel Type string for Other Equipment
         Constant::eFuel OtherEquipFuelType = Constant::eFuel::Invalid; // Fuel Type Number of the Other Equipment
     };
 
@@ -1033,8 +1030,6 @@ namespace DataHeatBalance {
         int CPUPowerFLTCurve = 0;                  // Index for CPU power function of CPULoadFrac (x) and TAirIn (y) curve
         int FanPowerFFCurve = 0;                   // Index for fan power function of flow fraction curve
         ITEInletConnection AirConnectionType = ITEInletConnection::AdjustedSupply; // Air connection type (AdjustedSupply, ZoneAirNode, RoomAirModel)
-        int InletRoomAirNodeNum = 0;                                               // Room air model node number for air inlet
-        int OutletRoomAirNodeNum = 0;                                              // Room air model node number for air outlet
         int SupplyAirNodeNum = 0;                                                  // Node number for supply air inlet
         Real64 DesignRecircFrac = 0.0;                                             // Design recirculation fraction (0.0-0.5)
         int RecircFLTCurve = 0;                             // Index for recirculation function of CPULoadFrac (x) and TSupply (y) curve
@@ -1044,12 +1039,6 @@ namespace DataHeatBalance {
         std::string EndUseSubcategoryCPU;                   // User defined name for the end use category for the CPU
         std::string EndUseSubcategoryFan;                   // User defined name for the end use category for the Fans
         std::string EndUseSubcategoryUPS;                   // User defined name for the end use category for the power supply
-        bool EMSCPUPowerOverrideOn = false;                 // EMS actuating CPU power if .TRUE.
-        Real64 EMSCPUPower = 0.0;                           // Value EMS is directing to use for override of CPU power [W]
-        bool EMSFanPowerOverrideOn = false;                 // EMS actuating Fan power if .TRUE.
-        Real64 EMSFanPower = 0.0;                           // Value EMS is directing to use for override of Fan power [W]
-        bool EMSUPSPowerOverrideOn = false;                 // EMS actuating UPS power if .TRUE.
-        Real64 EMSUPSPower = 0.0;                           // Value EMS is directing to use for override of UPS power [W]
         Real64 SupplyApproachTemp = 0.0;                    // The difference of the IT inlet temperature from the AHU supply air temperature
         Sched::Schedule *supplyApproachTempSched = nullptr; // The difference schedule of the IT inlet temperature from the AHU supply air temperature
         Real64 ReturnApproachTemp = 0.0;                    // The difference of the unit outlet temperature from the well mixed zone temperature
@@ -1101,8 +1090,6 @@ namespace DataHeatBalance {
         Real64 ZnHtgSetTemp = 0.0;    // Design zone heating setpoint temperature
         Real64 ExtSurfCondLoad = 0.0; // Conductional load through exterior surfaces by max temp diff
         Real64 FractionConvected = 0.0;
-        bool ManageDemand = false; // Flag to indicate whether to use demand limiting
-        Real64 DemandLimit = 0.0;  // Demand limit set by demand manager [W]
         // Report variables
         Real64 Power = 0.0;            // Electric power [W]
         Real64 RadGainRate = 0.0;      // Radiant heat gain [W]
@@ -1310,7 +1297,6 @@ namespace DataHeatBalance {
     {
         // Members
         std::string Name;
-        int ZonePtr = 0;                       // pointer to the mixing zone
         Real64 InMassFlowRate = 0.0;           // zone total supply air mass flow rate, kg/s
         Real64 ExhMassFlowRate = 0.0;          // zone exhaust total air mass flow rate, kg/s
         Real64 RetMassFlowRate = 0.0;          // zone return air mass flow rate, kg/s
@@ -1539,8 +1525,6 @@ namespace DataHeatBalance {
         Real64 AFNInfilVolMin = 9.9e9;       // a large number since finding minimum volume at current zone air density
         Real64 SimpVentVolTotalOcc = 0.0;    // volume for simple 'ZoneVentilation' of outside air for entire simulation during occupied current
         Real64 SimpVentVolMin = 9.9e9;       // a large number since finding minimum volumeat current zone air density
-        Real64 AFNVentVolTotalOcc = 0.0;     // volume for AFN ventilation of outside air for entire simulation during occupied at zone air density
-        Real64 AFNVentVolMin = 9.9e9;        // a large number since finding minimum volume at current zone air density
         Real64 MechVentVolTotalStdDen = 0.0; // volume for mechanical ventilation of outside air for entire simulation at standard density
         Real64 MechVentVolTotalOccStdDen = 0.0; // volume for mechanical ventilation of outside air for entire simulation during occupied at std
         Real64 InfilVolTotalStdDen = 0.0;       // volume for infiltration of outside air for entire simulation at standard density
@@ -1887,7 +1871,6 @@ struct HeatBalanceData : BaseGlobalStruct
     int TotRefDoorMixing = 0;  // Total RefrigerationDoor Mixing Statements in input
     int TotBBHeat = 0;         // Total BBHeat Statements instances after expansion to spaces
     int TotConstructs = 0;     // Total number of unique constructions in this simulation
-    int TotSpectralData = 0;   // Total window glass spectral data sets
     int TotZoneAirBalance = 0; // Total Zone Air Balance Statements in input
     int TotFrameDivider = 0;   // Total number of window frame/divider objects
     bool AirFlowFlag = false;

@@ -297,8 +297,6 @@ namespace Fluid {
 
         std::string GlycolName; // Name of non-water fluid that is part of this mixture
         // (refers to ethylene glycol, propylene glycol, or user fluid)
-        int BaseGlycolIndex = 0; // Index in user defined glycol data (>0 = index in raw data,
-        // -1=propylene glycol, -2=ethylene glycol)
         Real64 Concentration = 0.0; // Concentration (if applicable)
 
         bool CpDataPresent = false;   // Flag set when specific heat data is available
@@ -588,8 +586,6 @@ struct FluidData : BaseGlobalStruct
 
     int SatErrCountGetSupHeatEnthalpyRefrig = 0;
     int SatErrCountGetSupHeatDensityRefrig = 0;
-    int TempLoRangeErrIndexGetQualityRefrig = 0;
-    int TempHiRangeErrIndexGetQualityRefrig = 0;
     int TempRangeErrCountGetInterpolatedSatProp = 0;
     int TempRangeErrIndexGetInterpolatedSatProp = 0;
 

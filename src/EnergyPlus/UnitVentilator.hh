@@ -127,7 +127,6 @@ namespace UnitVentilator {
         DataPlant::PlantEquipmentType HeatingCoilType = DataPlant::PlantEquipmentType::Invalid;
 
         Fluid::RefrigProps *HCoil_fluid = nullptr;
-        Sched::Schedule *hCoilSched = nullptr;
 
         Real64 HCoilSchedValue = 0.0;
         Real64 MaxVolHotWaterFlow = 0.0; // m3/s
@@ -150,7 +149,6 @@ namespace UnitVentilator {
         std::string CCoilPlantType; // type of cooling coil for plant
         DataPlant::PlantEquipmentType CoolingCoilType = DataPlant::PlantEquipmentType::Invalid;
         HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid;
-        Sched::Schedule *cCoilSched = nullptr;
         Real64 CCoilSchedValue = 0.0;
         Real64 MaxVolColdWaterFlow = 0.0; // m3/s
         Real64 MaxColdWaterFlow = 0.0;    // kg/s

@@ -165,9 +165,8 @@ namespace HVACControllers {
         // --------------------
         // Other controller inputs, not yet used
         // --------------------
-        std::string LimitType; // Limit type as in HIGH or LOW
-        Real64 Range;          // The range or hysteresis of the control limit
-        Real64 Limit;          // The Limit value for a Limit Controller
+        Real64 Range; // The range or hysteresis of the control limit
+        Real64 Limit; // The Limit value for a Limit Controller
         // --------------------
         // Trace mechanism
         // --------------------

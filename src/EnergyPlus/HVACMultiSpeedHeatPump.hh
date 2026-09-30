@@ -128,7 +128,6 @@ namespace HVACMultiSpeedHeatPump {
         Real64 AuxOffCyclePower;                                   // Auxiliary Off-Cycle Electric Power
         Real64 DesignHeatRecFlowRate;                              // Design water volume flow rate through heat recovery loop [m3/s]
         bool HeatRecActive;                                        // True when entered Heat Rec Vol Flow Rate > 0
-        std::string HeatRecName;                                   // heat recovery water inlet name
         int HeatRecInletNodeNum;                                   // Node number on heat recovery water inlet
         int HeatRecOutletNodeNum;                                  // Node number on heat recovery water outlet
         Real64 MaxHeatRecOutletTemp;                               // Maximum outlet water temperature for heat recovery

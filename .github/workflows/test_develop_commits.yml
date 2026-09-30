@@ -31,7 +31,7 @@ jobs:
 #          alternate: false
 #          build-type: Release
 #          run-tests: true
-        - os: macos-14
+        - os: macos-15
           macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64

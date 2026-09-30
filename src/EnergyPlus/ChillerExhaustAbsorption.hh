@@ -74,8 +74,6 @@ namespace ChillerExhaustAbsorption {
     {
         // Members
         // Parts of Type that do not correspond with IDD definition
-        bool Available = false; // need an array of logicals--load identifiers of available equipment
-        bool ON = false;        // simulate the machine at it's operating part load ratio
         bool InCoolingMode = false;
         bool InHeatingMode = false;
         // Part of Type that directly corresponds with IDD definition

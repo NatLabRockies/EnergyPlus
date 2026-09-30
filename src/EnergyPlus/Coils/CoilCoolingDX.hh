@@ -177,7 +177,6 @@ struct CoilCoolingDX
     EnergyPlus::DataHeatBalance::HeatReclaimDataBase reclaimHeat;
 
     void setToHundredPercentDOAS();
-    bool isHundredPercentDOAS = false;
 
 private:
     static bool
@@ -189,7 +188,6 @@ struct CoilCoolingDXData : BaseGlobalStruct
     std::vector<CoilCoolingDX> coilCoolingDXs;
     bool coilCoolingDXGetInputFlag = true;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
-    HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
