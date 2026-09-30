@@ -78,7 +78,7 @@ jobs:
         cmake -G Ninja -DCMAKE_BUILD_TYPE:STRING=Release \
           -DENABLE_PCH:BOOL=ON \
           -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-          -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=OFF \
+          -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
           -DPython_ROOT_DIR:PATH="$(dirname "$(dirname "${{ steps.setup-python.outputs.python-path }}")")" \
           -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
           -DBUILD_TESTING:BOOL=OFF -DBUILD_FORTRAN:BOOL=OFF -DDOCUMENTATION_BUILD:STRING=DoNotBuild \
