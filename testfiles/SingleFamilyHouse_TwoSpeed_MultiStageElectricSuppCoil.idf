@@ -2083,9 +2083,6 @@
   OutputControl:Table:Style,
     HTML;                    !- Column Separator
 
-  OutputControl:Files,
-    Yes;                     !- Output CSV
-
   Output:Table:SummaryReports,
     AllSummary;              !- Report 1 Name
 

@@ -2014,9 +2014,6 @@
   OutputControl:Table:Style,
     HTML;                    !- Column Separator
 
-  OutputControl:Files,
-    Yes;                     !- Output CSV
-
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:VARIABLE ===========
 
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,timestep;
