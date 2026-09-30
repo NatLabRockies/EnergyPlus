@@ -1998,6 +1998,10 @@ This field is the electric consumption of the heating coil auxiliaries in Joules
 
 This field is the average electric consumption rate of the heating coil auxiliaries (e.g., inducer fan) in Watts over the timestep being reported.
 
+\paragraph{Heating Coil Runtime Fraction}\label{heating-coil-runtime-fraction-gas-multistage}
+
+This is the fraction of the system timestep that the gas heating coil operates. At stage 1, it is the cycling ratio, adjusted by the part-load fraction curve when one is specified; at stages above stage 1, it is 1, and it is 0 when the coil is off.
+
 \paragraph{Heating Coil Parasitic Gas Consumption {[}J{]}}\label{heating-coil-parasitic-gas-consumption-j}
 
 This field is the parasitic gas consumption of the heating coil in Joules over the timestep being reported (e.g., standing pilot light). The model assumes that the parasitic load is accumulated only for the portion of the simulation timestep where the gas heating coil is not operating. This output is also added to an output meter with Resource Type = Gas, End Use Key = Heating, Group Key = System (ref. Output:Meter objects).
