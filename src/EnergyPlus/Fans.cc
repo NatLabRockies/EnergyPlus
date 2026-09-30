@@ -1806,7 +1806,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
 
             // Update MassFlow & DeltaPress of the fan
             _maxAirFlowRate = maxAirFlowRate - _fanDesignFlowRateDec;
-            _maxAirMassFlowRate = maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir;
+            _maxAirMassFlowRate = min(_maxAirMassFlowRate, maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir);
             _deltaPress = fault.pressFracSched->getCurrentVal() * deltaPress;
         }
     }
@@ -1960,7 +1960,7 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
                     state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
-            _maxAirMassFlowRate = maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir;
+            _maxAirMassFlowRate = min(_maxAirMassFlowRate, maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir);
             _deltaPress = fault.pressFracSched->getCurrentVal() * deltaPress;
         }
     }
@@ -2206,24 +2206,12 @@ void FanComponent::simulateComponentModel(EnergyPlusData &state)
     // Calculate air temperature rise due to fan (and belt+motor if in airstream) power entering air-handler airflow
     // Calculate output node conditions
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 _maxAirMassFlowRate; // Fan Max mass airflow [kg/s]
-    Real64 _motorInAirFrac;     // Fraction of fan power input to airstream
-
     // Local variables
     Real64 _dimFlow;               // Fan dimensionless airflow [-]
     Real64 _beltPLEff;             // Belt normalized (part-load) efficiency [-]
     Real64 _motorPLEff;            // Motor normalized (part-load) efficiency [-]
     Real64 _vfdSpeedRatio(0.0);    // Ratio of motor speed to motor max speed [-]
     Real64 _vfdOutPowerRatio(0.0); // Ratio of VFD output power to max VFD output power [-]
-
-    if (state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0) {
-        _motorInAirFrac = state.dataFans->NightVentPerf(nightVentPerfNum).MotInAirFrac;
-        _maxAirMassFlowRate = state.dataFans->NightVentPerf(nightVentPerfNum).MaxAirMassFlowRate;
-    } else {
-        _motorInAirFrac = motorInAirFrac;
-        _maxAirMassFlowRate = maxAirMassFlowRate;
-    }
 
     // Get air density at standard conditions and get mass airflow through fan
     // From WeatherManager:
