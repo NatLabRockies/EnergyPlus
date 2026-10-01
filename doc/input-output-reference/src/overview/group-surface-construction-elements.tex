@@ -4375,7 +4375,7 @@ This output is the heat energy added after material layer N from the EMS heat fl
 
 \paragraph{CondFD EMS Sky Longwave Radiation Override Heat Flux}
 
-This output is the user-specified net sky longwave radiation heat flux applied to the exterior surface via the EMS actuator (Component type: ``CondFD Surface''; Control type: ``Sky Longwave Radiation Override''). Reports 0.0 when not actuated. Only valid for exterior CondFD surfaces.
+This output is the user-specified net sky longwave radiation heat flux applied to the exterior surface via the EMS actuator (Component type: ``CondFD Surface''; Control type: ``Sky Longwave Radiation Override''). Reports 0.0 when not actuated. Only valid for exterior CondFD surfaces. The actuator replaces only the sky term of this surface; windows and CTF surfaces keep the sky temperature calculated by EnergyPlus. To change the sky temperature for all exterior surfaces, use \hyperref[weatherpropertyskytemperature]{WeatherProperty:SkyTemperature}.
 
 \subsection{Construction:AirBoundary}\label{constructionairboundary}
 
