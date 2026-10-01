@@ -25215,6 +25215,7 @@ Daylighting:ReferencePoint,
 Daylighting:DELight:ComplexFenestration,
        \min-fields 5
        \memo Used for DElight Complex Fenestration of all types
+       \obsolete New=>deleted
   A1,  \field Name
        \required-field
        \note Only used for user reference
