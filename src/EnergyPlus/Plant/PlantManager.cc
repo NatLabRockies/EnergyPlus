@@ -2429,7 +2429,9 @@ void InitializeLoops(EnergyPlusData &state, bool const FirstHVACIteration) // tr
             // step 3, revise calling order
             // have now called each plant component model at least once with InitLoopEquip = .TRUE.
             // this means the calls to InterConnectTwoPlantLoopSides have now been made. Revise once because
-            // RevisePlantCallingOrder internally converges all demand-before-supply and inter-loop constraints.
+            // RevisePlantCallingOrder internally guarantees demand-before-supply for every loop and resolves
+            // inter-loop constraints where possible; a cyclic dependency between loops can make full resolution
+            // impossible, in which case RevisePlantCallingOrder issues a warning.
             if (passNum == 1) {
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     std::vector<std::string> initialCallingOrder;
@@ -3650,8 +3652,12 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     // METHODOLOGY EMPLOYED:
     // Repeatedly rearrange loop sides for interconnected components, then restore demand-before-supply for
     // every loop. A repair can disturb an interconnection that was already ordered, so continue until a full
-    // revision leaves the calling order unchanged. Limit the number of revisions to the number of half loops
-    // so inconsistent cyclic dependencies cannot iterate indefinitely.
+    // revision leaves the calling order unchanged. A cyclic dependency between interconnected loop sides (e.g.,
+    // reciprocal heat recovery) can prevent the calling order from ever settling down; in that case the same
+    // calling order eventually repeats, so revisions stop as soon as a repeat is detected rather than running
+    // until the number-of-half-loops revision limit is reached. If that happens, warn that a cyclic
+    // interconnection dependency likely exists and demand-before-supply is preserved but not every inter-loop
+    // ordering constraint could be honored.
 
     // Using/Aliasing
     using PlantUtilities::ShiftPlantLoopSideCallingOrder;
@@ -3663,6 +3669,22 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     bool thisLoopPutsDemandOnAnother;
     int ConnctNum;
 
+    auto snapshotCallingOrder = [&state]() {
+        std::vector<std::pair<int, DataPlant::LoopSideLocation>> snapshot;
+        snapshot.reserve(state.dataPlnt->TotNumHalfLoops);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            snapshot.emplace_back(entry.LoopIndex, entry.LoopSide);
+        }
+        return snapshot;
+    };
+
+    // Track every calling order seen so a cycle in the state space (not just an immediate fixed point) can be
+    // detected and stopped early instead of always running the full number-of-half-loops revision limit.
+    std::vector<std::vector<std::pair<int, DataPlant::LoopSideLocation>>> callingOrderHistory;
+    callingOrderHistory.push_back(snapshotCallingOrder());
+
+    bool converged = false;
     for (int revision = 1; revision <= state.dataPlnt->TotNumHalfLoops; ++revision) {
         Array1D<PlantCallingOrderInfoStruct> previousCallingOrder(state.dataPlnt->PlantCallingOrderInfo);
 
@@ -3734,8 +3756,29 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
             }
         }
         if (!callingOrderChanged) {
+            converged = true;
             break;
         }
+
+        // A cyclic dependency can make the calling order oscillate among a handful of states instead of settling
+        // on one; stop as soon as a previously seen state repeats since further revisions cannot make progress.
+        auto currentSnapshot = snapshotCallingOrder();
+        if (std::find(callingOrderHistory.begin(), callingOrderHistory.end(), currentSnapshot) != callingOrderHistory.end()) {
+            break;
+        }
+        callingOrderHistory.push_back(std::move(currentSnapshot));
+    }
+
+    if (!converged) {
+        // The revision limit was reached without the calling order settling down, which means at least two
+        // interconnected loop sides have conflicting ordering requirements (e.g., reciprocal heat recovery between
+        // two loops) that cannot all be satisfied at once. Demand-before-supply is still guaranteed for every loop,
+        // but the inter-loop calling order may not reflect every interconnection.
+        ShowWarningError(state,
+                         "RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side "
+                         "requirements; a cyclic dependency likely exists between two or more interconnected loops (e.g., reciprocal heat "
+                         "recovery equipment). Demand-before-supply ordering is preserved for every loop, but some inter-loop calling order "
+                         "constraints may not be honored.");
     }
 }
 
