@@ -411,6 +411,66 @@ namespace HeatBalanceIntRadExchange {
                     }
                 }
             }
+
+            if (state.dataHeatBal->TotFrameDivider > 0) {
+                // Window frames and dividers are not surfaces of the enclosure, but their inside faces exchange long-wave radiation with
+                // the zone at the window's incident IR (see Window::CalcWinFrameAndDividerTemps). Take their net gain from the opaque
+                // surfaces of the enclosure, in proportion to each surface's share of the long-wave radiation the window receives, so
+                // that the exchange conserves energy.
+                for (size_type WinZoneSurfNum = 0; WinZoneSurfNum < s_zone_Surfaces; ++WinZoneSurfNum) {
+                    int const WinSurfNum = zone_info.SurfacePtr[WinZoneSurfNum];
+                    Real64 FrameArea = state.dataSurface->SurfWinFrameArea(WinSurfNum);
+                    Real64 DividerArea = state.dataSurface->SurfWinDividerArea(WinSurfNum);
+                    if (FrameArea <= 0.0 && DividerArea <= 0.0) {
+                        continue;
+                    }
+                    // With representative surface calculations the enclosure holds only the representative window of a group; the frames
+                    // and dividers of all windows in the group have its temperatures and hence its net gain per unit area
+                    auto const &winSurf = state.dataSurface->Surface(WinSurfNum);
+                    if (winSurf.ConstituentSurfaceNums.size() > 1) {
+                        FrameArea = 0.0;
+                        DividerArea = 0.0;
+                        for (int constSurfNum : winSurf.ConstituentSurfaceNums) {
+                            FrameArea += state.dataSurface->SurfWinFrameArea(constSurfNum);
+                            DividerArea += state.dataSurface->SurfWinDividerArea(constSurfNum);
+                        }
+                    }
+                    Real64 const FrameDividerLWGain = FrameArea * state.dataSurface->SurfWinFrameNetLWInPerArea(WinSurfNum) +
+                                                      DividerArea * state.dataSurface->SurfWinDividerNetLWInPerArea(WinSurfNum); // W
+                    if (FrameDividerLWGain == 0.0) {
+                        continue;
+                    }
+                    // Weight of each surface whose heat balance uses NetLWRadToSurf (not windows, not Kiva foundation surfaces)
+                    auto shareOfWindowIR = [&](size_type const SendZoneSurfNum) -> Real64 {
+                        if (SendZoneSurfNum == WinZoneSurfNum) {
+                            return 0.0;
+                        }
+                        auto const &sendSurf = state.dataSurface->Surface(zone_info.SurfacePtr[SendZoneSurfNum]);
+                        if (state.dataConstruction->Construct(sendSurf.Construction).TypeIsWindow ||
+                            sendSurf.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::Kiva) {
+                            return 0.0;
+                        }
+                        if (state.dataHeatBalIntRadExchg->CarrollMethod) {
+                            return zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
+                        }
+                        return zone_ScriptF[WinZoneSurfNum * s_zone_Surfaces + SendZoneSurfNum];
+                    };
+                    Real64 SumShares = 0.0;
+                    for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                        SumShares += shareOfWindowIR(SendZoneSurfNum);
+                    }
+                    if (SumShares <= 0.0) {
+                        continue;
+                    }
+                    for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                        Real64 const Share = shareOfWindowIR(SendZoneSurfNum);
+                        if (Share > 0.0) {
+                            NetLWRadToSurf(zone_info.SurfacePtr[SendZoneSurfNum]) -=
+                                FrameDividerLWGain * Share / (SumShares * zone_info.Area[SendZoneSurfNum]);
+                        }
+                    }
+                }
+            }
         }
 
         // Automatic Surface Multipliers: Update values of surfaces not simulated

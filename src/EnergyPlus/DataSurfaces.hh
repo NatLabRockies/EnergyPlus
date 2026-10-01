@@ -1687,6 +1687,9 @@ struct SurfacesData : BaseGlobalStruct
     Array1D<Real64> SurfWinFrameQRadInAbs;
     Array1D<Real64> SurfWinDividerQRadOutAbs;
     Array1D<Real64> SurfWinDividerQRadInAbs;
+    // Net long-wave radiation from the zone absorbed by the inside face of the frame and of the divider (W/m2 of frame or divider area)
+    Array1D<Real64> SurfWinFrameNetLWInPerArea;
+    Array1D<Real64> SurfWinDividerNetLWInPerArea;
     Array1D<Real64> SurfWinExtBeamAbsByShade;       // Exterior beam solar absorbed by window shade (W/m2)
     Array1D<Real64> SurfWinExtDiffAbsByShade;       // Exterior diffuse solar absorbed by window shade (W/m2)
     Array1D<Real64> SurfWinIntBeamAbsByShade;       // Interior beam solar absorbed by window shade (W/m2)
