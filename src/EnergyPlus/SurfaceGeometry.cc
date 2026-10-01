@@ -13480,8 +13480,7 @@ namespace SurfaceGeometry {
             auto const &point = surf.Vertex(I);
             ShowContinueError(state, std::format(" ({:8.3F},{:8.3F},{:8.3F})", point.x, point.y, point.z));
         }
-        ShowFatalError(
-            state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
+        ShowFatalError(state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
         return;
     }
 

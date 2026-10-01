@@ -3034,7 +3034,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAlternateE
     EXPECT_TRUE(compare_err_stream("", true));
 }
 
-// Verify the fatal error remains when both candidate edges are too short.
+// Verify the fatal error remains when all three triangle edges are too short.
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAllEdgesInvalid)
 {
     state->dataSurface->Surface.allocate(1);
@@ -3113,8 +3113,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackSh
     Real64 const cosTilt = std::cos(tiltRadians);
     Real64 const sinTilt = std::sin(tiltRadians);
     auto const tiltPoint = [rotationAxis, cosTilt, sinTilt](Vector const &point) {
-        return cosTilt * point + sinTilt * cross(rotationAxis, point) +
-               (1.0 - cosTilt) * dot(rotationAxis, point) * rotationAxis;
+        return cosTilt * point + sinTilt * cross(rotationAxis, point) + (1.0 - cosTilt) * dot(rotationAxis, point) * rotationAxis;
     };
 
     auto &base = state->dataSurface->Surface(1);
@@ -3173,8 +3172,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackSh
     Real64 const fallbackXShift = dot(base.lcsx, baseVertexOffset);
     Real64 const fallbackYShift = dot(base.lcsy, baseVertexOffset);
     Vector const childVertexOffset = child.Vertex(1) - base.Vertex(2);
-    Real64 const childRelativeX = -childVertexOffset.x * std::cos(base.Azimuth * Constant::DegToRad) +
-                                  childVertexOffset.y * std::sin(base.Azimuth * Constant::DegToRad);
+    Real64 const childRelativeX =
+        -childVertexOffset.x * std::cos(base.Azimuth * Constant::DegToRad) + childVertexOffset.y * std::sin(base.Azimuth * Constant::DegToRad);
     Real64 const childRelativeY = -childVertexOffset.x * std::sin(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) -
                                   childVertexOffset.y * std::cos(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) +
                                   childVertexOffset.z * std::sin(base.Tilt * Constant::DegToRad);
