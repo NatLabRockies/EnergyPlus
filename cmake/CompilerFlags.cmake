@@ -27,7 +27,10 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_options(project_options INTERFACE /utf-8)  # Specifies both the source character set and the execution character set as UTF-8
   target_compile_options(project_options INTERFACE /permissive-)  # Enable standards-conforming compiler behavior
 
-  target_compile_options(project_warnings INTERFACE /W4 /WX)
+  target_compile_options(project_warnings INTERFACE /W4)
+  if(ENABLE_WARNINGS_AS_ERRORS)
+    target_compile_options(project_warnings INTERFACE /WX)
+  endif()
 
   # string(REGEX REPLACE "/W3" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}"
   # )# Increase to /W2 then /W3 as more serious warnings are addressed (using regex to avoid VC override warnings)
@@ -97,7 +100,9 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
 
   # COMPILER FLAGS
   target_compile_options(project_options INTERFACE -pipe) # Faster compiler processing
-  target_compile_options(project_warnings INTERFACE -Werror) # Compiler Driven Development
+  if(ENABLE_WARNINGS_AS_ERRORS)
+    target_compile_options(project_warnings INTERFACE -Werror) # Compiler Driven Development
+  endif()
   target_compile_options(project_warnings INTERFACE -Wpedantic)
   # Turn on warnings about constructs/situations that may be non-portable or outside of the standard
   target_compile_options(project_warnings INTERFACE -Wall) # Turn on warnings
