@@ -1003,9 +1003,6 @@ namespace Weather {
                             EnDate += std::format("/{}", envCurr.EndYear);
                         }
                         state.dataEnvrn->EnvironmentStartEnd = StDate + " - " + EnDate;
-                        state.dataEnvrn->StartYear = envCurr.StartYear;
-                        state.dataEnvrn->EndYear = envCurr.EndYear;
-
                         int TWeekDay = (envCurr.DayOfWeek == 0) ? 1 : envCurr.DayOfWeek;
                         auto const &MonWeekDay = envCurr.MonWeekDay;
 
@@ -1838,11 +1835,8 @@ namespace Weather {
 
             // Set Tomorrow's date data
             state.dataEnvrn->MonthTomorrow = state.dataWeather->TomorrowVariables.Month;
-            state.dataEnvrn->DayOfMonthTomorrow = state.dataWeather->TomorrowVariables.DayOfMonth;
             state.dataEnvrn->DayOfWeekTomorrow = state.dataWeather->TomorrowVariables.DayOfWeek;
             state.dataEnvrn->HolidayIndexTomorrow = state.dataWeather->TomorrowVariables.HolidayIndex;
-            state.dataEnvrn->YearTomorrow = state.dataWeather->TomorrowVariables.Year;
-
             if (envCurr.KindOfEnvrn == Constant::KindOfSim::RunPeriodWeather) {
                 if (state.dataEnvrn->Month == 1 && state.dataEnvrn->DayOfMonth == 1 && envCurr.ActualWeather) {
                     if (state.dataWeather->DatesShouldBeReset) {
@@ -2022,9 +2016,6 @@ namespace Weather {
             state.dataWeather->RptDayType = state.dataEnvrn->DayOfWeek;
         }
         state.dataEnvrn->DSTIndicator = state.dataWeather->TodayVariables.DaylightSavingIndex;
-        state.dataEnvrn->EquationOfTime = state.dataWeather->TodayVariables.EquationOfTime;
-        state.dataEnvrn->CosSolarDeclinAngle = state.dataWeather->TodayVariables.CosSolarDeclinAngle;
-        state.dataEnvrn->SinSolarDeclinAngle = state.dataWeather->TodayVariables.SinSolarDeclinAngle;
     }
 
     void SetCurrentWeather(EnergyPlusData &state)
@@ -4752,7 +4743,6 @@ namespace Weather {
         int RPD2 = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:WeatherFileConditionType");
         state.dataWeather->TotRunPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "RunPeriod");
         state.dataWeather->NumOfEnvrn = state.dataEnvrn->TotDesDays + state.dataWeather->TotRunPers + RPD1 + RPD2;
-        state.dataGlobal->WeathSimReq = state.dataWeather->TotRunPers > 0;
         state.dataWeather->TotReportPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Output:Table:ReportPeriod");
 #ifdef GET_OUT
         state.dataWeather->SPSiteScheduleNamePtr.allocate(state.dataEnvrn->TotDesDays * 5);
@@ -5384,7 +5374,6 @@ namespace Weather {
             state.dataWeather->Environment.redimension(++state.dataWeather->NumOfEnvrn);
             state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::RunPeriodWeather;
             nRunPeriods = 1;
-            state.dataGlobal->WeathSimReq = true;
             state.dataWeather->RunPeriodInput.allocate(nRunPeriods);
             auto &runPerInput1 = state.dataWeather->RunPeriodInput(1);
             runPerInput1.startJulianDate = General::OrdinalDay(runPerInput1.startMonth, runPerInput1.startDay, state.dataWeather->LeapYearAdd);

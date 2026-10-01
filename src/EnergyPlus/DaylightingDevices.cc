@@ -285,9 +285,7 @@ namespace Dayltg {
                 state.dataDaylightingDevicesData->TDDPipe(PipeNum).TransSolHorizon = CalcTDDTransSolHorizon(state, PipeNum);
 
                 // Initialize thermal properties
-                Real64 SumTZoneLengths = 0.0;
                 for (int TZoneNum = 1; TZoneNum <= state.dataDaylightingDevicesData->TDDPipe(PipeNum).NumOfTZones; ++TZoneNum) {
-                    SumTZoneLengths += state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZoneLength(TZoneNum);
 
                     SetupZoneInternalGain(state,
                                           state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZone(TZoneNum),
@@ -296,9 +294,6 @@ namespace Dayltg {
                                           &state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZoneHeatGain(TZoneNum));
 
                 } // TZoneNum
-
-                state.dataDaylightingDevicesData->TDDPipe(PipeNum).ExtLength =
-                    state.dataDaylightingDevicesData->TDDPipe(PipeNum).TotLength - SumTZoneLengths;
 
                 // Setup report variables: CurrentModuleObject='DaylightingDevice:Tubular'
                 SetupOutputVariable(state,

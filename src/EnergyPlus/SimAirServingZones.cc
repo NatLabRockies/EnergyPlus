@@ -739,9 +739,7 @@ void GetAirPathData(EnergyPlusData &state)
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf = CompTypes(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name = CompNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompIndex = 0;
-                primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNameIn = InletNodeNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNumIn = InletNodeNumbers(CompNum);
-                primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNameOut = OutletNodeNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNumOut = OutletNodeNumbers(CompNum);
                 primaryAirSystems.Branch(BranchNum).NodeNum(CompNum + 1) = OutletNodeNumbers(CompNum);
 
@@ -816,7 +814,6 @@ void GetAirPathData(EnergyPlusData &state)
 
             } // end of component loop
 
-            primaryAirSystems.Branch(BranchNum).ControlType = "";
             primaryAirSystems.Branch(BranchNum).NodeNumIn = InletNodeNumbers(1);
             primaryAirSystems.Branch(BranchNum).NodeNumOut = OutletNodeNumbers(NumCompsOnBranch);
 
@@ -1950,7 +1947,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
             int SupFanIndex = 0;
             int RetFanIndex = 0;
             bool FoundOASys = false;
-            thisPrimaryAirSys.FanDesCoolLoad = 0.0;
             HVAC::FanType supFanType = HVAC::FanType::Invalid;
             HVAC::FanType retFanType = HVAC::FanType::Invalid;
 
@@ -2003,7 +1999,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
             }
 
             thisPrimaryAirSys.retFanType = retFanType;
-            thisPrimaryAirSys.retFanNum = RetFanIndex;
         }
         // Check whether there are Central Heating Coils in the Primary Air System
         for (int AirLoopNum = 1; AirLoopNum <= numPrimaryAirSys; ++AirLoopNum) {

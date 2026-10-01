@@ -4746,7 +4746,6 @@ void GetDaylightingControls(EnergyPlusData &state, bool &ErrorsFound)
             sumFracs += refPt.fracZoneDaylit;
         }
 
-        daylightControl.sumFracLights = sumFracs;
         if ((1.0 - sumFracs) > FractionTolerance) {
             ShowWarningError(state, "GetDaylightingControls: Fraction of zone or space controlled by the Daylighting reference points is < 1.0.");
             ShowContinueError(state,

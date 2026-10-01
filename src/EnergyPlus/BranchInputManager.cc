@@ -2689,7 +2689,6 @@ namespace BranchInputManager {
                         MatchNodeName = state.dataBranchInputManager->Branch(Found).Component(Loop).OutletNodeName;
                     }
                 }
-                state.dataBranchInputManager->Branch(Found).FluidType = BranchFluidType;
                 BranchOutletNodeName = MatchNodeName;
                 if (state.dataBranchInputManager->Branch(Found).AssignedLoopName.empty()) {
                     BranchLoopName = "**Unknown**";

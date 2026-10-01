@@ -125,7 +125,6 @@ struct DataGlobal : BaseGlobalStruct
     bool DoPureLoadCalc = false;     // if true, just run sizing and no full simulation of design days, or weather days, or HVAC Sizing Simulations
     bool DoHVACSizingSimulation = false;              // User input in SimulationControl object
     int HVACSizingSimMaxIterations = 0;               // User input in SimulationControl object
-    bool WeathSimReq = false;                         // Input has a RunPeriod request
     bool DoOutputReporting = false;                   // TRUE if variables to be written out
     bool DoingSizing = false;                         // TRUE when "sizing" is being performed (some error messages won't be displayed)
     bool DoingHVACSizingSimulations = false;          // true when HVAC Sizing Simulations are being performed.
@@ -136,8 +135,6 @@ struct DataGlobal : BaseGlobalStruct
     bool DisplayUnusedSchedules = false;              // True when selection for  "DisplayUnusedSchedules" is entered
     bool DisplayAdvancedReportVariables = false;      // True when selection for  "DisplayAdvancedReportVariables" is entered
     bool DisplayZoneAirHeatBalanceOffBalance = false; // True when selection for  "DisplayZoneAirHeatBalanceOffBalance" is entered
-    bool DisplayInputInAudit = false;                 // True when environmental variable "DisplayInputInAudit" is used
-    bool CreateMinimalSurfaceVariables = false;       // True when selection for  "CreateMinimalSurfaceVariables" is entered
     Real64 CurrentTime = 0.0;                         // CurrentTime, in fractional hours, from start of day. Uses Loads time step.
     int SimTimeSteps = 0;                             // Number of (Loads) timesteps since beginning of run period (environment).
     int MinutesInTimeStep = 0;    // Minutes per time step calculated from NumTimeStepInHour (number of minutes per load time step)

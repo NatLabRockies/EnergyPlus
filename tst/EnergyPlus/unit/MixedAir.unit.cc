@@ -608,8 +608,6 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
                 state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
                 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_TRUE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
     EXPECT_EQ(1, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
 
@@ -633,8 +631,6 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
                 state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
                 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
     EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
 
@@ -660,8 +656,6 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
                 state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
                 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_TRUE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
     EXPECT_EQ(1, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
 
@@ -685,8 +679,6 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
                 state->dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac,
                 0.00001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
     EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
 
@@ -714,8 +706,6 @@ TEST_F(EnergyPlusFixture, MixedAir_HXBypassOptionTest)
                 0.00001);
     EXPECT_NEAR(state->dataMixedAir->OAController(OAControllerNum).OAMassFlow, 0.145329, 0.000001);
     EXPECT_EQ(expectedMinOAflow, state->dataAirLoop->AirLoopFlow(AirLoopNum).MinOutAir);
-    EXPECT_EQ(expectedMinOAflow / state->dataMixedAir->OAController(OAControllerNum).MixMassFlow,
-              state->dataAirLoop->AirLoopFlow(AirLoopNum).OAMinFrac);
     EXPECT_FALSE(state->dataAirLoop->AirLoopControlInfo(AirLoopNum).HeatRecoveryBypass);
     EXPECT_EQ(0, state->dataMixedAir->OAController(OAControllerNum).HeatRecoveryBypassStatus);
 }
@@ -844,8 +834,7 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest)
     state->dataGlobal->numSpaces = 1;
     DataHeatBalance::AllocateIntGains(*state);
     state->dataAirLoop->AirLoopFlow.allocate(1);
-    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01;    // DataAirLoop variable (AirloopHVAC)
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
+    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
 
     state->dataEnvrn->StdBaroPress = StdPressureSeaLevel;
     state->dataEnvrn->OutDryBulbTemp = 13.0;
@@ -1136,8 +1125,7 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOccupancyTest3Zone)
     state->dataGlobal->numSpaces = 3;
     DataHeatBalance::AllocateIntGains(*state);
     state->dataAirLoop->AirLoopFlow.allocate(1);
-    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01;    // DataAirLoop variable (AirloopHVAC)
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
+    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
 
     state->dataGlobal->TimeStepsInHour = 4;    // must initialize this to get schedules initialized
     state->dataGlobal->MinutesInTimeStep = 15; // must initialize this to get schedules initialized
@@ -1423,8 +1411,7 @@ TEST_F(EnergyPlusFixture, MissingDesignOccupancyTest)
     state->dataSize->ZoneAirDistribution(1).zoneADEffSched = Sched::GetSchedule(*state, "ZONEADEFFSCH");
 
     state->dataAirLoop->AirLoopFlow.allocate(1);
-    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01;    // DataAirLoop variable (AirloopHVAC)
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
+    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
 
     GetZoneData(*state, ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);        // expect no errors
@@ -6971,8 +6958,7 @@ TEST_F(EnergyPlusFixture, CO2ControlDesignOARateTest)
     state->dataHeatBal->Zone(1).zoneContamControllerSched = Sched::GetSchedule(*state, "CO2AVAILSCHEDULE");
 
     state->dataAirLoop->AirLoopFlow.allocate(1);
-    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01;    // DataAirLoop variable (AirloopHVAC)
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
+    state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.01; // DataAirLoop variable (AirloopHVAC)
 
     GetOAControllerInputs(*state);
 
@@ -7462,7 +7448,6 @@ TEST_F(EnergyPlusFixture, OAController_ProportionalMinimum_HXBypassTest)
 
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_NEAR(OAMassFlowActual, curOACntrl.OAMassFlow, 0.00000001);
     EXPECT_NEAR(OutAirMassFlowFracActual, curAirLoopFlow.OAFrac, 0.00000001);
@@ -7657,7 +7642,6 @@ TEST_F(EnergyPlusFixture, OAController_FixedMinimum_MinimumLimitTypeTest)
 
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_NEAR(OAMassFlowActual, curOACntrl.OAMassFlow, 0.00000001);
     EXPECT_NEAR(OutAirMassFlowFracActual, curAirLoopFlow.OAFrac, 0.00000001);
@@ -7870,8 +7854,6 @@ TEST_F(EnergyPlusFixture, OAController_HighExhaustMassFlowTest)
     OutAirMassFlowFracActual = OAMassFlowActual / curOACntrl.MixMassFlow;
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(0.2, curAirLoopFlow.OAMinFrac);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_EQ(OAMassFlowActual, curOACntrl.OAMassFlow);
     EXPECT_EQ(OAMassFlowActual, curAirLoopFlow.OAFlow);
@@ -7902,8 +7884,6 @@ TEST_F(EnergyPlusFixture, OAController_HighExhaustMassFlowTest)
     OutAirMassFlowFracActual = OAMassFlowActual / curOACntrl.MixMassFlow;
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(0.2, curAirLoopFlow.OAMinFrac);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_EQ(OAMassFlowActual, curOACntrl.OAMassFlow);
     EXPECT_EQ(OAMassFlowActual, curAirLoopFlow.OAFlow);
@@ -8120,8 +8100,6 @@ TEST_F(EnergyPlusFixture, OAController_LowExhaustMassFlowTest)
     OutAirMassFlowFracActual = OAMassFlowActual / curOACntrl.MixMassFlow;
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(0.5, curAirLoopFlow.OAMinFrac);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_EQ(OAMassFlowActual, curOACntrl.OAMassFlow);
     EXPECT_EQ(OAMassFlowActual, curAirLoopFlow.OAFlow);
@@ -8150,8 +8128,6 @@ TEST_F(EnergyPlusFixture, OAController_LowExhaustMassFlowTest)
     OutAirMassFlowFracActual = OAMassFlowActual / curOACntrl.MixMassFlow;
     // check min OA flow and fraction
     EXPECT_EQ(OAMassFlowAMin, curAirLoopFlow.MinOutAir);
-    EXPECT_EQ(0.5, curAirLoopFlow.OAMinFrac);
-    EXPECT_EQ(OutAirMassFlowFracMin, curAirLoopFlow.OAMinFrac);
     // check actual OA flow and fraction
     EXPECT_EQ(OAMassFlowActual, curOACntrl.OAMassFlow);
     EXPECT_EQ(OAMassFlowActual, curAirLoopFlow.OAFlow);

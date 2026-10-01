@@ -123,7 +123,6 @@ namespace ChillerGasAbsorption {
         bool isEnterCondensTemp = false;            // if using entering conderser water temperature is TRUE, exiting is FALSE
         bool isWaterCooled = false;                 // if water cooled it is TRUE
         Real64 CHWLowLimitTemp = 0.0;               // Chilled Water Lower Limit Temperature
-        Real64 FuelHeatingValue = 0.0;
         // Calculated design values
         Real64 DesCondMassFlowRate = 0.0; // design nominal mass flow rate of water through the condenser [kg/s]
         Real64 DesHeatMassFlowRate = 0.0; // design nominal mass flow rate of water through the hot water side [kg/s]

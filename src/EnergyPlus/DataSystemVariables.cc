@@ -93,7 +93,6 @@ namespace DataSystemVariables {
     constexpr const char *cIgnoreDiffuseRadiation("IgnoreDiffuseRadiation");
     constexpr const char *cSutherlandHodgman("SutherlandHodgman");
     constexpr const char *cSlaterBarsky("SlaterBarsky");
-    constexpr const char *cMinimalSurfaceVariables("CreateMinimalSurfaceVariables");
     constexpr const char *cMinimalShadowing("MinimalShadowing");
     constexpr const char *cInputPath1("epin");       // EP-Launch setting.  Full path + project name
     constexpr const char *cInputPath2("input_path"); // RunEplus.bat setting.  Full path
@@ -107,10 +106,7 @@ namespace DataSystemVariables {
     //  each individual HVAC controller with all controller iterations
 
     constexpr const char *MinReportFrequencyEnvVar("MINREPORTFREQUENCY"); // environment var for reporting frequency.
-    constexpr const char *
-        cDisplayInputInAuditEnvVar("DISPLAYINPUTINAUDIT"); // environmental variable that enables the echoing of the input file into the audit file
-
-    constexpr const char *ciForceTimeStepEnvVar("CI_FORCE_TIME_STEP"); // environment var forcing 30 minute time steps on CI for efficiency
+    constexpr const char *ciForceTimeStepEnvVar("CI_FORCE_TIME_STEP");    // environment var forcing 30 minute time steps on CI for efficiency
 
     constexpr const char *cBufferedErrFileEnvVar("BufferedErrFile"); // environment var to enable buffered eplusout.err
 
@@ -279,11 +275,6 @@ namespace DataSystemVariables {
             state.dataEnvrn->IgnoreSolarRadiation = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cMinimalSurfaceVariables, cEnvValue);
-        if (!cEnvValue.empty()) {
-            state.dataGlobal->CreateMinimalSurfaceVariables = env_var_on(cEnvValue); // Yes or True
-        }
-
         get_environment_variable(cSortIDD, cEnvValue);
         if (!cEnvValue.empty()) {
             state.dataSysVars->SortedIDD = env_var_on(cEnvValue); // Yes or True
@@ -343,11 +334,6 @@ namespace DataSystemVariables {
         get_environment_variable(TraceHVACControllerEnvVar, cEnvValue);
         if (!cEnvValue.empty()) {
             state.dataSysVars->TraceHVACControllerEnvFlag = env_var_on(cEnvValue); // Yes or True
-        }
-
-        get_environment_variable(cDisplayInputInAuditEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
-            state.dataGlobal->DisplayInputInAudit = env_var_on(cEnvValue); // Yes or True
         }
 
         get_environment_variable(ciForceTimeStepEnvVar, cEnvValue);

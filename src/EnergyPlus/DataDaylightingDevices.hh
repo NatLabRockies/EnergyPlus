@@ -95,7 +95,6 @@ namespace Dayltg {
         Array1D<Real64> PipeTransSolBeam; // Table of beam solar transmittance vs. cosine angle
         Real64 TransSolIso = 0.0;         // Diffuse isotropic solar transmittance (constant)
         Real64 TransSolHorizon = 0.0;     // Diffuse horizon solar transmittance (constant)
-        Real64 ExtLength = 0.0;           // Exterior exposed length of pipe
         Array1D<Real64> TZoneHeatGain;    // convection gain to transition zones
         // Report variables
         Real64 TransmittedSolar = 0.0;  // Solar transmitted by the TDD [W]

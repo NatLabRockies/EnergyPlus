@@ -769,7 +769,8 @@ void RegisterNodeConnection(EnergyPlusData &state,
                 ShowContinueError(state, std::format("In Field={}", InputFieldName));
                 ShowContinueError(state,
                                   std::format("Already used in {}=\"{}\".",
-                                              objTypeStr,
+                                              Node::ConnectionObjectTypeNamesUC[static_cast<int>(
+                                                  state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectType)],
                                               state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectName));
                 ShowContinueError(state,
                                   std::format(" as type={}, In Field={}",

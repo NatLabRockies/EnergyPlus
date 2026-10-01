@@ -2125,7 +2125,6 @@ void IndirectAbsorberSpecs::updateRecords(EnergyPlusData &state, Real64 MyLoad, 
         this->Report.EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
         this->Report.Evapmdot = 0.0;
         this->Report.Condmdot = 0.0;
-        this->Report.Genmdot = 0.0;
         this->Report.ActualCOP = 0.0;
         this->Report.ChillerPartLoadRatio = 0.0;
         this->Report.LoopLoss = 0.0;
@@ -2156,7 +2155,6 @@ void IndirectAbsorberSpecs::updateRecords(EnergyPlusData &state, Real64 MyLoad, 
         this->Report.EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
         this->Report.Evapmdot = this->EvapMassFlowRate;
         this->Report.Condmdot = this->CondMassFlowRate;
-        this->Report.Genmdot = this->GenMassFlowRate;
         this->Report.LoopLoss = this->EnergyLossToEnvironment;
         this->Report.ChillerCyclingFrac = this->ChillerONOFFCyclingFrac;
 

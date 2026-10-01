@@ -65,7 +65,6 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataWater.hh>
-#include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
@@ -152,7 +151,6 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
 
     ErrorObjectHeader eoh{routineName, "Coil:Cooling:DX", input_data.name};
 
-    this->original_input_specs = input_data;
     bool errorsFound = false;
     this->name = input_data.name;
     this->coilType = HVAC::CoilType::CoolingDX;
@@ -605,12 +603,11 @@ int CoilCoolingDX::getOpModeCapFTIndex(HVAC::CoilMode const mode)
     return this->performance->indexCapFT(mode);
 }
 
-void CoilCoolingDX::setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, int _airLoopNum)
+void CoilCoolingDX::setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, [[maybe_unused]] int airLoopNum)
 {
     this->supplyFanIndex = fanIndex;
     this->supplyFanName = fanName;
     this->supplyFanType = fanType;
-    this->airLoopNum = _airLoopNum;
 }
 
 void CoilCoolingDX::getFixedData(int &_evapInletNodeIndex,
@@ -807,11 +804,7 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             // report out fan information
             // should work for all fan types
             if (this->supplyFanIndex > 0) {
-                ReportCoilSelection::setCoilSupplyFanInfo(state,
-                                                          this->coilReportNum,
-                                                          state.dataFans->fans(this->supplyFanIndex)->Name,
-                                                          state.dataFans->fans(this->supplyFanIndex)->type,
-                                                          this->supplyFanIndex);
+                ReportCoilSelection::setCoilSupplyFanInfo(state, this->coilReportNum, this->supplyFanName, this->supplyFanType, this->supplyFanIndex);
             }
 
             // report out coil rating conditions, just create a set of dummy nodes and run calculate on them

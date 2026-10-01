@@ -610,7 +610,6 @@ namespace CoolTower {
                 coolTower.AirMassFlowRate = thisCTMFL;
                 coolTower.AirVolFlowRateStd = thisCTMFL / state.dataEnvrn->StdRhoAir;
                 coolTower.InletDBTemp = Zone(ZoneNum).OutDryBulbTemp;
-                coolTower.InletWBTemp = Zone(ZoneNum).OutWetBulbTemp;
                 coolTower.InletHumRat = state.dataEnvrn->OutHumRat;
                 coolTower.CoolTWaterConsumpRate = (std::abs(InletHumRat - OutletHumRat) * thisCTMFL) / RhoWater;
                 coolTower.CoolTWaterStarvMakeupRate = 0.0; // initialize -- calc in update

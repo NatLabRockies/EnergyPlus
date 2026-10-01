@@ -200,7 +200,6 @@ namespace GroundTemp {
         state.dataWeather->RunPeriodInput.redimension(state.dataWeather->TotRunPers);
         state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::ReadAllWeatherData;
         state.dataWeather->RPReadAllWeatherData = true;
-        state.dataGlobal->WeathSimReq = true;
         // RunPeriod is initialized to be one year of simulation
         // RunPeriodInput(TotRunPers).monWeekDay = 0; // Why do this?
 

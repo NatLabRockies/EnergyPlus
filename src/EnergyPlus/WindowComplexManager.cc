@@ -1200,13 +1200,11 @@ namespace WindowComplexManager {
                 BasisElem.UpprTheta = UpperTheta;
                 BasisElem.dTheta = BasisElem.UpprTheta - Theta;
                 BasisElem.LwrTheta = Theta;
-                BasisElem.LwrPhi = 0.0;
                 BasisElem.UpprPhi = 2.0 * Constant::Pi;
             } else {
                 BasisElem.Theta = Theta;
                 BasisElem.Phi = Phi;
                 BasisElem.dPhi = DPhi;
-                BasisElem.LwrPhi = Phi - DPhi / 2.0;
                 BasisElem.UpprPhi = Phi + DPhi / 2.0;
                 BasisElem.LwrTheta = LowerTheta;
                 BasisElem.UpprTheta = UpperTheta;
