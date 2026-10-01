@@ -202,4 +202,61 @@ TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
     EXPECT_NEAR(HeatLoad05, 0.5 * state->dataHeatingCoils->HeatingCoil(CoilNum).MSNominalCapacity(1), 0.0001);
 }
 
+TEST_F(EnergyPlusFixture, HeatingCoils_ElectricRuntimeFraction)
+{
+    state->init_state(*state);
+
+    state->dataHeatingCoils->HeatingCoil.allocate(1);
+    state->dataLoopNodes->Node.allocate(1);
+    auto &heatingCoil = state->dataHeatingCoils->HeatingCoil(1);
+    heatingCoil.availSched = Sched::GetScheduleAlwaysOn(*state);
+    heatingCoil.NominalCapacity = 10000.0;
+    heatingCoil.Efficiency = 1.0;
+    heatingCoil.InletAirMassFlowRate = 0.5;
+    heatingCoil.InletAirTemp = 20.0;
+    heatingCoil.InletAirHumRat = 0.008;
+    heatingCoil.AirOutletNodeNum = 1;
+
+    Real64 QCoilReq = 5000.0;
+    Real64 QCoilActual = 0.0;
+    HeatingCoils::CalcElectricHeatingCoil(*state, 1, QCoilReq, QCoilActual, HVAC::FanOp::Cycling, 0.5);
+
+    EXPECT_NEAR(heatingCoil.RTF, 0.5, 0.0001);
+    EXPECT_NEAR(heatingCoil.HeatingCoilLoad, 5000.0, 0.0001);
+    EXPECT_NEAR(heatingCoil.ElecUseLoad, 5000.0, 0.0001);
+}
+
+TEST_F(EnergyPlusFixture, HeatingCoils_ElectricMultiStageRuntimeFraction)
+{
+    state->init_state(*state);
+
+    state->dataHeatingCoils->HeatingCoil.allocate(1);
+    state->dataLoopNodes->Node.allocate(1);
+    auto &heatingCoil = state->dataHeatingCoils->HeatingCoil(1);
+    heatingCoil.availSched = Sched::GetScheduleAlwaysOn(*state);
+    heatingCoil.InletAirMassFlowRate = 0.5;
+    heatingCoil.InletAirTemp = 20.0;
+    heatingCoil.InletAirHumRat = 0.008;
+    heatingCoil.InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(heatingCoil.InletAirTemp, heatingCoil.InletAirHumRat);
+    heatingCoil.AirOutletNodeNum = 1;
+    heatingCoil.NumOfStages = 2;
+    heatingCoil.MSNominalCapacity.allocate(2);
+    heatingCoil.MSNominalCapacity(1) = 5000.0;
+    heatingCoil.MSNominalCapacity(2) = 10000.0;
+    heatingCoil.MSEfficiency.allocate(2);
+    heatingCoil.MSEfficiency = 1.0;
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataHVACGlobal->MSHPMassFlowRateLow = 0.5;
+
+    Real64 QCoilActual = 0.0;
+    HeatingCoils::CalcMultiStageElectricHeatingCoil(*state, 1, 0.0, 0.4, 1, HVAC::FanOp::Continuous, QCoilActual, false);
+    EXPECT_NEAR(heatingCoil.RTF, 0.4, 0.0001);
+
+    HeatingCoils::CalcMultiStageElectricHeatingCoil(*state, 1, 0.5, 0.0, 2, HVAC::FanOp::Continuous, QCoilActual, false);
+    EXPECT_NEAR(heatingCoil.RTF, 1.0, 0.0001);
+
+    HeatingCoils::CalcMultiStageElectricHeatingCoil(*state, 1, 0.0, 0.0, 1, HVAC::FanOp::Continuous, QCoilActual, false);
+    EXPECT_NEAR(heatingCoil.RTF, 0.0, 0.0001);
+}
+
 } // namespace EnergyPlus
