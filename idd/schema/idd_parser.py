@@ -219,6 +219,9 @@ def parse_idd(data):
             root["properties"][obj_name]["patternProperties"] = {}
             root["properties"][obj_name]["group"] = current_group_name
 
+            if "obsolete" in obj_data:
+                root["properties"][obj_name]["obsolete"] = obj_data.pop("obsolete")
+
             name_pattern_properties = ".*"
             if "name" in obj_data:
                 name_data = obj_data.pop("name")
