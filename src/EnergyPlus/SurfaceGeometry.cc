@@ -126,6 +126,8 @@ namespace SurfaceGeometry {
         state.dataSurface->SurfWinFrameQRadInAbs.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinDividerQRadOutAbs.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinDividerQRadInAbs.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinFrameNetLWInPerArea.dimension(NumSurfaces, 0);
+        state.dataSurface->SurfWinDividerNetLWInPerArea.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinExtBeamAbsByShade.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinExtDiffAbsByShade.dimension(NumSurfaces, 0);
         state.dataSurface->SurfWinIntBeamAbsByShade.dimension(NumSurfaces, 0);

@@ -2523,6 +2523,8 @@ void InitThermalAndFluxHistories(EnergyPlusData &state)
                     state.dataSurface->SurfWinDividerTempIn(SurfNum) = DataHeatBalance::SurfInitialTemp;
                     state.dataSurface->SurfWinDividerTempInOld(SurfNum) = DataHeatBalance::SurfInitialTemp;
                     state.dataSurface->SurfWinDividerTempSurfOut(SurfNum) = DataHeatBalance::SurfInitialTemp;
+                    state.dataSurface->SurfWinFrameNetLWInPerArea(SurfNum) = 0.0;
+                    state.dataSurface->SurfWinDividerNetLWInPerArea(SurfNum) = 0.0;
 
                     // Initialize previous-timestep shading indicators
                     state.dataSurface->SurfWinExtIntShadePrevTS(SurfNum) = DataSurfaces::WinShadingType::NoShade;

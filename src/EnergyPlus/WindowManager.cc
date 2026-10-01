@@ -5636,6 +5636,8 @@ namespace Window {
         s_surf->SurfWinFrameHeatLoss(SurfNum) = 0.0;
         s_surf->SurfWinDividerHeatGain(SurfNum) = 0.0;
         s_surf->SurfWinDividerHeatLoss(SurfNum) = 0.0;
+        s_surf->SurfWinFrameNetLWInPerArea(SurfNum) = 0.0;
+        s_surf->SurfWinDividerNetLWInPerArea(SurfNum) = 0.0;
 
         if (s_surf->SurfWinFrameArea(SurfNum) > 0.0) {
             // Window has a frame. Note that if a shade, screen or blind is present it covers only the glazed part of the
@@ -5672,6 +5674,12 @@ namespace Window {
             Efac = FrameCon / (HInRad + FrameCon + HInConvFr);
             s_surf->SurfWinFrameTempIn(SurfNum) = (Dfac + Efac * Afac) / (1.0 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinFrameTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
+            // Net long-wave radiation from the zone absorbed by the frame face and the room side of its inside projection. Frames are
+            // not surfaces of the radiant enclosure; HeatBalanceIntRadExchange::CalcInteriorRadExchange takes this gain from the
+            // zone's surfaces.
+            s_surf->SurfWinFrameNetLWInPerArea(SurfNum) = s_surf->SurfWinFrameEmis(SurfNum) * (1.0 + 0.5 * ProjCorrFrIn) *
+                                                          (s_surf->SurfWinIRfromParentZone(SurfNum) -
+                                                           Constant::StefanBoltzmann * pow_4(s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin));
             // Heat gain to zone from frame
 
             // FrameHeatTransfer = s_surf->SurfWinFrameArea(SurfNum) * FrameCon *
@@ -5740,6 +5748,11 @@ namespace Window {
             Efac = DivCon / (HInRad + DivCon + HInConvDiv);
             s_surf->SurfWinDividerTempIn(SurfNum) = (Dfac + Efac * Afac) / (1 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinDividerTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
+            // Net long-wave radiation from the zone absorbed by the divider (see frame above)
+            s_surf->SurfWinDividerNetLWInPerArea(SurfNum) =
+                DivEmisIn * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum)) *
+                (s_surf->SurfWinIRfromParentZone(SurfNum) -
+                 Constant::StefanBoltzmann * pow_4(s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin));
             // Contribution of divider to window heat gain
             // ProjCorrWinHeatGain = 1.0 + 2.0 * s_surf->SurfWinProjCorrDivIn(SurfNum);
 
