@@ -26,7 +26,6 @@ TEST( CArrayTest, Construction )
 		CArray_int w( v );
 		EXPECT_EQ( v, w );
 		EXPECT_EQ( w, v );
-		w += 1;
 		v = w;
 		EXPECT_EQ( v, w );
 		EXPECT_EQ( w, v );
@@ -35,16 +34,13 @@ TEST( CArrayTest, Construction )
 		EXPECT_TRUE( v >= w );
 		EXPECT_FALSE( v < w );
 		EXPECT_FALSE( v > w );
-		CArray_int s( v + w );
-		EXPECT_EQ( v.size(), s.size() );
-		EXPECT_TRUE( s == 46 );
 	}
 
 	{ // Copy constructor and assignment template
 		CArray_int v( 10u, 22 );
 		CArray<float> f( v );
 		EXPECT_EQ( CArray<float>( 10u, 22.0f ), f );
-		v += 1;
+		v = 23;
 		EXPECT_EQ( CArray_int( 10u, 23 ), v );
 		f = v;
 		EXPECT_EQ( CArray<float>( 10u, 23.0f ), f );
@@ -66,20 +62,8 @@ TEST( CArrayTest, Construction )
 TEST( CArrayTest, Assignment )
 {
 	CArray_int v( 10u, 22 );
-	v += 2;
-	EXPECT_EQ( CArray_int( 10u, 24 ), v );
-	v -= 2;
-	EXPECT_EQ( CArray_int( 10u, 22 ), v );
-	v *= 2;
-	EXPECT_EQ( CArray_int( 10u, 44 ), v );
-	v /= 2;
-	EXPECT_EQ( CArray_int( 10u, 22 ), v );
 	v = CArray_int( 20u, 33 );
 	EXPECT_EQ( CArray_int( 20u, 33 ), v );
-	v += v;
-	EXPECT_EQ( CArray_int( 20u, 66 ), v );
-	v -= v;
-	EXPECT_EQ( CArray_int( 20u, 0 ), v );
 	v = 55;
 	EXPECT_EQ( CArray_int( 20u, 55 ), v );
 }

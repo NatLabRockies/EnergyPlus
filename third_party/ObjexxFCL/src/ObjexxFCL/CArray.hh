@@ -350,85 +350,6 @@ public: // Assignment
 		return *this;
 	}
 
-	// += CArray
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	CArray &
-	operator +=( CArray< U > const & a )
-	{
-		assert( size_ == a.size_ );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] += T( a.data_[ i ] );
-		}
-		return *this;
-	}
-
-	// -= CArray
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	CArray &
-	operator -=( CArray< U > const & a )
-	{
-		assert( size_ == a.size_ );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] -= T( a.data_[ i ] );
-		}
-		return *this;
-	}
-
-	// += Value
-	CArray &
-	operator +=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] += t;
-		}
-		return *this;
-	}
-
-	// -= Value
-	CArray &
-	operator -=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] -= t;
-		}
-		return *this;
-	}
-
-	// *= Value
-	CArray &
-	operator *=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] *= t;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type >
-	CArray &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		U const inv_u( U( 1 ) / u );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] *= inv_u;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< ! std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type, typename = void >
-	CArray &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] /= u;
-		}
-		return *this;
-	}
-
 public: // Predicate
 
 	// Active?
@@ -570,7 +491,9 @@ public: // Modifier
 	{
 		T const length_( length() );
 		assert( length_ > T( 0 ) );
-		operator /=( length_ );
+		for ( size_type i = 0; i < size_; ++i ) {
+			data_[ i ] /= length_;
+		}
 		return *this;
 	}
 
@@ -1067,118 +990,6 @@ operator >( typename CArray< T >::Tc t, CArray< T > const & a )
 		if ( !( t > a[ i ] ) ) return false;
 	}
 	return true;
-}
-
-// Generator
-
-// -CArray
-template< typename T >
-inline
-CArray< T >
-operator -( CArray< T > const & a )
-{
-	CArray< T > r( a );
-	r *= T( -1 );
-	return r;
-}
-
-// CArray + CArray
-template< typename T >
-inline
-CArray< T >
-operator +( CArray< T > const & a, CArray< T > const & b )
-{
-	CArray< T > r( a );
-	r += b;
-	return r;
-}
-
-// CArray - CArray
-template< typename T >
-inline
-CArray< T >
-operator -( CArray< T > const & a, CArray< T > const & b )
-{
-	CArray< T > r( a );
-	r -= b;
-	return r;
-}
-
-// CArray + Value
-template< typename T >
-inline
-CArray< T >
-operator +( CArray< T > const & a, typename CArray< T >::Tc t )
-{
-	CArray< T > r( a );
-	r += t;
-	return r;
-}
-
-// Value + CArray
-template< typename T >
-inline
-CArray< T >
-operator +( typename CArray< T >::Tc t, CArray< T > const & a )
-{
-	CArray< T > r( a );
-	r += t;
-	return r;
-}
-
-// CArray - Value
-template< typename T >
-inline
-CArray< T >
-operator -( CArray< T > const & a, typename CArray< T >::Tc t )
-{
-	CArray< T > r( a );
-	r -= t;
-	return r;
-}
-
-// Value - CArray
-template< typename T >
-inline
-CArray< T >
-operator -( typename CArray< T >::Tc t, CArray< T > const & a )
-{
-	CArray< T > r( -a );
-	r += t;
-	return r;
-}
-
-// CArray * Value
-template< typename T >
-inline
-CArray< T >
-operator *( CArray< T > const & a, typename CArray< T >::Tc t )
-{
-	CArray< T > r( a );
-	r *= t;
-	return r;
-}
-
-// Value * CArray
-template< typename T >
-inline
-CArray< T >
-operator *( typename CArray< T >::Tc t, CArray< T > const & a )
-{
-	CArray< T > r( a );
-	r *= t;
-	return r;
-}
-
-// CArray / Value
-template< typename T >
-inline
-CArray< T >
-operator /( CArray< T > const & a, typename CArray< T >::Tc t )
-{
-	CArray< T > r( a );
-	r /= t;
-	return r;
 }
 
 // Stream >> CArray

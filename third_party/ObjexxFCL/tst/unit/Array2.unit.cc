@@ -742,42 +742,6 @@ TEST( Array2Test, AssignmentArgument )
 	}
 }
 
-TEST( Array2Test, AssignmentArithmetic )
-{
-	Array2D_int A1( 2, 3, 11 );
-	Array2D_int const A2( 2, 3, 10 );
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 11 ), A1 ) );
-
-	A1 += A2;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 21 ), A1 ) );
-	A1 -= A2;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 11 ), A1 ) );
-	A1 += 33;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 44 ), A1 ) );
-	A1 -= 33;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 11 ), A1 ) );
-	A1 *= A2;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 110 ), A1 ) );
-}
-
-TEST( Array2Test, AssignmentArithmeticArgument )
-{
-	Array2D_int A1( 2, 3, 11 );
-	Array2D_int const A2( 2, 3, 10 );
-	Array2A_int A3( A2 );
-
-	A1 += A3;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 21 ), A1 ) );
-	A1 -= A3;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 11 ), A1 ) );
-	A1 += 33;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 44 ), A1 ) );
-	A1 -= 33;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 11 ), A1 ) );
-	A1 *= A3;
-	EXPECT_TRUE( eq( Array2D_int( 2, 3, 110 ), A1 ) );
-}
-
 TEST( Array2Test, RangeBasedFor )
 {
 	Array2D_int A( 2, 3, { 1, 2, 3, 4, 5, 6 } );

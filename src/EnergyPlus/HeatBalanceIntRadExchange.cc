@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -267,7 +268,9 @@ namespace HeatBalanceIntRadExchange {
                     } else {
                         CalcScriptF(state, n_zone_Surfaces, zone_info.Area, zone_info.F, zone_info.Emissivity, zone_ScriptF);
                         // precalc - multiply by StefanBoltzmannConstant
-                        zone_ScriptF *= Constant::StefanBoltzmann;
+                        for (Real64 &sf : zone_ScriptF) {
+                            sf *= Constant::StefanBoltzmann;
+                        }
                     }
                 }
 
@@ -1610,7 +1613,10 @@ namespace HeatBalanceIntRadExchange {
         }
 
         //  Enforce reciprocity by averaging AiFij and AjFji
-        FixedAF = 0.5 * (AF + transpose(AF)); // Performance Slow way to average with transpose (heap use)
+        { // Performance Slow way to average with transpose (heap use)
+            Array2D<Real64> const AFt(transpose(AF));
+            std::transform(AF.begin(), AF.end(), AFt.begin(), FixedAF.begin(), [](Real64 lhs, Real64 rhs) { return 0.5 * (lhs + rhs); });
+        }
 
         AF.deallocate();
 
@@ -1664,7 +1670,10 @@ namespace HeatBalanceIntRadExchange {
                 if (MaxFixedFRowSum < 1.0) {
                     ShowFatalError(state, " FixViewFactors: Three surface or less zone failing ViewFactorFix correction which should never happen.");
                 } else {
-                    FixedF *= (1.0 / MaxFixedFRowSum);
+                    Real64 const invMaxFixedFRowSum(1.0 / MaxFixedFRowSum);
+                    for (Real64 &f : FixedF) {
+                        f *= invMaxFixedFRowSum;
+                    }
                 }
                 RowSum = sum(FixedF); // needs to be recalculated
             }
@@ -1690,11 +1699,17 @@ namespace HeatBalanceIntRadExchange {
                 } else {
                     RowCoefficient(i) = 1.0;
                 }
-                FixedAF(_, i) *= RowCoefficient(i);
+                for (int j = 1; j <= N; ++j) {
+                    FixedAF(j, i) *= RowCoefficient(i);
+                }
             }
 
             //  Enforce reciprocity by averaging AiFij and AjFji
-            FixedAF = 0.5 * (FixedAF + transpose(FixedAF));
+            {
+                Array2D<Real64> const FixedAFt(transpose(FixedAF));
+                std::transform(
+                    FixedAF.begin(), FixedAF.end(), FixedAFt.begin(), FixedAF.begin(), [](Real64 lhs, Real64 rhs) { return 0.5 * (lhs + rhs); });
+            }
 
             //  Form FixedF matrix
             for (int i = 1; i <= N; ++i) {
@@ -1714,7 +1729,11 @@ namespace HeatBalanceIntRadExchange {
             ConvrgOld = ConvrgNew;
             if (NumIterations > 400) { //  If everything goes bad,enforce reciprocity and go home.
                 //  Enforce reciprocity by averaging AiFij and AjFji
-                FixedAF = 0.5 * (FixedAF + transpose(FixedAF));
+                {
+                    Array2D<Real64> const FixedAFt(transpose(FixedAF));
+                    std::transform(
+                        FixedAF.begin(), FixedAF.end(), FixedAFt.begin(), FixedAF.begin(), [](Real64 lhs, Real64 rhs) { return 0.5 * (lhs + rhs); });
+                }
 
                 //  Form FixedF matrix
                 for (int i = 1; i <= N; ++i) {

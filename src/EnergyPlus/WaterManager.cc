@@ -46,8 +46,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1061,9 +1063,12 @@ namespace WaterManager {
         if (TotVdotSupplyAvail > state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate) {
             // pipe/filter rate constraints on inlet
             overflowVdot = TotVdotSupplyAvail - state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate;
-            state.dataWaterManager->overflowTwater =
-                sum(state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply * state.dataWaterData->WaterStorage(TankNum).TwaterSupply) /
-                sum(state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply);
+            {
+                auto const &vdotAvailSupply = state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply;
+                auto const &twaterSupply = state.dataWaterData->WaterStorage(TankNum).TwaterSupply;
+                state.dataWaterManager->overflowTwater =
+                    std::inner_product(vdotAvailSupply.begin(), vdotAvailSupply.end(), twaterSupply.begin(), 0.0) / sum(vdotAvailSupply);
+            }
             TotVdotSupplyAvail = state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate;
         }
         TotVolSupplyAvail = TotVdotSupplyAvail * TimeStepSysSec;
@@ -1118,8 +1123,12 @@ namespace WaterManager {
         if (TotVdotDemandAvail < OrigVdotDemandRequest) { // starvation
             // even distribution
             if (OrigVdotDemandRequest > 0.0) {
-                state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand =
-                    (TotVdotDemandAvail / OrigVdotDemandRequest) * state.dataWaterData->WaterStorage(TankNum).VdotRequestDemand;
+                Real64 const demandFrac(TotVdotDemandAvail / OrigVdotDemandRequest);
+                auto &vdotAvailDemand = state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand;
+                auto const &vdotRequestDemand = state.dataWaterData->WaterStorage(TankNum).VdotRequestDemand;
+                vdotAvailDemand.allocate(vdotRequestDemand);
+                std::transform(
+                    vdotRequestDemand.begin(), vdotRequestDemand.end(), vdotAvailDemand.begin(), [demandFrac](Real64 v) { return demandFrac * v; });
             } else {
                 state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand = 0.0;
             }

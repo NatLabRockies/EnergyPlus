@@ -173,18 +173,6 @@ TEST( ArrayTest, Assignment2DOverlapProxyVarying )
 	EXPECT_EQ( 3, A( 2, 2 ) );
 }
 
-TEST( ArrayTest, Operators2D )
-{
-	Array2D_int A( 3, 3, 33 );
-	Array2A_int B( A );
-	A += B;
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 66 ), A ) );
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 66 ), B ) );
-	A += 1;
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 67 ), A ) );
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 67 ), B ) );
-}
-
 TEST( ArrayTest, Swap3D )
 {
 	Array3D_int A( 4, 4, 4, 44 );
@@ -209,15 +197,9 @@ TEST( ArrayTest, Pow2D )
 	EXPECT_TRUE( eq( S, B ) );
 }
 
-TEST( ArrayTest, Generation2DValueMinusArray )
-{
-	Array2D_int A( 3, 3, 33 ), B( 44 - A );
-	EXPECT_TRUE( eq( Array2D_int( 3, 3, 11 ), B ) );
-}
-
 TEST( ArrayTest, Cross1D )
 {
-	Array1D_int A( 3, 33 ), B( 44 - A );
+	Array1D_int A( 3, 33 ), B( 3, 11 );
 	EXPECT_TRUE( eq( cross( A, B ), cross_product( A, B ) ) );
 }
 

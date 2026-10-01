@@ -405,85 +405,6 @@ public: // Assignment
 		return *this;
 	}
 
-	// += CArrayA
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	CArrayA &
-	operator +=( CArrayA< U > const & a )
-	{
-		assert( size_ == a.size_ );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] += T( a.data_[ i ] );
-		}
-		return *this;
-	}
-
-	// -= CArrayA
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	CArrayA &
-	operator -=( CArrayA< U > const & a )
-	{
-		assert( size_ == a.size_ );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] -= T( a.data_[ i ] );
-		}
-		return *this;
-	}
-
-	// += Value
-	CArrayA &
-	operator +=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] += t;
-		}
-		return *this;
-	}
-
-	// -= Value
-	CArrayA &
-	operator -=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] -= t;
-		}
-		return *this;
-	}
-
-	// *= Value
-	CArrayA &
-	operator *=( Tc t )
-	{
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] *= t;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type >
-	CArrayA &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		U const inv_u( U( 1 ) / u );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] *= inv_u;
-		}
-		return *this;
-	}
-
-	// /= Value
-	template< typename U, class = typename std::enable_if< ! std::is_floating_point< U >::value && std::is_assignable< T&, U >::value >::type, typename = void >
-	CArrayA &
-	operator /=( U const & u )
-	{
-		assert( u != U( 0 ) );
-		for ( size_type i = 0; i < size_; ++i ) {
-			data_[ i ] /= u;
-		}
-		return *this;
-	}
-
 public: // Predicate
 
 	// Active?
@@ -638,7 +559,9 @@ public: // Modifier
 	{
 		T const length_( length() );
 		assert( length_ > T( 0 ) );
-		operator /=( length_ );
+		for ( size_type i = 0; i < size_; ++i ) {
+			data_[ i ] /= length_;
+		}
 		return *this;
 	}
 
@@ -1147,118 +1070,6 @@ operator >( typename CArrayA< T >::Tc t, CArrayA< T > const & a )
 		if ( !( t > a[ i ] ) ) return false;
 	}
 	return true;
-}
-
-// Generator
-
-// -CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator -( CArrayA< T > const & a )
-{
-	CArrayA< T > r( a );
-	r *= T( -1 );
-	return r;
-}
-
-// CArrayA + CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator +( CArrayA< T > const & a, CArrayA< T > const & b )
-{
-	CArrayA< T > r( a );
-	r += b;
-	return r;
-}
-
-// CArrayA - CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator -( CArrayA< T > const & a, CArrayA< T > const & b )
-{
-	CArrayA< T > r( a );
-	r -= b;
-	return r;
-}
-
-// CArrayA + Value
-template< typename T >
-inline
-CArrayA< T >
-operator +( CArrayA< T > const & a, typename CArrayA< T >::Tc t )
-{
-	CArrayA< T > r( a );
-	r += t;
-	return r;
-}
-
-// Value + CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator +( typename CArrayA< T >::Tc t, CArrayA< T > const & a )
-{
-	CArrayA< T > r( a );
-	r += t;
-	return r;
-}
-
-// CArrayA - Value
-template< typename T >
-inline
-CArrayA< T >
-operator -( CArrayA< T > const & a, typename CArrayA< T >::Tc t )
-{
-	CArrayA< T > r( a );
-	r -= t;
-	return r;
-}
-
-// Value - CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator -( typename CArrayA< T >::Tc t, CArrayA< T > const & a )
-{
-	CArrayA< T > r( -a );
-	r += t;
-	return r;
-}
-
-// CArrayA * Value
-template< typename T >
-inline
-CArrayA< T >
-operator *( CArrayA< T > const & a, typename CArrayA< T >::Tc t )
-{
-	CArrayA< T > r( a );
-	r *= t;
-	return r;
-}
-
-// Value * CArrayA
-template< typename T >
-inline
-CArrayA< T >
-operator *( typename CArrayA< T >::Tc t, CArrayA< T > const & a )
-{
-	CArrayA< T > r( a );
-	r *= t;
-	return r;
-}
-
-// CArrayA / Value
-template< typename T >
-inline
-CArrayA< T >
-operator /( CArrayA< T > const & a, typename CArrayA< T >::Tc t )
-{
-	CArrayA< T > r( a );
-	r /= t;
-	return r;
 }
 
 // Stream >> CArrayA

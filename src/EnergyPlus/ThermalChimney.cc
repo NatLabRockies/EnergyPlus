@@ -1095,7 +1095,9 @@ namespace ThermalChimney {
 
             for (ThermChimLoop2 = ThermChimLoop1 + 1; ThermChimLoop2 <= NTC; ++ThermChimLoop2) {
                 TCcoefficient = -EquaCoef(ThermChimLoop1, ThermChimLoop2) / EquaCoef(ThermChimLoop1, ThermChimLoop1);
-                EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop2) += TCcoefficient * EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1);
+                for (int row = ThermChimLoop1; row <= NTC; ++row) {
+                    EquaCoef(row, ThermChimLoop2) += TCcoefficient * EquaCoef(row, ThermChimLoop1);
+                }
                 EquaConst(ThermChimLoop2) += TCcoefficient * EquaConst(ThermChimLoop1);
             }
         }
