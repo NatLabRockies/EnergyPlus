@@ -5676,8 +5676,8 @@ namespace Window {
 
             // FrameHeatTransfer = s_surf->SurfWinFrameArea(SurfNum) * FrameCon *
             //                     (s_surf->SurfWinFrameTempSurfOut(SurfNum) - s_surf->SurfWinFrameTempIn(SurfNum));
-            FrameHeatGain = s_surf->SurfWinFrameArea(SurfNum) * (1.0 + s_surf->SurfWinProjCorrFrIn(SurfNum)) *
-                            (HInConvFr * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin - tin));
+            // HInConvFr already includes the inside projection (1 + ProjCorrFrIn), as in the zone air heat balance
+            FrameHeatGain = s_surf->SurfWinFrameArea(SurfNum) * HInConvFr * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin - tin);
 
             if (FrameHeatGain > 0.0) {
                 s_surf->SurfWinFrameHeatGain(SurfNum) = FrameHeatGain;
@@ -5743,8 +5743,8 @@ namespace Window {
             // Contribution of divider to window heat gain
             // ProjCorrWinHeatGain = 1.0 + 2.0 * s_surf->SurfWinProjCorrDivIn(SurfNum);
 
-            DividerHeatGain = s_surf->SurfWinDividerArea(SurfNum) * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum)) *
-                              (HInConvDiv * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin - tin));
+            // HInConvDiv already includes the inside projection (1 + 2 ProjCorrDivIn), as in the zone air heat balance
+            DividerHeatGain = s_surf->SurfWinDividerArea(SurfNum) * HInConvDiv * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin - tin);
             // DividerHeatTransfer = s_surf->SurfWinDividerArea(SurfNum) * DivCon *
             //                      (s_surf->SurfWinDividerTempSurfOut(SurfNum) - s_surf->SurfWinDividerTempIn(SurfNum));
 
