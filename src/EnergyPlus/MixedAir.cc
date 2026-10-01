@@ -704,7 +704,7 @@ void SimOAComponent(EnergyPlusData &state,
         }
     } break;
     case SimAirServingZones::CompType::EvapCooler: { // EvaporativeCooler:Direct:CelDekPad, EvaporativeCooler:Indirect:CelDekPad
-        // EvaporativeCooler:Indirect:WetCoil, EvaporativeCooler:Indirect:ResearchSpecial
+        // EvaporativeCooler:Indirect:WetCoil, EvaporativeCooler:Indirect:UserEffectiveness
         if (Sim) {
             EvaporativeCoolers::SimEvapCooler(state, CompName, CompIndex);
         }
@@ -1138,7 +1138,7 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
                 } else if (thisComp == "DEHUMIDIFIER:DESICCANT:SYSTEM") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::Desiccant;
                 } else if (thisComp == "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD" || thisComp == "EVAPORATIVECOOLER:INDIRECT:WETCOIL" ||
-                           thisComp == "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL" || thisComp == "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL") {
+                           thisComp == "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS" || thisComp == "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::EvapCooler;
                 } else if (thisComp == "HUMIDIFIER:STEAM:GAS") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::Humidifier;
@@ -5682,8 +5682,8 @@ void GetOACompNodeNumbers(EnergyPlusData &state, int OASysNum, bool &errorsFound
         case MixedAir::ValidEquipListType::EvaporativeCoolerDirectCeldekPad:
         case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectCeldekPad:
         case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectWetCoil:
-        case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectResearchSpecial:
-        case MixedAir::ValidEquipListType::EvaporativeCoolerDirectResearchSpecial:
+        case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectUserEffectiveness:
+        case MixedAir::ValidEquipListType::EvaporativeCoolerDirectUserEffectiveness:
             thisOutsideAirSys.InletNodeNum(CompNum) = EvaporativeCoolers::GetInletNodeNum(state, CompName, InletNodeErrFlag);
             thisOutsideAirSys.OutletNodeNum(CompNum) = EvaporativeCoolers::GetOutletNodeNum(state, CompName, OutletNodeErrFlag);
             break;

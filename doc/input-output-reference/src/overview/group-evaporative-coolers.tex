@@ -166,11 +166,11 @@ This numeric field is the recirculating and spray pump electric power at the Pri
 This is the nominal water recirculating and spray pump power of evaporative cooler at primary air design flow rates and cooler design effectiveness.
 This input field is autosizable, see \hyperref[field-water-pump-power-sizing-factor]{Water Pump Power Sizing Factor}.
 
-\paragraph{Field: Water Pump Power Sizing Factor}\label{field-water-pump-power-sizing-factor}
+\paragraph{Field: Design Water Pump Power Per Unit Flow Rate}\label{field-design-water-pump-power-per-unit-flow-rate}
 
-This numeric field value is recirculating water pump sizing factor in \si{\wattperVolumeFlowRate}.
+This numeric field value is recirculating water pump sizing ratio in \si{\wattperVolumeFlowRate}.
 This field is used when the previous field is set to autosize. The pump design electric power is scaled with the Primary Design Air Flow Rate. This input field is autosizable.
-Average Pump Power sizing factor was estimated from pump power and primary air design flow rates inputs from energyplus example files and
+Average water pump power per unit primary design air flow rate was estimated from pump power and primary air design flow rate inputs from energyplus example files and
 is about \SI{90.0}{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Primary Air Design Flow Rate). The factor ranges from 55.0 to \SI{150.0}{\wattperVolumeFlowRate}.
 
 \paragraph{Field: Water Pump Power Modifier Curve Name}\label{field-water-pump-power-modifier-curve-name}
@@ -223,7 +223,7 @@ EvaporativeCooler:Direct:ResearchSpecial,
   ,                           !- Effectiveness Flow Ratio Modifier Curve Name
   autosize,                   !- Primary Air Design Flow Rate {m3/s}
   30.0,                       !- Recirculating Water Pump Design Power
-  ,                           !- Water Pump Power Sizing Factor
+  ,                           !- Design Water Pump Power Per Unit Flow Rate
   ,                           !- Water Pump Power Modifier Curve Name
   OAIndRDD Evap Cooler-OADirect Evap CoolerNode,  !- Air Inlet Node Name
   OADirect Evap Cooler-OAMixing BoxNode,  !- Air Outlet Node Name
@@ -625,9 +625,9 @@ This alpha field is the name of a curve that modifies the drybulb effectiveness 
 
 This numeric field is the recirculating pump electric power at Secondary Design Air Flow Rate in W. This is the nominal design pump power water recirculation and spray for evaporation at design secondary air flow rates and cooler design effectiveness. This input field is autosizable.
 
-\paragraph{Field: Water Pump Power Sizing Factor}\label{field-water-pump-power-sizing-factor-1}
+\paragraph{Field: Design Water Pump Power Per Unit Flow Rate}\label{field-design-water-pump-power-per-unit-flow-rate-1}
 
-This numeric field value is recirculating water pump sizing factor in \si{\wattperVolumeFlowRate}. This field is used when the previous field is set to autosize. The pump design electric power is scaled with Secondary Design Air Flow Rate. Average Pump Power sizing factor was estimated from pump power and secondary air design flow rates inputs from energyplus example files and is about 90.0 \si{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Secondary Air Design Flow Rate). The factor ranges from 55.0 to 150.0 \si{\wattperVolumeFlowRate}.
+This numeric field value is recirculating water pump sizing ratio in \si{\wattperVolumeFlowRate}. This field is used when the previous field is set to autosize. The pump design electric power is scaled with Secondary Design Air Flow Rate. Average water pump power per unit secondary design air flow rate was estimated from pump power and secondary air design flow rate inputs from energyplus example files and is about 90.0 \si{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Secondary Air Design Flow Rate). The factor ranges from 55.0 to 150.0 \si{\wattperVolumeFlowRate}.
 
 \paragraph{Field: Water Pump Power Modifier Curve Name}\label{field-water-pump-power-modifier-curve-name-1}
 
@@ -712,7 +712,7 @@ This numeric field defines the secondary air inlet node drybulb temperature limi
 An IDF example is shown below:
 
 \begin{lstlisting}
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
   DataC_IndirectEvapCooler,   !- Name
   ALWAYS_ON,                  !- Availability Schedule Name
   0.75,                       !- Cooler Wetbulb Design Effectiveness
@@ -740,7 +740,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
 
 \subsubsection{Outputs}\label{outputs-4-004}
 
-The output variables that are available for the EvaporativeCooler:Indirect:ResearchSpecial object are shown below:
+The output variables that are available for the EvaporativeCooler:Indirect:UserEffectiveness object are shown below:
 
 \begin{itemize}
 \item
@@ -773,11 +773,11 @@ This output variable provides the operating modes or status of the indirect evap
 
 \paragraph{Evaporative Cooler Part Load Ratio {[]}}\label{evaporative-cooler-part-load-ratio}
 
-This output variable provides the part load fraction of the indirect cooler. The ResearchSpecial cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
+This output variable provides the part load fraction of the indirect cooler. The UserEffectiveness cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
 
 \paragraph{Evaporative Cooler Dewpoint Bound Status {[]}}\label{evaporative-cooler-dewpoint-bound-status}
 
-This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The ResearchSpecial model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
+This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The UserEffectiveness model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
 
 \paragraph{Evaporative Cooler Electricity Rate {[}W{]}}\label{evaporative-cooler-electric-power-w-1}
 

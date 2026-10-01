@@ -1271,9 +1271,9 @@ void GetAirPathData(EnergyPlusData &state)
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
                     } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:WETCOIL") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
-                    } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL") {
+                    } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
-                    } else if (componentType == "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL") {
+                    } else if (componentType == "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
 
                         // Desiccant Dehumidifier Types for the air system simulation
@@ -3664,7 +3664,7 @@ void SimAirLoopComponent(EnergyPlusData &state,
         // Evap Cooler Types for the air system simulation
     } break;
     case CompType::EvapCooler: { // 'EvaporativeCooler:Direct:CelDekPad', 'EvaporativeCooler:Indirect:CelDekPad'
-        // 'EvaporativeCooler:Indirect:WetCoil', 'EvaporativeCooler:Indirect:ResearchSpecial'
+        // 'EvaporativeCooler:Indirect:WetCoil', 'EvaporativeCooler:Indirect:UserEffectiveness'
         SimEvapCooler(state, CompName, CompIndex, state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR);
         // Desiccant Dehumidifier Types for the air system simulation
     } break;

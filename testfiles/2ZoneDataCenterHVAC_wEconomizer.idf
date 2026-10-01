@@ -105,7 +105,7 @@
 ! Purchased Chilled Water:        No
 ! Purchased Hot Water:            No
 ! Air Terminal Unit Type:         AirTerminal:SingleDuct:VAV:NoReheat
-! Evaporative Cooler:             EvaporativeCooler:Direct:ResearchSpecial, EvaporativeCooler:Indirect:ResearchSpecial
+! Evaporative Cooler:             EvaporativeCooler:Direct:UserEffectiveness, EvaporativeCooler:Indirect:UserEffectiveness
 ! Coils:                          Coil:Cooling:DX:SingleSpeed, Coil:Cooling:Water
 ! Pumps:                          Pump:VariableSpeed
 ! Boilers:                        None
@@ -923,11 +923,11 @@
     West Zone Supply Fan,    !- Component 2 Name
     West Zone Mixed Air Node,!- Component 2 Inlet Node Name
     West Zone Supply Fan Outlet Node,  !- Component 2 Outlet Node Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 3 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 3 Object Type
     West Data Center DEC,    !- Component 3 Name
     West Zone Supply Fan Outlet Node,  !- Component 3 Inlet Node Name
     West Zone DEC Outlet Node,  !- Component 3 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 4 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 4 Object Type
     West Data Center IEC,    !- Component 4 Name
     West Zone DEC Outlet Node,  !- Component 4 Inlet Node Name
     West Zone IEC Outlet Node,  !- Component 4 Outlet Node Name
@@ -1088,14 +1088,14 @@
     ,                        !- Maximum Fraction of Outdoor Air Schedule Name
     ;                        !- Mechanical Ventilation Controller Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     West Data Center DEC,    !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     West Zone Supply Fan Outlet Node,  !- Air Inlet Node Name
     West Zone DEC Outlet Node,  !- Air Outlet Node Name
@@ -1107,7 +1107,7 @@
     18.0,                    !- Evaporative Operation Maximum Limit Wetbulb Temperature
     20.0;                    !- Evaporative Operation Maximum Limit Drybulb Temperature
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     West Data Center IEC,    !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.70,                    !- Cooler Wetbulb Design Effectiveness
@@ -1115,7 +1115,7 @@
     0.72,                    !- Cooler Drybulb Design Effectiveness
     IECEffDBFlowMod,         !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Recirculating Water Pump Design Power {W}
-    150.0,                   !- Water Pump Power Sizing Factor {W/(m3/s)}
+    150.0,                   !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     IECPumpPowerMod,         !- Water Pump Power Modifier Curve Name
     autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.4,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -1611,11 +1611,11 @@
     East Zone Supply Fan,    !- Component 2 Name
     East Zone Mixed Air Node,!- Component 2 Inlet Node Name
     East Zone Supply Fan Outlet Node,  !- Component 2 Outlet Node Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 3 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 3 Object Type
     East Data Center DEC,    !- Component 3 Name
     East Zone Supply Fan Outlet Node,  !- Component 3 Inlet Node Name
     East Zone DEC Outlet Node,  !- Component 3 Outlet Node Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 4 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 4 Object Type
     East Data Center IEC,    !- Component 4 Name
     East Zone DEC Outlet Node,  !- Component 4 Inlet Node Name
     East Zone IEC Outlet Node,  !- Component 4 Outlet Node Name
@@ -1774,14 +1774,14 @@
     ,                        !- Maximum Fraction of Outdoor Air Schedule Name
     ;                        !- Mechanical Ventilation Controller Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     East Data Center DEC,    !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     East Zone Supply Fan Outlet Node,  !- Air Inlet Node Name
     East Zone DEC Outlet Node,  !- Air Outlet Node Name
@@ -1793,7 +1793,7 @@
     20.0,                    !- Evaporative Operation Maximum Limit Wetbulb Temperature
     22.0;                    !- Evaporative Operation Maximum Limit Drybulb Temperature
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     East Data Center IEC,    !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.70,                    !- Cooler Wetbulb Design Effectiveness
@@ -1801,7 +1801,7 @@
     0.72,                    !- Cooler Drybulb Design Effectiveness
     IECEffDBFlowMod,         !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Recirculating Water Pump Design Power {W}
-    150.0,                   !- Water Pump Power Sizing Factor {W/(m3/s)}
+    150.0,                   !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     IECPumpPowerMod,         !- Water Pump Power Modifier Curve Name
     autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.4,                     !- Secondary Air Flow Scaling Factor {dimensionless}

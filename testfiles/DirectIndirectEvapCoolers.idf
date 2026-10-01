@@ -50,7 +50,7 @@
 ! HVAC:                           PSZ system with outside air, Uses UnitaryHeatCool with DX cooling coils and gas heat.
 !                                 All equipment is autosized. Three of the outdoor air system include direct and indirect
 !                                 evaporative coolers and one demonstrates just an direct cooler.  These are the
-!                                 "ResearchSpecial" coolers that modulate to meet setpoints.
+!                                 "UserEffectiveness" coolers that modulate to meet setpoints.
 !
 ! Zonal Equipment:                AirTerminal:SingleDuct:Uncontrolled
 ! Central Air Handling Equipment: No.
@@ -4046,9 +4046,9 @@
 
   AirLoopHVAC:OutdoorAirSystem:EquipmentList,
     FURNACE_PACU_CAV:1_OA_Equipment,  !- Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 1 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 1 Object Type
     FURNACE_PACU_CAV:1_OAIndRDD Evap Cooler,  !- Component 1 Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 2 Object Type
     FURNACE_PACU_CAV:1_OADirect Evap Cooler,  !- Component 2 Name
     OutdoorAir:Mixer,        !- Component 3 Object Type
     FURNACE_PACU_CAV:1_OAMixing Box;  !- Component 3 Name
@@ -4099,7 +4099,7 @@
     FixedMinimum,            !- Minimum Limit Type
     MinOA_Sched;             !- Minimum Outdoor Air Schedule Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     FURNACE_PACU_CAV:1_OAIndRDD Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4107,7 +4107,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4126,14 +4126,14 @@
     0.2,                     !- Drift Loss Fraction
     3;                       !- Blowdown Concentration Ratio
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     FURNACE_PACU_CAV:1_OADirect Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:1_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:1_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:1_OADirect Evap Cooler-FURNACE_PACU_CAV:1_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -4381,7 +4381,7 @@
 
   AirLoopHVAC:OutdoorAirSystem:EquipmentList,
     FURNACE_PACU_CAV:2_OA_Equipment,  !- Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 1 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 1 Object Type
     FURNACE_PACU_CAV:2_OADirect Evap Cooler,  !- Component 1 Name
     OutdoorAir:Mixer,        !- Component 2 Object Type
     FURNACE_PACU_CAV:2_OAMixing Box;  !- Component 2 Name
@@ -4432,14 +4432,14 @@
     FixedMinimum,            !- Minimum Limit Type
     MinOA_Sched;             !- Minimum Outdoor Air Schedule Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     FURNACE_PACU_CAV:2_OADirect Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:2_OAInlet Node,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:2_OADirect Evap Cooler-FURNACE_PACU_CAV:2_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -4687,9 +4687,9 @@
 
   AirLoopHVAC:OutdoorAirSystem:EquipmentList,
     FURNACE_PACU_CAV:3_OA_Equipment,  !- Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 1 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 1 Object Type
     FURNACE_PACU_CAV:3_OAIndRDD Evap Cooler,  !- Component 1 Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 2 Object Type
     FURNACE_PACU_CAV:3_OADirect Evap Cooler,  !- Component 2 Name
     OutdoorAir:Mixer,        !- Component 3 Object Type
     FURNACE_PACU_CAV:3_OAMixing Box;  !- Component 3 Name
@@ -4740,7 +4740,7 @@
     FixedMinimum,            !- Minimum Limit Type
     MinOA_Sched;             !- Minimum Outdoor Air Schedule Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     FURNACE_PACU_CAV:3_OAIndRDD Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4748,7 +4748,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4763,14 +4763,14 @@
     FURNACE_PACU_CAV:3_OAIndRDD Evap CoolerOA Outlet Node,  !- Secondary Air Outlet Node Name
     FURNACE_PACU_CAV:3_OADirect Evap Cooler-FURNACE_PACU_CAV:3_OAMixing BoxNode;  !- Sensor Node Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     FURNACE_PACU_CAV:3_OADirect Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:3_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:3_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:3_OADirect Evap Cooler-FURNACE_PACU_CAV:3_OAMixing BoxNode,  !- Air Outlet Node Name
@@ -5018,9 +5018,9 @@
 
   AirLoopHVAC:OutdoorAirSystem:EquipmentList,
     FURNACE_PACU_CAV:4_OA_Equipment,  !- Name
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- Component 1 Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- Component 1 Object Type
     FURNACE_PACU_CAV:4_OAIndRDD Evap Cooler,  !- Component 1 Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Component 2 Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Component 2 Object Type
     FURNACE_PACU_CAV:4_OADirect Evap Cooler,  !- Component 2 Name
     OutdoorAir:Mixer,        !- Component 3 Object Type
     FURNACE_PACU_CAV:4_OAMixing Box;  !- Component 3 Name
@@ -5071,7 +5071,7 @@
     FixedMinimum,            !- Minimum Limit Type
     MinOA_Sched;             !- Minimum Outdoor Air Schedule Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     FURNACE_PACU_CAV:4_OAIndRDD Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -5079,7 +5079,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     30.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     Autosize,                !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -5094,14 +5094,14 @@
     FURNACE_PACU_CAV:4_OAIndRDD Evap CoolerOA Outlet Node,  !- Secondary Air Outlet Node Name
     FURNACE_PACU_CAV:4_OADirect Evap Cooler-FURNACE_PACU_CAV:4_OAMixing BoxNode;  !- Sensor Node Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     FURNACE_PACU_CAV:4_OADirect Evap Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     30.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     FURNACE_PACU_CAV:4_OAIndRDD Evap Cooler-FURNACE_PACU_CAV:4_OADirect Evap CoolerNode,  !- Air Inlet Node Name
     FURNACE_PACU_CAV:4_OADirect Evap Cooler-FURNACE_PACU_CAV:4_OAMixing BoxNode,  !- Air Outlet Node Name
