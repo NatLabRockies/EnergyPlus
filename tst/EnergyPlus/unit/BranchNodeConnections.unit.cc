@@ -606,6 +606,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -613,6 +614,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1627,6 +1629,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1634,6 +1637,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 

@@ -1092,6 +1092,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1099,6 +1100,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2314,6 +2316,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2321,6 +2324,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 

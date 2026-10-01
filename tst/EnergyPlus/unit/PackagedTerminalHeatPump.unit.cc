@@ -3040,6 +3040,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
         "    SPACE1-1 Thermostat,     !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -3047,6 +3048,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
         "    SPACE2-1 Thermostat,     !- Name",
         "    SPACE2-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -3054,6 +3056,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
         "    SPACE3-1 Thermostat,     !- Name",
         "    SPACE3-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -3061,6 +3064,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
         "    SPACE4-1 Thermostat,     !- Name",
         "    SPACE4-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -3068,6 +3072,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
         "    SPACE5-1 Thermostat,     !- Name",
         "    SPACE5-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 

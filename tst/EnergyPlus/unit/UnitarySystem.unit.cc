@@ -1467,6 +1467,7 @@ protected:
             "Zone 1 Thermostat,       !- Name",
             "West Zone,               !- Zone or ZoneList Name",
             "Zone Control Type Sched, !- Control Type Schedule Name",
+            ",                        !- Temperature Difference Between Cutout And Setpoint",
             "ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
             "Heating Setpoint with SB,!- Control 1 Name",
             "ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -1476,6 +1477,7 @@ protected:
             "Zone 2 Thermostat,       !- Name",
             "EAST ZONE,               !- Zone or ZoneList Name",
             "Zone Control Type Sched, !- Control Type Schedule Name",
+            ",                        !- Temperature Difference Between Cutout And Setpoint",
             "ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
             "Heating Setpoint with SB,!- Control 1 Name",
             "ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -1485,6 +1487,7 @@ protected:
             "Zone 3 Thermostat,       !- Name",
             "NORTH ZONE,              !- Zone or ZoneList Name",
             "Zone Control Type Sched, !- Control Type Schedule Name",
+            ",                        !- Temperature Difference Between Cutout And Setpoint",
             "ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
             "Heating Setpoint with SB,!- Control 1 Name",
             "ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -10942,6 +10945,7 @@ ZoneControl:Thermostat,
   SPACE2-1 Thermostat,                                     !- Name
   SPACE2-1,                                                !- Zone or ZoneList Name
   HVACTemplate-Always 4,                                   !- Control Type Schedule Name
+  ,                                                        !- Temperature Difference Between Cutout And Setpoint
   ThermostatSetpoint:DualSetpoint,                         !- Control Object Type
   All Zones Dual SP Control;                               !- Control Name
 
@@ -12068,6 +12072,7 @@ Curve:Biquadratic,
     EAST ZONE Thermostat,    !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                              !- Temperature Difference Between Cutout And Setpoint
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Zone One DualSPSched;    !- Control 1 Name
 
@@ -13955,6 +13960,7 @@ Schedule:Compact,
     EAST ZONE Thermostat,    !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                              !- Temperature Difference Between Cutout And Setpoint
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Zone One DualSPSched;    !- Control 1 Name
 
@@ -15996,6 +16002,7 @@ Curve:Biquadratic,
     EAST ZONE Thermostat,    !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                              !- Temperature Difference Between Cutout And Setpoint
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Zone One DualSPSched;    !- Control 1 Name
 
@@ -19037,6 +19044,7 @@ Dimensionless;	!- Output Unit Type
     SPACE1-1 Thermostat,     !- Name
     ZONE ONE,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -25248,6 +25256,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
         "    SPACE1-1 Thermostat,     !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -25255,6 +25264,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_MultiSpeedFanWSHP_Test)
         "    SPACE2-1 Thermostat,     !- Name",
         "    SPACE2-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -28459,6 +28469,7 @@ TEST_F(EnergyPlusFixture, UnitarySystem_AFN_RTF)
         "    Zone 2 Thermostat,       !- Name",
         "    EAST ZONE,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
