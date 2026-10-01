@@ -355,8 +355,6 @@ struct WindowComplexManagerData : BaseGlobalStruct
     //          surface of the adjacent glazing layer)
     // 2*nlayer+1 = qin (heat flux from indoor space to inner-most glazing
     //              surface)
-    Array1D<Real64> qprim = Array1D<Real64>(TARCOGParams::maxlay1, 0.0); // Vector of heat fluxes from the outdoor-faced surfaces of glazing layers
-    //    towards the adjacent glazing cavity [W/m2]
     Array1D<Real64> qv = Array1D<Real64>(TARCOGParams::maxlay1, 0.0);    // Vector of heat fluxes to each gap by ventillation [W/m^2]
     Array1D<Real64> hcgap = Array1D<Real64>(TARCOGParams::maxlay1, 0.0); // Convective part of gap effective conductivity {maxlay}
     Array1D<Real64> hrgap = Array1D<Real64>(TARCOGParams::maxlay1, 0.0); // Radiative part of gap effective conductivity (including in and out)
@@ -371,9 +369,6 @@ struct WindowComplexManagerData : BaseGlobalStruct
     Array1D<Real64> Keff = Array1D<Real64>(TARCOGParams::maxlay, 0.0);                 // Vector of keff values for gaps [W/m.K] {maxlay}
     Array1D<Real64> ShadeGapKeffConv = Array1D<Real64>(TARCOGParams::maxlay - 1, 0.0); // Vector of convective keff values for areas above/below
     // SD layers [W/m.K] {maxlay-1}
-    Array1D<Real64> deltaTemp = Array1D<Real64>(100, 0.0);
-    Array1D_int iMinDT = Array1D_int(1, 0);
-    Array1D_int IDConst = Array1D_int(100, 0);
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

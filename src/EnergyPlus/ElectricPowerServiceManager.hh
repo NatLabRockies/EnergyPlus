@@ -722,7 +722,6 @@ private: // data
     GeneratorOpScheme genOperationScheme_; // Name of Operation Scheme
     std::string demandMeterName_;          // Name of Demand Energy Meter for "on demand" operation
     int demandMeterPtr_;                   // "pointer" to Meter for electrical Demand to meet
-    std::string generationMeterName_;      // Name of Generated Energy Meter for "on demand" operation
     bool generatorsPresent_;               // true if any generators
     bool myCoGenSetupFlag_;
     Real64 demandLimit_;                    // Demand Limit in Watts(W) which the generator will operate above

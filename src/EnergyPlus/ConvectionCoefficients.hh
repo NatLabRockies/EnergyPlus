@@ -83,8 +83,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        RefTemp refTempType = RefTemp::Invalid;
-        bool suppressRainChange = false;
         RefWind windSpeedType = RefWind::Invalid;
         int hfFnWindSpeedCurveNum = 0;
         int hnFnTempDiffCurveNum = 0;
@@ -197,7 +195,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        bool suppressRainChange = false;
 
         std::array<HcExt, static_cast<int>(ExtConvClass2::Num)> extConvClass2EqNums = {
             HcExt::SparrowWindward,                      // WindConvection_WindwardWall
@@ -783,7 +780,6 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;
-    bool FirstRoofSurf = true;
 
     // Object Data
     Convect::IntAdaptiveConvAlgo intAdaptiveConvAlgo; // stores rules for Hc model equations

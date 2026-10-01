@@ -959,7 +959,6 @@ struct OutputProcessorData : BaseGlobalStruct
     std::vector<OutputProcessor::Meter *> meters;
     std::map<std::string, int> meterMap;
 
-    char stamp[OutputProcessor::N_WriteTimeStampFormatData];
     bool Rept = false;
     bool OpaqSurfWarned = false;
 

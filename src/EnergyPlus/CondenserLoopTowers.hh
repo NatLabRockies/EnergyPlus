@@ -130,8 +130,6 @@ namespace CondenserLoopTowers {
         PIM PerformanceInputMethod_Num = PIM::Invalid; // Method of entering tower performance: UA and Design Water
         //  Flow Rate, or Nominal Capacity
         std::string ModelCoeffObjectName;                 // Cooling Tower:Variable Speed Model Coefficient Object name
-        bool Available = true;                            // need an array of logicals--load identifiers of available equipment
-        bool ON = true;                                   // Simulate the machine at it's operating part load ratio
         Real64 DesignWaterFlowRate = 0.0;                 // Design water flow rate through the tower [m3/s]
         bool DesignWaterFlowRateWasAutoSized = false;     // true if previous was autosize on input
         Real64 DesignWaterFlowPerUnitNomCap = 0.0;        // scalable sizing factor for water flow per capacity [m3/s/W]
@@ -169,7 +167,6 @@ namespace CondenserLoopTowers {
         Real64 CalibratedWaterFlowRate = 0.0;         // Water flow ratio required for model calibration
         Real64 BasinHeaterPowerFTempDiff = 0.0;       // Basin heater capacity per degree C below setpoint (W/C)
         Real64 BasinHeaterSetPointTemp = 0.0;         // setpoint temperature for basin heater operation (C)
-        Real64 MakeupWaterDrift = 0.0;                // Makeup water flow rate fraction due to drift
         Real64 FreeConvectionCapacityFraction = 0.0;  // Percentage of tower capacity in free convection regime
         Real64 TowerMassFlowRateMultiplier = 0.0;     // Maximum tower flow rate is this multiplier times design flow rate
         Real64 HeatRejectCapNomCapSizingRatio = 1.25; // ratio of actual cap to nominal capacity []
@@ -196,7 +193,6 @@ namespace CondenserLoopTowers {
         int OutdoorAirInletNodeNum = 0;                // Node number of outdoor air inlet for the tower
         ModelType TowerModelType = ModelType::Invalid; // Type of empirical model (1=CoolTools)
         int FanPowerfAirFlowCurve = 0;                 // Index to fan power correlation curve for VS Towers
-        Sched::Schedule *blowDownSched = nullptr;      // Pointer to blow down schedule
         Sched::Schedule *basinHeaterSched = nullptr;   // Pointer to basin heater schedule
         int HighMassFlowErrorCount = 0;                // Counter when mass flow rate is > Design*TowerMassFlowRateMultiplier
         int HighMassFlowErrorIndex = 0;                // Index for high mass flow recurring error message
@@ -204,10 +200,6 @@ namespace CondenserLoopTowers {
         int OutletWaterTempErrorIndex = 0;             // Index for outlet water temperature recurring error message
         int SmallWaterMassFlowErrorCount = 0;          // Counter when water mass flow rate is very small
         int SmallWaterMassFlowErrorIndex = 0;          // Index for very small water mass flow rate recurring error message
-        int WMFRLessThanMinAvailErrCount = 0;          // Counter when water mass flow rate is less than minimum available
-        int WMFRLessThanMinAvailErrIndex = 0;          // Index for water mass flow rate less than minavail recurring message
-        int WMFRGreaterThanMaxAvailErrCount = 0;       // Counter when water mass flow rate is greater than minimum available
-        int WMFRGreaterThanMaxAvailErrIndex = 0;       // Index for water mass flow rate > minavail recurring message
         int CoolingTowerAFRRFailedCount = 0;           // Counter for air flow rate ratio out of bounds error
         int CoolingTowerAFRRFailedIndex = 0;           // Index for air flow rate ratio out of bounds error
         int SpeedSelected = 0;                         // speed of the two-speed fan selected (0:ON;1:LOW;2:HIGH)
@@ -318,7 +310,6 @@ namespace CondenserLoopTowers {
         int VSErrorCountTR = 0;               // - counter if tower range temperature limits are exceeded
         int VSErrorCountTRCalc = 0;           // - counter if tower range temperature could not be calculated
         int VSErrorCountTA = 0;               // - counter if tower approach temperature limits are exceeded
-        int ErrIndexFlowFrac = 0;             // - index to recurring error structure for liquid to gas ratio
         int ErrIndexWFRR = 0;                 // - index to recurring error structure for water flow rate ratio
         int ErrIndexIAWB = 0;                 // - index to recurring error structure for inlet air WB
         int ErrIndexTR = 0;                   // - index to recurring error structure for tower range

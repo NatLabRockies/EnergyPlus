@@ -49,7 +49,7 @@ TEST( ReferenceTest, Basic )
 TEST( ReferenceTest, Advanced )
 {
 	int j( 42 ), k( 59 );
-	Reference_int r( j );
+	Reference< int > r( j );
 	EXPECT_TRUE( r.attached() );
 	EXPECT_TRUE( r.associated() );
 	EXPECT_TRUE( r.attached( j ) );
@@ -72,9 +72,9 @@ TEST( ReferenceTest, Advanced )
 	EXPECT_TRUE( r.associated( k ) );
 	EXPECT_FALSE( r.attached( j ) );
 	EXPECT_FALSE( r.associated( j ) );
-	Reference_int r1( r ); // Reference of Reference
+	Reference< int > r1( r ); // Reference of Reference
 	EXPECT_EQ( k, r1 );
-	Reference_int r2( r1 );
+	Reference< int > r2( r1 );
 	EXPECT_EQ( k, r2 );
 	r2 >>= j;
 	EXPECT_EQ( j, r2 );
@@ -87,7 +87,7 @@ TEST( ReferenceTest, ConstInt )
 {
 #ifndef OBJEXXFCL_CATCH_NONCONST_REFERENCE_TO_CONST
 	int const j( 42 );
-	Reference_int r( j ); // Fortran allows POINTER to INTENT(IN) (const) arg
+	Reference< int > r( j ); // Fortran allows POINTER to INTENT(IN) (const) arg
 	EXPECT_TRUE( r.attached() );
 	EXPECT_TRUE( r.associated() );
 	EXPECT_TRUE( r.attached( j ) );
@@ -114,7 +114,7 @@ TEST( ReferenceTest, String )
 TEST( ReferenceTest, Allocate )
 {
 	{
-		Reference_int r;
+		Reference< int > r;
 		r.allocate();
 		r = 123;
 		EXPECT_TRUE( r.attached() );

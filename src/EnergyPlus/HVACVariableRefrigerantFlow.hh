@@ -292,7 +292,6 @@ namespace HVACVariableRefrigerantFlow {
         std::string EvapWaterSupplyName;     // name of water source e.g. water storage tank
         int EvapWaterSupTankID;
         int EvapWaterTankDemandARRID;
-        std::string CondensateCollectName; // name of water source e.g. water storage tank
         int CondensateTankID;
         int CondensateTankSupplyARRID;
         Real64 CondensateVdot; // rate of water condensation from air stream [m3/s]
@@ -321,7 +320,6 @@ namespace HVACVariableRefrigerantFlow {
         int LowLoadTeError2PosTsucIndex = 0; // warning message index
         int LowLoadTeError2PosOUTe = 0;
         int LowLoadTeError2PosOUTeIndex = 0; // warning message index
-        int LowLoadTeErrorIndex = 0;         // warning message index
         // The following are for the Algorithm Type: VRF model based on physics, applicable for Fluid Temperature Control
         int AlgorithmIUCtrl;             // VRF indoor unit control algorithm, 1-High sensible, 2-Te/Tc constant
         Array1D<Real64> CompressorSpeed; // compressor speed array [rps]
@@ -632,7 +630,6 @@ namespace HVACVariableRefrigerantFlow {
         Array1D<Real64> TotalHeatLoad;                     // Total zone heating coil load met by TU
         Array1D_bool CoolingCoilPresent;                   // FALSE if coil not present
         Array1D_bool HeatingCoilPresent;                   // FALSE if coil not present
-        Array1D_bool SuppHeatingCoilPresent;               // FALSE if supplemental heating coil not present
         Array1D_bool TerminalUnitNotSizedYet;              // TRUE if terminal unit not sized
         Array1D_bool HRHeatRequest;                        // defines a heating load on VRFTerminalUnits when QZnReq < 0
         Array1D_bool HRCoolRequest;                        // defines a cooling load on VRFTerminalUnits when QZnReq > 0
@@ -780,8 +777,6 @@ namespace HVACVariableRefrigerantFlow {
         int DesignSpecMSHPIndex = -1;                           //  Multiuple performance index
         int NumOfSpeedHeating = 0;                              // Number of heating speed
         int NumOfSpeedCooling = 0;                              // Number of cooling speed
-        int HeatSpeedNum = 0;                                   // Heating speed number
-        int CoolSpeedNum = 0;                                   // Cooling speed number
         std::vector<Real64> CoolVolumeFlowRate;
         std::vector<Real64> CoolMassFlowRate;
         std::vector<Real64> HeatVolumeFlowRate;

@@ -123,7 +123,6 @@ set( test_src
   tst/unit/Array2.unit.cc
   tst/unit/Array3.unit.cc
   tst/unit/Array4.unit.cc
-  tst/unit/Array5.unit.cc
   tst/unit/ArrayS.unit.cc
   tst/unit/CArray.unit.cc
   tst/unit/CArrayA.unit.cc

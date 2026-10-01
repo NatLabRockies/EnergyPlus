@@ -103,7 +103,6 @@ namespace PipeHeatTransfer {
         // Input data
         std::string Name;
         std::string Construction;                // construction object name
-        std::string Environment;                 // keyword:  'Schedule', 'OutdoorAir', 'Zone'
         Sched::Schedule *envrSched = nullptr;    // temperature schedule for environmental temp
         Sched::Schedule *envrVelSched = nullptr; // temperature schedule for environmental temp
         std::string EnvrAirNode;                 // outside air node providing environmental temp

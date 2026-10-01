@@ -104,23 +104,22 @@ public: // Methods
 
     virtual void reportTerminalUnit(EnergyPlusData &state) = 0;
 
-protected:                                               // Data
-    AirTerminalUnitType terminalType = notYetDetermined; // Type of air distribution unit  //Legacy For use during transition to OO
-    std::string name;                                    // name of unit
-    std::string unitType;                                // type of unit = e.g. AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam
-    int aDUNum = 0;                                      // index of this unit in the corresponding air distribution unit structure
-    Sched::Schedule *airAvailSched = nullptr;            // schedule for pimary air availability
-    bool airAvailable = false;                           // true if primary air is available
-    Real64 vDotDesignPrimAir = 0.0;                      // Design primary air volume flow rate m3/s (autosizable)
-    bool vDotDesignPrimAirWasAutosized = false;          // true if user input for design air flow was autsized on input
-    Real64 mDotDesignPrimAir = 0.0;                      // Design primary air mass flow rate kg/s
-    int airInNodeNum = 0;                                // unit air inlet system node number, air enters into air terminal unit
-    int airOutNodeNum = 0;                               // unit air outlet system node number, air enters into zone from air terminal
-    int zoneIndex = 0;                                   // zone index for this air terminal unit
-    int zoneNodeIndex = 0;                               // index in node structure for the zone node for this air terminal
-    int ctrlZoneInNodeIndex = 0;                         // which controlled zone inlet node number corresponds with this unit
-    int airLoopNum = 0;                                  // index to airloop that this terminal unit is connected to
-    int termUnitSizingNum = 0;                           // index to TermUnitSizing, TermUnitFinalZoneSizing, and more for this air distribution unit
+protected:                                      // Data
+    std::string name;                           // name of unit
+    std::string unitType;                       // type of unit = e.g. AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam
+    int aDUNum = 0;                             // index of this unit in the corresponding air distribution unit structure
+    Sched::Schedule *airAvailSched = nullptr;   // schedule for pimary air availability
+    bool airAvailable = false;                  // true if primary air is available
+    Real64 vDotDesignPrimAir = 0.0;             // Design primary air volume flow rate m3/s (autosizable)
+    bool vDotDesignPrimAirWasAutosized = false; // true if user input for design air flow was autsized on input
+    Real64 mDotDesignPrimAir = 0.0;             // Design primary air mass flow rate kg/s
+    int airInNodeNum = 0;                       // unit air inlet system node number, air enters into air terminal unit
+    int airOutNodeNum = 0;                      // unit air outlet system node number, air enters into zone from air terminal
+    int zoneIndex = 0;                          // zone index for this air terminal unit
+    int zoneNodeIndex = 0;                      // index in node structure for the zone node for this air terminal
+    int ctrlZoneInNodeIndex = 0;                // which controlled zone inlet node number corresponds with this unit
+    int airLoopNum = 0;                         // index to airloop that this terminal unit is connected to
+    int termUnitSizingNum = 0;                  // index to TermUnitSizing, TermUnitFinalZoneSizing, and more for this air distribution unit
 }; // AirTerminalUnit
 
 } // namespace EnergyPlus
