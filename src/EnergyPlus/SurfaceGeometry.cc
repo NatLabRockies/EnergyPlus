@@ -13440,46 +13440,49 @@ namespace SurfaceGeometry {
         //       AUTHOR         George Walton, BLAST
         //       DATE WRITTEN   August 1976
         //       MODIFIED       LKL, May 2004 -- >4 sided polygons
+        //                      Joe Robertson, Oct. 2026 -- fall back to another polygon edge when edge 2-3 is too short
         //       RE-ENGINEERED  Yes
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine develops a coordinate transformation such that the X-axis goes
-        // through points 2 and 3 and the Y-axis goes through point 1
-        // of a plane figure in 3-d space.
+        // This subroutine projects a reference vertex onto a polygon edge to establish the coordinate origin. It tries boundary edges in
+        // cyclic order, starting with edge 2-3, until it finds one that is long enough.
 
         // REFERENCES:
         // 'NECAP' - NASA'S Energy-Cost Analysis Program
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 Gamma; // Intermediate Result
-        Real64 DotSelfX23;
-
-        // Object Data
-        Vector x21;
-        Vector x23;
-
-        // Determine Components of the Coordinate Translation Vector.
         auto const &surf = state.dataSurface->Surface(SurfNum);
 
-        x21 = surf.Vertex(2) - surf.Vertex(1);
-        x23 = surf.Vertex(2) - surf.Vertex(3);
-
-        DotSelfX23 = magnitude_squared(x23);
-
-        if (DotSelfX23 <= Constant::OneMillionth) {
-            ShowSevereError(state, std::format("CalcCoordinateTransformation: Invalid dot product, surface=\"{}\":", surf.Name));
-            for (int I = 1; I <= surf.Sides; ++I) {
-                auto const &point = surf.Vertex(I);
-                ShowContinueError(state, std::format(" ({:8.3F},{:8.3F},{:8.3F})", point.x, point.y, point.z));
+        auto const projectOntoEdge = [&](int const edgeStartIndex, int const edgeEndIndex, int const vertexToProjectIndex) {
+            auto const &edgeStart = surf.Vertex(edgeStartIndex);
+            Vector const edge = surf.Vertex(edgeEndIndex) - edgeStart;
+            Real64 const edgeLengthSquared = magnitude_squared(edge);
+            if (edgeLengthSquared <= Constant::OneMillionth) {
+                return false;
             }
-            ShowFatalError(
-                state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
-            return;
+
+            Real64 const gamma = dot(surf.Vertex(vertexToProjectIndex) - edgeStart, edge) / edgeLengthSquared;
+            CompCoordTranslVector = edgeStart + gamma * edge;
+            return true;
+        };
+
+        for (int edgeOffset = 0; edgeOffset < surf.Sides; ++edgeOffset) {
+            int const edgeStartIndex = (edgeOffset + 1) % surf.Sides + 1;
+            int const edgeEndIndex = (edgeStartIndex == surf.Sides) ? 1 : edgeStartIndex + 1;
+            int const vertexToProjectIndex = (edgeStartIndex == 1) ? surf.Sides : edgeStartIndex - 1;
+            if (projectOntoEdge(edgeStartIndex, edgeEndIndex, vertexToProjectIndex)) {
+                return;
+            }
         }
 
-        Gamma = dot(x21, x23) / magnitude_squared(x23);
-
-        CompCoordTranslVector = surf.Vertex(2) + Gamma * (surf.Vertex(3) - surf.Vertex(2));
+        ShowSevereError(state, std::format("CalcCoordinateTransformation: Invalid dot product, surface=\"{}\":", surf.Name));
+        for (int I = 1; I <= surf.Sides; ++I) {
+            auto const &point = surf.Vertex(I);
+            ShowContinueError(state, std::format(" ({:8.3F},{:8.3F},{:8.3F})", point.x, point.y, point.z));
+        }
+        ShowFatalError(
+            state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
+        return;
     }
 
     void CreateShadedWindowConstruction(EnergyPlusData &state,
