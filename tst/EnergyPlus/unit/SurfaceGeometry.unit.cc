@@ -73,6 +73,7 @@
 #include <EnergyPlus/SolarShading.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+#include <EnergyPlus/Vectors.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include <algorithm>
@@ -3003,6 +3004,196 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_VertexNumberMismatchTest)
                           ":006W27_RESTROOMS - ROOFCEILING : A and outside boundary surface: 016W88_WATERMETER - FLOOR : A",
                           "   **   ~~~   ** The vertex sizes are 4 for base surface and 5 for outside boundary surface. Please check inputs."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+// Reproduces issue #11707: use another polygon edge when the 2-3 edge is too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAlternateEdge)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "BLOCK BATIMENT0000000293627145-PART231 STOREY 0 ROOF 0001";
+    surface.Sides = 3;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {696212.1442928468, 7044674.109177616, 6.8};
+    surface.Vertex(2) = {696211.199943949, 7044696.100094359, 6.8};
+    surface.Vertex(3) = {696211.1998310842, 7044696.100282936, 6.8};
+
+    Vectors::CreateNewellSurfaceNormalVector(surface.Vertex, surface.Sides, surface.NewellSurfaceNormalVector);
+    Vectors::DetermineAzimuthAndTilt(
+        surface.Vertex, surface.Azimuth, surface.Tilt, surface.lcsx, surface.lcsy, surface.lcsz, surface.NewellSurfaceNormalVector);
+
+    Vector compCoordTranslVector(0.0, 0.0, 0.0);
+    EXPECT_NO_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector));
+    Vector const edge31 = surface.Vertex(1) - surface.Vertex(3);
+    Real64 const gamma = dot(surface.Vertex(2) - surface.Vertex(3), edge31) / magnitude_squared(edge31);
+    Vector const expectedTranslation = surface.Vertex(3) + gamma * edge31;
+    EXPECT_NEAR(compCoordTranslVector.x, expectedTranslation.x, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.y, expectedTranslation.y, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.z, expectedTranslation.z, 1.0e-9);
+    EXPECT_NEAR(magnitude_squared(surface.lcsx), 1.0, 1.0e-12);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+// Verify the fatal error remains when all three triangle edges are too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAllEdgesInvalid)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "COLLAPSED TRIANGLE";
+    surface.Sides = 3;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {1.0, 2.0, 3.0};
+    surface.Vertex(2) = {1.0006, 2.0002, 3.0};
+    surface.Vertex(3) = {1.0004, 2.0006, 3.0};
+
+    Vector compCoordTranslVector;
+    EXPECT_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector), std::runtime_error);
+
+    std::string const error_string = delimited_string({
+        "   ** Severe  ** CalcCoordinateTransformation: Invalid dot product, surface=\"COLLAPSED TRIANGLE\":",
+        "   **   ~~~   **  (   1.000,   2.000,   3.000)",
+        "   **   ~~~   **  (   1.001,   2.000,   3.000)",
+        "   **   ~~~   **  (   1.000,   2.001,   3.000)",
+        "   **  Fatal  ** CalcCoordinateTransformation: Program terminates due to preceding condition.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=1",
+        "   ..... Last severe error=CalcCoordinateTransformation: Invalid dot product, surface=\"COLLAPSED TRIANGLE\":",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+// Verify a pentagon falls back to edge 3-4 when edges 2-3 and 1-2 are too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationPentagonFallback)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "PENTAGON WITH CLUSTERED INITIAL VERTICES";
+    surface.Sides = 5;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {0.0, 0.0, 0.0};
+    surface.Vertex(2) = {0.0002, 0.0, 0.0};
+    surface.Vertex(3) = {0.0004, 0.0002, 0.0};
+    surface.Vertex(4) = {10.0, 10.0, 0.0};
+    surface.Vertex(5) = {-10.0, 10.0, 0.0};
+
+    EXPECT_LE(magnitude_squared(surface.Vertex(2) - surface.Vertex(3)), Constant::OneMillionth);
+    EXPECT_LE(magnitude_squared(surface.Vertex(2) - surface.Vertex(1)), Constant::OneMillionth);
+
+    Vector compCoordTranslVector(0.0, 0.0, 0.0);
+    EXPECT_NO_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector));
+
+    Vector const edge34 = surface.Vertex(4) - surface.Vertex(3);
+    Real64 const gamma = dot(surface.Vertex(2) - surface.Vertex(3), edge34) / magnitude_squared(edge34);
+    Vector const expectedTranslation = surface.Vertex(3) + gamma * edge34;
+    EXPECT_NEAR(compCoordTranslVector.x, expectedTranslation.x, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.y, expectedTranslation.y, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.z, expectedTranslation.z, 1.0e-9);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+// With edges 2-3 and 1-2 too short, edge 3-4 supplies the fallback origin. On this nonhorizontal parent, the child's
+// local shading coordinates change, but its world placement (original 3D coordinates) is unchanged when transformed
+// with the matching parent origin and basis.
+// This confirms the fallback produces a consistent transform for this nonhorizontal parent/child case.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackShiftsChildCoordinates)
+{
+    state->init_state(*state);
+
+    // Allocate the parent/child surfaces and arrays consumed by ProcessSurfaceVertices.
+    state->dataSurface->TotSurfaces = 2;
+    state->dataSurface->MaxVerticesPerSurface = 5;
+    state->dataSurface->Surface.allocate(2);
+    state->dataSurface->ShadeV.allocate(2);
+    state->dataSurface->X0.dimension(2, 0.0);
+    state->dataSurface->Y0.dimension(2, 0.0);
+    state->dataSurface->Z0.dimension(2, 0.0);
+
+    Real64 const tiltRadians = 30.0 * Constant::DegToRad;
+    Vector const rotationAxis = Vectors::VecNormalize(Vector{0.0002, 0.0002, 0.0});
+    Real64 const cosTilt = std::cos(tiltRadians);
+    Real64 const sinTilt = std::sin(tiltRadians);
+    auto const tiltPoint = [rotationAxis, cosTilt, sinTilt](Vector const &point) {
+        return cosTilt * point + sinTilt * cross(rotationAxis, point) + (1.0 - cosTilt) * dot(rotationAxis, point) * rotationAxis;
+    };
+
+    auto &base = state->dataSurface->Surface(1);
+    base.Name = "TILTED BASE WITH SHORT REFERENCE EDGE";
+    base.Class = SurfaceClass::Roof;
+    base.BaseSurf = 1;
+    base.HeatTransSurf = true;
+    base.Sides = 5;
+    base.GrossArea = 100.0;
+    base.Vertex.allocate(base.Sides);
+    base.Vertex(1) = tiltPoint(Vector{10.0, 10.0, 0.0});
+    base.Vertex(2) = tiltPoint(Vector{10.0002, 10.0, 0.0});
+    base.Vertex(3) = tiltPoint(Vector{10.0004, 10.0002, 0.0});
+    base.Vertex(4) = tiltPoint(Vector{20.0, 20.0, 0.0});
+    base.Vertex(5) = tiltPoint(Vector{0.0, 20.0, 0.0});
+
+    // Edges 2-3 and 1-2 are both below the 1 mm threshold; initialize the parent's local basis.
+    EXPECT_LE(magnitude_squared(base.Vertex(2) - base.Vertex(3)), Constant::OneMillionth);
+    EXPECT_LE(magnitude_squared(base.Vertex(2) - base.Vertex(1)), Constant::OneMillionth);
+    Vectors::CreateNewellSurfaceNormalVector(base.Vertex, base.Sides, base.NewellSurfaceNormalVector);
+    Vectors::DetermineAzimuthAndTilt(base.Vertex, base.Azimuth, base.Tilt, base.lcsx, base.lcsy, base.lcsz, base.NewellSurfaceNormalVector);
+    EXPECT_NEAR(base.Tilt, 30.0, 1.0e-8);
+
+    // Define a child in world coordinates so its processed local coordinates can be compared with the fallback origin.
+    auto &child = state->dataSurface->Surface(2);
+    child.Name = "CHILD TRIANGULAR WINDOW";
+    child.Class = SurfaceClass::Window;
+    child.BaseSurf = 1;
+    child.HeatTransSurf = true;
+    child.Sides = 3;
+    child.Area = 0.125;
+    child.Azimuth = base.Azimuth;
+    child.Tilt = base.Tilt;
+    child.Vertex.allocate(child.Sides);
+    child.Vertex(1) = tiltPoint(Vector{11.0, 14.0, 0.0});
+    child.Vertex(2) = tiltPoint(Vector{12.0, 14.0, 0.0});
+    child.Vertex(3) = tiltPoint(Vector{11.5, 15.0, 0.0});
+
+    // The parent must be processed first because it establishes the origin and shifts inherited by the child.
+    bool errorsFound = false;
+    ProcessSurfaceVertices(*state, 1, errorsFound);
+    ASSERT_FALSE(errorsFound);
+    ProcessSurfaceVertices(*state, 2, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    // Reconstruct the origin that the original 2-3 projection would have produced, for comparison only.
+    Vector const fallbackOrigin{state->dataSurface->X0(1), state->dataSurface->Y0(1), state->dataSurface->Z0(1)};
+    Vector const originalEdge = base.Vertex(3) - base.Vertex(2);
+    Real64 const originalGamma = dot(base.Vertex(1) - base.Vertex(2), originalEdge) / magnitude_squared(originalEdge);
+    Vector const originalOrigin = base.Vertex(2) + originalGamma * originalEdge;
+
+    // Compute the parent shifts and the child's local coordinates under the fallback and original origins.
+    auto const &baseShade = state->dataSurface->ShadeV(1);
+    Vector const processedBaseVertex2{baseShade.XV(2), baseShade.YV(2), baseShade.ZV(2)};
+    Vector const baseVertexOffset = processedBaseVertex2 - fallbackOrigin;
+    Real64 const fallbackXShift = dot(base.lcsx, baseVertexOffset);
+    Real64 const fallbackYShift = dot(base.lcsy, baseVertexOffset);
+    Vector const childVertexOffset = child.Vertex(1) - base.Vertex(2);
+    Real64 const childRelativeX =
+        -childVertexOffset.x * std::cos(base.Azimuth * Constant::DegToRad) + childVertexOffset.y * std::sin(base.Azimuth * Constant::DegToRad);
+    Real64 const childRelativeY = -childVertexOffset.x * std::sin(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) -
+                                  childVertexOffset.y * std::cos(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) +
+                                  childVertexOffset.z * std::sin(base.Tilt * Constant::DegToRad);
+    Real64 const originalXShift = dot(base.lcsx, processedBaseVertex2 - originalOrigin);
+    Real64 const originalYShift = dot(base.lcsy, processedBaseVertex2 - originalOrigin);
+    Real64 const originalChildX = childRelativeX + originalXShift;
+    Real64 const originalChildY = childRelativeY + originalYShift;
+    auto const &childShade = state->dataSurface->ShadeV(2);
+
+    // The origin change is visible in local coordinates, even though it does not move the child in world space.
+    EXPECT_NE(childShade.XV(1), originalChildX);
+    EXPECT_NEAR(childShade.YV(1), originalChildY, 1.0e-4);
+    EXPECT_NEAR(childShade.XV(1), childRelativeX + fallbackXShift, 1.0e-4);
+    EXPECT_NEAR(childShade.YV(1), childRelativeY + fallbackYShift, 1.0e-4);
+
+    // Applying the fallback origin and basis to the stored child coordinates recovers its input world vertex.
+    Vector const reconstructedChildVertex = fallbackOrigin + childShade.XV(1) * base.lcsx + childShade.YV(1) * base.lcsy;
+    EXPECT_NEAR(reconstructedChildVertex.x, child.Vertex(1).x, 1.0e-4);
+    EXPECT_NEAR(reconstructedChildVertex.y, child.Vertex(1).y, 1.0e-4);
+    EXPECT_NEAR(reconstructedChildVertex.z, child.Vertex(1).z, 1.0e-4);
 }
 
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest)
