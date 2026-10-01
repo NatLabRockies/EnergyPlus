@@ -234,6 +234,9 @@ struct PluginManagerData : BaseGlobalStruct
     std::vector<Real64> globalVariableValues;
     bool fullyReady = false;
     bool apiErrorFlag = false;
+    // Incremented by every actuator write or reset through the Data Exchange API; a callback that leaves it
+    // unchanged has not altered the simulation and is not reported as having run
+    int actuatorWriteCount = 0;
     std::vector<std::string> const objectsToFind = {
         "PythonPlugin:OutputVariable", "PythonPlugin:SearchPaths", "PythonPlugin:Instance", "PythonPlugin:Variables", "PythonPlugin:TrendVariable"};
 
@@ -250,6 +253,7 @@ struct PluginManagerData : BaseGlobalStruct
     void clear_state() override
     {
         callbacks.clear();
+        actuatorWriteCount = 0;
         userDefinedCallbackNames.clear();
         userDefinedCallbacks.clear();
 #if LINK_WITH_PYTHON
