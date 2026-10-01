@@ -418,6 +418,213 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
     EXPECT_GT(state->dataSurface->SurfWinHeatLossRep(winNum), state->dataSurface->SurfWinHeatGain(winNum));
 }
 
+TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
+{
+    // The solar absorbed by window frames and dividers and their share of the interior short-wave and radiant gains
+    // (SurfWinFrameQRadOutAbs, SurfWinFrameQRadInAbs, SurfWinDividerQRadOutAbs, SurfWinDividerQRadInAbs) are set once
+    // per time step in InitSolarHeatGains and InitIntSolarDistribution. The inside surface heat balance must pass them
+    // to the frame and divider heat balance, and repeated calls in a time step must not change them.
+
+    state->dataIPShortCut->lAlphaFieldBlanks = true;
+
+    std::string const idf_objects =
+        delimited_string({"Material,",
+                          "  Concrete Block,          !- Name",
+                          "  MediumRough,             !- Roughness",
+                          "  0.1014984,               !- Thickness {m}",
+                          "  0.3805070,               !- Conductivity {W/m-K}",
+                          "  608.7016,                !- Density {kg/m3}",
+                          "  836.8000;                !- Specific Heat {J/kg-K}",
+                          "Construction,",
+                          "  WallConstruction,        !- Name",
+                          "  Concrete Block;          !- Outside Layer",
+                          "WindowMaterial:SimpleGlazingSystem,",
+                          "  WindowMaterial,          !- Name",
+                          "  2.0,                     !- U-Factor {W/m2-K}",
+                          "  0.6,                     !- Solar Heat Gain Coefficient",
+                          "  0.7;                     !- Visible Transmittance",
+                          "Construction,",
+                          "  WindowConstruction,      !- Name",
+                          "  WindowMaterial;          !- Outside Layer",
+                          "WindowProperty:FrameAndDivider,",
+                          "  WindowFrame,             !- Name",
+                          "  0.10,                    !- Frame Width {m}",
+                          "  0.05,                    !- Frame Outside Projection {m}",
+                          "  0.05,                    !- Frame Inside Projection {m}",
+                          "  5.0,                     !- Frame Conductance {W/m2-K}",
+                          "  1.2,                     !- Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance",
+                          "  0.8,                     !- Frame Solar Absorptance",
+                          "  0.8,                     !- Frame Visible Absorptance",
+                          "  0.9,                     !- Frame Thermal Hemispherical Emissivity",
+                          "  DividedLite,             !- Divider Type",
+                          "  0.05,                    !- Divider Width {m}",
+                          "  1,                       !- Number of Horizontal Dividers",
+                          "  1,                       !- Number of Vertical Dividers",
+                          "  0.02,                    !- Divider Outside Projection {m}",
+                          "  0.02,                    !- Divider Inside Projection {m}",
+                          "  5.0,                     !- Divider Conductance {W/m2-K}",
+                          "  1.2,                     !- Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance",
+                          "  0.8,                     !- Divider Solar Absorptance",
+                          "  0.8,                     !- Divider Visible Absorptance",
+                          "  0.9;                     !- Divider Thermal Hemispherical Emissivity",
+                          "FenestrationSurface:Detailed,",
+                          "  FenestrationSurface,     !- Name",
+                          "  Window,                  !- Surface Type",
+                          "  WindowConstruction,      !- Construction Name",
+                          "  Wall,                    !- Building Surface Name",
+                          "  ,                        !- Outside Boundary Condition Object",
+                          "  0.5000000,               !- View Factor to Ground",
+                          "  WindowFrame,             !- Frame and Divider Name",
+                          "  1.0,                     !- Multiplier",
+                          "  4,                       !- Number of Vertices",
+                          "  2.000000,0.000000,6.000000,  !- X,Y,Z ==> Vertex 1 {m}",
+                          "  2.000000,0.000000,2.000000,  !- X,Y,Z ==> Vertex 2 {m}",
+                          "  8.000000,0.000000,2.000000,  !- X,Y,Z ==> Vertex 3 {m}",
+                          "  8.000000,0.000000,6.000000;  !- X,Y,Z ==> Vertex 4 {m}",
+                          "BuildingSurface:Detailed,",
+                          "  Wall,                    !- Name",
+                          "  Wall,                    !- Surface Type",
+                          "  WallConstruction,        !- Construction Name",
+                          "  Zone,                    !- Zone Name",
+                          "    ,                        !- Space Name",
+                          "  Outdoors,                !- Outside Boundary Condition",
+                          "  ,                        !- Outside Boundary Condition Object",
+                          "  SunExposed,              !- Sun Exposure",
+                          "  WindExposed,             !- Wind Exposure",
+                          "  0.5000000,               !- View Factor to Ground",
+                          "  4,                       !- Number of Vertices",
+                          "  0.000000,0.000000,10.00000,  !- X,Y,Z ==> Vertex 1 {m}",
+                          "  0.000000,0.000000,0,  !- X,Y,Z ==> Vertex 2 {m}",
+                          "  10.00000,0.000000,0,  !- X,Y,Z ==> Vertex 3 {m}",
+                          "  10.00000,0.000000,10.00000;  !- X,Y,Z ==> Vertex 4 {m}",
+                          "BuildingSurface:Detailed,",
+                          "  Floor,                   !- Name",
+                          "  Floor,                   !- Surface Type",
+                          "  WallConstruction,        !- Construction Name",
+                          "  Zone,                    !- Zone Name",
+                          "    ,                        !- Space Name",
+                          "  Outdoors,                !- Outside Boundary Condition",
+                          "  ,                        !- Outside Boundary Condition Object",
+                          "  NoSun,                   !- Sun Exposure",
+                          "  NoWind,                  !- Wind Exposure",
+                          "  1.0,                     !- View Factor to Ground",
+                          "  4,                       !- Number of Vertices",
+                          "  0.000000,0.000000,0,  !- X,Y,Z ==> Vertex 1 {m}",
+                          "  0.000000,10.000000,0,  !- X,Y,Z ==> Vertex 2 {m}",
+                          "  10.00000,10.000000,0,  !- X,Y,Z ==> Vertex 3 {m}",
+                          "  10.00000,0.000000,0;  !- X,Y,Z ==> Vertex 4 {m}",
+                          "Zone,",
+                          "  Zone,                    !- Name",
+                          "  0,                       !- Direction of Relative North {deg}",
+                          "  6.000000,                !- X Origin {m}",
+                          "  6.000000,                !- Y Origin {m}",
+                          "  0,                       !- Z Origin {m}",
+                          "  1,                       !- Type",
+                          "  1,                       !- Multiplier",
+                          "  autocalculate,           !- Ceiling Height {m}",
+                          "  autocalculate;           !- Volume {m3}"});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    createFacilityElectricPowerServiceObject(*state);
+    HeatBalanceManager::SetPreConstructionInputParameters(*state);
+
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->TimeStepZone = 1;
+    state->dataGlobal->TimeStepZoneSec = 60.0;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->BeginSimFlag = true;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataEnvrn->OutBaroPress = 100000;
+
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZTAV = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MRT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.0;
+
+    HeatBalanceManager::ManageHeatBalance(*state);
+
+    int winNum = 0;
+    for (int i = 1; i <= state->dataSurface->TotSurfaces; ++i) {
+        if (state->dataSurface->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
+            winNum = i;
+        }
+    }
+    ASSERT_GT(winNum, 0);
+
+    auto &s_surf = state->dataSurface;
+    ASSERT_GT(s_surf->SurfWinFrameArea(winNum), 0.0);
+    ASSERT_GT(s_surf->SurfWinDividerArea(winNum), 0.0);
+
+    Real64 constexpr T_in = 24.0;
+    Real64 constexpr T_out = 30.0;
+    state->dataSurface->SurfOutDryBulbTemp(winNum) = T_out;
+    state->dataEnvrn->SkyTemp = T_out - 10.0;
+    state->dataEnvrn->SkyTempKelvin = state->dataEnvrn->SkyTemp + Constant::Kelvin;
+    state->dataSurface->SurfWinIRfromParentZone(winNum) = Constant::StefanBoltzmann * std::pow(T_in + Constant::Kelvin, 4);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.01;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.01;
+    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+        thisSpaceHB.MAT = T_in;
+        thisSpaceHB.airHumRat = 0.01;
+    }
+    for (int i = 1; i <= state->dataSurface->TotSurfaces; ++i) {
+        state->dataHeatBalSurf->SurfOutsideTempHist(1)(i) = T_out;
+        state->dataHeatBalSurf->SurfTempIn(i) = T_in;
+        state->dataHeatBalSurf->SurfTempInTmp(i) = T_in;
+    }
+
+    auto setAbsorbed = [&](Real64 const frameOut, Real64 const frameIn, Real64 const divOut, Real64 const divIn) {
+        s_surf->SurfWinFrameQRadOutAbs(winNum) = frameOut;
+        s_surf->SurfWinFrameQRadInAbs(winNum) = frameIn;
+        s_surf->SurfWinDividerQRadOutAbs(winNum) = divOut;
+        s_surf->SurfWinDividerQRadInAbs(winNum) = divIn;
+    };
+
+    Real64 constexpr frameOutAbs = 400.0; // W/m2, e.g. 500 W/m2 incident with a solar absorptance of 0.8
+    Real64 constexpr frameInAbs = 40.0;   // W/m2, interior short-wave and radiant gains
+    Real64 constexpr divOutAbs = 300.0;
+    Real64 constexpr divInAbs = 30.0;
+
+    // Exercise both inside surface heat balance routines (CTF only, and mixed heat transfer algorithms)
+    for (bool const allCTF : {true, false}) {
+        state->dataHeatBal->AllCTF = allCTF;
+
+        setAbsorbed(0.0, 0.0, 0.0, 0.0);
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+        Real64 const frameTempOutNoAbs = s_surf->SurfWinFrameTempSurfOut(winNum);
+        Real64 const frameTempInNoAbs = s_surf->SurfWinFrameTempIn(winNum);
+        Real64 const divTempOutNoAbs = s_surf->SurfWinDividerTempSurfOut(winNum);
+        Real64 const divTempInNoAbs = s_surf->SurfWinDividerTempIn(winNum);
+        Real64 const frameGainNoAbs = s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum);
+
+        setAbsorbed(frameOutAbs, frameInAbs, divOutAbs, divInAbs);
+        // Call twice, as happens within a time step (predictor and corrector, radiant system resimulation)
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+
+        // The absorbed radiation is neither reset nor incremented by the projection long-wave terms
+        EXPECT_DOUBLE_EQ(frameOutAbs, s_surf->SurfWinFrameQRadOutAbs(winNum));
+        EXPECT_DOUBLE_EQ(frameInAbs, s_surf->SurfWinFrameQRadInAbs(winNum));
+        EXPECT_DOUBLE_EQ(divOutAbs, s_surf->SurfWinDividerQRadOutAbs(winNum));
+        EXPECT_DOUBLE_EQ(divInAbs, s_surf->SurfWinDividerQRadInAbs(winNum));
+
+        // Frame and divider are heated by the absorbed radiation (on develop before this fix the temperatures did not change),
+        // and the frame passes part of it to the zone air
+        EXPECT_GT(s_surf->SurfWinFrameTempSurfOut(winNum), frameTempOutNoAbs + 10.0);
+        EXPECT_GT(s_surf->SurfWinFrameTempIn(winNum), frameTempInNoAbs + 3.0);
+        EXPECT_GT(s_surf->SurfWinDividerTempSurfOut(winNum), divTempOutNoAbs + 10.0);
+        EXPECT_GT(s_surf->SurfWinDividerTempIn(winNum), divTempInNoAbs + 3.0);
+        Real64 const frameAbsorbed = s_surf->SurfWinFrameArea(winNum) * (frameOutAbs + frameInAbs);
+        EXPECT_GT(s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum), frameGainNoAbs + 0.1 * frameAbsorbed);
+    }
+}
+
 TEST_F(EnergyPlusFixture, WindowManager_TransAndReflAtPhi)
 {
 

@@ -8192,6 +8192,8 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
     // CalcWindowHeatBalance is called, then, multiple times and these need to be initialized before each call to
     // CalcWindowHeatBalance.
     // Only for Surface(SurfNum).Class == DataSurfaces::SurfaceClass::Window
+    // The frame and divider absorbed radiation (SurfWinFrameQRadOutAbs etc.) is not reset here: it is set once per time step
+    // in InitSolarHeatGains and InitIntSolarDistribution and is not changed by CalcWindowHeatBalance.
     for (int surfNum : HTWindowSurfs) {
         state.dataSurface->SurfWinHeatGain(surfNum) = 0.0;
         state.dataSurface->SurfWinHeatGainRep(surfNum) = 0.0;
@@ -8202,10 +8204,6 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
         state.dataSurface->SurfWinGainFrameDividerToZoneRep(surfNum) = 0.0;
         state.dataSurface->SurfWinGainConvShadeToZoneRep(surfNum) = 0.0;
         state.dataSurface->SurfWinGainIRShadeToZoneRep(surfNum) = 0.0;
-        state.dataSurface->SurfWinFrameQRadOutAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinFrameQRadInAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinDividerQRadOutAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinDividerQRadInAbs(surfNum) = 0.0;
     }
 
     state.dataHeatBal->InsideSurfIterations = 0;
@@ -9051,6 +9049,8 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
             // CalcWindowHeatBalance is called, then, multiple times and these need to be initialized before each call to
             // CalcWindowHeatBalance.
             // Only for Surface(SurfNum).Class == DataSurfaces::SurfaceClass::Window
+            // The frame and divider absorbed radiation (SurfWinFrameQRadOutAbs etc.) is not reset here: it is set once per time
+            // step in InitSolarHeatGains and InitIntSolarDistribution and is not changed by CalcWindowHeatBalance.
             int const firstWindowSurf = thisSpace.WindowSurfaceFirst;
             int const lastWindowSurf = thisSpace.WindowSurfaceLast;
             for (int surfNum = firstWindowSurf; surfNum <= lastWindowSurf; ++surfNum) {
@@ -9063,10 +9063,6 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
                 state.dataSurface->SurfWinGainFrameDividerToZoneRep(surfNum) = 0.0;
                 state.dataSurface->SurfWinGainConvShadeToZoneRep(surfNum) = 0.0;
                 state.dataSurface->SurfWinGainIRShadeToZoneRep(surfNum) = 0.0;
-                state.dataSurface->SurfWinFrameQRadOutAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinFrameQRadInAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinDividerQRadOutAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinDividerQRadInAbs(surfNum) = 0.0;
             }
 
             // Calculate heat extract due to additional heat flux source term as the surface boundary condition
