@@ -3091,8 +3091,10 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationPentagonFa
     EXPECT_TRUE(compare_err_stream("", true));
 }
 
-// With edges 2-3 and 1-2 too short, edge 3-4 supplies the fallback origin. The child's local shading coordinates change,
-// but its world placement (original 3D coordinates) is unchanged when transformed with the matching parent origin and basis.
+// With edges 2-3 and 1-2 too short, edge 3-4 supplies the fallback origin. On this nonhorizontal parent, the child's
+// local shading coordinates change, but its world placement (original 3D coordinates) is unchanged when transformed
+// with the matching parent origin and basis.
+// This confirms the fallback produces a consistent transform for this nonhorizontal parent/child case.
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackShiftsChildCoordinates)
 {
     state->init_state(*state);
@@ -3106,25 +3108,35 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackSh
     state->dataSurface->Y0.dimension(2, 0.0);
     state->dataSurface->Z0.dimension(2, 0.0);
 
+    Real64 const tiltRadians = 30.0 * Constant::DegToRad;
+    Vector const rotationAxis = Vectors::VecNormalize(Vector{0.0002, 0.0002, 0.0});
+    Real64 const cosTilt = std::cos(tiltRadians);
+    Real64 const sinTilt = std::sin(tiltRadians);
+    auto const tiltPoint = [rotationAxis, cosTilt, sinTilt](Vector const &point) {
+        return cosTilt * point + sinTilt * cross(rotationAxis, point) +
+               (1.0 - cosTilt) * dot(rotationAxis, point) * rotationAxis;
+    };
+
     auto &base = state->dataSurface->Surface(1);
-    base.Name = "HORIZONTAL BASE WITH SHORT REFERENCE EDGE";
+    base.Name = "TILTED BASE WITH SHORT REFERENCE EDGE";
     base.Class = SurfaceClass::Roof;
     base.BaseSurf = 1;
     base.HeatTransSurf = true;
     base.Sides = 5;
     base.GrossArea = 100.0;
     base.Vertex.allocate(base.Sides);
-    base.Vertex(1) = {10.0, 10.0, 0.0};
-    base.Vertex(2) = {10.0002, 10.0, 0.0};
-    base.Vertex(3) = {10.0004, 10.0002, 0.0};
-    base.Vertex(4) = {20.0, 20.0, 0.0};
-    base.Vertex(5) = {0.0, 20.0, 0.0};
+    base.Vertex(1) = tiltPoint(Vector{10.0, 10.0, 0.0});
+    base.Vertex(2) = tiltPoint(Vector{10.0002, 10.0, 0.0});
+    base.Vertex(3) = tiltPoint(Vector{10.0004, 10.0002, 0.0});
+    base.Vertex(4) = tiltPoint(Vector{20.0, 20.0, 0.0});
+    base.Vertex(5) = tiltPoint(Vector{0.0, 20.0, 0.0});
 
     // Edges 2-3 and 1-2 are both below the 1 mm threshold; initialize the parent's local basis.
     EXPECT_LE(magnitude_squared(base.Vertex(2) - base.Vertex(3)), Constant::OneMillionth);
     EXPECT_LE(magnitude_squared(base.Vertex(2) - base.Vertex(1)), Constant::OneMillionth);
     Vectors::CreateNewellSurfaceNormalVector(base.Vertex, base.Sides, base.NewellSurfaceNormalVector);
     Vectors::DetermineAzimuthAndTilt(base.Vertex, base.Azimuth, base.Tilt, base.lcsx, base.lcsy, base.lcsz, base.NewellSurfaceNormalVector);
+    EXPECT_NEAR(base.Tilt, 30.0, 1.0e-8);
 
     // Define a child in world coordinates so its processed local coordinates can be compared with the fallback origin.
     auto &child = state->dataSurface->Surface(2);
@@ -3137,9 +3149,9 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackSh
     child.Azimuth = base.Azimuth;
     child.Tilt = base.Tilt;
     child.Vertex.allocate(child.Sides);
-    child.Vertex(1) = {11.0, 14.0, 0.0};
-    child.Vertex(2) = {12.0, 14.0, 0.0};
-    child.Vertex(3) = {11.5, 15.0, 0.0};
+    child.Vertex(1) = tiltPoint(Vector{11.0, 14.0, 0.0});
+    child.Vertex(2) = tiltPoint(Vector{12.0, 14.0, 0.0});
+    child.Vertex(3) = tiltPoint(Vector{11.5, 15.0, 0.0});
 
     // The parent must be processed first because it establishes the origin and shifts inherited by the child.
     bool errorsFound = false;
