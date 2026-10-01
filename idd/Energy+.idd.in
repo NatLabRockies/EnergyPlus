@@ -73749,7 +73749,8 @@ Pump:VariableSpeed,
   N9 , \field Coefficient 4 of the Part Load Performance Curve
        \default 0.0
   N10, \field Design Minimum Flow Rate
-        \note When autosized the scaling factor is the input field Design Minimum Flow Rate Fraction
+        \note When autosized, this is the Design Maximum Flow Rate multiplied by the
+        \note Design Minimum Flow Rate Fraction.
         \units m3/s
         \autosizable
         \default autosize
@@ -73842,7 +73843,8 @@ Pump:VariableSpeed,
         \minimum> 0
   N15,  \field Design Minimum Flow Rate Fraction
         \type real
-        \note Used to size Design Minimum Flow Rate
+        \note Used to autosize the Design Minimum Flow Rate as a fraction of the
+        \note Design Maximum Flow Rate.
         \default 0.0
         \minimum 0
         \maximum 1.0
@@ -109331,9 +109333,10 @@ Output:Table:Annual,
        \begin-extensible
        \type external-list
        \external-list autoRDDvariableMeter
-       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter
-       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown
-       \note using the aggregation method specified.
+       \note Contains the name of a registered report variable (see Output:Variable and eplusout.rdd),
+       \note meter (see Output:Meter and eplusout.mdd), or schedule. EMS values must be exposed through
+       \note an EnergyManagementSystem:OutputVariable, which registers a report variable. The value is
+       \note shown using the aggregation method specified.
    A5, \field Aggregation Type for Variable or Meter 1
        \type choice
        \key SumOrAverage
@@ -109359,8 +109362,9 @@ Output:Table:Annual,
        \note Maximum and Minimum find the maximum and minimum value for the month and report it
        \note   along with the time that it first occurred. When Maximum or Minimum are selected a
        \note   column is automatically shown in the output report for the time that it occurred.
-       \note   When Maximum or Minimum are used with an average variable the value is divided
-       \note   by the length of the timestep.
+       \note   When Maximum or Minimum are used with a summed variable, the value is divided
+       \note   by the timestep length in seconds so that the reported result is a rate.
+       \note   Average variables are compared and reported without timestep conversion.
        \note ValueWhenMaxMin looks at the previous variable in the report that sets a maximum or minimum
        \note   and displays the value of the current variable at that same timestep.
        \note   Order of the variables in the report is important when using ValueWhenMaxMin.

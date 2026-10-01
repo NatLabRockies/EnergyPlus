@@ -4,13 +4,13 @@ EnergyPlus plant and condenser loops need pump components to drive liquid flow a
 
 \subsection{Pump:VariableSpeed}\label{pumpvariablespeed}
 
-Pumps are needed in both plant and condenser loops. The syntax for a variable speed pump is given below.
+This object models a variable-speed pump on a plant or condenser loop.
 
 \subsubsection{Inputs}\label{inputs-037}
 
 \paragraph{Field: Name}\label{field-name-036}
 
-This alpha field contains the identifying a unique name for the pump.
+This alpha field contains the unique identifying name for the pump.
 
 \paragraph{Field: Inlet Node Name}\label{field-inlet-node-name-005}
 
@@ -34,21 +34,21 @@ This numeric field contains the pump's design power consumption in Watts. If the
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-000}
 
-This numeric field contains the pump motor's efficiency in decimal form (0 = 0\%, 1 = 100\%).
+This numeric field contains the pump motor's efficiency in decimal form. The value must be greater than 0 and less than or equal to 1. The default is 0.9.
 
 \paragraph{Field: Fraction of Motor Inefficiencies to Fluid Stream}\label{field-fraction-of-motor-inefficiencies-to-fluid-stream}
 
-This numeric field contains the pump motor's fraction of power loss to the fluid.
+This numeric field is the fraction of pump motor losses that is added to the fluid. The value must be between 0 and 1; the default is 0.
 
 \paragraph{Field: Coefficient 1 of the Part Load Performance Curve}\label{field-coefficient-1-of-the-part-load-performance-curve}
 
 This numeric field contains the first coefficient in the part load ratio curve. The fraction of full load power is determined by the cubic equation:
 
 \begin{equation}
-FractionFullLoadPower = {C_1} + {C_2}PLR + {C_3}PL{R^2} + {C_4}PL{R^3}
+FractionFullLoadPower = C_1 + C_2 PLR + C_3 PLR^2 + C_4 PLR^3
 \end{equation}
 
-where C\(_{1}\),C\(_{2}\),C\(_{3}\),and C\(_{4}\) are Coefficients 1 4 (below) and PLR is the Part Load Ratio.
+where \(C_1\), \(C_2\), \(C_3\), and \(C_4\) are Coefficients 1 through 4, and \(PLR\) is the part-load ratio. The defaults are 0, 1, 0, and 0, respectively.
 
 \paragraph{Field: Coefficient 2 of the Part Load Performance Curve}\label{field-coefficient-2-of-the-part-load-performance-curve}
 
@@ -64,15 +64,15 @@ This numeric field contains the fourth coefficient in the part load ratio curve.
 
 \paragraph{Field: Design Minimum Flow Rate}\label{field-design-minimum-flow-rate}
 
-This field contains the minimum volume flow rate while operating in variable flow capacity rate in cubic meters per second. This field is autosizable. When set to autosize the value in the input field Design Minimum Flow Rate Sizing Factor is used to scale the minimum flow rate as a fraction of the Design Maximum Flow Rate.  Note that this Design Minimum Flow Rate should be less than the Design Maximum Flow Rate for a variable speed pump.  If the user enters a Design Minimum Flow Rate that is more than 99\% of the Design Maximum Flow Rate, a warning message is produced and the Design Minimum Flow Rate is reset to 99\% of the Design Maximum Flow Rate.
+This field contains the minimum volume flow rate while the pump is operating, in cubic meters per second. It can be autosized. When it is autosized, Design Minimum Flow Rate Fraction is multiplied by the Design Maximum Flow Rate. The minimum flow rate should be less than the maximum flow rate. If an entered minimum is greater than 99\% of the Design Maximum Flow Rate, a warning is issued and the minimum is reset to 99\% of the maximum.
 
 \paragraph{Field: Pump Control Type}\label{field-pump-control-type-000}
 
-This is a choice field of Continuous or Intermittent. A variable speed pump is defined with maximum and minimum flow rates that are the physical limits of the device. If there is no load on the loop and the pump is operating intermittently, then the pump can shutdown. For any other condition such as the loop having a load and the pump is operating intermittently or the pump is continuously operating (regardless of the loading condition), the pump will operate and select a flow somewhere between the minimum and maximum limits. In these cases where the pump is running, it will try to meet the flow request made by demand side components. Applicable availability managers (ref. \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList}) may override this control by forcing the pump to be on or off.
+The choices are Continuous and Intermittent; the default is Continuous. The maximum and minimum flow rates are the physical operating limits. An intermittent pump can shut down when there is no loop load. A continuous pump, or an intermittent pump when the loop has a load, operates between the minimum and maximum limits while trying to meet flow requests from demand-side components. Applicable availability managers (see \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList}) may override this control by forcing the pump on or off.
 
 \paragraph{Field: Pump Flow Rate Schedule Name}\label{field-pump-flow-rate-schedule-name-000}
 
-The schedule values modify the value for Rated Flow Rate of the pump on a time basis. This essentially sets the maximum value available for the pump at a given time, \textbf{not the actual flow rate at that time}. The default is that the pump is ON and runs according to its other operational requirements specified above. This schedule is for special, not typical pump operations. For additional control over pump flow, EMS actuators can be employed.
+Each schedule value is limited to the range 0 to 1 and multiplies the Design Maximum Flow Rate. This sets the maximum flow available to the pump at that time, \textbf{not the actual flow rate}. If this field is blank, the pump follows its other operating requirements without this additional limit. This schedule is intended for special pump operation; EMS actuators can provide additional flow control.
 
 \paragraph{Field: Pump Curve Name}\label{field-pump-curve-name}
 
@@ -84,27 +84,27 @@ For pressure simulation cases, this is the impeller diameter used during calcula
 
 \paragraph{Field: VFD Control Type}\label{field-vfd-control-type}
 
-This string defines which type of VFD control type to perform. PressureSetPointControl is a realistic approach which requires inputs of pressure range schedules to control the pump rpm to maintain a certain pressure drop (head). ManualControl is an idealized control strategy in which the pump RPM is maintained at a scheduled value throughout the simulation, abiding by other flow restrictions in the loop.
+This field selects the VFD control strategy. PressureSetpointControl uses the minimum and maximum pressure and rpm schedules to vary pump speed within those limits. ManualControl is an idealized strategy that maintains the scheduled pump rpm while respecting other flow restrictions in the loop.
 
 \paragraph{Field: Pump RPM Schedule Name}\label{field-pump-rpm-schedule-name}
 
-For VFD Control Type = ManualControl, this defines the pump RPM schedule to use during the simulation. For VFD Control Type = PressureSetPointControl, this field is not interpreted. The value of the schedule is RPM.
+For VFD Control Type = ManualControl, this field defines the pump rpm schedule. Schedule values must be greater than zero. For VFD Control Type = PressureSetpointControl, this field is not used.
 
 \paragraph{Field: Minimum Pressure Schedule}\label{field-minimum-pressure-schedule}
 
-For VFD Control Type = PressureSetPointControl, this field defines the minimum pressure range setpoint value, or the lower bound of pressure drop (head) to use when determining the required pump speed. For VFD Control Type = ManualControl, this field is not interpreted. The value of the schedule is Pascals.
+For VFD Control Type = PressureSetpointControl, this field defines the lower bound of the pressure drop (head) used to determine the required pump speed. For ManualControl, this field is not used. Schedule values are in Pascals.
 
 \paragraph{Field: Maximum Pressure Schedule}\label{field-maximum-pressure-schedule}
 
-For VFD Control Type = PressureSetPointControl, this field defines the maximum pressure range setpoint value, or the upper bound of pressure drop (head) to use when determining the required pump speed. For VFD Control Type = ManualControl, this field is not interpreted. The value of the schedule is Pascals.
+For VFD Control Type = PressureSetpointControl, this field defines the upper bound of the pressure drop (head) used to determine the required pump speed. For ManualControl, this field is not used. Schedule values are in Pascals.
 
 \paragraph{Field: Minimum RPM Schedule}\label{field-minimum-rpm-schedule}
 
-For VFD Control Type = PressureSetPointControl, this field defines the minimum allowable RPM, or the lower bound of pump speed to use when determining the required pump speed. For VFD Control Type = ManualControl, this field is not interpreted. The value of the schedule is RPM.
+For VFD Control Type = PressureSetpointControl, this field defines the minimum allowable rpm used when determining pump speed. For ManualControl, this field is not used.
 
 \paragraph{Field: Maximum RPM Schedule}\label{field-maximum-rpm-schedule}
 
-For VFD Control Type = PressureSetPointControl, this field defines the maximum allowable RPM, or the upper bound of pump speed to use when determining the required pump speed. For VFD Control Type = ManualControl, this field is not interpreted. The value of the schedule is RPM.
+For VFD Control Type = PressureSetpointControl, this field defines the maximum allowable rpm used when determining pump speed. For ManualControl, this field is not used.
 
 \paragraph{Field: Zone Name}\label{field-zone-name-008}
 
@@ -120,15 +120,15 @@ This field is optional. There are two choices PowerPerFlow and PowerPerFlowPerPr
 
 \paragraph{Field: Design Electric Power per Unit Flow Rate}\label{field-design-electric-power-per-unit-flow-rate}
 
-This field is optional. This input is used when the input field Design Power Consumption is set to autosize and the Design Power Sizing Method is set to PowerPerFlow. It allows setting the efficiency the pumping system's power consumption using only the design flow rate. If omitted the default value of 348701.1 W/(m\(^{3}\)/s) ( 22 W/gpm) will be used.
+This field is optional. It is used when Design Power Consumption is autosized and Design Power Sizing Method is PowerPerFlow. The value scales design electric power directly from the design flow rate. If omitted, the default is 348701.1 W/(m\(^{3}\)/s) (22 W/gpm).
 
 \paragraph{Field: Design Shaft Power per Unit Flow Rate Per Unit Head}\label{field-design-shaft-power-per-unit-flow-rate-per-unit-head}
 
-This field is optional. This input is used when the input field Design Power Consumption is set to autosize and the Design Power Sizing Method is set to PowerPerFlowPerPressure. It allows setting the efficiency of the impeller and drive assembly when calculating the pump power consumption for the design flow rate, motor efficiency, and pump head. If omitted the default value of 1.282051 W/((m\(^{3}\)/s)-Pa) will be used.
+This field is optional. It is used when Design Power Consumption is autosized and Design Power Sizing Method is PowerPerFlowPerPressure. The value represents the inverse efficiency of the impeller and drive assembly when design power is calculated from design flow rate, pump head, and motor efficiency. If omitted, the default is 1.282051282 W/((m\(^{3}\)/s)-Pa).
 
-\paragraph{Field: Design Minimum Flow Rate Sizing Factor}\label{field-design-minimum-flow-rate-sizing-factor}
+\paragraph{Field: Design Minimum Flow Rate Fraction}\label{field-design-minimum-flow-rate-sizing-factor}
 
-This field is optional. If omitted the default value of 0.0 will be used. This input is used when the input field Design Minimum Flow Rate is set to autosize. The minimum flow rate will be set to the product of this sizing factor and the Design Maximum Flow Rate.
+This field is optional and must be between 0 and 1. When Design Minimum Flow Rate is autosized, the minimum flow rate is the product of this fraction and the Design Maximum Flow Rate. The default is 0.0.
 
 \paragraph{Field: End-Use Subcategory}\label{field-end-use-subcategory-1-000}
 
@@ -150,7 +150,7 @@ Pump:VariableSpeed,
   1,                          !- Coefficient 2 of the Part Load Performance Curve
   0,                          !- Coefficient 3 of the Part Load Performance Curve
   0,                          !- Coefficient 4 of the Part Load Performance Curve
-  0,                          !- Minimum Flow Rate {m3/s}
+  0,                          !- Design Minimum Flow Rate {m3/s}
   Intermittent;               !- Pump Control Type
 
 Pump:VariableSpeed,
@@ -166,7 +166,7 @@ Pump:VariableSpeed,
   1,                          !- Coefficient 2 of the Part Load Performance Curve
   0,                          !- Coefficient 3 of the Part Load Performance Curve
   0,                          !- Coefficient 4 of the Part Load Performance Curve
-  0,                          !- Minimum Flow Rate {m3/s}
+  0,                          !- Design Minimum Flow Rate {m3/s}
   Intermittent;               !- Pump Control Type
 \end{lstlisting}
 
@@ -201,7 +201,7 @@ Pump:VariableSpeed,
 
 \paragraph{Pump Electricity Energy {[}J{]}}\label{pump-electric-energy-j}
 
-These outputs are the electric power input to the pump motor. Consumption is metered on Pumps:Electricity, Electricity:Plant, and Electricity:Facility.
+Pump Electricity Rate is the electric power input to the pump motor. Pump Electricity Energy is that power integrated over the reporting interval. The energy is metered on Pumps:Electricity, Electricity:Plant, and Electricity:Facility.
 
 \paragraph{Pump Shaft Power {[}W{]}}\label{pump-shaft-power-w}
 
@@ -211,7 +211,7 @@ This is the shaft power delivered from the motor to the pump.
 
 \paragraph{Pump Fluid Heat Gain Energy {[}J{]}}\label{pump-fluid-heat-gain-energy-j}
 
-These outputs are the energy added to the fluid as heat. For the current algorithm, this is equal to Pump Shaft Power, because the loops are closed and all energy added to the fluid will ultimately become heat due to friction.
+These outputs report the heat added to the fluid. The heat gain rate is the pump shaft power plus the fraction of motor inefficiency specified by Fraction of Motor Inefficiencies to Fluid Stream. The energy output is the heat gain rate integrated over the reporting interval.
 
 \paragraph{Pump Outlet Temperature {[}C{]}}\label{pump-outlet-temperature-c}
 

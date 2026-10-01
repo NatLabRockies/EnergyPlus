@@ -26,7 +26,7 @@ Var. Speed Motor & 0.0015302446 & 0.0052080574 & 1.1086242 & -0.11635563 & 0.000
 
 \subsection{Fan:SystemModel}\label{fansystemmodel}
 
-This object models fans of various types using a relatively simple engineering model. This fan can be used in variable air volume, constant volume, on-off cycling, two-speed, or multi-speed applications.  It was designed as a replacement for \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanonoff]{Fan:OnOff}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, and \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation}. The electric power consumed by the fan can be directly input or autosized using one of three optional methods.  For fans that can vary the volume flow rate the performance can be described using a separate performance curve or table object. Or for fans with discrete speed control the power fraction at each speed can be input directly with no need for a performance curve.
+This object models fans for variable-air-volume, constant-volume, on-off cycling, two-speed, and multi-speed applications. It was designed as a replacement for \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanonoff]{Fan:OnOff}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, and \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation}. The design electric power can be entered directly or autosized using one of three methods. For continuous speed control, a performance curve or table describes electric power as a function of flow fraction. For discrete speed control, the power fraction at each speed can be entered directly or calculated from that curve or table.
 
 \subsubsection{Inputs}\label{inputs-fansysmodel}
 
@@ -36,7 +36,7 @@ A unique name for this fan.  Any reference to this fan by another object will us
 
 \paragraph{Field: Availability Schedule Name}\label{field-availsched-fansysmodel}
 
-The name of an availability schedule for this fan. Schedule values greater than zero means the fan is available. If this field is blank, the fan is always available.
+The name of an availability schedule for this fan. Schedule values greater than zero mean that the fan is available. If this field is blank, the fan is always available.
 
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-fansysmodel}
 
@@ -48,15 +48,15 @@ The name of an air system node at the outlet of the fan. This field is required.
 
 \paragraph{Field: Design Maximum Air Flow Rate}\label{field-design-air-flow-fansysmodel}
 
-This numeric field is the design volume flow rate of fan as installed in the HVAC system, in m\(^{3}\)/s. This volume flow rate will be converted to a mass flow rate using an altitude-adjusted standard density of dry air at 20 °C drybulb. This the full-speed flow rate and serves as the upper limit for fans that can vary their flow rate. This field can be autosized.
+This numeric field is the design volume flow rate of the fan as installed in the HVAC system, in m\(^{3}\)/s. This volume flow rate is converted to a mass flow rate using the altitude-adjusted standard density of dry air at \SI{20}{\celsius} dry-bulb temperature. This is the full-speed flow rate and is the upper limit for fans that can vary their flow rate. This field can be autosized.
 
 \paragraph{Field: Speed Control Method}\label{field-speed-method-fansysmodel}
 
-This field is used to select how the fan speed can be varied. There are two choices, Continuous or Discrete.  Discrete indicates that the fan can operate only at specific speed settings and cannot be continuously varied.  Continuous indicates that the fan speed is variable and can change smoothly up to the Design Maximum Air Flow Rate. This input informs the program how power should be calculated with Discrete control using time-weighted averaging and Variable using flow-weighted averaging. A constant volume or on-off fan should use Discrete with Number of Speeds set to 1.  A variable air volume fan should use Continuous. Continuous requires that a fan performance curve be entered in the input field called Electric Power Function of Flow Fraction Curve Name.
+This field selects how the fan speed is controlled. The choices are Continuous and Discrete; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
 
 \paragraph{Field: Electric Power Minimum Flow Rate Fraction}\label{field-power-min-flow-fraction-fansysmodel}
 
-This numeric field is used to describe how low a variable speed fan can be operated. This value is used to calculate the fan power at low flow rates but does not enforce a lower end of the air flow during simulation. The value is a fraction of Design Maximum Air Flow Rate and should be between 0 and 1. This field is only used when Speed Control Method is set to Continuous.
+This numeric field is used to calculate the power of a continuously controlled fan at low flow rates; it does not impose a minimum air flow during simulation. The curve input is limited to no less than this fraction of Design Maximum Air Flow Rate. The value must be between 0 and 1, the default is 0.2, and it is used only when Speed Control Method is Continuous.
 
 \paragraph{Field: Design Pressure Rise}\label{field-pressure-fansysmodel}
 
@@ -72,7 +72,7 @@ This numeric field is the fraction of the motor heat that is added to the air st
 
 \paragraph{Field: Design Electric Power Consumption}\label{field-design-elec-power-fansysmodel}
 
-This numeric field is the electric power consumption at the full Design Maximum Air Flow Rate and Design Pressure Rise, in Watts.  The value entered in this field is used to determine the fan efficiency. This field is autosizable and defaults to autosize.  When autosized there are three different options available for the method used to size the design power and can be selected in the following field.
+This numeric field is the electric power consumption at the full Design Maximum Air Flow Rate and Design Pressure Rise, in Watts. The entered or autosized value is also used to determine the fan efficiency. This field is autosizable and defaults to autosize. When it is autosized, the following field selects one of three sizing methods.
 
 \paragraph{Field: Design Power Sizing Method}
 
@@ -92,19 +92,19 @@ This numeric field is used when the Design Power Sizing Method is set to PowerPe
 
 \paragraph{Field: Fan Total Efficiency}\label{field-total-efficiency-fansysmodel}
 
-This numeric field is used when the Design Power Sizing Method is set to TotalEfficiency and the Design Electric Power Consumption is set to Autosize. This value is used to determine the Design Electric Power Consumption from the Design Maximum Air Flow Rate and the Design Pressure Rise.  The total efficiency is defined such that the Design Electric Power Consumption = (Design Maximum Air Flow Rate) * (Design Pressure Rise) / (Fan Total Efficiency).  The default is 0.7.
+This numeric field is used when the Design Power Sizing Method is set to TotalEfficiencyAndPressure and the Design Electric Power Consumption is set to Autosize. It determines the Design Electric Power Consumption from the Design Maximum Air Flow Rate and Design Pressure Rise: Design Electric Power Consumption = (Design Maximum Air Flow Rate) * (Design Pressure Rise) / (Fan Total Efficiency). The default is 0.7.
 
 \paragraph{Field: Electric Power Function of Flow Fraction Curve Name}\label{field-power-curve-name-fansysmodel}
 
-This field is the name of performance curve or table that describes how electric power consumption varies with air flow rate.  The independent "x" variable of the performance curve or look up table is a normalized flow fraction defined as the current flow rate divided by the Design Maximum Air Flow Rate.  The model actually uses the ratio of (moist) air mass flow rates with the numerator taking account of humidity and barometric pressure.  The dependent variable that is the result of the performance curve or lookup table is a fraction that is multiplied by the Design Electric Power Consumption to determine the electric power use as a function of flow rate.  Any of the single-independent-variable curves can be used. This field is required if the Speed Control Method is set to Continuous. This field is used when the Speed Control Method is set to Discrete and the Number of Speeds is greater than 1 and the input fields Speed "n" Electric Power Fraction are left blank.  Note that the fourth order polynomial in \hyperref[curvequartic]{Curve:Quartic} can be used with the coefficients listed above to replicate the formulation used in the older \hyperref[fanvariablevolume]{Fan:VariableVolume} input object prior to version 8.6.
+This field is the name of a performance curve or table that describes how electric power consumption varies with air flow rate. The independent ``x'' variable is a normalized flow fraction defined as the current flow rate divided by the Design Maximum Air Flow Rate. The model uses the ratio of moist-air mass flow rates, so the numerator accounts for humidity and barometric pressure. The curve or table output is a fraction that is multiplied by the Design Electric Power Consumption. Any single-independent-variable curve can be used. This field is required when Speed Control Method is Continuous. It is also used with Discrete control when Number of Speeds is greater than 1 and a Speed ``n'' Electric Power Fraction is left blank. The fourth-order polynomial in \hyperref[curvequartic]{Curve:Quartic} can be used with the coefficients listed above to reproduce the formulation used by the older \hyperref[fanvariablevolume]{Fan:VariableVolume} object prior to version 8.6.
 
 \paragraph{Field: Night Ventilation Mode Pressure Rise}\label{field-nite-vent-pressure-fansysmodel}
 
-This optional numeric field is the total system pressure rise experienced by the fan when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}, in Pascals. This field allows modeling the fan device with a different system pressure that might occur when implementing a special strategy to precool a building at night using outdoor air with dampers fully open. This field is only used when an \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} object is used that specifies the fan's availability schedule. This field and the next one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
+This optional numeric field is the total system pressure rise experienced by the fan when operating in night ventilation mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}, in Pascals. A positive value overrides the Design Pressure Rise during night ventilation; if this field is blank or zero, the design pressure rise is used. This field allows the fan to be modeled with the different system pressure that can occur when outdoor air is used to precool a building with dampers fully open. This field and the next one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object, which is not needed with this fan.
 
 \paragraph{Field: Night Ventilation Mode Flow Fraction}\label{field-nite-vent-flow-fraction-fansysmodel}
 
-This numeric field is the air flow fraction for the fan speed used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. This field corresponds to the input field called Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object and, as is the case there, this field is not currently used by the night ventilation manager (which has its own flow fraction field at present). This is a fraction between 0 and 1 and describes the speed level for the fan relative to the Design Maximum Air Flow Rate. This field and the previous one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
+This numeric field is the fan flow fraction for night ventilation mode. It corresponds to Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object. The input is accepted but is not currently used; \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} uses its own flow fraction. This value must be between 0 and 1 and represents the fan flow relative to the Design Maximum Air Flow Rate.
 
 \paragraph{Field: Motor Loss Zone Name}\label{field-loss-zone-name-fansysmodel}
 
@@ -120,11 +120,11 @@ This optional field allows entering a user-defined name for the end use subcateg
 
 \paragraph{Field: Number of Speeds}\label{field-num-speeds-fansysmodel}
 
-This numeric field is used to specify the number of different speed levels available when Speed Control Method is set to Discrete. This field and the remaining field sets are not used when the Speed Control Method is set to Continuous.  For a constant volume fan enter a value of 1.0.  A value of 1.0 will use the fan's maximum design and no additional field sets are needed.  When set to a value greater than 1 then a pair of flow and power fraction inputs are provided for each speed in the remaining input fields.
+This integer field specifies the number of speed levels available when Speed Control Method is Discrete. The default is 1. This field and the remaining field sets are not used when Speed Control Method is Continuous. A value of 1 operates the fan at its maximum design speed, and no additional field sets are needed. For a value greater than 1, provide one pair of flow and power fractions for each speed in the remaining input fields.
 
 \paragraph{Field Set: (Speed Flow Fraction, Speed Electric Power Fraction)}\label{fieldset-flow-power-fractions-fansysmodel}
 
-A field set is pair of values for the flow fraction and electric power fraction at each speed. The sets should be arranged in increasing order so that the flow fractions become larger in subsequent field sets.  Typically the highest speed level will match the design maximum and have fractions of 1.0.  This object is extensible, so additional sets of the following two fields can be added to the end of this object.
+A field set is a pair of values for the flow fraction and electric power fraction at each speed. Arrange the sets in increasing order of flow fraction. Typically, the highest speed matches the design maximum and has flow and power fractions of 1.0. This object is extensible, so additional sets of the following two fields can be added to the end of the object.
 
 \paragraph{Field: Speed <\#> Flow Fraction}\label{field-speed-flow-fraction-fansysmodel}
 
@@ -132,7 +132,7 @@ This is the flow fraction for the fan speed. This value is multiplied by the Des
 
 \paragraph{Field: Speed <\#> Electric Power Fraction}\label{field-speed-power-fraction-fansysmodel}
 
-This field is the electric power fraction for the fan speed. This value is multiplied by the Design Electric Power Consumption to obtain the power consumption when operating at this speed. This field is optional if a performance curve is used in the input field Electric Power Function of Flow Fraction Curve Name.  If omitted and the performance curve is entered, the power at this speed will be determined using the curve or table.  If the power fraction is entered in this field it will be used instead of the curve or table. This allows either overriding the curve for particular speeds or removes the necessity of creating a curve for discrete speed control.
+This field is the electric power fraction for the fan speed. It is multiplied by the Design Electric Power Consumption to obtain the power consumption at this speed. If this field is blank and Electric Power Function of Flow Fraction Curve Name is provided, the curve or table determines the power fraction. An entered value overrides the curve or table for this speed, so a separate performance curve is not required when power fractions are entered for all discrete speeds.
 
 Some examples of IDF input objects follow.
 
@@ -300,15 +300,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-000}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency}
 
@@ -385,15 +387,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-1}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-1}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-1}
 
@@ -496,15 +500,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-2}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-2}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Fan Power Minimum Flow Rate Input Method}\label{field-fan-power-minimum-flow-rate-input-method}
 
@@ -546,37 +552,43 @@ The fraction of the motor heat that is added to the air stream. A value of 0 mea
 
 \paragraph{Field: Fan Power Coefficient 1}\label{field-fan-power-coefficient-1}
 
-The constant coefficient (C\(_{1}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The constant coefficient (\(C_1\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 2}\label{field-fan-power-coefficient-2}
 
-The linear coefficient (C\(_{2}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The linear coefficient (\(C_2\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 3}\label{field-fan-power-coefficient-3}
 
-The quadratic coefficient (C\(_{3}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The quadratic coefficient (\(C_3\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-PLF = C\(_{1}\) + C\(_{2}\)\(^{.}\) FF + C\(_{3}\)\(^{.}\) FF\(^{2 +}\) C\(_{4}\)\(^{.}\) FF\(^{3}\) + C\(_{5}\)\(^{.}\) FF\(^{4}\)
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 4}\label{field-fan-power-coefficient-4}
 
-The cubic coefficient (C\(_{1}\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The cubic coefficient (\(C_4\)) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-\begin{lstlisting}
-       PLF = C$_{1}$ + C$_{2}$$^{.}$ FF + C$_{3}$$^{.}$ FF$^{2 +}$ C$_{4}$$^{.}$ FF$^{3}$ + C$_{5}$$^{.}$ FF$^{4}$
-\end{lstlisting}
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Fan Power Coefficient 5}\label{field-fan-power-coefficient-5}
 
-The coefficient C\(_{5}\) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
+The quartic coefficient \(C_5\) in a fourth order polynomial curve giving the fraction of full load power (PLF) as a function of flow fraction (FF). Flow fraction is the air mass flow rate divided by the maximum air mass flow rate. The curve is:
 
-\begin{lstlisting}
-       PLF = C$_{1}$ + C$_{2}$$^{.}$ FF + C$_{3}$$^{.}$ FF$^{2 +}$ C$_{4}$$^{.}$ FF$^{3}$ + C$_{5}$$^{.}$ FF$^{4}$
-\end{lstlisting}
+\begin{equation}
+\mathrm{PLF} = C_1 + C_2 \cdot \mathrm{FF} + C_3 \cdot \mathrm{FF}^2 + C_4 \cdot \mathrm{FF}^3 + C_5 \cdot \mathrm{FF}^4
+\end{equation}
 
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-2-000}
 
@@ -649,15 +661,17 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-3}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa).
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-3}
 
-The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at 20 °C drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
+The full load air volumetric flow rate (m\(^{3}\)/sec) at standard temperature and pressure (dry air at \SI{20}{\celsius} drybulb). The program does use local barometric pressure to account for altitude using equation for ``standard atmospheric'' pressure on p 6.1 of the ASHRAE 1997 HOF (SI edition) to initialize the air systems being simulated.
 
-p = 101325*(1-2.25577E-05*Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m
+where \(p\) is pressure in Pa and \(Z\) is altitude in m.
 
 \paragraph{Field: Air Inlet Node Name}\label{field-air-inlet-node-name-3-000}
 
@@ -681,7 +695,7 @@ This field is optional. If it is not used then the exhaust fan is assumed to be 
 
 \paragraph{Field: Minimum Zone Temperature Limit Schedule Name}\label{field-minimum-zone-temperature-limit-schedule-name}
 
-This field is optional. If it is not used then there will be no temperature-related control over the operation of the exhaust fan. If the field is used, then enter the name of a schedule with values for zone temperature values (°C). The fan's control will be based on a comparison between the current zone air temperature and the schedule values. If the zone is warmer than the scheduled limit, then the fan will operate. When balancing with simple ventilation, this feature can be used to coordinate exhaust fan operation with ZoneVentilation:* controls for minimum indoor temperature.
+This field is optional. If it is not used then there will be no temperature-related control over the operation of the exhaust fan. If the field is used, then enter the name of a schedule with values for zone temperature values (\si{\celsius}). The fan's control will be based on a comparison between the current zone air temperature and the schedule values. If the zone is warmer than the scheduled limit, then the fan will operate. When balancing with simple ventilation, this feature can be used to coordinate exhaust fan operation with ZoneVentilation:* controls for minimum indoor temperature.
 
 \paragraph{Field: Balanced Exhaust Fraction Schedule Name}\label{field-balanced-exhaust-fraction-schedule-name}
 
@@ -804,7 +818,7 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-4}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa). This is a required field with no default.
+The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa). This is a required field with no default.
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-4}
 
@@ -851,7 +865,7 @@ FanPerformance:NightVentilation,
 
 \subsection{Fan:ComponentModel}\label{fancomponentmodel}
 
-The Fan:ComponentModel fan is a more detailed fan type that can be defined in the air loop for central constant-air-volume (CAV) and variable-air-volume (VAV) systems. It includes inputs that describe the air-distribution system as well as the fan, its drive belt (if used), its motor, and its variable-frequency-drive (if used). See the engineering documentation for further descriptions about the inputs for this fan type.
+Fan:ComponentModel is a detailed fan model for central constant-air-volume (CAV) and variable-air-volume (VAV) air systems. Its inputs describe the air-distribution system, fan wheel, drive belt (if used), motor, and variable-frequency drive (VFD, if used). See the Engineering Reference for the model equations and additional background.
 
 \subsubsection{Inputs}\label{inputs-5-011}
 
@@ -869,15 +883,17 @@ The required alpha name of the HVAC system node to which the fan sends its outle
 
 \paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-4-002}
 
-The required alpha name of the schedule (ref: Schedule) that denotes whether the fan can run during a given time period. A schedule value of 0 indicates that the fan is off for that time period. A schedule value greater than 0 indicates that the fan can operate during the time period. If this field is blank, the schedule has values of 1 for all time periods. Applicable availability managers (ref. \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList}) may override this schedule by forcing the fan to be on or off.
+The optional name of the schedule that determines whether the fan can run. A schedule value of 0 turns the fan off, and a value greater than 0 allows it to operate. If this field is blank, the fan is always available. Applicable availability managers (see \hyperref[availabilitymanagerassignmentlist]{AvailabilityManagerAssignmentList}) may override this schedule by forcing the fan on or off.
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-5}
 
-The full-load volumetric airflow (m\(^{3}\)/sec) through the fan at standard temperature and pressure (dry air at 20 °C dry-bulb). To initialize the air systems being simulated, the program uses local barometric pressure adjusted for altitude, based on the equation for ``standard atmospheric'' pressure on p.6.1 of the 1997 ASHRAE Handbook of Fundamentals (SI edition):
+The full-load volumetric airflow (m\(^{3}\)/sec) through the fan at standard temperature and pressure (dry air at \SI{20}{\celsius} dry-bulb). To initialize the air systems being simulated, the program uses local barometric pressure adjusted for altitude, based on the equation for ``standard atmospheric'' pressure on p.6.1 of the 1997 ASHRAE Handbook of Fundamentals (SI edition):
 
-p = 101325 * (1 - 2.25577E-05 * Z)**5.2559
+\begin{equation}
+p = 101325 \left(1 - 2.25577 \times 10^{-5} Z\right)^{5.2559}
+\end{equation}
 
-where p = pressure in Pa and Z = altitude in m. Can be autosized.
+where \(p\) is pressure in Pa and \(Z\) is altitude in m. Can be autosized.
 
 Specified or autosized maximum airflow rate (including effects of scaling by Field: Fan Sizing Factor) along with corresponding fan static pressure rise and fan shaft power are reported in the .eio file as, respectively, Design Fan Airflow {[}m3/s{]}, Design Fan Static Pressure Rise {[}Pa{]}, and Design Fan Shaft Power {[}W{]}.
 
@@ -899,13 +915,13 @@ The required numeric outlet area of the fan (\emph{A\(_{fan,out}\)}, m\(^{2}\)).
 
 \paragraph{Field: Maximum Fan Static Efficiency}\label{field-maximum-fan-static-efficiency}
 
-The required numeric maximum ratio (\(\eta_{fan,max}\) ) between the power delivered to the air (\emph{H\(_{air}\)}, W) and the fan shaft input power (\emph{H\(_{fan}\)}, W). For this parameter, \emph{H\(_{air}\)} is the volumetric airflow through the fan multiplied by the fan static pressure rise. Maximum fan static efficiency is determined from analyses of manufacturers data using:
+The required numeric maximum ratio (\(\eta_{fan,max}\)) between the power delivered to the air (\emph{H\(_{air}\)}, W) and the fan shaft input power (\emph{H\(_{fan}\)}, W). For this parameter, \emph{H\(_{air}\)} is the volumetric airflow through the fan multiplied by the fan static pressure rise. Maximum fan static efficiency is determined from analysis of manufacturer data using:
 
 \begin{equation}
 {\eta_{fan,\max }} = \max \left[ {\frac{{\left( {\Delta {P_{fan}} * {Q_{fan}}} \right)}}{{{H_{fan}}}}} \right]
 \end{equation}
 
-where \emph{P\(_{fan}\)} is fan static pressure rise (Pa) and \emph{Q\(_{fan}\)} is airflow through the fan (m\(^{3}\)/sec). Typically, do not select curves on fan performance maps of pressure rise versus flow correspond to or are near maximum efficiency. Must be greater than zero and less than or equal to 1.0.
+where \(\Delta P_{fan}\) is fan static pressure rise (Pa) and \(Q_{fan}\) is airflow through the fan (m\(^{3}\)/sec). Determine this value from points on the fan performance map that correspond to, or are near, maximum efficiency. The value must be greater than zero and less than or equal to 1.0.
 
 Calculated fan static efficiency at design flow condition (including part-load effects of oversized fan) is reported in the .eio file as Design Fan Efficiency {[}-{]}.
 
@@ -917,11 +933,11 @@ The required numeric Euler number (\emph{Eu\(_{max}\)}), which is also called th
 Eu = \frac{{\left( {\Delta {P_{fan}} * D_{fan}^4} \right)}}{{\left( {\rho  * Q_{fan}^2} \right)}}
 \end{equation}
 
-where \(P_{fan}\) is fan static pressure rise (Pa; see \emph{Fan Pressure Rise Curve Name} field), \(D_{fan}\) is wheel diameter (m), \(\rho\) is the manufacturer's reference air density (kg/m\(^{3}\)), and \(Q_{fan}\) is airflow through the fan (m\(^{3}\)/sec). \(Eu_{max}\) is calculated using any pair of pressure rise and airflow values that correspond with maximum fan static efficiency for the specified fan. Must be greater than zero.
+where \(\Delta P_{fan}\) is fan static pressure rise (Pa; see the \emph{Fan Pressure Rise Curve Name} field), \(D_{fan}\) is wheel diameter (m), \(\rho\) is the manufacturer's reference air density (kg/m\(^{3}\)), and \(Q_{fan}\) is airflow through the fan (m\(^{3}\)/sec). \(Eu_{max}\) is calculated using a pressure-rise and airflow pair that corresponds to maximum fan static efficiency for the specified fan. It must be greater than zero.
 
 \paragraph{Field: Maximum Dimensionless Fan Airflow}\label{field-maximum-dimensionless-fan-airflow}
 
-The required numeric maximum dimensionless airflow (\(\psi_{max}\)) through the fan, which corresponds to the maximum ratio between the airflow through the fan (\(Q_{fan}\), m\(^{3}\)/sec) and the fan shaft rotational speed (\(\omega_{fan}\)\emph{, rpm}) for the specified fan wheel diameter (D\(_{fan}\)\emph{, m}). \(\varphi_{max}\) is determined from manufacturers data using:
+The required numeric maximum dimensionless airflow (\(\varphi_{max}\)) through the fan, which corresponds to the maximum ratio between fan airflow (\(Q_{fan}\), m\(^{3}\)/sec) and fan shaft rotational speed (\(\omega_{fan}\), rpm) for the specified fan wheel diameter (\(D_{fan}\), m). \(\varphi_{max}\) is determined from manufacturer data using:
 
 \begin{equation}
 \varphi_{\max} = \frac{30}{\pi D_{fan}^3} \cdot \max \left( \frac{Q_{fan}}{\omega_{fan}} \right)
@@ -943,7 +959,7 @@ Specified or autosized belt maximum output torque (including effects of scaling 
 
 \paragraph{Field: Belt Sizing Factor}\label{field-belt-sizing-factor}
 
-The numeric dimensionless factor (\emph{F\(_{belt}\)}) used to multiply the specified or autosized fan shaft maximum output torque (\(_{belt,max}\)*). If specified, minimum value is 1.0. Default is 1.0 if field is blank.
+The numeric dimensionless factor (\emph{F\(_{belt}\)}) used to multiply the specified or autosized maximum belt output torque (\(\tau_{belt,max}\)). If specified, the minimum value is 1.0. The default is 1.0.
 
 \paragraph{Field: Belt Fractional Torque Transition}\label{field-belt-fractional-torque-transition}
 
@@ -999,7 +1015,7 @@ P_{sm} = P_{sm,\min } + \left( P_{sm,\max } - P_{sm,\min } \right) * \frac{{\lef
 
 where \({C_1} = {P_{sm,\min }} - {C_2}*{Q_{fan,\min }}\) and \({C_2} = \frac{{\left( {{P_{sm,\max }} - {P_{sm,\min }}} \right)}}{{\left( {{Q_{fan,\max }} - {Q_{fan,\min }}} \right)}}\)
 
-For \emph{Q\(_{fan}\)} \textless{} \emph{Q\(_{fan,min}\)}, \emph{P\(_{sm}\)} = \emph{P\(_{sm,min}\)};for \emph{Q\(_{fan}\)} \textgreater{} \emph{Q\(_{fan,max}\)}, \emph{P\(_{sm}\)} = \emph{P\(_{sm,max}\)}
+For \emph{Q\(_{fan}\)} \textless{} \emph{Q\(_{fan,min}\)}, \emph{P\(_{sm}\)} = \emph{P\(_{sm,min}\)}; for \emph{Q\(_{fan}\)} \textgreater{} \emph{Q\(_{fan,max}\)}, \emph{P\(_{sm}\)} = \emph{P\(_{sm,max}\)}.
 
 The minimum and maximum fan airflows (\emph{Q\(_{fan,min}\)} and \emph{Q\(_{fan,max}\)}) correspond respectively to the minimum and maximum duct static pressure set points (\emph{P\(_{sm,min}\)} and \emph{P\(_{sm,max}\)}).
 
@@ -1041,11 +1057,11 @@ where \(x_{\mathrm{belt, max}} = ln(F_{\mathrm{belt}} \cdot H_{\mathrm{fan, max}
 
 Note that \(\eta_{\mathrm{belt, max}} = exp(\eta_{\mathrm{belt, max, ln}})\).
 
-The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{belt, max}}\) is known, it is represented by coefficient \(C_1\) (\(= ln(\eta_{\mathrm{belt, max}})\)). In this case, coefficients \(C_2\) through \(C_5\) are set to zero. If this field is left blank (e.g., there is no belt), the model assumes that the output of the modifier curve is 1.0 for the entire simulation (maximum belt efficiency = 1.0).
+The curve output is the natural logarithm of efficiency and must be between -4.6 and 0.0. The model exponentiates that output to obtain a maximum belt efficiency greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{belt, max}}\) is known, set \(C_1 = ln(\eta_{\mathrm{belt, max}})\) and set \(C_2\) through \(C_5\) to zero. If this field is blank, such as for a direct-drive fan, the model uses a maximum belt efficiency of 1.0.
 
 \paragraph{Field: Normalized Belt Efficiency Curve Name Region 1}\label{field-normalized-belt-efficiency-curve-name-region-1}
 
-The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (par-load) fan drive belt efficiency (\(\eta_{\mathrm{belt}}(x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 1 (\(0 \le x_{\mathrm{belt}} < x_{\mathrm{belt, trans}}\)) is:
+The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized part-load fan drive belt efficiency (\(\eta_{\mathrm{belt}}(x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 1 (\(0 \le x_{\mathrm{belt}} < x_{\mathrm{belt, trans}}\)) is:
 
 \begin{equation}
   \frac{\eta_{\mathrm{belt}} ( x_{\mathrm{belt}} )}{\eta_{\mathrm{belt, max}}} = \frac{(C_1 \cdot x_{\mathrm{belt}})}{(C_2 + x_{\mathrm{belt}})} + C_3 \cdot x_{\mathrm{belt}}
@@ -1067,7 +1083,7 @@ The alpha name of the exponential decay performance curve (ref: \hyperref[curvee
 
 where \(x_{\mathrm{belt}} = \tau_{\mathrm{belt}} / \tau_{\mathrm{belt, max}}\); \(\tau_{\mathrm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\mathrm{fan}}\), rpm).
 
-The output of this curve is used to calculate the belt efficiency \(\eta_{\mathrm{belt}} (x_{\mathrm{belt}}\) in Region 2 at each time step by modifying \(\eta_{\mathrm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the belt efficiency \(\eta_{\mathrm{belt}} (x_{\mathrm{belt}})\) in Region 2 at each time step by modifying \(\eta_{\mathrm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
 If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\mathrm{belt, max}}\) in Region 2).
 
@@ -1087,7 +1103,7 @@ If this field is left blank, the model assumes that the output of the modifier c
 
 \paragraph{Field: Maximum Motor Efficiency Curve Name}\label{field-maximum-motor-efficiency-curve-name}
 
-The alpha name of the single rectangular hyperbola type 1 performance curve (ref: Curve: RectangularHyperbola1 in Performance Curves) that determines the maximum fan motor efficiency (\(\eta_{\mathrm{motor, max}}\)) as a function of \(x_{\mathrm{motor, max}}\). The curve is:
+The alpha name of the single rectangular hyperbola type 1 performance curve (ref: \hyperref[curverectangularhyperbola1]{Curve:RectangularHyperbola1} in Performance Curves) that determines the maximum fan motor efficiency (\(\eta_{\mathrm{motor, max}}\)) as a function of \(x_{\mathrm{motor, max}}\). The curve is:
 
 \begin{equation}
   \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor, max}}) / (C_2 + x_{\mathrm{motor, max}}) + C_3
@@ -1101,12 +1117,10 @@ If this field is left blank, the model assumes that the output of the modifier c
 
 \paragraph{Field: Normalized Motor Efficiency Curve Name}\label{field-normalized-motor-efficiency-curve-name}
 
-The name of the HVAC system node to which the fan sends its outlet air.
-
 The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (part-load) fan motor efficiency (\(\eta_{\mathrm{motor}} (x_{\mathrm{motor}}) /  \eta_{\mathrm{motor, max}}\)) as a function of the motor load fraction \(x_{\mathrm{motor}}\). The curve is:
 
 \begin{equation}
-  \eta_{\mathrm{motor}} (x_{\mathrm{motor}}) / \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor}}) / (C_2 + x_{\mathrm{motor}}) + (C_3 \cdot x_{\mathrm{motor}}
+  \eta_{\mathrm{motor}} (x_{\mathrm{motor}}) / \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor}}) / (C_2 + x_{\mathrm{motor}}) + (C_3 \cdot x_{\mathrm{motor}})
 \end{equation}
 
 where \(x_{\mathrm{motor}} = H_{\mathrm{belt}} / H_{\mathrm{belt, max}}\). \(H_{\mathrm{belt}}\) is the calculated output power from the motor to the belt (W), which corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W).
