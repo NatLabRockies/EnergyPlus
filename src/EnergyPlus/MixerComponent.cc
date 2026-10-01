@@ -527,11 +527,15 @@ void CalcAirMixer(EnergyPlusData &state, int &MixerNum)
 
     } else {
         // Mass Flow in air loop is zero and loop is not operating.
-        // Arbitrarily set the output to the first inlet leg
-        mixer.OutletHumRat = mixer.InletHumRat(1);
-        mixer.OutletPressure = mixer.InletPressure(1);
-        mixer.OutletEnthalpy = mixer.InletEnthalpy(1);
-        mixer.OutletTemp = mixer.InletTemp(1);
+        // Average the inlet legs so changes in mixer inlet branch order does not change results
+        // (previously set outlet equal to the first inlet leg which could change results when mixer branches are reordered)
+        for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+            mixer.OutletHumRat += mixer.InletHumRat(InletNodeNum) / mixer.NumInletNodes;
+            mixer.OutletPressure += mixer.InletPressure(InletNodeNum) / mixer.NumInletNodes;
+            mixer.OutletEnthalpy += mixer.InletEnthalpy(InletNodeNum) / mixer.NumInletNodes;
+        }
+        // Use Enthalpy and humidity ratio to get outlet temperature from psych chart
+        mixer.OutletTemp = PsyTdbFnHW(mixer.OutletEnthalpy, mixer.OutletHumRat);
     }
 
     // make sure MassFlowRateMaxAvail is >= MassFlowRate
@@ -573,28 +577,32 @@ void UpdateAirMixer(EnergyPlusData &state, int const MixerNum)
     outletNode.Quality = inletNode.Quality;
 
     if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
+        outletNode.CO2 = 0.0;
         if (mixer.OutletMassFlowRate > 0.0) {
             // CO2 balance to get outlet air CO2
-            outletNode.CO2 = 0.0;
             for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
                 outletNode.CO2 +=
                     state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).CO2 * mixer.InletMassFlowRate(InletNodeNum) / mixer.OutletMassFlowRate;
             }
         } else {
-            outletNode.CO2 = inletNode.CO2;
+            for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+                outletNode.CO2 += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).CO2 / mixer.NumInletNodes;
+            }
         }
     }
 
     if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
+        outletNode.GenContam = 0.0;
         if (mixer.OutletMassFlowRate > 0.0) {
             // Generic contaminant balance to get outlet air CO2
-            outletNode.GenContam = 0.0;
             for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
                 outletNode.GenContam += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).GenContam * mixer.InletMassFlowRate(InletNodeNum) /
                                         mixer.OutletMassFlowRate;
             }
         } else {
-            outletNode.GenContam = inletNode.GenContam;
+            for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+                outletNode.GenContam += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).GenContam / mixer.NumInletNodes;
+            }
         }
     }
 }
