@@ -698,7 +698,7 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_WaterCoolingCoilAutoSizeTest)
     Real64 DesCoolingCoilWaterVolFlowRate = DesWaterCoolingCoilLoad / (CoilDesWaterDeltaT * Cp * rho);
     // check water coil water flow rate calc
     EXPECT_EQ(DesWaterCoolingCoilLoad, state->dataWaterCoils->WaterCoil(1).DesWaterCoolingCoilRate);
-    EXPECT_EQ(DesCoolingCoilWaterVolFlowRate, state->dataWaterCoils->WaterCoil(1).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesCoolingCoilWaterVolFlowRate, state->dataWaterCoils->WaterCoil(1).MaxWaterVolFlowRate);
 }
 
 TEST_F(EnergyPlusFixture, OutdoorAirUnit_SteamHeatingCoilAutoSizeTest)

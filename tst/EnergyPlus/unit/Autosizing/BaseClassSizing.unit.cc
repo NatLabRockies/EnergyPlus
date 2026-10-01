@@ -688,7 +688,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_setOAFracForZoneEqSizing_Test)
 
     // ATMixer flow rate = 0 so oaFrac depends on ZoneEqSizing.OAVolFlow
     oaFrac = sizer.setOAFracForZoneEqSizing(*state, DesMassFlow, zoneEqSizing);
-    EXPECT_EQ(oaFrac, oaFrac_Test);
+    EXPECT_DOUBLE_EQ(oaFrac, oaFrac_Test);
 
     zoneEqSizing.ATMixerVolFlow = 0.11;
 
@@ -698,7 +698,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_setOAFracForZoneEqSizing_Test)
 
     // ATMixer flow rate > 0 so oaFrac depends on ZoneEqSizing.ATMixerVolFlow
     oaFrac = sizer.EnergyPlus::BaseSizer::setOAFracForZoneEqSizing(*state, DesMassFlow, zoneEqSizing);
-    EXPECT_EQ(oaFrac, oaFrac_Test);
+    EXPECT_DOUBLE_EQ(oaFrac, oaFrac_Test);
 
     DesMassFlow = 0.0;
     oaFrac = 1.0;
