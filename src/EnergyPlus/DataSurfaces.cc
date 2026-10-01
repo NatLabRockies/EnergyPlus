@@ -96,9 +96,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     // If sorting by y for slab method can detect clockwise faster by just comparing edges at bottom or top-most vertex
     Real64 area(0.0); // Actually 2x the signed area
     for (Vertices::size_type i = 0; i < n; ++i) {
-        Vector2D const &v(vertices[i]);
+        Vector2D const &vi(vertices[i]);
         Vector2D const &w(vertices[(i + 1) % n]);
-        area += (v.x * w.y) - (w.x * v.y);
+        area += (vi.x * w.y) - (w.x * vi.y);
     }
     if (area < 0.0) {
         std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
@@ -134,16 +134,16 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             using CrossEdges = std::vector<CrossEdge>;
             CrossEdges crossEdges;
             for (size_type i = 0; i < n; ++i) { // Find edges crossing slab
-                Vector2D const &v(vertices[i]);
+                Vector2D const &vi(vertices[i]);
                 Vector2D const &w(vertices[(i + 1) % n]);
-                if (((v.y <= yl) && (yu <= w.y)) || // Crosses upward
-                    ((yu <= v.y) && (w.y <= yl)))   // Crosses downward
+                if (((vi.y <= yl) && (yu <= w.y)) || // Crosses upward
+                    ((yu <= vi.y) && (w.y <= yl)))   // Crosses downward
                 {
                     Edge const &e(edges[i]);
                     assert(e.y != 0.0);
                     Real64 const exy(e.x / e.y);
-                    Real64 const xb(v.x + (yl - v.y) * exy); // x_bot coordinate where edge intersects yl
-                    Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
+                    Real64 const xb(vi.x + (yl - vi.y) * exy); // x_bot coordinate where edge intersects yl
+                    Real64 const xt(vi.x + (yu - vi.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
                     crossEdges.emplace_back(xb, xt, i);
@@ -693,8 +693,20 @@ std::string cSurfaceClass(SurfaceClass const ClassNo)
     case SurfaceClass::Window: {
         ClassName = "Window";
     } break;
+    case SurfaceClass::FixedWindow: {
+        ClassName = "FixedWindow";
+    } break;
+    case SurfaceClass::OperableWindow: {
+        ClassName = "OperableWindow";
+    } break;
+    case SurfaceClass::Skylight: {
+        ClassName = "Skylight";
+    } break;
     case SurfaceClass::GlassDoor: {
         ClassName = "Glass Door";
+    } break;
+    case SurfaceClass::OverheadDoor: {
+        ClassName = "OverheadDoor";
     } break;
     case SurfaceClass::Door: {
         ClassName = "Door";
@@ -757,24 +769,40 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
         if (thisConstruct.TotLayers == 0) {
             continue;
         }
-        if (thisConstruct.LayerPoint(1) == 0) {
-            continue; // error finding material number
+        if (thisConstruct.LayerPoint(1) == 0 || thisConstruct.LayerPoint(thisConstruct.TotLayers) == 0) {
+            continue; // error finding material number for either outside or inside (shouldn't ever get to this?)
         }
-        auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
-        if (mat->group != Material::Group::Regular) {
+        auto const *matExt = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
+        auto const *matInt = state.dataMaterial->materials(thisConstruct.LayerPoint(thisConstruct.TotLayers));
+        if (matExt->group != Material::Group::Regular && matInt->group != Material::Group::Regular) {
             continue;
         }
 
-        if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
+        bool pushedBack =
+            false; // gets set to true when the exterior gets pushed back to avoid double counting a surface in AllVaryAbsOpaqSurfaceList
+        if (matExt->group == Material::Group::Regular && matExt->absorpVarCtrlSignalOut != Material::VariableAbsCtrlSignal::Invalid) {
             // check for dynamic coating defined on interior surface
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
-                ShowWarningError(
-                    state,
-                    std::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
-                                "will be ignored here",
-                                thisSurface.Name));
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined for the outside material of an interior surface, {}."
+                                             " This VariableAbsorptance property will be ignored here.",
+                                             thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
+                pushedBack = true;
+            }
+        }
+        if (matInt->group == Material::Group::Regular && matInt->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid) {
+            // check for dynamic coating defined on interior surface
+            if (thisSurface.ExtBoundCond != ExternalEnvironment) {
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined for the inside material of an interior surface, {}."
+                                             " This VariableAbsorptance property will be ignored here.",
+                                             thisSurface.Name));
+            } else {
+                if (!pushedBack) {
+                    state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum); // only add if the outside didn't already add this
+                }
             }
         }
     }
@@ -786,11 +814,27 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (mat->group != Material::Group::Regular) {
                 continue;
             }
-            if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
-                ShowWarningError(state,
-                                 std::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
-                                             "property will be ignored here",
-                                             mat->Name));
+            if (mat->absorpVarCtrlSignalOut != Material::VariableAbsCtrlSignal::Invalid) {
+                ShowWarningError(
+                    state,
+                    std::format("MaterialProperty:VariableAbsorptance for the outside face defined on an inside-layer material, {} in {}."
+                                " This VariableAbsorptance property will be ignored here.",
+                                mat->Name,
+                                thisConstruct.Name));
+            }
+        }
+        for (int Layer = 1; Layer <= thisConstruct.TotLayers - 1; ++Layer) {
+            auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(Layer));
+            if (mat->group != Material::Group::Regular) {
+                continue;
+            }
+            if (mat->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid) {
+                ShowWarningError(
+                    state,
+                    std::format("MaterialProperty:VariableAbsorptance for the inside face defined on an outside-layer material, {} in {}."
+                                " This VariableAbsorptance property will be ignored here.",
+                                mat->Name,
+                                thisConstruct.Name));
             }
         }
     }

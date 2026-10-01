@@ -1930,7 +1930,7 @@ TEST_F(EnergyPlusFixture, UnitaryHeatCool_AFN_RTF)
     SimFurnace(*state, state->dataFurnaces->Furnace(1).Name, FirstHVACIteration, AirLoopNum, CompIndex);
 
     // Check that the runtime fraction is less than one so the impact of cycling fan is correctly accounted for in the AFN
-    EXPECT_TRUE(state->dataAirLoop->AirLoopAFNInfo(1).AFNLoopHeatingCoilMaxRTF < 1);
+    EXPECT_TRUE(state->dataAirLoop->AirLoopAFNInfo(1).AFNLoopOnOffFanRTF < 1);
 
     // Check that the system heating capacity is the same as the heating coil
     EXPECT_NEAR(state->dataHeatingCoils->HeatingCoil(1).NominalCapacity, state->dataFurnaces->Furnace(1).DesignHeatingCapacity, 1e-6);

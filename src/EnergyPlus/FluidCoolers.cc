@@ -114,8 +114,6 @@ FluidCoolerspecs *FluidCoolerspecs::factory(EnergyPlusData &state, DataPlant::Pl
 
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("FluidCooler::factory: Error getting inputs for cooler named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
 }
 
 void FluidCoolerspecs::simulate(EnergyPlusData &state,

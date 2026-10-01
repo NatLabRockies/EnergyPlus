@@ -281,7 +281,7 @@ namespace CostEstimateManager {
         std::string ThisConstructStr;
         auto &Zone(state.dataHeatBal->Zone);
 
-        int thisCoil; // index of named coil in its derived type
+        int thisCoil = 0; // index of named coil in its derived type
         int thisChil;
         int thisPV;
 
@@ -598,8 +598,8 @@ namespace CostEstimateManager {
 
         Array1D_bool uniqueSurfMask;
         Array1D<Real64> SurfMultipleARR;
-        int surf;     // do-loop counter for checking for surfaces for uniqueness
-        int thisCoil; // index of named coil in its derived type
+        int surf;         // do-loop counter for checking for surfaces for uniqueness
+        int thisCoil = 0; // index of named coil in its derived type
         bool WildcardObjNames;
         int thisChil;
         int thisPV;

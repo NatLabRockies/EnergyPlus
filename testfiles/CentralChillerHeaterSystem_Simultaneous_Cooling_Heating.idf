@@ -3027,7 +3027,6 @@
     0.0003125,               !- Design Condenser Water Flow Rate {m3/s}
     0.0003125,               !- Design Hot Water Flow Rate {m3/s}
     1,                       !- Compressor Motor Efficiency
-    WaterCooled,             !- Condenser Type
     EnteringCondenser,       !- Cooling Mode Temperature Curve Condenser Water Independent Variable
     ChillerHeaterClgCapFT,   !- Cooling Mode Cooling Capacity Function of Temperature Curve Name
     ChillerHeaterClgEIRFT,   !- Cooling Mode Electric Input to Cooling Output Ratio Function of Temperature Curve Name
@@ -3044,7 +3043,6 @@
 
   CentralHeatPumpSystem,
     ChillerBank,             !- Name
-    SmartMixing,             !- Control Method
     Big Chiller Inlet Node,  !- Cooling Loop Inlet Node Name
     Big Chiller Outlet Node, !- Cooling Loop Outlet Node Name
     Big Chiller Condenser Inlet Node,  !- Source Loop Inlet Node Name

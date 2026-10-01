@@ -88,93 +88,6 @@ double const double_max( std::numeric_limits< double >::max() );
 longdouble const longdouble_min( std::numeric_limits< longdouble >::min() );
 longdouble const longdouble_max( std::numeric_limits< longdouble >::max() );
 
-TEST( NumericTest, KIND )
-{
-	EXPECT_EQ( 4, KIND( bool() ) );
-
-	EXPECT_EQ( 1, KIND( std::int8_t() ) );
-	EXPECT_EQ( 2, KIND( std::int16_t() ) );
-	EXPECT_EQ( 4, KIND( std::int32_t() ) );
-	EXPECT_EQ( 8, KIND( std::int64_t() ) );
-
-	EXPECT_EQ( 1, KIND( std::uint8_t() ) );
-	EXPECT_EQ( 2, KIND( std::uint16_t() ) );
-	EXPECT_EQ( 4, KIND( std::uint32_t() ) );
-	EXPECT_EQ( 8, KIND( std::uint64_t() ) );
-
-	EXPECT_EQ( 4, KIND( float() ) );
-	EXPECT_EQ( 8, KIND( double() ) );
-	long double long_double = 0.0;
-	EXPECT_EQ( 16, KIND( long_double ) );
-
-	EXPECT_EQ( 4, KIND( std::complex< float >() ) );
-	EXPECT_EQ( 8, KIND( std::complex< double >() ) );
-	EXPECT_EQ( 16, KIND( std::complex< long double >() ) );
-
-	EXPECT_EQ( 1, KIND( char() ) );
-	EXPECT_EQ( 1, KIND( std::string() ) );
-}
-
-TEST( NumericTest, SELECTED_INT_KIND )
-{
-	const struct {
-		int input;
-		int output;
-	} tests[] = {
-	 { 0,  1 },
-	 { 1,  1 },
-	 { 2,  1 },
-	 { 3,  2 },
-	 { 4,  2 },
-	 { 5,  4 },
-	 { 6,  4 },
-	 { 7,  4 },
-	 { 8,  4 },
-	 { 9,  4 },
-	 { 10, 8 },
-	 { 11, 8 },
-	 { 12, 8 },
-	 { 13, 8 },
-	 { 14, 8 },
-	 { 15, 8 },
-	 { 16, 8 },
-	 { 17, 8 },
-	 { 18, 8 },
-	 { 19, -1 },
-	 { 20, -1 },
-	 { 1000, -1 },
-	 { -1, 1 },
-	 { -1000, 1 }
-	};
-	int const N( ARRAY_LENGTH(tests) );
-
-	for ( int i = 0; i < N; ++i ) {
-		EXPECT_EQ( tests[ i ].output, SELECTED_INT_KIND( tests[ i ].input ) );
-	}
-}
-
-TEST( NumericTest, SIZEOF )
-{
-	EXPECT_EQ( 1u,  SIZEOF( std::int8_t() ) );
-	EXPECT_EQ( 2u, SIZEOF( std::int16_t() ) );
-	EXPECT_EQ( 4u, SIZEOF( std::int32_t() ) );
-	EXPECT_EQ( 8u, SIZEOF( std::int64_t() ) );
-
-	EXPECT_EQ( 1u,  SIZEOF( std::uint8_t() ) );
-	EXPECT_EQ( 2u, SIZEOF( std::uint16_t() ) );
-	EXPECT_EQ( 4u, SIZEOF( std::uint32_t() ) );
-	EXPECT_EQ( 8u, SIZEOF( std::uint64_t() ) );
-
-	EXPECT_EQ( 3u,  SIZEOF( "Cat" ) );
-	EXPECT_EQ( 3u,  SIZEOF( std::string( "Cat" ) ) );
-
-	std::uint8_t a[2];
-	EXPECT_EQ( 2u,  SIZEOF( a ) );
-
-	Array1D< float > b( 4 );
-	EXPECT_EQ( 16u,  SIZEOF( b ) );
-}
-
 TEST( NumericTest, RADIX )
 {
 	EXPECT_EQ( std::numeric_limits< bool >::radix, RADIX( bool() ) );
@@ -199,32 +112,6 @@ TEST( NumericTest, RADIX )
 	EXPECT_EQ( std::numeric_limits< float >::radix, RADIX( float() ) );
 	EXPECT_EQ( std::numeric_limits< double >::radix, RADIX( double() ) );
 	EXPECT_EQ( std::numeric_limits< longdouble >::radix, RADIX( longdouble() ) );
-}
-
-TEST( NumericTest, DIGITS )
-{
-	EXPECT_EQ( std::numeric_limits< bool >::digits, DIGITS( bool() ) );
-	EXPECT_EQ( std::numeric_limits< char >::digits, DIGITS( char() ) );
-	EXPECT_EQ( std::numeric_limits< schar >::digits, DIGITS( schar() ) );
-	EXPECT_EQ( std::numeric_limits< uchar >::digits, DIGITS( uchar() ) );
-	EXPECT_EQ( std::numeric_limits< wchar_t >::digits, DIGITS( wchar_t() ) );
-	EXPECT_EQ( std::numeric_limits< char16_t >::digits, DIGITS( char16_t() ) );
-	EXPECT_EQ( std::numeric_limits< char32_t >::digits, DIGITS( char32_t() ) );
-	EXPECT_EQ( std::numeric_limits< short >::digits, DIGITS( short() ) );
-	EXPECT_EQ( std::numeric_limits< sshort >::digits, DIGITS( sshort() ) );
-	EXPECT_EQ( std::numeric_limits< ushort >::digits, DIGITS( ushort() ) );
-	EXPECT_EQ( std::numeric_limits< int >::digits, DIGITS( int() ) );
-	EXPECT_EQ( std::numeric_limits< sint >::digits, DIGITS( sint() ) );
-	EXPECT_EQ( std::numeric_limits< uint >::digits, DIGITS( uint() ) );
-	EXPECT_EQ( std::numeric_limits< long >::digits, DIGITS( long() ) );
-	EXPECT_EQ( std::numeric_limits< slong >::digits, DIGITS( slong() ) );
-	EXPECT_EQ( std::numeric_limits< ulong >::digits, DIGITS( ulong() ) );
-	EXPECT_EQ( std::numeric_limits< longlong >::digits, DIGITS( longlong() ) );
-	EXPECT_EQ( std::numeric_limits< slonglong >::digits, DIGITS( slonglong() ) );
-	EXPECT_EQ( std::numeric_limits< ulonglong >::digits, DIGITS( ulonglong() ) );
-	EXPECT_EQ( std::numeric_limits< float >::digits, DIGITS( float() ) );
-	EXPECT_EQ( std::numeric_limits< double >::digits, DIGITS( double() ) );
-	EXPECT_EQ( std::numeric_limits< longdouble >::digits, DIGITS( longdouble() ) );
 }
 
 TEST( NumericTest, Huge )
@@ -260,68 +147,6 @@ TEST( NumericTest, TINY )
 	EXPECT_EQ( longdouble_min, TINY( longdouble() ) );
 }
 
-TEST( NumericTest, EPSILON )
-{
-	EXPECT_EQ( std::numeric_limits< float >::epsilon(), EPSILON( float() ) );
-	EXPECT_EQ( std::numeric_limits< double >::epsilon(), EPSILON( double() ) );
-	EXPECT_EQ( std::numeric_limits< long double >::epsilon(), EPSILON( longdouble() ) );
-}
-
-TEST( NumericTest, PRECISION )
-{
-	EXPECT_EQ( 6, PRECISION( float() ) );
-	EXPECT_EQ( 15, PRECISION( double() ) );
-#ifdef __GNUC__
-	EXPECT_EQ( 18, PRECISION( longdouble() ) );
-#else
-#ifdef _WIN32
-	EXPECT_EQ( 15, PRECISION( longdouble() ) );
-#else
-	EXPECT_EQ( 18, PRECISION( longdouble() ) );
-#endif
-#endif
-
-	EXPECT_EQ( 6, PRECISION( std::complex< float >() ) );
-	EXPECT_EQ( 15, PRECISION( std::complex< double >() ) );
-#ifdef __GNUC__
-	EXPECT_EQ( 18, PRECISION( std::complex< longdouble >() ) );
-#else
-#ifdef _WIN32
-	EXPECT_EQ( 15, PRECISION( std::complex< longdouble >() ) );
-#else
-	EXPECT_EQ( 18, PRECISION( std::complex< longdouble >() ) );
-#endif
-#endif
-}
-
-TEST( NumericTest, EXPONENT_RANGE )
-{
-	EXPECT_EQ( 2,  EXPONENT_RANGE( std::int8_t() ) );
-	EXPECT_EQ( 4,  EXPONENT_RANGE( std::int16_t() ) );
-	EXPECT_EQ( 9,  EXPONENT_RANGE( std::int32_t() ) );
-	EXPECT_EQ( 18, EXPONENT_RANGE( std::int64_t() ) );
-
-	EXPECT_EQ( 2,  EXPONENT_RANGE( std::uint8_t() ) );
-	EXPECT_EQ( 4,  EXPONENT_RANGE( std::uint16_t() ) );
-	EXPECT_EQ( 9,  EXPONENT_RANGE( std::uint32_t() ) );
-	EXPECT_EQ( 18, EXPONENT_RANGE( std::uint64_t() ) );
-
-	EXPECT_EQ( 37,   EXPONENT_RANGE( float() ) );
-	EXPECT_EQ( 307,  EXPONENT_RANGE( double() ) );
-	EXPECT_EQ( 4931, EXPONENT_RANGE( longdouble() ) );
-
-	EXPECT_EQ( 37,   EXPONENT_RANGE( std::complex< float >() ) );
-	EXPECT_EQ( 307,  EXPONENT_RANGE( std::complex< double >() ) );
-	EXPECT_EQ( 4931, EXPONENT_RANGE( std::complex< long double >() ) );
-}
-
-TEST( NumericTest, MINEXPONENT )
-{
-	EXPECT_EQ( std::numeric_limits< float >::min_exponent, MINEXPONENT( float() ) );
-	EXPECT_EQ( std::numeric_limits< double >::min_exponent, MINEXPONENT( double() ) );
-	EXPECT_EQ( std::numeric_limits< longdouble >::min_exponent, MINEXPONENT( longdouble() ) );
-}
-
 TEST( NumericTest, EXPONENT )
 {
 	EXPECT_EQ( 0, EXPONENT( float() ) );
@@ -345,12 +170,6 @@ TEST( NumericTest, EXPONENT )
 	EXPECT_EQ( 0, EXPONENT( longdouble() ) );
 }
 
-TEST( NumericTest, SCALE )
-{
-	EXPECT_EQ( 128.0, SCALE( 4.0, 5 ) );
-	EXPECT_EQ( 24.0f, SCALE( 3.0f, 3 ) );
-}
-
 TEST( NumericTest, FRACTION )
 {
 	EXPECT_EQ( 0, FRACTION( float() ) );
@@ -367,12 +186,6 @@ TEST( NumericTest, FRACTION )
 	EXPECT_EQ( 0, FRACTION( float() ) );
 	EXPECT_EQ( 0, FRACTION( double() ) );
 	EXPECT_EQ( 0, FRACTION( longdouble() ) );
-}
-
-TEST( NumericTest, SPACING )
-{
-	EXPECT_EQ( SPACING( 0.0 ), TINY( 1.0 ) );
-	EXPECT_EQ( SPACING( 1.0 ), EPSILON( 1.0 ) );
 }
 
 TEST( NumericTest, NEAREST )

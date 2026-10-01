@@ -1143,7 +1143,7 @@ namespace Dayltg {
         // FUNCTION ARGUMENT DEFINITIONS:
 
         // FUNCTION PARAMETER DEFINITIONS:
-        int constexpr NPH(1000); // Number of altitude integration points
+        int constexpr numAltitudeIntegPoints(1000); // Number of altitude integration points
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 FluxInc = 0.0;   // Incident solar flux
@@ -1152,11 +1152,11 @@ namespace Dayltg {
         Real64 COSI;            // Cosine of incident angle
         Real64 SINI;            // Sine of incident angle
 
-        Real64 const dPH = 90.0 * Constant::DegToRad / NPH; // Altitude angle of sky element
-        Real64 PH = 0.5 * dPH;                              // Altitude angle increment
+        Real64 const dPH = 90.0 * Constant::DegToRad / numAltitudeIntegPoints; // Altitude angle of sky element
+        Real64 PH = 0.5 * dPH;                                                 // Altitude angle increment
 
         // Integrate from 0 to Pi/2 altitude
-        for (int N = 1; N <= NPH; ++N) {
+        for (int N = 1; N <= numAltitudeIntegPoints; ++N) {
             COSI = std::cos(Constant::PiOvr2 - PH);
             SINI = std::sin(Constant::PiOvr2 - PH);
 
@@ -1208,7 +1208,7 @@ namespace Dayltg {
         // FUNCTION ARGUMENT DEFINITIONS:
 
         // FUNCTION PARAMETER DEFINITIONS:
-        int constexpr NTH(18); // Number of azimuth integration points
+        int constexpr numAzimuthIntegPoints(18); // Number of azimuth integration points
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 FluxInc = 0.0;   // Incident solar flux
@@ -1224,10 +1224,10 @@ namespace Dayltg {
             // Integrate over the semicircle
             Real64 const THMIN = Theta - Constant::PiOvr2; // Minimum azimuth integration limit
             // Real64 const THMAX = Theta + PiOvr2; // Maximum azimuth integration limit
-            Real64 const dTH = 180.0 * Constant::DegToRad / NTH; // Azimuth angle increment
-            Real64 TH = THMIN + 0.5 * dTH;                       // Azimuth angle of sky horizon element
+            Real64 const dTH = 180.0 * Constant::DegToRad / numAzimuthIntegPoints; // Azimuth angle increment
+            Real64 TH = THMIN + 0.5 * dTH;                                         // Azimuth angle of sky horizon element
 
-            for (int N = 1; N <= NTH; ++N) {
+            for (int N = 1; N <= numAzimuthIntegPoints; ++N) {
                 // Calculate incident angle between dome outward normal and horizon element
                 Real64 COSI = CosPhi * std::cos(TH - Theta); // Cosine of the incident angle
 

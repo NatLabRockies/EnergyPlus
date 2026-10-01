@@ -58,6 +58,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
@@ -443,7 +444,7 @@ namespace HeatBalanceIntRadExchange {
         auto &movInsul = s_surf->intMovInsuls(SurfNum);
         if (movInsul.present != movInsul.presentPrevTS) {
             change = (std::abs(state.dataConstruction->Construct(s_surf->Surface(SurfNum).Construction).InsideAbsorpThermal -
-                               state.dataMaterial->materials(movInsul.matNum)->AbsorpThermal) > 0.01);
+                               state.dataMaterial->materials(movInsul.matNum)->AbsorpThermalIn) > 0.01);
         }
     }
 
@@ -1560,7 +1561,7 @@ namespace HeatBalanceIntRadExchange {
         Real64 constexpr DifferenceConvergence(0.00001);
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 ConvrgNew;
+        Real64 ConvrgNew = 0.0;
         Real64 CheckConvergeTolerance; // check value for actual warning
 
         bool Converged;
@@ -1644,7 +1645,7 @@ namespace HeatBalanceIntRadExchange {
                 // this max summation.  This will provide a cap on radiation so that no row has a sum greater than unity
                 // and will still maintain reciprocity.
                 Array1D<Real64> sumFixedF;
-                Real64 MaxFixedFRowSum;
+                Real64 MaxFixedFRowSum = 0.0;
                 sumFixedF.allocate(N);
                 sumFixedF = 0.0;
                 for (int i = 1; i <= N; ++i) {
@@ -1731,6 +1732,7 @@ namespace HeatBalanceIntRadExchange {
                             std::format("FixViewFactors: View factors convergence has failed and will lead to heat balance errors in zone=\"{}\".",
                                         enclName));
                     }
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::IncompleteViewFactors)];
                     ShowWarningError(
                         state,
                         std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
@@ -1774,6 +1776,7 @@ namespace HeatBalanceIntRadExchange {
                 F = FixedF;
                 FinalCheckValue = FixedCheckValue;
             } else {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::IncompleteViewFactors)];
                 ShowWarningError(
                     state,
                     std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",

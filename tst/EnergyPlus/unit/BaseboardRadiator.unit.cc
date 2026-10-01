@@ -67,6 +67,8 @@
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
+#include <EnergyPlus/ZoneEquipmentManager.hh>
+#include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataPlant;
@@ -359,6 +361,7 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     state->dataSize->ZoneSizingInput(3).ZoneNum = 3;
 
     int TotNumLoops = 1;
+    state->dataPlnt->TotNumLoops = TotNumLoops;
     state->dataPlnt->PlantLoop.allocate(TotNumLoops);
     state->dataSize->PlantSizData.allocate(TotNumLoops);
     state->dataSize->PlantSizData(1).DeltaT = 10.0;
@@ -371,11 +374,18 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
         loop.FluidName = "WATER";
         loop.glycol = Fluid::GetWater(*state);
         auto &loopside(state->dataPlnt->PlantLoop(l).LoopSide(DataPlant::LoopSideLocation::Demand));
-        loopside.TotalBranches = 1;
-        loopside.Branch.allocate(1);
-        auto &loopsidebranch(state->dataPlnt->PlantLoop(l).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1));
-        loopsidebranch.TotalComponents = 1;
-        loopsidebranch.Comp.allocate(1);
+        loopside.TotalBranches = 3;
+        loopside.Branch.allocate(3);
+        for (int k = 1; k <= loopside.TotalBranches; ++k) {
+            auto &branch(loopside.Branch(k));
+            branch.TotalComponents = 1;
+            branch.Comp.allocate(1);
+            auto &comp(branch.Comp(1));
+            comp.Type = DataPlant::PlantEquipmentType::Baseboard_Conv_Water;
+            comp.Name = "SPACE" + std::to_string(k + 1) + "-1 BASEBOARD";
+            comp.NodeNumIn = k * 2 + 8;  // bad idea to hard code this early
+            comp.NodeNumOut = k * 2 + 9; // bad idea to hard code this early
+        }
     }
 
     state->dataSize->ZoneSizingRunDone = true;
@@ -387,7 +397,36 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     state->dataSize->ZoneEqSizing.allocate(3);
     state->dataSize->ZoneSizingRunDone = true;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToHeatingSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).SequencedOutputRequiredToHeatingSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).SequencedOutputRequiredToHeatingSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).SequencedOutputRequiredToCoolingSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).SequencedOutputRequiredToCoolingSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).SequencedOutputRequiredToCoolingSP.allocate(3);
+
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(2).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(3).SequencedOutputRequired.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToHumidSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(2).SequencedOutputRequiredToHumidSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(3).SequencedOutputRequiredToHumidSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(1).SequencedOutputRequiredToDehumidSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(2).SequencedOutputRequiredToDehumidSP.allocate(3);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand(3).SequencedOutputRequiredToDehumidSP.allocate(3);
+
     state->dataZoneEnergyDemand->CurDeadBandOrSetback.allocate(3);
+    state->dataZoneEnergyDemand->DeadBandOrSetback.allocate(3);
+    state->dataHeatBal->MassConservation.allocate(3);
+    state->dataHeatBalFanSys->ZoneMassBalanceFlag.allocate(3);
+    state->dataHeatBal->RefrigCaseCredit.allocate(3);
+    state->dataHeatBalFanSys->TempControlType.allocate(3);
+    state->dataHeatBalFanSys->TempControlType(1) = HVAC::SetptType::SingleHeat;
+    state->dataHeatBalFanSys->TempControlType(2) = HVAC::SetptType::SingleHeat;
+    state->dataHeatBalFanSys->TempControlType(3) = HVAC::SetptType::SingleHeat;
 
     BaseboardNum = 1;
     CntrlZoneNum = 1;
@@ -416,6 +455,7 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     state->dataBaseboardRadiator->baseboards(BaseboardNum).UA = DataSizing::AutoSize; // reset to autosize to test new calculation
     state->files.eio.open_as_stringstream();
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
+    state->dataBaseboardRadiator->baseboards(BaseboardNum).MySizeFlag = false;
     EXPECT_EQ(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CntrlZoneNum).RemainingOutputReqToHeatSP, 2000.0); // design load = 2000
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 2000.0);                                 // UA = design load
     EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax, 4.86063E-05, 0.0000001);
@@ -457,6 +497,7 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     state->dataBaseboardRadiator->baseboards(BaseboardNum).ScaledHeatingCapacity = DataSizing::AutoSize;
     state->files.eio.open_as_stringstream();
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
+    state->dataBaseboardRadiator->baseboards(BaseboardNum).MySizeFlag = false;
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 2000.0);
     EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax, 4.86063E-05, 0.0000001);
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
@@ -487,6 +528,7 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
 
     state->dataBaseboardRadiator->baseboards(BaseboardNum).ZonePtr = 3;
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
+    state->dataBaseboardRadiator->baseboards(BaseboardNum).MySizeFlag = false;
     // check UA value
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).ScaledHeatingCapacity, 0.50);
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 1500.0);
@@ -507,6 +549,55 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
                                              "Design Size U-Factor Times Area Value [W/K], 3000"));
+
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(3);
+    state->dataZoneEquipmentManager->PrioritySimOrder.allocate(3);
+    state->dataBaseboardRadiator->getInputFlag = false;
+    state->dataGlobal->BeginEnvrnFlag = true;
+
+    state->dataZoneEquip->ZoneEquipList(1).EquipData(1).ON = false; // Zone 1 baseboard is off
+    state->dataZoneEquip->ZoneEquipList(2).EquipData(1).ON = false; // Zone 2 baseboard is off
+    state->dataZoneEquip->ZoneEquipList(3).EquipData(1).ON = false; // Zone 3 baseboard is off
+
+    // Initialize zone loads
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).TotalOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).TotalOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).TotalOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).RemainingOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).RemainingOutputRequired = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).OutputRequiredToHeatingSP = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(2).OutputRequiredToHeatingSP = 2000.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(3).OutputRequiredToHeatingSP = 2000.0;
+    state->dataZoneEnergyDemand->DeadBandOrSetback(1) = false; // Zone 1 is not in deadband, so it will be simulated
+    state->dataZoneEnergyDemand->DeadBandOrSetback(2) = false; // Zone 2 is not in deadband, so it will be simulated
+    state->dataZoneEnergyDemand->DeadBandOrSetback(3) = false; // Zone 3 is not in deadband, so it will be simulated
+
+    state->dataLoopNodes->Node(state->dataBaseboardRadiator->baseboards(1).WaterInletNode).Temp = 80.0;
+    state->dataLoopNodes->Node(state->dataBaseboardRadiator->baseboards(2).WaterInletNode).Temp = 80.0;
+    state->dataLoopNodes->Node(state->dataBaseboardRadiator->baseboards(3).WaterInletNode).Temp = 80.0;
+
+    bool simAir = false;
+    // Simulate zone equipment to set EquipData ON flags
+    ZoneEquipmentManager::SimZoneEquipment(*state, FirstHVACIteration, simAir);
+    EXPECT_TRUE(state->dataZoneEquip->ZoneEquipList(1).EquipData(1).ON); // Zone 1 baseboard is on
+    EXPECT_TRUE(state->dataZoneEquip->ZoneEquipList(2).EquipData(1).ON); // Zone 2 baseboard is on
+    EXPECT_TRUE(state->dataZoneEquip->ZoneEquipList(3).EquipData(1).ON); // Zone 3 baseboard is on
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(1).Power, 2000.0, 1.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(2).Power, 2000.0, 1.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(3).Power, 2000.0, 1.0);
+
+    state->dataZoneEnergyDemand->DeadBandOrSetback(1) = true;  // Zone 1 is in deadband, so it will not be simulated
+    state->dataZoneEnergyDemand->DeadBandOrSetback(2) = false; // Zone 2 is not in deadband, so it will be simulated
+    state->dataZoneEnergyDemand->DeadBandOrSetback(3) = true;  // Zone 3 is in deadband, so it will not be simulated
+
+    ZoneEquipmentManager::SimZoneEquipment(*state, FirstHVACIteration, simAir);
+    EXPECT_FALSE(state->dataZoneEquip->ZoneEquipList(1).EquipData(1).ON); // Zone 1 baseboard is off
+    EXPECT_TRUE(state->dataZoneEquip->ZoneEquipList(2).EquipData(1).ON);  // Zone 2 baseboard is on
+    EXPECT_FALSE(state->dataZoneEquip->ZoneEquipList(3).EquipData(1).ON); // Zone 3 baseboard is off
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(1).Power, 0.0, 1.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(2).Power, 2000.0, 1.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(3).Power, 0.0, 1.0);
 }
 
 TEST_F(EnergyPlusFixture, BaseboardConvWater_checkForZoneSizingTest)

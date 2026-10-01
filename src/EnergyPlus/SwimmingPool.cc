@@ -120,8 +120,6 @@ SwimmingPoolData *SwimmingPoolData::factory(EnergyPlusData &state, std::string c
     // If we didn't find it, fatal
     ShowFatalError(state,
                    std::format("LocalSwimmingPoolFactory: Error getting inputs or index for swimming pool named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void SwimmingPoolData::simulate(EnergyPlusData &state,

@@ -121,9 +121,9 @@ void ManageZoneContaminanUpdates(EnergyPlusData &state,
 
     if (state.dataZoneContaminantPredictorCorrector->GetZoneAirContamInputFlag) {
         if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
-            GetZoneContaminanInputs(state);
+            GetZoneContaminantInputs(state);
         }
-        GetZoneContaminanSetPoints(state);
+        GetZoneContaminantSetPoints(state);
         state.dataZoneContaminantPredictorCorrector->GetZoneAirContamInputFlag = false;
     }
 
@@ -155,7 +155,7 @@ void ManageZoneContaminanUpdates(EnergyPlusData &state,
     }
 }
 
-void GetZoneContaminanInputs(EnergyPlusData &state)
+void GetZoneContaminantInputs(EnergyPlusData &state)
 {
 
     // SUBROUTINE INFORMATION:
@@ -990,7 +990,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
     }
 }
 
-void GetZoneContaminanSetPoints(EnergyPlusData &state)
+void GetZoneContaminantSetPoints(EnergyPlusData &state)
 {
 
     // SUBROUTINE INFORMATION:
@@ -1088,10 +1088,7 @@ void GetZoneContaminanSetPoints(EnergyPlusData &state)
             state.dataHeatBal->Zone(controlledZone.ActualZoneNum).zoneContamControllerSched = controlledZone.availSched;
         }
 
-        if (state.dataIPShortCut->lAlphaFieldBlanks(4)) {
-            ShowSevereEmptyField(state, eoh, state.dataIPShortCut->cAlphaFieldNames(4));
-            ErrorsFound = true;
-        } else if ((controlledZone.setptSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(4))) == nullptr) {
+        if ((controlledZone.setptSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(4))) == nullptr) {
             ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4));
             ErrorsFound = true;
         } else if (!controlledZone.setptSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 2000.0)) {
@@ -1427,15 +1424,28 @@ void InitZoneContSetPoints(EnergyPlusData &state)
     }
 
     for (int Loop = 1; Loop <= (int)state.dataContaminantBalance->ContaminantControlledZone.size(); ++Loop) {
+        bool ErrorsFound = false;
         if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
             int ZoneNum = state.dataContaminantBalance->ContaminantControlledZone(Loop).ActualZoneNum;
+            // since required field in idd, this can't be nullptr
             state.dataContaminantBalance->ZoneCO2SetPoint(ZoneNum) =
                 state.dataContaminantBalance->ContaminantControlledZone(Loop).setptSched->getCurrentVal();
         }
         if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
             int ZoneNum = state.dataContaminantBalance->ContaminantControlledZone(Loop).ActualZoneNum;
-            state.dataContaminantBalance->ZoneGCSetPoint(ZoneNum) =
-                state.dataContaminantBalance->ContaminantControlledZone(Loop).genericContamSetptSched->getCurrentVal();
+            if (state.dataContaminantBalance->ContaminantControlledZone(Loop).genericContamSetptSched == nullptr) {
+                ShowSevereError(
+                    state,
+                    std::format("ZoneControl:ContaminantController: a Generic Contaminant Setpoint Schedule is not found for the controller ={}",
+                                state.dataContaminantBalance->ContaminantControlledZone(Loop).Name));
+                ErrorsFound = true;
+            } else {
+                state.dataContaminantBalance->ZoneGCSetPoint(ZoneNum) =
+                    state.dataContaminantBalance->ContaminantControlledZone(Loop).genericContamSetptSched->getCurrentVal();
+            }
+        }
+        if (ErrorsFound) {
+            ShowFatalError(state, "ZoneControl:ContaminantController: Program terminates for preceding reason(s).");
         }
     }
 
@@ -1557,14 +1567,14 @@ void PredictZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("PredictZoneContaminants");
 
-    Real64 A;                  // Coefficient of storage term in a zone balance equation
-    Real64 B;                  // Coefficient of variable term in a zone balance equation
-    Real64 C;                  // Coefficient of constnat term in a zone balance equation
-    Real64 LoadToCO2SetPoint;  // CO2 load at CO2 set point
-    Real64 ZoneAirCO2SetPoint; // Zone CO2 setpoint
-    Real64 LoadToGCSetPoint;   // Generic contaminant load at generic contaminant set point
-    Real64 ZoneAirGCSetPoint;  // Zone generic contaminant setpoint
-    Real64 GCGain;             // Zone generic contaminant internal load
+    Real64 A;                        // Coefficient of storage term in a zone balance equation
+    Real64 B;                        // Coefficient of variable term in a zone balance equation
+    Real64 C;                        // Coefficient of constant term in a zone balance equation
+    Real64 LoadToCO2SetPoint;        // CO2 load at CO2 set point
+    Real64 ZoneAirCO2SetPoint = 0.0; // Zone CO2 setpoint
+    Real64 LoadToGCSetPoint;         // Generic contaminant load at generic contaminant set point
+    Real64 ZoneAirGCSetPoint = 0.0;  // Zone generic contaminant setpoint
+    Real64 GCGain;                   // Zone generic contaminant internal load
 
     Real64 timeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
     // Update zone CO2
@@ -1684,9 +1694,6 @@ void PredictZoneContaminants(EnergyPlusData &state,
                 if (contaminantControlledZone.ActualZoneNum == ZoneNum) {
                     if (contaminantControlledZone.availSched->getCurrentVal() > 0.0) {
                         ZoneAirCO2SetPoint = state.dataContaminantBalance->ZoneCO2SetPoint(contaminantControlledZone.ActualZoneNum);
-                        if (contaminantControlledZone.EMSOverrideCO2SetPointOn) {
-                            ZoneAirCO2SetPoint = contaminantControlledZone.EMSOverrideCO2SetPointValue;
-                        }
                         ControlledCO2ZoneFlag = true;
                         break;
                     }
@@ -1696,9 +1703,6 @@ void PredictZoneContaminants(EnergyPlusData &state,
                 for (auto const &contaminantControlledZone : state.dataContaminantBalance->ContaminantControlledZone) {
                     if (contaminantControlledZone.availSched->getCurrentVal() > 0.0) {
                         ZoneAirCO2SetPoint = state.dataContaminantBalance->ZoneCO2SetPoint(contaminantControlledZone.ActualZoneNum);
-                        if (contaminantControlledZone.EMSOverrideCO2SetPointOn) {
-                            ZoneAirCO2SetPoint = contaminantControlledZone.EMSOverrideCO2SetPointValue;
-                        }
                         if (contaminantControlledZone.NumOfZones >= 1) {
                             if (contaminantControlledZone.ActualZoneNum != ZoneNum) {
                                 for (int I = 1; I <= contaminantControlledZone.NumOfZones; ++I) {
@@ -1799,9 +1803,6 @@ void PredictZoneContaminants(EnergyPlusData &state,
                 if (contaminantControlledZone.ActualZoneNum == ZoneNum) {
                     if (contaminantControlledZone.genericContamAvailSched->getCurrentVal() > 0.0) {
                         ZoneAirGCSetPoint = state.dataContaminantBalance->ZoneGCSetPoint(contaminantControlledZone.ActualZoneNum);
-                        if (contaminantControlledZone.EMSOverrideCO2SetPointOn) {
-                            ZoneAirGCSetPoint = contaminantControlledZone.EMSOverrideGCSetPointValue;
-                        }
                         ControlledGCZoneFlag = true;
                         break;
                     }
@@ -1811,9 +1812,6 @@ void PredictZoneContaminants(EnergyPlusData &state,
                 for (auto const &contaminantControlledZone : state.dataContaminantBalance->ContaminantControlledZone) {
                     if (contaminantControlledZone.genericContamAvailSched->getCurrentVal() > 0.0) {
                         ZoneAirGCSetPoint = state.dataContaminantBalance->ZoneGCSetPoint(contaminantControlledZone.ActualZoneNum);
-                        if (contaminantControlledZone.EMSOverrideCO2SetPointOn) {
-                            ZoneAirGCSetPoint = contaminantControlledZone.EMSOverrideGCSetPointValue;
-                        }
                         if (contaminantControlledZone.NumOfZones >= 1) {
                             if (contaminantControlledZone.ActualZoneNum != ZoneNum) {
                                 for (int I = 1; I <= contaminantControlledZone.NumOfZones; ++I) {
@@ -2171,12 +2169,12 @@ void CorrectZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("CorrectZoneContaminants");
 
-    Real64 CO2Gain;             // Zone CO2 internal gain
-    Real64 CO2GainExceptPeople; // Added for hybrid model, Zone CO2 internal gain
-    Real64 GCGain;              // Zone generic contaminant internal gain
-    Real64 A;
-    Real64 B;
-    Real64 C;
+    Real64 CO2Gain = 0.0;             // Zone CO2 internal gain
+    Real64 CO2GainExceptPeople = 0.0; // Added for hybrid model, Zone CO2 internal gain
+    Real64 GCGain = 0.0;              // Zone generic contaminant internal gain
+    Real64 A = 0.0;
+    Real64 B = 0.0;
+    Real64 C = 0.0;
 
     // Update zone CO2
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {

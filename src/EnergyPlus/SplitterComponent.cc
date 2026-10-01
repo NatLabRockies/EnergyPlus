@@ -574,7 +574,7 @@ namespace SplitterComponent {
         // as zero.
 
         // Return value
-        int SplitterOutletNumber;
+        int SplitterOutletNumber = 0;
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichSplitter;

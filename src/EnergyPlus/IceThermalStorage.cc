@@ -137,8 +137,6 @@ namespace IceThermalStorage {
         // If we didn't find it, fatal
         ShowFatalError(
             state, std::format("LocalSimpleIceStorageFactory: Error getting inputs for simple ice storage named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     PlantComponent *DetailedIceStorageData::factory(EnergyPlusData &state, std::string const &objectName)
@@ -159,8 +157,6 @@ namespace IceThermalStorage {
         ShowFatalError(state,
                        std::format("LocalDetailedIceStorageFactory: Error getting inputs for detailed ice storage named: {}",
                                    objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void SimpleIceStorageData::simulate(EnergyPlusData &state,
@@ -1465,8 +1461,8 @@ namespace IceThermalStorage {
     void DetailedIceStorageData::size(EnergyPlusData &state)
     {
         int const TESTankIndex = Util::FindItemInList(this->Name, state.dataIceThermalStorage->DetailedIceStorage, &DetailedIceStorageData::Name);
-        int const TESSizingIndex = state.dataIceThermalStorage->DetailedIceStorage(TESTankIndex).TESSizingIndex;
-        if (TESSizingIndex == 0) {
+        int const tesSizingIndex = state.dataIceThermalStorage->DetailedIceStorage(TESTankIndex).TESSizingIndex;
+        if (tesSizingIndex == 0) {
             return;
         }
         std::string_view const tankType = "ThermalStorage:Ice:Detailed";
@@ -1476,11 +1472,11 @@ namespace IceThermalStorage {
         int PltSizNum = plntLoop.PlantSizNum;
         auto &plntSizData = state.dataSize->PlantSizData(PltSizNum);
 
-        int startPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
-        int endPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
+        int startPeak = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
+        int endPeak = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
         Real64 onPeakTimeSteps = endPeak - startPeak;
         Real64 onPeakHours = onPeakTimeSteps / state.dataGlobal->TimeStepsInHour;
-        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).sizingFactor;
+        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).sizingFactor;
         Real64 onPeakSumWaterFlow = 0.0;
         if (!plntLoop.plantDesWaterFlowRate.empty()) {
             for (int ts = 0; ts < 24 * state.dataGlobal->TimeStepsInHour; ++ts) {
@@ -1515,8 +1511,8 @@ namespace IceThermalStorage {
     void SimpleIceStorageData::size(EnergyPlusData &state)
     {
         int const TESTankIndex = Util::FindItemInList(this->Name, state.dataIceThermalStorage->SimpleIceStorage, &SimpleIceStorageData::Name);
-        int const TESSizingIndex = state.dataIceThermalStorage->SimpleIceStorage(TESTankIndex).TESSizingIndex;
-        if (TESSizingIndex == 0) {
+        int const tesSizingIndex = state.dataIceThermalStorage->SimpleIceStorage(TESTankIndex).TESSizingIndex;
+        if (tesSizingIndex == 0) {
             return;
         }
         std::string_view const tankType = "ThermalStorage:Ice:Simple";
@@ -1526,11 +1522,11 @@ namespace IceThermalStorage {
         int PltSizNum = plntLoop.PlantSizNum;
         auto &plntSizData = state.dataSize->PlantSizData(PltSizNum);
 
-        Real64 startPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
-        Real64 endPeak = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
+        Real64 startPeak = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).onPeakStart * state.dataGlobal->TimeStepsInHour;
+        Real64 endPeak = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).onPeakEnd * state.dataGlobal->TimeStepsInHour;
         Real64 onPeakTimeSteps = endPeak - startPeak;
         Real64 onPeakHours = onPeakTimeSteps / state.dataGlobal->TimeStepsInHour;
-        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(TESSizingIndex).sizingFactor;
+        Real64 sizingFactor = state.dataIceThermalStorage->ThermalStorageSizing(tesSizingIndex).sizingFactor;
         Real64 onPeakSumWaterFlow = 0.0;
         if (!plntLoop.plantDesWaterFlowRate.empty()) {
             for (int ts = 0; ts < 24 * state.dataGlobal->TimeStepsInHour; ++ts) {

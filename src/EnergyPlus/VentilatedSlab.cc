@@ -1686,23 +1686,23 @@ namespace VentilatedSlab {
         std::string CoolingCoilType;
         Real64 rho;
         Real64 Cp;
-        Real64 MaxAirVolFlowDes;        // Autosized maximum air flow for reporting
-        Real64 MaxAirVolFlowUser;       // Hardsized maximum air flow for reporting
-        Real64 OutAirVolFlowDes;        // Autosized outdoor air flow for reporting
-        Real64 OutAirVolFlowUser;       // Hardsized outdoor air flow for reporting
-        Real64 MinOutAirVolFlowDes;     // Autosized minimum outdoor air flow for reporting
-        Real64 MinOutAirVolFlowUser;    // Hardsized minimum outdoor air flow for reporting
-        Real64 MaxVolHotWaterFlowDes;   // Autosized maximum hot water flow for reporting
-        Real64 MaxVolHotWaterFlowUser;  // Hardsized maximum hot water flow for reporting
-        Real64 MaxVolHotSteamFlowDes;   // Autosized maximum hot steam flow for reporting
-        Real64 MaxVolHotSteamFlowUser;  // Hardsized maximum hot steam flow for reporting
-        Real64 MaxVolColdWaterFlowDes;  // Autosized maximum cold water flow for reporting
-        Real64 MaxVolColdWaterFlowUser; // Hardsized maximum cold water flow for reporting
-        std::string CompName;           // component name
-        std::string CompType;           // component type
-        std::string SizingString;       // input field sizing description (e.g., Nominal Capacity)
-        Real64 TempSize;                // autosized value of coil input field
-        int FieldNum = 2;               // IDD numeric field number where input field description is found
+        Real64 MaxAirVolFlowDes;                // Autosized maximum air flow for reporting
+        Real64 MaxAirVolFlowUser;               // Hardsized maximum air flow for reporting
+        Real64 OutAirVolFlowDes;                // Autosized outdoor air flow for reporting
+        Real64 OutAirVolFlowUser;               // Hardsized outdoor air flow for reporting
+        Real64 MinOutAirVolFlowDes;             // Autosized minimum outdoor air flow for reporting
+        Real64 MinOutAirVolFlowUser;            // Hardsized minimum outdoor air flow for reporting
+        Real64 MaxVolHotWaterFlowDes;           // Autosized maximum hot water flow for reporting
+        Real64 MaxVolHotWaterFlowUser;          // Hardsized maximum hot water flow for reporting
+        Real64 MaxVolHotSteamFlowDes;           // Autosized maximum hot steam flow for reporting
+        Real64 MaxVolHotSteamFlowUser;          // Hardsized maximum hot steam flow for reporting
+        Real64 MaxVolColdWaterFlowDes;          // Autosized maximum cold water flow for reporting
+        Real64 MaxVolColdWaterFlowUser;         // Hardsized maximum cold water flow for reporting
+        std::string CompName;                   // component name
+        std::string CompType;                   // component type
+        std::string SizingString;               // input field sizing description (e.g., Nominal Capacity)
+        Real64 TempSize = DataSizing::AutoSize; // autosized value of coil input field
+        int FieldNum = 2;                       // IDD numeric field number where input field description is found
         int SizingMethod;  // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing, CoolingCapacitySizing,
                            // HeatingCapacitySizing, etc.)
         bool PrintFlag;    // TRUE when sizing information is reported in the eio file
@@ -3435,7 +3435,7 @@ namespace VentilatedSlab {
         static std::string const CurrentModuleObject("ZoneHVAC:VentilatedSlab");
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 CpAirZn;        // Intermediate calculational variable for specific heat of air
+        Real64 CpAirZn = 0.0;  // Intermediate calculational variable for specific heat of air
         Real64 DewPointTemp;   // Dew-point temperature based on the zone air conditions
         Real64 EpsMdotCpAirZn; // Epsilon (heat exchanger terminology) times water mass flow rate times water specific heat
         Real64 Mdot;           // Intermediate calculation variable for mass flow rate in a surface within the radiant system
@@ -3446,7 +3446,7 @@ namespace VentilatedSlab {
         // unused0309  INTEGER  :: RadSurfNumNum
         Real64 TotalVentSlabRadPower; // Total heat source/sink to radiant system
         Real64 AirOutletTempCheck;    // Radiant system air outlet temperature (calculated from mixing all outlet streams together)
-        Real64 AirTempIn;             // Temperature of the air entering the radiant system, in C
+        Real64 AirTempIn = 0.0;       // Temperature of the air entering the radiant system, in C
         Real64 Ca;                    // Coefficients to relate the inlet air temperature to the heat source
         Real64 Cb;
         Real64 Cc;

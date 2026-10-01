@@ -165,7 +165,7 @@ struct CoilCoolingDXCurveFitSpeed
     void CalcSpeedOutput(EnergyPlusData &state,
                          const Node::NodeData &inletNode,
                          Node::NodeData &outletNode,
-                         Real64 PLR,
+                         Real64 t_PLR,
                          HVAC::FanOp const fanOp,
                          Real64 condInletTemp);
 
@@ -182,7 +182,7 @@ struct CoilCoolingDXCurveFitSpeed
     Real64 calcEffectiveSHR(const Node::NodeData &inletNode,
                             Real64 const inletWetBulb,
                             Real64 const SHRss,      // Steady-state sensible heat ratio
-                            Real64 const RTF,        // Compressor run-time fraction
+                            Real64 const t_RTF,      // Compressor run-time fraction
                             Real64 const QLatRated,  // Rated latent capacity
                             Real64 const QLatActual, // Actual latent capacity
                             Real64 const HeatingRTF  // Used to recalculate Toff for cycling fan systems

@@ -129,6 +129,7 @@ namespace OutputReportPredefined {
         s->pdstOpaque = newPreDefSubTable(state, s->pdrEnvelope, "Opaque Exterior");
 
         s->pdchOpCons = newPreDefColumn(state, s->pdstOpaque, "Construction");
+        s->pdchOpConsSource = newPreDefColumn(state, s->pdstOpaque, "Construction Assignment Source");
         s->pdchOpZone = newPreDefColumn(state, s->pdstOpaque, "Zone");
         s->pdchOpSpace = newPreDefColumn(state, s->pdstOpaque, "Space");
         s->pdchOpRefl = newPreDefColumn(state, s->pdstOpaque, "Reflectance");
@@ -143,6 +144,7 @@ namespace OutputReportPredefined {
         s->pdstIntOpaque = newPreDefSubTable(state, s->pdrEnvelope, "Opaque Interior");
 
         s->pdchIntOpCons = newPreDefColumn(state, s->pdstIntOpaque, "Construction");
+        s->pdchIntOpConsSource = newPreDefColumn(state, s->pdstIntOpaque, "Construction Assignment Source");
         s->pdchIntOpZone = newPreDefColumn(state, s->pdstIntOpaque, "Zone");
         s->pdchIntOpSpace = newPreDefColumn(state, s->pdstIntOpaque, "Space");
         s->pdchIntOpAdjSurf = newPreDefColumn(state, s->pdstIntOpaque, "Adjacent Surface");
@@ -158,6 +160,7 @@ namespace OutputReportPredefined {
         s->pdstFen = newPreDefSubTable(state, s->pdrEnvelope, "Exterior Fenestration");
 
         s->pdchFenCons = newPreDefColumn(state, s->pdstFen, "Construction");
+        s->pdchFenConsSource = newPreDefColumn(state, s->pdstFen, "Construction Assignment Source");
         s->pdchFenZone = newPreDefColumn(state, s->pdstFen, "Zone");
         s->pdchFenSpace = newPreDefColumn(state, s->pdstFen, "Space");
         s->pdchFenFrameDivName = newPreDefColumn(state, s->pdstFen, "Frame and Divider");
@@ -195,6 +198,7 @@ namespace OutputReportPredefined {
         s->pdstIntFen = newPreDefSubTable(state, s->pdrEnvelope, "Interior Fenestration");
 
         s->pdchIntFenCons = newPreDefColumn(state, s->pdstIntFen, "Construction");
+        s->pdchIntFenConsSource = newPreDefColumn(state, s->pdstIntFen, "Construction Assignment Source");
         s->pdchIntFenZone = newPreDefColumn(state, s->pdstIntFen, "Zone");
         s->pdchIntFenSpace = newPreDefColumn(state, s->pdstIntFen, "Space");
         s->pdchIntFenAreaOf1 = newPreDefColumn(state, s->pdstIntFen, "Area of One Opening [m2]");
@@ -211,6 +215,7 @@ namespace OutputReportPredefined {
 
         s->pdstDoor = newPreDefSubTable(state, s->pdrEnvelope, "Exterior Door");
         s->pdchDrCons = newPreDefColumn(state, s->pdstDoor, "Construction");
+        s->pdchDrConsSource = newPreDefColumn(state, s->pdstDoor, "Construction Assignment Source");
         s->pdchDrZone = newPreDefColumn(state, s->pdstDoor, "Zone");
         s->pdchDrSpace = newPreDefColumn(state, s->pdstDoor, "Space");
         s->pdchDrUfactFilm = newPreDefColumn(state, s->pdstDoor, "U-Factor with Film [W/m2-K]");
@@ -221,6 +226,7 @@ namespace OutputReportPredefined {
         s->pdstIntDoor = newPreDefSubTable(state, s->pdrEnvelope, "Interior Door");
 
         s->pdchIntDrCons = newPreDefColumn(state, s->pdstIntDoor, "Construction");
+        s->pdchIntDrConsSource = newPreDefColumn(state, s->pdstIntDoor, "Construction Assignment Source");
         s->pdchIntDrZone = newPreDefColumn(state, s->pdstIntDoor, "Zone");
         s->pdchIntDrSpace = newPreDefColumn(state, s->pdstIntDoor, "Space");
         s->pdchIntDrUfactFilm = newPreDefColumn(state, s->pdstIntDoor, "U-Factor with Film [W/m2-K]");
@@ -319,6 +325,16 @@ namespace OutputReportPredefined {
         // The Btu/W-h isn't going to convert anyways, and the W/W will convert to W/W since it has "SI" in the string as a hint
         s->pdchMechIPLVSI = newPreDefColumn(state, s->pdstMech, "IPLV in SI Units [W/W]");
         s->pdchMechIPLVIP = newPreDefColumn(state, s->pdstMech, "IPLV in IP Units [Btu/W-h]");
+
+        s->pdstGLHE = newPreDefSubTable(state, s->pdrEquip, "Ground Loop Heat Exchangers");
+
+        s->pdchGLHEType = newPreDefColumn(state, s->pdstGLHE, "Type");
+        s->pdchGLHETubeLength = newPreDefColumn(state, s->pdstGLHE, "Total Tube Length [m]");
+        s->pdchGLHEVolFlow = newPreDefColumn(state, s->pdstGLHE, "Design Volume Flow Rate [m3/s]");
+        s->pdchGLHEbhDepth = newPreDefColumn(state, s->pdstGLHE, "Depth [m]");
+        s->pdchGLHEbhDiam = newPreDefColumn(state, s->pdstGLHE, "Diameter [m]");
+        s->pdchGLHEbhLeng = newPreDefColumn(state, s->pdstGLHE, "Length [m]");
+        s->pdchGLHENumHolesTrenches = newPreDefColumn(state, s->pdstGLHE, "Number of Holes/Trenches");
 
         // Ok Constant                        Object Name                            Module                   Example File
         // -- ------------------------------- -------------------------------------- ------------------------ -----------------
@@ -1724,6 +1740,12 @@ namespace OutputReportPredefined {
         s->pdchLeedSchStPt11amWedCnt = newPreDefColumn(state, s->pdstLeedSchedSetPts, "Days with Same 11am Value");
         s->pdchLeedSchStPt11pmWednesday = newPreDefColumn(state, s->pdstLeedSchedSetPts, "11pm First Wednesday [C]");
         s->pdchLeedSchStPt11pmWedCnt = newPreDefColumn(state, s->pdstLeedSchedSetPts, "Days with Same 11pm Value");
+
+        s->pdstLeedVentilation = newPreDefSubTable(state, s->pdrLeed, "Ventilation");
+        s->pdchLeedVentMinVentPerArea = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Ventilation Per Area [m3/s-m2]");
+        s->pdchLeedVentMinVentPerZone = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Ventilation Per Zone [m3/s]");
+        s->pdchLeedVentMinFlowPerArea = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Flow Per Area [m3/s-m2]");
+        s->pdchLeedVentMinFlowPerZone = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Flow Per Zone [m3/s]");
 
         s->pdrCO2Resilience = newPreDefReport(state, "CO2ResilienceSummary", "CO2R", "Annual CO2 Resilience Summary");
 

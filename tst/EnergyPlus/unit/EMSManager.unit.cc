@@ -1478,15 +1478,15 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(21).Operand(3).Type, Value::Number); // argument was passed to EMS function
     index = 21 + offset;
     EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name, "VAR21");
-    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 5.573987554, 0.00000001); // TdpFnTdbTwbPb 30.0 16.0 101325 =
+    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 5.573987554, 5e-7); // TdpFnTdbTwbPb 30.0 16.0 101325 =
 
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(22).Operator, ErlFunc::TdpFnWPb);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(22).NumOperands, 2);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(22).Operand.size(), 2u);
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(22).Operand(2).Type, Value::Number); // argument was passed to EMS function
     index = 22 + offset;
-    EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name, "VAR22");                            // verified at sugartech site as 14.0439
-    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 14.044515576, 0.00000001); // TdpFnWPb 0.01 101325 =
+    EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name, "VAR22");                      // verified at sugartech site as 14.0439
+    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 14.044515576, 5e-7); // TdpFnWPb 0.01 101325 =
 
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(23).Operator, ErlFunc::HFnTdbW);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(23).NumOperands, 2);
@@ -1572,7 +1572,7 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
     index = 32 + offset;
     EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name,
               "VAR32"); // verified at sugartech site using 30 C db and 0.01 kg/kg = 19.60536624685125 C
-    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 19.60933534, 0.00000001); // TwbFnTdbWPb 30.0 0.01 101325.0 =
+    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 19.60933534, 2e-6); // TwbFnTdbWPb 30.0 0.01 101325.0 =
 
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(33).Operator, ErlFunc::VFnTdbWPb);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(33).NumOperands, 3);

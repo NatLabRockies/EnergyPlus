@@ -838,8 +838,8 @@ void CalcEarthTube(EnergyPlusData &state)
     // This subroutine simulates the components making up the EarthTube unit.
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 Process1;    // Variable Used in the Middle of the Calculation
-    Real64 GroundTempt; // Ground Temperature between Depth z at time t
+    Real64 Process1;          // Variable Used in the Middle of the Calculation
+    Real64 GroundTempt = 0.0; // Ground Temperature between Depth z at time t
 
     Real64 AirThermCond;         // Thermal Conductivity of Air (W/mC)
     Real64 AirKinemVisco;        // Kinematic Viscosity of Air (m2/s)

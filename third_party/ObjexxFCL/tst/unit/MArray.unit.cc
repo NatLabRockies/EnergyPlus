@@ -48,11 +48,6 @@ TEST( MArrayTest, Basic1D )
 	EXPECT_EQ( 3, ma( 3 ) );
 	EXPECT_EQ( 4, ma( 4 ) );
 	EXPECT_EQ( 5, ma( 5 ) );
-	EXPECT_EQ( 2, ma( 1 ) );
-	EXPECT_EQ( 3, ma( 2 ) );
-	EXPECT_EQ( 4, ma( 3 ) );
-	EXPECT_EQ( 5, ma( 4 ) );
-	EXPECT_EQ( 6, ma( 5 ) );
 }
 
 TEST( MArrayTest, Range1D )

@@ -262,12 +262,11 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         } else {
             ++state.dataMoistureBalEMPD->ErrCount;
             if (state.dataMoistureBalEMPD->ErrCount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                ShowMessage(state, "GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer of Surfaces");
+                ShowMessage(state, std::format("{}: EMPD properties are not assigned to the inside layer of Surfaces", routineName));
                 ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
             }
             if (state.dataGlobal->DisplayExtraWarnings) {
-                ShowMessage(
-                    state, std::format("GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer in Surface={}", surf.Name));
+                ShowMessage(state, std::format("{}: EMPD properties are not assigned to the inside layer in Surface={}", routineName, surf.Name));
                 ShowContinueError(state, std::format("with Construction={}", constr.Name));
             }
         }
@@ -315,7 +314,7 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
     ReportMoistureBalanceEMPD(state);
 
     if (ErrorsFound) {
-        ShowFatalError(state, "GetMoistureBalanceEMPDInput: Errors found getting EMPD material properties, program terminated.");
+        ShowFatalError(state, std::format("{}: Errors found getting EMPD material properties, program terminated.", routineName));
     }
 }
 
@@ -369,7 +368,6 @@ void InitMoistureBalanceEMPD(EnergyPlusData &state)
         return;
     }
     // Initialize the report variable
-
     GetMoistureBalanceEMPDInput(state);
 
     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
@@ -541,10 +539,17 @@ void CalcMoistureBalanceEMPD(EnergyPlusData &state,
 
     auto const &constr = state.dataConstruction->Construct(surface.Construction);
     auto const *mat = dynamic_cast<MaterialEMPD const *>(s_mat->materials(constr.LayerPoint(constr.TotLayers)));
-    assert(mat != nullptr);
-    if (mat->mu <= 0.0) {
+    // assert(mat != nullptr);
+
+    if ((mat != nullptr) && mat->mu <= 0.0) {
         rv_surface =
             PsyRhovFnTdbWPb(TempZone, state.dataZoneTempPredictorCorrector->zoneHeatBalance(surface.Zone).airHumRat, state.dataEnvrn->OutBaroPress);
+        return;
+    } else if (mat == nullptr) {
+        // Surface/construction without EMPD properties: treat as no moisture buffering for this surface.
+        rv_surface = rho_vapor_air_in;
+        rv_surf_layer = rv_surface;
+        rv_deep_layer = rv_surface;
         return;
     }
 

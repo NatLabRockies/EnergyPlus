@@ -496,7 +496,6 @@ namespace FourPipeBeam {
             return thisBeam;
         }
         ShowFatalError(state, std::format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
-        return nullptr;
     }
 
     int HVACFourPipeBeam::getAirLoopNum()
@@ -826,13 +825,13 @@ namespace FourPipeBeam {
                 this->coolingAvailable = true;
                 this->heatingAvailable = false;
                 auto f = [&state, this](Real64 const airFlow) {
-                    static constexpr std::string_view routineName("Real64 HVACFourPipeBeam::residualSizing ");
+                    static constexpr std::string_view residualRoutineName("Real64 HVACFourPipeBeam::residualSizing ");
                     this->mDotSystemAir = airFlow;
                     this->vDotDesignPrimAir = this->mDotSystemAir / state.dataEnvrn->StdRhoAir;
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -841,7 +840,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {
@@ -897,13 +896,13 @@ namespace FourPipeBeam {
                 this->heatingAvailable = true;
                 this->coolingAvailable = false;
                 auto f = [&state, this](Real64 const airFlow) {
-                    static constexpr std::string_view routineName("Real64 HVACFourPipeBeam::residualSizing ");
+                    static constexpr std::string_view residualRoutineName("Real64 HVACFourPipeBeam::residualSizing ");
                     this->mDotSystemAir = airFlow;
                     this->vDotDesignPrimAir = this->mDotSystemAir / state.dataEnvrn->StdRhoAir;
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -912,7 +911,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {
@@ -1386,12 +1385,28 @@ namespace FourPipeBeam {
         auto &adu = state.dataDefineEquipment->AirDistUnit(this->aDUNum);
         if (!state.dataSize->TermUnitFinalZoneSizing.empty()) {
             auto &sizing = state.dataSize->TermUnitFinalZoneSizing(adu.TermUnitSizingNum);
-            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, sizing.DesCoolVolFlowMin);
-            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA);
+            Real64 minZoneFlow = this->vDotDesignPrimAir;
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, minZoneFlow, 4);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA, 4);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupCoolingSP, adu.Name, sizing.CoolDesTemp);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupHeatingSP, adu.Name, sizing.HeatDesTemp);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatingCap, adu.Name, sizing.DesHeatLoad);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolingCap, adu.Name, sizing.DesCoolLoad);
+
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerZone, sizing.ZoneName, minZoneFlow, 6);
+            Real64 minZoneFlowPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? minZoneFlow / sizing.TotalZoneFloorArea : 0.0;
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerArea, sizing.ZoneName, minZoneFlowPerFloorArea, 6);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchLeedVentMinVentPerZone,
+                                                     sizing.ZoneName,
+                                                     sizing.MinOA,
+                                                     6); // minZoneVoa
+            Real64 minZoneVoaPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? sizing.MinOA / sizing.TotalZoneFloorArea : 0.0;
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchLeedVentMinVentPerArea,
+                                                     sizing.ZoneName,
+                                                     minZoneVoaPerFloorArea,
+                                                     6); // minZoneVoaPerFloorArea
         }
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermTypeInp, adu.Name, "AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam");
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermPrimFlow, adu.Name, this->vDotNormRatedPrimAir);

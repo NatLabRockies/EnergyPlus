@@ -109,7 +109,6 @@ namespace DataHVACControllers {
 
 struct HVACCtrlData : BaseGlobalStruct
 {
-    Array1D_string const ControllerTypes = Array1D_string(1, std::string("Controller:WaterCoil"));
     static constexpr std::array<std::string_view, 5> ActionTypes = {"No action", "Reverse action", "Normal action"};
     Array1D_string const ControllerModeTypes = Array1D_string({-1, 5},
                                                               {"Wrong action mode",

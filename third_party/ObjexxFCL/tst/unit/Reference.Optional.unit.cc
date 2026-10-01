@@ -51,7 +51,7 @@ TEST( ReferenceOptionalTest, ReferenceConstOptional )
 	int i( 42 );
 	int const & j( i );
 	Optional_int_const o( j );
-	Reference_int r( o );
+	Reference< int > r( o );
 	EXPECT_EQ( 42, o() );
 	EXPECT_EQ( 42, r() );
 	i = 56;
@@ -64,7 +64,7 @@ TEST( ReferenceOptionalTest, ReferenceConstOptionalValue )
 	int i( 42 );
 	int const & j( i );
 	Optional_int_const o( j );
-	Reference_int r( o() );
+	Reference< int > r( o() );
 	EXPECT_EQ( 42, o() );
 	EXPECT_EQ( 42, r() );
 	i = 56;
@@ -76,7 +76,7 @@ TEST( ReferenceOptionalTest, ReferenceAttachConstOptional )
 {
 	int i( 42 );
 	Optional_int_const o( i );
-	Reference_int r;
+	Reference< int > r;
 	r >>= o;
 	EXPECT_EQ( 42, o() );
 	EXPECT_EQ( 42, r() );

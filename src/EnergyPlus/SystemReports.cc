@@ -1044,7 +1044,12 @@ void InitEnergyReports(EnergyPlusData &state)
     // initialize energy report variables
 }
 
-void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &ArrayCount, int &LoopCount, bool &ConnectionFlag)
+void FindFirstLastPtr([[maybe_unused]] EnergyPlusData &state,
+                      [[maybe_unused]] int &LoopType,
+                      [[maybe_unused]] int &LoopNum,
+                      [[maybe_unused]] int &ArrayCount,
+                      [[maybe_unused]] int &LoopCount,
+                      [[maybe_unused]] bool &ConnectionFlag)
 {
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Dan Fisher
@@ -1058,150 +1063,6 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
     // METHODOLOGY EMPLOYED:
     // Once all compsets have been established (second iteration) find all components
     // subcomponents, etc.
-
-    int DemandSideLoopNum;
-    int DemandSideBranchNum;
-    int DemandSideCompNum;
-    int DemandSideLoopType;
-    bool found;
-
-    // Object Data
-
-    return; // Autodesk:? Is this routine now an intentional NOOP?
-
-    auto &LoopStack = state.dataSysRpts->LoopStack;
-    if (state.dataSysRpts->OneTimeFlag_FindFirstLastPtr) {
-        LoopStack.allocate(state.dataSysRpts->MaxLoopArraySize);
-        state.dataAirSystemsData->DemandSideConnect.allocate(state.dataSysRpts->MaxCompArraySize);
-
-        state.dataSysRpts->OneTimeFlag_FindFirstLastPtr = false;
-    }
-    for (auto &e : LoopStack) {
-        e.LoopNum = 0;
-        e.LoopType = 0;
-    }
-
-    ConnectionFlag = false;
-    //    countloop=0
-    //    write(outputfiledebug,*) '1228=lt,lc,lnum,cflag,arrcnt',looptype,loopcount,LoopNum,connectionflag,arraycount
-
-    while (LoopCount > 0) {
-        //        write(outputfiledebug,*) '1231==lt,lc,lnum,cflag,arrcnt',looptype,loopcount,LoopNum,connectionflag,arraycount
-        //        write(outputfiledebug,*) 'loop=plname',TRIM(plantloop(LoopNum)%name)
-        --LoopCount;
-        //        countloop=countloop+1
-        //        if (countloop > 100) exit
-        if (LoopType == 1) {
-            for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
-                 ++BranchNum) {
-                for (int SupplySideCompNum = 1;
-                     SupplySideCompNum <=
-                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
-                     ++SupplySideCompNum) {
-                    {
-                        auto const &thisVentRepComp =
-                            state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                                SupplySideCompNum);
-                        DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
-                        DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
-                        DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
-                        DemandSideCompNum = thisVentRepComp.ConnectPlant.CompNum;
-                    }
-                    // If the connection is valid load the connection array
-                    if (DemandSideLoopType == 1 || DemandSideLoopType == 2) {
-                        ConnectionFlag = true;
-                        ++ArrayCount;
-                        if (ArrayCount > state.dataSysRpts->MaxCompArraySize) {
-                            state.dataAirSystemsData->DemandSideConnect.redimension(state.dataSysRpts->MaxCompArraySize += 100);
-                        }
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopType = DemandSideLoopType;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopNum = DemandSideLoopNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).BranchNum = DemandSideBranchNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).CompNum = DemandSideCompNum;
-
-                        found = false;
-                        print(state.files.debug, "1271=lstacksize {}\n", size(LoopStack));
-                        for (int Idx = 1; Idx <= isize(LoopStack); ++Idx) {
-                            if (DemandSideLoopNum == LoopStack(Idx).LoopNum && DemandSideLoopType == LoopStack(Idx).LoopType) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            ++LoopCount;
-                            //       write(outputfiledebug,*) '1280=lc,mxsize',loopcount,maxlooparraysize
-                            //       write(outputfiledebug,*) '1281=dsloopnum,dslooptype',DemandSideLoopNum,DemandSideLoopType
-                            if (LoopCount > state.dataSysRpts->MaxLoopArraySize) {
-                                LoopStack.redimension(state.dataSysRpts->MaxLoopArraySize += 100);
-                            }
-                            //               write(outputfiledebug,*)
-                            //               '1294=lcnt,dsloopnum,dslooptype',loopcount,DemandSideLoopNum,DemandSideLoopType
-                            LoopStack(LoopCount).LoopNum = DemandSideLoopNum;
-                            LoopStack(LoopCount).LoopType = DemandSideLoopType;
-                        }
-                    }
-                }
-            }
-        } else if (LoopType == 2) {
-            for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
-                 ++BranchNum) {
-                for (int SupplySideCompNum = 1;
-                     SupplySideCompNum <=
-                     state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
-                     ++SupplySideCompNum) {
-                    {
-                        auto const &thisVentRepComp =
-                            state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                                SupplySideCompNum);
-                        DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
-                        DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
-                        DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
-                        DemandSideCompNum = thisVentRepComp.ConnectPlant.CompNum;
-                    }
-                    // If the connection is valid load the connection array
-                    if (DemandSideLoopType == 1 || DemandSideLoopType == 2) {
-                        ConnectionFlag = true;
-                        ++ArrayCount;
-                        if (ArrayCount > state.dataSysRpts->MaxCompArraySize) {
-                            state.dataAirSystemsData->DemandSideConnect.redimension(state.dataSysRpts->MaxCompArraySize += 100);
-                        }
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopType = DemandSideLoopType;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopNum = DemandSideLoopNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).BranchNum = DemandSideBranchNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).CompNum = DemandSideCompNum;
-
-                        found = false;
-                        for (int Idx = 1; Idx <= isize(LoopStack); ++Idx) {
-                            if (DemandSideLoopNum == LoopStack(Idx).LoopNum && DemandSideLoopType == LoopStack(Idx).LoopType) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            ++LoopCount;
-                            //       write(outputfiledebug,*) '1341=lcnt,arrsize',loopcount,maxlooparraysize
-                            //       write(outputfiledebug,*) '1342=lsloopnum,dslooptype',DemandSideLoopNum,DemandSideLoopType
-                            if (LoopCount > state.dataSysRpts->MaxLoopArraySize) {
-                                LoopStack.redimension(state.dataSysRpts->MaxLoopArraySize += 100);
-                            }
-                            LoopStack(LoopCount).LoopNum = DemandSideLoopNum;
-                            LoopStack(LoopCount).LoopType = DemandSideLoopType;
-                        }
-                    }
-                }
-            }
-        } else {
-            print(state.files.debug, "{}\n", "1361=error");
-            // error
-        }
-
-        // now unload the LoopNum and LoopType arrays
-        if (LoopCount > 0) {
-            LoopType = LoopStack(LoopCount).LoopType;
-            LoopNum = LoopStack(LoopCount).LoopNum;
-        }
-
-    } // While loop
 }
 
 void UpdateZoneCompPtrArray(EnergyPlusData &state,

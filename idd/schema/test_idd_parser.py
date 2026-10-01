@@ -222,3 +222,38 @@ BrokenObject,
   N1; \field Number 1
      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
     )
+
+
+def test_idd_type_node():
+    data = idd_parser.Data()
+    data.file = r"""
+\group test
+
+MyObject,
+  A1; \field Inlet Node Name
+      \type node
+      \required-field
+"""
+    idd_parser.parse_idd(data)
+    assert data.schema["properties"].keys() == {"MyObject"}
+    assert data.schema["properties"]["MyObject"] == {
+        "patternProperties": {
+            ".*": {
+                "type": "object",
+                "properties": {"inlet_node_name": {"type": "string", "data_type": "node"}},
+                "required": [
+                    "inlet_node_name",
+                ],
+            }
+        },
+        "group": "test",
+        "legacy_idd": {
+            "field_info": {
+                "inlet_node_name": {"field_name": "Inlet Node Name", "field_type": "a"},
+            },
+            "fields": ["inlet_node_name"],
+            "alphas": {"fields": ["inlet_node_name"]},
+            "numerics": {"fields": []},
+        },
+        "type": "object",
+    }

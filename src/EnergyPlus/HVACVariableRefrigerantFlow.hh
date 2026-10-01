@@ -292,7 +292,6 @@ namespace HVACVariableRefrigerantFlow {
         std::string EvapWaterSupplyName;     // name of water source e.g. water storage tank
         int EvapWaterSupTankID;
         int EvapWaterTankDemandARRID;
-        std::string CondensateCollectName; // name of water source e.g. water storage tank
         int CondensateTankID;
         int CondensateTankSupplyARRID;
         Real64 CondensateVdot; // rate of water condensation from air stream [m3/s]
@@ -321,7 +320,6 @@ namespace HVACVariableRefrigerantFlow {
         int LowLoadTeError2PosTsucIndex = 0; // warning message index
         int LowLoadTeError2PosOUTe = 0;
         int LowLoadTeError2PosOUTeIndex = 0; // warning message index
-        int LowLoadTeErrorIndex = 0;         // warning message index
         // The following are for the Algorithm Type: VRF model based on physics, applicable for Fluid Temperature Control
         int AlgorithmIUCtrl;             // VRF indoor unit control algorithm, 1-High sensible, 2-Te/Tc constant
         Array1D<Real64> CompressorSpeed; // compressor speed array [rps]
@@ -389,7 +387,9 @@ namespace HVACVariableRefrigerantFlow {
         Real64 SCHigh;                    // VRF outdoor unit subcooling degrees upper limit [C]
         Real64 VRFOperationSimPath;       // simulation path indicating the VRF operation mode [--]
         bool checkPlantCondTypeOneTime;
-        int CondenserCapErrIdx; // recurring condenser capacity error index
+        int CondenserCapErrIdx;              // recurring condenser capacity error index
+        int CondenserCoolingIterLimitErrIdx; // recurring cooling compressor iteration limit error index
+        int CondenserHeatingIterLimitErrIdx; // recurring heating compressor iteration limit error index
         bool adjustedTe;
 
         // Default Constructor
@@ -430,7 +430,8 @@ namespace HVACVariableRefrigerantFlow {
               RatedHeatCapacity(0.0), RatedCompPower(14000.0), RatedCompPowerPerCapcity(0.35), RatedOUFanPower(0.0), RatedOUFanPowerPerCapcity(0.0),
               RateBFOUEvap(0.45581), RateBFOUCond(0.21900), RefPipDiaSuc(0.0), RefPipDiaDis(0.0), RefPipLen(0.0), RefPipEquLen(0.0), RefPipHei(0.0),
               RefPipInsThi(0.0), RefPipInsCon(0.0), SH(0.0), SC(0.0), SCHE(0.0), SHLow(0.0), SCLow(0.0), SHHigh(0.0), SCHigh(0.0),
-              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), adjustedTe(false)
+              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), CondenserCoolingIterLimitErrIdx(0),
+              CondenserHeatingIterLimitErrIdx(0), adjustedTe(false)
         {
         }
 
@@ -529,7 +530,7 @@ namespace HVACVariableRefrigerantFlow {
                              Real64 MaxOutdoorUnitTc,   // The maximum temperature that Tc can be at heating mode [C]
                              Real64 &OUCondHeatRelease, // Condenser heat release (cooling mode) [W]
                              Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                             Real64 &Ncomp,             // Compressor power [W]
+                             Real64 &t_Ncomp,           // Compressor power [W]
                              Real64 &CyclingRatio       // Cycling Ratio [W]
         );
 
@@ -545,7 +546,7 @@ namespace HVACVariableRefrigerantFlow {
                         Real64 Pipe_Q,             // Piping Loss Algorithm Parameter: Heat loss [W]
                         Real64 &OUEvapHeatExtract, // Condenser heat release (cooling mode) [W]
                         Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                        Real64 &Ncomp,             // Compressor power [W]
+                        Real64 &t_Ncomp,           // Compressor power [W]
                         Real64 &CyclingRatio       // Compressor cycling ratio
         );
 
@@ -567,7 +568,7 @@ namespace HVACVariableRefrigerantFlow {
                               Real64 &m_ref_OU_cond, // mass flow rate of Refrigerant through OU condenser [kg/s]
                               Real64 &N_fan_OU,      // outdoor unit fan power [W]
                               Real64 &CompSpdActual, // Actual compressor running speed [rps]
-                              Real64 &Ncomp          // compressor power [W]
+                              Real64 &t_Ncomp        // compressor power [W]
         );
 
         void VRFOU_CompSpd(EnergyPlusData &state,
@@ -587,7 +588,7 @@ namespace HVACVariableRefrigerantFlow {
                            Real64 h_IU_evap_in,  // Enthalpy of IU at inlet, for C_cap_operation calculation [kJ/kg]
                            Real64 h_comp_in,     // Enthalpy after piping loss (compressor inlet), for C_cap_operation calculation [kJ/kg]
                            Real64 &Q_c_tot,      // Compressor evaporative capacity [W]
-                           Real64 &Ncomp         // Compressor power [W]
+                           Real64 &t_Ncomp       // Compressor power [W]
         );
 
         void VRFOU_PipeLossC(EnergyPlusData &state,
@@ -629,7 +630,6 @@ namespace HVACVariableRefrigerantFlow {
         Array1D<Real64> TotalHeatLoad;                     // Total zone heating coil load met by TU
         Array1D_bool CoolingCoilPresent;                   // FALSE if coil not present
         Array1D_bool HeatingCoilPresent;                   // FALSE if coil not present
-        Array1D_bool SuppHeatingCoilPresent;               // FALSE if supplemental heating coil not present
         Array1D_bool TerminalUnitNotSizedYet;              // TRUE if terminal unit not sized
         Array1D_bool HRHeatRequest;                        // defines a heating load on VRFTerminalUnits when QZnReq < 0
         Array1D_bool HRCoolRequest;                        // defines a cooling load on VRFTerminalUnits when QZnReq > 0
@@ -777,8 +777,6 @@ namespace HVACVariableRefrigerantFlow {
         int DesignSpecMSHPIndex = -1;                           //  Multiuple performance index
         int NumOfSpeedHeating = 0;                              // Number of heating speed
         int NumOfSpeedCooling = 0;                              // Number of cooling speed
-        int HeatSpeedNum = 0;                                   // Heating speed number
-        int CoolSpeedNum = 0;                                   // Cooling speed number
         std::vector<Real64> CoolVolumeFlowRate;
         std::vector<Real64> CoolMassFlowRate;
         std::vector<Real64> HeatVolumeFlowRate;

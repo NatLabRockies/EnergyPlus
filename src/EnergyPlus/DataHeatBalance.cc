@@ -369,18 +369,18 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
     int InsideMaterNum = thisConstruct.LayerPoint(InsideLayer); // Material "number" of the Inside layer
     if (InsideMaterNum != 0) {
         auto const *mat = s_mat->materials(InsideMaterNum);
-        thisConstruct.InsideAbsorpVis = mat->AbsorpVisible;
-        thisConstruct.InsideAbsorpSolar = mat->AbsorpSolar;
+        thisConstruct.InsideAbsorpVis = mat->AbsorpVisibleIn;
+        thisConstruct.InsideAbsorpSolar = mat->AbsorpSolarIn;
 
         // Following line applies only to opaque surfaces; it is recalculated later for windows.
-        thisConstruct.ReflectVisDiffBack = 1.0 - mat->AbsorpVisible;
+        thisConstruct.ReflectVisDiffBack = 1.0 - mat->AbsorpVisibleIn;
     }
 
     int OutsideMaterNum = thisConstruct.LayerPoint(1); // Material "number" of the Outside layer
     if (OutsideMaterNum != 0) {
         auto const *mat = s_mat->materials(OutsideMaterNum);
-        thisConstruct.OutsideAbsorpVis = mat->AbsorpVisible;
-        thisConstruct.OutsideAbsorpSolar = mat->AbsorpSolar;
+        thisConstruct.OutsideAbsorpVis = mat->AbsorpVisibleOut;
+        thisConstruct.OutsideAbsorpSolar = mat->AbsorpSolarOut;
     }
 
     thisConstruct.TotSolidLayers = 0;
@@ -740,19 +740,20 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         }
         if (InsideMaterNum != 0) {
             auto const *thisInsideMaterial = s_mat->materials(InsideMaterNum);
-            thisConstruct.InsideAbsorpVis = thisInsideMaterial->AbsorpVisible;
-            thisConstruct.InsideAbsorpSolar = thisInsideMaterial->AbsorpSolar;
+            thisConstruct.InsideAbsorpVis = thisInsideMaterial->AbsorpVisibleIn;
+            thisConstruct.InsideAbsorpSolar = thisInsideMaterial->AbsorpSolarIn;
+            thisConstruct.InsideAbsorpThermal = thisInsideMaterial->AbsorpThermalIn;
         }
 
         if ((matOutside->group == Material::Group::Glass) || (matOutside->group == Material::Group::GlassSimple)) { // Glass
             thisConstruct.OutsideAbsorpThermal = matOutside->AbsorpThermalFront;
         } else { // Exterior shade, blind or screen
-            thisConstruct.OutsideAbsorpThermal = matOutside->AbsorpThermal;
+            thisConstruct.OutsideAbsorpThermal = matOutside->AbsorpThermalOut;
         }
 
     } else { // Opaque surface
-        thisConstruct.InsideAbsorpThermal = matInside->AbsorpThermal;
-        thisConstruct.OutsideAbsorpThermal = matOutside->AbsorpThermal;
+        thisConstruct.InsideAbsorpThermal = matInside->AbsorpThermalIn;
+        thisConstruct.OutsideAbsorpThermal = matOutside->AbsorpThermalOut;
     }
 
     thisConstruct.OutsideRoughness = matOutside->Roughness;
@@ -930,7 +931,11 @@ Real64 ComputeNominalUwithConvCoeffs(EnergyPlusData &state,
         0.0,       // Detached_B
         0.0,       // Detached_F
         0.1197548, // Window
+        0.1197548, // FixedWindow
+        0.1197548, // OperableWindow
+        0.1197548, // Skylight
         0.1197548, // GlassDoor
+        0.1197548, // OverheadDoor
         0.1197548, // Door
         0.0,       // Shading
         0.0,       // Overhang

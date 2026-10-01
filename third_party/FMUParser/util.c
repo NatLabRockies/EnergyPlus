@@ -113,7 +113,7 @@ char *getTmpPath(const char *nam, size_t length)
 /// Set the mode in debug so that the debug information will be printed
 ///
 //////////////////////////////////////////////////////////////////////////////
-void setDebug()
+void setDebug(void)
 {
     debug = 1;
 }

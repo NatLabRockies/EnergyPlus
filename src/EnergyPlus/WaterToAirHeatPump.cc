@@ -1146,10 +1146,10 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideAirOutletEnth;     // Load Side Outlet Enthalpy [J/kg]
         Real64 EffectiveSurfaceTemp;      // Effective Surface Temperature [C]
         Real64 EffectiveSatEnth;          // Saturated Enthalpy of Air Corresponding to the Effective Surface Temperature [J/kg]
-        Real64 QSource;                   // Source Side Heat Transfer Rate [W]
-        Real64 QLoadTotal;                // Load Side Total Heat Transfer Rate [W]
-        Real64 QSensible;                 // Load Side Sensible Heat Transfer Rate [W]
-        Real64 Power;                     // Power Consumption [W]
+        Real64 QSource = 0.0;             // Source Side Heat Transfer Rate [W]
+        Real64 QLoadTotal = 0.0;          // Load Side Total Heat Transfer Rate [W]
+        Real64 QSensible = 0.0;           // Load Side Sensible Heat Transfer Rate [W]
+        Real64 Power = 0.0;               // Power Consumption [W]
         Real64 EvapTemp;                  // Evaporating Temperature [C]
         Real64 ANTUWET;                   // Number of Transfer Unit for Wet Condition
         Real64 EffectWET;                 // Load Side Heat Exchanger Effectiveness
@@ -1159,18 +1159,18 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideTemp;              // Load Side Saturated Refrigerant Temperature [C]
         Real64 SourceSidePressure;        // Source Side Saturated Refrigerant Pressure [Pa]
         Real64 LoadSidePressure;          // Load Side Saturated Refrigerant Pressure [Pa]
-        Real64 SuctionPr;                 // Compressor Suction Pressure [Pa]
-        Real64 DischargePr;               // Compressor Discharge Pressure [Pa]
+        Real64 SuctionPr = 0.0;           // Compressor Suction Pressure [Pa]
+        Real64 DischargePr = 0.0;         // Compressor Discharge Pressure [Pa]
         Real64 CompressInletTemp;         // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 MassRef;                   // Mass Flow Rate of Refrigerant [kg/s]
+        Real64 MassRef = 0.0;             // Mass Flow Rate of Refrigerant [kg/s]
         Real64 SourceSideOutletEnth;      // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
         Real64 LoadSideOutletEnth;        // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
         Real64 CpAir;                     // Specific Heat of Air [J/kg_C]
         Real64 SuperHeatEnth;             // Enthalpy of the Superheated Refrigerant [J/kg]
-        Real64 CompSuctionTemp1;          // Guess of the Temperature of the Refrigerant Entering the Compressor #1 [C]
-        Real64 CompSuctionTemp2;          // Guess of the Temperature of the Refrigerant Entering the Compressor #2 [C]
+        Real64 CompSuctionTemp1 = 0.0;    // Guess of the Temperature of the Refrigerant Entering the Compressor #1 [C]
+        Real64 CompSuctionTemp2 = 0.0;    // Guess of the Temperature of the Refrigerant Entering the Compressor #2 [C]
         Real64 CompSuctionEnth;           // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
-        Real64 CompSuctionDensity;        // Density of the Refrigerant Entering the Compressor [kg/m3]
+        Real64 CompSuctionDensity = 0.0;  // Density of the Refrigerant Entering the Compressor [kg/m3]
         Real64 CompSuctionSatTemp;        // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
         bool LatDegradModelSimFlag;       // Latent degradation model simulation flag
         bool StillSimulatingFlag;         // Final Simulation Flag
@@ -1621,35 +1621,35 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideAirOutletEnth; // Load Side Outlet Enthalpy [J/kg]
         Real64 CpAir;                 // Specific Heat of Air [J/kg_C]
         Real64 DegradFactor;          // Degradation Factor [~]
-        Real64 QSource;               // Source Side Heat Transfer Rate [W]
-        Real64 QLoadTotal;            // Load Side Heat Transfer Rate [W]
-        Real64 Power;                 // Power Consumption [W]
+        Real64 QSource = 0.0;         // Source Side Heat Transfer Rate [W]
+        Real64 QLoadTotal = 0.0;      // Load Side Heat Transfer Rate [W]
+        Real64 Power = 0.0;           // Power Consumption [W]
 
-        Real64 SourceSideEffect;     // Source Side Heat Exchanger Effectiveness
-        Real64 SourceSideTemp;       // Source Side Saturated Refrigerant Temperature [C]
-        Real64 LoadSideTemp;         // Load Side Saturated Refrigerant Temperature [C]
-        Real64 SourceSidePressure;   // Source Side Saturated Refrigerant Pressure [Pa]
-        Real64 LoadSidePressure;     // Load Side Saturated Refrigerant Pressure [Pa]
-        Real64 SuctionPr;            // Compressor Suction Pressure [Pa]
-        Real64 DischargePr;          // Compressor Discharge Pressure [Pa]
-        Real64 CompressInletTemp;    // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 MassRef;              // Mass Flow Rate of Refrigerant [kg/s]
-        Real64 SourceSideOutletEnth; // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
-        Real64 LoadSideOutletEnth;   // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
-        Real64 SuperHeatEnth;        // Enthalpy of the Superheated Refrigerant [J/kg]
-        Real64 CompSuctionTemp1;     // Guess of the Temperature of the Refrigerant Entering the
+        Real64 SourceSideEffect;       // Source Side Heat Exchanger Effectiveness
+        Real64 SourceSideTemp;         // Source Side Saturated Refrigerant Temperature [C]
+        Real64 LoadSideTemp;           // Load Side Saturated Refrigerant Temperature [C]
+        Real64 SourceSidePressure;     // Source Side Saturated Refrigerant Pressure [Pa]
+        Real64 LoadSidePressure;       // Load Side Saturated Refrigerant Pressure [Pa]
+        Real64 SuctionPr = 0.0;        // Compressor Suction Pressure [Pa]
+        Real64 DischargePr = 0.0;      // Compressor Discharge Pressure [Pa]
+        Real64 CompressInletTemp;      // Temperature of the Refrigerant Entering the Compressor [C]
+        Real64 MassRef = 0.0;          // Mass Flow Rate of Refrigerant [kg/s]
+        Real64 SourceSideOutletEnth;   // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
+        Real64 LoadSideOutletEnth;     // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
+        Real64 SuperHeatEnth;          // Enthalpy of the Superheated Refrigerant [J/kg]
+        Real64 CompSuctionTemp1 = 0.0; // Guess of the Temperature of the Refrigerant Entering the
         // Compressor #1 [C]
-        Real64 CompSuctionTemp2; // Guess of the Temperature of the Refrigerant Entering the
+        Real64 CompSuctionTemp2 = 0.0; // Guess of the Temperature of the Refrigerant Entering the
         // Compressor #2 [C]
-        Real64 CompSuctionTemp;    // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 CompSuctionEnth;    // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
-        Real64 CompSuctionDensity; // Density of the Refrigerant Entering the Compressorkg/m3
-        Real64 CompSuctionSatTemp; // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
-        bool StillSimulatingFlag;  // Final Simulation Flag
-        bool Converged;            // Overall convergence Flag
-        int SolFlag;               // Solution flag returned from RegulaFalsi function
-        Real64 LoadResidual;       // loop convergence criteria
-        Real64 SourceResidual;     // loop convergence criteria
+        Real64 CompSuctionTemp;          // Temperature of the Refrigerant Entering the Compressor [C]
+        Real64 CompSuctionEnth;          // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
+        Real64 CompSuctionDensity = 0.0; // Density of the Refrigerant Entering the Compressorkg/m3
+        Real64 CompSuctionSatTemp;       // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
+        bool StillSimulatingFlag;        // Final Simulation Flag
+        bool Converged;                  // Overall convergence Flag
+        int SolFlag;                     // Solution flag returned from RegulaFalsi function
+        Real64 LoadResidual;             // loop convergence criteria
+        Real64 SourceResidual;           // loop convergence criteria
 
         //  LOAD LOCAL VARIABLES FROM DATA STRUCTURE (for code readability)
 
@@ -2093,14 +2093,14 @@ namespace WaterToAirHeatPump {
         Real64 Twet_max; // Maximum allowed value for Twet
         // shut off after compressor cycle off  [s]
 
-        Real64 Ton;     // Coil on time (sec)
-        Real64 Toff;    // Coil off time (sec)
-        Real64 Toffa;   // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
-        Real64 aa;      // Intermediate variable
-        Real64 To1;     // Intermediate variable (first guess at To). To = time to the start of moisture removal
-        Real64 To2;     // Intermediate variable (second guess at To). To = time to the start of moisture removal
-        Real64 Error;   // Error for iteration (DO) loop
-        Real64 LHRmult; // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
+        Real64 Ton;       // Coil on time (sec)
+        Real64 Toff;      // Coil off time (sec)
+        Real64 Toffa;     // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
+        Real64 aa;        // Intermediate variable
+        Real64 To1;       // Intermediate variable (first guess at To). To = time to the start of moisture removal
+        Real64 To2 = 0.0; // Intermediate variable (second guess at To). To = time to the start of moisture removal
+        Real64 Error;     // Error for iteration (DO) loop
+        Real64 LHRmult;   // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
 
         //  No moisture evaporation (latent degradation) occurs for runtime fraction of 1.0
         //  All latent degradation model parameters cause divide by 0.0 if not greater than 0.0
@@ -2270,7 +2270,7 @@ namespace WaterToAirHeatPump {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -2321,7 +2321,7 @@ namespace WaterToAirHeatPump {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // Obtains and Allocates WatertoAirHP related parameters from input file
         if (state.dataWaterToAirHeatPump->GetCoilsInputFlag) { // First time subroutine has been entered
@@ -2360,7 +2360,7 @@ namespace WaterToAirHeatPump {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // Obtains and Allocates WatertoAirHP related parameters from input file
         if (state.dataWaterToAirHeatPump->GetCoilsInputFlag) { // First time subroutine has been entered

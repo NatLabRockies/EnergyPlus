@@ -423,7 +423,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -450,7 +450,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -493,7 +493,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -536,7 +536,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
         virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt, sqlite3_stmt *subInsertStmt);
 
     private:
@@ -557,7 +557,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -582,7 +582,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -623,7 +623,7 @@ private:
         }
 
         // only inserts construction
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
         // inserts construction and construction layers
         virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt, sqlite3_stmt *subInsertStmt);
 
@@ -655,7 +655,7 @@ private:
             {
             }
 
-            virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+            bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
         private:
             int const &constructNumber;
@@ -681,7 +681,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -716,7 +716,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -756,7 +756,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -786,7 +786,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -816,7 +816,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -846,7 +846,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -876,7 +876,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -907,7 +907,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -935,7 +935,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -957,7 +957,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;
@@ -979,7 +979,7 @@ private:
         {
         }
 
-        virtual bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
+        bool insertIntoSQLite(sqlite3_stmt *insertStmt) override;
 
     private:
         int const number;

@@ -256,9 +256,9 @@ public:
         }
     }
 
-    static void addPluginGlobal(EnergyPlus::EnergyPlusData &state, std::string const &varName)
+    void addPluginGlobal(std::string const &varName)
     {
-        state.dataPluginManager->pluginManager->addGlobalVariable(state, varName);
+        this->state->dataPluginManager->pluginManager->addGlobalVariable(*this->state, varName);
     }
 
     void addTrendWithNewGlobal(std::string const &newGlobalVarName, std::string const &trendName, int numTrendValues) const
@@ -294,7 +294,7 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestListAllDataInCSV)
     this->setupActuatorsOnceAllAreRequested();
     this->preRequestInternalVariable("Floor Area", "Zone 1", 6.02e23);
     this->setupInternalVariablesOnceAllAreRequested();
-    this->addPluginGlobal(*state, "Plugin_Global_Var_Name");
+    this->addPluginGlobal("Plugin_Global_Var_Name");
     this->addTrendWithNewGlobal("NewGlobalVarHere", "Trend 1", 3);
     char *charCsvDataFull = listAllAPIDataCSV((void *)this->state);
     std::string csvData = std::string(charCsvDataFull);

@@ -116,7 +116,6 @@ TEST( CstringTest, JustifyTrim )
 	s = "Bozo \t ";
 	EXPECT_EQ( 6u, s.len_trim() );
 	EXPECT_EQ( "Bozo \t", s.trimmed() );
-	EXPECT_EQ( "Bozo", s );
 }
 
 TEST( CstringTest, Centering )

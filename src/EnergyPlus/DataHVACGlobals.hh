@@ -417,19 +417,6 @@ namespace HVAC {
 
     int constexpr MaxSpeedLevels = 10;
 
-    struct ComponentSetPtData
-    {
-        // Members
-        std::string EquipmentType;
-        std::string EquipmentName;
-        int NodeNumIn = 0;
-        int NodeNumOut = 0;
-        Real64 EquipDemand = 0.0;
-        Real64 DesignFlowRate = 0.0;
-        std::string HeatOrCool;
-        int OpType = 0;
-    };
-
     // Compressor operation
     enum class CompressorOp
     {
@@ -443,7 +430,6 @@ namespace HVAC {
 struct HVACGlobalsData : BaseGlobalStruct
 {
     // Object Data
-    Array1D<HVAC::ComponentSetPtData> CompSetPtEquip;
 
     // For multispeed heat pump only
     Real64 MSHPMassFlowRateLow = 0.0;       // Mass flow rate at low speed
@@ -457,8 +443,9 @@ struct HVACGlobalsData : BaseGlobalStruct
     Real64 deviationFromSetPtThresholdHtg = -0.2; // heating threshold for reporting setpoint deviation
     Real64 deviationFromSetPtThresholdClg = 0.2;  // cooling threshold for reporting setpoint deviation
 
-    bool SimAirLoopsFlag = false;           // True when the air loops need to be (re)simulated
-    bool SimElecCircuitsFlag = false;       // True when electic circuits need to be (re)simulated
+    bool SimAirLoopsFlag = false;     // True when the air loops need to be (re)simulated
+    bool SimElecCircuitsFlag = false; // True when electic circuits need to be (re)simulated
+    bool PVSurfaceHeatBalanceResimFlag = false;
     bool SimPlantLoopsFlag = false;         // True when the main plant loops need to be (re)simulated
     bool SimZoneEquipmentFlag = false;      // True when zone equipment components need to be (re)simulated
     bool SimNonZoneEquipmentFlag = false;   // True when non-zone equipment components need to be (re)simulated
@@ -480,8 +467,6 @@ struct HVACGlobalsData : BaseGlobalStruct
     bool UseZoneTimeStepHistory = true;    // triggers use of zone time step history, else system time step history, for ZTM1, ZTMx
     int NumPlantLoops = 0;                 // Number of plant loops specified in simulation
     int NumCondLoops = 0;                  // Number of condenser plant loops specified in simulation
-    int NumElecCircuits = 0;               // Number of electric circuits specified in simulation
-    int NumGasMeters = 0;                  // Number of gas meters specified in simulation
     int NumPrimaryAirSys = 0;              // Number of primary HVAC air systems
     Real64 OnOffFanPartLoadFraction = 1.0; // fan part-load fraction (Fan:OnOff)
     Real64 DXCoilTotalCapacity = 0.0;      // DX coil total cooling capacity (eio report var for HPWHs)
@@ -501,7 +486,6 @@ struct HVACGlobalsData : BaseGlobalStruct
     bool DoSetPointTest = false;        // True one time only for sensed node setpoint test
     bool NightVentOn = false;           // set TRUE in SimAirServingZone if night ventilation is happening
 
-    int NumTempContComps = 0;
     Real64 HPWHInletDBTemp = 0.0;     // Used by curve objects when calculating DX coil performance for HEAT PUMP:WATER HEATER
     Real64 HPWHInletWBTemp = 0.0;     // Used by curve objects when calculating DX coil performance for HEAT PUMP:WATER HEATER
     Real64 HPWHCrankcaseDBTemp = 0.0; // Used for HEAT PUMP:WATER HEATER crankcase heater ambient temperature calculations

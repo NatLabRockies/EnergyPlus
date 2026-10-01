@@ -1045,7 +1045,7 @@ namespace HybridEvapCoolingModel {
         return averagedVal;
     }
 
-    Real64 Model::CalculatePartRuntimeFraction(Real64 MinOA_Msa,
+    Real64 Model::CalculatePartRuntimeFraction(Real64 t_MinOA_Msa,
                                                Real64 Mvent,
                                                Real64 RequestedCoolingLoad,
                                                Real64 RequestedHeatingLoad,
@@ -1078,22 +1078,21 @@ namespace HybridEvapCoolingModel {
         Real64 PLHumidRatio, PLDehumidRatio, PLVentRatio, PLSensibleCoolingRatio, PLSensibleHeatingRatio, PartRuntimeFraction;
         PLHumidRatio = PLDehumidRatio = PLVentRatio = PLSensibleCoolingRatio = PLSensibleHeatingRatio = 0;
 
-        if (Mvent > 0) {
-            PLVentRatio = MinOA_Msa / Mvent;
+        if (VentilationRequested && Mvent > 0) {
+            PLVentRatio = t_MinOA_Msa / Mvent;
         }
         PartRuntimeFraction = PLVentRatio;
 
-        if (SensibleRoomORZone > 0) {
+        if (CoolingRequested && SensibleRoomORZone > 0) {
             PLSensibleCoolingRatio = std::abs(RequestedCoolingLoad) / std::abs(SensibleRoomORZone);
         }
         if (PLSensibleCoolingRatio > PartRuntimeFraction) {
             PartRuntimeFraction = PLSensibleCoolingRatio;
         }
 
-        if (SensibleRoomORZone < 0) {
+        if (HeatingRequested && SensibleRoomORZone < 0) {
             PLSensibleHeatingRatio = std::abs(RequestedHeatingLoad) / std::abs(SensibleRoomORZone);
         }
-
         if (PLSensibleHeatingRatio > PartRuntimeFraction) {
             PartRuntimeFraction = PLSensibleHeatingRatio;
         }
@@ -1101,7 +1100,6 @@ namespace HybridEvapCoolingModel {
         if (RequestedDehumidificationLoad > 0) {
             PLDehumidRatio = std::abs(RequestedDehumidificationLoad) / std::abs(LatentRoomORZone);
         }
-
         if (PLDehumidRatio > PartRuntimeFraction) {
             PartRuntimeFraction = PLDehumidRatio;
         }
@@ -1193,13 +1191,15 @@ namespace HybridEvapCoolingModel {
         bool DidWeMeetLoad = false;
         bool DidWeMeetHumidification = false;
         bool DidWePartlyMeetLoad = false;
+        bool DidWeMeetVentilation = false;
         Real64 OptimalSetting_RunFractionTotalFuel = IMPLAUSIBLE_POWER;
         Real64 Tma;
         Real64 Wma;
         Real64 Hsa;
         Real64 Hma;
-        Real64 PreviousMaxiumConditioningOutput = 0;
-        Real64 PreviousMaxiumHumidOrDehumidOutput = 0;
+        Real64 PreviousMaximumConditioningOutput = 0;
+        Real64 PreviousMaximumHumidOrDehumidOutput = 0;
+        Real64 PreviousMaximumSupplyFanElectricPower = IMPLAUSIBLE_POWER;
         std::string ObjectID = Name.c_str();
         if (StepIns.RHosa > 1) {
             ShowSevereError(
@@ -1328,11 +1328,8 @@ namespace HybridEvapCoolingModel {
                                 CandidateSetting.Unscaled_Supply_Air_Mass_Flow_Rate = UnscaledMsa;
                                 CandidateSetting.ScaledSupply_Air_Mass_Flow_Rate = ScaledMsa;
 
-                                // If no load is requested but ventilation is required, set the supply air mass flow rate to the minimum of the
-                                // required ventilation flow rate and the maximum supply air flow rate
                                 if (!CoolingRequested && !HeatingRequested && !DehumidificationRequested && !HumidificationRequested) {
-                                    CandidateSetting.ScaledSupply_Air_Mass_Flow_Rate =
-                                        min(MinOA_Msa, CandidateSetting.ScaledSupply_Air_Mass_Flow_Rate);
+                                    // If no load is requested but ventilation is required, set the supply air temp to the outside air temp
                                     // add fan heat if not included in lookup tables for supply air stream
                                     Tsa = StepIns.Tosa + FanHeatTemp;
                                 }
@@ -1453,33 +1450,32 @@ namespace HybridEvapCoolingModel {
                 thisSetting.oMode.CalculateCurveVal(state, StepIns.Tosa, Wosa, StepIns.Tra, Wra, UnscaledMsa, OSAF, WATER_USE);
 
             // Calculate partload fraction required to meet all requirements
-            // Fraction can be above 1 meaning its not able to do it completely in a time step
-            Real64 PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
-                                                                      thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
-                                                                      StepIns.RequestedCoolingLoad,
-                                                                      StepIns.RequestedHeatingLoad,
-                                                                      SensibleRoomORZone,
-                                                                      StepIns.ZoneDehumidificationLoad,
-                                                                      StepIns.ZoneMoistureLoad,
-                                                                      latentRoomORZone);
+            thisSetting.Runtime_Fraction = CalculatePartRuntimeFraction(MinOA_Msa,
+                                                                        thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
+                                                                        StepIns.RequestedCoolingLoad,
+                                                                        StepIns.RequestedHeatingLoad,
+                                                                        SensibleRoomORZone,
+                                                                        StepIns.ZoneDehumidificationLoad,
+                                                                        StepIns.ZoneMoistureLoad,
+                                                                        latentRoomORZone);
 
             Real64 RunFractionTotalFuel;
             switch (ObjectiveFunction) {
             default:
             case ObjectiveFunctionType::ElectricityUse:
-                RunFractionTotalFuel = thisSetting.ElectricalPower * PartRuntimeFraction;
+                RunFractionTotalFuel = (thisSetting.ElectricalPower * thisSetting.Runtime_Fraction) +
+                                       (thisSetting.SupplyFanElectricPower * thisSetting.Runtime_Fraction);
                 break;
             case ObjectiveFunctionType::SecondFuelUse:
-                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::ThirdFuelUse:
-                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             case ObjectiveFunctionType::WaterUse:
-                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * PartRuntimeFraction;
+                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * thisSetting.Runtime_Fraction;
                 break;
             }
-            thisSetting.Runtime_Fraction = PartRuntimeFraction; //
 
             if (Conditioning_load_met && Humidification_load_met) {
                 // store best performing mode
@@ -1495,24 +1491,33 @@ namespace HybridEvapCoolingModel {
 
                     if (Conditioning_load_met) {
                         DidWeMeetLoad = true;
-                        if (HumidificationRequested && (latentRoomORZone < PreviousMaxiumHumidOrDehumidOutput)) {
+                        if (HumidificationRequested && (latentRoomORZone < PreviousMaximumHumidOrDehumidOutput)) {
                             store_best_attempt = true;
                         }
-                        if (DehumidificationRequested && (latentRoomORZone > PreviousMaxiumHumidOrDehumidOutput)) {
+                        if (DehumidificationRequested && (latentRoomORZone > PreviousMaximumHumidOrDehumidOutput)) {
                             store_best_attempt = true;
                         }
                         if (store_best_attempt) {
-                            PreviousMaxiumHumidOrDehumidOutput = latentRoomORZone;
+                            PreviousMaximumHumidOrDehumidOutput = latentRoomORZone;
                         }
                     } else {
-                        if (CoolingRequested && (SensibleRoomORZone > PreviousMaxiumConditioningOutput)) {
+                        if (CoolingRequested && (SensibleRoomORZone > PreviousMaximumConditioningOutput)) {
                             store_best_attempt = true;
                         }
-                        if (HeatingRequested && (SensibleRoomORZone < PreviousMaxiumConditioningOutput)) {
+                        if (HeatingRequested && (SensibleRoomORZone < PreviousMaximumConditioningOutput)) {
                             store_best_attempt = true;
                         }
                         if (store_best_attempt) {
-                            PreviousMaxiumConditioningOutput = SensibleRoomORZone;
+                            PreviousMaximumConditioningOutput = SensibleRoomORZone;
+                        } else if (VentilationRequested && !DidWePartlyMeetLoad) {
+                            // If no load is requested but ventilation is required, find the setting that uses the least supply fan power.
+                            // Note that settings that meet partial load still take priority, so use logic separate from store_best_attempt.
+                            Real64 RunFractionSupplyFanElectricPower = thisSetting.SupplyFanElectricPower * thisSetting.Runtime_Fraction;
+                            if (RunFractionSupplyFanElectricPower < PreviousMaximumSupplyFanElectricPower) {
+                                PreviousMaximumSupplyFanElectricPower = RunFractionSupplyFanElectricPower;
+                                OptimalSetting = thisSetting;
+                                DidWeMeetVentilation = true;
+                            }
                         }
                     }
                     if (store_best_attempt) {
@@ -1542,6 +1547,7 @@ namespace HybridEvapCoolingModel {
             ErrorCode = 0;
             // save the optimal setting in the
             CurrentOperatingSettings[0] = OptimalSetting;
+            PrimaryMode = OptimalSetting.Mode;
             PrimaryModeRuntimeFraction = OptimalSetting.Runtime_Fraction;
             oStandBy.Runtime_Fraction = (1 - PrimaryModeRuntimeFraction);
             if (oStandBy.Runtime_Fraction < 0) {
@@ -1549,18 +1555,22 @@ namespace HybridEvapCoolingModel {
             }
             CurrentOperatingSettings[1] = oStandBy;
         } else {
-            // if we partly met the load then do the best we can and run full out in that optimal setting.
-            if (DidWePartlyMeetLoad) {
+            // if we partly met the load or met the ventilation then do the best we can
+            if (DidWePartlyMeetLoad || DidWeMeetVentilation) {
                 ErrorCode = 0;
                 count_DidWeNotMeetLoad++;
                 if (OptimalSetting.ElectricalPower == IMPLAUSIBLE_POWER) {
                     ShowWarningError(state, "Model was not able to provide cooling for a time step, called in HybridEvapCooling:dostep");
                     OptimalSetting.ElectricalPower = 0;
                 }
-                OptimalSetting.Runtime_Fraction = 1;
                 CurrentOperatingSettings[0] = OptimalSetting;
                 PrimaryMode = OptimalSetting.Mode;
-                PrimaryModeRuntimeFraction = 1;
+                PrimaryModeRuntimeFraction = OptimalSetting.Runtime_Fraction;
+                oStandBy.Runtime_Fraction = (1 - PrimaryModeRuntimeFraction);
+                if (oStandBy.Runtime_Fraction < 0) {
+                    oStandBy.Runtime_Fraction = 0;
+                }
+                CurrentOperatingSettings[1] = oStandBy;
             }
             // if we didn't even partially meet the load make sure the operational settings are just the standby mode.
             else {

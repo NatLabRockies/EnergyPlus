@@ -74,6 +74,80 @@ namespace MixedAir {
     // Data
     // MODULE PARAMETER DEFINITIONS
 
+    // the equipment list object has its own subset of E+ components that are valid, this covers that list
+    enum class ValidEquipListType
+    {
+        Invalid = -1,
+        OutdoorAirMixer,
+        FanConstantVolume,
+        FanVariableVolume,
+        FanSystemModel,
+        FanComponentModel,
+        CoilCoolingWater,
+        CoilHeatingWater,
+        CoilHeatingSteam,
+        CoilCoolingWaterDetailedGeometry,
+        CoilHeatingElectric,
+        CoilHeatingFuel,
+        CoilSystemCoolingWater,
+        CoilSystemCoolingWaterHeatExchangerAssisted,
+        CoilSystemCoolingDX,
+        CoilSystemHeatingDX,
+        AirLoopHVACUnitarySystem,
+        CoilUserDefined,
+        HeatExchangerAirToAirFlatPlate,
+        HeatExchangerAirToAirSensibleAndLatent,
+        HeatExchangerDesiccantBalancedFlow,
+        DehumidifierDesiccantNoFans,
+        DehumidifierDesiccantSystem,
+        HumidifierSteamElectric,
+        HumidifierSteamGas,
+        SolarCollectorUnglazedTranspired,
+        SolarCollectorFlatPlatePhotovoltaicThermal,
+        EvaporativeCoolerDirectCeldekPad,
+        EvaporativeCoolerIndirectCeldekPad,
+        EvaporativeCoolerIndirectWetCoil,
+        EvaporativeCoolerIndirectResearchSpecial,
+        EvaporativeCoolerDirectResearchSpecial,
+        ZoneHVACTerminalUnitVariableRefrigerantFlow,
+        Num
+    };
+
+    constexpr std::array<std::string_view, static_cast<int>(ValidEquipListType::Num)> validEquipNamesUC = {
+        "OUTDOORAIR:MIXER",
+        "FAN:CONSTANTVOLUME",
+        "FAN:VARIABLEVOLUME",
+        "FAN:SYSTEMMODEL",
+        "FAN:COMPONENTMODEL",
+        "COIL:COOLING:WATER",
+        "COIL:HEATING:WATER",
+        "COIL:HEATING:STEAM",
+        "COIL:COOLING:WATER:DETAILEDGEOMETRY",
+        "COIL:HEATING:ELECTRIC",
+        "COIL:HEATING:FUEL",
+        "COILSYSTEM:COOLING:WATER",
+        "COILSYSTEM:COOLING:WATER:HEATEXCHANGERASSISTED",
+        "COILSYSTEM:COOLING:DX",
+        "COILSYSTEM:HEATING:DX",
+        "AIRLOOPHVAC:UNITARYSYSTEM",
+        "COIL:USERDEFINED",
+        "HEATEXCHANGER:AIRTOAIR:FLATPLATE",
+        "HEATEXCHANGER:AIRTOAIR:SENSIBLEANDLATENT",
+        "HEATEXCHANGER:DESICCANT:BALANCEDFLOW",
+        "DEHUMIDIFIER:DESICCANT:NOFANS",
+        "DEHUMIDIFIER:DESICCANT:SYSTEM",
+        "HUMIDIFIER:STEAM:ELECTRIC",
+        "HUMIDIFIER:STEAM:GAS",
+        "SOLARCOLLECTOR:UNGLAZEDTRANSPIRED",
+        "SOLARCOLLECTOR:FLATPLATE:PHOTOVOLTAICTHERMAL",
+        "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
+        "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD",
+        "EVAPORATIVECOOLER:INDIRECT:WETCOIL",
+        "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL",
+        "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL",
+        "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW",
+    };
+
     enum class LockoutType
     {
         Invalid = -1,
@@ -199,7 +273,6 @@ namespace MixedAir {
         Real64 RelLatentLossRate = 0.0;
         Real64 RelTotalLossRate = 0.0;
 
-        int ZoneEquipZoneNum = 0;
         std::string VentilationMechanicalName;   // Name of ventilation:mechanical object used for DCV
         int VentMechObjectNum = 0;               // Index to VENTILATION:MECHANICAL object for this controller
         int HumidistatZoneNum = 0;               // zone number where humidistat is located
@@ -310,11 +383,10 @@ namespace MixedAir {
     {
         // Members
         std::string Name;
-        int MixerIndex = 0; // Set on first call...
-        int MixNode = 0;    // Outlet node - mixed air
-        int InletNode = 0;  // Inlet node for outside air stream (Nov. 2004 BTG was OANode )
-        int RelNode = 0;    // Outlet node - relief air
-        int RetNode = 0;    // Inlet node - return air
+        int MixNode = 0;   // Outlet node - mixed air
+        int InletNode = 0; // Inlet node for outside air stream (Nov. 2004 BTG was OANode )
+        int RelNode = 0;   // Outlet node - relief air
+        int RetNode = 0;   // Inlet node - return air
         Real64 MixTemp = 0.0;
         Real64 MixHumRat = 0.0;
         Real64 MixEnthalpy = 0.0;
@@ -451,6 +523,8 @@ namespace MixedAir {
 
     int GetOACompListNumber(EnergyPlusData &state, int OASysNum); // OA Sys Number
 
+    void GetOACompNodeNumbers(EnergyPlusData &state, int const OASysNum, bool &errorsFound); // OA Sys Number
+
     std::string GetOACompName(EnergyPlusData &state,
                               int OASysNum, // OA Sys Number
                               int InListNum // In-list Number
@@ -496,7 +570,6 @@ struct MixedAirData : BaseGlobalStruct
     std::unordered_map<std::string, std::string> OAControllerUniqueNames;
     std::string CompType;
     std::string CompName;
-    std::string CtrlName;
     Array1D_bool OAControllerMyOneTimeFlag;
     Array1D_bool OAControllerMyEnvrnFlag;
     Array1D_bool OAControllerMySizeFlag;

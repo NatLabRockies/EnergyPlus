@@ -1166,7 +1166,7 @@ void CoolingPanelParams::CalcCoolingPanel(EnergyPlusData &state, int const Cooli
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     Real64 RadHeat;
     Real64 CoolingPanelCool;
-    Real64 waterMassFlowRate;
+    Real64 waterMassFlowRate = 0.0;
     Real64 CapacitanceWater;
     Real64 NTU;
     Real64 Effectiveness;

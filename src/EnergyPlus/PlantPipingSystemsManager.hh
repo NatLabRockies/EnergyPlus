@@ -220,7 +220,6 @@ namespace PlantPipingSystemsManager {
         Real64 Temperature_PrevIteration = 0.0; // C
         Real64 Temperature_PrevTimeStep = 0.0;  // C
         Real64 Beta = 0.0;                      // K/W
-        BaseThermalPropertySet Properties;
 
         // Default Constructor
         BaseCell() = default;
@@ -247,6 +246,7 @@ namespace PlantPipingSystemsManager {
         Real64 RadialCentroid = 0.0;
         Real64 InnerRadius = 0.0;
         Real64 OuterRadius = 0.0;
+        BaseThermalPropertySet Properties;
 
         // Default Constructor
         RadialCellInformation() = default;
@@ -463,6 +463,7 @@ namespace PlantPipingSystemsManager {
         CellType cellType = CellType::Invalid;
         std::map<Direction, NeighborInformation> NeighborInfo;
         CartesianPipeCellInformation PipeCellData;
+        BaseThermalPropertySet Properties;
 
         // Default Constructor
         CartesianCell() = default;
@@ -896,15 +897,15 @@ namespace PlantPipingSystemsManager {
                               bool PartitionsExist,
                               ObjexxFCL::Optional_int BasementWallXIndex = _,
                               ObjexxFCL::Optional_int BasementFloorYIndex = _,
-                              ObjexxFCL::Optional_int XIndex = _,
-                              ObjexxFCL::Optional_int XWallIndex = _,
-                              ObjexxFCL::Optional_int InsulationXIndex = _,
-                              ObjexxFCL::Optional_int YIndex = _,
-                              ObjexxFCL::Optional_int YFloorIndex = _,
-                              ObjexxFCL::Optional_int InsulationYIndex = _,
-                              ObjexxFCL::Optional_int ZIndex = _,
-                              ObjexxFCL::Optional_int ZWallIndex = _,
-                              ObjexxFCL::Optional_int InsulationZIndex = _);
+                              ObjexxFCL::Optional_int t_XIndex = _,
+                              ObjexxFCL::Optional_int t_XWallIndex = _,
+                              ObjexxFCL::Optional_int t_InsulationXIndex = _,
+                              ObjexxFCL::Optional_int t_YIndex = _,
+                              ObjexxFCL::Optional_int t_YFloorIndex = _,
+                              ObjexxFCL::Optional_int t_InsulationYIndex = _,
+                              ObjexxFCL::Optional_int t_ZIndex = _,
+                              ObjexxFCL::Optional_int t_ZWallIndex = _,
+                              ObjexxFCL::Optional_int t_InsulationZIndex = _);
 
         void createCellArray(std::vector<Real64> const &XBoundaryPoints,
                              std::vector<Real64> const &YBoundaryPoints,

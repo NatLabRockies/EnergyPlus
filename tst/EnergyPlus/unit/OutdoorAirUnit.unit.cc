@@ -105,7 +105,6 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_AutoSize)
     int CurZoneNum(1);             // index to zone
     Real64 SysOutputProvided(0.0); // function returns sensible capacity [W]
     Real64 LatOutputProvided(0.0); // function returns latent capacity [W]
-    int ZoneInletNode(0);
 
     std::string const idf_objects = delimited_string({
         "Output:Diagnostics, DisplayExtraWarnings;",
@@ -328,7 +327,7 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_AutoSize)
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesTemp = 13.1;                   // 55.58 F
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesHumRat = 0.009297628698818194; // humrat at 12.77777 C db / 12.6 C wb
 
-    ZoneInletNode = OutdoorAirUnit::GetOutdoorAirUnitZoneInletNode(*state, OAUnitNum);
+    OutdoorAirUnit::GetOutdoorAirUnitZoneInletNode(*state, OAUnitNum);
 
     // schedule values will get reset to 0 if initialized before GetInput
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0;    // enable the VRF condenser
@@ -361,8 +360,19 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_AutoSize)
     EXPECT_DOUBLE_EQ(SAFanPower, 75.0);
     EXPECT_DOUBLE_EQ(EAFanPower, 75.0);
     EXPECT_DOUBLE_EQ(SAFanPower + EAFanPower, state->dataOutdoorAirUnit->OutAirUnit(OAUnitNum).ElecFanRate);
-    compare_err_stream_substring("", true);
-    EXPECT_TRUE(compare_err_stream("", true));
+    std::string const sizing_error_string = delimited_string({
+        "   ** Warning ** SizeDXCoil Coil:Cooling:DX:SingleSpeed ACDXCOIL 1",
+        "   **   ~~~   ** ...Gross Rated Total Cooling Capacity [W] will be limited by the maximum rated volume flow per rated total capacity ratio.",
+        "   **   ~~~   ** ...DX coil volume flow rate [m3/s] = 0.500000",
+        "   **   ~~~   ** ...Requested capacity [W] = 75.000",
+        "   **   ~~~   ** ...Requested flow/capacity ratio [m3/s/W] = 0.00666667",
+        "   **   ~~~   ** ...Maximum flow/capacity ratio [m3/s/W] = 6.04100E-05",
+        "   **   ~~~   ** ...Adjusted capacity [W] = 8276.775",
+        "   ** Warning ** SizeHeatingCoil: : Potential issue with equipment sizing for Coil:Heating:Electric ZONE1OAUHEATINGCOIL",
+        "   **   ~~~   ** ...Rated Total Heating Capacity = 0.00 [W]",
+        "   **   ~~~   ** ...Capacity used to size child component set to 0 [W]",
+    });
+    EXPECT_TRUE(compare_err_stream(sizing_error_string, true));
 
     // #6173
     state->dataOutdoorAirUnit->OutAirUnit(OAUnitNum).ExtAirMassFlow = 0.0;

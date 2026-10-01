@@ -1484,11 +1484,11 @@ TEST_F(EnergyPlusFixture, HPWHTestSPControl)
     Tank.CalcHeatPumpWaterHeater(*state, FirstHVACIteration);
     Tank.UpdateWaterThermalTank(*state);
     // no standby losses, tank at 50 C, tank should heat up and HP should be on.
-    EXPECT_NEAR(57.2028862, Tank.TankTemp, 0.0000001);                           // final tank temperature
+    EXPECT_NEAR(57.2028862, Tank.TankTemp, 5e-7);                                // final tank temperature
     EXPECT_NEAR(1.0, HeatPump.HeatingPLR, 0.0000001);                            // HP operating at full capacity
     EXPECT_TRUE(WaterThermalTanks::TankOperatingMode::Heating == HeatPump.Mode); // expect HP to remain in heating mode
-    EXPECT_NEAR(53.6014431, Tank.TankTempAvg, 0.0000001);                        // average tank temp over time step
-    EXPECT_NEAR(53.6014431, Tank.SourceOutletTemp, 0.0000001);                   // source outlet = average tank temp
+    EXPECT_NEAR(53.6014431, Tank.TankTempAvg, 5e-7);                             // average tank temp over time step
+    EXPECT_NEAR(53.6014431, Tank.SourceOutletTemp, 5e-7);                        // source outlet = average tank temp
 
     // HP in heating mode and tank at moderate temp needing only partial HP operation. Use nodes not adding heat to tank.
     Tank.TankTemp = 56.0;

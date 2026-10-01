@@ -18,7 +18,7 @@ if (${ENABLE_OPENMP})
   endif()
 endif()
 
-target_link_libraries(ConvertInputFormat PRIVATE energyplusparser project_options project_warnings)
+target_link_libraries(ConvertInputFormat PRIVATE cli11 energyplusparser objexx project_options project_warnings)
 
 # See https://en.cppreference.com/w/cpp/filesystem#Notes
 if ((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
@@ -30,7 +30,7 @@ set_target_properties(ConvertInputFormat PROPERTIES FOLDER Auxiliary)
 
 install(TARGETS ConvertInputFormat DESTINATION ./)
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(ConvertInputFormat "." Unspecified)
 endif()

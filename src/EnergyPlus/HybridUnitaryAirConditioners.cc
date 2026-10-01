@@ -133,7 +133,6 @@ void SimZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
                                    CompNum,
                                    CompName,
                                    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
-        return;
     }
     try {
         CalcZoneHybridUnitaryAirConditioners(state, CompNum, ZoneNum, SensibleOutputProvided, LatentOutputProvided);
@@ -144,7 +143,6 @@ void SimZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
                                    CompNum,
                                    CompName,
                                    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
-        return;
     }
     try {
         ReportZoneHybridUnitaryAirConditioners(state, CompNum);
@@ -155,7 +153,6 @@ void SimZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
                                    CompNum,
                                    CompName,
                                    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(CompNum).Name));
-        return;
     }
 }
 
@@ -681,8 +678,8 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             for (int modeIter = 0; modeIter <= Numberofoperatingmodes - 1; ++modeIter) {
                 ErrorsFound = hybridUnitaryAC.ParseMode(state, Alphas, cAlphaFields, Numbers, lAlphaBlanks, lNumericBlanks, cCurrentModuleObject);
                 if (ErrorsFound) {
-                    ShowFatalError(state, std::format("{}: Errors found parsing modes", routineName));
                     ShowContinueError(state, "... Preceding condition causes termination.");
+                    ShowFatalError(state, std::format("{}: Errors found parsing modes", routineName));
                     break;
                 }
             }
@@ -1281,8 +1278,8 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
     }
     Errors = ErrorsFound;
     if (ErrorsFound) {
-        ShowFatalError(state, std::format("{}: Errors found in getting input.", routineName));
         ShowContinueError(state, "... Preceding condition causes termination.");
+        ShowFatalError(state, std::format("{}: Errors found in getting input.", routineName));
     }
 }
 int GetHybridUnitaryACOutAirNode(EnergyPlusData &state, int const CompNum)

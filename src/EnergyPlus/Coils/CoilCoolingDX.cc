@@ -95,7 +95,6 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
     }
 
     ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
-    return nullptr;
 }
 
 int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const &coilName)
@@ -790,11 +789,6 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
     // DataAirLoop::LoopDXCoilRTF = max(this->coolingCoilRuntimeFraction, DXCoil(DXCoilNum).HeatingCoilRuntimeFraction);
     state.dataAirLoop->LoopDXCoilRTF = this->coolingCoilRuntimeFraction;
     state.dataHVACGlobal->DXElecCoolingPower = this->elecCoolingPower;
-    if (this->airLoopNum > 0) {
-        state.dataAirLoop->AirLoopAFNInfo(this->airLoopNum).AFNLoopDXCoilRTF = this->coolingCoilRuntimeFraction;
-        // The original calculation is below, but no heating yet
-        //        max(DXCoil(DXCoilNum).CoolingCoilRuntimeFraction, DXCoil(DXCoilNum).HeatingCoilRuntimeFraction);
-    }
 
     // report out to the coil sizing report if needed
     if (this->reportCoilFinalSizes) {

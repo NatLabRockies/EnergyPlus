@@ -67,39 +67,13 @@
 // EnergyPlus Headers
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/Formatters.hh>
 #include <EnergyPlus/PluginManager.hh>
 #include <EnergyPlus/PythonEngine.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 #if LINK_WITH_PYTHON
-template <> struct std::formatter<PyStatus>
-{
-    // parse is inherited from formatter<string_view>.
-    constexpr auto parse(std::format_parse_context &ctx) -> std::format_parse_context::iterator
-    {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext> auto format(const PyStatus &status, FormatContext &ctx) const
-    {
-        if (PyStatus_Exception(status) == 0) {
-            return ctx.out();
-        }
-        if (PyStatus_IsExit(status) != 0) {
-            return std::format_to(ctx.out(), "Exited with code {}", status.exitcode);
-        }
-        if (PyStatus_IsError(status) != 0) {
-            auto it = ctx.out();
-            it = std::format_to(it, "Fatal Python error: ");
-            if (status.func != nullptr) {
-                it = std::format_to(it, "{}: ", status.func);
-            }
-            it = std::format_to(it, "{}", status.err_msg);
-            return it;
-        }
-        return ctx.out();
-    }
-};
+#    include <EnergyPlus/PythonHelpers.hh>
 #endif
 
 namespace EnergyPlus {
@@ -107,201 +81,6 @@ namespace EnergyPlus {
 namespace Python {
 
 #if LINK_WITH_PYTHON
-
-    void reportPythonError([[maybe_unused]] EnergyPlusData &state)
-    {
-        PyObject *exc_type = nullptr;
-        PyObject *exc_value = nullptr;
-        PyObject *exc_tb = nullptr;
-        PyErr_Fetch(&exc_type, &exc_value, &exc_tb);
-        // Normalizing the exception is needed. Without it, our custom EnergyPlusException go through just fine
-        // but any ctypes built-in exception for eg will have wrong types
-        PyErr_NormalizeException(&exc_type, &exc_value, &exc_tb);
-        PyObject *str_exc_value = PyObject_Repr(exc_value); // Now a unicode object
-        PyObject *pyStr2 = PyUnicode_AsEncodedString(str_exc_value, "utf-8", "Error ~");
-        Py_DECREF(str_exc_value);
-        char *strExcValue = PyBytes_AsString(pyStr2); // NOLINT(hicpp-signed-bitwise)
-        Py_DECREF(pyStr2);
-        EnergyPlus::ShowContinueError(state, "Python error description follows: ");
-        EnergyPlus::ShowContinueError(state, strExcValue);
-
-        // See if we can get a full traceback.
-        // Calls into python, and does the same as capturing the exception in `e`
-        // then `print(traceback.format_exception(e.type, e.value, e.tb))`
-        PyObject *pModuleName = PyUnicode_DecodeFSDefault("traceback");
-        PyObject *pyth_module = PyImport_Import(pModuleName);
-        Py_DECREF(pModuleName);
-
-        if (pyth_module == nullptr) {
-            EnergyPlus::ShowContinueError(state, "Cannot find 'traceback' module in reportPythonError(), this is weird");
-            return;
-        }
-
-        PyObject *pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
-        Py_DECREF(pyth_module); // PyImport_Import returns a new reference, decrement it
-
-        if ((pyth_func != nullptr) || (PyCallable_Check(pyth_func) != 0)) {
-
-            PyObject *pyth_val = PyObject_CallFunction(pyth_func, "OOO", exc_type, exc_value, exc_tb);
-
-            // traceback.format_exception returns a list, so iterate on that
-            if ((pyth_val == nullptr) || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
-                EnergyPlus::ShowContinueError(state, "In reportPythonError(), traceback.format_exception did not return a list.");
-                return;
-            }
-
-            Py_ssize_t numVals = PyList_Size(pyth_val);
-            if (numVals == 0) {
-                EnergyPlus::ShowContinueError(state, "No traceback available");
-                return;
-            }
-
-            EnergyPlus::ShowContinueError(state, "Python traceback follows: ");
-
-            EnergyPlus::ShowContinueError(state, "```");
-
-            for (Py_ssize_t itemNum = 0; itemNum < numVals; itemNum++) {
-                PyObject *item = PyList_GetItem(pyth_val, itemNum);
-                if (PyUnicode_Check(item)) { // NOLINT(hicpp-signed-bitwise) -- something inside Python code causes warning
-                    std::string traceback_line = PyUnicode_AsUTF8(item);
-                    if (!traceback_line.empty() && traceback_line[traceback_line.length() - 1] == '\n') {
-                        traceback_line.erase(traceback_line.length() - 1);
-                    }
-                    EnergyPlus::ShowContinueError(state, std::format(" >>> {}", traceback_line));
-                }
-                // PyList_GetItem returns a borrowed reference, do not decrement
-            }
-
-            EnergyPlus::ShowContinueError(state, "```");
-
-            // PyList_Size returns a borrowed reference, do not decrement
-            Py_DECREF(pyth_val); // PyObject_CallFunction returns new reference, decrement
-        }
-        Py_DECREF(pyth_func); // PyObject_GetAttrString returns a new reference, decrement it
-    }
-
-    void addToPythonPath(EnergyPlusData &state, const fs::path &includePath, bool userDefinedPath)
-    {
-        if (includePath.empty()) {
-            return;
-        }
-
-        // We use generic_string / generic_wstring here, which will always use a forward slash as directory separator even on windows
-        // This doesn't handle the (very strange, IMHO) case were on unix you have backlashes (which are VALID filenames on Unix!)
-        // Could use FileSystem::makeNativePath first to convert the backslashes to forward slashes on Unix
-        PyObject *unicodeIncludePath = nullptr;
-        if constexpr (std::is_same_v<typename fs::path::value_type, wchar_t>) {
-            const std::wstring ws = includePath.generic_wstring();
-            unicodeIncludePath = PyUnicode_FromWideChar(ws.c_str(), static_cast<Py_ssize_t>(ws.size())); // New reference
-        } else {
-            const std::string s = includePath.generic_string();
-            unicodeIncludePath = PyUnicode_FromString(s.c_str()); // New reference
-        }
-        if (unicodeIncludePath == nullptr) {
-            EnergyPlus::ShowFatalError(state, std::format("ERROR converting the path \"{:g}\" for addition to the sys.path in Python", includePath));
-        }
-
-        PyObject *sysPath = PySys_GetObject("path"); // Borrowed reference
-        int const ret = PyList_Insert(sysPath, 0, unicodeIncludePath);
-        Py_DECREF(unicodeIncludePath);
-
-        if (ret != 0) {
-            if (PyErr_Occurred() != nullptr) {
-                reportPythonError(state);
-            }
-            EnergyPlus::ShowFatalError(state, std::format("ERROR adding \"{:g}\" to the sys.path in Python", includePath));
-        }
-
-        if (userDefinedPath) {
-            EnergyPlus::ShowMessage(state, std::format("Successfully added path \"{:g}\" to the sys.path in Python", includePath));
-        }
-
-        // PyRun_SimpleString)("print(' EPS : ' + str(sys.path))");
-    }
-
-    void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
-    {
-        PyStatus status;
-
-        // first pre-config Python so that it can speak UTF-8
-        PyPreConfig preConfig;
-        // This is the other related line that caused Decent CI to start having trouble.  I'm putting it back to
-        // PyPreConfig_InitPythonConfig, even though I think it should be isolated.  Will deal with this after IO freeze.
-        PyPreConfig_InitPythonConfig(&preConfig);
-        // PyPreConfig_InitIsolatedConfig(&preConfig);
-        preConfig.utf8_mode = 1;
-        status = Py_PreInitialize(&preConfig);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, std::format("Could not pre-initialize Python to speak UTF-8... {}", status));
-        }
-
-        PyConfig config;
-        PyConfig_InitIsolatedConfig(&config);
-        config.isolated = 1;
-
-        status = PyConfig_SetBytesString(&config, &config.program_name, PluginManagement::programName);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, std::format("Could not initialize program_name on PyConfig... {}", status));
-        }
-
-        status = PyConfig_Read(&config);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, std::format("Could not read back the PyConfig... {}", status));
-        }
-
-        if constexpr (std::is_same_v<typename fs::path::value_type, wchar_t>) {
-            // PyConfig_SetString copies the wide character string str into *config_str.
-            std::wstring const ws = pathToPythonPackages.generic_wstring();
-            const wchar_t *wcharPath = ws.c_str();
-
-            status = PyConfig_SetString(&config, &config.home, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
-            }
-            status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
-            }
-            config.module_search_paths_set = 1;
-            status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
-            }
-
-        } else {
-            // PyConfig_SetBytesString takes a `const char * str` and decodes str using Py_DecodeLocale() and set the result into *config_str
-            // But we want to avoid doing it three times, so we PyDecodeLocale manually
-            // Py_DecodeLocale can be called because Python has been PreInitialized.
-            wchar_t *wcharPath = Py_DecodeLocale(pathToPythonPackages.generic_string().c_str(), nullptr); // This allocates!
-
-            status = PyConfig_SetString(&config, &config.home, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
-            }
-            status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
-            }
-            config.module_search_paths_set = 1;
-            status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-            if (PyStatus_Exception(status) != 0) {
-                ShowFatalError(state, std::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
-            }
-
-            PyMem_RawFree(wcharPath);
-        }
-
-        // This was Py_InitializeFromConfig(&config), but was giving a seg fault when running inside
-        // another Python instance, for example as part of an API run.  Per the example here:
-        // https://docs.python.org/3/c-api/init_config.html#preinitialize-python-with-pypreconfig
-        // It looks like we don't need to initialize from config again, it should be all set up with
-        // the init calls above, so just initialize and move on.
-        // UPDATE: This worked happily for me on Linux, and also when I build locally on Windows, but not on Decent CI
-        // I suspect a difference in behavior for Python versions.  I'm going to temporarily revert this back to initialize
-        // with config and get IO freeze going, then get back to solving it.
-        // Py_Initialize();
-        Py_InitializeFromConfig(&config);
-    }
 
     PythonEngine::PythonEngine(EnergyPlusData &state) : eplusRunningViaPythonAPI(state.dataPluginManager->eplusRunningViaPythonAPI)
     {
@@ -312,21 +91,8 @@ namespace Python {
         } else {
             programDir = FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(FileSystem::getProgramPath()));
         }
-        fs::path const pathToPythonPackages = programDir / "python_lib";
 
-        initPython(state, pathToPythonPackages);
-
-        // we also need to set an extra import path to find some dynamic library loading stuff, again make it relative to the binary
-        addToPythonPath(state, programDir / "python_lib/lib-dynload", false);
-
-        // now for additional paths:
-        // we'll always want to add the program executable directory to PATH so that Python can find the installed pyenergyplus package
-        // we will then optionally add the current working directory to allow Python to find scripts in the current directory
-        // we will then optionally add the directory of the running IDF to allow Python to find scripts kept next to the IDF
-        // we will then optionally add any additional paths the user specifies on the search paths object
-
-        // so add the executable directory here
-        addToPythonPath(state, programDir, false);
+        EnergyPlus::PythonHelpers::initPython(state, programDir);
 
         PyObject *m = PyImport_AddModule("__main__");
         if (m == nullptr) {

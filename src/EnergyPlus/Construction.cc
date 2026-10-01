@@ -362,8 +362,8 @@ void ConstructionProps::calculateTransferFunction(EnergyPlusData &state, bool &E
                     --this->TempAfterLayer;
                 }
             } else { // These are not adjacent layers and there is a logic flaw here (should not happen)
+                ShowSevereError(state, "This should never happen.  Contact EnergyPlus Support for further assistance.");
                 ShowFatalError(state, std::format("Combining resistance layers failed for {}", this->Name));
-                ShowContinueError(state, "This should never happen.  Contact EnergyPlus Support for further assistance.");
             }
         }
     }

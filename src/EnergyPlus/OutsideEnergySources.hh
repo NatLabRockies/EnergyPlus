@@ -82,7 +82,6 @@ namespace OutsideEnergySources {
         PlantLocation plantLoc{};
         // flags
         bool BeginEnvrnInitFlag = true;
-        bool CheckEquipName = true;
         Real64 MassFlowRate = 0.0;
         Real64 InletTemp = 0.0;
         Real64 OutletTemp = 0.0;

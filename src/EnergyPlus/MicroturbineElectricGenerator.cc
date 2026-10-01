@@ -112,8 +112,6 @@ PlantComponent *MTGeneratorSpecs::factory(EnergyPlusData &state, std::string con
     ShowFatalError(state,
                    std::format("LocalMicroTurbineGeneratorFactory: Error getting inputs for microturbine generator named: {}",
                                objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void GetMTGeneratorInput(EnergyPlusData &state)

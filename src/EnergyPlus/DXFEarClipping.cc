@@ -443,7 +443,7 @@ namespace DXFEarClipping {
         EP_SIZE_CHECK(rangles, nvert);
 
         // Subroutine local variable declarations:
-        bool inpoly; // in polygon or not
+        bool inpoly = false; // in polygon or not
 
         // Object Data
         Vector_2d point;               // structure for point

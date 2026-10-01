@@ -281,8 +281,8 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
     }
 
     bool is_continuous = representation->performance.compressor_speed_control_type == tk205::ashrae205_ns::SpeedControlType::CONTINUOUS;
-    auto outdoor_coil_entering_dry_bulb_temperature_K = condInletNode.Temp + Constant::Kelvin;
-    auto indoor_coil_entering_dry_bulb_temperature_K = inletNode.Temp + Constant::Kelvin;
+    auto actual_outdoor_coil_entering_dry_bulb_temperature_K = condInletNode.Temp + Constant::Kelvin;
+    auto actual_indoor_coil_entering_dry_bulb_temperature_K = inletNode.Temp + Constant::Kelvin;
     auto ambient_pressure = state.dataEnvrn->OutBaroPress;
     auto indoor_coil_entering_relative_humidity = Psychrometrics::PsyRhFnTdbWPb(state, inletNode.Temp, inletNode.HumRat, ambient_pressure);
 
@@ -290,9 +290,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
 
         // In cycling operation (continuous or discrete) this_speed = 1; compressor_sequence_number = 1;
         const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-            representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+            representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                       indoor_coil_entering_relative_humidity,
-                                                                                      indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                      actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                       air_mass_flow_rate,
                                                                                       this_speed,
                                                                                       ambient_pressure,
@@ -309,9 +309,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
             // For example, a speed number of 2 with a ratio between (0,1) indicates that the compressor is modulating between speeds 1 and 2 with the
             // given ratio. The ASHRAE205 model simply interpolates using a decimal fraction speed.
             [[maybe_unused]] const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-                representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                           indoor_coil_entering_relative_humidity,
-                                                                                          indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                          actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                           air_mass_flow_rate,
                                                                                           this_speed - 1 + ratio,
                                                                                           ambient_pressure,
@@ -325,9 +325,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
             auto mass_flow_rate_upperspeed = speeds[this_speed - 1].evaporator_air_mass_flow;
 
             const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-                representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                           indoor_coil_entering_relative_humidity,
-                                                                                          indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                          actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                           mass_flow_rate_upperspeed,
                                                                                           this_speed,
                                                                                           ambient_pressure,
@@ -340,9 +340,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
                 auto mass_flow_rate_lowerspeed = speeds[lowerspeed - 1].evaporator_air_mass_flow;
 
                 const auto &[gross_capacity_lower_speed, gross_sensible_capacity_lower_speed, power_lower_speed] =
-                    representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                    representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                               indoor_coil_entering_relative_humidity,
-                                                                                              indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                              actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                               mass_flow_rate_lowerspeed,
                                                                                               lowerspeed,
                                                                                               ambient_pressure,

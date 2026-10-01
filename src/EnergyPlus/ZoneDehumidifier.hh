@@ -87,7 +87,6 @@ namespace ZoneDehumidifier {
         Real64 RatedAirMassFlow = 0.0;                                        // Rated air mass flow rate through the dehumidifier [kg/s]
         Real64 MinInletAirTemp = 0.0;                                         // Minimum dry-bulb temperature for dehumidifier operation [C]
         Real64 MaxInletAirTemp = 0.0;                                         // Maximum dry-bulb temperature for dehumidifier operation [C]
-        Real64 InletAirMassFlow = 0.0;                                        // Inlet air mass flow rate for the time step being simulated [kg/s]
         Real64 OutletAirEnthalpy = 0.0;                                       // Dehumidifier outlet air enthalpy [J/kg]
         Real64 OutletAirHumRat = 0.0;                                         // Dehumidifier outlet air humidity ratio [kg/kg]
         Real64 OffCycleParasiticLoad = 0.0;                                   // Off Cycle Parasitic Load, user input [W]
@@ -127,6 +126,7 @@ namespace ZoneDehumidifier {
         Real64 OffCycleParasiticElecPower = 0.0; // Zone Dehumidifier Off-Cycle Parasitic Electric Power [W]
         Real64 OffCycleParasiticElecCons = 0.0;  // Zone Dehumidifier Off-Cycle Parasitic Electric Consumption [J]
         bool MyEnvrnFlag = true;
+        bool MySetPointCheckFlag = true;
         bool CheckEquipName = true;
         bool ZoneEquipmentListChecked = false;
     };
@@ -142,7 +142,7 @@ namespace ZoneDehumidifier {
 
     void GetZoneDehumidifierInput(EnergyPlusData &state);
 
-    void InitZoneDehumidifier(EnergyPlusData &state, int ZoneDehumNum); // Number of the current zone dehumidifier being simulated
+    void InitZoneDehumidifier(EnergyPlusData &state, int ZoneDehumNum, int ZoneNum); // Number of the current zone dehumidifier and serving zone
 
     void CalcZoneDehumidifier(EnergyPlusData &state,
                               int ZoneDehumNum,       // Index number of the current zone dehumidifier being simulated

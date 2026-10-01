@@ -302,7 +302,7 @@ namespace TARCOGCommon {
         Real64 constexpr TINY(1.0e-20);
 
         int i;
-        int imax;
+        int imax = 0;
         int j;
         int k;
         Real64 aamax;

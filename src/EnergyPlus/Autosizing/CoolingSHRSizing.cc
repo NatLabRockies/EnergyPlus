@@ -121,7 +121,8 @@ Real64 CoolingSHRSizer::size(EnergyPlusData &state, Real64 _originalValue, bool 
                         std::string msg = "Developer Error: For autosizing of " + this->compType + ' ' + this->compName +
                                           ", DataFlowUsedForSizing and DataCapacityUsedForSizing " + this->sizingString +
                                           " must both be greater than 0.";
-                        this->errorType = AutoSizingResultType::ErrorType1;
+                        // A fatal when SHR can't be calculated because capacity = 0
+                        // Go ahead and show the message, but don't fatal out the simulation
                         this->addErrorMessage(msg);
                     }
                 }

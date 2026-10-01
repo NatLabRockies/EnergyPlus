@@ -73,7 +73,7 @@ foreach(i RANGE 1 ${end})
       install_target_prereqs("${LAST_NAME}" PreProcess/IDFVersionUpdater)
     endif()
 
-    if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+    if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
       include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
       register_install_codesign_target("${LAST_NAME}" PreProcess/IDFVersionUpdater Unspecified)
     endif()
@@ -94,7 +94,7 @@ if(NOT ${FORTRAN_STATIC_EXE})
   install_target_prereqs("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater)
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater Unspecified)
 endif()
@@ -153,3 +153,14 @@ install(FILES "SupportFiles/Report Variables 24-2-0 to 25-1-0.csv" DESTINATION "
 install(FILES "SupportFiles/Report Variables 25-1-0 to 25-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 25-2-0 to 26-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 26-1-0 to 26-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
+
+if(BUILD_TESTING)
+  if(Pytest_AVAILABLE)
+    add_test(NAME Transition.transition_tests
+      COMMAND ${Python_EXECUTABLE} -m pytest --verbose
+              --transition-cli-dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+              "${CMAKE_CURRENT_SOURCE_DIR}/tests/"
+    )
+    set_tests_properties(Transition.transition_tests PROPERTIES TIMEOUT 120)
+  endif()
+endif()

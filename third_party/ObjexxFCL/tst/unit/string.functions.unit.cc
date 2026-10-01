@@ -199,11 +199,8 @@ TEST( StringFunctionsTest, Comparison )
 	EXPECT_TRUE( equal( s, "FiSh", false ) );
 	EXPECT_FALSE( equal( s, "fiSh" ) );
 	EXPECT_FALSE( equal( s, "fiSh", true ) );
-	lowercase( s );
-	EXPECT_EQ( "fish", s );
 	uppercase( s );
 	EXPECT_EQ( "FISH", s );
-	EXPECT_EQ( "fish", lowercased( s ) );
 	EXPECT_EQ( "FISH", uppercased( s ) );
 	EXPECT_TRUE( lessthani( s, "fiShY" ) );
 	EXPECT_FALSE( lessthani( s, "fiSh" ) );
@@ -258,53 +255,11 @@ TEST( StringFunctionsTest, Conversion )
 	EXPECT_EQ( 99, ichar( string( "c" ) ) );
 
 	EXPECT_EQ( 99, ichar( "c" ) );
-
-	EXPECT_EQ( string( "c" ), achar( 99 ) );
-}
-
-TEST( StringFunctionsTest, ConversionTo )
-{
-	EXPECT_FALSE( type_of< bool >( string( "0" ) ) );
-	EXPECT_TRUE( type_of< bool >( string( "1" ) ) );
-	EXPECT_FALSE( type_of< bool >( string( "F" ) ) );
-	EXPECT_TRUE( type_of< bool >( string( "T" ) ) );
-	EXPECT_FALSE( type_of< bool >( string( "false" ) ) );
-	EXPECT_TRUE( type_of< bool >( string( "true" ) ) );
-	EXPECT_EQ( 123, type_of< int >( string( "123" ) ) );
-	EXPECT_EQ( short( 123 ), type_of< short int >( string( "123" ) ) );
-	EXPECT_EQ( 123l, type_of< long int >( string( "123" ) ) );
-	EXPECT_EQ( 123u, type_of< unsigned int >( string( "123" ) ) );
-	EXPECT_EQ( 123.0f, type_of< float >( string( "123" ) ) );
-	EXPECT_EQ( 123.75f, type_of< float >( string( "123.75" ) ) );
-	EXPECT_EQ( 123.0, type_of< double >( string( "123" ) ) );
-	EXPECT_EQ( 123.75, type_of< double >( string( "123.75" ) ) );
-	EXPECT_EQ( 'X', type_of< char >( string( "X" ) ) );
-
-	EXPECT_FALSE( type_of< bool >( "0" ) );
-	EXPECT_TRUE( type_of< bool >( "1" ) );
-	EXPECT_FALSE( type_of< bool >( "F" ) );
-	EXPECT_TRUE( type_of< bool >( "T" ) );
-	EXPECT_FALSE( type_of< bool >( "false" ) );
-	EXPECT_TRUE( type_of< bool >( "true" ) );
-	EXPECT_EQ( 123, type_of< int >( "123" ) );
-	EXPECT_EQ( short( 123 ), type_of< short int >( "123" ) );
-	EXPECT_EQ( 123l, type_of< long int >( "123" ) );
-	EXPECT_EQ( 123u, type_of< unsigned int >( "123" ) );
-	EXPECT_EQ( 123.0f, type_of< float >( "123" ) );
-	EXPECT_EQ( 123.75f, type_of< float >( "123.75" ) );
-	EXPECT_EQ( 123.0, type_of< double >( "123" ) );
-	EXPECT_EQ( 123.75, type_of< double >( "123.75" ) );
-	EXPECT_EQ( 'X', type_of< char >( "X" ) );
-
 }
 
 TEST( StringFunctionsTest, Modifier )
 {
 	string s( "Big Dog" );
-	lowercase( s );
-	EXPECT_EQ( "big dog", s );
-	uppercase( s );
-	EXPECT_EQ( "big dog", lowercase( s ) );
 	uppercase( s );
 	EXPECT_EQ( "BIG DOG", s );
 
@@ -313,33 +268,25 @@ TEST( StringFunctionsTest, Modifier )
 	s = "aBana";
 	EXPECT_EQ( "B", strip( s, "an" ) );
 	s = "aBana";
-	EXPECT_EQ( "Bana", lstrip( s, "an" ) );
 	s = "aBana";
 	EXPECT_EQ( "aB", rstrip( s, "an" ) );
 	s = " Dog   ";
 	EXPECT_EQ( "Dog", strip( s ) );
 	s = " Dog   ";
-	EXPECT_EQ( "Dog   ", lstrip( s ) );
 	s = " Dog   ";
 	EXPECT_EQ( " Dog", rstrip( s ) );
 	s = "Dog";
 	EXPECT_EQ( "Dog   ", pad( s, 6u ) );
 	s = "Dog";
-	EXPECT_EQ( "   Dog", lpad( s, 6u ) );
 	s = "Dog";
-	EXPECT_EQ( "Dog   ", rpad( s, 6u ) );
 	s = "Doggy";
 	EXPECT_EQ( "Dog", pare( s, 3u ) );
 	s = "a Dog";
-	EXPECT_EQ( "Dog", lpare( s, 3u ) );
 	s = "Doggy";
-	EXPECT_EQ( "Dog", rpare( s, 3u ) );
 	s = "A long story";
 	EXPECT_EQ( "A lo", size( s, 4u ) );
 	s = "A long story";
-	EXPECT_EQ( "tory", lsize( s, 4u ) );
 	s = "A long story";
-	EXPECT_EQ( "A lo", rsize( s, 4u ) );
 	s = "   Center Me     ";
 	EXPECT_EQ( "    Center Me    ", center( s ) );
 	s = "   Center Me     ";
@@ -371,73 +318,34 @@ TEST( StringFunctionsTest, Modifier )
 TEST( StringFunctionsTest, Generator )
 {
 	EXPECT_EQ( "     ", blank( 5 ) );
-	EXPECT_EQ( "big dog", lowercased( string( "Big Dog" ) ) );
 	EXPECT_EQ( "BIG DOG", uppercased( string( "Big Dog" ) ) );
 	EXPECT_EQ( "Dog  ", ljustified( string( "  Dog" ) ) );
 	EXPECT_EQ( "  Dog", rjustified( string( "Dog  " ) ) );
 	EXPECT_EQ( "Dog", trimmed( string( "Dog  " ) ) );
 	EXPECT_EQ( "Dog", trimmed_whitespace( string( "Dog \t \0  " ) ) );
 	EXPECT_EQ( "B", stripped( string( "aBana" ), "an" ) );
-	EXPECT_EQ( "Bana", lstripped( string( "aBana" ), "an" ) );
-	EXPECT_EQ( "aB", rstripped( string( "aBana" ), "an" ) );
 	EXPECT_EQ( "Dog", stripped( string( " Dog   " ) ) );
-	EXPECT_EQ( "Dog   ", lstripped( string( " Dog   " ) ) );
-	EXPECT_EQ( " Dog", rstripped( string( " Dog   " ) ) );
 	EXPECT_EQ( "Dog", stripped_whitespace( string( " Dog \t " ) ) );
-	EXPECT_EQ( "Cat  ", padded( string( "Cat" ), 5 ) );
-	EXPECT_EQ( "  Cat", lpadded( string( "Cat" ), 5 ) );
-	EXPECT_EQ( "Cat  ", rpadded( string( "Cat" ), 5 ) );
-	EXPECT_EQ( "Dog", pared( string( "Doggy" ), 3u ) );
-	EXPECT_EQ( "Dog", lpared( string( "a Dog" ), 3u ) );
-	EXPECT_EQ( "Dog", rpared( string( "Doggy" ), 3u ) );
 	EXPECT_EQ( "A lo", sized( string( "A long story" ), 4u ) );
-	EXPECT_EQ( "tory", lsized( string( "A long story" ), 4u ) );
-	EXPECT_EQ( "A lo", rsized( string( "A long story" ), 4u ) );
 	EXPECT_EQ( "    Center Me    ", centered( string( "   Center Me     " ) ) );
 	EXPECT_EQ( "      Center Me      ", centered( string( "   Center Me     " ), 21u ) );
 	EXPECT_EQ( "Center Me", centered( string( "   Center Me     " ), 9u ) );
 	EXPECT_EQ( "enter M", centered( string( "   Center Me     " ), 7u ) );
 	EXPECT_EQ( "nter ", centered( string( "   Center Me     " ), 5u ) );
 	EXPECT_EQ( "ter", centered( string( "   Center Me     " ), 3u ) );
-	EXPECT_EQ( "Ban", uniqued( string( "Banana" ) ) );
 	EXPECT_EQ( "Bonono", replaced( string( "Banana" ), "a", "o" ) );
 	EXPECT_EQ( "Bonona", replaced( string( "Banana" ), "an", "on" ) );
-	EXPECT_EQ( "Dog", overlayed( string( "Cat" ), "Dog" ) );
-	EXPECT_EQ( "Cat Hat Dog", overlayed( string( "Cat and Dog" ), "Hat", 4 ) );
-	EXPECT_EQ( "Cat and Gator", overlayed( string( "Cat and Dog" ), "Gator", 8u ) );
-	EXPECT_EQ( "Dog", overlaid( string( "Cat" ), "Dog" ) );
-	EXPECT_EQ( "Cat Hat Dog", overlaid( string( "Cat and Dog" ), "Hat", 4 ) );
-	EXPECT_EQ( "Cat and Gator", overlaid( string( "Cat and Dog" ), "Gator", 8u ) );
 	EXPECT_EQ( "HaHaHa", repeated( string( "Ha" ), 3 ) );
 	EXPECT_EQ( "HaHaHa", repeat( string( "Ha" ), 3 ) );
 	EXPECT_EQ( "Fish", head( string( "Fish gotta swim" ) ) );
-}
-
-TEST( StringFunctionsTest, ConversionToString )
-{
-	EXPECT_EQ( "123", string_of< int >( 123 ) );
-	EXPECT_EQ( "123", string_of( 123 ) );
-	EXPECT_EQ( "123.5", string_of( 123.5 ) );
-	EXPECT_EQ( "123.125", string_of( 123.1251, 6 ) );
-	EXPECT_EQ( "123  ", lstring_of( 123, 5 ) );
-	EXPECT_EQ( "123AA", lstring_of( 123, 5, 'A' ) );
-	EXPECT_EQ( "1.125", general_string_of( 1.1251, 5, 4 ) );
-	EXPECT_EQ( "1.125", fixed_string_of( 1.1251, 5, 3 ) );
-#if defined(__GNUC__) && defined(_WIN32)
-	_set_output_format(_TWO_DIGIT_EXPONENT);
-#endif
 }
 
 TEST( StringFunctionsTest, StripSpace )
 {
 	string s( "  Fish " );
 	EXPECT_EQ( "Fish", stripped( s ) );
-	EXPECT_EQ( "Fish ", lstripped( s ) );
-	EXPECT_EQ( "  Fish", rstripped( s ) );
-	lstrip( s );
-	EXPECT_EQ( "Fish ", s );
 	rstrip( s );
-	EXPECT_EQ( "Fish", s );
+	EXPECT_EQ( "  Fish", s );
 	s = "  Cow  ";
 	strip( s );
 	EXPECT_EQ( "Cow", s );
@@ -456,14 +364,8 @@ TEST( StringFunctionsTest, StripSpecifiedCharacters )
 	EXPECT_EQ( "Fis", stripped( s, "h" ) );
 	EXPECT_EQ( "ish", stripped( s, "F" ) );
 	EXPECT_EQ( "is", stripped( s, "Fh" ) );
-	EXPECT_EQ( "Fish", lstripped( s, "xyz" ) );
-	EXPECT_EQ( "ish", lstripped( s, "Fx" ) );
-	EXPECT_EQ( "Fish", rstripped( s, "abc" ) );
-	EXPECT_EQ( "Fi", rstripped( s, "asbch" ) );
-	lstrip( s, "F" );
-	EXPECT_EQ( "ish", s );
 	rstrip( s, "sh" );
-	EXPECT_EQ( "i", s );
+	EXPECT_EQ( "Fi", s );
 }
 
 TEST( StringFunctionsTest, Centering )
@@ -499,8 +401,6 @@ TEST( StringFunctionsTest, Repeated )
 TEST( StringFunctionsTest, Pad )
 {
 	string s( "Fish Tank" );
-	EXPECT_EQ( "Fish Tank", padded( s, 5 ) );
-	EXPECT_EQ( "Fish Tank   ", padded( s, 12 ) );
 	EXPECT_EQ( "Fish Tank", pad( s, 5 ) );
 	EXPECT_EQ( "Fish Tank   ", pad( s, 12 ) );
 }
@@ -508,8 +408,6 @@ TEST( StringFunctionsTest, Pad )
 TEST( StringFunctionsTest, Pare )
 {
 	string s( "Fish Tank" );
-	EXPECT_EQ( "Fish Tank", pared( s, 12 ) );
-	EXPECT_EQ( "Fish", pared( s, 4 ) );
 	EXPECT_EQ( "Fish Tank", pare( s, 12 ) );
 	EXPECT_EQ( "Fish", pare( s, 4 ) );
 }

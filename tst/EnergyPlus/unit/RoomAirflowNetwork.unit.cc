@@ -116,7 +116,7 @@ using namespace EnergyPlus::Psychrometrics;
 class RoomAirflowNetworkTest : public EnergyPlusFixture
 {
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -156,7 +156,7 @@ protected:
         state->afn->AirflowNetworkLinkSimu.allocate(5);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }

@@ -168,7 +168,6 @@ namespace DataAirLoop {
         Real64 MinOutAir = 0.0;             // minimum outside air mass flow rate [kg/s]
         Real64 MaxOutAir = 0.0;             // current maximum available outside air mass flow rate [kg/s]
         Real64 OAMinFrac = 0.0;             // minimum outside air flow fraction this time step
-        Real64 Previous = 0.0;              // Previous mass air flow rate for this loop [kg/s]
         Real64 SupFlow = 0.0;               // supply air flow rate (includes LeakFlow) [kg/s]
         Real64 ZoneRetFlow = 0.0;           // return air flow rate at all zone return air nodes (includes RecircFlow, excludes LeakFlow) [kg/s]
         Real64 ZoneRetFlowRatio = 1.0;      // ratio for adjusting zone return flows for excess zone exhaust
@@ -227,9 +226,7 @@ namespace DataAirLoop {
         Real64 LoopSystemOffMassFlowrate = 0.0;                  // Loop mass flow rate during off cycle using an OnOff fan
         Real64 LoopOnOffFanPartLoadRatio = 0.0;                  // OnOff fan part load ratio
         Real64 LoopCompCycRatio = 0.0;                           // Loop compressor cycling ratio for multispeed heat pump
-        Real64 AFNLoopHeatingCoilMaxRTF = 0.0;                   // Maximum run time fraction for electric or gas heating coil in an HVAC Air Loop
         Real64 AFNLoopOnOffFanRTF = 0.0;                         // OnOff fan run time fraction in an HVAC Air Loop
-        Real64 AFNLoopDXCoilRTF = 0.0;                           // OnOff fan run time fraction in an HVAC Air Loop
     };
 
 } // namespace DataAirLoop

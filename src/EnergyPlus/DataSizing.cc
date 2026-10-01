@@ -353,7 +353,6 @@ void TermUnitZoneSizingData::copyFromZoneSizing(ZoneSizingData const &sourceData
     this->DesHeatOAFlowFrac = sourceData.DesHeatOAFlowFrac;
     this->DesCoolMassFlow = sourceData.DesCoolMassFlow;
     this->DesCoolMassFlowNoOA = sourceData.DesCoolMassFlowNoOA;
-    this->DesCoolOAFlowFrac = sourceData.DesCoolOAFlowFrac;
     this->DesHeatLoad = sourceData.DesHeatLoad;
     this->NonAirSysDesHeatLoad = sourceData.NonAirSysDesHeatLoad;
     this->DesCoolLoad = sourceData.DesCoolLoad;
@@ -1044,7 +1043,7 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     Real64 ZoneMaxCO2;                // Breathing-zone CO2 concentration
     Real64 ZoneMinCO2;                // Minimum CO2 concentration in zone
     Real64 ZoneContamControllerSched; // Schedule value for ZoneControl:ContaminantController
-    Real64 CO2PeopleGeneration;       // CO2 generation from people at design level
+    Real64 CO2PeopleGeneration = 0.0; // CO2 generation from people at design level
 
     OAVolumeFlowRate = 0.0;
 

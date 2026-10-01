@@ -1198,7 +1198,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction; // index of construction in main construction structure
-            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             TscollK = state.dataTranspiredCollector->UTSC(UTSCNum).TcollLast + Constant::Kelvin;
             HPlenARR(ThisSurf) = Sigma * AbsExt * AbsThermSurf * (pow_4(TscollK) - pow_4(TsoK)) / (TscollK - TsoK);
@@ -1751,9 +1751,9 @@ namespace TranspiredCollector {
         Real64 LocalWetBulbTemp;      // OutWetBulbTemp for here
         Real64 LocalOutHumRat;        // OutHumRat for here
         bool ICSCollectorIsOn(false); // ICS collector has OSCM on
-        int CollectorNum;             // current solar collector index
-        Real64 ICSWaterTemp;          // ICS solar collector water temp
-        Real64 ICSULossbottom;        // ICS solar collector bottom loss Conductance
+        int CollectorNum = 0;         // current solar collector index
+        Real64 ICSWaterTemp = 0.0;    // ICS solar collector water temp
+        Real64 ICSULossbottom = 0.0;  // ICS solar collector bottom loss Conductance
         Real64 sum_area = 0.0;
         Real64 sum_produc_area_drybulb = 0.0;
         Real64 sum_produc_area_wetbulb = 0.0;
@@ -1809,7 +1809,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction;
-            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             Real64 TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             Real64 TsBaffK = TmpTsBaf + Constant::Kelvin;
             if (TsBaffK == TsoK) {        // avoid divide by zero
@@ -1963,7 +1963,7 @@ namespace TranspiredCollector {
         Real64 constexpr Pr(0.71); // Prandtl number for air
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS
-        Real64 gnu901; // Nusselt number temporary variables for
+        Real64 gnu901 = 0.0; // Nusselt number temporary variables for
 
         Real64 tiltr = Tilt * Constant::DegToRad;
         Real64 Ra = Gr * Pr; // Rayleigh number

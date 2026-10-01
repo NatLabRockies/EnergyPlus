@@ -750,11 +750,11 @@ namespace DualDuct {
         // Uses the status flags to trigger events.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int HotInNode;
-        int ColdInNode;
-        int OAInNode; // Outdoor Air Inlet Node for VAV:OutdoorAir units
-        int RAInNode; // Reciruclated Air Inlet Node for VAV:OutdoorAir units
-        int OutNode;
+        int HotInNode = 0;
+        int ColdInNode = 0;
+        int OAInNode = 0; // Outdoor Air Inlet Node for VAV:OutdoorAir units
+        int RAInNode = 0; // Reciruclated Air Inlet Node for VAV:OutdoorAir units
+        int OutNode = 0;
         int Loop;          // Loop checking control variable
         Real64 PeopleFlow; // local sum variable, m3/s
 
@@ -1445,13 +1445,13 @@ namespace DualDuct {
         Real64 QRALoad;               // Amount of cooling load accounted for by Recirc Stream [W]
         Real64 CpAirZn;               // specific heat of zone air
         Real64 CpAirSysOA;            // specific heat of outdoor air
-        Real64 CpAirSysRA;            // specific heat of recirculated air
+        Real64 CpAirSysRA = 0.0;      // specific heat of recirculated air
         Real64 OAMassFlow;            // Supply air flow rate based on minimum OA requirement - for printing
         Real64 TotMassFlow;           // [kg/sec]   Total Mass Flow Rate from OA and Recirc Inlets
-        int OAInletNodeNum;
-        int RecircInletNodeNum;
+        int oaInletNodeNum;
+        int RecircInletNodeNum = 0;
 
-        OAInletNodeNum = this->OAInletNodeNum;
+        oaInletNodeNum = this->OAInletNodeNum;
         if (this->RecircIsUsed) {
             RecircInletNodeNum = this->RecircAirInletNodeNum;
         }
@@ -1465,7 +1465,7 @@ namespace DualDuct {
 
         // Calculate all of the required Cp's
         CpAirZn = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(ZoneNodeNum).HumRat);
-        CpAirSysOA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(OAInletNodeNum).HumRat);
+        CpAirSysOA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(oaInletNodeNum).HumRat);
         if (this->RecircIsUsed) {
             CpAirSysRA = Psychrometrics::PsyCpAirFnW(state.dataLoopNodes->Node(RecircInletNodeNum).HumRat);
         }
@@ -2074,12 +2074,28 @@ namespace DualDuct {
         auto &adu = state.dataDefineEquipment->AirDistUnit(this->ADUNum);
         if (!state.dataSize->TermUnitFinalZoneSizing.empty()) {
             auto &sizing = state.dataSize->TermUnitFinalZoneSizing(adu.TermUnitSizingNum);
-            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, sizing.DesCoolVolFlowMin);
-            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA);
+            Real64 minZoneFlow = this->MaxAirVolFlowRate * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, minZoneFlow, 4);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA, 4);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupCoolingSP, adu.Name, sizing.CoolDesTemp);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupHeatingSP, adu.Name, sizing.HeatDesTemp);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatingCap, adu.Name, sizing.DesHeatLoad);
             OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolingCap, adu.Name, sizing.DesCoolLoad);
+
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerZone, sizing.ZoneName, minZoneFlow, 6);
+            Real64 minZoneFlowPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? minZoneFlow / sizing.TotalZoneFloorArea : 0.0;
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerArea, sizing.ZoneName, minZoneFlowPerFloorArea, 6);
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchLeedVentMinVentPerZone,
+                                                     sizing.ZoneName,
+                                                     sizing.MinOA,
+                                                     6); // minZoneVoa
+            Real64 minZoneVoaPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? sizing.MinOA / sizing.TotalZoneFloorArea : 0.0;
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchLeedVentMinVentPerArea,
+                                                     sizing.ZoneName,
+                                                     minZoneVoaPerFloorArea,
+                                                     6); // minZoneVoaPerFloorArea
         }
 
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermTypeInp, adu.Name, dualDuctDamperNames[(int)this->DamperType]);

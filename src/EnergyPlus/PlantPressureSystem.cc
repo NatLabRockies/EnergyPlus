@@ -843,7 +843,7 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
     using Curve::CurveValue;
 
     // Return value
-    Real64 ResolvedLoopMassFlowRate;
+    Real64 ResolvedLoopMassFlowRate = 0.0;
 
     // FUNCTION PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("ResolvedLoopMassFlowRate: ");

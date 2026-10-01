@@ -1,3 +1,7 @@
 26.1.0,26.2.0,Transition notes - some of these are EMS variable names
-0,0,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+4,4,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+Refrigeration Zone Air Chiller Sensible Heat Ratio,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio,
+Refrigeration Zone Air Chiller Frost Accumulation Mass,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass,
+Refrigeration Zone Air Chiller Defrost Electricity Rate,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate,
+Refrigeration Zone Air Chiller Defrost Electricity Energy,Refrigeration Zone Air Chiller Coil Defrost Electricity Energy,
 old variable name,new variable name,-- add variable names (before this line) and leave off units -- <DELETE> to delete

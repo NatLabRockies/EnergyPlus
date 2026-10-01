@@ -29,6 +29,16 @@ cf [third_party/nlohmann/json3.12.0.patch](third_party/nlohmann/json3.12.0.patch
 The `validation_visitor.hpp` was modified to include better error messages and use RE2 instead of std::regex.
 
 
+## Kiva
+
+Our vendored copy has `vendor/eigen` removed to avoid duplicating the shared `third_party/eigen`.
+Since `libkiva` exports `vendor/eigen` as a PUBLIC include directory, `third_party/CMakeLists.txt` points the `libkiva` target at `third_party/eigen` after `add_subdirectory(kiva)`.
+
+## libtk205
+
+Our vendored copy has `vendor/btwxt` and `vendor/valijson` removed; its `vendor/CMakeLists.txt` skips adding them because the `btwxt` and `nlohmann_json` targets already exist by the time it is processed.
+`src/CMakeLists.txt` was patched to link the `btwxt` target (getting its headers as a usage requirement) instead of including the removed `vendor/btwxt/include`. This change would be valid upstream too.
+
 ## SSC (SAM Simulation Core)
 
 The SSC library is brought in as a git subtree from https://github.com/NREL/ssc. Generally we bring in a release tag instead of their `develop` branch. Then I have commented out many parts of SSC in the CMakeLists.txt and a few other files that are not used in EnergyPlus to minimize the size of the binary.

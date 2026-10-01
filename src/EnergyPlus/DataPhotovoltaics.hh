@@ -316,7 +316,10 @@ namespace DataPhotovoltaics {
         int ExtVentCavPtr;                   // pointer to Exterior Vented Cavity EXTERIOR VENTED CAVITY
         int PVTPtr;                          // pointer to PVT model
         Real64 SurfaceSink;                  // PV power "sink" for integration
-        PVReportVariables Report;            // report variables
+        bool SurfaceCouplingRunFlag = true;  // run flag used before the surface heat balance
+        Real64 SurfaceCouplingSource = 0.0;  // last integrated PV sink applied to its coupled model
+        bool SurfaceCouplingNeedsResim = false;
+        PVReportVariables Report; // report variables
         // nested structs for user input parameters
         SimplePVParamsStruct SimplePVModule;       // simple model input params
         TRNSYSPVModuleParamsStruct TRNSYSPVModule; // equivalent one-diode input params

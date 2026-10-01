@@ -436,6 +436,8 @@ UnitarySystemPerformance:Multispeed,
 
 \begin{itemize}
 \item
+  HVAC,Average, Unitary System Part Load Ratio {[]}
+\item
   HVAC,Average, Unitary System Fan Part Load Ratio {[]}
 \item
   HVAC,Average, Unitary System Compressor Part Load Ratio
@@ -544,13 +546,17 @@ Subcool reheat coil outputs under Coil:Cooling:DX
   HVAC,Average, Unitary System Cooling Coil Load Sensible Heat Ratio {[]}
 \end{itemize}
 
+\paragraph{Unitary System Part Load Ratio {[]}}\label{unitary-system-part-load-ratio}
+
+This output variable is an indication of coil operation within the Unitary System. Coil operation is calculated based on the ratio of the sensible heating (or cooling) load to the steady-state heating (or cooling) capacity. When water coils are present this report indicates the relative load met by the coil. For multi-speed coils, when the speed number is greater than 1, the value is 1.0.
+
 \paragraph{Unitary System Fan Part Load Ratio {[]}}\label{unitary-system-fan-part-load-ratio}
 
-This output variable is the ratio of actual air mass flow rate through the unitary system to the unitary system's design air mass flow rate (i.e., design volumetric flow rate converted to dry air mass flow rate). For continuous fan operation mode, this variable is always 1.0 when the unitary system is available (based on the availability schedule). For cycling fan/cycling coil operation mode, the actual air mass flow rate is calculated based on the ratio of the sensible heating (or cooling) load to the steady-state unitary system heating (or cooling) capacity. For the cycling fan mode, the runtime fraction for the unitary system fan may be different from the fan part-load ratio reported here due the part-load performance of the unitary system's heating (or cooling) coil (delay at start-up to reach steady-state output). In general, runtime fractions are reported by individual components where appropriate (e.g., Fan:OnOff). When the speed number is greater than 1, the value is 1.0.
+This output variable is the ratio of actual air mass flow rate through the unitary system to the unitary system's design air mass flow rate (i.e., design volumetric flow rate converted to dry air mass flow rate). For continuous fan operation mode, this variable is always 1.0 when the unitary system is available (based on the availability schedule). For cycling fan/cycling coil operation mode, the actual air mass flow rate is calculated based on the ratio of the sensible heating (or cooling) load to the steady-state unitary system heating (or cooling) capacity. For the cycling fan mode, the runtime fraction for the unitary system fan may be different from the fan part-load ratio reported here due the part-load performance of the unitary system's heating (or cooling) coil (delay at start-up to reach steady-state output). In general, runtime fractions are reported by individual components where appropriate (e.g., Fan:OnOff). For multi-speed coils, when the speed number is greater than 1, the value is 1.0.
 
 \paragraph{Unitary System Compressor Part Load Ratio {[]}}\label{unitary-system-compressor-part-load-ratio}
 
-This output variable is the ratio of the sensible load (heating or cooling) to the steady-state capacity of the unitary system's DX heating or cooling coil at Speed 1. The runtime fraction for the unitary system compressor may be different from the compressor part-load ratio reported here due the part-load performance of the heating/cooling coil (delay at start-up to reach steady-state output). In general, runtime fractions are reported by individual components where appropriate. When the speed number is greater than 1, the value is 1.0.
+This output variable is the ratio of the sensible load (heating or cooling) to the steady-state capacity of the unitary system's DX heating or cooling coil at Speed 1. The runtime fraction for the unitary system compressor may be different from the compressor part-load ratio reported here due the part-load performance of the heating/cooling coil (delay at start-up to reach steady-state output). In general, runtime fractions are reported by individual components where appropriate. When water coils are present the value is 0.0. For multi-speed coils, when the speed number is greater than 1, the value is 1.0.
 
 \paragraph{Unitary System DX Coil Cycling Ratio {[]}}\label{unitary-system-dx-coil-cycling-ratio}
 

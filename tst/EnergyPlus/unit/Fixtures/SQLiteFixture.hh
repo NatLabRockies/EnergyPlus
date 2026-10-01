@@ -72,7 +72,7 @@ protected:
 
     std::shared_ptr<std::ostringstream> ss;
 
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
         ss = std::make_shared<std::ostringstream>();
@@ -89,7 +89,7 @@ protected:
         ss->str(std::string());
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }

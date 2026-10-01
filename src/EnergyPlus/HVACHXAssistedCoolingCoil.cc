@@ -1652,7 +1652,7 @@ namespace HVACHXAssistedCoolingCoil {
         // as negative.
 
         // Return value
-        Real64 MaxWaterFlowRate; // returned max water flow rate of matched coil
+        Real64 MaxWaterFlowRate = 0.0; // returned max water flow rate of matched coil
 
         // Obtains and allocates HXAssistedCoolingCoil related parameters from input file
         if (state.dataHVACAssistedCC->GetCoilsInputFlag) { // First time subroutine has been called, get input data
@@ -1714,7 +1714,7 @@ namespace HVACHXAssistedCoolingCoil {
         // as negative.
 
         // Return value
-        Real64 MaxAirFlowRate; // returned max air flow rate of matched HX
+        Real64 MaxAirFlowRate = 0.0; // returned max air flow rate of matched HX
 
         // Obtains and allocates HXAssistedCoolingCoil related parameters from input file
         if (state.dataHVACAssistedCC->GetCoilsInputFlag) { // First time subroutine has been called, get input data

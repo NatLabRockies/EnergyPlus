@@ -1789,7 +1789,7 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
     // Other components on this branch will request flow for this branch
 
     //  ! If this is a variable speed pump
-    if (thisPump.pumpType == PumpType::VarSpeed || thisPump.pumpType == PumpType::Bank_VarSpeed || thisPump.pumpType == PumpType::Cond) {
+    if (pumpType == PumpType::VarSpeed || pumpType == PumpType::Bank_VarSpeed || pumpType == PumpType::Cond) {
         if (DataPlant::CompData::getPlantComponent(state, thisPump.plantLoc).FlowCtrl == DataBranchAirLoopPlant::ControlType::SeriesActive) {
             daPumps->PumpMassFlowRate = 0.0;
         }
@@ -1825,7 +1825,7 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
     //****************************!
     //** UPDATE PUMP BANK USAGE **!
     //****************************!
-    switch (thisPump.pumpType) {
+    switch (pumpType) {
     case PumpType::Bank_VarSpeed:
     case PumpType::Bank_ConSpeed: {
         // previously, pumps did whatever they wanted
@@ -1953,6 +1953,23 @@ void CalcPumps(EnergyPlusData &state, int const PumpNum, Real64 const FlowReques
             ShowFatalError(state, "Errors in plant calculation would result in divide-by-zero cause program termination.");
         }
         daPumps->Power = VolFlowRate * thisPump.EMSPressureOverrideValue / TotalEffic;
+    }
+
+    // #10821: Warn when the nominal constant speed pump model is operating at low flow but consuming full power.
+    // Pressure-based and EMS pressure calculations override the nominal full-power model and must not trigger this warning.
+    bool const pumpPowerWasOverridden =
+        (thisPump.plantLoc.loopNum > 0 && thisPump.plantLoc.loop->UsePressureForPumpCalcs) || thisPump.EMSPressureOverrideOn;
+    if (pumpType == PumpType::ConSpeed && !pumpPowerWasOverridden && !state.dataGlobal->WarmupFlag && !state.dataGlobal->DoingSizing &&
+        !state.dataGlobal->KickOffSimulation && daPumps->Power > 0.0 && VolFlowRate < 0.25 * thisPump.NomVolFlowRate) {
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::format("{} Part Load Ratio < 1, {}, Name={}, pump has full power even at less than 25% nominal flow rate, VolFlowRate=",
+                        RoutineName,
+                        pumpTypeIDFNames[static_cast<int>(pumpType)],
+                        thisPump.Name),
+            thisPump.PLRErrIndex,
+            VolFlowRate,
+            VolFlowRate);
     }
 
     //****************************!

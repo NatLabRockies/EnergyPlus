@@ -230,7 +230,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
         });
 
         state->init_state_called = false;
-        compare_err_stream_substring("", true);
+        compare_err_stream("", true);
         // Input processor with throw a severe, so do not use assertions
         EXPECT_FALSE(process_idf(idf_objects, false));
         state->init_state(*state);
@@ -359,7 +359,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_Unicity)
         "    DisplayAllWarnings;      !- Key 1",
     });
 
-    compare_err_stream_substring("", true);
+    compare_err_stream("", true);
     // Input processor will throw a severe, so do not use assertions
     EXPECT_FALSE(process_idf(idf_objects, false));
     state->init_state(*state);

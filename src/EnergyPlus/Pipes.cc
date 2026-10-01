@@ -91,8 +91,6 @@ PlantComponent *LocalPipeData::factory(EnergyPlusData &state, DataPlant::PlantEq
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalPipeDataFactory: Error getting inputs for pipe named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void LocalPipeData::simulate(EnergyPlusData &state,

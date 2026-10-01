@@ -172,8 +172,8 @@ namespace TarcogShading {
         Real64 Ahs;
         Real64 press1;
         Real64 press2;
-        Real64 s1;
-        Real64 s2;
+        Real64 s1 = 0.0;
+        Real64 s2 = 0.0;
         Real64 s;
         Real64 hcvs;
         Real64 qvs;
@@ -184,8 +184,8 @@ namespace TarcogShading {
         Real64 Tav;
         Real64 Tgap;
         Real64 Temp;
-        Real64 speed1;
-        Real64 speed2;
+        Real64 speed1 = 0.0;
+        Real64 speed2 = 0.0;
         Real64 Tav1;
         Real64 Tav2;
         Real64 Tgap1;
@@ -669,24 +669,24 @@ namespace TarcogShading {
         Real64 con0;
         Real64 pr0;
         Real64 cp0;
-        Real64 dens1;
+        Real64 dens1 = 0.0;
         Real64 visc1;
         Real64 con1;
         Real64 pr1;
-        Real64 cp1;
-        Real64 dens2;
+        Real64 cp1 = 0.0;
+        Real64 dens2 = 0.0;
         Real64 visc2;
         Real64 con2;
         Real64 pr2;
-        Real64 cp2;
-        Real64 Tup;
-        Real64 Tdown;
+        Real64 cp2 = 0.0;
+        Real64 Tup = 0.0;
+        Real64 Tdown = 0.0;
         Real64 H01;
         Real64 H02;
         Real64 beta1;
         Real64 beta2;
-        Real64 alpha1;
-        Real64 alpha2;
+        Real64 localAlpha1;
+        Real64 localAlpha2;
         Real64 P1;
         Real64 P2;
         Real64 qsmooth;
@@ -851,15 +851,15 @@ namespace TarcogShading {
             beta1 = std::pow(e, P1);
             beta2 = std::pow(e, P2);
 
-            alpha1 = 1.0 - beta1;
-            alpha2 = 1.0 - beta2;
+            localAlpha1 = 1.0 - beta1;
+            localAlpha2 = 1.0 - beta2;
 
             if (Tgap1 > Tgap2) {
-                Tup = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
-                Tdown = alpha2 * Tav2 + beta2 * Tup;
+                Tup = (localAlpha1 * Tav1 + beta1 * localAlpha2 * Tav2) / (1.0 - beta1 * beta2);
+                Tdown = localAlpha2 * Tav2 + beta2 * Tup;
             } else {
-                Tdown = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
-                Tup = alpha2 * Tav2 + beta2 * Tdown;
+                Tdown = (localAlpha1 * Tav1 + beta1 * localAlpha2 * Tav2) / (1.0 - beta1 * beta2);
+                Tup = localAlpha2 * Tav2 + beta2 * Tdown;
             }
 
             TGapOld1 = Tgap1;
@@ -1010,12 +1010,12 @@ namespace TarcogShading {
         Real64 pr0;
         Real64 cp0;
         // REAL(r64) :: dens1, visc1, con1, pr1, cp1
-        Real64 dens2;
+        Real64 dens2 = 0.0;
         Real64 visc2;
         Real64 con2;
         Real64 pr2;
-        Real64 cp2;
-        Real64 Tgapout;
+        Real64 cp2 = 0.0;
+        Real64 Tgapout = 0.0;
         Real64 H0;
         Real64 P;
         Real64 beta;

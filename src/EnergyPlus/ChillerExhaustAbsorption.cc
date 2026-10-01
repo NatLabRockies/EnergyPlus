@@ -127,8 +127,6 @@ ExhaustAbsorberSpecs *ExhaustAbsorberSpecs::factory(EnergyPlusData &state, std::
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalExhaustAbsorberFactory: Error getting inputs for comp named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void ExhaustAbsorberSpecs::simulate(
@@ -378,7 +376,6 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
         Node::TestCompSet(state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(6), s_ipsc->cAlphaArgs(7), "Hot Water Nodes");
         if (Get_ErrorsFound) {
             ShowFatalError(state, std::format("Errors found in processing node input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            Get_ErrorsFound = false;
         }
 
         // Assign Part Load Ratios
@@ -463,7 +460,6 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
 
         if (Get_ErrorsFound) {
             ShowFatalError(state, std::format("Errors found in processing curve input for {}={}", cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            Get_ErrorsFound = false;
         }
         if (Util::SameString(s_ipsc->cAlphaArgs(15), "LeavingCondenser")) {
             thisChiller.isEnterCondensTemp = false;

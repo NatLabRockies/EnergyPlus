@@ -27,6 +27,7 @@ IF ( CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR 
 ENDIF()
 
 add_library(epexpat STATIC ${epexpat_SRCS})
+target_include_directories(epexpat PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 target_compile_options(epexpat PRIVATE $<$<COMPILE_LANG_AND_ID:C,AppleClang>:-Wno-shorten-64-to-32>)
 
 set_target_properties(

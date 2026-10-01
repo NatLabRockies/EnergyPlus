@@ -42,10 +42,10 @@ if(USE_PSYCH_ERRORS)
 endif()
 
 set(SRC
-    "${PROJECT_SOURCE_DIR}/third_party/milo/dtoa.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/itoa.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/diyfp.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/ieee754.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/dtoa.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/itoa.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/diyfp.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/ieee754.h"
     AirLoopHVACDOAS.cc
     AirLoopHVACDOAS.hh
     AirTerminalUnit.hh
@@ -234,6 +234,8 @@ set(SRC
     DaylightingDevices.hh
     DaylightingManager.cc
     DaylightingManager.hh
+    ConstructionAssignmentSet.cc
+    ConstructionAssignmentSet.hh
     DemandManager.cc
     DemandManager.hh
     DesiccantDehumidifiers.cc
@@ -288,6 +290,7 @@ set(SRC
     FluidCoolers.hh
     FluidProperties.cc
     FluidProperties.hh
+    Formatters.hh
     FromChars.hh
     FuelCellElectricGenerator.cc
     FuelCellElectricGenerator.hh
@@ -548,6 +551,8 @@ set(SRC
     PurchasedAirManager.hh
     PythonEngine.cc
     PythonEngine.hh
+    PythonHelpers.cc
+    PythonHelpers.hh
     RefrigeratedCase.cc
     RefrigeratedCase.hh
     ReportCoilSelection.cc
@@ -707,10 +712,10 @@ set(SRC
 create_src_groups("${SRC}")
 
 set(INPUTPARSING_SRC
-    "${PROJECT_SOURCE_DIR}/third_party/milo/dtoa.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/itoa.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/diyfp.h"
-    "${PROJECT_SOURCE_DIR}/third_party/milo/ieee754.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/dtoa.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/itoa.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/diyfp.h"
+    "${PROJECT_SOURCE_DIR}/third_party/milo/milo/ieee754.h"
     "${CMAKE_CURRENT_BINARY_DIR}/DataStringGlobals.cc"
     DataStringGlobals.hh
     FileSystem.cc
@@ -753,12 +758,13 @@ if(LINK_WITH_PYTHON)
 
   # now we need to get the Python libs and add the include path for further compiling
   # The Development (libs) was already found in the root level CMakeLists.txt
-  include_directories("${Python_INCLUDE_DIRS}")
+  # Marked SYSTEM so MSVC treats it as an external header (/external:I) and doesn't apply /W4 /WX to it
+  target_include_directories(project_options SYSTEM INTERFACE "${Python_INCLUDE_DIRS}")
 endif()
 
 add_library(energyplusparser STATIC ${INPUTPARSING_SRC})
 target_link_libraries(energyplusparser PUBLIC embedded_epjson_source nlohmann_json re2 ${CMAKE_DL_LIBS})
-target_link_libraries(energyplusparser PRIVATE project_options project_fp_options project_warnings)
+target_link_libraries(energyplusparser PRIVATE cli11 fast_float milo objexx valijson project_options project_fp_options project_warnings)
 if(WIN32)
   target_link_libraries(energyplusparser PUBLIC Shlwapi)
 endif()
@@ -774,6 +780,19 @@ endif()
 # first we will create a static library of EnergyPlus this will be linked
 # statically to create the DLL and also the unit tests
 add_library(energypluslib STATIC ${SRC})
+
+# Debug Python Config
+option(DEBUG_PYTHON_CONFIG "Debug Python PyPreConfig and PyConfig initialization" OFF)
+mark_as_advanced(DEBUG_PYTHON_CONFIG)
+if(DEBUG_PYTHON_CONFIG)
+  # Linking PUBLIC so it reaches energyplusapi too
+  target_compile_definitions(energypluslib PUBLIC DEBUG_PYTHON_CONFIG=1)
+endif()
+
+# Detect incorrect recurring error MsgIndex usage (throw on every recurring error call). Always on for Debug configs.
+option(FORCE_DEBUG_MSG_INDEX "Force-enable detection of incorrect recurring error MsgIndex usage in non Debug mode" OFF)
+mark_as_advanced(FORCE_DEBUG_MSG_INDEX)
+target_compile_definitions(energypluslib PUBLIC $<$<OR:$<CONFIG:Debug>,$<BOOL:${FORCE_DEBUG_MSG_INDEX}>>:DEBUG_MSG_INDEX>)
 
 if(ENABLE_UNITY)
   set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
@@ -795,9 +814,10 @@ target_link_libraries(
          Windows-CalcEngine
          airflownetworklib
          ssc
-         libtk205)
+         libtk205
+         fast_float)
 
-target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings)
+target_link_libraries(energypluslib PRIVATE cli11 milo valijson project_options project_fp_options project_warnings)
 if(ENABLE_PCH)
   target_precompile_headers(energypluslib PRIVATE ${EP_CXX_PCH_HEADERS})
 endif()
@@ -860,7 +880,7 @@ else() # windows
                             "${CMAKE_CURRENT_BINARY_DIR}/energyplusapi.rc")
 endif()
 target_link_libraries(energyplusapi PRIVATE energypluslib)
-target_link_libraries(energyplusapi PRIVATE project_options project_fp_options project_warnings)
+target_link_libraries(energyplusapi PRIVATE cli11 project_options project_fp_options project_warnings)
 
 set_target_properties(energyplusapi PROPERTIES INSTALL_NAME_DIR "@executable_path")
 if(ENABLE_UNITY)
@@ -874,7 +894,7 @@ if(APPLE OR UNIX)
 else() # windows
   add_executable(energyplus main.cc "${CMAKE_CURRENT_BINARY_DIR}/energyplus.rc")
 endif()
-target_link_libraries(energyplus PRIVATE energyplusapi project_options project_fp_options project_warnings)
+target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
 
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})
@@ -1139,7 +1159,9 @@ if(BUILD_TESTING)
 
   # Functional API does not need a run folder to be created
   add_test(NAME "API.TestFunctionalPython" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestFunctional.py")
-  set_tests_properties("API.TestFunctionalPython" PROPERTIES ENVIRONMENT PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS})
+  set_tests_properties(
+    "API.TestFunctionalPython" PROPERTIES ENVIRONMENT
+                                           "PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS};ENERGYPLUS_USE_PSYCH_ERRORS=$<BOOL:${USE_PSYCH_ERRORS}>")
 
   # Runtime tests need a folder to be created for output files, if we are building fortran, let's test that the python API properly sets the E+ install root by passing "-r"
   set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtime_python")
@@ -1264,7 +1286,7 @@ if(UNIX AND NOT APPLE)
   endif()
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(energyplus "." Unspecified ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/python_entitlements.xml")
   register_install_codesign_target(energyplusapi "." Unspecified)

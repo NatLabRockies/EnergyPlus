@@ -3573,10 +3573,10 @@ namespace HVACUnitaryBypassVAV {
         //  based on 1 zone's VAV box fully opened. The other VAV boxes are partially open (modulated).
 
         // Return value
-        Real64 CalcSetPointTempTarget;
+        Real64 CalcSetPointTempTarget = 0.0;
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
-        Real64 ZoneLoad;                 // Zone load sensed by thermostat [W]
+        Real64 ZoneLoad = 0.0;           // Zone load sensed by thermostat [W]
         Real64 QToCoolSetPt;             // Zone load to cooling setpoint [W]
         Real64 QToHeatSetPt;             // Zone load to heating setpoint [W]
         Real64 SupplyAirTemp;            // Supply air temperature required to meet load [C]
@@ -3708,8 +3708,8 @@ namespace HVACUnitaryBypassVAV {
         // Set OnOffAirFlowRatio to be used by DX coils
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 ZoneMassFlow; // Zone mass flow rate required to meet zone load [kg/s]
-        Real64 ZoneLoad;     // Zone load calculated by ZoneTempPredictor [W]
+        Real64 ZoneMassFlow;   // Zone mass flow rate required to meet zone load [kg/s]
+        Real64 ZoneLoad = 0.0; // Zone load calculated by ZoneTempPredictor [W]
 
         auto &cBVAV = state.dataHVACUnitaryBypassVAV->CBVAV(CBVAVNum);
 

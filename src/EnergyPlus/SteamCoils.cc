@@ -1522,7 +1522,7 @@ namespace SteamCoils {
         // as negative.
 
         // Return value
-        Real64 MaxWaterFlowRate; // returned max water flow rate of matched coil
+        Real64 MaxWaterFlowRate = 0.0; // returned max water flow rate of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -1909,7 +1909,7 @@ namespace SteamCoils {
         // as zero.
 
         // Return value
-        Real64 Capacity; // returned operating capacity of matched coil (W)
+        Real64 Capacity = 0.0; // returned operating capacity of matched coil (W)
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;

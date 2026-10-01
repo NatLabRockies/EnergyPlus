@@ -2483,10 +2483,10 @@ void CalcTESCoilCoolingOnlyMode(EnergyPlusData &state, int const TESCoilNum, [[m
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingOnlyMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+    Real64 CondInletTemp = 0.0; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
     // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -2749,10 +2749,10 @@ void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state,
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingAndChargeMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
-                            // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletTemp = 0.0;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+                                  // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -2783,9 +2783,9 @@ void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state,
         CondInletHumRat = PsyWFnTdbTwbPb(state, CondInletTemp, OutdoorWetBulb, CondAirSidePressure, RoutineName);
     }
 
-    Real64 QdotChargeLimit; // limit for charge cooling power to hit limit of storage.
-    Real64 sTES;            // stat of Thermal energy storage [C or fraction of ice]
-    bool TESCanBeCharged;
+    Real64 QdotChargeLimit = 0.0; // limit for charge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;            // stat of Thermal energy storage [C or fraction of ice]
+    bool TESCanBeCharged = false;
 
     switch (state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum).StorageMedia) {
     case MediaType::Water:
@@ -3157,10 +3157,10 @@ void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state,
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingAndDischargeMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
-                            // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletTemp = 0.0;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+                                  // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -3191,8 +3191,8 @@ void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state,
         CondInletHumRat = PsyWFnTdbTwbPb(state, CondInletTemp, OutdoorWetBulb, CondAirSidePressure, RoutineName);
     }
 
-    Real64 QdotDischargeLimit; // limit for discharge cooling power to hit limit of storage.
-    Real64 sTES;               // stat of Thermal energy storage [C or fraction of ice]
+    Real64 QdotDischargeLimit = 0.0; // limit for discharge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;               // stat of Thermal energy storage [C or fraction of ice]
     bool TESHasSomeCharge = false;
 
     switch (thisTESCoil.StorageMedia) {
@@ -3499,10 +3499,10 @@ void CalcTESCoilChargeOnlyMode(EnergyPlusData &state, int const TESCoilNum)
     static constexpr std::string_view RoutineName("CalcTESCoilChargeOnlyMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+    Real64 CondInletTemp = 0.0; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
     // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -3546,8 +3546,8 @@ void CalcTESCoilChargeOnlyMode(EnergyPlusData &state, int const TESCoilNum)
     }
 
     bool TESCanBeCharged = false; // true if room for tank to be charged.
-    Real64 QdotChargeLimit;       // limit for charge cooling power to hit limit of storage.
-    Real64 sTES;                  // local state of Thermal Energy Storage (C or ice fraction)
+    Real64 QdotChargeLimit = 0.0; // limit for charge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;            // local state of Thermal Energy Storage (C or ice fraction)
 
     switch (thisTESCoil.StorageMedia) {
     case MediaType::Water:
@@ -3666,9 +3666,9 @@ void CalcTESCoilDischargeOnlyMode(EnergyPlusData &state, int const TESCoilNum, R
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
-    Real64 QdotDischargeLimit;     // limit for how much storage can be discharged without overshooting
-    Real64 sTES = 0.0;             // state of charge of Thermal Energy Storage
-    bool TESHasSomeCharge = false; // true when there is something available in storage
+    Real64 QdotDischargeLimit = 0.0; // limit for how much storage can be discharged without overshooting
+    Real64 sTES = 0.0;               // state of charge of Thermal Energy Storage
+    bool TESHasSomeCharge = false;   // true when there is something available in storage
 
     switch (thisTESCoil.StorageMedia) {
     case MediaType::Water:
@@ -3758,8 +3758,8 @@ void CalcTESCoilDischargeOnlyMode(EnergyPlusData &state, int const TESCoilNum, R
         Real64 const PartLoadDryCoilOutAirTemp = PsyTdbFnHW(PartLoadOutAirEnth, EvapInletHumRat);
 
         bool CoilMightBeDry = false;
-        Real64 DryCoilTestEvapInletHumRat;
-        Real64 SHRadp;
+        Real64 DryCoilTestEvapInletHumRat = 0.0;
+        Real64 SHRadp = 0.0;
         if (PartLoadDryCoilOutAirTemp > PsyTsatFnHPb(state, PartLoadOutAirEnth, state.dataEnvrn->OutBaroPress, RoutineName)) {
             CoilMightBeDry = true;
             // find wADP, humidity ratio at apparatus dewpoint and inlet hum rat that would have dry coil

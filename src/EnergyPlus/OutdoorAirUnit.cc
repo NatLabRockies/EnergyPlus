@@ -1463,16 +1463,16 @@ namespace OutdoorAirUnit {
         // na
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 DesOATemp;      // Design OA Temp degree C
-        Real64 AirMassFlow;    // air mass flow rate [kg/s]
-        Real64 QTotUnitOut;    // total unit output [watts]
-        Real64 QUnitOut = 0.0; // heating or sens. cooling provided by fan coil unit [watts]
-        Real64 LatLoadMet;     // heating or sens. cooling provided by fan coil unit [watts]
-        Real64 MinHumRat;      // desired temperature after mixing inlet and outdoor air [degrees C]
-        Real64 SetPointTemp;   // temperature that will be used to control the radiant system [Celsius]
-        Real64 HiCtrlTemp;     // Current high point in setpoint temperature range
-        Real64 LoCtrlTemp;     // Current low point in setpoint temperature range
-        Real64 AirInEnt;       // RE-calculate the Enthalpy of supply air
+        Real64 DesOATemp = 0.0; // Design OA Temp degree C
+        Real64 AirMassFlow;     // air mass flow rate [kg/s]
+        Real64 QTotUnitOut;     // total unit output [watts]
+        Real64 QUnitOut = 0.0;  // heating or sens. cooling provided by fan coil unit [watts]
+        Real64 LatLoadMet;      // heating or sens. cooling provided by fan coil unit [watts]
+        Real64 MinHumRat;       // desired temperature after mixing inlet and outdoor air [degrees C]
+        Real64 SetPointTemp;    // temperature that will be used to control the radiant system [Celsius]
+        Real64 HiCtrlTemp;      // Current high point in setpoint temperature range
+        Real64 LoCtrlTemp;      // Current low point in setpoint temperature range
+        Real64 AirInEnt;        // RE-calculate the Enthalpy of supply air
         Real64 AirOutletTemp = 0.0;
         Real64 ZoneSupAirEnt; // Specific humidity ratio of inlet air (kg moisture / kg moist air)
         // Latent output

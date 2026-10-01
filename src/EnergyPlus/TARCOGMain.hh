@@ -170,7 +170,7 @@ namespace TARCOGMain {
                   Array1D<Real64> &ShadeGapKeffConv,           // Vector of convective keff values for areas above/below
                   Real64 SDScalar,                             // Factor of Venetian SD layer contribution to convection
                   int SHGCCalc,                                // SHGC calculation switch:
-                  int &NumOfIterations,                        // Number of iterations for reaching solution
+                  int &t_NumOfIterations,                      // Number of iterations for reaching solution
                   Real64 edgeGlCorrFac                         // Edge of glass correction factor
     );
 }

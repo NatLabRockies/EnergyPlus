@@ -259,7 +259,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                    Array1D<Real64> &ShadeGapKeffConv,
                    Real64 const SDScalar,
                    int const SHGCCalc,
-                   int &NumOfIterations,
+                   int &t_NumOfIterations,
                    Real64 const edgeGlCorrFac)
 {
 
@@ -312,15 +312,15 @@ void Calc_ISO15099(EnergyPlusData &state,
     EP_SIZE_CHECK(ShadeGapKeffConv, MaxGap);
 
     //  REAL(r64) :: grho(maxgas,3)
-    Real64 shgct_NOSD;
+    Real64 shgct_NOSD = 0.0;
     Real64 trmout;
 
     Real64 Gout;
     Real64 Gin;
     Real64 AchievedErrorTolerance;
     Real64 AchievedErrorToleranceSolar;
-    int NumOfIter;
-    int NumOfIterSolar;
+    int NumOfIter = 0;
+    int NumOfIterSolar = 0;
 
     Real64 tgg;
     Real64 qc1;
@@ -567,7 +567,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIterSolar,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIterSolar;
+        t_NumOfIterations = NumOfIterSolar;
         // exit on error:
 
         if (nlayer > 1) {
@@ -721,7 +721,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIter,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIter;
+        t_NumOfIterations = NumOfIter;
 
         // exit on error:
         if (!(GoAhead(nperr))) {
@@ -978,7 +978,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                     NumOfIter_NOSD,
                     edgeGlCorrFac);
 
-            NumOfIterations = NumOfIter_NOSD;
+            t_NumOfIterations = NumOfIter_NOSD;
             // exit on error
             if (!(GoAhead(nperr))) {
                 return;

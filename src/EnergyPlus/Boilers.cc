@@ -490,6 +490,13 @@ void BoilerSpecs::SetupOutputVars(EnergyPlusData &state)
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         this->Name);
+    SetupOutputVariable(state,
+                        "Boiler Coefficient of Performance",
+                        Constant::Units::None,
+                        this->BoilerCOP,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        this->Name);
     if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
         SetupEMSInternalVariable(state, "Boiler Nominal Capacity", this->Name, "[W]", this->NomCap);
     }
@@ -1044,6 +1051,9 @@ void BoilerSpecs::UpdateBoilerRecords(EnergyPlusData &state,
     this->FuelConsumed = this->FuelUsed * ReportingConstant;
     this->ParasiticElecConsumption = this->ParasiticElecPower * ReportingConstant;
     this->ParasiticFuelConsumption = this->ParasiticFuelRate * ReportingConstant;
+    this->BoilerCOP = (this->FuelUsed + this->ParasiticElecPower + this->ParasiticFuelRate) > 0
+                          ? this->BoilerLoad / (this->FuelUsed + this->ParasiticElecPower + this->ParasiticFuelRate)
+                          : 0.0;
 }
 
 } // namespace EnergyPlus::Boilers

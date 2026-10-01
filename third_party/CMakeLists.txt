@@ -1,34 +1,25 @@
-#### Create interface for JSON for Modern C++ so we can include it in targets
-# add_library( ModernJSON INTERFACE )
-# target_include_directories( ModernJSON INTERFACE "${PROJECT_SOURCE_DIR}/nlohmann" "${PROJECT_SOURCE_DIR}/doj" )
+# INTERFACE targets
 
-add_library( nlohmann_json INTERFACE )
-target_compile_definitions(
-        nlohmann_json
-        INTERFACE
-        JSON_USE_IMPLICIT_CONVERSIONS=1
-)
-if(NOT MSVC)  # This is really only needed with newer Clang, but gcc is fine with it
-  target_compile_options(nlohmann_json INTERFACE -Wno-deprecated-declarations)
-endif()
-target_compile_options(nlohmann_json INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-Wno-shorten-64-to-32>)
-target_include_directories(
-        nlohmann_json
-        SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-)
-set_source_files_properties(
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/nlohmann/json.hpp
-  TARGET_DIRECTORY nlohmann_json
-  PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations
-)
+# JSON for Modern C++ (header-only)
+add_subdirectory(nlohmann)
 
-# To avoid modifying every third_party library
-# we link the project_options in here for every library in this
-# subdirectory
+# CLI11 (header-only, used for command-line parsing)
+add_subdirectory(CLI)
 
-# SAM Is included up here to make sure it doesn't get the C++17 flags
+# valijson (header-only, used for epJSON schema validation)
+add_subdirectory(valijson)
 
+# fast_float (header-only, used for fast string-to-number parsing)
+add_subdirectory(fast_float)
+
+# milo (header-only, used for fast number-to-string formatting)
+add_subdirectory(milo)
+
+# END of INTERFACE targets
+
+set(all_third_party_targets "")
+
+# SAM Is included up here to make sure it doesn't get the C++20 flags
 # SAM Simulation Core (SSC)
 mark_as_advanced(FORCE JSONCPP_USE_SECURE_MEMORY)
 mark_as_advanced(FORCE JSONCPP_WITH_CMAKE_PACKAGE)
@@ -62,37 +53,14 @@ add_subdirectory(ssc)
 set_target_properties(ssc PROPERTIES FOLDER ThirdParty/ssc)
 set_target_properties(shared PROPERTIES FOLDER ThirdParty/ssc)
 set_target_properties(splinter PROPERTIES FOLDER ThirdParty/ssc)
-
-if(CMAKE_COMPILER_IS_GNUCXX
-   OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-   OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") # g++/Clang
-  target_compile_options(splinter PRIVATE -Wno-error -w)
-  target_compile_options(shared PRIVATE -Wno-error -w)
-  target_compile_options(ssc PRIVATE -Wno-error -w)
-elseif(MSVC) # VisualStudio
-  target_compile_options(splinter PRIVATE /W0)
-  target_compile_options(shared PRIVATE /W0 /wd4244)
-  target_compile_options(ssc PRIVATE /W0)
-endif()
 target_compile_features(ssc PRIVATE cxx_std_11)
-
-# C++20 flag is intentionally after ssc
-set(CMAKE_CXX_STANDARD 20)
-
-#Note: the Tarcog files are improperly initializing their virtual base classes, and this 4589 warning
-# on MSVC is legitimate, but silencing the warning because it's a third-party library
-
-# Shush every warning for any lib added after it?
-# link_libraries(turn_off_warnings)
-
-if(NOT MSVC)
-  add_compile_options(-Wno-pedantic -Wno-unused-parameter -Wno-unknown-pragmas)
-  if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> $<$<COMPILE_LANGUAGE:CXX>:-Wno-restrict>)
-  endif()
-else()
-  add_compile_options(/wd4267 /wd4996 /wd4068 /wd4244 /wd4589)
+if(MSVC)
+  target_compile_options(shared PRIVATE /wd4244)
 endif()
+list(APPEND all_third_party_targets ssc shared splinter)
+
+# Make sure C++20 flag is kept at 20 after SSC
+set(CMAKE_CXX_STANDARD 20)
 
 set(INSTALL_GTEST CACHE BOOL OFF)
 mark_as_advanced(INSTALL_GTEST)
@@ -101,21 +69,12 @@ set(RE2_BUILD_TESTING
     OFF
     CACHE BOOL "" FORCE)
 
-# Don't force Penumbra testing just because OpenGL is found, allow the developer to set it to ON or OFF as they want
-#if(OPENGL_FOUND)
-#  set(BUILD_PENUMBRA_TESTING
-#      ${BUILD_TESTING}
-#      CACHE BOOL "" FORCE)
-#endif()
-
 # We don't want to enable the global project_warnings for any of the third party projects
-link_libraries(project_options)
 add_subdirectory(SQLite)
 set_target_properties(sqlite PROPERTIES FOLDER ThirdParty/SQLite)
-
-# Then add in the FP options after SQLite project
-# because it cannot compile with any of the checked FP options
-link_libraries(project_fp_options)
+# We don't want to enable the global project_fp_options for SQLite because it cannot compile with any of the checked FP options
+target_link_libraries(sqlite PRIVATE project_options)
+list(APPEND all_third_party_targets sqlite)
 
 if(BUILD_TESTING)
   set(gtest_force_shared_crt
@@ -135,11 +94,17 @@ if(BUILD_TESTING)
   set_target_properties(gmock PROPERTIES FOLDER ThirdParty/gtest)
   set_target_properties(gmock_main PROPERTIES FOLDER ThirdParty/gtest)
 
+  list(APPEND all_third_party_targets gtest gtest_main gmock gmock_main)
+
   set(is_clang "$<CXX_COMPILER_ID:Clang>")
   set(v21_or_later "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,21>")
   set(is_clang_v21_or_later "$<AND:${is_clang},${v21_or_later}>")
   foreach(_gtest_target gtest gtest_main gmock gmock_main)
     if(TARGET ${_gtest_target})
+      target_link_libraries(${_gtest_target}
+        PRIVATE
+          project_options project_fp_options
+      )
       target_compile_options(${_gtest_target}
         PRIVATE
           "$<${is_clang_v21_or_later}:-Wno-character-conversion>"
@@ -151,27 +116,38 @@ endif()
 
 add_subdirectory(ObjexxFCL)
 set_target_properties(objexx PROPERTIES FOLDER ThirdParty/ObjexxFCL)
-
-add_subdirectory(BCVTB)
-set_target_properties(bcvtb PROPERTIES FOLDER ThirdParty/BCVTB)
+target_link_libraries(objexx PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets objexx)
 
 add_subdirectory(Expat)
 set_target_properties(epexpat PROPERTIES FOLDER ThirdParty/Expat)
+target_link_libraries(epexpat PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets epexpat)
+
+add_subdirectory(BCVTB)
+set_target_properties(bcvtb PROPERTIES FOLDER ThirdParty/BCVTB)
+target_link_libraries(bcvtb PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets bcvtb)
 
 add_subdirectory(FMI)
 set_target_properties(epfmiimport PROPERTIES FOLDER ThirdParty/FMI)
-target_link_libraries(epfmiimport PRIVATE turn_off_warnings)
+target_link_libraries(epfmiimport PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets epfmiimport)
 
 add_subdirectory(zlib)
 set_target_properties(miniziplib PROPERTIES FOLDER ThirdParty/zlib)
-target_link_libraries(miniziplib PRIVATE turn_off_warnings)
+target_link_libraries(miniziplib PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets miniziplib)
 
 add_subdirectory(DElight)
 set_target_properties(DElight PROPERTIES FOLDER ThirdParty/DElight)
-target_link_libraries(DElight PRIVATE turn_off_warnings)
+target_link_libraries(DElight PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets DElight)
 
 add_subdirectory(re2)
 set_target_properties(re2 PROPERTIES FOLDER ThirdParty/re2)
+target_link_libraries(re2 PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets re2)
 
 # Kiva
 option(BUILD_GROUND_PLOT "Build ground plotting library (for Kiva debugging only)" OFF)
@@ -186,17 +162,32 @@ set(KIVA_COVERAGE OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(kiva)
 set_target_properties(libkiva PROPERTIES FOLDER ThirdParty/Kiva)
+target_link_libraries(libkiva PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets libkiva)
+# libkiva exports "${kiva_SOURCE_DIR}/vendor/eigen" as a PUBLIC include, but our vendored Kiva
+# has vendor/eigen removed: point it at the shared copy instead. PUBLIC because libkiva's public
+# headers (e.g. Ground.hpp) include Eigen, so consumers (energypluslib) need it too.
+# Note: ssc/splinter carries its own private, flattened Eigen 3.2.8 copy and does not use this one
+# (upstream ssc removed it in favor of OR-Tools in 2026, see NatLabRockies/ssc#1367).
+# SYSTEM is needed here: the add_subdirectory(third_party SYSTEM) property only makes interface
+# includes system for *consumers*, while this Eigen dir must also be -isystem when libkiva
+# compiles its own sources (old Eigen triggers -Wdeprecated-enum-enum-conversion under C++20).
+target_include_directories(libkiva SYSTEM PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/eigen")
+# EnergyPlus includes kiva headers with a <libkiva/...> prefix (e.g. HeatBalanceKivaManager.hh),
+# which libkiva's own exported include dirs don't serve: export the parent dir for that spelling.
+target_include_directories(libkiva PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/kiva/src")
 
 if(NOT APPLE)
   add_subdirectory(FMUParser)
   set_target_properties(parser PROPERTIES FOLDER ThirdParty/FMI)
-  if(NOT MSVC)
-    target_compile_options(parser PRIVATE -Wno-switch)
-  endif()
+  target_link_libraries(parser PRIVATE project_options project_fp_options)
+  list(APPEND all_third_party_targets parser)
 endif()
 
 add_subdirectory(Windows-CalcEngine)
 set_target_properties(Windows-CalcEngine PROPERTIES FOLDER ThirdParty/Windows-CalcEngine)
+target_link_libraries(Windows-CalcEngine PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets Windows-CalcEngine)
 
 # Btwxt
 include_directories(${gtest_SOURCE_DIR}/include/ SYSTEM)
@@ -208,6 +199,8 @@ set_target_properties(btwxt PROPERTIES FOLDER ThirdParty/Btwxt)
 mark_as_advanced(FORCE btwxt_STATIC_LIB)
 mark_as_advanced(FORCE btwxt_COVERAGE)
 mark_as_advanced(FORCE btwxt_BUILD_TESTING)
+target_link_libraries(btwxt PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets btwxt)
 
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING
@@ -220,6 +213,13 @@ if(OPENGL_FOUND)
   set_target_properties(tess2 PROPERTIES FOLDER ThirdParty/Penumbra)
   mark_as_advanced(FORCE penumbra_STATIC_LIB)
   mark_as_advanced(FORCE penumbra_COVERAGE)
+  list(APPEND all_third_party_targets glfw glad penumbra tess2)
+  foreach(_penumbra_target glfw glad penumbra tess2)
+    target_link_libraries(${_penumbra_target}
+      PRIVATE
+      project_options project_fp_options
+    )
+  endforeach()
 endif()
 
 # libtk205
@@ -233,3 +233,48 @@ add_subdirectory(libtk205)
 mark_as_advanced(FORCE libtk205_STATIC_LIB)
 mark_as_advanced(FORCE libtk205_COVERAGE)
 mark_as_advanced(FORCE libtk205_BUILD_TESTING)
+target_link_libraries(libtk205 PRIVATE project_options project_fp_options)
+list(APPEND all_third_party_targets libtk205)
+
+# unconditionnally turn off zlib and ssc
+set(too_noisy_targets miniziplib ssc splinter shared)
+foreach(target IN LISTS too_noisy_targets)
+  target_link_libraries(${target} PRIVATE turn_off_warnings)
+endforeach()
+
+if(NOT ENABLE_WARNINGS_IN_THIRD_PARTY)
+  foreach(target IN LISTS all_third_party_targets)
+    if(TARGET ${target})
+      target_link_libraries(${target} PRIVATE turn_off_warnings)
+    endif()
+  endforeach()
+else()
+  set(skip_libs
+    ${too_noisy_targets}
+    # Too noisy as well
+    epexpat re2
+    # vendored libraries
+    glad glfw
+  )
+
+  add_library(skip_common_warnings INTERFACE)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(skip_common_warnings
+      INTERFACE
+        -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function
+        -Wno-suggest-override
+    )
+  endif()
+
+  foreach(target IN LISTS all_third_party_targets)
+    # Skip
+    if("${target}" IN_LIST skip_libs)
+      message(DEBUG "Skipping ${target} for project_warnings")
+      continue()
+    endif()
+
+    if(TARGET ${target})
+      target_link_libraries(${target} PRIVATE project_warnings warnings_as_not_error skip_common_warnings)
+    endif()
+  endforeach()
+endif()

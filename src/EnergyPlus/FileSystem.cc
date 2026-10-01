@@ -50,6 +50,7 @@
 #    include <Shlwapi.h>
 #    include <windows.h>
 #else
+#    include <sys/wait.h>
 #    include <unistd.h>
 #endif
 #include <cerrno>
@@ -315,9 +316,15 @@ namespace FileSystem {
         // cf C:\Program Files (x86)\Windows Kits\10\Source\10.0.17763.0\ucrt\exec
         // Ends up calling something that looks like the following:
         // cmd /C ""C:\path\to\ReadVarsESO.exe" "A folder with spaces\1ZoneUncontrolled.mvi" unlimited"
+        // On Windows, system() already returns the launched process's exit code directly.
         return system(("\"" + command + "\"").c_str());
 #else
-        return system(command.c_str());
+        // On POSIX, system() returns a wait-status that must be decoded to get the child's actual exit code.
+        int const status = system(command.c_str());
+        if (status == -1 || !WIFEXITED(status)) {
+            return -1;
+        }
+        return WEXITSTATUS(status);
 #endif
     }
 

@@ -65,6 +65,7 @@
 #include <EnergyPlus/PlantPressureSystem.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Pumps.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
@@ -138,7 +139,7 @@ namespace DataPlant {
         // On constant speed branch pump loop sides we need to re-simulate
         if (this->hasConstSpeedBranchPumps) {
             // turn off any pumps connected to unloaded equipment and re-do the flow/load solution pass
-            this->DisableAnyBranchPumpsConnectedToUnloadedEquipment();
+            this->DisableAnyBranchPumpsConnectedToUnloadedEquipment(state);
             this->DoFlowAndLoadSolutionPass(state, OtherLoopSide, ThisSideInletNode, FirstHVACIteration);
         }
 
@@ -662,8 +663,19 @@ namespace DataPlant {
         }
     }
 
-    void HalfLoopData::DisableAnyBranchPumpsConnectedToUnloadedEquipment()
+    void HalfLoopData::DisableAnyBranchPumpsConnectedToUnloadedEquipment(EnergyPlusData &state)
     {
+        // A tower branch can read zero dispatched load just because the loop has not started circulating yet;
+        // disabling its pump while the other side is turning the loop on deadlocks the cold start.
+        bool demandIsTurningLoopOn = false;
+        // plantLoc on a half loop side carries only loopNum/loopSideNum; its .loop pointer is never set
+        if (this->plantLoc.loopNum > 0 && this->plantLoc.loopNum <= state.dataPlnt->TotNumLoops) {
+            auto &thisLoop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+            auto const otherSide = LoopSideOther[static_cast<int>(this->plantLoc.loopSideNum)];
+            demandIsTurningLoopOn = (thisLoop.TypeOfLoop == DataPlant::LoopType::Condenser) &&
+                                    (thisLoop.LoopSide(otherSide).flowRequestNeedAndTurnOn > DataBranchAirLoopPlant::MassFlowTolerance);
+        }
+
         for (int branchNum = 2; branchNum <= this->TotalBranches - 1; ++branchNum) {
             auto &branch = this->Branch(branchNum);
             Real64 totalDispatchedLoadOnBranch = 0.0;
@@ -677,7 +689,7 @@ namespace DataPlant {
                     totalDispatchedLoadOnBranch += component.MyLoad;
                 }
             }
-            if (std::abs(totalDispatchedLoadOnBranch) < 0.001) {
+            if (std::abs(totalDispatchedLoadOnBranch) < 0.001 && !demandIsTurningLoopOn) {
                 branch.disableOverrideForCSBranchPumping = true;
             }
         }
@@ -1687,7 +1699,7 @@ namespace DataPlant {
     void HalfLoopData::SimulateLoopSideBranchGroup(EnergyPlusData &state,
                                                    int const FirstBranchNum,
                                                    int const LastBranchNum,
-                                                   Real64 FlowRequest,
+                                                   Real64 t_FlowRequest,
                                                    bool const FirstHVACIteration,
                                                    bool &LoopShutDownFlag)
     {
@@ -1746,7 +1758,7 @@ namespace DataPlant {
                     if (this->BranchPumpsExist) {
                         SimulateSinglePump(state, this_comp.location, branch.RequestedMassFlow);
                     } else {
-                        SimulateSinglePump(state, this_comp.location, FlowRequest);
+                        SimulateSinglePump(state, this_comp.location, t_FlowRequest);
                     }
                     break;
                 case DataPlant::OpScheme::CompSetPtBased:
@@ -1985,8 +1997,8 @@ namespace DataPlant {
         auto const &this_comp(this->Branch(BranchNum).Comp(CompNum));
 
         // Get information
-        int const InletNode(this_comp.NodeNumIn);
-        int const OutletNode(this_comp.NodeNumOut);
+        int const compInletNode(this_comp.NodeNumIn);
+        int const compOutletNode(this_comp.NodeNumOut);
 
         if (this->FlowLock == DataPlant::FlowLock::Unlocked) {
 
@@ -1998,7 +2010,7 @@ namespace DataPlant {
 
             default: {
                 // pumps pipes, etc. will be lumped in here with other component types, but they will have no delta T anyway
-                ComponentMassFlowRate = state.dataLoopNodes->Node(InletNode).MassFlowRateRequest;
+                ComponentMassFlowRate = state.dataLoopNodes->Node(compInletNode).MassFlowRateRequest;
                 // make sure components like economizers use the mass flow request
                 break;
             }
@@ -2015,7 +2027,7 @@ namespace DataPlant {
             }
             default: {
                 // pumps pipes, etc. will be lumped in here with other component types, but they will have no delta T anyway
-                ComponentMassFlowRate = state.dataLoopNodes->Node(OutletNode).MassFlowRate;
+                ComponentMassFlowRate = state.dataLoopNodes->Node(compOutletNode).MassFlowRate;
             }
             }
 
@@ -2028,8 +2040,8 @@ namespace DataPlant {
         }
 
         // Get an average temperature for the property call
-        Real64 const InletTemp(state.dataLoopNodes->Node(InletNode).Temp);
-        Real64 const OutletTemp(state.dataLoopNodes->Node(OutletNode).Temp);
+        Real64 const InletTemp(state.dataLoopNodes->Node(compInletNode).Temp);
+        Real64 const OutletTemp(state.dataLoopNodes->Node(compOutletNode).Temp);
         Real64 const AverageTemp((InletTemp + OutletTemp) / 2.0);
         Real64 const ComponentCp(state.dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getSpecificHeat(state, AverageTemp, RoutineName));
 
@@ -2162,6 +2174,7 @@ namespace DataPlant {
         Real64 ThisLoopSideFlow = ThisSideLoopFlowRequest;
         Real64 TotalPumpMinAvailFlow = 0.0;
         Real64 TotalPumpMaxAvailFlow = 0.0;
+        Real64 intermittentConstantSpeedInletPumpFlow = 0.0;
         if (allocated(this->Pumps)) {
 
             //~ Initialize pump values
@@ -2180,6 +2193,38 @@ namespace DataPlant {
                 TotalPumpMaxAvailFlow += e.CurrentMaxAvail;
             }
 
+            auto &loop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+            auto const otherSide = LoopSideOther[static_cast<int>(this->plantLoc.loopSideNum)];
+            bool const hasFixedFlowBypassPath =
+                this->BypassExists && (loop.LoopSide(otherSide).BypassExists || loop.CommonPipeType != DataPlant::CommonPipeType::No);
+            bool const pressureDeterminesPumpFlow =
+                loop.UsePressureForPumpCalcs && loop.PressureSimType == DataPlant::PressSimType::FlowCorrection && loop.PressureDrop > 0.0;
+
+            if (ThisSideLoopFlowRequest > DataConvergParams::PlantFlowRateToler && hasFixedFlowBypassPath && !pressureDeterminesPumpFlow) {
+                for (auto const &pumpInfo : this->Pumps) {
+                    if (pumpInfo.BranchNum != 1) {
+                        continue;
+                    }
+                    auto const &pumpBranch = this->Branch(pumpInfo.BranchNum);
+                    auto const &pumpComp = pumpBranch.Comp(pumpInfo.CompNum);
+                    if (pumpComp.Type != DataPlant::PlantEquipmentType::PumpConstantSpeed || pumpComp.CompNum <= 0) {
+                        continue;
+                    }
+                    auto const &pump = state.dataPumps->PumpEquip(pumpComp.CompNum);
+                    bool const supervisoryOff = (loop.EMSCtrl && loop.EMSValue <= 0.0) || (this->EMSCtrl && this->EMSValue <= 0.0) ||
+                                                (pumpBranch.EMSCtrlOverrideOn && pumpBranch.EMSCtrlOverrideValue <= 0.0) ||
+                                                (pumpComp.EMSLoadOverrideOn && pumpComp.EMSLoadOverrideValue == 0.0);
+                    if (pump.PumpControl != Pumps::PumpControlType::Intermittent || pump.EMSMassFlowOverrideOn || supervisoryOff ||
+                        pumpInfo.CurrentMaxAvail <= DataConvergParams::PlantFlowRateToler) {
+                        continue;
+                    }
+                    Real64 const scheduleFraction = (pump.flowRateSched != nullptr) ? std::clamp(pump.flowRateSched->getCurrentVal(), 0.0, 1.0) : 1.0;
+                    Real64 const scheduledPumpFlow = pump.MassFlowRateMax * scheduleFraction;
+                    Real64 const constrainedPumpFlow = min(scheduledPumpFlow, state.dataLoopNodes->Node(ThisSideInletNode).MassFlowRateMax);
+                    intermittentConstantSpeedInletPumpFlow = max(intermittentConstantSpeedInletPumpFlow, constrainedPumpFlow);
+                }
+            }
+
             // Use the pump min/max avail to attempt to constrain the loop side flow
             ThisLoopSideFlow = PlantUtilities::BoundValueToWithinTwoValues(ThisLoopSideFlow, TotalPumpMinAvailFlow, TotalPumpMaxAvailFlow);
         }
@@ -2187,6 +2232,15 @@ namespace DataPlant {
         // Now we check flow restriction from the other side, both min and max avail.
         // Doing this last basically means it wins, so the pump should pull down to meet the flow restriction
         ThisLoopSideFlow = PlantUtilities::BoundValueToNodeMinMaxAvail(state, ThisLoopSideFlow, ThisSideInletNode);
+
+        if (intermittentConstantSpeedInletPumpFlow > DataConvergParams::PlantFlowRateToler) {
+            // A constant-speed inlet pump operates at its scheduled fixed flow when on. The bypass path carries the
+            // difference between that fixed flow and the active branch requests. Restore only the maximum availability
+            // so the splitter can propagate the bypass capacity. Raising the minimum would latch the intermittent pump on.
+            ThisLoopSideFlow = intermittentConstantSpeedInletPumpFlow;
+            state.dataLoopNodes->Node(ThisSideInletNode).MassFlowRateMaxAvail = intermittentConstantSpeedInletPumpFlow;
+            TotalPumpMaxAvailFlow = intermittentConstantSpeedInletPumpFlow;
+        }
 
         // Final preparation of loop inlet min/max avail if pumps exist
         if (allocated(this->Pumps)) {

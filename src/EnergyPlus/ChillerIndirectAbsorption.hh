@@ -138,8 +138,6 @@ namespace ChillerIndirectAbsorption {
         Node::FluidType GenHeatSourceType = Node::FluidType::Blank;  // Generator heat source type, Node::NodeFluidType::Steam=3 or
                                                                      // Node::NodeFluidType::Water=2
         Fluid::RefrigProps *steam = nullptr;                         // STEAM Fluid Properties
-        bool Available = false;                                      // need an array of logicals--load identifiers of available equipment
-        bool ON = false;                                             // simulate the machine at it's operating part load ratio
         DataPlant::FlowMode FlowMode = DataPlant::FlowMode::Invalid; // one of 3 modes for component flow during operation
         bool ModulatedFlowSetToLoop = false;                         // True if the setpoint is missing at the outlet node
         bool ModulatedFlowErrDone = false;                           // true if setpoint warning issued
@@ -176,8 +174,6 @@ namespace ChillerIndirectAbsorption {
         bool MyEnvrnFlag = true;
         ReportVars Report;
         DataBranchAirLoopPlant::ControlType EquipFlowCtrl = DataBranchAirLoopPlant::ControlType::Invalid;
-
-        Fluid::GlycolProps *water = nullptr;
 
         static IndirectAbsorberSpecs *factory(EnergyPlusData &state, std::string const &objectName);
 

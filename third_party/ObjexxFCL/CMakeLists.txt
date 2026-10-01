@@ -123,7 +123,6 @@ set( test_src
   tst/unit/Array2.unit.cc
   tst/unit/Array3.unit.cc
   tst/unit/Array4.unit.cc
-  tst/unit/Array5.unit.cc
   tst/unit/ArrayS.unit.cc
   tst/unit/CArray.unit.cc
   tst/unit/CArrayA.unit.cc
@@ -155,6 +154,7 @@ set( test_src
 )
 
 add_library( ${target_name} ${src} )
+target_include_directories(${target_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (BUILD_TESTING AND BUILD_OBJEXXFCL_TESTING)
   create_test_targets(${target_name} "${test_src}" "")

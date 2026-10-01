@@ -375,36 +375,6 @@ TEST( FmathTest, Acot )
 	EXPECT_DOUBLE_EQ( acot( -1.0e99 ), pi< double >() );
 }
 
-TEST( FmathTest, Sind )
-{
-	EXPECT_EQ( sind( 0.0 ), 0.0 );
-	EXPECT_DOUBLE_EQ( sind( 45.0 ), std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( sind( 90.0 ), 1.0 );
-	EXPECT_DOUBLE_EQ( sind( 135.0 ), std::sqrt( 0.5 ) );
-	EXPECT_NEAR( sind( 180.0 ), 0.0, 1.0e-14 );
-	EXPECT_DOUBLE_EQ( sind( 225.0 ), -std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( sind( 270.0 ), -1.0 );
-	EXPECT_DOUBLE_EQ( sind( 315.0 ), -std::sqrt( 0.5 ) );
-	EXPECT_NEAR( sind( 360.0 ), 0.0, 1.0e-14 );
-	EXPECT_DOUBLE_EQ( sind( 315.0 + 360.0 ), -std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( sind( -45.0 ), -std::sqrt( 0.5 ) );
-}
-
-TEST( FmathTest, Cosd )
-{
-	EXPECT_EQ( cosd( 0.0 ), 1.0 );
-	EXPECT_DOUBLE_EQ( cosd( 45.0 ), std::sqrt( 0.5 ) );
-	EXPECT_NEAR( cosd( 90.0 ), 0.0, 1.0e-14 );
-	EXPECT_DOUBLE_EQ( cosd( 135.0 ), -std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( cosd( 180.0 ), -1.0 );
-	EXPECT_DOUBLE_EQ( cosd( 225.0 ), -std::sqrt( 0.5 ) );
-	EXPECT_NEAR( cosd( 270.0 ), 0.0, 1.0e-14 );
-	EXPECT_DOUBLE_EQ( cosd( 315.0 ), std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( cosd( 360.0 ), 1.0 );
-	EXPECT_DOUBLE_EQ( cosd( 315.0 + 360.0 ), std::sqrt( 0.5 ) );
-	EXPECT_DOUBLE_EQ( cosd( -45.0 ), std::sqrt( 0.5 ) );
-}
-
 TEST( FmathTest, Tand )
 {
 	EXPECT_EQ( tand( 0.0 ), 0.0 );

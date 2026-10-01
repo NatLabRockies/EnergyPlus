@@ -156,7 +156,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate electric chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void ElectricChillerSpecs::getInput(EnergyPlusData &state)
@@ -504,10 +503,11 @@ namespace PlantChillers {
                 if (thisChiller.DesignHeatRecVolFlowRate > 0.0) {
                     PlantUtilities::RegisterPlantCompDesignFlow(state, thisChiller.HeatRecInletNodeNum, thisChiller.DesignHeatRecVolFlowRate);
                 }
-                // Condenser flow rate must be specified for heat reclaim
+                // Condenser flow rate must be specified or sized for heat reclaim
                 if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
                     thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    if (thisChiller.CondVolFlowRate <= 0.0) {
+                    if (thisChiller.CondVolFlowRate <= 0.0 && thisChiller.CondVolFlowRate != DataSizing::AutoSize &&
+                        !state.dataIPShortCut->lNumericFieldBlanks(10)) {
                         ShowSevereError(
                             state,
                             std::format("Invalid {}={:.6f}", state.dataIPShortCut->cNumericFieldNames(10), state.dataIPShortCut->rNumericArgs(10)));
@@ -557,11 +557,7 @@ namespace PlantChillers {
                 thisChiller.DesignHeatRecMassFlowRate = 0.0;
                 thisChiller.HeatRecInletNodeNum = 0;
                 thisChiller.HeatRecOutletNodeNum = 0;
-                // if heat recovery is not used, don't care about condenser flow rate for air/evap-cooled equip.
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
-                }
+
                 if ((!state.dataIPShortCut->lAlphaFieldBlanks(8)) || (!state.dataIPShortCut->lAlphaFieldBlanks(9))) {
                     ShowWarningError(state,
                                      std::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
@@ -1150,7 +1146,7 @@ namespace PlantChillers {
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->EvapInletNodeNum, tmpEvapVolFlowRate);
 
         Real64 tmpCondVolFlowRate = this->CondVolFlowRate;
-        if (PltSizCondNum > 0 && PltSizNum > 0) {
+        if (PltSizCondNum > 0 && PltSizNum > 0 && this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             if (state.dataSize->PlantSizData(PltSizNum).DesVolFlowRate >= HVAC::SmallWaterVolFlow && tmpNomCap > 0.0) {
                 Real64 rho = this->CDPlantLoc.loop->glycol->getDensity(state, this->TempDesCondIn, RoutineName);
                 Real64 Cp = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, this->TempDesCondIn, RoutineName);
@@ -1202,12 +1198,13 @@ namespace PlantChillers {
             }
         } else {
             if (this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state, "Autosizing of Electric Chiller condenser flow rate requires a condenser");
+                ShowSevereError(state, "Autosizing of Electric Chiller condenser water flow rate requires a condenser");
                 ShowContinueError(state, "loop Sizing:Plant object");
                 ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
                 ErrorsFound = true;
             }
-            if (!this->CondVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport && (this->CondVolFlowRate > 0.0)) {
+            if (this->CondenserType == DataPlant::CondenserType::WaterCooled && !this->CondVolFlowRateWasAutoSized &&
+                state.dataPlnt->PlantFinalSizesOkayToReport && this->CondVolFlowRate > 0.0) {
                 BaseSizer::reportSizerOutput(
                     state, "Chiller:Electric", this->Name, "User-Specified Design Condenser Water Flow Rate [m3/s]", this->CondVolFlowRate);
             }
@@ -1216,6 +1213,27 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (state.dataPlnt->PlantFinalSizesOkayToReport) {
+                Real64 const desAirVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+                if (this->CondVolFlowRate == DataSizing::AutoSize || this->CondVolFlowRate == 0.0) {
+                    this->CondVolFlowRate = desAirVolFlowRate;
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "Design Size Design Condenser Fluid Flow Rate [m3/s]", this->CondVolFlowRate);
+                } else if (std::abs((this->CondVolFlowRate - desAirVolFlowRate) / desAirVolFlowRate) > state.dataSize->AutoVsHardSizingThreshold) {
+                    ShowWarningError(state, std::format("User-specified Design Condenser Fluid Flow Rate = {:.5f} [m3/s]", this->CondVolFlowRate));
+                    ShowContinueError(state,
+                                      std::format("differs from design size design condenser fluid flow rate = {:.5f} [m3/s]", desAirVolFlowRate));
+                    ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                    ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                    ShowContinueError(state, std::format("Occurs in Electric Chiller object={}", this->Name));
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "Design Size Design Condenser Fluid Flow Rate [m3/s]", desAirVolFlowRate);
+                    BaseSizer::reportSizerOutput(
+                        state, "Chiller:Electric", this->Name, "User-Specified Design Condenser Fluid Flow Rate [m3/s]", this->CondVolFlowRate);
+                }
+            }
         }
         if (ErrorsFound) {
             ShowFatalError(state, "Preceding sizing errors cause program termination");
@@ -1979,6 +1997,8 @@ namespace PlantChillers {
             if (this->CondenserType != DataPlant::CondenserType::WaterCooled) {
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).HumRat = state.dataLoopNodes->Node(this->CondInletNodeNum).HumRat;
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).Enthalpy = state.dataLoopNodes->Node(this->CondInletNodeNum).Enthalpy;
+                state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate = this->CondMassFlowRate;
+                state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = this->CondMassFlowRate;
             }
 
             this->EvapInletTemp = state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp;
@@ -2008,13 +2028,13 @@ namespace PlantChillers {
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).HumRat = this->CondOutletHumRat;
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).Enthalpy =
                     Psychrometrics::PsyHFnTdbW(this->CondOutletTemp, this->CondOutletHumRat);
+                state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate = this->CondMassFlowRate;
+                state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = this->CondMassFlowRate;
             }
             // set node flow rates;  for these load based models
             // assume that the sufficient evaporator flow rate available
             this->EvapInletTemp = state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp;
             this->CondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
-            this->CondOutletTemp = state.dataLoopNodes->Node(this->CondOutletNodeNum).Temp;
-            this->EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
             if (this->CondenserType == DataPlant::CondenserType::EvapCooled) {
                 this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
             }
@@ -2140,7 +2160,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate engine driven chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void EngineDrivenChillerSpecs::simulate(
@@ -2579,11 +2598,7 @@ namespace PlantChillers {
                 thisChiller.DesignHeatRecMassFlowRate = 0.0;
                 thisChiller.HeatRecInletNodeNum = 0;
                 thisChiller.HeatRecOutletNodeNum = 0;
-                // if heat recovery is not used, don't care about condenser flow rate for air/evap-cooled equip.
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
-                }
+
                 if ((!state.dataIPShortCut->lAlphaFieldBlanks(13)) || (!state.dataIPShortCut->lAlphaFieldBlanks(14))) {
                     ShowWarningError(state,
                                      std::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
@@ -3250,6 +3265,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         // autosize support for heat recovery flow rate.
@@ -4181,7 +4201,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate gas turbine chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void
@@ -4575,10 +4594,6 @@ namespace PlantChillers {
                                                  state.dataIPShortCut->cCurrentModuleObject,
                                                  state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "However, Node names were specified for heat recovery inlet or outlet nodes");
-                }
-                if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                    thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) {
-                    thisChiller.CondVolFlowRate = 0.0011; // set to avoid errors in calc routine
                 }
             }
 
@@ -5217,6 +5232,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         Real64 GTEngineCapacityDes = this->NomCap / (this->engineCapacityScalar * this->COP);
@@ -5546,7 +5566,7 @@ namespace PlantChillers {
 
         //  LOAD LOCAL VARIABLES FROM DATA STRUCTURE (for code readability)
         Real64 ChillerNomCap = this->NomCap;
-        Real64 COP = this->COP;
+        Real64 localCOP = this->COP;
         Real64 TempCondIn = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
         Real64 TempEvapOut = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
 
@@ -5555,14 +5575,14 @@ namespace PlantChillers {
             (!state.dataGlobal->KickOffSimulation)) {
             int FaultIndex = this->FaultyChillerFoulingIndex;
             Real64 NomCap_ff = ChillerNomCap;
-            Real64 COP_ff = COP;
+            Real64 COP_ff = localCOP;
 
             // calculate the Faulty Chiller Fouling Factor using fault information
             this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(FaultIndex).CalFoulingFactor(state);
 
             // update the Chiller nominal capacity and COP at faulty cases
             ChillerNomCap = NomCap_ff * this->FaultyChillerFoulingFactor;
-            COP = COP_ff * this->FaultyChillerFoulingFactor;
+            localCOP = COP_ff * this->FaultyChillerFoulingFactor;
         }
 
         // If there is a fault of Chiller SWT Sensor
@@ -5613,7 +5633,7 @@ namespace PlantChillers {
             } else {
                 FRAC = 1.0;
             }
-            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / COP * FRAC;
+            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / localCOP * FRAC;
 
             // Either set the flow to the Constant value or calculate the flow for the variable volume
             if ((this->FlowMode == DataPlant::FlowMode::Constant) || (this->FlowMode == DataPlant::FlowMode::NotModulated)) {
@@ -5796,7 +5816,7 @@ namespace PlantChillers {
             }
 
             // Chiller is false loading below PLR = minimum unloading ratio, find PLR used for energy calculation
-            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / COP * FRAC;
+            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / localCOP * FRAC;
 
             if (this->EvapMassFlowRate == 0.0) {
                 this->QEvaporator = 0.0;
@@ -6143,7 +6163,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate constant COP chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void ConstCOPChillerSpecs::simulate(
@@ -6273,15 +6292,10 @@ namespace PlantChillers {
             if (thisChiller.EvapVolFlowRate == DataSizing::AutoSize) {
                 thisChiller.EvapVolFlowRateWasAutoSized = true;
             }
-            if (thisChiller.CondenserType == DataPlant::CondenserType::AirCooled ||
-                thisChiller.CondenserType == DataPlant::CondenserType::EvapCooled) { // Condenser flow rate not used for these cond types
-                thisChiller.CondVolFlowRate = 0.0011;
-            } else {
-                thisChiller.CondVolFlowRate = state.dataIPShortCut->rNumericArgs(4);
-                if (thisChiller.CondVolFlowRate == DataSizing::AutoSize) {
-                    if (thisChiller.CondenserType == DataPlant::CondenserType::WaterCooled) {
-                        thisChiller.CondVolFlowRateWasAutoSized = true;
-                    }
+            thisChiller.CondVolFlowRate = state.dataIPShortCut->rNumericArgs(4);
+            if (thisChiller.CondVolFlowRate == DataSizing::AutoSize) {
+                if (thisChiller.CondenserType == DataPlant::CondenserType::WaterCooled) {
+                    thisChiller.CondVolFlowRateWasAutoSized = true;
                 }
             }
             thisChiller.SizFac = state.dataIPShortCut->rNumericArgs(5);
@@ -6670,7 +6684,7 @@ namespace PlantChillers {
 
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("InitConstCOPChiller");
-        constexpr Real64 TempDesCondIn(25.0); // Design condenser inlet temp. C
+        constexpr Real64 localTempDesCondIn(25.0); // Design condenser inlet temp. C
 
         this->oneTimeInit(state);
 
@@ -6684,7 +6698,7 @@ namespace PlantChillers {
             // init maximum available condenser flow rate
             if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
 
-                state.dataLoopNodes->Node(this->CondInletNodeNum).Temp = TempDesCondIn;
+                state.dataLoopNodes->Node(this->CondInletNodeNum).Temp = localTempDesCondIn;
 
                 rho = this->CDPlantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
 
@@ -6693,7 +6707,8 @@ namespace PlantChillers {
                 PlantUtilities::InitComponentNodes(state, 0.0, this->CondMassFlowRateMax, this->CondInletNodeNum, this->CondOutletNodeNum);
             } else { // air or evap-air
                 state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate =
-                    this->CondVolFlowRate * Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, TempDesCondIn, 0.0, RoutineName);
+                    this->CondVolFlowRate *
+                    Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, localTempDesCondIn, 0.0, RoutineName);
 
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate;
                 state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRateMaxAvail =
@@ -6975,6 +6990,11 @@ namespace PlantChillers {
         // save the design condenser water volumetric flow rate for use by the condenser water loop sizing algorithms
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             PlantUtilities::RegisterPlantCompDesignFlow(state, this->CondInletNodeNum, tmpCondVolFlowRate);
+        } else {
+            // sizing of condenser flow for air/evap-cooled is not reported but the condenser side deltaT is calculated, so at least make it realistic
+            if (this->CondVolFlowRate == DataSizing::AutoSize && state.dataPlnt->PlantFinalSizesOkayToReport) {
+                this->CondVolFlowRate = this->NomCap * 0.000114; // m3/s/w (850 cfm/ton)
+            }
         }
 
         if (ErrorsFound) {
@@ -7053,7 +7073,7 @@ namespace PlantChillers {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 TempEvapOutSetPoint(0.0);     // C - evaporator outlet temperature setpoint
-        Real64 COP = this->COP;              // coefficient of performance
+        Real64 localCOP = this->COP;         // coefficient of performance
         Real64 ChillerNomCap = this->NomCap; // chiller nominal capacity
         this->Power = 0.0;
 
@@ -7062,14 +7082,14 @@ namespace PlantChillers {
             (!state.dataGlobal->KickOffSimulation)) {
             int FaultIndex = this->FaultyChillerFoulingIndex;
             Real64 NomCap_ff = ChillerNomCap;
-            Real64 COP_ff = COP;
+            Real64 COP_ff = localCOP;
 
             // calculate the Faulty Chiller Fouling Factor using fault information
             this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(FaultIndex).CalFoulingFactor(state);
 
             // update the Chiller nominal capacity and COP at faulty cases
             ChillerNomCap = NomCap_ff * this->FaultyChillerFoulingFactor;
-            COP = COP_ff * this->FaultyChillerFoulingFactor;
+            localCOP = COP_ff * this->FaultyChillerFoulingFactor;
         }
 
         if (this->CWPlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
@@ -7290,7 +7310,7 @@ namespace PlantChillers {
                 }
             } // End of Constant or Variable Flow If Block for FlowLock = 0 (or making a flow request)
             if (this->thermosiphonDisabled(state)) {
-                this->Power = std::abs(MyLoad) / COP;
+                this->Power = std::abs(MyLoad) / localCOP;
             }
 
             // If there is a fault of Chiller SWT Sensor
@@ -7401,7 +7421,7 @@ namespace PlantChillers {
             } else {
                 // Calculate the Power consumption of the Const COP chiller which is a simplified calculation
                 if (this->thermosiphonDisabled(state)) {
-                    this->Power = this->QEvaporator / COP;
+                    this->Power = this->QEvaporator / localCOP;
                 }
             }
             if (this->QEvaporator == 0.0 && this->CondenserType == DataPlant::CondenserType::EvapCooled) {
@@ -7416,13 +7436,13 @@ namespace PlantChillers {
         this->QCondenser = this->Power + this->QEvaporator;
 
         // If not air or evap cooled then set to the condenser node that is attached to a cooling tower
-        Real64 const CondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
+        Real64 const localCondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
 
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             // local for fluid specif heat, for condenser
-            Real64 const CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, CondInletTemp, RoutineName);
+            Real64 const CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, localCondInletTemp, RoutineName);
             if (this->CondMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
-                this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + CondInletTemp;
+                this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + localCondInletTemp;
             } else {
                 ShowSevereError(state, std::format("CalcConstCOPChillerModel: Condenser flow = 0, for CONST COP Chiller={}", this->Name));
                 ShowContinueErrorTimeStamp(state, "");
@@ -7430,7 +7450,7 @@ namespace PlantChillers {
         } else { // Air Cooled or Evap Cooled
             //  Set condenser outlet temp to condenser inlet temp for Air Cooled or Evap Cooled
             //  since there is no CondMassFlowRate and would divide by zero
-            this->CondOutletTemp = CondInletTemp;
+            this->CondOutletTemp = localCondInletTemp;
         }
 
         // Calculate Energy
@@ -7443,12 +7463,12 @@ namespace PlantChillers {
 
             if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
                 // first check for run away condenser loop temps (only reason yet to be observed for this?)
-                if (CondInletTemp > 70.0) {
+                if (localCondInletTemp > 70.0) {
                     ShowSevereError(
                         state,
                         std::format("CalcConstCOPChillerModel: Condenser loop inlet temperatures over 70.0 C for ConstCOPChiller={}", this->Name));
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, std::format("Condenser loop water temperatures are too high at{:.2f}", CondInletTemp));
+                    ShowContinueError(state, std::format("Condenser loop water temperatures are too high at{:.2f}", localCondInletTemp));
                     ShowContinueError(state, "Check input for condenser plant loop, especially cooling tower");
                     ShowContinueError(state,
                                       std::format("Evaporator inlet temperature: {:.2f}", state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp));

@@ -513,16 +513,16 @@ namespace BaseboardRadiator {
 
         // Do the Begin Environment initializations
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag && !this->SetLoopIndexFlag) {
-            int WaterInletNode = this->WaterInletNode;
+            int waterInletNode = this->WaterInletNode;
             Real64 rho = this->plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
             this->WaterMassFlowRateMax = rho * this->WaterVolFlowRateMax;
             PlantUtilities::InitComponentNodes(state, 0.0, this->WaterMassFlowRateMax, this->WaterInletNode, this->WaterOutletNode);
-            state.dataLoopNodes->Node(WaterInletNode).Temp = Constant::HWInitConvTemp;
-            Real64 Cp = this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(WaterInletNode).Temp, RoutineName);
-            state.dataLoopNodes->Node(WaterInletNode).Enthalpy = Cp * state.dataLoopNodes->Node(WaterInletNode).Temp;
-            state.dataLoopNodes->Node(WaterInletNode).Quality = 0.0;
-            state.dataLoopNodes->Node(WaterInletNode).Press = 0.0;
-            state.dataLoopNodes->Node(WaterInletNode).HumRat = 0.0;
+            state.dataLoopNodes->Node(waterInletNode).Temp = Constant::HWInitConvTemp;
+            Real64 Cp = this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(waterInletNode).Temp, RoutineName);
+            state.dataLoopNodes->Node(waterInletNode).Enthalpy = Cp * state.dataLoopNodes->Node(waterInletNode).Temp;
+            state.dataLoopNodes->Node(waterInletNode).Quality = 0.0;
+            state.dataLoopNodes->Node(waterInletNode).Press = 0.0;
+            state.dataLoopNodes->Node(waterInletNode).HumRat = 0.0;
             // pick a mass flow rate that depends on the max water mass flow rate. CR 8842 changed to factor of 2.0
             if (this->AirMassFlowRate <= 0.0) {
                 this->AirMassFlowRate = 2.0 * this->WaterMassFlowRateMax;
@@ -535,11 +535,11 @@ namespace BaseboardRadiator {
         }
 
         // Do the every time step initializations
-        int WaterInletNode = this->WaterInletNode;
+        int waterInletNode = this->WaterInletNode;
         int ZoneNode = state.dataZoneEquip->ZoneEquipConfig(this->ZonePtr).ZoneNode;
-        this->WaterMassFlowRate = state.dataLoopNodes->Node(WaterInletNode).MassFlowRate;
-        this->WaterInletTemp = state.dataLoopNodes->Node(WaterInletNode).Temp;
-        this->WaterInletEnthalpy = state.dataLoopNodes->Node(WaterInletNode).Enthalpy;
+        this->WaterMassFlowRate = state.dataLoopNodes->Node(waterInletNode).MassFlowRate;
+        this->WaterInletTemp = state.dataLoopNodes->Node(waterInletNode).Temp;
+        this->WaterInletEnthalpy = state.dataLoopNodes->Node(waterInletNode).Enthalpy;
         this->AirInletTemp = state.dataLoopNodes->Node(ZoneNode).Temp;
         this->AirInletHumRat = state.dataLoopNodes->Node(ZoneNode).HumRat;
     }
@@ -570,7 +570,7 @@ namespace BaseboardRadiator {
         Real64 DesCoilLoad(0.0);
         Real64 UA0; // lower bound for UA
         Real64 UA1; // upper bound for UA
-        Real64 UA;
+        Real64 UALocal;
         bool ErrorsFound(false);             // If errors detected in input
         Real64 rho;                          // local fluid density
         Real64 Cp;                           // local fluid specific heat
@@ -789,7 +789,7 @@ namespace BaseboardRadiator {
                                     return (DesCoilLoad - LoadMet) / DesCoilLoad;
                                 };
                                 int SolFla = 0;
-                                General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
+                                General::SolveRoot(state, Acc, MaxIte, SolFla, UALocal, f, UA0, UA1);
                                 // if the numerical inversion failed, issue error messages.
                                 if (SolFla == -1) {
                                     ShowSevereError(state,
@@ -802,7 +802,7 @@ namespace BaseboardRadiator {
                                     } else {
                                         ShowContinueError(
                                             state, "Could not calculate design value for comparison to user value, and the simulation continues");
-                                        UA = 0.0;
+                                        UALocal = 0.0;
                                     }
                                 } else if (SolFla == -2) {
                                     ShowSevereError(state,
@@ -815,11 +815,11 @@ namespace BaseboardRadiator {
                                     } else {
                                         ShowContinueError(
                                             state, "Could not calculate design value for comparison to user value, and the simulation continues");
-                                        UA = 0.0;
+                                        UALocal = 0.0;
                                     }
                                 }
-                                UADes = UA; // baseboard->baseboards(BaseboardNum)%UA = UA
-                            } else {        // baseboard design load is greater than output at UA = design load so set UA = design load
+                                UADes = UALocal; // baseboard->baseboards(BaseboardNum)%UA = UA
+                            } else {             // baseboard design load is greater than output at UA = design load so set UA = design load
                                 UADes = UA1;
                                 if (UAAutoSize) {
                                     ShowWarningError(state,

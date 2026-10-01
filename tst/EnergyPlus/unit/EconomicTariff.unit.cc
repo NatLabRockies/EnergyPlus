@@ -345,7 +345,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_Gas_CCF_Test)
     state->dataOutputProcessor->meterMap.insert_or_assign("NATURALGAS:FACILITY", state->dataOutputProcessor->meters.size() - 1);
 
     UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -386,7 +385,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_Electric_CCF_Test)
     state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:FACILITY", state->dataOutputProcessor->meters.size() - 1);
 
     UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -603,7 +601,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
 
     // This will only do the get input routines
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -653,7 +650,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
     // This Should now call GatherForEconomics
     state->dataGlobal->DoOutputReporting = true;
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
     EXPECT_ENUM_EQ(Season::Winter, state->dataEconTariff->tariff(1).seasonForMonth(5));
     EXPECT_ENUM_EQ(Season::Invalid, state->dataEconTariff->tariff(1).seasonForMonth(6));
 
@@ -679,7 +675,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
 
     // This Should now call GatherForEconomics
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
     EXPECT_ENUM_EQ(Season::Winter, state->dataEconTariff->tariff(1).seasonForMonth(5));
     EXPECT_ENUM_EQ(Season::Summer, state->dataEconTariff->tariff(1).seasonForMonth(6));
 }

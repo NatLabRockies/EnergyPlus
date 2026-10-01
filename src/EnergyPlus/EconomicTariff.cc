@@ -3901,6 +3901,9 @@ void LEEDtariffReporting(EnergyPlusData &state)
         othrUnits = EconConv::USERDEF;
         gasDemWindowUnits = DemandWindow::Invalid;
         othrDemWindowUnits = DemandWindow::Invalid;
+        distCoolDemWindowUnits = DemandWindow::Invalid;
+        distHeatWaterDemWindowUnits = DemandWindow::Invalid;
+        distHeatSteamDemWindowUnits = DemandWindow::Invalid;
         std::string elecTariffNames;
         std::string gasTariffNames;
         std::string distCoolTariffNames;

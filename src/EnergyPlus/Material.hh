@@ -240,31 +240,58 @@ namespace Material {
         Real64 SpecHeat = 0.0;  // Layer specific heat (J/kgK)
         Real64 Thickness = 0.0; // Layer thickness (m)
 
-        Real64 AbsorpThermal = 0.0;      // Layer thermal absorptance
-        Real64 AbsorpThermalInput = 0.0; // Layer thermal absorptance input by user
-        Real64 AbsorpThermalBack = 0.0;  // Infrared radiation back absorption
-        Real64 AbsorpThermalFront = 0.0; // Infrared radiation front absorption
+        Real64 AbsorpThermalOut = 0.0;        // Layer thermal absorptance outside face
+        Real64 AbsorpThermalInputOut = 0.0;   // Layer thermal absorptance outside face input by user
+        Real64 AbsorpThermalIn = 0.0;         // Layer thermal absorptance inside face
+        Real64 AbsorpThermalInputIn = 0.0;    // Layer thermal absorptance inside face input by user
+        bool hasAbsorpThermalInputIn = false; // Optional inside-face thermal absorptance was explicitly input
+        Real64 AbsorpThermalBack = 0.0;       // Infrared radiation back absorption
+        Real64 AbsorpThermalFront = 0.0;      // Infrared radiation front absorption
 
-        Real64 AbsorpSolar = 0.0;      // Layer solar absorptance
-        Real64 AbsorpSolarInput = 0.0; // Layer solar absorptance input by user
+        Real64 AbsorpSolarOut = 0.0;        // Layer solar absorptance outside face
+        Real64 AbsorpSolarInputOut = 0.0;   // Layer solar absorptance outside face input by user
+        Real64 AbsorpSolarIn = 0.0;         // Layer solar absorptance inside face
+        Real64 AbsorpSolarInputIn = 0.0;    // Layer solar absorptance inside face input by user
+        bool hasAbsorpSolarInputIn = false; // Optional inside-face solar absorptance was explicitly input
 
-        Real64 AbsorpVisible = 0.0;      // Layer Visible Absorptance
-        Real64 AbsorpVisibleInput = 0.0; // Layer Visible Absorptance input by user
+        Real64 AbsorpVisibleOut = 0.0;        // Layer Visible Absorptance outside face
+        Real64 AbsorpVisibleInputOut = 0.0;   // Layer Visible Absorptance outside face input by user
+        Real64 AbsorpVisibleIn = 0.0;         // Layer Visible Absorptance inside face
+        Real64 AbsorpVisibleInputIn = 0.0;    // Layer Visible Absorptance inside face input by user
+        bool hasAbsorpVisibleInputIn = false; // Optional inside-face visible absorptance was explicitly input
 
         // Radiation parameters // Are these for windows or for opaque materials also?
-        bool AbsorpSolarEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
-        Real64 AbsorpSolarEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
-        bool AbsorpThermalEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance
-        Real64 AbsorpThermalEMSOverride = 0.0;   // value to use when EMS calling to override value for thermal absorptance
-        bool AbsorpVisibleEMSOverrideOn = false; // if true, then EMS calling to override value for visible absorptance
-        Real64 AbsorpVisibleEMSOverride = 0.0;   // value to use when EMS calling to override value for visible absorptance
+        // Legacy EMS overrides apply to both faces for backward compatibility.
+        bool AbsorpSolarEMSOverrideOn = false;
+        Real64 AbsorpSolarEMSOverride = 0.0;
+        bool AbsorpThermalEMSOverrideOn = false;
+        Real64 AbsorpThermalEMSOverride = 0.0;
+        bool AbsorpVisibleEMSOverrideOn = false;
+        Real64 AbsorpVisibleEMSOverride = 0.0;
+        bool AbsorpSolarOutEMSOverrideOn = false;   // if true, then EMS calling to override value for solar absorptance
+        Real64 AbsorpSolarOutEMSOverride = 0.0;     // value to use when EMS calling to override value for solar absorptance
+        bool AbsorpThermalOutEMSOverrideOn = false; // if true, then EMS calling to override value for thermal absorptance
+        Real64 AbsorpThermalOutEMSOverride = 0.0;   // value to use when EMS calling to override value for thermal absorptance
+        bool AbsorpVisibleOutEMSOverrideOn = false; // if true, then EMS calling to override value for visible absorptance
+        Real64 AbsorpVisibleOutEMSOverride = 0.0;   // value to use when EMS calling to override value for visible absorptance
+        bool AbsorpSolarInEMSOverrideOn = false;    // if true, then EMS calling to override value for solar absorptance
+        Real64 AbsorpSolarInEMSOverride = 0.0;      // value to use when EMS calling to override value for solar absorptance
+        bool AbsorpThermalInEMSOverrideOn = false;  // if true, then EMS calling to override value for thermal absorptance
+        Real64 AbsorpThermalInEMSOverride = 0.0;    // value to use when EMS calling to override value for thermal absorptance
+        bool AbsorpVisibleInEMSOverrideOn = false;  // if true, then EMS calling to override value for visible absorptance
+        Real64 AbsorpVisibleInEMSOverride = 0.0;    // value to use when EMS calling to override value for visible absorptance
 
         // dynamic thermal and solar absorptance coating parameters
-        VariableAbsCtrlSignal absorpVarCtrlSignal = VariableAbsCtrlSignal::Invalid;
-        Sched::Schedule *absorpThermalVarSched = nullptr;
-        Curve::Curve *absorpThermalVarCurve = nullptr;
-        Sched::Schedule *absorpSolarVarSched = nullptr;
-        Curve::Curve *absorpSolarVarCurve = nullptr;
+        VariableAbsCtrlSignal absorpVarCtrlSignalOut = VariableAbsCtrlSignal::Invalid;
+        Sched::Schedule *absorpThermalVarSchedOut = nullptr;
+        Curve::Curve *absorpThermalVarCurveOut = nullptr;
+        Sched::Schedule *absorpSolarVarSchedOut = nullptr;
+        Curve::Curve *absorpSolarVarCurveOut = nullptr;
+        VariableAbsCtrlSignal absorpVarCtrlSignalIn = VariableAbsCtrlSignal::Invalid;
+        Sched::Schedule *absorpThermalVarSchedIn = nullptr;
+        Curve::Curve *absorpThermalVarCurveIn = nullptr;
+        Sched::Schedule *absorpSolarVarSchedIn = nullptr;
+        Curve::Curve *absorpSolarVarCurveIn = nullptr;
 
         bool hasEMPD = false;
         bool hasHAMT = false;
@@ -325,7 +352,7 @@ namespace Material {
             group = Group::Invalid;
         }
         ~MaterialShadingDevice() = default;
-        virtual bool can_instantiate() = 0; // Prevents this class from being instantiated
+        bool can_instantiate() override = 0; // Prevents this class from being instantiated
     };
 
     // Class for WindowMaterial:Shade
@@ -515,8 +542,7 @@ namespace Material {
         Real64 SlatWidth = 0.0;                                                                                   // Slat width (m)
         Real64 SlatSeparation = 0.0;                                                                              // Slat separation (m)
         Real64 SlatThickness = 0.0;                                                                               // Slat thickness (m)
-        Real64 SlatCrown = 0.0;        // the height of the slate (length from the chord to the curve)
-        Real64 SlatAngle = 0.0;        // Slat angle (deg)
+        Real64 SlatAngle = 0.0;                                                                                   // Slat angle (deg)
         Real64 MinSlatAngle = 0.0;     // Minimum slat angle for variable-angle slats (deg) (user input)
         Real64 MaxSlatAngle = 0.0;     // Maximum slat angle for variable-angle slats (deg) (user input)
         Real64 SlatConductivity = 0.0; // Slat conductivity (W/m-K)
@@ -532,7 +558,7 @@ namespace Material {
             group = Group::Blind;
         }
         ~MaterialBlind() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         } // This function allows this class to be instantiated
@@ -561,7 +587,7 @@ namespace Material {
             group = Group::ComplexShade;
         }
         ~MaterialComplexShade() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         } // This function allows this class to be instantiated
@@ -619,32 +645,6 @@ namespace Material {
             group = Group::ComplexWindowGap;
         }
         ~MaterialComplexWindowGap() = default;
-    };
-
-    struct ScreenBmTraAbsRef
-    {
-        struct
-        {
-            Real64 Tra = 0.0;
-        } Bm;
-        struct
-        {
-            Real64 Tra = 0.0;
-        } Df;
-        Real64 Abs = 0.0;
-        Real64 Ref = 0.0;
-    };
-
-    struct ScreenBmTAR
-    {
-        struct
-        {
-            ScreenBmTraAbsRef Ft, Bk;
-        } Sol;
-        struct
-        {
-            ScreenBmTraAbsRef Ft, Bk;
-        } Vis;
     };
 
     // Screen Beam Transmittance, Absorptance, Reflectance (TAR) properties
@@ -832,20 +832,13 @@ namespace Material {
         // Window-related radiation parameters
         Real64 GlassTransDirtFactor = 1.0; // Multiplier on glass transmittance due to dirt
         bool SolarDiffusing = false;       // True if glass diffuses beam solar radiation
-        Real64 ReflectSolDiffBack = 0.0;   // Solar back diffuse reflectance
-        Real64 ReflectSolDiffFront = 0.0;  // Solar front diffuse reflectance
         Real64 ReflectVisBeamBack = 0.0;   // Visible back reflectance (beam to everything)
         Real64 ReflectVisBeamFront = 0.0;  // Visible front reflectance (beam to everything)
-        Real64 ReflectVisDiffBack = 0.0;   // Visible back diffuse reflectance
-        Real64 ReflectVisDiffFront = 0.0;  // Visible front diffuse reflectance
-        Real64 TransSolBeam = 0.0;         // Solar transmittance (beam to everything)
-        Real64 TransVisBeam = 0.0;         // Visible transmittance (beam to everything)
         // Complex fenestration parameters
         Real64 YoungModulus = 0.0;  // Young's modulus (Pa) - used in window deflection calculations
         Real64 PoissonsRatio = 0.0; // Poisson's ratio - used in window deflection calculations
 
         // Added 12/22/2008 for thermochromic window glazing material
-        Real64 SpecTemp = 0.0;                          // Temperature corresponding to the specified material properties
         int TCParentMatNum = 0;                         // Reference to the parent object WindowMaterial:Glazing:Thermochromic
         int GlassSpectralDataPtr = 0;                   // Number of a spectral data set associated with a window glass material
         Curve::Curve *GlassSpecAngTransCurve = nullptr; // Transmittance as a function of spectral and angle associated with a glass material
@@ -866,7 +859,7 @@ namespace Material {
             group = Group::Glass;
         }
         ~MaterialGlass() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         }
@@ -884,7 +877,7 @@ namespace Material {
             group = Group::GlassEQL;
         }
         ~MaterialGlassEQL() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         }
@@ -937,29 +930,25 @@ struct MaterialData : BaseGlobalStruct
     Array1D<Material::MaterialBase *> materials;
     std::map<std::string, int> materialMap;
 
-    int NumRegulars = 0;
     int NumNoMasses = 0;
     int NumIRTs = 0;
     int NumAirGaps = 0;
-    int NumW5Glazings = 0;         // Window5 Glass Materials, specified by transmittance and front and back reflectance
-    int NumW5AltGlazings = 0;      // Window5 Glass Materials, specified by index of refraction and extinction coeff
-    int NumW5Gases = 0;            // Window5 Single-Gas Materials
-    int NumW5GasMixtures = 0;      // Window5 Gas Mixtures
-    int NumW7SupportPillars = 0;   // Complex fenestration support pillars
-    int NumW7DeflectionStates = 0; // Complex fenestration deflection states
-    int NumW7Gaps = 0;             // Complex fenestration material gaps
-    int NumBlinds = 0;             // Total number of blind materials
-    int NumScreens = 0;            // Total number of exterior window screen materials
-    int NumTCGlazings = 0;         // Number of TC glazing object - WindowMaterial:Glazing:Thermochromic found in the idf file
-    int NumShades = 0;             // Total number of shade materials
-    int NumComplexGaps = 0;        // Total number of window gaps for complex fenestrations
-    int NumSimpleWindows = 0;      // number of simple window systems.
-    int NumEQLGlazings = 0;        // Window5 Single-Gas Materials for Equivalent Layer window model
-    int NumEQLShades = 0;          // Total number of shade materials for Equivalent Layer window model
-    int NumEQLDrapes = 0;          // Total number of drape materials for Equivalent Layer window model
-    int NumEQLBlinds = 0;          // Total number of blind materials for Equivalent Layer window model
-    int NumEQLScreens = 0;         // Total number of exterior window screen materials for Equivalent Layer window model
-    int NumEQLGaps = 0;            // Window5 Equivalent Layer Single-Gas Materials
+    int NumW5Glazings = 0;    // Window5 Glass Materials, specified by transmittance and front and back reflectance
+    int NumW5AltGlazings = 0; // Window5 Glass Materials, specified by index of refraction and extinction coeff
+    int NumW5Gases = 0;       // Window5 Single-Gas Materials
+    int NumW5GasMixtures = 0; // Window5 Gas Mixtures
+    int NumW7Gaps = 0;        // Complex fenestration material gaps
+    int NumBlinds = 0;        // Total number of blind materials
+    int NumScreens = 0;       // Total number of exterior window screen materials
+    int NumTCGlazings = 0;    // Number of TC glazing object - WindowMaterial:Glazing:Thermochromic found in the idf file
+    int NumShades = 0;        // Total number of shade materials
+    int NumSimpleWindows = 0; // number of simple window systems.
+    int NumEQLGlazings = 0;   // Window5 Single-Gas Materials for Equivalent Layer window model
+    int NumEQLShades = 0;     // Total number of shade materials for Equivalent Layer window model
+    int NumEQLDrapes = 0;     // Total number of drape materials for Equivalent Layer window model
+    int NumEQLBlinds = 0;     // Total number of blind materials for Equivalent Layer window model
+    int NumEQLScreens = 0;    // Total number of exterior window screen materials for Equivalent Layer window model
+    int NumEQLGaps = 0;       // Window5 Equivalent Layer Single-Gas Materials
     int NumEcoRoofs = 0;
 
     bool AnyVariableAbsorptance = false;

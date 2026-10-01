@@ -808,7 +808,17 @@ TEST_F(EnergyPlusFixture, SeriesPIUZoneOAVolumeFlowRateTest)
     EXPECT_EQ(PriMinMassFlow, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
     EXPECT_EQ(expect_OutdoorAirFlowRate, thisSeriesAT.OutdoorAirFlowRate);
 
-    // test 3: - Cooling load, at maximum primary air flow rate
+    // test 3: No heating load at 0 primary flow rate
+    FirstHVACIteration = true;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 0.0;
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = 0.0;
+    PoweredInductionUnits::InitPIU(*state, PIUNum, FirstHVACIteration);
+    PoweredInductionUnits::CalcSeriesPIU(*state, PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(thisSeriesAT.OutAirNode).MassFlowRate); // fails prior to MinAvail fix for 0 flow #11737
+
+    // test 4: - Cooling load, at maximum primary air flow rate
     // set cooling zone and AT unit inlet conditions
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 24.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0080;
@@ -2001,6 +2011,47 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
         "   ************* Beginning System Sizing Calculations",
     });
     EXPECT_TRUE(compare_err_stream(expectedError, true));
+
+    // PIU TU has not been sized yet, so the following should be true:
+    EXPECT_EQ(state->dataPowerInductionUnits->PIU(1).MaxTotAirVolFlow, DataSizing::AutoSize);
+    EXPECT_EQ(state->dataPowerInductionUnits->PIU(1).MaxPriAirVolFlow, DataSizing::AutoSize);
+
+    state->dataGlobal->SysSizingCalc = false; // allow PIU TU to be sized
+    state->dataSize->CurTermUnitSizingNum = 1;
+    state->dataSize->CurZoneEqNum = 1;
+    // Zone sizing has complegted with MinOA = 0 and would size PIU secondary to same value as primary
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.0, 0.00001);
+    // raise minimum zone OA so that parallel PIU will be sized with a secondary flow less than the primary flow
+    state->dataSize->TermUnitFinalZoneSizing(1).MinOA = 0.05;
+
+    int constexpr PIUNum = 1;
+    bool const FirstHVACIteration = true;
+    PoweredInductionUnits::InitPIU(*state, PIUNum, FirstHVACIteration); // call init to size TU
+
+    // check series PIU sizing results
+    auto &piuUnit = state->dataPowerInductionUnits->PIU(1);
+    EXPECT_NEAR(piuUnit.MaxTotAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxPriAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MinPriAirFlowFrac, 0.19954, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxSecAirVolFlow, 0.0, 0.00001); // not used for series PIU
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.05, 0.00001);
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA / piuUnit.MaxPriAirVolFlow, piuUnit.MinPriAirFlowFrac, 0.00001);
+
+    // Check sizing for Parallel PIU
+    piuUnit.UnitType_Num = DataDefineEquip::ZnAirLoopEquipType::SingleDuct_ParallelPIU_Reheat;
+    piuUnit.MaxTotAirVolFlow = 0.0; // parallel PIU does not have total air flow rate input field, reset to constructor initialization
+    piuUnit.MaxPriAirVolFlow = DataSizing::AutoSize;
+    piuUnit.MinPriAirFlowFrac = DataSizing::AutoSize; // reset air flow inputs to autosize
+    piuUnit.MaxSecAirVolFlow = DataSizing::AutoSize;
+
+    PoweredInductionUnits::SizePIU(*state, PIUNum); // call sizing directly on second pass (MySizeFlag flag has been set false)
+
+    // check parallel PIU sizing results
+    EXPECT_NEAR(piuUnit.MaxTotAirVolFlow, 0.0, 0.00001); // not used for parallel PIU
+    EXPECT_NEAR(piuUnit.MaxPriAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MinPriAirFlowFrac, 0.19954, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxSecAirVolFlow, 0.20057, 0.00001);
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.05, 0.00001);
 }
 
 TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)
@@ -3104,7 +3155,6 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
 
     auto &siz = state->dataSize->TermUnitFinalZoneSizing;
     siz.allocate(2);
-    siz(1).DesCoolVolFlowMin = 0.15;
     siz(1).MinOA = 0.05;
     siz(1).CoolDesTemp = 12.5;
     siz(1).HeatDesTemp = 40.0;
@@ -3123,8 +3173,8 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
 
     piu(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.2500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));

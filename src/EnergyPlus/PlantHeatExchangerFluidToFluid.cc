@@ -151,8 +151,6 @@ PlantComponent *HeatExchangerStruct::factory(EnergyPlusData &state, std::string 
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalPlantFluidHXFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void HeatExchangerStruct::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
@@ -698,7 +696,7 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
 
     // METHODOLOGY EMPLOYED:
     // the supply side flow rate is obtained from the plant sizing structure
-    // the demand side is sized to match the supply side
+    // the demand side is sized to match the supply side multiplied by Sizing DeltaT and Cp ratio
     // the UA is sized for an effectiveness of 1.0 using sizing temps
     // the capacity uses the full HX model
 
@@ -748,7 +746,21 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
     Real64 tmpDmdSideDesignVolFlowRate = this->DemandSideLoop.DesignVolumeFlowRate;
     if (this->DemandSideLoop.DesignVolumeFlowRateWasAutoSized) {
         if (tmpSupSideDesignVolFlowRate > HVAC::SmallWaterVolFlow) {
-            tmpDmdSideDesignVolFlowRate = tmpSupSideDesignVolFlowRate;
+            Real64 Cp_sup = 1.0;
+            Real64 Cp_dem = 1.0;
+            Real64 Dt_sup = 1.0;
+            Real64 Dt_dem = 1.0;
+            Real64 rho_sup = 1.0;
+            Real64 rho_dem = 1.0;
+            if (PltSizNumSupSide > 0 && PltSizNumDmdSide > 0) {
+                Cp_sup = this->SupplySideLoop.loop->glycol->getSpecificHeat(state, Constant::InitConvTemp, RoutineName);
+                Cp_dem = this->DemandSideLoop.loop->glycol->getSpecificHeat(state, Constant::InitConvTemp, RoutineName);
+                Dt_sup = state.dataSize->PlantSizData(PltSizNumSupSide).DeltaT;
+                Dt_dem = state.dataSize->PlantSizData(PltSizNumDmdSide).DeltaT;
+                rho_sup = this->SupplySideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
+                rho_dem = this->DemandSideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
+            }
+            tmpDmdSideDesignVolFlowRate = tmpSupSideDesignVolFlowRate * ((Cp_sup * Dt_sup * rho_sup) / (Cp_dem * Dt_dem * rho_dem));
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 this->DemandSideLoop.DesignVolumeFlowRate = tmpDmdSideDesignVolFlowRate;
             }
@@ -894,14 +906,41 @@ void HeatExchangerStruct::size(EnergyPlusData &state)
                     2.0;
             }
         }
+        Real64 tmpDeltaTLoop = 0.0;
+        if (this->UAWasAutoSized) {
+            Real64 loopVolFlow = 0.0;
+            if (PltSizNumSupSide > 0) {
+                loopVolFlow = this->SupplySideLoop.DesignVolumeFlowRate;
+                tmpDeltaTLoop = state.dataSize->PlantSizData(PltSizNumSupSide).DeltaT;
+            }
+            Real64 Cp = this->SupplySideLoop.loop->glycol->getSpecificHeat(state, Constant::InitConvTemp, RoutineName);
+            Real64 rho = this->SupplySideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
 
-        Real64 rho = this->SupplySideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
-        Real64 SupSideMdot = this->SupplySideLoop.DesignVolumeFlowRate * rho;
-        rho = this->DemandSideLoop.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
-        Real64 DmdSideMdot = this->DemandSideLoop.DesignVolumeFlowRate * rho;
-
-        this->calculate(state, SupSideMdot, DmdSideMdot);
-        this->SupplySideLoop.MaxLoad = std::abs(this->HeatTransferRate);
+            this->SupplySideLoop.MaxLoad = Cp * rho * tmpDeltaTLoop * loopVolFlow;
+        } else {
+            // if UA is hard-sized use loop set points. These will not be calculated if Sizing:Plant objects are present, recalculate here.
+            if (this->SupplySideLoop.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
+                state.dataLoopNodes->Node(this->SupplySideLoop.inletNodeNum).Temp =
+                    state.dataLoopNodes->Node(this->SupplySideLoop.loop->TempSetPointNodeNum).TempSetPoint;
+            } else if (this->SupplySideLoop.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
+                state.dataLoopNodes->Node(this->SupplySideLoop.inletNodeNum).Temp =
+                    (state.dataLoopNodes->Node(this->SupplySideLoop.loop->TempSetPointNodeNum).TempSetPointHi +
+                     state.dataLoopNodes->Node(this->SupplySideLoop.loop->TempSetPointNodeNum).TempSetPointLo) /
+                    2.0;
+            }
+            if (this->DemandSideLoop.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
+                state.dataLoopNodes->Node(this->DemandSideLoop.inletNodeNum).Temp =
+                    state.dataLoopNodes->Node(this->DemandSideLoop.loop->TempSetPointNodeNum).TempSetPoint;
+            } else if (this->DemandSideLoop.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
+                state.dataLoopNodes->Node(this->DemandSideLoop.inletNodeNum).Temp =
+                    (state.dataLoopNodes->Node(this->DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointHi +
+                     state.dataLoopNodes->Node(this->DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointLo) /
+                    2.0;
+            }
+            tmpDeltaTLoop = std::abs(state.dataLoopNodes->Node(this->SupplySideLoop.inletNodeNum).Temp -
+                                     state.dataLoopNodes->Node(this->DemandSideLoop.inletNodeNum).Temp);
+            this->SupplySideLoop.MaxLoad = this->UA * tmpDeltaTLoop;
+        }
     }
     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchMechType, this->Name, "HeatExchanger:FluidToFluid");

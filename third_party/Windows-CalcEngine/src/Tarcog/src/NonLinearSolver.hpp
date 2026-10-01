@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include <WCECommon.hpp>
 #include "HeatFlowBalance.hpp"
 #include "IGU.hpp"
 
@@ -33,7 +32,6 @@ namespace Tarcog
             void estimateNewState(const std::vector<double> & t_Solution);
 
             CIGU & m_IGU;
-            FenestrationCommon::CLinearSolver m_LinearSolver;
             CHeatFlowBalance m_QBalance;
             std::vector<double> m_IGUState;
             double m_Tolerance;

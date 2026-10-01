@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout EnergyPlus
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 

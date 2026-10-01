@@ -87,9 +87,9 @@ protected:
     //        return EnergyPlusFixture::process_idd(idd, errors_found);
     //    }
 
-    bool processErrors(EnergyPlusData &state)
+    bool processErrors(EnergyPlusData &t_state)
     {
-        return state.dataInputProcessing->inputProcessor->processErrors(state);
+        return t_state.dataInputProcessing->inputProcessor->processErrors(t_state);
     }
 
     std::vector<std::string> const &validationErrors()

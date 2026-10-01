@@ -302,9 +302,7 @@ TEST_F(EnergyPlusFixture, AirflowNetworkSimulationControl_SetSolver)
 
     SurfaceGeometry::AllocateSurfaceWindows(*state, 2);
     state->dataSurface->Surface(1).OriginalClass = DataSurfaces::SurfaceClass::Window;
-    ;
     state->dataSurface->Surface(2).OriginalClass = DataSurfaces::SurfaceClass::Window;
-    ;
     state->dataGlobal->NumOfZones = 1;
 
     state->dataHeatBal->TotPeople = 1; // Total number of people statements

@@ -115,14 +115,6 @@ namespace DataBSDFWindow {
         Real64 LwrPhi = 0.0;    // Patch lower edge, Phi
         // Note: The dimension index of the BasisElementDescription object corresponds to
         // the position (index) of this element in the row or column of property matrix
-        // Note:  the following are intended to be used for interpolating directions among basis elements
-        int INNbInL = 0;  // Index of inward (lower Theta) neighbor, lower phi
-        int INNbInH = 0;  // Index of inward (lower Theta) neighbor, higher phi
-        int INNbOutL = 0; // Index of outward (higher Theta) neighbor, lower phi
-        int INNbOutH = 0; // Index of outward (higher Theta) neighbor, higher phi
-        int INNbLft = 0;  // Index of leftward (higher Phi) neighbor (same Theta)
-        int INNbRt = 0;   // Index of rightward (lower Phi) neighbor (same Theta)
-        // These indices are in the BasisElement array, which matches the row/column of the matrix
     };
 
     struct BSDFDaylghtPosition
@@ -322,19 +314,8 @@ namespace DataBSDFWindow {
     struct BSDFWindowDescript
     {
         // Members
-        int NumStates = 0;               // Number of states for this window
-        int CurrentState = 1;            // Current state of this window
-        Array2D<Real64> ResultAllStates; // Array to hold calculated
-        // quantities for all states.
-        // Currently unallocated.  To be defined when control
-        // scheme worked out.  This is an array (nvar, nstates)
-        // to be set up for some number of variables, and calculated
-        // for all states 1...NumStates each time step.  e.g., one variable could be
-        // total beam transmitted solar, another total transmitted diffuse
-        // The idea is that for a given time step when one has the
-        // actual result (total cooling load or whatever), one needs to have
-        // some information about all the states to decide where to
-        // set the state variable for the next time step
+        int NumStates = 0;             // Number of states for this window
+        int CurrentState = 1;          // Current state of this window
         Array1D<BSDFStateDescr> State; // State description, dimensioned with number of states
     };
 

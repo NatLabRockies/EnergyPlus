@@ -104,8 +104,6 @@ namespace BoilerSteam {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("LocalBoilerSteamFactory: Error getting inputs for steam boiler named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void BoilerSpecs::simulate(
@@ -430,6 +428,13 @@ namespace BoilerSteam {
                             "Boiler Steam Efficiency",
                             Constant::Units::None,
                             this->BoilerEff,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            this->Name);
+        SetupOutputVariable(state,
+                            "Boiler Steam Coefficient of Performance",
+                            Constant::Units::None,
+                            this->BoilerCOP,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->Name);
@@ -861,6 +866,7 @@ namespace BoilerSteam {
         this->BoilerMassFlowRate = state.dataLoopNodes->Node(BoilerOutletNode).MassFlowRate;
         this->BoilerEnergy = this->BoilerLoad * ReportingConstant;
         this->FuelConsumed = this->FuelUsed * ReportingConstant;
+        this->BoilerCOP = (this->FuelUsed) > 0 ? this->BoilerLoad / this->FuelUsed : 0.0;
     }
 
 } // namespace BoilerSteam

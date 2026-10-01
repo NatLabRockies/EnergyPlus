@@ -161,8 +161,12 @@ int main()
     if (errorsOccurred > 0) {
         printf("C API Test: Errors were caught during dew point calculation, good!\n");
     } else {
+#ifdef EP_psych_errors
         printf("C API Test: Errors were NOT caught during dew point calculation, bad!\n");
         return 1;
+#else
+        printf("C API Test: Psychrometric errors are disabled; no dew point calculation errors expected.\n");
+#endif
     }
 
     printf("EnergyPlus Version: %s", energyPlusVersion());

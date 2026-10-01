@@ -159,7 +159,6 @@ std::unique_ptr<SQLite> CreateSQLiteDatabase(EnergyPlusData &state)
                                         writeTabularDataToSQLite);
     } catch (const std::runtime_error &error) {
         ShowFatalError(state, error.what());
-        return nullptr;
     }
 }
 
@@ -1924,7 +1923,7 @@ void SQLite::createSQLiteTabularDataRecords(Array2D_string const &body, // html 
         int const reportNameIndex = createSQLiteStringTableRecord(reportName, ReportNameId);
         int const reportForStringIndex = createSQLiteStringTableRecord(reportForString, ReportForStringId);
         int const tableNameIndex = createSQLiteStringTableRecord(tableName, TableNameId);
-        int unitsIndex;
+        int unitsIndex = 0;
 
         for (size_t iCol = 0, k = body.index(1, 1); iCol < sizeColumnLabels; ++iCol) {
             std::string colUnits;

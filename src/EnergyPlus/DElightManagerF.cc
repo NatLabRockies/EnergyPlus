@@ -57,7 +57,7 @@
 
 // Third Party Headers
 extern "C" {
-#include <DElight/DElightManagerC.h>
+#include <DElightManagerC.h>
 }
 
 // EnergyPlus Headers
@@ -360,7 +360,7 @@ namespace DElightManagerF {
                                     iMatlLayer = state.dataConstruction->Construct(iconstruct).LayerPoint(1);
                                     // Get the outside visible reflectance of this material layer
                                     // (since Construct(iconstruct)%ReflectVisDiffFront always appears to == 0.0)
-                                    rExtVisRefl = 1.0 - state.dataMaterial->materials(iMatlLayer)->AbsorpVisible;
+                                    rExtVisRefl = 1.0 - state.dataMaterial->materials(iMatlLayer)->AbsorpVisibleOut;
                                 } else {
                                     rExtVisRefl = 0.0;
                                 }

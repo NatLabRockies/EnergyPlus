@@ -757,10 +757,11 @@ namespace OutputProcessor {
                     meterOrVarNameUC.erase(lbrackPos);
                 }
 
-                // A custom meter cannot reference another custom meter
+                // A Meter:Custom cannot reference another Meter:Custom
                 if (std::find(customMeterNames.begin(), customMeterNames.end(), meterOrVarNameUC) != customMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:Custom in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:Custom in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -768,10 +769,11 @@ namespace OutputProcessor {
                     break;
                 }
 
-                // A custom meter cannot reference another customDec meter
+                // A Meter:Custom cannot reference a Meter:CustomDecrement
                 if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), meterOrVarNameUC) != customDecMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -791,7 +793,8 @@ namespace OutputProcessor {
                     } else if (units != srcMeter->units) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", differing units in {}="{}".)",
+                                          std::format(R"({}="{}", differing units in {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -812,7 +815,8 @@ namespace OutputProcessor {
                     if (srcDDVar->storeType != StoreType::Sum) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", variable not summed variable {}="{}".)",
+                                          std::format(R"({}="{}", variable not summed variable {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -850,9 +854,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -869,7 +893,8 @@ namespace OutputProcessor {
                 } else {
                     // Cannot use ShowWarningItemNotFound because this string appears in a unit test
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", invalid {}="{}".)",
+                                     std::format(R"({}="{}", invalid {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -881,10 +906,11 @@ namespace OutputProcessor {
 
             // Somehow, this meter is not linked to any variables either directly or via another meter
             if (!itemsAssigned) {
-                ShowWarningError(state, std::format("Meter:Custom=\"{}\", no items assigned ", ipsc->cAlphaArgs(1)));
+                ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another Meter:Custom.");
+                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being assigned to a "
+                    "Meter:Custom.");
                 continue;
             }
 
@@ -983,8 +1009,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -994,7 +1030,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)
@@ -1052,10 +1090,11 @@ namespace OutputProcessor {
             }
             std::string decMeterNameUC = Util::makeUPPER(decMeterName);
 
-            // DecMeter cannot be a Meter:Custom
+            // Source Meter Name cannot be a Meter:CustomDecrement (it can be a Meter:Custom, though)
             if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), decMeterNameUC) != customDecMeterNames.end()) {
                 ShowWarningError(state,
-                                 std::format(R"(Meter:CustomDec="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                 std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                             ipsc->cCurrentModuleObject,
                                              ipsc->cAlphaArgs(1),
                                              ipsc->cAlphaFieldNames(3),
                                              ipsc->cAlphaArgs(3)));
@@ -1063,7 +1102,7 @@ namespace OutputProcessor {
                 continue;
             }
 
-            auto foundDecMeter = op->meterMap.find(decMeterName);
+            auto foundDecMeter = op->meterMap.find(decMeterNameUC);
             if (foundDecMeter == op->meterMap.end()) {
                 ShowSevereItemNotFound(state, eoh, ipsc->cAlphaFieldNames(3), decMeterName);
                 ErrorsFound = true;
@@ -1072,7 +1111,7 @@ namespace OutputProcessor {
 
             int decMeterNum = foundDecMeter->second;
             auto *decMeter = op->meters[decMeterNum];
-            assert(decMeter->type == MeterType::Normal);
+            assert(decMeter->type == MeterType::Normal || decMeter->type == MeterType::Custom);
 
             Constant::Units units = decMeter->units;
 
@@ -1098,10 +1137,11 @@ namespace OutputProcessor {
                     meterOrVarNameUC.erase(lbrackPos);
                 }
 
-                // A custom meter cannot reference another custom meter
+                // A Meter:CustomDecrement cannot reference another Meter:CustomDecrement (it can reference a Meter:Custom, though)
                 if (std::find(customDecMeterNames.begin(), customDecMeterNames.end(), meterOrVarNameUC) != customDecMeterNames.end()) {
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                     std::format(R"({}="{}", contains a reference to another Meter:CustomDecrement in field: {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -1121,7 +1161,8 @@ namespace OutputProcessor {
                     } else if (units != srcMeter->units) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", differing units in {}="{}".)",
+                                          std::format(R"({}="{}", differing units in {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -1142,7 +1183,8 @@ namespace OutputProcessor {
                     if (srcDDVar->storeType != StoreType::Sum) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format(R"(Meter:Custom="{}", variable not summed variable {}="{}".)",
+                                          std::format(R"({}="{}", variable not summed variable {}="{}".)",
+                                                      ipsc->cCurrentModuleObject,
                                                       ipsc->cAlphaArgs(1),
                                                       ipsc->cAlphaFieldNames(fldIndex + 1),
                                                       meterOrVarNameUC));
@@ -1180,9 +1222,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -1199,7 +1261,8 @@ namespace OutputProcessor {
                 } else {
                     // Cannot use ShowWarningItemNotFound because this string appears in a unit test
                     ShowWarningError(state,
-                                     std::format(R"(Meter:Custom="{}", invalid {}="{}".)",
+                                     std::format(R"({}="{}", invalid {}="{}".)",
+                                                 ipsc->cCurrentModuleObject,
                                                  ipsc->cAlphaArgs(1),
                                                  ipsc->cAlphaFieldNames(fldIndex + 1),
                                                  ipsc->cAlphaArgs(fldIndex + 1)));
@@ -1210,12 +1273,15 @@ namespace OutputProcessor {
 
             } // for (fldIndex)
 
-            // Somehow, this meter is not linked to any variables either directly or via another meter
+            // Unreachable: itemsAssigned is set true above as soon as the Source Meter Name resolves, before this loop even runs, and nothing
+            // in the loop above ever resets it to false. A valid decrement meter only requires a valid Source Meter Name; bad/empty group
+            // fields are handled separately via foundBadSrc.
             if (!itemsAssigned) {
-                ShowWarningError(state, std::format("Meter:Custom=\"{}\", no items assigned ", ipsc->cAlphaArgs(1)));
+                ShowWarningError(state, std::format("{}=\"{}\", no items assigned ", ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    "...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another Meter:Custom.");
+                    "...will not be shown with the Meter results. This may be caused by a Meter:CustomDecrement being assigned to another "
+                    "Meter:CustomDecrement.");
                 continue;
             }
 
@@ -1281,8 +1347,9 @@ namespace OutputProcessor {
                     // No need to check for units
                     // No need to check for duplicates
 
-                    // Check for duplicates
-                    if (std::find(meter->srcMeterNums.begin(), meter->srcMeterNums.end(), srcMeterNum) != meter->srcMeterNums.end()) {
+                    // srcMeterNums[0] is the source meter whose value is decremented. The remaining entries are meters to subtract,
+                    // so only those entries are duplicates of this group item.
+                    if (std::find(meter->srcMeterNums.begin() + 1, meter->srcMeterNums.end(), srcMeterNum) != meter->srcMeterNums.end()) {
                         ShowWarningCustom(state,
                                           eoh,
                                           std::format("{}=\"{}\" referenced multiple times, only first instance will be used",
@@ -1327,8 +1394,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -1338,7 +1415,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)
@@ -2922,8 +3001,6 @@ namespace OutputProcessor {
         {
             return -11;
         }
-
-        return -1;
     } // DetermineIndexGroupKeyFromMeterName()
 
     std::string DetermineIndexGroupFromMeterGroup(Meter const *meter) // the meter
@@ -4250,8 +4327,8 @@ Real64 GetInternalVariableValue(EnergyPlusData &state,
         resultVal = 0.0;
     } else if (varType == VariableType::Integer || varType == VariableType::Real) {
         if (keyVarIndex < 0 || keyVarIndex >= (int)op->outVars.size()) {
-            ShowFatalError(state, "GetInternalVariableValue: passed variable index beyond range of array.");
             ShowContinueError(state, std::format("Index = {} Number of variables = {}", keyVarIndex, op->outVars.size()));
+            ShowFatalError(state, "GetInternalVariableValue: passed variable index beyond range of array.");
         }
 
         // must use %Which, %Value is always zero if variable is not a requested report variable

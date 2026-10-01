@@ -4809,8 +4809,8 @@ bool ASHWAT_ThermalRatings(EnergyPlusData &state,
     Real64 TRMOUTdv;
     Array1D<Real64> SOURCEdv(FS.NL + 1); // indices of merit
     Real64 QGAIN;                        // total gain to conditioned space [[W/m2]
-    Real64 SaveHCNLm;                    // place to save HC[NL-1] - two resistance networks differ
-    Real64 SaveHCNL;                     // place to save HC[NL]   - two resistance networks differ
+    Real64 SaveHCNLm = 0.0;              // place to save HC[NL-1] - two resistance networks differ
+    Real64 SaveHCNL = 0.0;               // place to save HC[NL]   - two resistance networks differ
                                          // in their definitions of these heat transfer coefficients
 
     ASHWAT_ThermalRatings = false; // init to failure

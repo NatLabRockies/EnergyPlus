@@ -104,8 +104,10 @@ namespace ZoneTempPredictorCorrector {
         // This entire struct is re-initialized during the simulation, so no static data may be stored here (e.g. zone or space characteristics)
 
         // Zone or space air drybulb temperature conditions
-        Real64 MAT = DataHeatBalance::ZoneInitialTemp;      // Mean Air Temperature at end of zone time step [C]
-        Real64 MRT = DataHeatBalance::ZoneInitialTemp;      // Mean Radiant Temperature [C]
+        Real64 MAT = DataHeatBalance::ZoneInitialTemp; // Mean Air Temperature at end of zone time step [C]
+        Real64 MRT =
+            DataHeatBalance::ZoneInitialTemp; // Mean Radiant Temperature using the ZoneMRTCalculation definition defined by the input object [C]
+        Real64 stdMRT = DataHeatBalance::ZoneInitialTemp;   // "Standard" Mean Radiant Temperature using the standard area-emissivity weighting [C]
         Real64 ZTAV = DataHeatBalance::ZoneInitialTemp;     // Air Temperature Averaged over the zone time step (during HVAC Time Steps)
         Real64 ZT = DataHeatBalance::ZoneInitialTemp;       // Air Temperature Averaged over the system time step
         Real64 ZTAVComf = DataHeatBalance::ZoneInitialTemp; // Air Temperature Averaged used in thermal comfort models (currently Fanger model only) -
@@ -158,7 +160,6 @@ namespace ZoneTempPredictorCorrector {
         Real64 SumHmAW = 0.0;   // SUM OF ZONE AREA*Moist CONVECTION COEFF*INSIDE Humidity Ratio
         Real64 SumHmARa = 0.0;  // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air
         Real64 SumHmARaW = 0.0; // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air* Inside Humidity Ration
-        Real64 SumHmARaZ = 0.0;
 
         Real64 TempDepCoef = 0.0; // Temperature dependent coefficient
         Real64 TempIndCoef = 0.0; // Temperature ndependent coefficient

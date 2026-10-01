@@ -48,6 +48,9 @@
 #ifndef WindowManager_hh_INCLUDED
 #define WindowManager_hh_INCLUDED
 
+// C++ Headers
+#include <span>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1A.hh>
 
@@ -141,12 +144,12 @@ namespace Window {
                                         std::array<Real64, maxGlassLayers> &aft // System absorptance of each glass layer
     );
 
-    Real64 solarSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p);
+    Real64 solarSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p);
 
-    Real64 visibleSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p);
+    Real64 visibleSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p);
 
-    Real64 Interpolate(gsl::span<Real64 const> x, // Array of data points for independent variable
-                       gsl::span<Real64 const> y, // Array of data points for dependent variable
+    Real64 Interpolate(std::span<Real64 const> x, // Array of data points for independent variable
+                       std::span<Real64 const> y, // Array of data points for dependent variable
                        int npts,                  // Number of data pairs
                        Real64 xin                 // Given value of x
     );

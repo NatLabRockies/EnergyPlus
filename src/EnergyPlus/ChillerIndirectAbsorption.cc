@@ -121,8 +121,6 @@ IndirectAbsorberSpecs *IndirectAbsorberSpecs::factory(EnergyPlusData &state, std
     // If we didn't find it, fatal
     ShowFatalError(state,
                    std::format("LocalIndirectAbsorptionChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void IndirectAbsorberSpecs::simulate(
@@ -1402,8 +1400,8 @@ void IndirectAbsorberSpecs::sizeChiller(EnergyPlusData &state)
                 Real64 EnthSteamOutWet = this->steam->getSatEnthalpy(
                     state, state.dataSize->PlantSizData(PltSizSteamNum).ExitTemp, 0.0, std::string{SizeChillerAbsorptionIndirect} + this->Name);
 
-                auto *water = Fluid::GetWater(state);
-                Real64 CpWater = water->getSpecificHeat(state, GeneratorOutletTemp, RoutineName);
+                auto *waterFluid = Fluid::GetWater(state);
+                Real64 CpWater = waterFluid->getSpecificHeat(state, GeneratorOutletTemp, RoutineName);
                 Real64 HfgSteam = EnthSteamOutDry - EnthSteamOutWet;
                 //         calculate the mass flow rate through the generator
                 Real64 SteamMassFlowRate = (tmpNomCap * SteamInputRatNom) / ((HfgSteam) + (SteamDeltaT * CpWater));

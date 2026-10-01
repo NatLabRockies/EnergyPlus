@@ -694,10 +694,10 @@ namespace ThermalChimney {
         int constexpr NTC(15); // Number of subregions in thermal chimney air channel for FINITE DIFFERENCE
 
         // To be obtained from other modules and subroutines
-        Real64 SurfTempAbsorberWall;     // Absorber wall surface temperature (K)
-        Real64 SurfTempGlassCover;       // Glass cover surface temperature (K)
-        Real64 ConvTransCoeffWallFluid;  // Absorber wall convection transfer coefficient
-        Real64 ConvTransCoeffGlassFluid; // Glass cover convection transfer coefficient
+        Real64 SurfTempAbsorberWall = 0.0;     // Absorber wall surface temperature (K)
+        Real64 SurfTempGlassCover = 0.0;       // Glass cover surface temperature (K)
+        Real64 ConvTransCoeffWallFluid = 0.0;  // Absorber wall convection transfer coefficient
+        Real64 ConvTransCoeffGlassFluid = 0.0; // Glass cover convection transfer coefficient
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         // Real local variables
@@ -708,8 +708,8 @@ namespace ThermalChimney {
         Real64 RoomAirTemp;
         Real64 AirSpecHeatThermalChim; // (J/kg*C) or (J/kg*K)
         Real64 AbsorberWallWidthTC;
-        Real64 TCVolumeAirFlowRate; // (m^3/s)
-        Real64 TCMassAirFlowRate;   // (kg/s)
+        Real64 TCVolumeAirFlowRate;     // (m^3/s)
+        Real64 TCMassAirFlowRate = 0.0; // (kg/s)
         Real64 DischargeCoeffTC;
         Real64 AirOutletCrossAreaTC;
         Real64 AirInletCrossArea;
@@ -725,8 +725,8 @@ namespace ThermalChimney {
         Real64 Process3; // Temporary Variable Used in the Middle of the Calculation
         // unused1208  REAL(r64)   :: Process4                            ! Temporary Variable Used in the Middle of the Calculation
         Real64 AirDensityThermalChim; // (kg/m^3)
-        Real64 AirDensity;            // (kg/m^3)
-        Real64 CpAir;
+        Real64 AirDensity = 0.0;      // (kg/m^3)
+        Real64 CpAir = 0.0;
         Real64 TemporaryWallSurfTemp;
 
         Real64 DeltaL; // OverallThermalChimLength / NTC

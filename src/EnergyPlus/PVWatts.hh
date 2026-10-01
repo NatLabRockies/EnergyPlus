@@ -102,30 +102,6 @@ namespace PVWatts {
         Num
     };
 
-    struct DCPowerOutput
-    {
-        Real64 poa;  // Plane of array irradiance
-        Real64 tpoa; // Transmitted plane of array irradiance
-        Real64 pvt;  // PV Cell temperature
-        Real64 dc;   // DC power output
-    };
-
-    struct IrradianceOutput
-    {
-        Real64 solazi;
-        Real64 solzen;
-        Real64 solalt;
-        Real64 aoi;
-        Real64 stilt;
-        Real64 sazi;
-        Real64 rot;
-        Real64 btd;
-        Real64 ibeam;
-        Real64 iskydiff;
-        Real64 ignddiff;
-        int sunup;
-    };
-
     class PVWattsGenerator
     {
     private:

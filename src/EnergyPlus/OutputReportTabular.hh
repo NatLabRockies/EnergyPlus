@@ -377,7 +377,6 @@ namespace OutputReportTabular {
     {
         // Members
         std::string varName;                     // name of variable
-        std::string colHead;                     // column header (not used for user defined monthly)
         int varNum;                              // variable or meter number
         OutputProcessor::VariableType typeOfVar; // 0=not found, 1=integer, 2=real, 3=meter
         OutputProcessor::StoreType avgSum;       // Variable  is Averaged=1 or Summed=2
@@ -532,7 +531,6 @@ namespace OutputReportTabular {
         Real64 hvacLossInstantSeq = 0.0;
 
         Real64 powerGenInstantSeq = 0.0;
-        Real64 powerGenRadSeq = 0.0;
         Real64 infilInstantSeq = 0.0;
         Real64 infilLatentSeq = 0.0;
 
@@ -1125,7 +1123,6 @@ struct OutputReportTabularData : BaseGlobalStruct
         OutputReportTabular::maxNumStyles, OutputReportTabular::TableStyle::Invalid); // see list of parameters
 
     Real64 timeInYear = 0.0;
-    int defaultSigDigits = 2;
     bool formatReals_Tabular = true;
     bool formatReals_JSON = true;
     bool formatReals_SQLite = true;

@@ -3994,13 +3994,13 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CTRANS)
         transformedVertices.emplace_back(xs(i), ys(i), zs(i));
     }
     double perimeter = 0.0;
-    for (auto it = transformedVertices.begin(); it != transformedVertices.end(); ++it) {
+    for (auto vertIt = transformedVertices.begin(); vertIt != transformedVertices.end(); ++vertIt) {
 
-        auto itnext = std::next(it);
+        auto itnext = std::next(vertIt);
         if (itnext == std::end(transformedVertices)) {
             itnext = std::begin(transformedVertices);
         }
-        perimeter += SurfaceGeometry::distance(*it, *itnext);
+        perimeter += SurfaceGeometry::distance(*vertIt, *itnext);
     }
     EXPECT_DOUBLE_EQ(expected_perimeter, perimeter);
 
