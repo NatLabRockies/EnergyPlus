@@ -534,11 +534,11 @@ The Zone Air Heat Balance System Convective Heat Gain Rate is the sum, in watts,
 
 \paragraph{Zone Air Heat Balance Air Energy Storage Rate {[}W{]}}\label{zone-air-heat-balance-air-energy-storage-rate-w}
 
-The Zone Air Heat Balance Air Energy Storage Rate is the heat stored, in watts, in the zone air as result of zone air temperature changing from one timestep to the next. This field is not multiplied by zone or group multipliers.
+The Zone Air Heat Balance Air Energy Storage Rate is the heat stored, in watts, in the zone air as result of zone air temperature changing from one timestep to the next. This field is not multiplied by zone or group multipliers. With the default ZoneAirHeatBalanceAlgorithm ThirdOrderBackwardDifference, this rate is reported as the first-order difference of the zone air temperature over the system timestep, while the zone air temperature is solved with the third-order formula. The other Zone Air Heat Balance terms therefore do not add up exactly to the storage rate with that algorithm; the difference is reported by the Zone Air Heat Balance Deviation Rate. With AnalyticalSolution and EulerMethod the terms add up to the storage rate.
 
 \paragraph{Zone Air Heat Balance Deviation Rate {[}W{]}}\label{zone-air-heat-balance-deviation-rate-w}
 
-The Zone Air Heat Balance Deviation Rate is the imbalance, in watts, in the energy balance for zone air. The value should be near zero but will become non-zero if zone conditions are changing rapidly or erratically. This field is not multiplied by zone or group multipliers. (This output variable is only generated if the user has set a computer system environment variable DisplayAdvancedReportVariables equal to ``yes''.)
+The Zone Air Heat Balance Deviation Rate is the imbalance, in watts, in the energy balance for zone air: the sum of the other Zone Air Heat Balance terms minus the Air Energy Storage Rate. The value should be near zero but will become non-zero if zone conditions are changing rapidly or erratically, and with ThirdOrderBackwardDifference (see Air Energy Storage Rate above). This field is not multiplied by zone or group multipliers. This output variable is only available if \hyperref[outputdiagnostics]{Output:Diagnostics} contains the key DisplayAdvancedReportVariables, and it is only calculated if Output:Diagnostics also contains the key DisplayZoneAirHeatBalanceOffBalance; otherwise it reports zero.
 
 \paragraph{Zone Air System Sensible Heating Energy {[}J{]}}\label{zone-air-system-sensible-heating-energy-j}
 
