@@ -57,8 +57,8 @@ OutputControl:RVI,
   A6,  \field Key Name 6
   A7,  \field Key Name 7
   A8,  \field Key Name 8
-  A9,  \field Key Name 9  
-  A10;  \field Key Name 10  
+  A9,  \field Key Name 9
+  A10;  \field Key Name 10
 
 OutputControl:MVI,
     \extensible:1
@@ -73,8 +73,8 @@ OutputControl:MVI,
   A6,  \field Key Name 6
   A7,  \field Key Name 7
   A8,  \field Key Name 8
-  A9,  \field Key Name 9  
-  A10;  \field Key Name 10  
+  A9,  \field Key Name 9
+  A10;  \field Key Name 10
 
 OutputControl:CSV:Style,
        \memo Unit conversions on reporting and meter variables
@@ -86,7 +86,7 @@ OutputControl:CSV:Style,
        \key JtoMJ
        \key JtoGJ
        \key InchPound
-       \default None 
+       \default None
 ```
 
 ## Outputs Description ##
