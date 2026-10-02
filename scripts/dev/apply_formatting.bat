@@ -20,11 +20,8 @@ if errorlevel 1 (
 pushd "%~dp0\..\.." || exit /b 1
 
 for %%d in (src tst) do (
-  echo Formatting files under %%d
-  for /r "%%d" %%f in (*.hpp *.h *.hh *.cc *.cpp *.c) do (
-    call :format "%%f"
-    if errorlevel 1 goto :format_failed
-  )
+  call :format_directory "%%d"
+  if errorlevel 1 goto :format_failed
 )
 
 popd
@@ -33,6 +30,14 @@ exit /b 0
 :format_failed
 popd
 exit /b 1
+
+:format_directory
+echo Formatting files under "%~1"
+for /r "%~1" %%f in (*.hpp *.h *.hh *.cc *.cpp *.c) do (
+  call :format "%%f"
+  if errorlevel 1 exit /b 1
+)
+exit /b 0
 
 :format
 echo Formatting "%~1"
