@@ -177,7 +177,7 @@
 !                   to the dispersal of the object. If this object is
 !                   encountered in an IDF, the InputProcessor will post an
 !                   appropriate message to the error file.
-!                   usage, if a replacement is available: 
+!                   usage, if a replacement is available:
 !                       \obsolete New=>[New object name]
 !                   usage, if no replacement is available:
 !                       \obsolete New=>deleted
