@@ -71,6 +71,7 @@ OkObject,
       \minimum 1
 
 NotBrokenObject,
+  \obsolete New=>deleted
   A1, \field Name
   N2; \field Last Field
       \maximum 10
@@ -85,6 +86,7 @@ Obj2,
             ".*": {"type": "object", "properties": {"last_field": {"type": "number", "maximum": 10.0}}}
         },
         "group": "test",
+        "obsolete": "New=>deleted",
         "name": {"type": "string"},
         "legacy_idd": {
             "field_info": {

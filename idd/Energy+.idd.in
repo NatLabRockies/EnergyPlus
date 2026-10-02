@@ -171,12 +171,16 @@
 !                   routines using blanks for alpha fields (note -- blanks
 !                   may not be allowable for some alpha fields).
 !
-!  \obsolete        This object has been replaced though is kept (and is read)
+!  \obsolete        This object will be removed in a future version, possibly
+!                   with a replacement object identified. It is still read
 !                   in the current version. Please refer to documentation as
 !                   to the dispersal of the object. If this object is
 !                   encountered in an IDF, the InputProcessor will post an
 !                   appropriate message to the error file.
-!                   usage:  \obsolete New=>[New object name]
+!                   usage, if a replacement is available:
+!                       \obsolete New=>[New object name]
+!                   usage, if no replacement is available:
+!                       \obsolete New=>deleted
 !
 !  \extensible:<#>  This object is dynamically extensible -- meaning the input
 !                   object may be extended beyond the number of fields shown in
@@ -25215,6 +25219,7 @@ Daylighting:ReferencePoint,
 Daylighting:DELight:ComplexFenestration,
        \min-fields 5
        \memo Used for DElight Complex Fenestration of all types
+       \obsolete New=>deleted
   A1,  \field Name
        \required-field
        \note Only used for user reference
