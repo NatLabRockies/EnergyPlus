@@ -48,6 +48,7 @@
 // C++ Headers
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <map>
 #include <ostream>
@@ -372,9 +373,7 @@ namespace ResultsFramework {
             std::swap(hourOfDay, lastHour);
             std::swap(curMin, lastMinute);
         }
-        // future start of ISO 8601 datetime output
-        // std::format("YYYY-{:02d}/{:02d}T{:02d}:{:02d}:00", month, dayOfMonth, hourOfDay, curMin);
-        // std::format("{:02d}/{:02d} {:02d}:{:02d}:00", month, dayOfMonth, hourOfDay, curMin);
+
         if (iso8601) {
             TS.emplace_back(std::format("{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00", calendarYear, month, dayOfMonth, hourOfDay, curMin));
         } else {
@@ -586,8 +585,8 @@ namespace ResultsFramework {
             }
         }
     }
-    // class Table
 
+    // class Table
     Table::Table(Array2D_string const &body,
                  Array1D_string const &rowLabels,
                  Array1D_string const &columnLabels,
@@ -642,7 +641,6 @@ namespace ResultsFramework {
     }
 
     // class Report
-
     json Report::getJSON() const
     {
 
@@ -712,6 +710,51 @@ namespace ResultsFramework {
         return root;
     }
 
+    CSVWriter::CSVWriter(std::vector<std::string> const &key_names,
+                         std::vector<std::string> const &output_variables,
+                         std::map<std::string, std::vector<std::string>> const &outputVariableKeyNames)
+        : CSVWriter(output_variables.size())
+    {
+        filterByKeyNames = !key_names.empty();
+        if (!filterByKeyNames) {
+            return;
+        }
+
+        outputVariableIndexToKeyNameIndexMapping = std::vector<int>(output_variables.size(), -1);
+
+        std::map<std::string, int> outputVariableLookup;
+        for (std::size_t i = 0; i < output_variables.size(); ++i) {
+            outputVariableLookup.emplace(output_variables[i], static_cast<int>(i));
+        }
+
+        int index = 0;
+        for (auto const &keyName : key_names) {
+            auto exact_match = outputVariableLookup.find(keyName);
+            if (exact_match != outputVariableLookup.end()) {
+                keyNames.emplace_back(exact_match->first);
+                outputVariableIndexToKeyNameIndexMapping[exact_match->second] = index;
+                ++index;
+                continue;
+            }
+
+            std::string lowerKeyName = keyName;
+            std::transform(
+                lowerKeyName.begin(), lowerKeyName.end(), lowerKeyName.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            auto it = outputVariableKeyNames.find(lowerKeyName);
+            if (it != outputVariableKeyNames.end()) {
+                for (auto const &outputVariableName : it->second) {
+                    auto foundOutputVariable = outputVariableLookup.find(outputVariableName);
+                    if (foundOutputVariable == outputVariableLookup.end()) {
+                        continue;
+                    }
+                    outputVariableIndexToKeyNameIndexMapping[foundOutputVariable->second] = index;
+                    keyNames.emplace_back(outputVariableName);
+                    ++index;
+                }
+            }
+        }
+    }
+
     void CSVWriter::parseTSOutputs(EnergyPlusData &state,
                                    json const &data,
                                    std::vector<std::string> const &outputVariables,
@@ -722,12 +765,14 @@ namespace ResultsFramework {
         }
         updateReportFreq(reportingFrequency);
         std::vector<int> indices;
+        std::vector<int> keyNameToOutputData(keyNames.size(), -1);
 
         std::string reportFrequency = data.at("ReportFrequency").get<std::string>();
         if (reportFrequency == "Detailed-HVAC" || reportFrequency == "Detailed-Zone") {
             reportFrequency = "Each Call";
         }
         auto const &columns = data.at("Cols");
+        int column_index = 0;
         for (auto const &column : columns) {
             std::string search_string =
                 std::format("{0} [{1}]({2})", column.at("Variable").get<std::string>(), column.at("Units").get<std::string>(), reportFrequency);
@@ -740,8 +785,16 @@ namespace ResultsFramework {
             if (found == outputVariables.end()) {
                 ShowFatalError(state, std::format("Output variable ({0}) not found output variable list", search_string));
             }
-            outputVariableIndices[std::distance(outputVariables.begin(), found)] = true;
-            indices.emplace_back(std::distance(outputVariables.begin(), found));
+            int const outputVariableIndex = static_cast<int>(std::distance(outputVariables.begin(), found));
+            outputVariableIndices[outputVariableIndex] = true;
+            indices.emplace_back(outputVariableIndex);
+            if (filterByKeyNames) {
+                int const keyNameIndex = outputVariableIndexToKeyNameIndexMapping[outputVariableIndex];
+                if (keyNameIndex != -1) {
+                    keyNameToOutputData[keyNameIndex] = column_index;
+                }
+            }
+            ++column_index;
         }
 
         auto const &rows = data.at("Rows");
@@ -749,26 +802,46 @@ namespace ResultsFramework {
             for (auto &el : row.items()) {
                 auto found_key = outputs.find(el.key());
                 if (found_key == outputs.end()) {
-                    std::vector<std::string> output(outputVariables.size());
-                    int i = 0;
-                    for (auto const &col : el.value()) {
-                        if (col.is_null()) {
-                            output[indices[i]] = "";
-                        } else {
-                            dtoa(col.get<double>(), s);
-                            output[indices[i]] = s;
+                    std::vector<std::string> output(filterByKeyNames ? keyNames.size() : outputVariables.size());
+                    if (filterByKeyNames) {
+                        for (std::size_t i = 0; i < keyNameToOutputData.size(); ++i) {
+                            int const columnIndex = keyNameToOutputData[i];
+                            if (columnIndex == -1) {
+                                continue;
+                            }
+                            auto const &col = el.value()[columnIndex];
+                            if (!col.is_null()) {
+                                dtoa(col.get<double>(), s);
+                                output[i] = s;
+                            }
                         }
-                        ++i;
+                    } else {
+                        int i = 0;
+                        for (auto const &col : el.value()) {
+                            if (col.is_null()) {
+                                output[indices[i]] = "";
+                            } else {
+                                dtoa(col.get<double>(), s);
+                                output[indices[i]] = s;
+                            }
+                            ++i;
+                        }
                     }
                     outputs[el.key()] = output;
                 } else {
                     int i = 0;
                     for (auto const &col : el.value()) {
+                        int const outputIndex =
+                            filterByKeyNames ? outputVariableIndexToKeyNameIndexMapping[indices[i]] : static_cast<int>(indices[i]);
+                        if (outputIndex == -1) {
+                            ++i;
+                            continue;
+                        }
                         if (col.is_null()) {
-                            found_key->second[indices[i]] = "";
+                            found_key->second[outputIndex] = "";
                         } else {
                             dtoa(col.get<double>(), s);
-                            found_key->second[indices[i]] = s;
+                            found_key->second[outputIndex] = s;
                         }
                         ++i;
                     }
@@ -823,13 +896,22 @@ namespace ResultsFramework {
 
         print(outputFile, "{}", "Date/Time,");
         std::string sep;
-        for (auto it = outputVariables.begin(); it != outputVariables.end(); ++it) {
-            if (!outputVariableIndices[std::distance(outputVariables.begin(), it)]) {
-                continue;
+        if (filterByKeyNames) {
+            for (auto const &keyName : keyNames) {
+                print(outputFile, "{}{}", sep, keyName);
+                if (sep.empty()) {
+                    sep = ",";
+                }
             }
-            print(outputFile, "{}{}", sep, *it);
-            if (sep.empty()) {
-                sep = ",";
+        } else {
+            for (auto it = outputVariables.begin(); it != outputVariables.end(); ++it) {
+                if (!outputVariableIndices[std::distance(outputVariables.begin(), it)]) {
+                    continue;
+                }
+                print(outputFile, "{}{}", sep, *it);
+                if (sep.empty()) {
+                    sep = ",";
+                }
             }
         }
         print(outputFile, "{}", '\n');
@@ -844,6 +926,17 @@ namespace ResultsFramework {
                 }
             }
             print(outputFile, " {},", datetime);
+            if (filterByKeyNames) {
+                sep = "";
+                for (auto const &data : item.second) {
+                    print(outputFile, "{}{}", sep, data);
+                    if (sep.empty()) {
+                        sep = ",";
+                    }
+                }
+                print(outputFile, "{}", '\n');
+                continue;
+            }
             item.second.erase(std::remove_if(item.second.begin(),
                                              item.second.end(),
                                              [&](const std::string &d) {
@@ -1072,8 +1165,8 @@ namespace ResultsFramework {
         if (!hasOutputData()) {
             return;
         }
-        CSVWriter csv(outputVariables.size());
-        CSVWriter mtr_csv(outputVariables.size());
+        CSVWriter csv(state.files.outputControl.rviKeyNames, outputVariables, outputVariableKeyNames);
+        CSVWriter mtr_csv(state.files.outputControl.mviKeyNames, outputVariables, outputVariableKeyNames);
 
         for (ReportFreq freq :
              {ReportFreq::Year, ReportFreq::Simulation, ReportFreq::Month, ReportFreq::Day, ReportFreq::Hour, ReportFreq::TimeStep}) {
@@ -1182,12 +1275,26 @@ namespace ResultsFramework {
                                              std::string_view const units,
                                              OutputProcessor::ReportFreq const freq)
     {
-        outputVariables.emplace_back(std::format("{0}:{1} [{2}]({3})", keyedValue, variableName, units, reportFreqNames[(int)freq]));
+        auto const reportVariable = std::format("{0}:{1} [{2}]({3})", keyedValue, variableName, units, reportFreqNames[(int)freq]);
+        outputVariables.emplace_back(reportVariable);
+
+        std::string outputVariableKeyName(variableName.begin(), variableName.end());
+        std::transform(outputVariableKeyName.begin(), outputVariableKeyName.end(), outputVariableKeyName.begin(), [](unsigned char c) {
+            return static_cast<char>(std::tolower(c));
+        });
+        outputVariableKeyNames[outputVariableKeyName].emplace_back(reportVariable);
     }
 
     void ResultsFramework::addReportMeter(std::string const &meter, std::string_view units, OutputProcessor::ReportFreq const freq)
     {
-        outputVariables.emplace_back(std::format("{0} [{1}]({2})", meter, units, reportFreqNames[(int)freq]));
+        auto const meterVariable = std::format("{0} [{1}]({2})", meter, units, reportFreqNames[(int)freq]);
+        outputVariables.emplace_back(meterVariable);
+
+        std::string outputVariableKeyName(meter.begin(), meter.end());
+        std::transform(outputVariableKeyName.begin(), outputVariableKeyName.end(), outputVariableKeyName.begin(), [](unsigned char c) {
+            return static_cast<char>(std::tolower(c));
+        });
+        outputVariableKeyNames[outputVariableKeyName].emplace_back(meterVariable);
     }
 
 } // namespace ResultsFramework
