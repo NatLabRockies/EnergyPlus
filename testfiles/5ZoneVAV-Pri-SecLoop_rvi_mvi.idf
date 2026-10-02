@@ -2,7 +2,7 @@
 !-Option OriginalOrderTop UseSpecialFormat
 !-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
-! 5ZoneVAV-TwowayCommonPipe.idf
+! 5ZoneVAV-Pri-SecLoop_rvi_mvi.idf
 ! Basic file description:  1 story building divided into 4 exterior and one interior conditioned zones and return plenum
 !                          illustrates the use of primary-secondary chilled water loops with different primary and secondary setpoints.
 ! Highlights:              Primary-Secondary chilled water loops, controlled to different setpoints.
