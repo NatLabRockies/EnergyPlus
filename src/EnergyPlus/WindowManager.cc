@@ -5651,24 +5651,29 @@ namespace Window {
             HOutRad = 0.5 * s_surf->SurfWinFrameEmis(SurfNum) * Constant::StefanBoltzmann *
                       pow_3(TOutRadFr + s_surf->SurfWinFrameTempSurfOut(SurfNum) + Constant::Kelvin);
             HOutConvFr = HOutConv;
+            // Solar and interior short-wave and radiant gains absorbed by the frame, set once per time step in
+            // InitSolarHeatGains and InitIntSolarDistribution. The projection long-wave terms below are added to local
+            // copies so that repeated calls in a time step do not accumulate them.
+            Real64 FrameQRadOutAbs = s_surf->SurfWinFrameQRadOutAbs(SurfNum);
+            Real64 FrameQRadInAbs = s_surf->SurfWinFrameQRadInAbs(SurfNum);
             auto const &frdiv = s_surf->FrameDivider(FrDivNum);
             if (frdiv.FrameProjectionOut > 0.0) {
                 HOutRad *= (1.0 + ProjCorrFrOut);
                 HOutConvFr = HOutConv * (1.0 + ProjCorrFrOut);
                 // Add long-wave from outside window surface absorbed by frame outside projection
-                s_surf->SurfWinFrameQRadOutAbs(SurfNum) += 0.5 * s_surf->SurfWinProjCorrFrOut(SurfNum) * frdiv.FrameEmis * EmisGlassOut *
-                                                           Constant::StefanBoltzmann * pow_4(surfWin.thetaFace[1]);
+                FrameQRadOutAbs += 0.5 * s_surf->SurfWinProjCorrFrOut(SurfNum) * frdiv.FrameEmis * EmisGlassOut * Constant::StefanBoltzmann *
+                                   pow_4(surfWin.thetaFace[1]);
             }
             if (frdiv.FrameProjectionIn > 0.0) {
                 HInRad *= (1.0 + ProjCorrFrIn);
                 HInConvFr = HInConv * (1.0 + ProjCorrFrIn);
                 // Add long-wave from inside window surface absorbed by frame inside projection
-                s_surf->SurfWinFrameQRadInAbs(SurfNum) += 0.5 * s_surf->SurfWinProjCorrFrIn(SurfNum) * frdiv.FrameEmis * EmisGlassIn *
-                                                          Constant::StefanBoltzmann * pow_4(surfWin.thetaFace[2 * TotGlassLayers]);
+                FrameQRadInAbs += 0.5 * s_surf->SurfWinProjCorrFrIn(SurfNum) * frdiv.FrameEmis * EmisGlassIn * Constant::StefanBoltzmann *
+                                  pow_4(surfWin.thetaFace[2 * TotGlassLayers]);
             }
-            Afac = (HOutRad * TOutRadFr + HOutConvFr * tout + s_surf->SurfWinFrameQRadOutAbs(SurfNum)) / (HOutRad + FrameCon + HOutConvFr);
+            Afac = (HOutRad * TOutRadFr + HOutConvFr * tout + FrameQRadOutAbs) / (HOutRad + FrameCon + HOutConvFr);
             Bfac = FrameCon / (HOutRad + FrameCon + HOutConvFr);
-            Dfac = (HInRad * TInRadFr + HInConvFr * tin + s_surf->SurfWinFrameQRadInAbs(SurfNum)) / (HInRad + FrameCon + HInConvFr);
+            Dfac = (HInRad * TInRadFr + HInConvFr * tin + FrameQRadInAbs) / (HInRad + FrameCon + HInConvFr);
             Efac = FrameCon / (HInRad + FrameCon + HInConvFr);
             s_surf->SurfWinFrameTempIn(SurfNum) = (Dfac + Efac * Afac) / (1.0 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinFrameTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
@@ -5710,6 +5715,10 @@ namespace Window {
             HOutRad =
                 0.5 * DivEmisOut * Constant::StefanBoltzmann * pow_3(TOutRadDiv + s_surf->SurfWinDividerTempSurfOut(SurfNum) + Constant::Kelvin);
             HOutConvDiv = HOutConv;
+            // Solar and interior short-wave and radiant gains absorbed by the divider (see frame above); the projection
+            // long-wave terms are added to local copies.
+            Real64 DividerQRadOutAbs = s_surf->SurfWinDividerQRadOutAbs(SurfNum);
+            Real64 DividerQRadInAbs = s_surf->SurfWinDividerQRadInAbs(SurfNum);
             auto const &frdiv = s_surf->FrameDivider(FrDivNum);
             if (frdiv.DividerProjectionOut > 0.0) {
                 HOutRad *= (1.0 + 2.0 * s_surf->SurfWinProjCorrDivOut(SurfNum));
@@ -5718,8 +5727,8 @@ namespace Window {
                 }
                 HOutConvDiv *= (1.0 + 2.0 * s_surf->SurfWinProjCorrDivOut(SurfNum));
                 // Add long-wave from outside window surface absorbed by divider outside projection
-                s_surf->SurfWinDividerQRadOutAbs(SurfNum) += s_surf->SurfWinProjCorrDivOut(SurfNum) * frdiv.DividerEmis * EmisGlassOut *
-                                                             Constant::StefanBoltzmann * pow_4(surfWin.thetaFace[1]);
+                DividerQRadOutAbs += s_surf->SurfWinProjCorrDivOut(SurfNum) * frdiv.DividerEmis * EmisGlassOut * Constant::StefanBoltzmann *
+                                     pow_4(surfWin.thetaFace[1]);
             }
 
             HInConvDiv = HInConv;
@@ -5731,12 +5740,12 @@ namespace Window {
                 }
                 HInConvDiv *= (1.0 + 2.0 * s_surf->SurfWinProjCorrDivIn(SurfNum));
                 // Add long-wave from inside window surface absorbed by divider inside projection
-                s_surf->SurfWinDividerQRadInAbs(SurfNum) += s_surf->SurfWinProjCorrDivIn(SurfNum) * frdiv.DividerEmis * EmisGlassIn *
-                                                            Constant::StefanBoltzmann * pow_4(surfWin.thetaFace[2 * TotGlassLayers]);
+                DividerQRadInAbs += s_surf->SurfWinProjCorrDivIn(SurfNum) * frdiv.DividerEmis * EmisGlassIn * Constant::StefanBoltzmann *
+                                    pow_4(surfWin.thetaFace[2 * TotGlassLayers]);
             }
-            Afac = (HOutRad * TOutRadDiv + HOutConvDiv * tout + s_surf->SurfWinDividerQRadOutAbs(SurfNum)) / (HOutRad + DivCon + HOutConvDiv);
+            Afac = (HOutRad * TOutRadDiv + HOutConvDiv * tout + DividerQRadOutAbs) / (HOutRad + DivCon + HOutConvDiv);
             Bfac = DivCon / (HOutRad + DivCon + HOutConvDiv);
-            Dfac = (HInRad * TInRadDiv + HInConvDiv * tin + s_surf->SurfWinDividerQRadInAbs(SurfNum)) / (HInRad + DivCon + HInConvDiv);
+            Dfac = (HInRad * TInRadDiv + HInConvDiv * tin + DividerQRadInAbs) / (HInRad + DivCon + HInConvDiv);
             Efac = DivCon / (HInRad + DivCon + HInConvDiv);
             s_surf->SurfWinDividerTempIn(SurfNum) = (Dfac + Efac * Afac) / (1 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinDividerTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
