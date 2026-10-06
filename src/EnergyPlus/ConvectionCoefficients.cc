@@ -1973,7 +1973,7 @@ void CalcDetailedHcInForDVModel(EnergyPlusData &state,
                                 int const SurfNum,                             // surface number for which coefficients are being calculated
                                 const Array1D<Real64> &SurfaceTemperatures,    // Temperature of surfaces for evaluation of HcIn
                                 Array1D<Real64> &HcIn,                         // Interior Convection Coeff Array
-                                ObjexxFCL::Optional<Array1S<Real64> const> Vhc // Velocity array for forced convection coeff calculation
+                                ObjexxFCL::Optional<Array1D<Real64> const> Vhc // Velocity array for forced convection coeff calculation
 )
 {
 
@@ -2232,7 +2232,7 @@ void CalcCeilingDiffuserIntConvCoeff(EnergyPlusData &state,
 
 void CalcCeilingDiffuserInletCorr(EnergyPlusData &state,
                                   int const ZoneNum,                         // Zone number
-                                  const Array1S<Real64> &SurfaceTemperatures // For CalcASHRAEDetailed, if called
+                                  const Array1D<Real64> &SurfaceTemperatures // For CalcASHRAEDetailed, if called
 )
 {
 

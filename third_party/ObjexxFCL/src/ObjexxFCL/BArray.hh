@@ -14,9 +14,7 @@
 // Licensing is available from Objexx Engineering, Inc.:  http://objexx.com
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/DimensionSlice.hh>
 #include <ObjexxFCL/IndexRange.hh>
-#include <ObjexxFCL/IndexSlice.hh>
 
 namespace ObjexxFCL {
 
@@ -27,8 +25,6 @@ class BArray
 public: // Types
 
 	typedef  IndexRange  IR;
-	typedef  IndexSlice  IS;
-	typedef  DimensionSlice  DS;
 
 	// STL style
 	typedef  std::size_t  size_type;

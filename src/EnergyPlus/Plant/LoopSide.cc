@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 
 // ObjexxFCL Headers
@@ -387,22 +388,22 @@ namespace DataPlant {
         }
 
         InletAvgTemp = sum(this->InletNode.TemperatureHistory) / size(this->InletNode.TemperatureHistory);
-        if (any_ne(this->InletNode.TemperatureHistory, InletAvgTemp)) {
+        if (std::ranges::any_of(this->InletNode.TemperatureHistory, [&](auto const &elem) { return elem != InletAvgTemp; })) {
             return false;
         }
 
         InletAvgMdot = sum(this->InletNode.MassFlowRateHistory) / size(this->InletNode.MassFlowRateHistory);
-        if (any_ne(this->InletNode.MassFlowRateHistory, InletAvgMdot)) {
+        if (std::ranges::any_of(this->InletNode.MassFlowRateHistory, [&](auto const &elem) { return elem != InletAvgMdot; })) {
             return false;
         }
 
         OutletAvgTemp = sum(this->OutletNode.TemperatureHistory) / size(this->OutletNode.TemperatureHistory);
-        if (any_ne(this->OutletNode.TemperatureHistory, OutletAvgTemp)) {
+        if (std::ranges::any_of(this->OutletNode.TemperatureHistory, [&](auto const &elem) { return elem != OutletAvgTemp; })) {
             return false;
         }
 
         OutletAvgMdot = sum(this->OutletNode.MassFlowRateHistory) / size(this->OutletNode.MassFlowRateHistory);
-        if (any_ne(this->OutletNode.MassFlowRateHistory, OutletAvgMdot)) {
+        if (std::ranges::any_of(this->OutletNode.MassFlowRateHistory, [&](auto const &elem) { return elem != OutletAvgMdot; })) {
             return false;
         }
 

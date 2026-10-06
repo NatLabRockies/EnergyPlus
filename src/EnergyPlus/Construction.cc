@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// Standard Headers
+#include <algorithm>
+
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -1217,8 +1220,8 @@ void ConstructionProps::calculateExponentialMatrix()
     // takes advantage of the fact that AMat is tridiagonal.  Thus, it
     // only factors the elements of the AMat that are known to be non-zero.
 
-    fact = this->CTFTimeStep / std::pow(2.0, k); // Start of Step 3 ...
-    AMat1 *= fact;                               // ... end of Step 3.
+    fact = this->CTFTimeStep / std::pow(2.0, k);                                                      // Start of Step 3 ...
+    std::transform(AMat1.begin(), AMat1.end(), AMat1.begin(), [fact](Real64 v) { return v * fact; }); // ... end of Step 3.
 
     // Step 4, page 128:  Calculate l, the highest power to which AMat
     // must be taken theoretically to accurately calculate its exponential.
@@ -1247,7 +1250,9 @@ void ConstructionProps::calculateExponentialMatrix()
 
     // Step 5, page 128:  Calculate the exponential.  First, add the
     // linear term to the identity matrix.
-    this->AExp = AMat1 + this->IdenMatrix; // Start of Step 5 ...
+    std::transform(AMat1.begin(), AMat1.end(), this->IdenMatrix.begin(), this->AExp.begin(), [](Real64 lhs, Real64 rhs) {
+        return lhs + rhs;
+    }); // Start of Step 5 ...
 
     // Now, add successive terms to the expansion as per the standard
     // exponential formula.  AMato contains the last "power" of AMat
@@ -1289,7 +1294,7 @@ void ConstructionProps::calculateExponentialMatrix()
 
         // Update AMato and AExp matrices
         AMato = AMatN;
-        this->AExp += AMato;
+        std::transform(this->AExp.begin(), this->AExp.end(), AMato.begin(), this->AExp.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
 
         // The next DO loop tests the significant figures limit criteria to
         // see if any values in AExp are still changing appreciably.
@@ -1522,7 +1527,7 @@ void ConstructionProps::calculateGammas()
     // noting that BMat contains only the non-zero values of the B Matrix.
 
     ATemp.allocate(this->rcmax, this->rcmax);
-    ATemp = this->AExp - this->IdenMatrix;
+    std::transform(this->AExp.begin(), this->AExp.end(), this->IdenMatrix.begin(), ATemp.begin(), [](Real64 lhs, Real64 rhs) { return lhs - rhs; });
     Gamma1 = 0.0;
 
     for (int i = 1; i <= this->rcmax; ++i) {

@@ -16176,7 +16176,6 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_SizingWithFans)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = 0;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanType = HVAC::FanType::Invalid;
 
     state->dataSize->SysSizingRunDone = true;

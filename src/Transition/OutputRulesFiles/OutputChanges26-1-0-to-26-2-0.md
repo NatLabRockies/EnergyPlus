@@ -52,6 +52,16 @@ These are new report variables, not renames of existing report variables, so no 
 
 See pull request [#11750](https://github.com/NatLabRockies/EnergyPlus/pull/11750)
 
+### Zone Standard Mean Radiant Temperature report variable
+
+PR #11718 adds the `Zone Standard Mean Radiant Temperature` report variable, reported in degrees Celsius as a zone timestep average with the zone name as the output key. It is available for zones that use the `ZoneMRTCalculation` object and reports the standard mean radiant temperature based on the zone's heat-transfer surfaces and current inside-face thermal absorptance weighting.
+
+This output remains the standard MRT even when `ZoneMRTCalculation` changes the `Zone Mean Radiant Temperature` used for controls and other reporting. If the weighting is negligible, it falls back to the zone mean air temperature and EnergyPlus issues a warning.
+
+This is a new report variable, not a rename of an existing report variable, so no report-variable CSV transition is required.
+
+See pull request [#11718](https://github.com/NatLabRockies/EnergyPlus/pull/11718)
+
 ### EIO Material Details absorptance columns
 
 PR #11750 expands the `Material Details` record in `eplusout.eio`. The three absorptance columns
@@ -83,3 +93,15 @@ PR #11778 changes the `Surfaces by Class` table in the `Object Count Summary` re
 - `Overhead Door` surfaces are reported separately and are no longer included in the `Door` row.
 
 See pull request [#11778](https://github.com/NatLabRockies/EnergyPlus/pull/11778) for more details.
+
+### Surrounding-surface report variables
+
+PR #11796 restores two report variables that were documented but unavailable because their registrations were inadvertently removed:
+
+- `Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient`
+- `Surface Outside Face Surrounding Surfaces Average Temperature`
+
+The variables are available for exterior heat-transfer surfaces that use `SurfaceProperty:SurroundingSurfaces`. These are newly available
+report variables, not renames of existing variables, so no report-variable CSV transition is required.
+
+See pull request [#11796](https://github.com/NatLabRockies/EnergyPlus/pull/11796) for more details.

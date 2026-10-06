@@ -10364,8 +10364,8 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_18000W_SEER2_2023_ValueTest)
                                    TSRatedAirVolFlowRate,
                                    thisCoil.EIRFFlow, // EIRFFlowCurveIndex, | Only High Speed
                                    TSRatedCOP,
-                                   TSEIRFTemp,      // EIRFTempCurveIndex,
-                                   thisCoil.PLFFPLR // PLFFPLRCurveIndex | Coil Level Decleration
+                                   TSEIRFTemp,         // EIRFTempCurveIndex,
+                                   thisCoil.PLFFPLR(1) // PLFFPLRCurveIndex | Coil Level Decleration
         );
     NetCoolingCapRatedMaxSpeed = NetCoolingCapRated2023;
     EXPECT_TRUE(SEER2_User > 0.0);

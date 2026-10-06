@@ -213,24 +213,20 @@ namespace CTElectricGenerator {
                 }
 
                 // Not sure what to do with electric nodes, so do not use optional arguments
-                state.dataCTElectricGenerator->CTGenerator(genNum).ElectricCircuitNode =
-                    Node::GetOnlySingleNode(state,
-                                            electricCircuitNodeName,
-                                            ErrorsFound,
-                                            Node::ConnectionObjectType::GeneratorCombustionTurbine,
-                                            generatorName,
-                                            Node::FluidType::Electric,
-                                            Node::ConnectionType::Electric,
-                                            Node::CompFluidStream::Primary,
-                                            Node::ObjectIsNotParent);
+                Node::GetOnlySingleNode(state,
+                                        electricCircuitNodeName,
+                                        ErrorsFound,
+                                        Node::ConnectionObjectType::GeneratorCombustionTurbine,
+                                        generatorName,
+                                        Node::FluidType::Electric,
+                                        Node::ConnectionType::Electric,
+                                        Node::CompFluidStream::Primary,
+                                        Node::ObjectIsNotParent);
 
                 state.dataCTElectricGenerator->CTGenerator(genNum).MinPartLoadRat =
                     inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "minimum_part_load_ratio");
                 state.dataCTElectricGenerator->CTGenerator(genNum).MaxPartLoadRat =
                     inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "maximum_part_load_ratio");
-                state.dataCTElectricGenerator->CTGenerator(genNum).OptPartLoadRat =
-                    inputProcessor->getRealFieldValue(generatorFields, objectSchemaProps, "optimum_part_load_ratio");
-
                 // Load Special CT Generator Input
 
                 state.dataCTElectricGenerator->CTGenerator(genNum).PLBasedFuelInputCurve = Curve::GetCurve(state, partLoadBasedFuelInputCurveName);

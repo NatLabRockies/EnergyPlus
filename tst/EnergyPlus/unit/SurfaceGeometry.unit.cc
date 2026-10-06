@@ -3213,7 +3213,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     surface.GrossArea = 100.0;
     vertices.deallocate();
     vertices.allocate(8);
-    vertices = actualVertices;
+    std::copy(actualVertices.begin(), actualVertices.end(), vertices.begin());
     CheckConvexity(*state, 1, surface.Sides);
 
     EXPECT_EQ(4, surface.Sides);
@@ -3270,7 +3270,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_ASHRAE901_Hospital_
         {27.4320, 48.7680, 21.3415},
         {9.1440, 48.7680, 21.3415},
     };
-    surface.Vertex = vertices;
+    surface.Vertex.allocate(static_cast<int>(vertices.size()));
+    std::copy(vertices.begin(), vertices.end(), surface.Vertex.begin());
 
     CheckConvexity(*state, 1, surface.Sides);
 
@@ -3328,7 +3329,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexity_ColinearStability)
         floorSurface.Name = "Floor";
         floorSurface.Vertex.allocate(nVertices);
 
-        floorSurface.Vertex = floorVertices;
+        std::copy(floorVertices.begin(), floorVertices.end(), floorSurface.Vertex.begin());
 
         CheckConvexity(*state, floorSurfNum, floorSurface.Sides);
 
@@ -3347,7 +3348,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexity_ColinearStability)
         ceilingSurface.Name = "Ceiling";
         ceilingSurface.Vertex.allocate(nVertices);
 
-        ceilingSurface.Vertex = ceilingVertices;
+        std::copy(ceilingVertices.begin(), ceilingVertices.end(), ceilingSurface.Vertex.begin());
 
         CheckConvexity(*state, ceilingSurfNum, ceilingSurface.Sides);
 

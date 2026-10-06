@@ -116,14 +116,6 @@ TEST( OptionalTest, StringAssignment )
 	EXPECT_EQ( "New string", s );
 }
 
-TEST( OptionalTest, StringConversion )
-{
-	std::string const s( "Dog" );
-	Optional_string_const o( s );
-	EXPECT_EQ( std::string( "Dog Run" ), o + " Run" );
-	EXPECT_EQ( std::string( "Fast Dog" ), "Fast " + o );
-}
-
 TEST( OptionalTest, ConstReference )
 {
 	int i( 42 );

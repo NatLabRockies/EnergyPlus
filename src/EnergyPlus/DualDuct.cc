@@ -302,7 +302,6 @@ namespace DualDuct {
                 for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
                     if (thisDD.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
                         state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = thisDD.ColdAirInletNodeNum;
-                        state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum2 = thisDD.HotAirInletNodeNum;
                         thisDD.ADUNum = ADUNum;
                     }
                 }
@@ -442,7 +441,6 @@ namespace DualDuct {
                 for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
                     if (thisDD.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
                         state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = thisDD.ColdAirInletNodeNum;
-                        state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum2 = thisDD.HotAirInletNodeNum;
                         thisDD.ADUNum = ADUNum;
                     }
                 }
@@ -611,7 +609,6 @@ namespace DualDuct {
                 for (ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
                     if (thisDD.OutletNodeNum == state.dataDefineEquipment->AirDistUnit(ADUNum).OutletNodeNum) {
                         state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum = thisDD.OAInletNodeNum;
-                        state.dataDefineEquipment->AirDistUnit(ADUNum).InletNodeNum2 = thisDD.RecircAirInletNodeNum;
                         thisDD.ADUNum = ADUNum;
                     }
                 }

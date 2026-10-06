@@ -2411,7 +2411,6 @@ TEST_F(EnergyPlusFixture, EMS_ViewFactorToGround)
     state->init_state(*state);
 
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
 
     SimulationManager::ManageSimulation(*state);
 

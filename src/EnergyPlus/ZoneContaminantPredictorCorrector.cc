@@ -246,7 +246,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
         auto &contam = state.dataContaminantBalance->ZoneContamGenericConstant(Loop);
         contam.Name = AlphaName(1);
         contam.ZoneName = AlphaName(2);
-        contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
+        contam.ActualZoneNum = Util::FindItemInList(contam.ZoneName, state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -254,7 +254,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.ZoneName));
             ErrorsFound = true;
         }
 
@@ -345,9 +345,8 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
 
         auto &contam = state.dataContaminantBalance->ZoneContamGenericPDriven(Loop);
         contam.Name = AlphaName(1);
-
         contam.SurfName = AlphaName(2);
-        contam.SurfNum = Util::FindItemInList(AlphaName(2), state.afn->MultizoneSurfaceData, &AirflowNetwork::MultizoneSurfaceProp::SurfName);
+        contam.SurfNum = Util::FindItemInList(contam.SurfName, state.afn->MultizoneSurfaceData, &AirflowNetwork::MultizoneSurfaceProp::SurfName);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -355,17 +354,19 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.SurfName));
             ShowContinueError(state, "which is not listed in AirflowNetwork:MultiZone:Surface.");
             ErrorsFound = true;
         }
         // Ensure external surface
         if (contam.SurfNum > 0 &&
             state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).SurfNum).ExtBoundCond != DataSurfaces::ExternalEnvironment) {
-            ShowSevereError(
-                state,
-                std::format(
-                    "{}{}=\"{}. The entered surface ({}) is not an exterior surface", RoutineName, CurrentModuleObject, AlphaName(1), AlphaName(2)));
+            ShowSevereError(state,
+                            std::format("{}{}=\"{}. The entered surface ({}) is not an exterior surface",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        contam.SurfName));
             ErrorsFound = true;
         }
 
@@ -478,9 +479,8 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
 
         auto &contam = state.dataContaminantBalance->ZoneContamGenericCutoff(Loop);
         contam.Name = AlphaName(1);
-
         contam.ZoneName = AlphaName(2);
-        contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
+        contam.ActualZoneNum = Util::FindItemInList(contam.ZoneName, state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -488,7 +488,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.ZoneName));
             ErrorsFound = true;
         }
 
@@ -586,9 +586,8 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
         auto &contam = state.dataContaminantBalance->ZoneContamGenericDecay(Loop);
 
         contam.Name = AlphaName(1);
-
         contam.ZoneName = AlphaName(2);
-        contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
+        contam.ActualZoneNum = Util::FindItemInList(contam.ZoneName, state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -596,7 +595,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.ZoneName));
             ErrorsFound = true;
         }
 
@@ -701,7 +700,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
         auto &contam = state.dataContaminantBalance->ZoneContamGenericBLDiff(Loop);
         contam.Name = AlphaName(1);
         contam.SurfName = AlphaName(2);
-        contam.SurfNum = Util::FindItemInList(AlphaName(2), state.dataSurface->Surface);
+        contam.SurfNum = Util::FindItemInList(contam.SurfName, state.dataSurface->Surface);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -709,7 +708,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.SurfName));
             ErrorsFound = true;
         }
 
@@ -814,9 +813,8 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
 
         auto &contam = state.dataContaminantBalance->ZoneContamGenericDVS(Loop);
         contam.Name = AlphaName(1);
-
         contam.SurfName = AlphaName(2);
-        contam.SurfNum = Util::FindItemInList(AlphaName(2), state.dataSurface->Surface);
+        contam.SurfNum = Util::FindItemInList(contam.SurfName, state.dataSurface->Surface);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -824,7 +822,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.SurfName));
             ErrorsFound = true;
         }
 
@@ -909,9 +907,8 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
 
         auto &contam = state.dataContaminantBalance->ZoneContamGenericDRS(Loop);
         contam.Name = AlphaName(1);
-
         contam.ZoneName = AlphaName(2);
-        contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
+        contam.ActualZoneNum = Util::FindItemInList(contam.ZoneName, state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
                             std::format("{}{}=\"{}\", invalid {} entered={}",
@@ -919,7 +916,7 @@ void GetZoneContaminantInputs(EnergyPlusData &state)
                                         CurrentModuleObject,
                                         AlphaName(1),
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        AlphaName(2)));
+                                        contam.ZoneName));
             ErrorsFound = true;
         }
 
@@ -1062,14 +1059,14 @@ void GetZoneContaminantSetPoints(EnergyPlusData &state)
         auto &controlledZone = state.dataContaminantBalance->ContaminantControlledZone(ContControlledZoneNum);
         controlledZone.Name = state.dataIPShortCut->cAlphaArgs(1);
         controlledZone.ZoneName = state.dataIPShortCut->cAlphaArgs(2);
-        controlledZone.ActualZoneNum = Util::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataHeatBal->Zone);
+        controlledZone.ActualZoneNum = Util::FindItemInList(controlledZone.ZoneName, state.dataHeatBal->Zone);
         if (controlledZone.ActualZoneNum == 0) {
             ShowSevereError(state,
                             std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
                                         cCurrentModuleObject,
-                                        state.dataIPShortCut->cAlphaArgs(1),
+                                        controlledZone.Name,
                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                        state.dataIPShortCut->cAlphaArgs(2)));
+                                        controlledZone.ZoneName));
             ErrorsFound = true;
         } else {
             //      Zone(ContaminantControlledZone(ContControlledZoneNum)%ActualZoneNum)%TempControlledZoneIndex = ContControlledZoneNum

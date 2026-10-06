@@ -725,7 +725,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         int SchedMax = tempZone.setptTypeSched->getMaxVal(state);
 
         if (SchedMin == (int)HVAC::SetptType::Uncontrolled && SchedMax == (int)HVAC::SetptType::Uncontrolled) {
-            if (FindNumberInList(tempZone.setptTypeSched->Num, CTSchedMapToControlledZone, state.dataZoneCtrls->NumTempControlledZones) == 0) {
+            if (FindNumberInList(tempZone.setptTypeSched->Num, CTSchedMapToControlledZone) == 0) {
                 ShowSevereError(state, std::format("Control Type Schedule={}", tempZone.setptTypeSched->Name));
                 ShowContinueError(state, "..specifies control type 0 for all entries.");
                 ShowContinueError(state, "All zones using this Control Type Schedule have no heating or cooling available.");
@@ -1373,7 +1373,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         int SchedMax = comfortZone.setptTypeSched->getMaxVal(state);
 
         if (SchedMin == (int)HVAC::SetptType::Uncontrolled && SchedMax == (int)HVAC::SetptType::Uncontrolled) {
-            if (FindNumberInList(comfortZone.setptTypeSched->Num, CCmSchedMapToControlledZone, state.dataZoneCtrls->NumComfortControlledZones) == 0) {
+            if (FindNumberInList(comfortZone.setptTypeSched->Num, CCmSchedMapToControlledZone) == 0) {
                 ShowWarningError(state, std::format("Control Type Schedule={}", comfortZone.setptTypeSched->Name));
                 ShowContinueError(state, "..specifies control type 0 for all entries.");
                 ShowContinueError(state, "All zones using this Control Type Schedule have no thermal comfort control.");

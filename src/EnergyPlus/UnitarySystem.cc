@@ -4911,13 +4911,7 @@ namespace UnitarySystems {
                                 this->m_ControlType = UnitarySysCtrlType::Load;
                             }
                         }
-                        newCoil.setData(this->m_FanIndex, this->m_FanType, this->m_FanName, this->m_SuppCoilPlantLoc.loopNum);
-
-                        // Push heating coil PLF curve index to DX coil
-                        //                    if ( HeatingCoilPLFCurveIndex > 0 ) {
-                        //                        SetDXCoolingCoilData( UnitarySystem( UnitarySysNum ).CoolingCoilIndex, ErrorsFound,
-                        //                        HeatingCoilPLFCurveIndex );
-                        //                    }
+                        newCoil.setData(this->m_FanIndex, this->m_FanType, this->m_FanName);
                     }
 
                     if (state.dataGlobal->DoCoilDirectSolutions && this->m_NumOfSpeedCooling > 1) {

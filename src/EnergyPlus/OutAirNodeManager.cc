@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 
 // ObjexxFCL Headers
@@ -233,7 +234,7 @@ namespace OutAirNodeManager {
                     }
                     for (int NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
                         // Duplicates here are not a problem, just ignore
-                        if (!any_eq(TmpNums, NodeNums(NodeNum))) {
+                        if (!std::ranges::any_of(TmpNums, [&](auto const &elem) { return elem == NodeNums(NodeNum); })) {
                             ++ListSize;
                             if (ListSize > CurSize) {
                                 TmpNums.redimension(CurSize += 100, 0);
@@ -298,7 +299,7 @@ namespace OutAirNodeManager {
                     continue;
                 }
 
-                if (!any_eq(TmpNums, NodeNums(1))) {
+                if (!std::ranges::any_of(TmpNums, [&](auto const &elem) { return elem == NodeNums(1); })) {
                     ++ListSize;
                     if (ListSize > CurSize) {
                         TmpNums.redimension(CurSize += 100, 0);
@@ -362,7 +363,8 @@ namespace OutAirNodeManager {
 
         if (ListSize > 0) {
             state.dataOutAirNodeMgr->NumOutsideAirNodes = ListSize;
-            state.dataOutAirNodeMgr->OutsideAirNodeList = TmpNums({1, static_cast<int>(ListSize)});
+            state.dataOutAirNodeMgr->OutsideAirNodeList.dimension(static_cast<int>(ListSize));
+            std::copy_n(TmpNums.begin(), ListSize, state.dataOutAirNodeMgr->OutsideAirNodeList.begin());
         }
     }
 
@@ -431,7 +433,7 @@ namespace OutAirNodeManager {
             SetOutAirNodes(state);
         }
 
-        if (any_eq(state.dataOutAirNodeMgr->OutsideAirNodeList, NodeNumber)) {
+        if (std::ranges::any_of(state.dataOutAirNodeMgr->OutsideAirNodeList, [&](auto const &elem) { return elem == NodeNumber; })) {
             Okay = true;
         } else {
             Okay = false;
@@ -487,7 +489,7 @@ namespace OutAirNodeManager {
         Okay = false;
 
         if (state.dataOutAirNodeMgr->NumOutsideAirNodes > 0) {
-            if (any_eq(state.dataOutAirNodeMgr->OutsideAirNodeList, NodeNumber)) {
+            if (std::ranges::any_of(state.dataOutAirNodeMgr->OutsideAirNodeList, [&](auto const &elem) { return elem == NodeNumber; })) {
                 Okay = true;
             } else {
                 Okay = false;
