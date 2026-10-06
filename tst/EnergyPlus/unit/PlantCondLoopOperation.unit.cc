@@ -63,6 +63,25 @@
 
 using namespace EnergyPlus;
 
+class VariableCapacityPlantComponent : public PlantComponent
+{
+public:
+    Real64 dynamicMaxCapacity = 0.0;
+
+    void simulate(EnergyPlusData &, const PlantLocation &, bool, Real64 &, bool) override
+    {
+    }
+
+    void oneTimeInit(EnergyPlusData &) override
+    {
+    }
+
+    std::tuple<Real64, bool> getDynamicMaxCapacity(EnergyPlusData &) override
+    {
+        return {this->dynamicMaxCapacity, true};
+    }
+};
+
 class DistributePlantLoadTest : public EnergyPlusFixture
 {
 
@@ -291,6 +310,50 @@ TEST_F(DistributePlantLoadTest, DistributePlantLoad_Sequential)
     EXPECT_EQ(thisBranch.Comp(1).MyLoad, 40.0);
     EXPECT_EQ(thisBranch.Comp(2).MyLoad, 100.0);
     EXPECT_EQ(remainingLoopDemand, 60.0);
+}
+
+TEST_F(DistributePlantLoadTest, DistributePlantLoad_SequentialHonorsDynamicCapacity)
+{
+    auto &plantLoop = state->dataPlnt->PlantLoop(1);
+    auto &thisBranch = plantLoop.LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1);
+    plantLoop.LoadDistribution = DataPlant::LoadingScheme::Sequential;
+    plantLoop.OpScheme(1).EquipList(1).NumComps = 3;
+
+    VariableCapacityPlantComponent variableCapacityComponent;
+    thisBranch.Comp(1).compPtr = &variableCapacityComponent;
+    thisBranch.Comp(1).MaxLoad = 100.0;
+    thisBranch.Comp(2).MaxLoad = 60.0;
+    thisBranch.Comp(3).MaxLoad = 40.0;
+
+    // A reported zero is a valid current capacity, so the next component meets the load.
+    Real64 remainingLoopDemand = 0.0;
+    Real64 loopDemand = 10.0;
+    PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+    EXPECT_EQ(0.0, thisBranch.Comp(1).MyLoad);
+    EXPECT_EQ(10.0, thisBranch.Comp(2).MyLoad);
+    EXPECT_EQ(0.0, thisBranch.Comp(3).MyLoad);
+    EXPECT_EQ(0.0, remainingLoopDemand);
+
+    // The dynamic maximum, rather than the 100 W design maximum, limits the first component.
+    DistributePlantLoadTest::ResetLoads();
+    variableCapacityComponent.dynamicMaxCapacity = 50.0;
+    loopDemand = 100.0;
+    PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+    EXPECT_EQ(50.0, thisBranch.Comp(1).MyLoad);
+    EXPECT_EQ(50.0, thisBranch.Comp(2).MyLoad);
+    EXPECT_EQ(0.0, thisBranch.Comp(3).MyLoad);
+    EXPECT_EQ(0.0, remainingLoopDemand);
+
+    // Without a dynamic implementation, a zero static maximum retains the legacy unrestricted behavior.
+    DistributePlantLoadTest::ResetLoads();
+    thisBranch.Comp(1).compPtr = nullptr;
+    thisBranch.Comp(1).MaxLoad = 0.0;
+    loopDemand = 30.0;
+    PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+    EXPECT_EQ(30.0, thisBranch.Comp(1).MyLoad);
+    EXPECT_EQ(0.0, thisBranch.Comp(2).MyLoad);
+    EXPECT_EQ(0.0, thisBranch.Comp(3).MyLoad);
+    EXPECT_EQ(0.0, remainingLoopDemand);
 }
 
 TEST_F(DistributePlantLoadTest, DistributePlantLoad_Uniform)
