@@ -478,6 +478,46 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             }
         }
     }
+
+    auto const rvi_instances = ip->epJSON.find("OutputControl:RVI");
+    if (rvi_instances != ip->epJSON.end()) {
+        auto const &objectSchemaProps = ip->getObjectSchemaProps(state, "OutputControl:RVI");
+        auto const &instancesValue = rvi_instances.value();
+        for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+            auto const &fields = instance.value();
+            ip->markObjectAsUsed("OutputControl:RVI", instance.key());
+
+            auto extensibles = fields.find("output_variables");
+            if (extensibles != fields.end()) {
+                auto const &extensionSchemaProps = objectSchemaProps["output_variables"]["items"]["properties"];
+                auto const &extensiblesArray = extensibles.value();
+                rviKeyNames.reserve(extensiblesArray.size());
+                for (auto extensibleInstance = extensiblesArray.begin(); extensibleInstance != extensiblesArray.end(); ++extensibleInstance) {
+                    rviKeyNames.emplace_back(ip->getAlphaFieldValue(extensibleInstance.value(), extensionSchemaProps, "key_name"));
+                }
+            }
+        }
+    }
+
+    auto const mvi_instances = ip->epJSON.find("OutputControl:MVI");
+    if (mvi_instances != ip->epJSON.end()) {
+        auto const &objectSchemaProps = ip->getObjectSchemaProps(state, "OutputControl:MVI");
+        auto const &instancesValue = mvi_instances.value();
+        for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+            auto const &fields = instance.value();
+            ip->markObjectAsUsed("OutputControl:MVI", instance.key());
+
+            auto extensibles = fields.find("output_meters");
+            if (extensibles != fields.end()) {
+                auto const &extensionSchemaProps = objectSchemaProps["output_meters"]["items"]["properties"];
+                auto const &extensiblesArray = extensibles.value();
+                mviKeyNames.reserve(extensiblesArray.size());
+                for (auto extensibleInstance = extensiblesArray.begin(); extensibleInstance != extensiblesArray.end(); ++extensibleInstance) {
+                    mviKeyNames.emplace_back(ip->getAlphaFieldValue(extensibleInstance.value(), extensionSchemaProps, "key_name"));
+                }
+            }
+        }
+    }
 }
 
 void IOFiles::flushAll()

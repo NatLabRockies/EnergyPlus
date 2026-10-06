@@ -100,6 +100,27 @@ protected:
     {
         return getCSVOutputs(t_state, data, freq, resultsFramework.outputVariables);
     }
+
+    std::map<std::string, std::vector<std::string>> getCSVOutputs(EnergyPlusData &t_state,
+                                                                  json const &data,
+                                                                  OutputProcessor::ReportFreq reportingFrequency,
+                                                                  std::vector<std::string> const &keyNames,
+                                                                  std::vector<std::string> const &outputVariables,
+                                                                  std::map<std::string, std::vector<std::string>> const &outputVariableKeyNames)
+    {
+        ResultsFramework::CSVWriter csv(keyNames, outputVariables, outputVariableKeyNames);
+        csv.parseTSOutputs(t_state, data, outputVariables, reportingFrequency);
+        return csv.outputs;
+    }
+
+    std::map<std::string, std::vector<std::string>> getCSVOutputs(EnergyPlusData &t_state,
+                                                                  json const &data,
+                                                                  ResultsFramework::ResultsFramework const &resultsFramework,
+                                                                  OutputProcessor::ReportFreq reportingFrequency,
+                                                                  std::vector<std::string> const &keyNames)
+    {
+        return getCSVOutputs(t_state, data, reportingFrequency, keyNames, resultsFramework.outputVariables, resultsFramework.outputVariableKeyNames);
+    }
 };
 
 } // namespace EnergyPlus
