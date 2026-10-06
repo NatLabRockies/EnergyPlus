@@ -60,7 +60,7 @@ This numeric field is used to calculate the power of a continuously controlled f
 
 \paragraph{Field: Design Pressure Rise}\label{field-pressure-fansysmodel}
 
-This numeric field is the total system pressure rise experienced by the fan in Pascals at full flow rate and altitude-adjusted standard density of dry air at 20 degrees Celsius drybulb. This field is required.
+This numeric field is the total system pressure rise experienced by the fan in Pascals at full flow rate and altitude-adjusted standard density of dry air at \SI{20}{\celsius} dry-bulb temperature. This field is required.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-eff-fansysmodel}
 
@@ -104,7 +104,7 @@ This optional numeric field is the total system pressure rise experienced by the
 
 \paragraph{Field: Night Ventilation Mode Flow Fraction}\label{field-nite-vent-flow-fraction-fansysmodel}
 
-This numeric field is the fan flow fraction for night ventilation mode. It corresponds to Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object. The input is accepted but is not currently used; \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} uses its own flow fraction. This value must be between 0 and 1 and represents the fan flow relative to the Design Maximum Air Flow Rate.
+This field currently has no effect on Fan:SystemModel operation. Set the night-ventilation airflow with the Night Venting Flow Fraction field of \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. The value must be between 0 and 1.
 
 \paragraph{Field: Motor Loss Zone Name}\label{field-loss-zone-name-fansysmodel}
 
@@ -1053,11 +1053,11 @@ The alpha name of the quartic polynomial performance curve (ref: \hyperref[curve
 \eta_{\mathrm{belt, max, ln}} = C_1 + C_2 \cdot x_{\mathrm{belt, max}} + C_3 \cdot x_{\mathrm{belt, max}}^2 + C_4 \cdot x_{\mathrm{belt, max}}^3 + C_5 \cdot x_{\mathrm{belt, max}}^4
 \end{equation}
 
-where \(x_{\mathrm{belt, max}} = ln(F_{\mathrm{belt}} \cdot H_{\mathrm{fan, max}})\) with \(H_{\mathrm{fan, max}}\) expressed in terms of hp.
+where \(x_{\mathrm{belt,max}} = \ln(H_{\mathrm{fan,max}})\), with \(H_{\mathrm{fan,max}}\) expressed in hp.
 
-Note that \(\eta_{\mathrm{belt, max}} = exp(\eta_{\mathrm{belt, max, ln}})\).
+Note that \(\eta_{\mathrm{belt,max}} = \exp(\eta_{\mathrm{belt,max,ln}})\).
 
-The curve output is the natural logarithm of efficiency and must be between -4.6 and 0.0. The model exponentiates that output to obtain a maximum belt efficiency greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{belt, max}}\) is known, set \(C_1 = ln(\eta_{\mathrm{belt, max}})\) and set \(C_2\) through \(C_5\) to zero. If this field is blank, such as for a direct-drive fan, the model uses a maximum belt efficiency of 1.0.
+The curve output is the natural logarithm of efficiency and must be between -4.6 and 0.0. The model exponentiates that output to obtain a maximum belt efficiency greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{belt,max}}\) is known, set \(C_1 = \ln(\eta_{\mathrm{belt,max}})\) and set \(C_2\) through \(C_5\) to zero. If this field is blank, such as for a direct-drive fan, the model uses a maximum belt efficiency of 1.0.
 
 \paragraph{Field: Normalized Belt Efficiency Curve Name Region 1}\label{field-normalized-belt-efficiency-curve-name-region-1}
 
@@ -1078,7 +1078,7 @@ If this field is left blank, the model assumes that the output of the modifier c
 The alpha name of the exponential decay performance curve (ref: \hyperref[curveexponentialdecay]{Curve:ExponentialDecay} in Performance Curves) that determines the normalized (part-load) fan drive belt efficiency (\(\eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 2 (\(x_{\mathrm{belt, trans}} \le x_{\mathrm{belt}} \le 1\)) is:
 
 \begin{equation}
-  \eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}} = C_1 + C_2 \cdot exp(C_3 \cdot x_{\mathrm{belt}})
+  \eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}} = C_1 + C_2 \cdot \exp(C_3 \cdot x_{\mathrm{belt}})
 \end{equation}
 
 where \(x_{\mathrm{belt}} = \tau_{\mathrm{belt}} / \tau_{\mathrm{belt, max}}\); \(\tau_{\mathrm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\mathrm{fan}}\), rpm).
@@ -1109,7 +1109,7 @@ The alpha name of the single rectangular hyperbola type 1 performance curve (ref
   \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor, max}}) / (C_2 + x_{\mathrm{motor, max}}) + C_3
 \end{equation}
 
-where \(x_{\mathrm{motor, max}} = ln(F_{\mathrm{motor}} \cdot H_{\mathrm{belt, max}})\) with \(H_{\mathrm{belt, max}}\) expressed in terms of hp. \(H_{\mathrm{belt, max}}\) is the maximum output power from the motor to the belt, which corresponds to the calculated maximum power input to the fan shaft (\(H_{\mathrm{fan, max}}\), W).
+where \(x_{\mathrm{motor, max}} = \ln(F_{\mathrm{motor}} \cdot H_{\mathrm{belt, max}})\) with \(H_{\mathrm{belt, max}}\) expressed in terms of hp. \(H_{\mathrm{belt, max}}\) is the maximum output power from the motor to the belt, which corresponds to the calculated maximum power input to the fan shaft (\(H_{\mathrm{fan, max}}\), W).
 
 The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{motor, max}}\) is known, it is represented by coefficient \(C_3\). In this case, coefficients \(C_1\) and \(C_2\) are set to zero.
 

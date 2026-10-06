@@ -52716,7 +52716,9 @@ Fan:SystemModel,
        \units Pa
        \ip-units inH2O
   N11, \field Night Ventilation Mode Flow Fraction
-       \note Fraction of Design Maximum Air Flow Rate to use when in night mode using AvailabilityManager:NightVentilation
+       \note This field currently has no effect on Fan:SystemModel operation.
+       \note Set night-ventilation airflow with the Night Venting Flow Fraction field of
+       \note AvailabilityManager:NightVentilation.
        \type real
        \minimum 0.0
        \maximum 1.0
@@ -109333,10 +109335,10 @@ Output:Table:Annual,
        \begin-extensible
        \type external-list
        \external-list autoRDDvariableMeter
-       \note Contains the name of a registered report variable (see Output:Variable and eplusout.rdd),
-       \note meter (see Output:Meter and eplusout.mdd), or schedule. EMS values must be exposed through
-       \note an EnergyManagementSystem:OutputVariable, which registers a report variable. The value is
-       \note shown using the aggregation method specified.
+       \note Contains the name of an output variable (see Output:Variable and eplusout.rdd), meter
+       \note (see Output:Meter and eplusout.mdd), or schedule. To include an EMS value, define it with
+       \note an EnergyManagementSystem:OutputVariable object. EMS internal variables and arbitrary IDF
+       \note object fields cannot be referenced directly. The value is shown using the specified aggregation method.
    A5, \field Aggregation Type for Variable or Meter 1
        \type choice
        \key SumOrAverage
@@ -109403,14 +109405,14 @@ Output:Table:Annual,
        \note   the report is important when using this Aggregation Type.
        \note MaximumDuringHoursShown - Reports the maximum value and the time that the maximum value
        \note   occurred but only during the hours reported with the previous "hours-" Aggregation Type.
-       \note   When the Maximum option is used with an average variable the value is divided
-       \note   by the length of the timestep. Order of the variables in the report is important
-       \note   when using this Aggregation Type.
+       \note   When this option is used with a summed variable, the value is divided by the timestep
+       \note   length in seconds so that the reported result is a rate. Average variables are reported
+       \note   without timestep conversion. Order of the variables in the report is important.
        \note MinimumDuringHoursShown - Reports the minimum value and the time that the minimum value
        \note   occurred but only during the hours reported with the previous "hours-" Aggregation Type.
-       \note   When the Minimum option is used with an average variable the value is divided
-       \note   by the length of the timestep. Order of the variables in the report is important
-       \note   when using this Aggregation Type.
+       \note   When this option is used with a summed variable, the value is divided by the timestep
+       \note   length in seconds so that the reported result is a rate. Average variables are reported
+       \note   without timestep conversion. Order of the variables in the report is important.
    N1, \field Digits After Decimal 1
        \type integer
        \default 2

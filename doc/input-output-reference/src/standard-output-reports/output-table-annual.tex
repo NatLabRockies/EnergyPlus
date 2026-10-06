@@ -18,7 +18,7 @@ This optional schedule limits the timesteps included in the aggregations. If the
 
 \paragraph{Field: Variable or Meter or EMS Variable or Field \textless{}\#\textgreater{} Name}\label{field-variable-or-meter-name}
 
-This field contains the name of a registered report variable (see \hyperref[outputvariable]{Output:Variable} and eplusout.rdd), meter (see \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter} and eplusout.mdd), or schedule. Registered report variables include EnergyManagementSystem:OutputVariable objects. Although the field name retains ``EMS Variable or Field,'' the current annual-table lookup does not directly resolve an EMS internal variable or an arbitrary IDF object field. The value is shown using the specified aggregation method. Lookup checks report variables first, then meters, then schedules.
+This field contains the name of an output variable, meter, or schedule. Available output-variable names are listed in eplusout.rdd (see \hyperref[outputvariable]{Output:Variable}), and meter names are listed in eplusout.mdd (see \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meter}). To include an EMS value, first define it with an EnergyManagementSystem:OutputVariable object. EMS internal variables and arbitrary IDF object fields cannot be referenced directly. The value is shown using the specified aggregation method. If the same name matches more than one type, EnergyPlus checks output variables first, then meters, then schedules.
 
 \paragraph{Field: Aggregation Type for Variable or Meter \textless{}\#\textgreater{}}\label{field-aggregation-type-for-variable-or-meter}
 
