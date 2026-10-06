@@ -1368,6 +1368,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "    Zone 1 Thermostat,       !- Name",
         "    West Zone,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",

@@ -36831,6 +36831,13 @@ ZoneControl:Thermostat,
        \required-field
        \type object-list
        \object-list ScheduleNames
+  N1 , \field Temperature Difference Between Cutout And Setpoint
+       \note This optional choice field provides a temperature difference between cut-out temperature and
+       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
+       \units deltaC
+       \type real
+       \minimum 0.0
+       \default 0.0
   A4 , \field Control 1 Object Type
        \required-field
        \type choice
@@ -36872,18 +36879,11 @@ ZoneControl:Thermostat,
        \key ThermostatSetpoint:SingleCooling
        \key ThermostatSetpoint:SingleHeatingOrCooling
        \key ThermostatSetpoint:DualSetpoint
-  A11, \field Control 4 Name
+  A11; \field Control 4 Name
        \note Control names are names of individual control objects (e.g. ThermostatSetpoint:SingleHeating)
        \note Schedule values in these objects list actual setpoint temperatures for the control types
        \type object-list
        \object-list ControlTypeNames
-  N1 ; \field Temperature Difference Between Cutout And Setpoint
-       \note This optional choice field provides a temperature difference between cut-out temperature and
-       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
-       \units deltaC
-       \type real
-       \minimum 0.0
-       \default 0.0
 
 ZoneControl:Thermostat:OperativeTemperature,
        \memo This object can be used with the ZoneList option on a thermostat or with one

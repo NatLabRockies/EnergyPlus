@@ -1027,6 +1027,7 @@ TEST_F(EnergyPlusFixture, ColdestSetPointMgrInSingleDuct)
         "    SPACE1-1 Control,        !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",

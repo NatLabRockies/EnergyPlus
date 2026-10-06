@@ -1719,6 +1719,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_UserDefinedDuctViewFactors)
         "    Zone Thermostat,         !- Name",
         "    OCCUPIED ZONE,           !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -4279,6 +4280,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
         "    Zone Thermostat,         !- Name",
         "    LIVING ZONE,             !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
