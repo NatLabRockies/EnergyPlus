@@ -127,11 +127,16 @@ void runAnyRegisteredCallbacks(EnergyPlusData &state, EMSManager::EMSCallFrom co
     if (state.dataGlobal->KickOffSimulation) {
         return;
     }
+    int const actuatorWritesBefore = state.dataPluginManager->actuatorWriteCount;
     for (auto const &cb : state.dataPluginManager->callbacks[iCalledFrom]) {
         if (iCalledFrom == EMSManager::EMSCallFrom::UserDefinedComponentModel) {
             continue; // these are called -intentionally- using the runSingleUserDefinedCallback method
         }
         cb(&state);
+    }
+    // only a callback that wrote an actuator counts as having run: at InsideHVACSystemIterationLoop, anyRan forces
+    // additional air loop iterations, which would otherwise change the results of a callback that only reads values
+    if (state.dataPluginManager->actuatorWriteCount != actuatorWritesBefore) {
         anyRan = true;
     }
 #if LINK_WITH_PYTHON
