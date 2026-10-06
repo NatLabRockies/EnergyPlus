@@ -53,8 +53,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
-#include <ObjexxFCL/char.functions.hh>
 #include <ObjexxFCL/random.hh>
 #include <ObjexxFCL/string.functions.hh>
 #include <ObjexxFCL/time.hh>
@@ -173,7 +171,7 @@ void InitializeRuntimeLanguage(EnergyPlusData &state)
             // datevalues(1)+datevalues(2)+datevalues(3)+  &
             // datevalues(5)+datevalues(6)+datevalues(7)+datevalues(8)
             state.dataRuntimeLang->ErlVariable(state.dataRuntimeLangProcessor->ActualTimeNum).Value =
-                SetErlValueNumber(double(sum(datevalues({5, 8}))));
+                SetErlValueNumber(double(datevalues(5) + datevalues(6) + datevalues(7) + datevalues(8)));
             // datevalues(5)+datevalues(6)+datevalues(7)+datevalues(8)
             //    ELSE
             //      ErlVariable(ActualDateAndTimeNum)%Value  = SetErlValueNumber(REAL(RANDOM_NUMBER(X=509),r64))
@@ -342,8 +340,8 @@ void BeginEnvrnInitializeRuntimeLanguage(EnergyPlusData &state)
 
     // reinitialize trend variables so old data are purged
     for (int TrendVarNum = 1; TrendVarNum <= state.dataRuntimeLang->NumErlTrendVariables; ++TrendVarNum) {
-        int TrendDepth = state.dataRuntimeLang->TrendVariable(TrendVarNum).LogDepth;
-        state.dataRuntimeLang->TrendVariable(TrendVarNum).TrendValARR({1, TrendDepth}) = 0.0;
+        // TrendValARR is allocated to LogDepth
+        state.dataRuntimeLang->TrendVariable(TrendVarNum).TrendValARR = 0.0;
     }
 
     // reinitialize sensors
@@ -734,7 +732,9 @@ int AddInstruction(EnergyPlusData &state,
         TempStack = thisErlStack;
         thisErlStack.Instruction.deallocate();
         thisErlStack.Instruction.allocate(thisErlStack.NumInstructions + 1);
-        thisErlStack.Instruction({1, thisErlStack.NumInstructions}) = TempStack.Instruction({1, thisErlStack.NumInstructions});
+        for (int i = 1; i <= thisErlStack.NumInstructions; ++i) {
+            thisErlStack.Instruction(i) = TempStack.Instruction(i);
+        }
         ++thisErlStack.NumInstructions;
     }
 
@@ -787,7 +787,9 @@ void AddError(EnergyPlusData &state,
         TempStack = thisErlStack;
         thisErlStack.Error.deallocate();
         thisErlStack.Error.allocate(thisErlStack.NumErrors + 1);
-        thisErlStack.Error({1, thisErlStack.NumErrors}) = TempStack.Error({1, thisErlStack.NumErrors});
+        for (int i = 1; i <= thisErlStack.NumErrors; ++i) {
+            thisErlStack.Error(i) = TempStack.Error(i);
+        }
         ++thisErlStack.NumErrors;
     }
 
@@ -1141,7 +1143,7 @@ void ParseExpression(EnergyPlusData &state,
         PeriodFound = false;
         ErrorFlag = false;
         LastED = false;
-        if (is_any_of(NextChar, "0123456789.")) {
+        if (std::string_view("0123456789.").find(NextChar) != std::string_view::npos) {
             // Parse a number literal token
             ++Pos;
             StringToken += NextChar;
@@ -1155,7 +1157,7 @@ void ParseExpression(EnergyPlusData &state,
 
             while (Pos < LastPos) {
                 NextChar = String[Pos];
-                if (is_any_of(NextChar, "0123456789.eEdD")) {
+                if (std::string_view("0123456789.eEdD").find(NextChar) != std::string_view::npos) {
                     ++Pos;
                     if (NextChar == '.') {
                         if (PeriodFound) {
@@ -1170,7 +1172,7 @@ void ParseExpression(EnergyPlusData &state,
                         }
                         PeriodFound = true;
                     }
-                    if (is_any_of(NextChar, "eEdD")) {
+                    if (std::string_view("eEdD").find(NextChar) != std::string_view::npos) {
                         StringToken += NextChar;
                         if (LastED) {
                             ShowSevereError(state, std::format("EMS Parse Expression, for \"{}\".", state.dataRuntimeLang->ErlStack(StackNum).Name));
@@ -1187,7 +1189,7 @@ void ParseExpression(EnergyPlusData &state,
                     } else {
                         StringToken += NextChar;
                     }
-                } else if (is_any_of(NextChar, "+-")) { // +/- following an ED is okay.
+                } else if (std::string_view("+-").find(NextChar) != std::string_view::npos) { // +/- following an ED is okay.
                     if (LastED) {
                         StringToken += NextChar;
                         ++Pos;
@@ -1196,8 +1198,8 @@ void ParseExpression(EnergyPlusData &state,
                         // +/- will be processed on next pass, nothing needs to be done after a numeral
                         break;
                     }
-                } else if (is_any_of(NextChar, " +-*/^=<>)")) { // Any binary operator is okay
-                    break;                                      // End of token
+                } else if (std::string_view(" +-*/^=<>)").find(NextChar) != std::string_view::npos) { // Any binary operator is okay
+                    break;                                                                            // End of token
                 } else {
                     // Error: strange sequence of characters:  return TokenString//NextChar   e.g.,  234.44a or 234.44%
                     StringToken += NextChar;
@@ -1230,7 +1232,7 @@ void ParseExpression(EnergyPlusData &state,
                 }
             }
 
-        } else if (is_any_of(NextChar, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")) {
+        } else if (std::string_view("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ").find(NextChar) != std::string_view::npos) {
             // Parse an undetermined string token (could be a variable, subroutine, or named operator)
             ++Pos;
             StringToken += NextChar;
@@ -1240,10 +1242,10 @@ void ParseExpression(EnergyPlusData &state,
 
             while (Pos < LastPos) {
                 NextChar = String[Pos];
-                if (is_any_of(NextChar, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")) {
+                if (std::string_view("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789").find(NextChar) != std::string_view::npos) {
                     ++Pos;
                     StringToken += NextChar;
-                } else if (is_any_of(NextChar, " +-*/^=<>()")) {
+                } else if (std::string_view(" +-*/^=<>()").find(NextChar) != std::string_view::npos) {
                     break; // End of token
                 } else {
                     // Error: bad syntax:  return TokenString//NextChar   e.g.,  var1$ or b%
@@ -1259,7 +1261,7 @@ void ParseExpression(EnergyPlusData &state,
             }
             state.dataRuntimeLangProcessor->PEToken(NumTokens).Variable = NewEMSVariable(state, StringToken, StackNum);
 
-        } else if (is_any_of(NextChar, "+-*/^=<>@|&")) {
+        } else if (std::string_view("+-*/^=<>@|&").find(NextChar) != std::string_view::npos) {
             // Parse an operator token
             if (NextChar == '-') {
                 StringToken = "-";
@@ -1428,7 +1430,7 @@ void ParseExpression(EnergyPlusData &state,
 
             ++Pos;
 
-        } else if (is_any_of(NextChar, "()")) {
+        } else if (std::string_view("()").find(NextChar) != std::string_view::npos) {
             // Parse a parenthesis token
             ++Pos;
             StringToken = NextChar;
@@ -1445,7 +1447,7 @@ void ParseExpression(EnergyPlusData &state,
                 state.dataRuntimeLangProcessor->PEToken(NumTokens).Parenthesis = Token::ParenthesisRight;
             }
 
-        } else if (is_any_of(NextChar, "\"")) {
+        } else if (std::string_view("\"").find(NextChar) != std::string_view::npos) {
             // Parse a string literal token
             if (state.dataSysVars->DeveloperFlag) {
                 print(state.files.debug, "{}\n", "LITERAL STRING");
@@ -1532,7 +1534,9 @@ int ProcessTokens(
                         LastPos = TokenNum;
                         NumSubTokens = LastPos - Pos - 1;
                         SubTokenList.allocate(NumSubTokens);
-                        SubTokenList({1, NumSubTokens}) = Token({Pos + 1, LastPos - 1}); // Need to check that these don't exceed bounds
+                        for (int i = 1; i <= NumSubTokens; ++i) { // Need to check that these don't exceed bounds
+                            SubTokenList(i) = Token(Pos + i);
+                        }
                         ExpressionNum = ProcessTokens(state, SubTokenList, NumSubTokens, StackNum, ParsingString);
                         SubTokenList.deallocate();
 
@@ -1540,7 +1544,9 @@ int ProcessTokens(
                         NewNumTokens = NumTokens - NumSubTokens - 1;
                         if (NewNumTokens > 0) {
                             if (LastPos + 1 <= NumTokens) {
-                                Token({Pos + 1, NewNumTokens}) = Token({LastPos + 1, _});
+                                for (int i = Pos + 1; i <= NewNumTokens; ++i) { // shift left, forward copy is overlap-safe
+                                    Token(i) = Token(i + LastPos - Pos);
+                                }
                             }
                             Token.redimension(NewNumTokens);
                             Token(Pos).Type = Token::Expression;
@@ -1680,7 +1686,9 @@ int ProcessTokens(
             // Replace the three tokens with one expression token
             if ((NumOperands == 2) && (NumTokens - 2 > 0)) {
                 if (Pos + 2 <= NumTokens) {
-                    Token({Pos, NumTokens - 2}) = Token({Pos + 2, _});
+                    for (int i = Pos; i <= NumTokens - 2; ++i) { // shift left, forward copy is overlap-safe
+                        Token(i) = Token(i + 2);
+                    }
                 }
                 Token(Pos - 1).Type = Token::Expression;
                 Token(Pos - 1).Expression = ExpressionNum;
@@ -2359,7 +2367,12 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
                     if (thisIndex >= 1) {
                         if (thisIndex <= state.dataRuntimeLang->TrendVariable(thisTrend).LogDepth) {
                             // calculate average
-                            thisAverage = sum(state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})) / double(thisIndex);
+                            auto const &thisTrendVar = state.dataRuntimeLang->TrendVariable(thisTrend);
+                            Real64 sumTrendVal = 0.0;
+                            for (int i = 1; i <= thisIndex; ++i) {
+                                sumTrendVal += thisTrendVar.TrendValARR(i);
+                            }
+                            thisAverage = sumTrendVal / double(thisIndex);
                             ReturnValue = SetErlValueNumber(thisAverage, Operand(1));
                         } else {
                             ReturnValue.Type = Value::Error;
@@ -2454,12 +2467,18 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
 
                         if (thisIndex <= state.dataRuntimeLang->TrendVariable(thisTrend).LogDepth) {
                             // closed form solution for slope of linear least squares fit
-                            thisSlope = (sum(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex})) *
-                                             sum(state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})) -
-                                         thisIndex * sum((state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}) *
-                                                          state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})))) /
-                                        (pow_2(sum(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}))) -
-                                         thisIndex * sum(pow(state.dataRuntimeLang->TrendVariable(thisTrend).TimeARR({1, thisIndex}), 2)));
+                            auto &thisTrendVar = state.dataRuntimeLang->TrendVariable(thisTrend);
+                            Real64 sumTime = 0.0;
+                            Real64 sumTrendVal = 0.0;
+                            Real64 sumTimeSq = 0.0;
+                            Real64 dotTimeTrendVal = 0.0;
+                            for (int i = 1; i <= thisIndex; ++i) {
+                                sumTime += thisTrendVar.TimeARR(i);
+                                sumTrendVal += thisTrendVar.TrendValARR(i);
+                                sumTimeSq += pow_2(thisTrendVar.TimeARR(i));
+                                dotTimeTrendVal += thisTrendVar.TimeARR(i) * thisTrendVar.TrendValARR(i);
+                            }
+                            thisSlope = (sumTime * sumTrendVal - thisIndex * dotTimeTrendVal) / (pow_2(sumTime) - thisIndex * sumTimeSq);
                             ReturnValue = SetErlValueNumber(thisSlope, Operand(1)); // rate of change per hour
                         } else {
                             ReturnValue.Type = Value::Error;
@@ -2483,8 +2502,12 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
                     thisIndex = std::floor(Operand(2).Number);
                     if (thisIndex >= 1) {
                         if (thisIndex <= state.dataRuntimeLang->TrendVariable(thisTrend).LogDepth) {
-                            ReturnValue =
-                                SetErlValueNumber(sum(state.dataRuntimeLang->TrendVariable(thisTrend).TrendValARR({1, thisIndex})), Operand(1));
+                            auto const &thisTrendVar = state.dataRuntimeLang->TrendVariable(thisTrend);
+                            Real64 sumTrendVal = 0.0;
+                            for (int i = 1; i <= thisIndex; ++i) {
+                                sumTrendVal += thisTrendVar.TrendValARR(i);
+                            }
+                            ReturnValue = SetErlValueNumber(sumTrendVal, Operand(1));
                         } else {
                             ReturnValue.Type = Value::Error;
                             ReturnValue.Error = "Built-in trend function called with index larger than what is being logged";
@@ -3159,7 +3182,9 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 if (NumAlphas > 1) {
                     state.dataRuntimeLang->ErlStack(StackNum).Line.allocate(NumAlphas - 1);
                     state.dataRuntimeLang->ErlStack(StackNum).NumLines = NumAlphas - 1;
-                    state.dataRuntimeLang->ErlStack(StackNum).Line({1, NumAlphas - 1}) = cAlphaArgs({2, NumAlphas}); // note array assignment
+                    for (int i = 1; i <= NumAlphas - 1; ++i) { // note array assignment
+                        state.dataRuntimeLang->ErlStack(StackNum).Line(i) = cAlphaArgs(i + 1);
+                    }
                 }
 
             } // ProgramNum
@@ -3195,7 +3220,9 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 if (NumAlphas > 1) {
                     state.dataRuntimeLang->ErlStack(StackNum).Line.allocate(NumAlphas - 1);
                     state.dataRuntimeLang->ErlStack(StackNum).NumLines = NumAlphas - 1;
-                    state.dataRuntimeLang->ErlStack(StackNum).Line({1, NumAlphas - 1}) = cAlphaArgs({2, NumAlphas}); // note array assignment
+                    for (int i = 1; i <= NumAlphas - 1; ++i) { // note array assignment
+                        state.dataRuntimeLang->ErlStack(StackNum).Line(i) = cAlphaArgs(i + 1);
+                    }
                 }
             }
         }

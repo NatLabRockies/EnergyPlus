@@ -1118,9 +1118,7 @@ void InitPurchasedAir(EnergyPlusData &state, int const PurchAirNum, int const Co
         // this check has to be done here because of SimPurchasedAir passing in ControlledZoneNum
         int SupplyNodeNum = PurchAir.ZoneSupplyAirNodeNum;
         if (SupplyNodeNum > 0) {
-            int NodeIndex = FindNumberInList(SupplyNodeNum,
-                                             state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode,
-                                             state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes);
+            int NodeIndex = FindNumberInList(SupplyNodeNum, state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNode);
             if (NodeIndex == 0) {
                 ShowSevereError(state, std::format("InitPurchasedAir: In {} = {}", PurchAir.cObjectName, PurchAir.Name));
                 ShowContinueError(state,
@@ -1138,9 +1136,7 @@ void InitPurchasedAir(EnergyPlusData &state, int const PurchAirNum, int const Co
         bool UseReturnNode = false;
         if (PurchAir.ZoneExhaustAirNodeNum > 0) {
             int ExhaustNodeNum = PurchAir.ZoneExhaustAirNodeNum;
-            int NodeIndex = FindNumberInList(ExhaustNodeNum,
-                                             state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ExhaustNode,
-                                             state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumExhaustNodes);
+            int NodeIndex = FindNumberInList(ExhaustNodeNum, state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ExhaustNode);
             if (NodeIndex == 0) {
                 ShowSevereError(state, std::format("InitPurchasedAir: In {} = {}", PurchAir.cObjectName, PurchAir.Name));
                 ShowContinueError(

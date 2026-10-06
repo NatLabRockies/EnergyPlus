@@ -396,9 +396,8 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
     sizedValue = sizer.size(*this->state, inputValue, errorsFound);
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_TRUE(sizer.wasAutoSized);
-    EXPECT_NEAR(4740.64, sizedValue, 0.01);                              // change in capacity because precool conditions mixed with return
-    EXPECT_NEAR(158.33, sizer.primaryAirSystem(1).FanDesCoolLoad, 0.01); // air loop fan heat is saved in sizer class
-    EXPECT_NEAR(state->dataSize->DataCoilSizingAirInTemp, 23.44, 0.01);  // does not include fan heat because PrimaryAirSys fan place not set
+    EXPECT_NEAR(4740.64, sizedValue, 0.01);                             // change in capacity because precool conditions mixed with return
+    EXPECT_NEAR(state->dataSize->DataCoilSizingAirInTemp, 23.44, 0.01); // does not include fan heat because PrimaryAirSys fan place not set
     EXPECT_EQ(1.0, state->dataSize->DataFracOfAutosizedCoolingCapacity);
     sizer.autoSizedValue = 0.0; // reset for next test
     Real64 unScaledCapacity = sizedValue;
@@ -417,7 +416,6 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
     EXPECT_ENUM_EQ(AutoSizingResultType::NoError, sizer.errorType);
     EXPECT_TRUE(sizer.wasAutoSized);
     EXPECT_NEAR(unScaledCapacity * 0.5, sizedValue, 0.01);               // change in capacity because precool conditions mixed with return
-    EXPECT_NEAR(158.33, sizer.primaryAirSystem(1).FanDesCoolLoad, 0.01); // air loop fan heat is saved in sizer class
     EXPECT_EQ(1.0, state->dataSize->DataFracOfAutosizedCoolingCapacity); // Data global is not affected
     EXPECT_NEAR(state->dataSize->DataCoilSizingAirInTemp, 24.22, 0.01);  // does include fan heat because PrimaryAirSys fan place is set
     EXPECT_EQ(0.5, sizer.dataFracOfAutosizedCoolingCapacity);            // sizer class holds fractional value

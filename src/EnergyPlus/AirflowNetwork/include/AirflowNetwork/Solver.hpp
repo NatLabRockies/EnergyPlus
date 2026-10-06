@@ -90,13 +90,9 @@ namespace AirflowNetwork {
         Real64 InfilMass;           // Mass of Air {kg} due to infiltration
         Real64 infilMassFlow;       // Mass flow rate of air {kg/s} due to infiltration
         Real64 InfilAirChangeRate;  // Infiltration air change rate {ach}
-        Real64 VentilHeatLoss;      // Heat Gain {W} due to ventilation
-        Real64 VentilHeatGain;      // Heat Loss {W} due to ventilation
         Real64 VentilVolume;        // Volume of Air {m3} due to ventilation
         Real64 VentilMass;          // Mass of Air {kg} due to ventilation
         Real64 VentilAirChangeRate; // Ventilation air change rate {ach}
-        Real64 VentilFanElec;       // Fan Electricity {W} due to ventilation
-        Real64 VentilAirTemp;       // Air Temp {C} of ventilation
         Real64 MixVolume;           // Mixing volume of Air {m3}
         Real64 MixMass;             // Mixing mass of air {kg}
         Real64 ExfilSensiLoss;      // Sensible heat Loss rate {W} due to exfiltration
@@ -108,9 +104,9 @@ namespace AirflowNetwork {
 
         // Default Constructor
         AirflowNetworkReportVars()
-            : InfilVolume(0.0), InfilMass(0.0), infilMassFlow(0.0), InfilAirChangeRate(0.0), VentilHeatLoss(0.0), VentilHeatGain(0.0),
-              VentilVolume(0.0), VentilMass(0.0), VentilAirChangeRate(0.0), VentilFanElec(0.0), VentilAirTemp(0.0), MixVolume(0.0), MixMass(0.0),
-              ExfilSensiLoss(0.0), ExfilLatentLoss(0.0), ExfilTotalLoss(0.0), ExfilMass(0.0), InletMass(0.0), OutletMass(0.0)
+            : InfilVolume(0.0), InfilMass(0.0), infilMassFlow(0.0), InfilAirChangeRate(0.0), VentilVolume(0.0), VentilMass(0.0),
+              VentilAirChangeRate(0.0), MixVolume(0.0), MixMass(0.0), ExfilSensiLoss(0.0), ExfilLatentLoss(0.0), ExfilTotalLoss(0.0), ExfilMass(0.0),
+              InletMass(0.0), OutletMass(0.0)
         {
         }
     };
@@ -436,8 +432,6 @@ namespace AirflowNetwork {
         Array1D<Real64> PW;
 
         // Common block CONTROL
-        Real64 PB = 0.0;
-
         // Common block ZONL
         // Array1D<Real64> RHOZ;
         // Array1D<Real64> SQRTDZ;
@@ -462,18 +456,14 @@ namespace AirflowNetwork {
         Array1D<Real64> SUMF;
 
         Array1D_bool AirflowNetworkZoneFlag;
-        int NumOfNodesMultiZone = 0;    // Number of nodes for multizone calculation
-        int NumOfNodesDistribution = 0; // Number of nodes for distribution system calculation
-        int NumOfLinksMultiZone = 0;    // Number of links for multizone calculation
-        int NumOfLinksDistribution = 0; // Number of links for distribution system calculation
-        int NumOfNodesIntraZone = 0;    // Number of nodes for intrazone calculation
-        int NumOfLinksIntraZone = 0;    // Number of links for intrazone calculation
+        int NumOfNodesMultiZone = 0; // Number of nodes for multizone calculation
+        int NumOfLinksMultiZone = 0; // Number of links for multizone calculation
+        int NumOfNodesIntraZone = 0; // Number of nodes for intrazone calculation
+        int NumOfLinksIntraZone = 0; // Number of links for intrazone calculation
 
         int AirflowNetworkNumOfNodes = 0; // Number of nodes for AirflowNetwork calculation
-        // = NumOfNodesMultiZone+NumOfNodesDistribution
         int AirflowNetworkNumOfComps = 0; // Number of components for AirflowNetwork calculation
         int AirflowNetworkNumOfLinks = 0; // Number of links for AirflowNetwork calculation
-        // = NumOfLinksMultiZone+NumOfLinksDistribution
         // RoomAirManager use
         int AirflowNetworkNumOfSurfaces = 0; // The number of surfaces for multizone calculation
         int AirflowNetworkNumOfZones = 0;    // The number of zones for multizone calculation
@@ -507,8 +497,6 @@ namespace AirflowNetwork {
         // Moved from simulation control to outer object
         int ExtLargeOpeningErrCount = 0; // Exterior large opening error count during HVAC system operation
         int ExtLargeOpeningErrIndex = 0; // Exterior large opening error index during HVAC system operation
-        int OpenFactorErrCount = 0;      // Large opening error count at Open factor > 1.0
-        int OpenFactorErrIndex = 0;      // Large opening error error index at Open factor > 1.0
 
         Array1D<AirflowNetwork::AirflowNetworkNodeProp> AirflowNetworkNodeData;
         Array1D<AirflowNetwork::AirflowNetworkCompProp> AirflowNetworkCompData;
@@ -640,7 +628,6 @@ namespace AirflowNetwork {
             AFLOW.clear();
             PS.clear();
             PW.clear();
-            PB = 0.0;
             SUMAF.clear();
             PZ.clear();
             ID.clear();
@@ -663,9 +650,7 @@ namespace AirflowNetwork {
             AirflowNetworkLinkSimu.clear();
             AirflowNetworkZoneFlag.clear();
             NumOfNodesMultiZone = 0;
-            NumOfNodesDistribution = 0;
             NumOfLinksMultiZone = 0;
-            NumOfLinksDistribution = 0;
             NumOfNodesIntraZone = 0;
             NumOfLinksIntraZone = 0;
             AirflowNetworkNumOfNodes = 0;
@@ -690,8 +675,6 @@ namespace AirflowNetwork {
             multizone_always_simulated = false;
             ExtLargeOpeningErrCount = 0;
             ExtLargeOpeningErrIndex = 0;
-            OpenFactorErrCount = 0;
-            OpenFactorErrIndex = 0;
             AirflowNetworkNodeData.clear();
             AirflowNetworkCompData.clear();
             AirflowNetworkLinkageData.clear();

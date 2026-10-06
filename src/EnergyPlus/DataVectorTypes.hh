@@ -127,30 +127,6 @@ namespace DataVectorTypes {
     //            return *this;
     //        }
     //
-    //        // Array Assignment
-    //        inline
-    //        Vector &
-    //        operator =( Array1A< Real64 > const a )
-    //        {
-    //            a.dim( 3 );
-    //            x = a( 1 );
-    //            y = a( 2 );
-    //            z = a( 3 );
-    //            return *this;
-    //        }
-    //
-    //        // Array Assignment
-    //        inline
-    //        Vector &
-    //        operator =( Array1S< Real64 > const & a )
-    //        {
-    //            assert( ( a.l() == 1 ) && ( a.u() == 3 ) );
-    //            x = a( 1 );
-    //            y = a( 2 );
-    //            z = a( 3 );
-    //            return *this;
-    //        }
-    //
     //        // Vector3 Assignment
     //        inline
     //        Vector &

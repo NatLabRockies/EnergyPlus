@@ -68,9 +68,7 @@ namespace GroundHeatExchangers {
         int numTrenches = 0;         // Number of parallel trenches [m]
         Real64 trenchSpacing = 0.0;  // Spacing between parallel trenches [m]
         int numCoils = 0;            // Number of coils
-        int monthOfMinSurfTemp = 0;
         Real64 maxSimYears = 0.0;
-        Real64 minSurfTemp = 0.0;
         Array1D<Real64> X0;
         Array1D<Real64> Y0;
         Real64 Z0 = 0.0;

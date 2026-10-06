@@ -109,8 +109,6 @@ TEST_F(EnergyPlusFixture, DuctLoss_test)
 
     std::string const idf_objects0 = R"IDF(
 
-  Version,26.2;
-
   Building,
     House with AirflowNetwork simulation,  !- Name
     0,                       !- North Axis {deg}

@@ -49,7 +49,7 @@
 #define ThermalEN673Calc_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
@@ -75,12 +75,12 @@ namespace ThermalEN673Calc {
                     Real64 const dir,
                     const Array1D<Real64> &asol,
                     const Array1D<Real64> &presure,
-                    Array2A_int const iprop,
-                    Array2A<Real64> const frct,
+                    Array2D_int const &iprop,
+                    Array2D<Real64> const &frct,
                     const Array1D_int &nmix,
-                    Array2A<Real64> const xgcon,
-                    Array2A<Real64> const xgvis,
-                    Array2A<Real64> const xgcp,
+                    Array2D<Real64> const &xgcon,
+                    Array2D<Real64> const &xgvis,
+                    Array2D<Real64> const &xgcp,
                     const Array1D<Real64> &xwght,
                     Array1D<Real64> &theta,
                     Real64 &ufactor,
@@ -106,11 +106,11 @@ namespace ThermalEN673Calc {
                        const Array1D<Real64> &thick,
                        const Array1D<Real64> &scon,
                        Real64 const tilt,
-                       Array2A_int const iprop,
-                       Array2A<Real64> const frct,
-                       Array2A<Real64> const xgcon,
-                       Array2A<Real64> const xgvis,
-                       Array2A<Real64> const xgcp,
+                       Array2D_int const &iprop,
+                       Array2D<Real64> const &frct,
+                       Array2D<Real64> const &xgcon,
+                       Array2D<Real64> const &xgvis,
+                       Array2D<Real64> const &xgcp,
                        const Array1D<Real64> &xwght,
                        const Array1D<Real64> &presure,
                        const Array1D_int &nmix,

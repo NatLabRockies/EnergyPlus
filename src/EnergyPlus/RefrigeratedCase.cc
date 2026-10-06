@@ -3053,15 +3053,21 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!allocated(RefrigRack(RackNum).CoilNum)) {
                         RefrigRack(RackNum).CoilNum.allocate(NumCoils);
                     }
-                    RefrigRack(RackNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
+                    for (int i = 1; i <= NumCoils; ++i) {
+                        RefrigRack(RackNum).CoilNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum(i);
+                    }
                     if (!allocated(RefrigRack(RackNum).CaseNum)) {
                         RefrigRack(RackNum).CaseNum.allocate(NumCases);
                     }
-                    RefrigRack(RackNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
+                    for (int i = 1; i <= NumCases; ++i) {
+                        RefrigRack(RackNum).CaseNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum(i);
+                    }
                     if (!allocated(RefrigRack(RackNum).WalkInNum)) {
                         RefrigRack(RackNum).WalkInNum.allocate(NumWalkIns);
                     }
-                    RefrigRack(RackNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
+                    for (int i = 1; i <= NumWalkIns; ++i) {
+                        RefrigRack(RackNum).WalkInNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum(i);
+                    }
                 } else if (CoilNum != 0) { // Name points to a coil
                     NumCoils = 1;
                     RefrigRack(RackNum).NumCoils = 1;
@@ -4263,15 +4269,21 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         if (!allocated(Secondary(SecondaryNum).CaseNum)) {
                             Secondary(SecondaryNum).CaseNum.allocate(NumCases);
                         }
-                        Secondary(SecondaryNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
+                        for (int i = 1; i <= NumCases; ++i) {
+                            Secondary(SecondaryNum).CaseNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum(i);
+                        }
                         if (!allocated(Secondary(SecondaryNum).CoilNum)) {
                             Secondary(SecondaryNum).CoilNum.allocate(NumCoils);
                         }
-                        Secondary(SecondaryNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
+                        for (int i = 1; i <= NumCoils; ++i) {
+                            Secondary(SecondaryNum).CoilNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum(i);
+                        }
                         if (!allocated(Secondary(SecondaryNum).WalkInNum)) {
                             Secondary(SecondaryNum).WalkInNum.allocate(NumWalkIns);
                         }
-                        Secondary(SecondaryNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
+                        for (int i = 1; i <= NumWalkIns; ++i) {
+                            Secondary(SecondaryNum).WalkInNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum(i);
+                        }
                     } else if (CaseNum != 0) { // Name points to a case
                         NumCases = 1;
                         Secondary(SecondaryNum).NumCases = 1;
@@ -5347,19 +5359,25 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         if (!allocated(System(RefrigSysNum).CaseNum)) {
                             System(RefrigSysNum).CaseNum.allocate(NumCases);
                         }
-                        System(RefrigSysNum).CaseNum({1, NumCases}) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCases});
+                        for (int i = 1; i <= NumCases; ++i) {
+                            System(RefrigSysNum).CaseNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum(i);
+                        }
                     }
                     if (NumCoils > 0) {
                         if (!allocated(System(RefrigSysNum).CoilNum)) {
                             System(RefrigSysNum).CoilNum.allocate(NumCoils);
                         }
-                        System(RefrigSysNum).CoilNum({1, NumCoils}) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum({1, NumCoils});
+                        for (int i = 1; i <= NumCoils; ++i) {
+                            System(RefrigSysNum).CoilNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).CoilItemNum(i);
+                        }
                     }
                     if (NumWalkIns > 0) {
                         if (!allocated(System(RefrigSysNum).WalkInNum)) {
                             System(RefrigSysNum).WalkInNum.allocate(NumWalkIns);
                         }
-                        System(RefrigSysNum).WalkInNum({1, NumWalkIns}) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkIns});
+                        for (int i = 1; i <= NumWalkIns; ++i) {
+                            System(RefrigSysNum).WalkInNum(i) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum(i);
+                        }
                     }
                 } else if (CaseNum != 0) { // Name points to a case
                     NumCases = 1;
@@ -5511,12 +5529,15 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!allocated(System(RefrigSysNum).SecondaryNum)) {
                         System(RefrigSysNum).SecondaryNum.allocate(NumSecondary);
                     }
-                    System(RefrigSysNum).SecondaryNum({1, NumSecondary}) = TransferLoadList(TransferLoadListNum).SecondaryItemNum({1, NumSecondary});
+                    for (int i = 1; i <= NumSecondary; ++i) {
+                        System(RefrigSysNum).SecondaryNum(i) = TransferLoadList(TransferLoadListNum).SecondaryItemNum(i);
+                    }
                     if (!allocated(System(RefrigSysNum).CascadeLoadNum)) {
                         System(RefrigSysNum).CascadeLoadNum.allocate(NumCascadeLoad);
                     }
-                    System(RefrigSysNum).CascadeLoadNum({1, NumCascadeLoad}) =
-                        TransferLoadList(TransferLoadListNum).CascadeLoadItemNum({1, NumCascadeLoad});
+                    for (int i = 1; i <= NumCascadeLoad; ++i) {
+                        System(RefrigSysNum).CascadeLoadNum(i) = TransferLoadList(TransferLoadListNum).CascadeLoadItemNum(i);
+                    }
                 } else if (SecondaryNum != 0) { // Name points to a secondary loop load
                     NumSecondary = 1;
                     System(RefrigSysNum).NumSecondarys = 1;
@@ -5741,7 +5762,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!allocated(System(RefrigSysNum).CompressorNum)) {
                         System(RefrigSysNum).CompressorNum.allocate(NumCompressorsSys);
                     }
-                    System(RefrigSysNum).CompressorNum({1, NumCompressorsSys}) = CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
+                    for (int i = 1; i <= NumCompressorsSys; ++i) {
+                        System(RefrigSysNum).CompressorNum(i) = CompressorLists(ListNum).CompItemNum(i);
+                    }
                 } else if (CompNum != 0) {
                     NumCompressorsSys = 1;
                     System(RefrigSysNum).NumCompressors = 1;
@@ -6013,8 +6036,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         if (!allocated(System(RefrigSysNum).HiStageCompressorNum)) {
                             System(RefrigSysNum).HiStageCompressorNum.allocate(NumHiStageCompressorsSys);
                         }
-                        System(RefrigSysNum).HiStageCompressorNum({1, NumHiStageCompressorsSys}) =
-                            CompressorLists(ListNum).CompItemNum({1, NumHiStageCompressorsSys});
+                        for (int i = 1; i <= NumHiStageCompressorsSys; ++i) {
+                            System(RefrigSysNum).HiStageCompressorNum(i) = CompressorLists(ListNum).CompItemNum(i);
+                        }
                     } else if (CompNum != 0) {
                         NumHiStageCompressorsSys = 1;
                         System(RefrigSysNum).NumHiStageCompressors = 1;
@@ -6382,15 +6406,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         if (!allocated(TransSystem(TransRefrigSysNum).CaseNumMT)) {
                             TransSystem(TransRefrigSysNum).CaseNumMT.allocate(NumCasesMT);
                         }
-                        TransSystem(TransRefrigSysNum).CaseNumMT({1, NumCasesMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesMT});
+                        for (int i = 1; i <= NumCasesMT; ++i) {
+                            TransSystem(TransRefrigSysNum).CaseNumMT(i) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum(i);
+                        }
                     }
                     if (NumWalkInsMT > 0) {
                         if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumMT)) {
                             TransSystem(TransRefrigSysNum).WalkInNumMT.allocate(NumWalkInsMT);
                         }
-                        TransSystem(TransRefrigSysNum).WalkInNumMT({1, NumWalkInsMT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsMT});
+                        for (int i = 1; i <= NumWalkInsMT; ++i) {
+                            TransSystem(TransRefrigSysNum).WalkInNumMT(i) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum(i);
+                        }
                     }
                 } else if (CaseNum != 0) { // Name points to a case
                     NumCasesMT = 1;
@@ -6515,15 +6541,17 @@ void GetRefrigerationInput(EnergyPlusData &state)
                         if (!allocated(TransSystem(TransRefrigSysNum).CaseNumLT)) {
                             TransSystem(TransRefrigSysNum).CaseNumLT.allocate(NumCasesLT);
                         }
-                        TransSystem(TransRefrigSysNum).CaseNumLT({1, NumCasesLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum({1, NumCasesLT});
+                        for (int i = 1; i <= NumCasesLT; ++i) {
+                            TransSystem(TransRefrigSysNum).CaseNumLT(i) = CaseAndWalkInList(CaseAndWalkInListNum).CaseItemNum(i);
+                        }
                     }
                     if (NumWalkInsLT > 0) {
                         if (!allocated(TransSystem(TransRefrigSysNum).WalkInNumLT)) {
                             TransSystem(TransRefrigSysNum).WalkInNumLT.allocate(NumWalkInsLT);
                         }
-                        TransSystem(TransRefrigSysNum).WalkInNumLT({1, NumWalkInsLT}) =
-                            CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum({1, NumWalkInsLT});
+                        for (int i = 1; i <= NumWalkInsLT; ++i) {
+                            TransSystem(TransRefrigSysNum).WalkInNumLT(i) = CaseAndWalkInList(CaseAndWalkInListNum).WalkInItemNum(i);
+                        }
                     }
                 } else if (CaseNum != 0) { // Name points to a case
                     NumCasesLT = 1;
@@ -6659,8 +6687,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumHP)) {
                         TransSystem(TransRefrigSysNum).CompressorNumHP.allocate(NumCompressorsSys);
                     }
-                    TransSystem(TransRefrigSysNum).CompressorNumHP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
+                    for (int i = 1; i <= NumCompressorsSys; ++i) {
+                        TransSystem(TransRefrigSysNum).CompressorNumHP(i) = CompressorLists(ListNum).CompItemNum(i);
+                    }
                 } else if (CompNum != 0) {
                     NumCompressorsSys = 1;
                     TransSystem(TransRefrigSysNum).NumCompressorsHP = 1;
@@ -6745,8 +6774,9 @@ void GetRefrigerationInput(EnergyPlusData &state)
                     if (!allocated(TransSystem(TransRefrigSysNum).CompressorNumLP)) {
                         TransSystem(TransRefrigSysNum).CompressorNumLP.allocate(NumCompressorsSys);
                     }
-                    TransSystem(TransRefrigSysNum).CompressorNumLP({1, NumCompressorsSys}) =
-                        CompressorLists(ListNum).CompItemNum({1, NumCompressorsSys});
+                    for (int i = 1; i <= NumCompressorsSys; ++i) {
+                        TransSystem(TransRefrigSysNum).CompressorNumLP(i) = CompressorLists(ListNum).CompItemNum(i);
+                    }
                 } else if (CompNum != 0) {
                     NumCompressorsSys = 1;
                     TransSystem(TransRefrigSysNum).NumCompressorsLP = 1;

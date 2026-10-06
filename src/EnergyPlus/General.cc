@@ -979,7 +979,7 @@ void Iterate(Real64 &ResultX,  // ResultX is the final Iteration result passed b
     Y1 = Y0;
 }
 
-int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int const NumItems)
+int FindNumberInList(int const WhichNumber, Array1D_int const &ListOfItems)
 {
 
     // FUNCTION INFORMATION:
@@ -990,10 +990,7 @@ int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int c
     // This function looks up a number(integer) in a similar list of
     // items and returns the index of the item in the list, if found.
 
-    // Argument array dimensioning
-    ListOfItems.dim(_);
-
-    for (int Count = 1; Count <= NumItems; ++Count) {
+    for (int Count = 1, NumItems = ListOfItems.isize(); Count <= NumItems; ++Count) {
         if (WhichNumber == ListOfItems(Count)) {
             return Count;
         }

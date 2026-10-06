@@ -541,28 +541,6 @@ namespace DataSurfaces {
         // Constructor
         Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v, Vector2D const &vl, Vector2D const &vu);
 
-    public: // Predicates
-            // Bounding box contains a point?
-        bool bb_contains(Vector2D const &v) const
-        {
-            return (vl.x <= v.x) && (v.x <= vu.x) && (vl.y <= v.y) && (v.y <= vu.y);
-        }
-
-    public: // Comparison
-            // Equality
-        friend bool operator==(Surface2D const &a, Surface2D const &b)
-        {
-            auto const &v1 = a.vertices;
-            auto const &v2 = b.vertices;
-            return eq(v1, v2);
-        }
-
-        // Inequality
-        friend bool operator!=(Surface2D const &a, Surface2D const &b)
-        {
-            return !(a == b);
-        }
-
     public:                                              // Data
         int axis = 0;                                    // Axis of projection (0=x, 1=y, 2=z)
         Vertices vertices;                               // Vertices
@@ -905,9 +883,8 @@ namespace DataSurfaces {
 
     struct SurfaceWindowRefPt
     {
-        Real64 solidAng = 0.0;    // Solid angle subtended by window from daylit ref points 1 and 2
-        Real64 solidAngWtd = 0.0; // Solid angle subtended by window from ref pts weighted by glare pos factor
-        std::array<std::array<Real64, (int)WinCover::Num>, (int)Lum::Num> lums = {{{0.0, 0.0}}};
+        Real64 solidAng = 0.0;        // Solid angle subtended by window from daylit ref points 1 and 2
+        Real64 solidAngWtd = 0.0;     // Solid angle subtended by window from ref pts weighted by glare pos factor
         Real64 illumFromWinRep = 0.0; // Illuminance from window at reference point N [lux]
         Real64 lumWinRep = 0.0;       // Window luminance as viewed from reference point N [cd/m2]
     };
@@ -953,9 +930,6 @@ namespace DataSurfaces {
         std::array<Real64, (int)FWC::Num> EnclAreaReflProdMinusThisSurf = {0.0, 0.0, 0.0};
 
         BSDFWindowDescript ComplexFen; // Data for complex fenestration, see DataBSDFWindow.cc for declaration
-        bool hasShade = false;
-        bool hasBlind = false;
-        bool hasScreen = false;
     };
 
     struct SurfaceShade
@@ -1230,7 +1204,6 @@ namespace DataSurfaces {
         Real64 SurfFilmCoef;                       // Combined convective/radiative film coefficient if >0, else use other coefficients
         Real64 WindSpeedCoef;                      // Coefficient modifying the wind speed term (s/m)
         Real64 ZoneAirTempCoef;                    // Coefficient modifying the zone air temperature part of the equation
-        std::string ConstTempScheduleName;         // Schedule name for scheduled outside temp
         Sched::Schedule *constTempSched = nullptr; // Index for scheduled outside temp.
         bool SinusoidalConstTempCoef;              // If true then ConstTempCoef varies by sine wave
         Real64 SinusoidPeriod;                     // period of sine wave variation  (hr)

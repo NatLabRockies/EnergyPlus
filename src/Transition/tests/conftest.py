@@ -62,7 +62,7 @@ import pytest
 
 def validate_dir(arg) -> Path:
     if (dirpath := Path(arg).expanduser()).is_dir():
-        return dirpath
+        return dirpath.resolve()
     raise NotADirectoryError(arg)
 
 

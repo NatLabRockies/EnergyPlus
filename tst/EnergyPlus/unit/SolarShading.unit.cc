@@ -112,8 +112,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTest)
     state->dataHeatBal->SurfCosIncAngHR.allocate(HoursInDay, state->dataSurface->TotSurfaces);
     state->dataHeatBal->SurfCosIncAng.allocate(HoursInDay, NumTimeSteps, state->dataSurface->TotSurfaces);
     state->dataSurface->SurfOpaqAO.allocate(state->dataSurface->TotSurfaces);
-    state->dataHeatBal->SurfWinBackSurfaces.allocate(HoursInDay, NumTimeSteps, state->dataBSDFWindow->MaxBkSurf, state->dataSurface->TotSurfaces);
-    state->dataHeatBal->SurfWinOverlapAreas.allocate(HoursInDay, NumTimeSteps, state->dataBSDFWindow->MaxBkSurf, state->dataSurface->TotSurfaces);
+    state->dataHeatBal->SurfWinBackSurfOverlaps.allocate(HoursInDay, NumTimeSteps, state->dataBSDFWindow->MaxBkSurf, state->dataSurface->TotSurfaces);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
         state->dataSurface->SurfSunCosHourly(hour) = 0.0;
@@ -170,8 +169,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTest)
     state->dataHeatBal->SurfCosIncAngHR.deallocate();
     state->dataHeatBal->SurfCosIncAng.deallocate();
     state->dataSurface->SurfOpaqAO.deallocate();
-    state->dataHeatBal->SurfWinBackSurfaces.deallocate();
-    state->dataHeatBal->SurfWinOverlapAreas.deallocate();
+    state->dataHeatBal->SurfWinBackSurfOverlaps.deallocate();
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
@@ -382,8 +380,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
     state->dataHeatBal->SurfCosIncAngHR.deallocate();
     state->dataHeatBal->SurfCosIncAng.deallocate();
     state->dataSurface->SurfOpaqAO.deallocate();
-    state->dataHeatBal->SurfWinBackSurfaces.deallocate();
-    state->dataHeatBal->SurfWinOverlapAreas.deallocate();
+    state->dataHeatBal->SurfWinBackSurfOverlaps.deallocate();
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_SurfaceScheduledSolarInc)

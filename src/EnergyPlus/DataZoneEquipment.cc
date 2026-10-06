@@ -1042,7 +1042,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
 
             // Check for multiple assignments
             for (int ZoneEquipTypeNum = 1; ZoneEquipTypeNum <= thisZoneEquipList.NumOfEquipTypes; ++ZoneEquipTypeNum) {
-                if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) > 1) {
+                if (std::ranges::count(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) > 1) {
                     ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(
                         state,
@@ -1050,21 +1050,21 @@ void processZoneEquipmentInput(EnergyPlusData &state,
                                     "sequence assignments and number of equipment.",
                                     ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
-                } else if (count_eq(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) == 0) {
+                } else if (std::ranges::count(thisZoneEquipList.CoolingPriority, ZoneEquipTypeNum) == 0) {
                     ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       std::format("...zero assigned to Zone Equipment Cooling Sequence={}, apparent gap in sequence assignments in "
                                                   "this equipment list.",
                                                   ZoneEquipTypeNum));
                 }
-                if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) > 1) {
+                if (std::ranges::count(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) > 1) {
                     ShowSevereError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       std::format("...multiple assignments for Zone Equipment Heating or No-Load Sequence={}, must be 1-1 "
                                                   "correspondence between sequence assignments and number of equipment.",
                                                   ZoneEquipTypeNum));
                     state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
-                } else if (count_eq(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) == 0) {
+                } else if (std::ranges::count(thisZoneEquipList.HeatingPriority, ZoneEquipTypeNum) == 0) {
                     ShowWarningError(state, std::format("{}{} = {}", RoutineName, CurrentModuleObject, thisZoneEquipList.Name));
                     ShowContinueError(state,
                                       std::format("...zero assigned to Zone Equipment Heating or No-Load Sequence={}, apparent gap in sequence "

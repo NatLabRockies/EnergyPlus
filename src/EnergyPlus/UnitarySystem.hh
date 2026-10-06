@@ -554,7 +554,6 @@ namespace UnitarySystems {
         std::vector<Real64> m_HeatVolumeFlowRate;
         std::vector<Real64> m_HeatMassFlowRate;
         std::vector<Real64> m_MSHeatingSpeedRatio;
-        std::vector<Real64> m_HeatingVolFlowRatio;
         std::vector<int> m_IterationMode;  // array of operating mode each iteration
         std::vector<Real64> FullOutput;    // Full output for different speed
         std::vector<Real64> FullLatOutput; // Full latent output for different speed
@@ -569,10 +568,6 @@ namespace UnitarySystems {
             int m_HXAssistedSensPLRFailIndex = 0;   // used in HX Assisted calculations
             int m_HXAssistedSensPLRFail2 = 0;       // used in HX Assisted calculations
             int m_HXAssistedSensPLRFailIndex2 = 0;  // used in HX Assisted calculations
-            int m_HXAssistedLatPLRIter = 0;         // used in HX Assisted calculations
-            int m_HXAssistedLatPLRIterIndex = 0;    // used in HX Assisted calculations
-            int m_HXAssistedLatPLRFail = 0;         // used in HX Assisted calculations
-            int m_HXAssistedLatPLRFailIndex = 0;    // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRIter = 0;       // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRIterIndex = 0;  // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRFail = 0;       // used in HX Assisted calculations

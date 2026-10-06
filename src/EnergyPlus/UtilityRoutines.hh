@@ -55,7 +55,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.fwd.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
@@ -420,8 +419,6 @@ namespace Util {
         return (it == list.end()) ? -1 : static_cast<int>(it - list.begin());
     }
 
-    int FindItemInList(std::string_view const String, Array1S_string const ListOfItems, int NumItems);
-
     template <typename InputIterator> int FindItemInList(std::string_view const str, InputIterator first, InputIterator last)
     {
         auto it = std::find(first, last, str);
@@ -429,26 +426,6 @@ namespace Util {
             return std::distance(first, it) + 1;
         }
         return 0;
-    }
-
-    inline int FindItemInList(std::string_view const String, Array1S_string const ListOfItems)
-    {
-        return Util::FindItemInList(String, ListOfItems, ListOfItems.isize());
-    }
-
-    template <typename A> inline int FindItemInList(std::string_view const String, MArray1<A, std::string> const &ListOfItems, int const NumItems)
-    {
-        for (int Count = 1; Count <= NumItems; ++Count) {
-            if (String == ListOfItems(Count)) {
-                return Count;
-            }
-        }
-        return 0; // Not found
-    }
-
-    template <typename A> inline int FindItemInList(std::string_view const String, MArray1<A, std::string> const &ListOfItems)
-    {
-        return Util::FindItemInList(String, ListOfItems, ListOfItems.isize());
     }
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
@@ -542,32 +519,6 @@ namespace Util {
         return FindItem(String, ListOfItems, ListOfItems.isize());
     }
 
-    int FindItem(std::string_view const String, Array1S_string const ListOfItems, int const NumItems);
-
-    inline int FindItem(std::string_view const String, Array1S_string const ListOfItems)
-    {
-        return FindItem(String, ListOfItems, ListOfItems.isize());
-    }
-
-    template <typename A> inline int FindItem(std::string_view const String, MArray1<A, std::string> const &ListOfItems, int const NumItems)
-    {
-        int const item_number(Util::FindItemInList(String, ListOfItems, NumItems));
-        if (item_number != 0) {
-            return item_number;
-        }
-        for (int Count = 1; Count <= NumItems; ++Count) {
-            if (equali(String, ListOfItems(Count))) {
-                return Count;
-            }
-        }
-        return 0; // Not found
-    }
-
-    template <typename A> inline int FindItem(std::string_view const String, MArray1<A, std::string> const &ListOfItems)
-    {
-        return FindItem(String, ListOfItems, ListOfItems.isize());
-    }
-
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
     // Container needs size() and operator[i] and elements need Name
     inline int FindItem(std::string_view const String, Container const &ListOfItems, int const NumItems)
@@ -654,7 +605,7 @@ namespace Util {
                                        std::string &nameToBeSet,          // field that is being set once a match is found
                                        int &ptrToBeSet,                   // pointer that is being set once a match is found
                                        std::string const &userName,       // name to be found searching through the list
-                                       Array1S_string const &listOfNames, // list of names in which the userName must be found
+                                       Array1D_string const &listOfNames, // list of names in which the userName must be found
                                        std::string const &itemType,       // string containing type of base object
                                        std::string const &itemName,       // string containing name of base object
                                        bool &errorFound);                 // set to true if an error is found
@@ -674,6 +625,9 @@ namespace Util {
         using is_transparent = void;
         bool operator()(std::string_view a, std::string_view b) const noexcept;
     };
+
+    // Value of an environment variable, or an empty string if it is not set. Trailing spaces are stripped
+    std::string getEnvVar(std::string const &name);
 
     void appendPerfLog(EnergyPlusData &state, std::string const &colHeader, std::string const &colValue, bool finalColumn = false);
 

@@ -4985,7 +4985,6 @@ namespace CondenserLoopTowers {
         this->FanPower = 0.0;
         this->OutletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
 
-        this->WaterUsage = 0.0;
         Real64 Twb = this->AirWetBulb;
         Real64 TwbCapped = this->AirWetBulb;
 
@@ -6242,7 +6241,6 @@ namespace CondenserLoopTowers {
             this->FanPower = 0.0;
             this->FanEnergy = 0.0;
             this->AirFlowRatio = 0.0;
-            this->WaterAmountUsed = 0.0;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
             this->FanCyclingRatio = 0.0;
             this->BypassFraction = 0.0; // added for fluid bypass
@@ -6252,7 +6250,6 @@ namespace CondenserLoopTowers {
             this->InletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
             this->FanEnergy = this->FanPower * ReportingConstant;
             this->AirFlowRatio = this->airFlowRateRatio;
-            this->WaterAmountUsed = this->WaterUsage * ReportingConstant;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
         }
     }

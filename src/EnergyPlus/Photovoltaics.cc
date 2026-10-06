@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -409,11 +410,12 @@ namespace Photovoltaics {
             case CellIntegration::SurfaceOutsideFace:
             case CellIntegration::TranspiredCollector:
             case CellIntegration::ExteriorVentedCavity: {
-                dupPtr = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).SurfaceName,
-                                              state.dataPhotovoltaic->PVarray({PVnum + 1, state.dataPhotovoltaic->NumPVs}),
-                                              &PVArrayStruct::SurfaceName);
-                if (dupPtr != 0) {
-                    dupPtr += PVnum; // to correct for shortened array in find item
+                dupPtr = 0;
+                for (int iPV = PVnum + 1; iPV <= state.dataPhotovoltaic->NumPVs; ++iPV) {
+                    if (state.dataPhotovoltaic->PVarray(iPV).SurfaceName == state.dataPhotovoltaic->PVarray(PVnum).SurfaceName) {
+                        dupPtr = iPV;
+                        break;
+                    }
                 }
                 if (dupPtr != 0) {
                     auto &thisPVarray = state.dataPhotovoltaic->PVarray(dupPtr);
@@ -1246,7 +1248,7 @@ namespace Photovoltaics {
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.TimeElapsed = TimeElapsed;
         }
 
-        if (any_gt(state.dataHeatBal->SurfQRadSWOutIncident, 0.0)) {
+        if (std::ranges::any_of(state.dataHeatBal->SurfQRadSWOutIncident, [](Real64 const v) { return v > 0.0; })) {
             //  Determine the amount of radiation incident on each PV
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation =
                 state.dataHeatBal->SurfQRadSWOutIncident(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr); //[W/m2]

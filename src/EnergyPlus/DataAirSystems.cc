@@ -82,9 +82,6 @@ namespace DataAirSystems {
 
     // DefinePrimaryAirSystem contains the data for a primary air HVAC system
 
-    // The ConnectionPoint derived type is used to link quickly between loops at connection points
-    // and avoids the need for repetitive searches.
-
     // INTERFACE BLOCK SPECIFICATIONS
     // None
 

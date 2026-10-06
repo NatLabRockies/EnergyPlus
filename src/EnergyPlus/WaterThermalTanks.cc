@@ -52,7 +52,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/floops.hh>
 #include <ObjexxFCL/member.functions.hh>
 
 // EnergyPlus Headers
@@ -8683,8 +8682,8 @@ void WaterThermalTankData::CalcNodeMassFlowsWithDirection(
             } else {
                 Step = 1;
             }
-            Real64 MinDeltaTemp = 1.0e6; // Some big number
-            int const NodeNum_stop(floop_end(useInletStratNod, useOutletStratNode, Step));
+            Real64 MinDeltaTemp = 1.0e6;                        // Some big number
+            int const NodeNum_stop = useOutletStratNode + Step; // one past the outlet node, so the outlet node is included
             for (int NodeNum = useInletStratNod; NodeNum != NodeNum_stop; NodeNum += Step) {
                 Real64 DeltaTemp = std::abs(this->Node(NodeNum).Temp - this->UseInletTemp);
                 if (DeltaTemp < MinDeltaTemp) {
@@ -8702,8 +8701,8 @@ void WaterThermalTankData::CalcNodeMassFlowsWithDirection(
             } else {
                 Step = 1;
             }
-            Real64 MinDeltaTemp = 1.0e6; // Some big number
-            int const NodeNum_stop(floop_end(sourceInletStratNode, sourceOutletStratNode, Step));
+            Real64 MinDeltaTemp = 1.0e6;                           // Some big number
+            int const NodeNum_stop = sourceOutletStratNode + Step; // one past the outlet node, so the outlet node is included
             for (int NodeNum = sourceInletStratNode; NodeNum != NodeNum_stop; NodeNum += Step) {
                 Real64 DeltaTemp = std::abs(this->Node(NodeNum).Temp - this->SourceInletTemp);
                 if (DeltaTemp < MinDeltaTemp) {
@@ -8822,8 +8821,8 @@ void WaterThermalTankData::CalcNodeMassFlows(InletPositionMode inletMode)
             } else {
                 Step = 1;
             }
-            Real64 MinDeltaTemp = 1.0e6; // Some big number
-            int const NodeNum_stop(floop_end(useInletStratNod, useOutletStratNode, Step));
+            Real64 MinDeltaTemp = 1.0e6;                        // Some big number
+            int const NodeNum_stop = useOutletStratNode + Step; // one past the outlet node, so the outlet node is included
             for (int NodeNum = useInletStratNod; NodeNum != NodeNum_stop; NodeNum += Step) {
                 Real64 DeltaTemp = std::abs(this->Node(NodeNum).Temp - this->UseInletTemp);
                 if (DeltaTemp < MinDeltaTemp) {
@@ -8841,8 +8840,8 @@ void WaterThermalTankData::CalcNodeMassFlows(InletPositionMode inletMode)
             } else {
                 Step = 1;
             }
-            Real64 MinDeltaTemp = 1.0e6; // Some big number
-            int const NodeNum_stop(floop_end(sourceInletStratNode, sourceOutletStratNode, Step));
+            Real64 MinDeltaTemp = 1.0e6;                           // Some big number
+            int const NodeNum_stop = sourceOutletStratNode + Step; // one past the outlet node, so the outlet node is included
             for (int NodeNum = sourceInletStratNode; NodeNum != NodeNum_stop; NodeNum += Step) {
                 Real64 DeltaTemp = std::abs(this->Node(NodeNum).Temp - this->SourceInletTemp);
                 if (DeltaTemp < MinDeltaTemp) {
@@ -11137,7 +11136,8 @@ void WaterThermalTankData::MinePlantStructForInfo(EnergyPlusData &state)
         }
         // Is this wh Use side plumbed in series (default) or are there other branches in parallel?
         if (this->UseSidePlantLoc.side->Splitter.Exists) {
-            if (any_eq(this->UseSidePlantLoc.side->Splitter.NodeNumOut, this->UseInletNode)) { // this wh is on the splitter
+            if (std::ranges::any_of(this->UseSidePlantLoc.side->Splitter.NodeNumOut,
+                                    [&](auto const &elem) { return elem == this->UseInletNode; })) { // this wh is on the splitter
                 if (this->UseSidePlantLoc.side->Splitter.TotalOutletNodes > 1) {
                     this->UseSideSeries = false;
                 }
@@ -11157,7 +11157,8 @@ void WaterThermalTankData::MinePlantStructForInfo(EnergyPlusData &state)
         }
         // Is this wh Source side plumbed in series (default) or are there other branches in parallel?
         if (this->SrcSidePlantLoc.side->Splitter.Exists) {
-            if (any_eq(this->SrcSidePlantLoc.side->Splitter.NodeNumOut, this->SourceInletNode)) { // this wh is on the splitter
+            if (std::ranges::any_of(this->SrcSidePlantLoc.side->Splitter.NodeNumOut,
+                                    [&](auto const &elem) { return elem == this->SourceInletNode; })) { // this wh is on the splitter
                 if (this->SrcSidePlantLoc.side->Splitter.TotalOutletNodes > 1) {
                     this->SourceSideSeries = false;
                 }

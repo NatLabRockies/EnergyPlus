@@ -54,12 +54,9 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/PlantComponent.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -75,24 +72,18 @@ namespace CTElectricGenerator {
     struct CTGeneratorData : PlantComponent
     {
         // Members
-        std::string Name;                                   // user identifier
-        std::string TypeOf = "Generator:CombustionTurbine"; // Type of Generator
-        GeneratorType CompType_Num = GeneratorType::CombTurbine;
+        std::string Name;                              // user identifier
         Constant::eFuel FuelType;                      // Type of Fuel - DIESEL, GASOLINE, GAS
         Real64 RatedPowerOutput = 0.0;                 // W - design nominal capacity of Generator
-        int ElectricCircuitNode = 0;                   // Electric Circuit Node
         Real64 MinPartLoadRat = 0.0;                   // (CT MIN) min allowed operating frac full load
         Real64 MaxPartLoadRat = 0.0;                   // (CT MAX) max allowed operating frac full load
-        Real64 OptPartLoadRat = 0.0;                   // (CT BEST) optimal operating frac full load
         Real64 FuelEnergyUseRate = 0.0;                // (EFUEL) rate of Fuel Energy Required to run COMBUSTION turbine (W)
         Real64 FuelEnergy = 0.0;                       // Amount of Fuel Energy Required to run COMBUSTION turbine (J)
         Curve::Curve *PLBasedFuelInputCurve = nullptr; // (FUL1GC) Curve for Part Load Ratio Based Fuel Input
         // Coefficients Poly Fit
         Curve::Curve *TempBasedFuelInputCurve = nullptr; // (FUL2GC) Curve for Ambient Temperature Based Fuel Input
         // Coeff Poly Fit
-        Real64 ExhaustFlow = 0.0;                        // (FEX) Exhaust Gas Flow Rate cubic meters per second???
         Curve::Curve *ExhaustFlowCurve = nullptr;        // (FEXGC) Curve for Exhaust Gas Flow Rate Input Coef Poly Fit
-        Real64 ExhaustTemp = 0.0;                        // (TEX) Exhaust Gas Temperature in C
         Curve::Curve *PLBasedExhaustTempCurve = nullptr; // (TEX1GC) Curve for Part Load Ratio Based Exhaust Temp Input
         // Coeffs Poly Fit
         Curve::Curve *TempBasedExhaustTempCurve = nullptr; // (TEX2GC) Curve for Ambient Temperature Based Exhaust Gas Temp to
@@ -104,7 +95,6 @@ namespace CTElectricGenerator {
         Real64 ExhaustEnergyRec = 0.0;                  // Recovered Exhaust heat  (J)
         Real64 TotalHeatEnergyRec = 0.0;                // total heat recovered (J)
         Curve::Curve *QLubeOilRecoveredCurve = nullptr; // (ELUBEGC) Curve for Recoverable Lube Oil heat Input Coef Poly Fit
-        Real64 UA = 0.0;                                // (UACGC) exhaust gas Heat Exchanger UA
         std::array<Real64, 2> UACoef = {0.0};           // Heat Exchanger UA  Coeffs Poly Fit
         Real64 MaxExhaustperCTPower = 0.0;              // MAX EXHAUST FLOW PER W POWER OUTPUT COEFF
         Real64 DesignHeatRecVolFlowRate = 0.0;          // m3/s, Design Water mass flow rate through heat recovery loop
@@ -128,11 +118,10 @@ namespace CTElectricGenerator {
         bool MyEnvrnFlag = true;
         bool MyPlantScanFlag = true;
         bool MySizeAndNodeInitFlag = true;
-        bool CheckEquipName = true;
         bool MyFlag = true;
 
         // Default Constructor
-        CTGeneratorData() : HRPlantLoc{}
+        CTGeneratorData() : FuelType()
         {
         }
 

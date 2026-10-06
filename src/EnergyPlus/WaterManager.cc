@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1062,9 +1063,12 @@ namespace WaterManager {
         if (TotVdotSupplyAvail > state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate) {
             // pipe/filter rate constraints on inlet
             overflowVdot = TotVdotSupplyAvail - state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate;
-            state.dataWaterManager->overflowTwater =
-                sum(state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply * state.dataWaterData->WaterStorage(TankNum).TwaterSupply) /
-                sum(state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply);
+            {
+                auto const &vdotAvailSupply = state.dataWaterData->WaterStorage(TankNum).VdotAvailSupply;
+                auto const &twaterSupply = state.dataWaterData->WaterStorage(TankNum).TwaterSupply;
+                state.dataWaterManager->overflowTwater =
+                    std::inner_product(vdotAvailSupply.begin(), vdotAvailSupply.end(), twaterSupply.begin(), 0.0) / sum(vdotAvailSupply);
+            }
             TotVdotSupplyAvail = state.dataWaterData->WaterStorage(TankNum).MaxInFlowRate;
         }
         TotVolSupplyAvail = TotVdotSupplyAvail * TimeStepSysSec;
@@ -1119,8 +1123,12 @@ namespace WaterManager {
         if (TotVdotDemandAvail < OrigVdotDemandRequest) { // starvation
             // even distribution
             if (OrigVdotDemandRequest > 0.0) {
-                state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand =
-                    (TotVdotDemandAvail / OrigVdotDemandRequest) * state.dataWaterData->WaterStorage(TankNum).VdotRequestDemand;
+                Real64 const demandFrac(TotVdotDemandAvail / OrigVdotDemandRequest);
+                auto &vdotAvailDemand = state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand;
+                auto const &vdotRequestDemand = state.dataWaterData->WaterStorage(TankNum).VdotRequestDemand;
+                vdotAvailDemand.allocate(vdotRequestDemand);
+                std::transform(
+                    vdotRequestDemand.begin(), vdotRequestDemand.end(), vdotAvailDemand.begin(), [demandFrac](Real64 v) { return demandFrac * v; });
             } else {
                 state.dataWaterData->WaterStorage(TankNum).VdotAvailDemand = 0.0;
             }
@@ -1287,14 +1295,18 @@ namespace WaterManager {
                 oldSupplyCompNames = state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames;
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames.deallocate();
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames.allocate(oldNumSupply + 1);
-                state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames({1, oldNumSupply}) = oldSupplyCompNames; // array assignment
+                for (int i = 1; i <= oldNumSupply; ++i) {
+                    state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames(i) = oldSupplyCompNames(i);
+                }
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompNames(oldNumSupply + 1) = CompName;
             }
             if (allocated(state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes)) {
                 oldSupplyCompTypes = state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes;
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes.deallocate();
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes.allocate(oldNumSupply + 1);
-                state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes({1, oldNumSupply}) = oldSupplyCompTypes; // array assignment
+                for (int i = 1; i <= oldNumSupply; ++i) {
+                    state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes(i) = oldSupplyCompTypes(i);
+                }
                 state.dataWaterData->WaterStorage(TankIndex).SupplyCompTypes(oldNumSupply + 1) = CompType;
             }
             state.dataWaterData->WaterStorage(TankIndex).VdotAvailSupply.deallocate();
@@ -1401,14 +1413,18 @@ namespace WaterManager {
                 oldDemandCompNames = state.dataWaterData->WaterStorage(TankIndex).DemandCompNames;
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompNames.deallocate();
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompNames.allocate(oldNumDemand + 1);
-                state.dataWaterData->WaterStorage(TankIndex).DemandCompNames({1, oldNumDemand}) = oldDemandCompNames; // array assignment
+                for (int i = 1; i <= oldNumDemand; ++i) {
+                    state.dataWaterData->WaterStorage(TankIndex).DemandCompNames(i) = oldDemandCompNames(i);
+                }
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompNames(oldNumDemand + 1) = CompName;
             }
             if (allocated(state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes)) {
                 oldDemandCompTypes = state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes;
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes.deallocate();
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes.allocate(oldNumDemand + 1);
-                state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes({1, oldNumDemand}) = oldDemandCompTypes; // array assignment
+                for (int i = 1; i <= oldNumDemand; ++i) {
+                    state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes(i) = oldDemandCompTypes(i);
+                }
                 state.dataWaterData->WaterStorage(TankIndex).DemandCompTypes(oldNumDemand + 1) = CompType;
             }
 
