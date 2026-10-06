@@ -922,7 +922,7 @@ Timestep,
        \memo transfer and load calculations.
        \unique-object
        \format singleLine
-  N1 ; \field Number of Timesteps per Hour
+  N1 , \field Number of Timesteps per Hour
        \note Number in hour: normal validity 4 to 60: 6 suggested
        \note Must be evenly divisible into 60
        \note Allowable values include 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, and 60
@@ -934,6 +934,15 @@ Timestep,
        \type integer
        \minimum 1
        \maximum 60
+  N2 ; \field Number of Timesteps per Hour for Sizing
+       \default 6
+       \type integer
+       \minimum 1
+       \maximum 60
+       \note Used when simulation timesteps differ from sizing
+       \note Must be evenly divisible into 60
+       \note Allowable values include 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, and 60
+       \note Normal 6 is minimum as lower values may cause inaccuracies
 
 ConvergenceLimits,
        \memo Specifies limits on HVAC system simulation timesteps and iterations.

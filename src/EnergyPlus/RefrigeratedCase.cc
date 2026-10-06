@@ -487,7 +487,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
     Real64 NominalTotalCompCapLP(0.0); // Total of nominal low pressure compressor capacities, used for rough input check (W) (Transcritical CO2)
     Real64 NominalTotalCompCapHP(0.0);
     Array1D<Real64> Numbers;   // Numeric items for object
-    Array2D<Real64> DayValues; // Array of schedule values
 
     auto &RefrigCase = state.dataRefrigCase->RefrigCase;
     auto &RefrigRack = state.dataRefrigCase->RefrigRack;
@@ -623,7 +622,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
         TransferLoadList.allocate(state.dataRefrigCase->NumSimulationTransferLoadLists);
     }
 
-    DayValues.allocate(state.dataGlobal->TimeStepsInHour, Constant::iHoursInDay);
     state.dataRefrigCase->RefrigPresentInZone.dimension(state.dataGlobal->NumOfZones, false);
 
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "Refrigeration:Case", MaxNumArgs, MaxNumAlphasCase, MaxNumNumbersCase);
@@ -6970,7 +6968,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
     } //(NumTransRefrigSystems > 0)
 
-    DayValues.deallocate();
     Alphas.deallocate();
     Numbers.deallocate();
     cAlphaFieldNames.deallocate();

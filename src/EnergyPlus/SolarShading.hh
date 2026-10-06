@@ -353,13 +353,13 @@ struct SolarShadingData : BaseGlobalStruct
     int MAXHCArrayBounds = 0;    // Bounds based on Max Number of Vertices in surfaces
     int MAXHCArrayIncrement = 0; // Increment based on Max Number of Vertices in surfaces
                                  // The following variable should be re-engineered to lower in module hierarchy but need more analysis
-    int NVS;                     // Number of vertices of the shadow/clipped surface
-    int NumVertInShadowOrClippedSurface;
-    int CurrentSurfaceBeingShadowed;
-    int CurrentShadowingSurface;
-    int OverlapStatus; // Results of overlap calculation:
-                       // 1=No overlap; 2=NS1 completely within NS2
-                       // 3=NS2 completely within NS1; 4=Partial overlap
+    int NVS = 0;                 // Number of vertices of the shadow/clipped surface
+    int NumVertInShadowOrClippedSurface = 0;
+    int CurrentSurfaceBeingShadowed = 0;
+    int CurrentShadowingSurface = 0;
+    int OverlapStatus = 0; // Results of overlap calculation:
+                           // 1=No overlap; 2=NS1 completely within NS2
+                           // 3=NS2 completely within NS1; 4=Partial overlap
 
     Array1D<Real64> SurfSunCosTheta;            // Cosine of angle of incidence of sun's rays on surface NS
     Array1D<Real64> SurfAnisoSkyMult;           // Multiplier on exterior-surface sky view factor to account for
@@ -511,6 +511,8 @@ struct SolarShadingData : BaseGlobalStruct
     std::vector<Real64> cos_Theta;
     std::unique_ptr<std::iostream> shd_stream; // Shading file stream
 
+    bool updateTSArraysFlag = true; // True if the TS data arrays need to be updated
+
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
@@ -646,6 +648,7 @@ struct SolarShadingData : BaseGlobalStruct
         this->sin_Theta.clear();
         this->cos_Theta.clear();
         this->shd_stream.reset();
+        this->updateTSArraysFlag = true;
     }
 
     // Default Constructor

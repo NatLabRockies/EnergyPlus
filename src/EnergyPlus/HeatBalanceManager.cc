@@ -2885,6 +2885,15 @@ namespace HeatBalanceManager {
             DisplayString(state, "Initializing Solar Calculations");
             InitSolarCalculations(state); // Initialize the shadowing calculations
         }
+        if (state.dataHeatBalMgr->updateTSArraysFlag && state.dataGlobal->updateTSArrays) {
+            state.dataHeatBalMgr->updateTSArraysFlag = false;
+            state.dataHeatBalMgr->TempZoneRpt.dimension(state.dataGlobal->NumOfZones, state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay, 0.0);
+            state.dataHeatBalMgr->LoadZoneRpt.dimension(state.dataGlobal->NumOfZones, state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay, 0.0);
+            state.dataHeatBalMgr->MaxLoadZoneRpt.dimension(
+                state.dataGlobal->NumOfZones, state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay, 0.0);
+            state.dataHeatBalMgr->TempZoneRptStdDev.allocate(state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay);
+            state.dataHeatBalMgr->LoadZoneRptStdDev.allocate(state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay);
+        }
 
         if (state.dataGlobal->BeginEnvrnFlag) {
             state.dataHeatBalMgr->MaxHeatLoadPrevDay = 0.0;

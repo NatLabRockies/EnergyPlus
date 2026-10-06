@@ -1400,6 +1400,8 @@ struct OutputReportTabularData : BaseGlobalStruct
     std::string curColHeadWithSI;
     std::string curColHead;
 
+    bool updateTSArraysFlag = true; // True if the TS data arrays need to be updated
+
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
@@ -1670,6 +1672,7 @@ struct OutputReportTabularData : BaseGlobalStruct
         this->Wm2_unitName.clear();
         this->curColHeadWithSI.clear();
         this->curColHead.clear();
+        this->updateTSArraysFlag = true;
     }
 };
 
