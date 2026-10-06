@@ -81,6 +81,7 @@ namespace LiquidCooledITEPlantComponents {
 
         // --- Input parameters ---
         Sched::Schedule *availabilitySchedule = nullptr;
+        Sched::Schedule *itLoadSchedule = nullptr; // optional additive IT load [W]
         ThermalResistanceMethod thermalResistanceMethod = ThermalResistanceMethod::Standard;
         DataPlant::FlowMode flowMode = DataPlant::FlowMode::Constant;
         Real64 thermalResistance = 0.0;              // nominal cold-plate thermal resistance [K/W]
@@ -97,7 +98,7 @@ namespace LiquidCooledITEPlantComponents {
         bool myPlantScanFlag = true;           // false once ScanPlantLoopsForObject has run
         bool mySizingFlag = true;              // false once sizeColdPlate has finalized
         bool myEnvrnFlag = true;               // reset to true each BeginEnvrnFlag cycle
-        Real64 actualLoad = 0.0;               // IT load requested by the paired ITE object [W]
+        Real64 loadFromITEquipment = 0.0;      // IT load set by the paired ElectricEquipment:ITE:LiquidCooled object [W]
         Real64 heatRemovedByFluid = 0.0;       // heat actually transferred to the coolant [W]
         Real64 heatRemovedByFluidEnergy = 0.0; // [J]
         Real64 zoneHeatGainRate = 0.0;         // unmet load returned to zone heat balance [W]

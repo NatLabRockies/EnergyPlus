@@ -312,6 +312,9 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
 {
     Real64 massFlowRate = 0.0;
 
+    Real64 const loadFromSchedule = (this->itLoadSchedule != nullptr) ? std::max(0.0, this->itLoadSchedule->getCurrentVal()) : 0.0;
+    Real64 const load = this->loadFromITEquipment + loadFromSchedule;
+
     // Check if the component is running
     Real64 running = (this->availabilitySchedule != nullptr) ? this->availabilitySchedule->getCurrentVal() : 1.0;
 
@@ -319,7 +322,7 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
     this->auxElecPower = (running > 0.0) ? this->auxPower : 0.0;
 
     // No load or not running
-    if (this->actualLoad <= 0.0 || running <= 0.0) {
+    if (load <= 0.0 || running <= 0.0) {
         this->heatRemovedByFluid = 0.0;
         this->zoneHeatGainRate = 0.0;
         this->massFlowRate = 0.0;
@@ -354,16 +357,16 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
             };
 
             // First: solve for flow that meets the target operating temperature
-            auto targetResidual = [&loadCalculated, this](Real64 const massFlow) {
-                return loadCalculated(massFlow, this->targetCaseOperatingTemperature) - this->actualLoad;
+            auto targetResidual = [&loadCalculated, this, load](Real64 const massFlow) {
+                return loadCalculated(massFlow, this->targetCaseOperatingTemperature) - load;
             };
             int SolFla;
             General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, targetResidual, 0.0, maximumMassFlowRate);
 
             // If no solution, try again allowing the case to rise to the maximum temperature
             if (SolFla < 0) {
-                auto maxTempResidual = [&loadCalculated, this](Real64 const massFlow) {
-                    return loadCalculated(massFlow, this->maximumCaseTemperature) - this->actualLoad;
+                auto maxTempResidual = [&loadCalculated, this, load](Real64 const massFlow) {
+                    return loadCalculated(massFlow, this->maximumCaseTemperature) - load;
                 };
                 General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, maxTempResidual, 0.0, maximumMassFlowRate);
 
@@ -388,8 +391,8 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
             : (this->maximumCaseTemperature - inletTemp) / thermalResistance;
 
     // Determine how much of the load is met by the fluid and how much spills to the zone
-    this->heatRemovedByFluid = std::min(this->actualLoad, maxHeatTransferRate);
-    this->zoneHeatGainRate = this->actualLoad - this->heatRemovedByFluid;
+    this->heatRemovedByFluid = std::min(load, maxHeatTransferRate);
+    this->zoneHeatGainRate = load - this->heatRemovedByFluid;
 
     // Chip case temperature
     if (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD && massFlowRate > 0.0) {
@@ -436,9 +439,15 @@ void CoilCoolingITEColdPlateData::processInputForCoilCoolingITEColdPlate(EnergyP
         CoilCoolingITEColdPlateData thisColdPlate;
         thisColdPlate.name = Util::makeUPPER(thisObjectName);
 
-        // Get schedule
+        // Get schedules
         if (fields.contains("availability_schedule")) {
             thisColdPlate.availabilitySchedule = Sched::GetSchedule(state, fields.at("availability_schedule").get<std::string>());
+        }
+        if (fields.contains("it_equipment_load_schedule_name")) {
+            std::string const schedName = fields.at("it_equipment_load_schedule_name").get<std::string>();
+            if (!schedName.empty()) {
+                thisColdPlate.itLoadSchedule = Sched::GetSchedule(state, schedName);
+            }
         }
 
         // Get the numeric fields

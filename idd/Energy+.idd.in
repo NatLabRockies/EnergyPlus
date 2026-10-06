@@ -63931,11 +63931,17 @@ Coil:Cooling:ITE:ColdPlate,
        \key ConstantFlow
        \key VariableFlow
        \default ConstantFlow
-  A9 ; \field End-Use Subcategory
+  A9 , \field End-Use Subcategory
        \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
        \type alpha
        \retaincase
        \default General
+  A10; \field IT Equipment Load Schedule Name
+       \note Optional schedule specifying an IT equipment heat load in watts added to any load set by
+       \note a paired ElectricEquipment:ITE:LiquidCooled object. When both are present their
+       \note contributions are summed. When no paired object exists this schedule is the sole load source.
+       \type object-list
+       \object-list ScheduleNames
 
 \group Evaporative Coolers
 
