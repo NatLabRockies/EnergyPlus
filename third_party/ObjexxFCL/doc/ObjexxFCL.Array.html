@@ -49,8 +49,6 @@
 			<p class="body">The Array class template hierarchy provides Fortran-style arrays with these attributes of Fortran 77 arrays:</p>
 			<ul class="body">
 				<li>Arbitrary index ranges for each dimension.</li>
-				<li>Arrays and array elements can be passed to array arguments of any <b>rank</b> (number of dimensions) and/or dimensions.</li>
-				<li>Array arguments can be dimensioned with an assumed size for the last dimension.</li>
 				<li>Note: This ObjexxFCL variant uses row-major array layout, unlike Fortran's column-major layout to support projects migrated to the more typical C/C++ array layout.</li>
 			</ul>
 			<p class="body">and these capabilities <em>not</em> provided by Fortran 77 arrays:</p>
@@ -63,16 +61,14 @@
 				<li>Linear index subscripting for fast inner loop operations.</li>
 				<li>Dynamic (run-time) sizing.</li>
 				<li>Iterator access.</li>
-				<li><span class="source">std::vector</span>-like API with grow/shrink-friendly operations like push_back, emplace, and reserve.</li>
+				<li><span class="source">std::vector</span>-like API with grow/shrink-friendly operations like push_back, emplace_back, and reserve.</li>
 			</ul>
 			<p class="body">The Arrays are not intended to be a complete numerical matrix class library. A number of general purpose matrix libraries are available for C++ and Objexx Engineering can provide interfacing to those libraries. Objexx Engineering can also provide linear algebra functions and solvers for the Array classes to meet project requirements.</p>
 			<p class="body">There are a few types of Arrays:</p>
 			<ul class="body">
-				<li><a href="#Base_Arrays">Base Arrays</a> are the abstract base class for the three concrete Array types.</li>
+				<li><a href="#Base_Arrays">Base Arrays</a> are the abstract base class for the concrete Array types.</li>
 				<li><a href="#Real_Arrays">Real Arrays</a> are regular arrays that own their data.</li>
-				<li><a href="#Argument_Arrays">Argument Arrays</a> are proxies that use the data of other arrays as a contiguous block but can provide a view of the data with different rank and/or dimensions. Argument arrays are used as function arguments to support passing arrays of a different rank or array &quot;slices&quot; to functions as is common in Fortran 77 usage.</li>
 <!--				<li><a href="#Key_Arrays">Key Arrays</a> are real Arrays that use key index types for element lookup.<-->
-				<li><a href="#Slice_Arrays">Slice Arrays</a> are proxies that select a not necessarily contiguous sub-array of the same or lesser rank defined by index slices or sections.</li>
 			</ul>
 			<p class="body">The Arrays are class templates. Shorthand (typedef) names are provided for the common value types in the Array forward declaration headers so, for example, we use <span class="source">Array2D_int</span> instead of <span class="source">Array2D&lt; int &gt;</span> on this page.</p>
 
@@ -136,7 +132,7 @@ Array2D_double B( 5, 5 );
 B = A; // Now B is 3 x 3</pre></td>
 				</tr>
 			</table>
-			<p>This will redimension the array if necessary before assigning the values of the other array. For an argument Array this redimensioning only changes the view into the data array to which it is attached.</p>
+			<p>This will redimension the array if necessary before assigning the values of the other array.</p>
 			<p class="body">Individual Array elements can be assigned in the usual fashion using multidimensional or linear subscripting:</p>
 			<table border="1" cellspacing="0" cellpadding="12">
 				<tr>
@@ -146,7 +142,6 @@ A( 3, 7 ) = 1.23;
 A[ 28 ] = 4.56;</pre></td>
 				</tr>
 			</table>
-			<p><b>Warning!:</b> Assignment between real Arrays and argument Array proxies of them or between proxies of the same real Array can lead to unexpected results and should be used with care.</p>
 
 			<h2 class="h3"><a name="Base_Arrays" id="Base_Arrays"></a>Base Arrays</h2>
 			<p class="body">Base Arrays are the abstract base class for the concrete Arrays of the same rank and value type. Base Arrays classes have names of the form Array<em>N</em>&lt;<em>type</em>&gt; with shorthand names of the form Array<em>N</em>_<em>type</em> where <em>N</em> is the rank of the array and <em>type</em> is the value type the array hold. Functions written with pass by reference or const reference base Array arguments can be passed any Arrays of its rank and value type.</p>
@@ -256,14 +251,13 @@ C.redimension( B ); // C is now 5 x 5 with 3 x 3 portion preserved</pre></td>
 				</tr>
 			</table>
 			<p class="body">Real Arrays do not need to be explicitly deallocated before reallocating them with <span class="source">allocate</span>, <span class="source">dimension</span>, or <span class="source">redimension</span> calls. If the reallocation size happens to be the same as the current size the allocation methods will take advantage of that so <em>not</em> calling <span class="source">deallocate</span> will save the cost of a heap allocation.</p>
-			<p class="body"><b>Warning!</b> Resizing a real Array invalidates any argument Arrays attached to it.</p>
 
 			<h3 class="h4">Iterators</h3>
 			<p class="body">Arrays provide an iterator interface with <span class="source">begin</span>, <span class="source">end</span>, <span class="source">rbegin</span>, and <span class="source">rend</span> methods. This allows the Arrays to be used with many C++ Standard Library functions and C++11 range-based for loops. For multidimensional Arrays it is important to understand that iterators provide a memory-order traversal, which is row-major order for this variant of the ObjexxFCL.</p>
 
 			<h3 class="h4">Array1D Vector-Like Interface</h3>
 			<p class="body">Array1D has an additional <span class="source">std::vector</span>-like personality for more natural use as a general purpose C++ container with the performance capabilities of <span class="source">std::vector</span>.</p>
-			<p class="body">The methods in this API are shown below. Array1D has the same overloads of these that <span class="source">std::vector</span> provides.</p>
+			<p class="body">The methods in this API are shown below. Array1D provides only the overloads of these that are used by client code, so it does not have every overload that <span class="source">std::vector</span> provides.</p>
 			<table border="1" cellspacing="0" cellpadding="6" bordercolor="#CABEDC">
 				<tr class="table_text">
 					<td><b>Method Name</b></td>
@@ -282,16 +276,8 @@ C.redimension( B ); // C is now 5 x 5 with 3 x 3 portion preserved</pre></td>
 					<td>Add an element at the end</td>
 				</tr>
 				<tr class="table_text">
-					<td class="source">pop_back</td>
-					<td>Remove the last element</td>
-				</tr>
-				<tr class="table_text">
 					<td class="source">insert</td>
-					<td>Add an element or elements at a specified position</td>
-				</tr>
-				<tr class="table_text">
-					<td class="source">emplace</td>
-					<td>Add an in-place constructed element at a specified position</td>
+					<td>Add a copy of an element at a specified position</td>
 				</tr>
 				<tr class="table_text">
 					<td class="source">emplace_back</td>
@@ -299,7 +285,7 @@ C.redimension( B ); // C is now 5 x 5 with 3 x 3 portion preserved</pre></td>
 				</tr>
 				<tr class="table_text">
 					<td class="source">erase</td>
-					<td>Remove an element or elements at a specified position</td>
+					<td>Remove the element at a specified position</td>
 				</tr>
 				<tr class="table_text">
 					<td class="source">reserve</td>
@@ -311,124 +297,6 @@ C.redimension( B ); // C is now 5 x 5 with 3 x 3 portion preserved</pre></td>
 				</tr>
 			</table>
 			<p class="body">Other than <span class="source">front</span> and <span class="source">back</span>, these methods change the size of the Array1D. As with <span class="source">std::vector</span> they use an excess capacity strategy to reduce the number of expensive heap allocations. The presence of excess capacity is treated as an indicator that an Array1D is in a vector-like mode where excess capacity should be exploited to tradeoff greater memory use for performance. If an Array1D has excess capacity, <span class="source">allocate</span> and <span class="source">dimension</span> will use that capacity when possible to avoid a heap allocation.</p>
-
-			<h2 class="h3"><a name="Argument_Arrays" id="Argument_Arrays"></a>Argument Arrays</h2>
-			<p class="body">Argument Arrays behave in most ways like a real Array but they attach to the data of another Array and do not allocate or own their array data. Argument Arrays can attach to all or part of Arrays of any rank and dimensions. Typically, they may provide a smaller, lower rank &quot;view&quot; of a slice of a larger array or simply a lower rank &quot;view&quot; of a whole array. This provides the ability to mimic Fortran array passing &ldquo;tricks&rdquo; and the memory sharing of a Fortran <b>EQUIVALENCE</b> between two arrays or array sections.</p>
-			<p class="body">Argument Arrays have names of the form Array<em>N</em>A&lt;<em>type</em>&gt; with shorthand names of the form Array<em>N</em>A_<em>type</em> where <em>N</em> is the rank of the array and <em>type</em> is the value type the array hold.</p>
-
-			<h3 class="h4">Construction</h3>
-			<p class="body">Argument Arrays can be constructed in a number of ways. Default construction creates an undimensioned argument Array that is not attached to another Array:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2A_int A; // Default constructed: Detached</pre></td>
-				</tr>
-			</table>
-			<p class="body">Default-constructed argument Arrays can be later attached and dimensioned with <span class="source">attach</span> and <span class="source">dimension</span> calls as described below.</p>
-			<p class="body">Whole array construction attaches the argument Array to the whole source Array:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2D_int A( 7, 7 );
-Array1A_int B( A ); // 1D view of A</pre></td>
-				</tr>
-			</table>
-			<p class="body">You can also construct a whole-array argument Array and specify its dimensions with multi-argument constructors:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array3D_int A( 5, 5, 10 );
-Array2A_int C( A, 25, 10 ); // 2D view of A</pre></td>
-				</tr>
-			</table>
-			<p class="body">Argument Arrays can be constructed from elements of another Array to create a view of a contiguous portion of the array:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array3D_int A( 5, 5, 10 );
-// 2D views of the tail of the 3D A array
-Array2A_int D( A( 1, 1, 3 ), 5, 5 ); // Valid extent unknown
-Array2A_int E( A.a( 1, 1, 3 ), 5, 5 ); // Valid extent known</pre></td>
-				</tr>
-			</table>
-			<p class="body">The D array is passed an element so it is constructed without knowledge of the extent of valid memory it can access. The index ranges specified may be within that valid extent or not. This mechanism allows support of Fortran array passing usage but exposes code to array bounds violations that can't be detected by the argument Array classes.</p>
-			<p class="body">The E array is passed an element using the <span class="source">a</span> function, which creates an ArrayTail object that knows its size, which allows bounds error detection in debug builds but at some cost in construction time.</p>
-			<p class="body">When single Array argument constructors are used, as when creating an argument Array via pass-by-value, default argument Array dimensions are used:</p>
-			<ul class="body">
-				<li>If the argument is an Array of the same rank as the argument Array then its dimensions are used.</li>
-				<li>If the argument is an Array of different rank or an array element or section then an index range of [1,1] is used for all dimensions except the last which gets the range [1,<em>size</em>] where <em>size</em> is the array or section size and is unbounded for construction from an element. The <span class="source">dimension</span> function (see below) can be used to set the desired dimensions before the array is used.</li>
-			</ul>
-
-			<h3 class="h4">Attach/Detach</h3>
-			<p class="body">Argument Arrays can be dynamically attached and detached from source arrays:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2A_int G; // Default constructed: Unattached
-...
-Array3D_int A( 3, 3, 5 );
-G.attach( A ).dimension( 9, 5 ); // All of A
-...
-G.attach( A( 3, 3, 2 ) ).dimension( 3, 3 ); // Slab of A</pre></td>
-				</tr>
-			</table>
-			<p class="body">A call to <span class="source">detach</span> detaches an argument Array from its source array. It isn't necessary to explicitly detach before attaching to a new source array: that happens automatically. The <span class="source">dimension</span> calls (see below) are chained after the <span class="source">attach</span> calls to set the dimensions.</p>
-			<p class="body">The <span class="source">active</span> member function will tell you whether an argument Array is currently attached to a source array.</p>
-
-			<h3 class="h4">Explicit Dimensioning</h3>
-			<p class="body">Argument Arrays can be dynamically (re)sized via the <span class="source">dimension</span> member function using a syntax similar to their constructors:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array3D_int A( 3, 3, 5 );
-Array2A_int B( A( 1, 1, 2 ) );
-B.dimension( 3, 3 );
-</pre></td>
-				</tr>
-			</table>
-			<p class="body">Dimensioning argument Arrays only changes the perceived size of the arrays' view and doesn't cause reallocation of a data array, so no initializing variants of <span class="source">dimension</span> are provided. From the argument Array's perspective the elements are reflowed in row-major order to fill the new dimensions, unlike a data-preserving <span class="source">redimension</span> call on a real Array, which keeps elements in their original index positions as the dimensions change. Attempting to dimension an argument Array to a size that exceeds the actual size of the associated data array, if known, will trigger an assertion failure in debug builds.</p>
-			<p class="body">Argument Arrays can also be dimensioned to match the dimensions of another array:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2D_float B( 3, 3 );
-
-Array3D_int A( 3, 3, 5 );
-Array2A_int C( A( 1, 1, 2 ) );
-C.dimension( B );
-</pre></td>
-				</tr>
-			</table>
-			<p class="body">An assumed-size (upper-unbounded) dimension can be specified for the last dimension by using an underscore, <span class="source">_</span> (a predefined instance of <span class="source">Omit</span>):</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>void f( Array2A_int I )
-{
-   I.dim( 100, _ ); // Assumed-size
-}</pre></td>
-				</tr>
-			</table>
-			<p><span class="body">The use of <span class="source">_</span> for the last dimension is analogous to Fortran's assumed-size array dimensioning. If the actual array size is known then the last dimension will be set appropriately so that bounds errors can be caught by assertion failures in debug builds, but if an array element is passed by the fast method the last dimension will have an unbounded upper extent and the array size will be unbounded.</span></p>
-			<p><span class="body">The <span class="source">dim</span> function can be used to dimension an argument Array after it is constructed, such as one created <i>via</i> a pass-by-value argument:</span></p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>void f( Array2A_double const R )
-{
-   R.dim( 3, 3 );
-   ...
-}</pre></td>
-				</tr>
-			</table>
-			<p class="body">The <span class="source">dim</span> function is like <span class="source">dimension</span> but can be used to set up the argument Array dimensions even if it is const, such as in the example above: this is needed since we can't set the desired dimensions in the argument declaration.</p>
-			<p class="body">When an argument Array is declared as a pass-by-value argument of a function the actual argument passed becomes the constructor argument to the argument Array. Argument Arrays must be passed by value to create a proxy of the passed array, but they can also be passed by reference when proxy creation isn't needed (no change to rank or dimensions is required). Although there is no copying of the array data when argument Arrays are constructed there is a small construction cost.</p>
-
-			<h3 class="h4">Const-Correctness</h3>
-			<p class="body">Argument Arrays have proxy semantics and share the const-correctness semantics of pointers. The constness of the proxy and the data it is a proxy for are distinct and both are needed to get full constness:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2D_int const A( 3, 3 );
-...
-Array2A_int B( A ); // Can alter A's data and B's state
-Array2A_int const C( A ); // Can alter A's data but not C's state</pre>
-				</tr>
-			</table>
-			<p class="body">One approach sometimes used to address this issue is to provide always-const versions of the proxy classes. This has the benefit of compile-time const correctness checks but forces a lot of code changes and limits the legal attach operations.</p>
-			<p class="body">Argument Arrays are typically created <i>via</i> pass-by-value function arguments. If the functions do not need to alter the array values then qualify them with const in the function declaration, assuring const-correctness is preserved. Alternatively, a const reference to the argument Arrays can be used for subscripting operations.</p>
-
-			<p class="body"><b>Warning!:</b> Resizing a real Array invalidates any argument Arrays that are attached to its data.</p>
 
 <!--			<h2 class="h3"><a name="Key_Arrays" id="Key_Arrays"></a>Key Arrays</h2> -->
 <!--			<p class="body">Key Arrays are real Arrays that are accessed by key index objects rather than integer indices. Any key type that the Key Array is able to convert to an integer will work: if the integer index for a key is a protected or private conversion then the Key Array will have to be a friend of the key type. -->
@@ -442,46 +310,20 @@ Array2A_int const C( A ); // Can alter A's data but not C's state</pre>
 
 			<h3 class="h4">Alignment</h3>
 			<p class="body">Aligned array elements allow more efficient vectorization by eliminating the up-front "peel" loop needed to deal with the unaligned elements. While unaligned access has a smaller performance cost on modern CPUs usign aligned array data is still faster. The ObjexxFCL real arrays, Array<i>N</i>D, have optional element alignment support to enable more efficient vectorization.</p>
-			<p class="body">To enable aligned array element data so that the first array element address is aligned properly for the target build hardware define the OBJEXXFCL_ALIGN preprocessor symbol in the compilation process. This will align the Array (and CArrayA) first elements to be aligned properly for the target hardware. For SSE targets this gives 16 byte alignment, for AVX and AVX2 this gives 32 byte alignment, and for AVX-512 and MIC (Intel Phi) targets this gives 64 byte alignment. The alignment can be overridden to specify a larger (power of 2) alignment by giving a value to OBJEXXFCL_ALIGN. For example, to get 64 byte alignment on AVX2 hardware, perhaps to match the cache line size, you can add a compile flag that typically looks like -DOBJEXXFCL_ALIGN=64.</p>
+			<p class="body">To enable aligned array element data so that the first array element address is aligned properly for the target build hardware define the OBJEXXFCL_ALIGN preprocessor symbol in the compilation process. This will align the Array first elements to be aligned properly for the target hardware. For SSE targets this gives 16 byte alignment, for AVX and AVX2 this gives 32 byte alignment, and for AVX-512 and MIC (Intel Phi) targets this gives 64 byte alignment. The alignment can be overridden to specify a larger (power of 2) alignment by giving a value to OBJEXXFCL_ALIGN. For example, to get 64 byte alignment on AVX2 hardware, perhaps to match the cache line size, you can add a compile flag that typically looks like -DOBJEXXFCL_ALIGN=64.</p>
 			<p class="body">For 2+ dimension arrays aligning the first element is not sufficient for optimal performance: ideally you want the first element of the innermost loop "row" aligned. Considering 2D arrays, there are a couple of ways to achieve this:</p>
 				<ul>
-					<li>An array of arrays design with each row an aligned Array1D or CArrayA (or a raw C array that is aligned). This is non-contiguous between rows but that may not harm performance for row-dominated operations. Heap allocation of each row can be a performance consideration if the 2D array is constructed frequently.</li>
-					<li>An Array2D with row lengths padded to assure rows are aligned properly. The<br> <span class="source">padded< T >( row )</span> function in align.hh will give the padded row length needed for a given nominal row length. The cost of processing the extra padding elements is normally small since they are just filling out the SIMD lines. To communicate the row alignment to the compiler it may work to use <span class="source">ASSUME( row % N == 0 )</span> where the <span class="source">ASSUME</span> macro is from vectorize.hh, row is the row length (after padding) and <span class="source">N</span> is the number of elements of that type to fill the hardware alignment width (such as 4 for doubles with AVX 32 byte alignment).</li>
+					<li>An array of arrays design with each row an aligned Array1D (or a raw C array that is aligned). This is non-contiguous between rows but that may not harm performance for row-dominated operations. Heap allocation of each row can be a performance consideration if the 2D array is constructed frequently.</li>
+					<li>An Array2D with row lengths padded to assure rows are aligned properly. The cost of processing the extra padding elements is normally small since they are just filling out the SIMD lines. To communicate the row alignment to the compiler it may work to use <span class="source">ASSUME( row % N == 0 )</span> where the <span class="source">ASSUME</span> macro is from vectorize.hh, row is the row length (after padding) and <span class="source">N</span> is the number of elements of that type to fill the hardware alignment width (such as 4 for doubles with AVX 32 byte alignment).</li>
 				</ul>
 			<p class="body">For the compiler to exploit array alignment additional "hints" must be added to your code. One method is to use "assume aligned" directives: these differ across platforms but the vectorize.hh header has a portable macro ASSUME_ALIGNED_OBJEXXFCL(p) where p is a pointer to the first array element (this macro knows the ObjexxFCL alignment so it isn't passed as an argument). The "assume aligned" approach has the downside that the address of Array elements can't be passed so the loop must be rewritten with raw pointers. A simpler approach is avaiable for Intel C++ when all array accesses are aligned by placing a <span class="source">#pragma vector aligned</span> line before the loop, so placing a block like this before the for loop should suffice:</p>
 <pre>#if defined(__INTEL_COMPILER) && defined(OBJEXXFCL_ALIGN)
 #pragma vector aligned
 #endif</pre>
 
-			<h2 class="h3"><a name="Slice_Arrays" id="Slice_Arrays"></a>Slice Arrays</h2>
-			<p class="body">Slice Arrays are array proxies that present a slice of another array as an array of the same or lesser rank. A slice Array is normally created by an indexing operation on an array where some or all of the indexes are index slices rather than scalar indexes. An index slice has a start index, an end index, and a stride, or step, value. Index slices are denoted with a <span class="source">{start,end,stride}</span> syntax:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>Array2D_int A( 3, 3 ); // 2D array
-...
-A( {1,3,2}, {1,3,2} ); // 2D 2x2 slice of A selecting indexes 1 and 3 in each dimension
-A( 2, {1,2} ); // 1D slice of A with elements 1 and 2 of A's 2nd row
-</pre></td>
-				</tr>
-			</table>
-			<p class="body">Details about slice arrays:</p>
-				<ul>
-					<li>The start and end indexes must be valid array indexes for the dimension.</li>
-					<li>Start indexes default to the lower index of the dimension.</li>
-					<li>End indexes default to the upper index of the dimension.</li>
-					<li>Stride values default to 1 and can be positive or negative but not zero.</li>
-					<li>The <span class="source">{start,end,stride}</span> syntax uses the C++11 initializer_list type. An underscore can be used for the start or end index to indicate the default value. An index slice with a single value is taken as specifying the start index as in <span class="source">{start}</span>. (The underscore is actually a predefined object of the Omit type provided for convenience.)</li>
-					<li>Slice arrays themselves are indexed contiguously like regular arrays with a lower index of 1 in each dimension.</li>
-					<li>Index slices are instances of the IndexSlice class internally and that type can be used instead of the initializer_list syntax but this is not recommended.</li>
-					<li>Slice arrays are types within the ArrayS class template hierarchy.</li>
-					<li>Slice arrays are used for the analog of Fortran's assumed shape array arguments as pass-by-value proxy arguments.</li>
-					<li>While slices are proxies, so creating them does not copy arrays, there are performance considerations when using them. There is some modest overhead in constructing a slice, either from an explicit slicing operation or as a pass-by-value argument. Slices do not support the fast linear indexing of the other FArrys, limiting performance tuning opportunities. Sparse slices are not cache efficient and thus can degrade performance. It is sometimes beneficial to copy the slice of interest into a contiguous Array before using it in a performance-critical section.</li>
-				</ul>
-
 			<h2 class="h3">Array Passing</h2>
-			<p class="body">Real Arrays can be used as function arguments that are declared as passed by value (expensive), reference, or const reference. Within the functions those Arrays have the same rank and dimensions as the passed Array.</p>
-			<p class="body">To pass Arrays of different rank or dimensions or size or to pass Array elements as the starting point of an Array section or slice the function argument must be an argument Array declared as pass-by-value. These arrays are constructed at the time of the function call but the underlying data is not copied: since they are proxies for the passed arrays data so the construction cost is modest.</p>
-			<p class="body">Arrays and array elements of any rank and size Array can be passed to an argument Array. Although the array data is not copied, the construction of argument Arrays at each function call can add significant overhead for heavily called functions compared with passing Arrays by reference. If a function will always be passed arrays of the rank and dimensions used by the function it is more efficient for the array arguments to be passed by reference. To support passing all types of Array of a given rank and value type to a function the arguments should be declared references to the base Array class of that rank and value type:</p>
+			<p class="body">Arrays can be used as function arguments that are declared as passed by value (expensive), reference, or const reference. Within the functions those Arrays have the same rank and dimensions as the passed Array.</p>
+			<p class="body">To support passing all types of Array of a given rank and value type to a function the arguments should be declared references to the base Array class of that rank and value type:</p>
 			<table border="1" cellspacing="0" cellpadding="12">
 				<tr>
 					<td bgcolor="#F7F4F7"><pre>void f( Array2_int &amp; A );</pre></td>
@@ -489,25 +331,9 @@ A( 2, {1,2} ); // 1D slice of A with elements 1 and 2 of A's 2nd row
 			</table>
 			<p class="body">Base Arrays support all Array operations except those with semantics that are specific to the concrete Array type, such as <span class="source">dimension</span> or <span class="source">attach</span>.</p>
 
-			<h2 class="h3">Array Element Passing</h2>
-			<p class="body">There are two ways to pass an array element to an argument array, <b>faster</b> or <b>safer</b>:</p>
-			<table border="1" cellspacing="0" cellpadding="12">
-				<tr>
-					<td bgcolor="#F7F4F7"><pre>void f( Array2A_int A );
-
-void g()
-{
-   Array3D_int G( 3, 3, 5 );
-   f( G( 2, 3, 4 ) ); // Faster
-   f( G.a( 2, 3, 4 ) ); // Safer
-}</pre></td>
-				</tr>
-			</table>
-			<p class="body">The faster method is transparent in the call statement but does not provide the function information about the actual size of the underlying array. The safer method uses the <span class="source">a</span> member function to provide a proxy for the array tail section starting at the specified element that allows the function to check for array bounds errors in debug builds.</p>
-
 			<h2 class="h3">Array Size</h2>
 			<p class="body">Array sizes are limited to 2<sup>N</sup>-2 where N is the bit size of std::size_t, so very large arrays are supported on 64-bit platforms where std::size_t is 64 bits. The index range for each dimension is indexed by int, which is still 32 bits on 64-bit platforms, so the size along each dimension is more limited than the total array size on 64-bit platforms. Attempting to create an array with a dimension or total size exceeding these limits is caught by assertion-enabled debug builds. The operating system on a given platform may further limit the allocatable size.</p>
-			<p class="body">The size of an Array can be obtained via the <span class="source">size</span> member function. For real Arrays this is the actual array data size and for argument Arrays this is the size of the active array part that it is using, which may be unknown/unbounded. The <span class="source">size_bounded</span> and <span class="source">size_unbounded</span> member functions can be used to test whether the active array has unbounded/unknown extent. The size of the actual array data can be obtained via the <span class="source">array_size</span> member function, and the <span class="source">array_size_bounded</span> and <span class="source">array_size_unbounded</span> member functions can be used to test whether the actual array data has unknown/unbounded extent.</p>
+			<p class="body">The size of an Array can be obtained via the <span class="source">size</span> member function. For real Arrays this is the actual array data size. The size of the actual array data can also be obtained via the <span class="source">array_size</span> member function.</p>
 
 			<h3 class="h4">Array Size Reports</h3>
 			<p class="body">The array name or location of creation isn't known at the point of reporting but the report includes the value type, element count, and index ranges to aid in the identification of the associated array. The value type held by the Array is the typeid's name() string for that type, which varies by compiler. The codes used by GCC are:</p>
@@ -577,7 +403,7 @@ void g()
 			<p class="body">The size is computed as the number of elements times the sizeof the Array's value type, so Arrays holding value types that have associated heap memory do not show the full memory they use.</p>
 
 			<h2 class="h3">Array Activity State</h2>
-			<p class="body">The <span class="source">active</span> member function can be called to determine whether a real Array is allocated or whether an argument Array is attached to another Array.</p>
+			<p class="body">The <span class="source">active</span> member function can be called to determine whether a real Array is allocated.</p>
 
 			<h2 class="h3">Generator Functions</h2>
 			<p class="body">Operator functions that generate Arrays include the unary minus function and sums and differences of Arrays of the same rank and dimensions and of Arrays and scalar values:</p>
@@ -596,12 +422,11 @@ C = A + 3; // Adds 3 to each element</pre>
 			<p>These operators accept all types of Arrays but always produce real Arrays.</p>
 
 			<h2 class="h3">Special Functions</h2>
-			<p class="body"><b>Array1D</b> arrays have the <span class="source">length</span> and <span class="source">length_squared</span> member functions to compute their L<sub>2</sub> norm length and squared length and the <span class="source">normalize</span> function to normalize the array to unit length. The <span class="source">dot_product</span> function computes the dot (inner) product of two Array1Ds. The <span class="source">cross_product</span> function computes the cross product of two Array1Ds of size 3.</p>
-			<p class="body"><b>Array2D</b> arrays have the boolean <span class="source">square</span> function to test whether the array is square, the <span class="source"><b>to_identity</b></span> function to make a square array into the identity matrix and the <span class="source">to_diag</span> function to make a square array into a diagonal matrix with a uniform value. The <span class="source">transpose</span> function transposes a square array and the <span class="source">transposed</span> function returns a transposed copy of the array. The <span class="source">identity</span> and <span class="source">diag</span> static functions are named constructors to create identity and diagonal matrices, respectively.</p>
+			<p class="body"><b>Array2D</b> arrays have the boolean <span class="source">square</span> function to test whether the array is square, and the <span class="source"><b>to_identity</b></span> function to make a square array into the identity matrix.</p>
 			<p class="body">The <span class="source">swap</span> functions allow two real Arrays of the same rank to efficiently swap their contents. There is a single-argument <span class="source">swap</span> member function and a two-argument <span class="source">swap</span> non-member function. Use <span class="source">A.swap( B )</span> or <span class="source">swap( A, B )</span> (using <span class="source">std::swap( A, B )</span> wil be slower on compilers that don't support the provided overloaded function templates).</p>
 
 			<h2 class="h3">Array Debugging</h2>
-			<p class="body">For Fortran-like performance, the Array classes don't check for array bounds errors in release builds (when NDEBUG is defined). It is therefore important to test assertion-enabled debug builds of code using the Array classes. To get all argument Arrays bounds checked it would be necessary to use the safer array element passing method described above, but at some cost to the performance of release builds.</p>
+			<p class="body">For Fortran-like performance, the Array classes don't check for array bounds errors in release builds (when NDEBUG is defined). It is therefore important to test assertion-enabled debug builds of code using the Array classes.</p>
 
 			<h2 class="h3">Array Output</h2>
 			<p class="body">Stream output operators are provided for each Array. These are simple output of elements in memory order without an attempt to organize by rows or slices, so custom output functions will be needed for application-specific formatting.</p>
@@ -621,10 +446,6 @@ C = A + 3; // Adds 3 to each element</pre>
 					<td><font color="#16694A"><b>Array<em>N</em>D.hh</b></font></td>
 					<td><em>N</em>D real Array class template</td>
 				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>Array<em>N</em>A.hh</b></font></td>
-					<td><em>N</em>D argument Array class template</td>
-				</tr>
 <!--			<tr class="table_text">                                                          -->
 <!--				<td><font color="#16694A"><b>KeyArray<em>N</em>D.hh</b></font></td>            -->
 <!--				<td><em>N</em>D key-indexed Array class template</td>                         -->
@@ -632,10 +453,6 @@ C = A + 3; // Adds 3 to each element</pre>
 				<tr class="table_text">
 					<td><font color="#16694A"><b>Array<em>N</em>.all.hh</b></font></td>
 					<td><em>N</em>D Array class template master header</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>Array<em>N</em>S.hh</b></font></td>
-					<td><em>N</em>D slice Array class template</td>
 				</tr>
 			</table>
 			<p class="body">Headers for each rank and type of Array that are used more than &quot;in name&quot; must be included. To use all array types of a given rank <em>N</em> include Array<em>N</em>.all.hh to. Including only the Array headers needed will reduce compilation time.</p>

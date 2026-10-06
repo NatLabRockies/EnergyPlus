@@ -541,28 +541,6 @@ namespace DataSurfaces {
         // Constructor
         Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v, Vector2D const &vl, Vector2D const &vu);
 
-    public: // Predicates
-            // Bounding box contains a point?
-        bool bb_contains(Vector2D const &v) const
-        {
-            return (vl.x <= v.x) && (v.x <= vu.x) && (vl.y <= v.y) && (v.y <= vu.y);
-        }
-
-    public: // Comparison
-            // Equality
-        friend bool operator==(Surface2D const &a, Surface2D const &b)
-        {
-            auto const &v1 = a.vertices;
-            auto const &v2 = b.vertices;
-            return eq(v1, v2);
-        }
-
-        // Inequality
-        friend bool operator!=(Surface2D const &a, Surface2D const &b)
-        {
-            return !(a == b);
-        }
-
     public:                                              // Data
         int axis = 0;                                    // Axis of projection (0=x, 1=y, 2=z)
         Vertices vertices;                               // Vertices

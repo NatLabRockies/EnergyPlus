@@ -112,7 +112,6 @@ namespace DataBSDFWindow {
         Real64 UpprTheta = 0.0; // Patch upper edge, Theta
         Real64 LwrTheta = 0.0;  // Patch lower edge, Theta
         Real64 UpprPhi = 0.0;   // Patch upper edge, Phi
-        Real64 LwrPhi = 0.0;    // Patch lower edge, Phi
         // Note: The dimension index of the BasisElementDescription object corresponds to
         // the position (index) of this element in the row or column of property matrix
     };
@@ -322,9 +321,7 @@ namespace DataBSDFWindow {
     struct BSDFLayerAbsorpStruct
     {
         // Members
-        int MaterialIndex = 0;  // pointer to material layer
         int FrtAbsIndex = 0;    // pointer to matrix for Front directional absorptance vector
-        int AbsNcols = 0;       // Number of elements (columns) in each of the absorption (row) vectors
         Array2D<Real64> FrtAbs; // Front directional absorptance vector
         int BkAbsIndex = 0;     // pointer to matrix for Back directional absorptance vector
         Array2D<Real64> BkAbs;  // Back directional absorptance vector
@@ -343,20 +340,12 @@ namespace DataBSDFWindow {
         int NBasis = 0;              // No. elements in basis
         Array2D<Real64> BasisMat;    // basis matrix
         int SolFrtTransIndex = 0;    // pointer to matrix for Front optical transmittance matrix
-        int SolFrtTransNrows = 0;    // No. rows in matrix
-        int SolFrtTransNcols = 0;    // No. columns in matrix
         Array2D<Real64> SolFrtTrans; // Front optical transmittance matrix
         int SolBkReflIndex = 0;      // pointer to matrix for Back optical reflectance matrix
-        int SolBkReflNrows = 0;      // No. rows in matrix
-        int SolBkReflNcols = 0;      // No. columns in matrix
         Array2D<Real64> SolBkRefl;   // Back optical reflectance matrix
         int VisFrtTransIndex = 0;    // pointer to matrix for Front visible transmittance matrix
-        int VisFrtTransNrows = 0;    // No. rows in matrix
-        int VisFrtTransNcols = 0;    // No. columns in matrix
         Array2D<Real64> VisFrtTrans; // Front visible transmittance matrix
         int VisBkReflIndex = 0;      // pointer to matrix for Back visible reflectance matrix
-        int VisBkReflNrows = 0;      // No. rows in matrix
-        int VisBkReflNcols = 0;      // No. columns in matrix
         Array2D<Real64> VisBkRefl;   // Back visible reflectance matrix
         int NumLayers = 0;
         Array1D<BSDFLayerAbsorpStruct> Layer;

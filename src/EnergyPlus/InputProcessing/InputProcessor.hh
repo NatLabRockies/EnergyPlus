@@ -57,7 +57,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.fwd.hh>
 #include <ObjexxFCL/Optional.hh>
 
 #include <nlohmann/json.hpp>
@@ -141,10 +140,12 @@ public:
 
     const json &getJSONObjectItem(EnergyPlusData &state, std::string_view ObjType, std::string_view ObjName);
 
+    // Output arrays are filled positionally from their first element, regardless of their lower bound
+    // (e.g. an Array1D declared {0, N} receives the first field at index 0)
     void getObjectItem(EnergyPlusData &state,
                        std::string_view Object,
                        int const Number,
-                       Array1S_string Alphas,
+                       Array1D_string &Alphas,
                        int &NumAlphas,
                        Array1D<Real64> &Numbers,
                        int &NumNumbers,
@@ -255,10 +256,10 @@ private:
                             json const &ep_schema_object,
                             std::string const &field,
                             json const &legacy_field_info,
-                            int &alpha_index,
-                            int &numeric_index,
+                            int &alpha_index,   // 0-index, always, for operator[]
+                            int &numeric_index, // 0-index, always, for operator[]
                             bool within_max_fields,
-                            Array1S_string Alphas,
+                            Array1D_string &Alphas,
                             int &NumAlphas,
                             Array1D<Real64> &Numbers,
                             int &NumNumbers,

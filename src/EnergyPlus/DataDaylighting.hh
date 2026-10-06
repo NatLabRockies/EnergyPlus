@@ -192,7 +192,6 @@ namespace Dayltg {
         int TotalDaylRefPoints = 0;                                         // Number of daylighting reference points for this control
 
         Array1D<DaylRefPt> refPts;                              // Points 1 and 2 are the control reference points
-        Real64 sumFracLights = 0.0;                             // Sum of lighting control fractions for this daylighting control
         LtgCtrlType LightControlType = LtgCtrlType::Continuous; // Lighting control type (same for all reference points)
         int glareRefPtNumber = 0;                               // from field: Glare Calculation Daylighting Reference Point Name
         Real64 ViewAzimuthForGlare = 0.0;                       // View direction relative to window for glare calculation (deg)

@@ -274,8 +274,6 @@ namespace CondenserLoopTowers {
         Real64 AirFlowRatio = 0.0;           // Air flow ratio through variable speed cooling tower
         Real64 BasinHeaterPower = 0.0;       // Basin heater power (W)
         Real64 BasinHeaterConsumption = 0.0; // Basin heater energy consumption (J)
-        Real64 WaterUsage = 0.0;             // Tower water usage (m3/s)
-        Real64 WaterAmountUsed = 0.0;        // Tower make up water usage (m3)
         Real64 FanCyclingRatio = 0.0;        // cycling ratio of tower fan when min fan speed provide too much capacity (for VFD)
         Real64 EvaporationVdot = 0.0;
         Real64 EvaporationVol = 0.0;

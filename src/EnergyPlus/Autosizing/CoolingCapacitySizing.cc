@@ -400,7 +400,6 @@ Real64 CoolingCapacitySizer::size(EnergyPlusData &state, Real64 _originalValue, 
                             if (this->primaryAirSystem(this->curSysNum).retFanType != HVAC::FanType::Invalid) {
                                 FanCoolLoad += (1.0 - OutAirFrac) * this->calcFanDesHeatGain(DesVolFlow);
                             }
-                            this->primaryAirSystem(this->curSysNum).FanDesCoolLoad = FanCoolLoad;
                         }
                         Real64 PeakCoilLoad = max(0.0, (state.dataEnvrn->StdRhoAir * DesVolFlow * (CoilInEnth - CoilOutEnth)));
                         Real64 CpAir = Psychrometrics::PsyCpAirFnW(CoilInHumRat);

@@ -49,9 +49,6 @@
 #define DaylightingManager_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array1A.hh>
-#include <ObjexxFCL/Array2A.hh>
-#include <ObjexxFCL/Array2S.hh>
 #include <ObjexxFCL/Vector3.fwd.hh>
 
 // EnergyPlus Headers

@@ -66,7 +66,6 @@ TEST( Array3Test, ConstructCopy )
 	EXPECT_EQ( A.I3(), B.I3() );
 	EXPECT_TRUE( conformable( A, B ) );
 	EXPECT_TRUE( equal_dimensions( A, B ) );
-	EXPECT_TRUE( eq( A, B ) );
 }
 
 TEST( Array3Test, ConstructOtherData )
@@ -189,14 +188,3 @@ TEST( Array3Test, Predicates )
 	EXPECT_FALSE( A4.proxy() );
 }
 
-TEST( Array3Test, PredicateComparisonsValues )
-{
-	Array3D_int A1;
-	EXPECT_TRUE( eq( A1, 0 ) && eq( 0, A1 ) ); // Empty array is considered to equal any scalar (no values don't equal the scalar)
-
-	Array3D_int A2( 2, 3, 2, 31459 );
-	EXPECT_TRUE( eq( A2, 31459 ) && eq( 31459, A1 ) );
-
-	Array3D_int A3( 2, 2, 2, { 111, 112, 121, 122, 211, 212, 221, 222 } );
-	EXPECT_FALSE( eq( A3, 11 ) || eq( 23, A3 ) );
-}

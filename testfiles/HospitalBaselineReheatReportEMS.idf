@@ -67,7 +67,7 @@
 ! ExtWallConstruction=Steel-Framed
 ! Number of Zones: 130
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,6;
 

@@ -48,8 +48,10 @@
 #ifndef WindowComplexManager_hh_INCLUDED
 #define WindowComplexManager_hh_INCLUDED
 
+// C++ Headers
+#include <span>
+
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array1S.hh>
 #include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
@@ -241,9 +243,8 @@ namespace WindowComplexManager {
 
     void CheckGasCoefs(Real64 const currentWeight, int &indexNumber, Array1D<Real64> &wght, bool &feedData);
 
-    int SearchAscTable(Real64 const y,            // Value to be found in the table
-                       int const n,               // Number of values in the table
-                       Array1S<Real64> const ytab // Table of values, monotonic, ascending order
+    int SearchAscTable(Real64 const y,                    // Value to be found in the table
+                       std::span<const Real64> const ytab // Table of values, monotonic, ascending order
     );
 
     //=================================================================================================

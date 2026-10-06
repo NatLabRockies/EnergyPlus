@@ -50,7 +50,6 @@
 #include <format>
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/time.hh>
 
 // EnergyPlus Headers
@@ -1013,7 +1012,7 @@ int actualTime(EnergyPlusState)
     const std::string datestring;
     Array1D_int datevalues(8);
     ObjexxFCL::date_and_time(datestring, _, _, datevalues);
-    return sum(datevalues({5, 8}));
+    return datevalues(5) + datevalues(6) + datevalues(7) + datevalues(8);
 }
 
 int actualDateTime(EnergyPlusState)

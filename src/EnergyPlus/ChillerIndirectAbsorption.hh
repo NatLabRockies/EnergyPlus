@@ -83,7 +83,6 @@ namespace ChillerIndirectAbsorption {
         Real64 EvapOutletTemp = 0.0;       // reporting: C - evaporator outlet temperature
         Real64 Evapmdot = 0.0;             // reporting: kg/ - evaporator mass flow rate
         Real64 Condmdot = 0.0;             // reporting: kg/ - condenser mass flow rate
-        Real64 Genmdot = 0.0;              // reporting: generators mass flow rate when connected to plant
         Real64 SteamMdot = 0.0;            // reporting: kg/s - steam mass flow rate
         Real64 ActualCOP = 0.0;            // reporting: coefficient of performance = QEvap/QGenerator
         Real64 ChillerPartLoadRatio = 0.0; // reporting: part-load ratio

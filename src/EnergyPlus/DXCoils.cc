@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -8683,16 +8684,16 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                                  thisDXCoil.Name,
                                  thisDXCoil.coilType,
                                  1,
-                                 thisDXCoil.RatedTotCap(1),
-                                 thisDXCoil.RatedCOP(1),
-                                 thisDXCoil.CCapFFlow(1),
-                                 thisDXCoil.CCapFTemp(1),
-                                 thisDXCoil.EIRFFlow(1),
-                                 thisDXCoil.EIRFTemp(1),
-                                 thisDXCoil.PLFFPLR(1),
-                                 thisDXCoil.RatedAirVolFlowRate(1),
-                                 thisDXCoil.FanPowerPerEvapAirFlowRate(1),
-                                 thisDXCoil.FanPowerPerEvapAirFlowRate_2023(1),
+                                 thisDXCoil.RatedTotCap,
+                                 thisDXCoil.RatedCOP,
+                                 thisDXCoil.CCapFFlow,
+                                 thisDXCoil.CCapFTemp,
+                                 thisDXCoil.EIRFFlow,
+                                 thisDXCoil.EIRFTemp,
+                                 thisDXCoil.PLFFPLR,
+                                 thisDXCoil.RatedAirVolFlowRate,
+                                 thisDXCoil.FanPowerPerEvapAirFlowRate,
+                                 thisDXCoil.FanPowerPerEvapAirFlowRate_2023,
                                  thisDXCoil.CondenserType,
                                  thisDXCoil.RegionNum,
                                  thisDXCoil.MinOATCompressor,
@@ -10263,7 +10264,7 @@ void CalcDoe2DXCoil(EnergyPlusData &state,
 
         // Calculate basin heater power
         if (thisDXCoil.coilType == HVAC::CoilType::CoolingDXTwoStageWHumControl) {
-            if (any_eq(thisDXCoil.CondenserType, DataHeatBalance::RefrigCondenserType::Evap)) {
+            if (std::ranges::any_of(thisDXCoil.CondenserType, [&](auto const &elem) { return elem == DataHeatBalance::RefrigCondenserType::Evap; })) {
                 CalcBasinHeaterPower(state,
                                      thisDXCoil.BasinHeaterPowerFTempDiff,
                                      thisDXCoil.basinHeaterSched,
@@ -14630,7 +14631,7 @@ void ReportDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the c
         } else {
             thisDXCoil.FuelConsumed = thisDXCoil.FuelUsed * ReportingConstant;
         }
-        if (any_eq(thisDXCoil.CondenserType, DataHeatBalance::RefrigCondenserType::Evap)) {
+        if (std::ranges::any_of(thisDXCoil.CondenserType, [&](auto const &elem) { return elem == DataHeatBalance::RefrigCondenserType::Evap; })) {
             thisDXCoil.BasinHeaterConsumption = thisDXCoil.BasinHeaterPower * ReportingConstant;
         }
     } break;
@@ -14658,7 +14659,7 @@ void ReportDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the c
         state.dataHVACGlobal->DXElecCoolingPower = thisDXCoil.ElecCoolingPower;
         thisDXCoil.EvapCondPumpElecConsumption = thisDXCoil.EvapCondPumpElecPower * ReportingConstant;
         thisDXCoil.EvapWaterConsump = thisDXCoil.EvapWaterConsumpRate * ReportingConstant;
-        if (any_eq(thisDXCoil.CondenserType, DataHeatBalance::RefrigCondenserType::Evap)) {
+        if (std::ranges::any_of(thisDXCoil.CondenserType, [&](auto const &elem) { return elem == DataHeatBalance::RefrigCondenserType::Evap; })) {
             thisDXCoil.BasinHeaterConsumption = thisDXCoil.BasinHeaterPower * ReportingConstant;
         }
     } break;

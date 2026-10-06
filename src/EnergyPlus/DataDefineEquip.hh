@@ -116,7 +116,6 @@ namespace DataDefineEquip {
         Real64 MaxAvailDelta = 0.0;               // change in max avail mass low rate due to leaks [kg/s]
         Real64 MinAvailDelta = 0.0;               // change in min avail mass low rate due to leaks [kg/s]
         int InletNodeNum = 0;                     // index of inlet node 1
-        int InletNodeNum2 = 0;                    // index of inlet node 2 (used for dual duct airterminals)
         int ZoneEqNum = 0;                        // index of zone equipment object for this terminal unit
         int AirLoopNum = 0;                       // index to airloop that this terminal unit is connected to
         Real64 LeakLoadMult = 0.0;                // zome load multiplier to adjust for downstream leak

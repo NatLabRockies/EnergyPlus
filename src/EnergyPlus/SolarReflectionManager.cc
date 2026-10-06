@@ -606,8 +606,10 @@ namespace SolarReflectionManager {
                 FigureBeamSolDiffuseReflFactors(state, state.dataSolarReflectionManager->IHr);
             } // End of IHr loop
         } else { // timestep integrated solar, use current hour of day
-            state.dataSurface->SurfReflFacBmToDiffSolObs(state.dataGlobal->HourOfDay, {1, state.dataSurface->TotSurfaces}) = 0.0;
-            state.dataSurface->SurfReflFacBmToDiffSolGnd(state.dataGlobal->HourOfDay, {1, state.dataSurface->TotSurfaces}) = 0.0;
+            for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
+                state.dataSurface->SurfReflFacBmToDiffSolObs(state.dataGlobal->HourOfDay, SurfNum) = 0.0;
+                state.dataSurface->SurfReflFacBmToDiffSolGnd(state.dataGlobal->HourOfDay, SurfNum) = 0.0;
+            }
             FigureBeamSolDiffuseReflFactors(state, state.dataGlobal->HourOfDay);
         }
     }
@@ -900,8 +902,10 @@ namespace SolarReflectionManager {
                 FigureBeamSolSpecularReflFactors(state, state.dataSolarReflectionManager->NumHr);
             } // End of NumHr loop
         } else { // timestep integrated solar, use current hour of day
-            state.dataSurface->SurfReflFacBmToBmSolObs(state.dataGlobal->HourOfDay, {1, state.dataSurface->TotSurfaces}) = 0.0;
-            state.dataSurface->SurfCosIncAveBmToBmSolObs(state.dataGlobal->HourOfDay, {1, state.dataSurface->TotSurfaces}) = 0.0;
+            for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
+                state.dataSurface->SurfReflFacBmToBmSolObs(state.dataGlobal->HourOfDay, SurfNum) = 0.0;
+                state.dataSurface->SurfCosIncAveBmToBmSolObs(state.dataGlobal->HourOfDay, SurfNum) = 0.0;
+            }
             FigureBeamSolSpecularReflFactors(state, state.dataGlobal->HourOfDay);
         }
     }

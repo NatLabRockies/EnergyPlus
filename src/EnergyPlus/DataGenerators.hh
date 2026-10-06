@@ -201,7 +201,7 @@ namespace DataGenerators {
         // user input data
         std::string Name;                                                                                // name of this fuel supply module
         DataGenerators::FuelTemperatureMode FuelTempMode = DataGenerators::FuelTemperatureMode::Invalid; // temperature of fuel node
-        DataGenerators::FuelMode FuelTypeMode = DataGenerators::FuelMode::Invalid;                       // type of fuel, gasous or liquid
+        DataGenerators::FuelMode FuelTypeMode = DataGenerators::FuelMode::Invalid;                       // type of fuel, gaseous or liquid
         std::string NodeName;                                                                            // node name for temperature at input
         int NodeNum = 0;                                                                                 // node number for temperature at input
         Sched::Schedule *sched = nullptr;                                                                // fuel temperature at input
@@ -217,7 +217,6 @@ namespace DataGenerators {
         Real64 LHVliquid = 0.0;            // userdefined lhv for generic liquid (J/kg)
         Real64 HHV = 0.0;                  // higher heating value of fuel (J/kg)
         Real64 MW = 0.0;                   // molecular weight g/mol
-        Real64 eCO2 = 0.0;                 // mass flow based CO2 emissions factor for complete combustion (-)
         Real64 KmolPerSecToKgPerSec = 0.0; // conversion from moles to kilograms for this fuel. (
         Real64 StoicOxygenRate = 0.0;
         Real64 TfuelIntoCompress = 0.0; // inlet fuel temperature
@@ -237,7 +236,6 @@ namespace DataGenerators {
     {
         // Members
         std::string ConstituentName;
-        std::string ConstituentFormula;
         Real64 StdRefMolarEnthOfForm = 0.0;
         DataGenerators::ThermodynamicMode ThermoMode = DataGenerators::ThermodynamicMode::Invalid; // method of calculation for thermodynamics
         Real64 ShomateA = 0.0;
@@ -246,7 +244,6 @@ namespace DataGenerators {
         Real64 ShomateD = 0.0;
         Real64 ShomateE = 0.0;
         Real64 ShomateF = 0.0;
-        Real64 ShomateG = 0.0;
         Real64 ShomateH = 0.0;
         Real64 NumCarbons = 0.0;
         Real64 NumHydrogens = 0.0;
@@ -258,7 +255,6 @@ namespace DataGenerators {
         Real64 NASA_A4 = 0.0;
         Real64 NASA_A5 = 0.0;
         Real64 NASA_A6 = 0.0;
-        Real64 NASA_A7 = 0.0;
     };
 
     struct GeneratorDynamicsManagerStruct
@@ -275,29 +271,17 @@ namespace DataGenerators {
         bool WarmUpByTimeDelay = false; // Warm up mode control
         bool WarmUpByEngineTemp = true; // Warm up mode control
         Real64 StartUpTimeDelay = 0.0;  // time for start up [hours]
-        Real64 WarmUpDelay = 0.0;       // time for warm up delay [s]
-        Real64 PcoolDown = 0.0;         // power during cool down
         Real64 CoolDownDelay = 0.0;     // time for cool down delay [hours]
-        Real64 Pstandby = 0.0;          // standby power [w]
-        Real64 MCeng = 0.0;             // aggregated thermal mass of engine [  ]
-        Real64 MCcw = 0.0;              // aggregated thermal mass of heat recovery [   ]
-        Real64 kf = 0.0;                // coefficient k_f for warmup fuel flow rate
         Real64 TnomEngOp = 0.0;         // nominal engine operating temperature [C]
-        Real64 kp = 0.0;                // coefficient k_p for warmup power
         bool MandatoryFullCoolDown = false;
-        bool WarmRestartOkay = true;
         Sched::Schedule *availSched = nullptr;
         // Calculated values and input from elsewhere
         DataGenerators::OperatingMode CurrentOpMode = DataGenerators::OperatingMode::Off; // current operating mode, uses params like OpModeNormal
         DataGenerators::OperatingMode LastOpMode = DataGenerators::OperatingMode::Off;
         Real64 FractionalDayofLastShutDown = 0.0;
         Real64 FractionalDayofLastStartUp = 0.0;
-        bool HasBeenOn = false;
-        bool DuringStartUp = false;
-        bool DuringShutDown = false;
         Real64 FuelMdotLastTimestep = 0.0;
         Real64 PelLastTimeStep = 0.0;
-        int NumCycles = 0;
         Real64 ElectEffNom = 0.0; // efficiency to use for control decisions
         Real64 ThermEffNom = 0.0; // thermal efficiency to use fo control decisions
         Real64 QdotHXMax = 0.0;   // Thermal power max

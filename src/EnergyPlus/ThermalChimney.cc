@@ -1055,12 +1055,11 @@ namespace ThermalChimney {
         } // ... end of zone loads report variable update loop.
     }
 
-    void GaussElimination(Array2A<Real64> EquaCoef, Array1D<Real64> &EquaConst, Array1D<Real64> &ThermChimSubTemp, int const NTC)
+    void GaussElimination(Array2D<Real64> &EquaCoef, Array1D<Real64> &EquaConst, Array1D<Real64> &ThermChimSubTemp, int const NTC)
     {
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine solves linear algebraic equations using Gauss Elimination Method.
 
-        EquaCoef.dim(NTC, NTC);
         EP_SIZE_CHECK(EquaConst, NTC);
         EP_SIZE_CHECK(ThermChimSubTemp, NTC);
 
@@ -1085,17 +1084,25 @@ namespace ThermalChimney {
             }
 
             if (pivot != ThermChimLoop1) {
-                tempor({ThermChimLoop1, NTC}) = EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1);
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    tempor(i) = EquaCoef(i, ThermChimLoop1);
+                }
                 tempb = EquaConst(ThermChimLoop1);
-                EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1) = EquaCoef({ThermChimLoop1, NTC}, pivot);
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    EquaCoef(i, ThermChimLoop1) = EquaCoef(i, pivot);
+                }
                 EquaConst(ThermChimLoop1) = EquaConst(pivot);
-                EquaCoef({ThermChimLoop1, NTC}, pivot) = tempor({ThermChimLoop1, NTC});
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    EquaCoef(i, pivot) = tempor(i);
+                }
                 EquaConst(pivot) = tempb;
             }
 
             for (ThermChimLoop2 = ThermChimLoop1 + 1; ThermChimLoop2 <= NTC; ++ThermChimLoop2) {
                 TCcoefficient = -EquaCoef(ThermChimLoop1, ThermChimLoop2) / EquaCoef(ThermChimLoop1, ThermChimLoop1);
-                EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop2) += TCcoefficient * EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1);
+                for (int row = ThermChimLoop1; row <= NTC; ++row) {
+                    EquaCoef(row, ThermChimLoop2) += TCcoefficient * EquaCoef(row, ThermChimLoop1);
+                }
                 EquaConst(ThermChimLoop2) += TCcoefficient * EquaConst(ThermChimLoop1);
             }
         }

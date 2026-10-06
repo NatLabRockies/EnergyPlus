@@ -49,7 +49,6 @@
 #define GeneralRoutines_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2S.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -188,7 +187,7 @@ void TestAirPathIntegrity(EnergyPlusData &state, bool &ErrFound);
 
 void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound);
 
-void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_int ValRetAPaths);
+void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2D_int &ValRetAPaths);
 
 void CalcComponentSensibleLatentOutput(Real64 const MassFlow,  // air mass flow rate, {kg/s}
                                        Real64 const TDB2,      // dry-bulb temperature at state 2 {C}

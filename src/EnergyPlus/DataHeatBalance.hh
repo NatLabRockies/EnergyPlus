@@ -48,11 +48,16 @@
 #ifndef DataHeatBalance_hh_INCLUDED
 #define DataHeatBalance_hh_INCLUDED
 
+// C++ Headers
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <vector>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Array3D.hh>
-#include <ObjexxFCL/Array4D.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -1790,6 +1795,73 @@ namespace DataHeatBalance {
 
     void AllocateIntGains(EnergyPlusData &state);
 
+    // A back surface receiving beam solar radiation from an exterior window
+    struct WinBackSurfOverlap
+    {
+        int backSurfNum = 0;      // Back surface number, 0 marks the end of the list for a window
+        Real64 overlapArea = 0.0; // Area of the exterior window sending beam solar radiation to backSurfNum
+    };
+
+    // For a given hour and timestep, a list of up to maxBkSurf back surfaces receiving beam solar radiation from each exterior window.
+    // Accessed with 1-based (hour, timeStep, iBack, surfNum), stored as [hour][timeStep][surfNum][iBack] so each window's list is contiguous.
+    class WinBackSurfOverlaps
+    {
+    public:
+        void allocate(int const numHours, int const numTimeSteps, int const maxBkSurf, int const numSurfaces)
+        {
+            m_numHours = numHours;
+            m_numTimeSteps = numTimeSteps;
+            m_maxBkSurf = maxBkSurf;
+            m_numSurfaces = numSurfaces;
+            m_data.assign(static_cast<std::size_t>(numHours) * numTimeSteps * numSurfaces * maxBkSurf, WinBackSurfOverlap{});
+        }
+
+        void deallocate()
+        {
+            m_data = std::vector<WinBackSurfOverlap>(); // move-assign an empty vector to release the memory ({} would keep the capacity)
+            m_numHours = m_numTimeSteps = m_maxBkSurf = m_numSurfaces = 0;
+        }
+
+        // Reset all entries
+        void reset()
+        {
+            std::fill(m_data.begin(), m_data.end(), WinBackSurfOverlap{});
+        }
+
+        // Reset all entries of one hour and timestep
+        void reset(int const hour, int const timeStep)
+        {
+            std::fill_n(m_data.begin() + index(hour, timeStep, 1, 1), static_cast<std::size_t>(m_numSurfaces) * m_maxBkSurf, WinBackSurfOverlap{});
+        }
+
+        WinBackSurfOverlap const &operator()(int const hour, int const timeStep, int const iBack, int const surfNum) const
+        {
+            return m_data[index(hour, timeStep, iBack, surfNum)];
+        }
+
+        WinBackSurfOverlap &operator()(int const hour, int const timeStep, int const iBack, int const surfNum)
+        {
+            return m_data[index(hour, timeStep, iBack, surfNum)];
+        }
+
+    private:
+        std::size_t index(int const hour, int const timeStep, int const iBack, int const surfNum) const
+        {
+            assert((1 <= hour) && (hour <= m_numHours));
+            assert((1 <= timeStep) && (timeStep <= m_numTimeSteps));
+            assert((1 <= iBack) && (iBack <= m_maxBkSurf));
+            assert((1 <= surfNum) && (surfNum <= m_numSurfaces));
+            return ((static_cast<std::size_t>(hour - 1) * m_numTimeSteps + (timeStep - 1)) * m_numSurfaces + (surfNum - 1)) * m_maxBkSurf +
+                   (iBack - 1);
+        }
+
+        std::vector<WinBackSurfOverlap> m_data;
+        int m_numHours = 0;
+        int m_numTimeSteps = 0;
+        int m_maxBkSurf = 0;
+        int m_numSurfaces = 0;
+    };
+
 } // namespace DataHeatBalance
 
 struct HeatBalanceData : BaseGlobalStruct
@@ -2000,10 +2072,8 @@ struct HeatBalanceData : BaseGlobalStruct
     Array3D<Real64> SurfSunlitFrac;              // TimeStep fraction of heat transfer surface that is sunlit
     Array3D<Real64> SurfSunlitFracWithoutReveal; // For a window with reveal, the sunlit fraction  without shadowing by the reveal
     Array3D<Real64> SurfCosIncAng;               // TimeStep cosine of beam radiation incidence angle on surface
-    Array4D_int SurfWinBackSurfaces;     // For a given hour and timestep, a list of up to 20 surfaces receiving  beam solar radiation from a given
-                                         // exterior window
-    Array4D<Real64> SurfWinOverlapAreas; // For a given hour and timestep, the areas of the exterior window sending beam solar radiation to the
-                                         // surfaces listed in BackSurfaces
+    // For a given hour and timestep, the back surfaces receiving beam solar radiation from each exterior window, and their overlap areas
+    DataHeatBalance::WinBackSurfOverlaps SurfWinBackSurfOverlaps;
     Real64 zeroPointerVal = 0.0;
     EPVector<DataHeatBalance::ZonePreDefRepType> ZonePreDefRep;
     DataHeatBalance::ZonePreDefRepType BuildingPreDefRep;
