@@ -746,4 +746,46 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteMode_EMSPressureRiseResetTest)
     locExpectPower = 0.0;
     EXPECT_DOUBLE_EQ(locFanElecPower, locExpectPower); // expects zero fan power
 }
+
+TEST_F(EnergyPlusFixture, ZoneExhaustFan_InputTest)
+{
+
+    std::string const idf_objects = delimited_string({
+
+        "  Fan:ZoneExhaust,",
+        "    Exhaust Fan ,           !- Name",
+        "    ,                       !- Availability Schedule Name",
+        "    ,                       !- Fan Total Efficiency",
+        "    100.0,                  !- Pressure Rise",
+        "    1.0 ,                   !- Maximum Air Flow Rate",
+        "    TestFanAirInletNode,    !- Air Inlet Node Name",
+        "    TestFanOutletNode,      !- Air Outlet Node Name",
+        "    ,                       !- End-Use Subcategory",
+        "    ,                       !- Flow Fraction Schedule Name",
+        "    ,                       !- System Availability Manager Coupling Mode",
+        "    ,                       !- Minimum Zone Temperature Limit Schedule Name",
+        "    ,                       !- Balanced Exhaust Fraction Schedule Name",
+        "    Outside,                !- Motor Loss Location",
+        "    0.9 ,                   !- Motor In Air Stream Fraction",
+        "    ;                       !- Motor Loss Zone Name",
+
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    Fans::GetFanInput(*state);
+    state->dataSize->CurZoneEqNum = 0;
+    state->dataSize->CurSysNum = 0;
+    state->dataSize->CurOASysNum = 0;
+    state->dataEnvrn->StdRhoAir = 1.2;
+
+    auto *fan = state->dataFans->fans(1);
+    assert(fan != nullptr);
+    EXPECT_ENUM_EQ(Fans::HeatLossDest::Outside, fan->heatLossDest);
+    EXPECT_EQ(0.9, fan->motorInAirFrac);
+    EXPECT_EQ(0, fan->zoneNum);
+    EXPECT_EQ(0.6, fan->totalEff);
+    EXPECT_EQ(1.0, fan->maxAirFlowRate);
+}
 } // namespace EnergyPlus

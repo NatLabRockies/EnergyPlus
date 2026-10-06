@@ -576,6 +576,22 @@ void GetFanInput(EnergyPlusData &state)
             Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(9), cAlphaArgs(9), Clusive::In, 0.0, Clusive::In, 1.0);
             ErrorsFound = true;
         }
+        fan->heatLossDest = static_cast<HeatLossDest>(getEnumValue(heatLossDestNamesUC, cAlphaArgs(10)));
+        if (fan->heatLossDest == HeatLossDest::Zone) {
+            if ((fan->zoneNum = Util::FindItemInList(cAlphaArgs(11), state.dataHeatBal->Zone)) == 0) {
+                fan->heatLossDest = HeatLossDest::AirStream;
+                ShowWarningItemNotFound(state,
+                                        eoh,
+                                        cAlphaFieldNames(11),
+                                        cAlphaArgs(11),
+                                        "Zone or Space not found. Exhaust fan motor heat losses will not be added to a zone or space");
+                // continue with simulation but motor losses not sent to a zone.
+            } else {
+                SetupZoneInternalGain(state, fan->zoneNum, fan->Name, DataHeatBalance::IntGainType::FanZoneExhaust, &fan->powerLossToZone);
+            }
+        }
+        fan->motorInAirFrac = rNumericArgs(4);
+
         if (ErrorsFound) {
             ShowFatalError(state, std::format("{}: Errors found in input for fan name = {}.  Program terminates.", routineName, fan->Name));
         }
@@ -2128,7 +2144,8 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
     if (_fanIsRunning) {
         // Fan is operating
         totalPower = max(0.0, _massFlow * _deltaPress / (_totalEff * _rhoAir)); // total fan power
-        powerLossToAir = totalPower;
+        powerLossToAir = totalPower * motorInAirFrac;
+        powerLossToZone = (heatLossDest == HeatLossDest::Zone) ? totalPower - powerLossToAir : 0.0;
         outletAirEnthalpy = inletAirEnthalpy + powerLossToAir / _massFlow;
         // This fan does not change the moisture or Mass Flow across the component
         outletAirHumRat = inletAirHumRat;
@@ -2139,6 +2156,7 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
         // Fan is off and not operating no power consumed and mass flow rate.
         totalPower = 0.0;
         powerLossToAir = 0.0;
+        powerLossToZone = 0.0;
         outletAirMassFlowRate = 0.0;
         outletAirHumRat = inletAirHumRat;
         outletAirEnthalpy = inletAirEnthalpy;
