@@ -2580,7 +2580,14 @@ SurfName:MatName).
    flux. Positive values indicate net radiation into the surface;
    negative values indicate net radiation leaving the surface (cooling).
    Only applies to exterior CondFD surfaces. The actuated component
-   unique name is the surface name (e.g. “ZN001:ROOF001”).
+   unique name is the surface name (e.g. “ZN001:ROOF001”). The override
+   affects only the sky term of the actuated surface: its exchange with
+   the ground, the outdoor air and surrounding surfaces is unchanged, and
+   other exterior surfaces, including windows and surfaces that use the
+   CTF algorithm, keep the sky temperature calculated by EnergyPlus. The
+   flux is applied as given, independent of the surface temperature in
+   that time step. To change the sky temperature for all exterior
+   surfaces, use WeatherProperty:SkyTemperature instead.
 
 Conduction Finite Difference Outputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
