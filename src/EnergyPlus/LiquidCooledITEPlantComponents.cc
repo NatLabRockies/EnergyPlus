@@ -164,6 +164,13 @@ void CoilCoolingITEColdPlateData::setupOutputVariables(EnergyPlusData &state)
                         OutputProcessor::Group::Plant,
                         OutputProcessor::EndUseCat::Cooling,
                         this->endUseSubcategory);
+    SetupOutputVariable(state,
+                        "Coil Cooling ITE Cold Plate Effective Thermal Resistance",
+                        Constant::Units::K_W,
+                        this->effectiveThermalResistance,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        this->name);
 }
 
 void CoilCoolingITEColdPlateData::simulate(EnergyPlusData &state,
@@ -172,7 +179,7 @@ void CoilCoolingITEColdPlateData::simulate(EnergyPlusData &state,
                                            [[maybe_unused]] Real64 &CurLoad,
                                            [[maybe_unused]] bool RunFlag)
 {
-    if (this->myEnvrnFlag && state.dataGlobal->BeginEnvrnFlag && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+    if (this->myEnvrnFlag && state.dataGlobal->BeginEnvrnFlag) {
         static constexpr std::string_view routineName("CoilCoolingITEColdPlateData::simulate");
         Real64 const rho = this->plantLoc.loop->glycol->getDensity(state, state.dataLoopNodes->Node(this->inletNode).Temp, routineName);
         Real64 const maxMdot = (this->maximumFlowRate > 0.0 ? this->maximumFlowRate : this->nominalFlowRate) * rho;
@@ -268,7 +275,7 @@ void CoilCoolingITEColdPlateData::sizeColdPlate(EnergyPlusData &state)
 {
     static constexpr std::string_view routineName("sizeColdPlate");
 
-    if (this->nominalFlowRate == DataSizing::AutoSize) {
+    if (this->nominalFlowRateWasAutoSized) {
         int const plantSizingNum = this->plantLoc.loop->PlantSizNum;
 
         if (plantSizingNum > 0) {
@@ -280,13 +287,17 @@ void CoilCoolingITEColdPlateData::sizeColdPlate(EnergyPlusData &state)
             Real64 const cp = this->plantLoc.loop->glycol->getSpecificHeat(state, plantSizing.ExitTemp, routineName);
             Real64 const rho = this->plantLoc.loop->glycol->getDensity(state, plantSizing.ExitTemp, routineName);
             // ExitTemp is the loop supply (inlet to cold plate); ExitTemp+DeltaT is the return (outlet from cold plate)
-            Real64 designLoad = getDesignLoad(state, plantSizing.ExitTemp, plantSizing.ExitTemp + plantSizing.DeltaT);
+            Real64 const designLoad = getDesignLoad(state, plantSizing.ExitTemp, plantSizing.ExitTemp + plantSizing.DeltaT);
 
             if (designLoad > 0) {
                 this->nominalFlowRate = designLoad / (plantSizing.DeltaT * cp * rho);
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
+                if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                     BaseSizer::reportSizerOutput(
                         state, "Coil:Cooling:ITE:ColdPlate", this->name, "Design Size Fluid Flow Rate [m3/s]", this->nominalFlowRate);
+                }
+                if (state.dataPlnt->PlantFirstSizesOkayToReport) {
+                    BaseSizer::reportSizerOutput(
+                        state, "Coil:Cooling:ITE:ColdPlate", this->name, "Initial Design Size Fluid Flow Rate [m3/s]", this->nominalFlowRate);
                 }
             } else {
                 ShowFatalError(state, std::format("sizeColdPlate: Design load must be greater than 0 for object=\"{}\"", this->name));
@@ -296,7 +307,7 @@ void CoilCoolingITEColdPlateData::sizeColdPlate(EnergyPlusData &state)
         }
     }
 
-    if (this->maximumFlowRate == DataSizing::AutoSize) {
+    if (this->maximumFlowRateWasAutoSized) {
         this->maximumFlowRate = this->nominalFlowRate;
     }
 
@@ -307,7 +318,21 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
 {
     Real64 massFlowRate = 0.0;
 
-    Real64 const loadFromSchedule = (this->itLoadSchedule != nullptr) ? std::max(0.0, this->itLoadSchedule->getCurrentVal()) : 0.0;
+    Real64 const loadFromSchedule = (this->itLoadSchedule != nullptr) ? this->itLoadSchedule->getCurrentVal() : 0.0;
+    if (loadFromSchedule < 0.0) {
+        ShowFatalError(state,
+                       std::format("Coil:Cooling:ITE:ColdPlate \"{}\": IT equipment load schedule value is negative ({:.2f} W). "
+                                   "The load schedule must be non-negative.",
+                                   this->name,
+                                   loadFromSchedule));
+    }
+    if (this->loadFromITEquipment < 0.0) {
+        ShowFatalError(state,
+                       std::format("Coil:Cooling:ITE:ColdPlate \"{}\": IT equipment load from paired equipment is negative ({:.2f} W). "
+                                   "This is an unexpected condition; check the paired ElectricEquipment:ITE:LiquidCooled object.",
+                                   this->name,
+                                   this->loadFromITEquipment));
+    }
     Real64 const load = this->loadFromITEquipment + loadFromSchedule;
 
     // Check if the component is running
@@ -319,8 +344,9 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
     // No load or not running
     if (load <= 0.0 || running <= 0.0) {
         this->heatRemovedByFluid = 0.0;
-        this->zoneHeatGainRate = 0.0;
+        this->zoneHeatGainRate = load; // unmet load goes to zone when unavailable
         this->massFlowRate = 0.0;
+        this->effectiveThermalResistance = 0.0;
         this->caseTemperature = 0.0;
         this->inletTemp = state.dataLoopNodes->Node(this->inletNode).Temp;
         this->outletTemp = this->inletTemp;
@@ -336,50 +362,56 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
     Real64 const nominalMassFlowRate = this->nominalFlowRate * rho;
     Real64 const maximumMassFlowRate = (this->maximumFlowRate > 0.0) ? this->maximumFlowRate * rho : nominalMassFlowRate;
 
-    // Handle flow based on flow lock status
-    if (this->plantLoc.side->FlowLock == DataPlant::FlowLock::Unlocked) {
-        bool const variableFlowIllDefined =
-            (this->thermalResistanceMethod == ThermalResistanceMethod::Standard && this->thermalResistanceModifierCurveIndex == 0);
-        if (this->flowMode == DataPlant::FlowMode::Constant || variableFlowIllDefined) {
-            massFlowRate = nominalMassFlowRate;
-        } else { // Variable flow mode
-            // returns the load achievable at a given mass flow rate and target temperature
-            auto loadCalculated = [this, &state, cp, inletTemp, nominalMassFlowRate](Real64 const massFlow, Real64 const targetTemp) {
-                Real64 thermalResistance = this->thermalResistance * this->getThermalResistanceModifier(state, massFlow / nominalMassFlowRate);
-                return (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD)
-                           ? massFlow * cp * (1.0 - std::exp(-1.0 / (massFlow * cp * thermalResistance))) * (targetTemp - inletTemp)
-                           : (targetTemp - inletTemp) / thermalResistance;
-            };
+    // Determine the mass flow rate based on the flow mode and the load to be removed
+    bool const variableFlowIllDefined =
+        (this->thermalResistanceMethod == ThermalResistanceMethod::Standard && this->thermalResistanceModifierCurveIndex == 0);
+    if (this->flowMode == DataPlant::FlowMode::Constant || variableFlowIllDefined) {
+        massFlowRate = nominalMassFlowRate;
+    } else { // Variable flow mode
+        // returns the load achievable at a given mass flow rate and target temperature
+        auto loadCalculated = [this, &state, cp, inletTemp, nominalMassFlowRate](Real64 const massFlow, Real64 const targetTemp) {
+            Real64 thermalResistance = this->thermalResistance * this->getThermalResistanceModifier(state, massFlow / nominalMassFlowRate);
+            return (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD)
+                       ? massFlow * cp * (1.0 - std::exp(-1.0 / (massFlow * cp * thermalResistance))) * (targetTemp - inletTemp)
+                       : (targetTemp - inletTemp) / thermalResistance;
+        };
 
-            // First: solve for flow that meets the target operating temperature
-            auto targetResidual = [&loadCalculated, this, load](Real64 const massFlow) {
-                return loadCalculated(massFlow, this->targetCaseOperatingTemperature) - load;
-            };
-            int SolFla;
-            General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, targetResidual, 0.0, maximumMassFlowRate);
+        // First: solve for flow that meets the target operating temperature
+        auto targetResidual = [&loadCalculated, this, load](Real64 const massFlow) {
+            return loadCalculated(massFlow, this->targetCaseOperatingTemperature) - load;
+        };
+        int SolFla;
+        General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, targetResidual, 0.0, maximumMassFlowRate);
 
-            // If no solution, try again allowing the case to rise to the maximum temperature
+        // If no solution, try again allowing the case to rise to the maximum temperature
+        if (SolFla < 0) {
+            auto maxTempResidual = [&loadCalculated, this, load](Real64 const massFlow) {
+                return loadCalculated(massFlow, this->maximumCaseTemperature) - load;
+            };
+            General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, maxTempResidual, 0.0, maximumMassFlowRate);
+
+            // If still no solution, use maximum flow rate, excess heat that cannot be removed will be added to the zone heat gain
             if (SolFla < 0) {
-                auto maxTempResidual = [&loadCalculated, this, load](Real64 const massFlow) {
-                    return loadCalculated(massFlow, this->maximumCaseTemperature) - load;
-                };
-                General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, maxTempResidual, 0.0, maximumMassFlowRate);
-
-                // If still no solution, use maximum flow rate, excess heat that cannot be removed will be added to the zone heat gain
-                if (SolFla < 0) {
-                    massFlowRate = maximumMassFlowRate;
-                }
+                massFlowRate = maximumMassFlowRate;
             }
         }
-    } else {
-        // Flow is locked, use the current flow rate
-        massFlowRate = state.dataLoopNodes->Node(this->inletNode).MassFlowRate;
     }
     PlantUtilities::SetComponentFlowRate(state, massFlowRate, this->inletNode, this->outletNode, this->plantLoc);
     this->massFlowRate = massFlowRate;
 
+    // If the flow is zero, all of the load goes to the zone and the case temperature is at its maximum
+    if (massFlowRate <= 0.0) {
+        this->heatRemovedByFluid = 0.0;
+        this->zoneHeatGainRate = load;
+        this->effectiveThermalResistance = 0.0;
+        this->caseTemperature = this->maximumCaseTemperature;
+        this->outletTemp = inletTemp;
+        return;
+    }
+
     // Flow is known check cold plate maximum heat transfer rate
     Real64 thermalResistance = this->thermalResistance * this->getThermalResistanceModifier(state, massFlowRate / nominalMassFlowRate);
+    this->effectiveThermalResistance = thermalResistance;
     Real64 maxHeatTransferRate =
         (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD)
             ? massFlowRate * cp * (1.0 - std::exp(-1.0 / (massFlowRate * cp * thermalResistance))) * (this->maximumCaseTemperature - inletTemp)
@@ -452,7 +484,9 @@ void CoilCoolingITEColdPlateData::processInputForCoilCoolingITEColdPlate(EnergyP
         thisColdPlate.thermalResistance = ip->getRealFieldValue(fields, schemaProps, "nominal_thermal_resistance");
         thisColdPlate.maximumCaseTemperature = ip->getRealFieldValue(fields, schemaProps, "maximum_case_temperature");
         thisColdPlate.nominalFlowRate = ip->getRealFieldValue(fields, schemaProps, "nominal_liquid_flow_rate");
+        thisColdPlate.nominalFlowRateWasAutoSized = (thisColdPlate.nominalFlowRate == DataSizing::AutoSize);
         thisColdPlate.maximumFlowRate = ip->getRealFieldValue(fields, schemaProps, "maximum_liquid_flow_rate");
+        thisColdPlate.maximumFlowRateWasAutoSized = (thisColdPlate.maximumFlowRate == DataSizing::AutoSize);
         thisColdPlate.targetCaseOperatingTemperature = fields.contains("target_case_operating_temperature")
                                                            ? ip->getRealFieldValue(fields, schemaProps, "target_case_operating_temperature")
                                                            : thisColdPlate.maximumCaseTemperature;
@@ -544,8 +578,7 @@ void CoilCoolingITEColdPlateData::processInputForCoilCoolingITEColdPlate(EnergyP
 
         // Set up zone heat gains
         if (zoneIndex > 0) {
-            SetupZoneInternalGain(
-                state, zoneIndex, stored.name, DataHeatBalance::IntGainType::CoilCoolingITEColdPlate, nullptr, &stored.zoneHeatGainRate);
+            SetupZoneInternalGain(state, zoneIndex, stored.name, DataHeatBalance::IntGainType::CoilCoolingITEColdPlate, &stored.zoneHeatGainRate);
         }
     }
     if (errorsFound) {
