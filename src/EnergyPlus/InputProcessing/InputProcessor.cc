@@ -351,19 +351,15 @@ void InputProcessor::warnObsoleteObjects(EnergyPlusData &state)
 
         for (auto const &[objectName, object] : objects.items()) {
             if (replacement == "deleted") {
-                ShowWarningError(state,
-                                 std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete and will be removed in the future.",
-                                             objectType,
-                                             objectName));
+                ShowWarningError(
+                    state,
+                    std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete and will be removed in the future.", objectType, objectName));
             } else if (!replacement.empty()) {
-                ShowWarningError(state,
-                                 std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete. Replace it with {}.",
-                                             objectType,
-                                             objectName,
-                                             replacement));
+                ShowWarningError(
+                    state,
+                    std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete. Replace it with {}.", objectType, objectName, replacement));
             } else {
-                ShowWarningError(state,
-                                 std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete.", objectType, objectName));
+                ShowWarningError(state, std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete.", objectType, objectName));
             }
         }
     }
