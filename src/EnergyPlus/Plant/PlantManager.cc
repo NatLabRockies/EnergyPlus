@@ -3112,7 +3112,8 @@ void CheckPlantOnAbort(EnergyPlusData &state)
                         case DataPlant::PlantEquipmentType::CoilWaterSimpleHeating:
                         case DataPlant::PlantEquipmentType::CoilSteamAirHeating:
                         case DataPlant::PlantEquipmentType::SolarCollectorFlatPlate:
-                        case DataPlant::PlantEquipmentType::PlantLoadProfile: {
+                        case DataPlant::PlantEquipmentType::PlantLoadProfile:
+                        case DataPlant::PlantEquipmentType::CoilCoolingITEColdPlate: {
                             ShouldBeACTIVE = true;
                         } break;
                         default: {
