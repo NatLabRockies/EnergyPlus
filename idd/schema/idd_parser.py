@@ -219,8 +219,6 @@ def parse_idd(data):
 
             if "obsolete" in obj_data:
                 root["properties"][obj_name]["obsolete"] = handle_obsolete(obj_data.pop("obsolete"), obj_name)
-                if root["properties"][obj_name]["obsolete"] != 'deleted':
-                    raise 'stopstopstop'
 
             name_pattern_properties = ".*"
             if "name" in obj_data:
@@ -918,12 +916,12 @@ def eat_comment(data):
 def handle_obsolete(string, obj_name):
     if len(string) < 6:
         raise ValueError(f"In object '{obj_name}', insufficient data for /obsolete")
-    if string[:5] != 'New=>':
+    if string[:5] != "New=>":
         raise ValueError(f"In object '{obj_name}', expected '=>' for /obsolete, got '{string[:5]}' instead")
     obj_string = string[5:].strip()
     if not obj_string:
         raise ValueError(f"In object '{obj_name}', expected non-empty string after '=>' for /obsolete")
-    if obj_string != 'deleted' and obj_string.lower() == 'deleted':
+    if obj_string != "deleted" and obj_string.lower() == "deleted":
         warnings.warn(f"In object '{obj_name}', '{obj_string}' converted to 'deleted' for /obsolete", SyntaxWarning)
-        obj_string = 'deleted'
+        obj_string = "deleted"
     return obj_string

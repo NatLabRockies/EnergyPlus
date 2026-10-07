@@ -347,12 +347,7 @@ void InputProcessor::warnObsoleteObjects(EnergyPlusData &state)
             continue;
         }
 
-        std::string const obsolete = obsolete_it->get<std::string>();
-        auto const separator = obsolete.find("=>");
-        std::string replacement;
-        if (separator != std::string::npos) {
-            replacement = obsolete.substr(separator + 2);
-        }
+        std::string const replacement = obsolete_it->get<std::string>();
 
         for (auto const &[objectName, object] : objects.items()) {
             if (replacement == "deleted") {
