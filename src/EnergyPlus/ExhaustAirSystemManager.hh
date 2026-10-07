@@ -111,7 +111,6 @@ namespace ExhaustAirSystemManager {
         FlowControlType FlowControlOption = FlowControlType::Scheduled;
         Sched::Schedule *exhaustFlowFractionSched = nullptr;
         std::string SupplyNodeOrNodelistName;
-        int SupplyNodeOrNodelistNum = 0; // may not need this one
         Sched::Schedule *minZoneTempLimitSched = nullptr;
         Sched::Schedule *minExhFlowFracSched = nullptr;
         Sched::Schedule *balancedExhFracSched = nullptr;

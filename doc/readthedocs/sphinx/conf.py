@@ -20,8 +20,8 @@ autodoc_mock_imports = ["pyenergyplus"]
 project = "EnergyPlus"
 copyright = "2026, National Laboratory of the Rockies for the United States Department of Energy"
 author = "National Laboratory of the Rockies for the United States Department of Energy"
-version = "26.2"  # The short X.Y version
-release = "26.2"  # The full version, including alpha/beta/rc tags
+version = "27.1"  # The short X.Y version
+release = "27.1"  # The full version, including alpha/beta/rc tags
 
 # -- General configuration ---------------------------------------------------
 extensions = [

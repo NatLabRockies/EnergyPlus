@@ -137,7 +137,7 @@ namespace DataRuntimeLanguage {
             errFlag = true;
             ErrorsFound = true;
         }
-        if ((!cFieldValue.empty()) && (is_any_of(cFieldValue[0], InvalidStartCharacters))) {
+        if ((!cFieldValue.empty()) && (InvalidStartCharacters.find(cFieldValue[0]) != std::string_view::npos)) {
             ShowSevereError(state, std::format("{}=\"{}\", Invalid variable name entered.", cModuleObject, cFieldValue));
             ShowContinueError(state, std::format("...{}; Names used as EMS variables cannot start with numeric characters.", cFieldName));
             errFlag = true;

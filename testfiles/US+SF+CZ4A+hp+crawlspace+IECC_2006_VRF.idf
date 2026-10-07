@@ -30,7 +30,7 @@
 !    dhw_type =
 !    TEMPLATE_PATH = template/v9.5
 
-  Version,26.2;
+  Version,27.1;
 
 ! added VRF system
 

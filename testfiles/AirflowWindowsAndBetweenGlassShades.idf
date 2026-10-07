@@ -46,7 +46,7 @@
 ! Plant:    N/A
 ! SolDis=FullInteriorAndExterior, Anisotropic sky, Detailed Interior and Exterior Convection
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,6;
 

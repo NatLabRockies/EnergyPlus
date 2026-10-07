@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdio>
@@ -54,7 +55,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/string.functions.hh>
 #include <ObjexxFCL/time.hh>
 
@@ -1003,9 +1003,6 @@ namespace Weather {
                             EnDate += std::format("/{}", envCurr.EndYear);
                         }
                         state.dataEnvrn->EnvironmentStartEnd = StDate + " - " + EnDate;
-                        state.dataEnvrn->StartYear = envCurr.StartYear;
-                        state.dataEnvrn->EndYear = envCurr.EndYear;
-
                         int TWeekDay = (envCurr.DayOfWeek == 0) ? 1 : envCurr.DayOfWeek;
                         auto const &MonWeekDay = envCurr.MonWeekDay;
 
@@ -1286,7 +1283,7 @@ namespace Weather {
             }
         }
 
-        if (any_eq(WeekDays, 0)) {
+        if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
             // need to start at StMon and go backwards.
             // EndDayOfMonth is also "days" in month.  (without leap year day in February)
             CurWeekDay = StWeekDay;
@@ -1386,7 +1383,7 @@ namespace Weather {
                 }
             }
 
-            if (any_eq(WeekDays, 0)) {
+            if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
                 // need to start at StMon and go backwards.
                 // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                 CurWeekDay = WeekDays(StartMonth);
@@ -1483,7 +1480,7 @@ namespace Weather {
                     }
                 }
 
-                if (any_eq(WeekDays, 0)) {
+                if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
                     // need to start at StMon and go backwards.
                     // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                     CurWeekDay = WeekDays(StartMonth);
@@ -1614,10 +1611,16 @@ namespace Weather {
         int JDay = General::OrdinalDay(ActStartMonth, ActStartDay, state.dataWeather->LeapYearAdd);
         int JDay1 = General::OrdinalDay(ActEndMonth, ActEndDay, state.dataWeather->LeapYearAdd);
         if (JDay1 >= JDay) {
-            DSTIdx({JDay, JDay1}) = 1;
+            for (int Day = JDay; Day <= JDay1; ++Day) {
+                DSTIdx(Day) = 1;
+            }
         } else {
-            DSTIdx({JDay, 366}) = 1;
-            DSTIdx({1, JDay1}) = 1;
+            for (int Day = JDay; Day <= 366; ++Day) {
+                DSTIdx(Day) = 1;
+            }
+            for (int Day = 1; Day <= JDay1; ++Day) {
+                DSTIdx(Day) = 1;
+            }
         }
     }
 
@@ -1838,11 +1841,8 @@ namespace Weather {
 
             // Set Tomorrow's date data
             state.dataEnvrn->MonthTomorrow = state.dataWeather->TomorrowVariables.Month;
-            state.dataEnvrn->DayOfMonthTomorrow = state.dataWeather->TomorrowVariables.DayOfMonth;
             state.dataEnvrn->DayOfWeekTomorrow = state.dataWeather->TomorrowVariables.DayOfWeek;
             state.dataEnvrn->HolidayIndexTomorrow = state.dataWeather->TomorrowVariables.HolidayIndex;
-            state.dataEnvrn->YearTomorrow = state.dataWeather->TomorrowVariables.Year;
-
             if (envCurr.KindOfEnvrn == Constant::KindOfSim::RunPeriodWeather) {
                 if (state.dataEnvrn->Month == 1 && state.dataEnvrn->DayOfMonth == 1 && envCurr.ActualWeather) {
                     if (state.dataWeather->DatesShouldBeReset) {
@@ -2022,9 +2022,6 @@ namespace Weather {
             state.dataWeather->RptDayType = state.dataEnvrn->DayOfWeek;
         }
         state.dataEnvrn->DSTIndicator = state.dataWeather->TodayVariables.DaylightSavingIndex;
-        state.dataEnvrn->EquationOfTime = state.dataWeather->TodayVariables.EquationOfTime;
-        state.dataEnvrn->CosSolarDeclinAngle = state.dataWeather->TodayVariables.CosSolarDeclinAngle;
-        state.dataEnvrn->SinSolarDeclinAngle = state.dataWeather->TodayVariables.SinSolarDeclinAngle;
     }
 
     void SetCurrentWeather(EnergyPlusData &state)
@@ -4752,7 +4749,6 @@ namespace Weather {
         int RPD2 = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:WeatherFileConditionType");
         state.dataWeather->TotRunPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "RunPeriod");
         state.dataWeather->NumOfEnvrn = state.dataEnvrn->TotDesDays + state.dataWeather->TotRunPers + RPD1 + RPD2;
-        state.dataGlobal->WeathSimReq = state.dataWeather->TotRunPers > 0;
         state.dataWeather->TotReportPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Output:Table:ReportPeriod");
 #ifdef GET_OUT
         state.dataWeather->SPSiteScheduleNamePtr.allocate(state.dataEnvrn->TotDesDays * 5);
@@ -5384,7 +5380,6 @@ namespace Weather {
             state.dataWeather->Environment.redimension(++state.dataWeather->NumOfEnvrn);
             state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::RunPeriodWeather;
             nRunPeriods = 1;
-            state.dataGlobal->WeathSimReq = true;
             state.dataWeather->RunPeriodInput.allocate(nRunPeriods);
             auto &runPerInput1 = state.dataWeather->RunPeriodInput(1);
             runPerInput1.startJulianDate = General::OrdinalDay(runPerInput1.startMonth, runPerInput1.startDay, state.dataWeather->LeapYearAdd);
@@ -6955,7 +6950,7 @@ namespace Weather {
                 }
 
                 // Assign the ground reflectances to the variable
-                state.dataWeather->GroundReflectances({1, 12}) = GndProps({1, 12});
+                state.dataWeather->GroundReflectances = GndProps;
 
             } else {
                 ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));

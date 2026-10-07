@@ -956,8 +956,9 @@ namespace Sched {
             }
 
             ProcessIntervalFields(state,
-                                  Alphas({4, _}),
+                                  Alphas,
                                   Numbers,
+                                  4, // index in Alphas of the first "until" field
                                   NumFields,
                                   NumNumbers,
                                   minuteVals,
@@ -1838,8 +1839,9 @@ namespace Sched {
                         NumFields = NumNumbers;
                         ErrorHere = false;
                         ProcessIntervalFields(state,
-                                              Alphas({UntilFld, _}),
+                                              Alphas,
                                               Numbers,
+                                              UntilFld, // index in Alphas of the first "until" field
                                               NumFields,
                                               NumNumbers,
                                               minuteVals,
@@ -3134,8 +3136,9 @@ namespace Sched {
     } // ExternalInterfaceSetSchedule()
 
     void ProcessIntervalFields(EnergyPlusData &state,
-                               Array1S_string const Untils,
-                               Array1S<Real64> const Numbers,
+                               Array1D_string const &Alphas,
+                               Array1D<Real64> const &Numbers,
+                               int const firstUntilAlphaIndex, // index in Alphas of the first "until" field
                                int const NumUntils,
                                int const NumNumbers,
                                std::array<Real64, Constant::iMinutesInDay> &minuteVals,
@@ -3187,7 +3190,7 @@ namespace Sched {
         }
 
         for (int Count = 1; Count <= NumUntils; ++Count) {
-            std::string const &until = Untils(Count);
+            std::string const &until = Alphas(firstUntilAlphaIndex + Count - 1);
             std::string::size_type Pos = index(until, "UNTIL");
             if (Pos == 0) {
                 if (until[5] == ':') {
@@ -3212,8 +3215,7 @@ namespace Sched {
                 continue;
             }
             if (HHField == Constant::iHoursInDay && MMField > 0 && MMField < Constant::iMinutesInHour) {
-                ShowWarningError(state,
-                                 std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", Untils(Count)));
+                ShowWarningError(state, std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", until));
                 ShowContinueError(state, std::format("Occurred in Day Schedule={}", DayScheduleName));
                 ShowContinueError(state, "Terminating the field at 24:00");
                 MMField = 0;

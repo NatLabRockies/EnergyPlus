@@ -112,8 +112,6 @@ namespace EvaporativeFluidCoolers {
         DataPlant::PlantEquipmentType Type = DataPlant::PlantEquipmentType::Invalid;
         std::string PerformanceInputMethod;
         PIM PerformanceInputMethod_Num = PIM::StandardDesignCapacity;
-        bool Available = true;                               // need an array of logicals--load identifiers of available equipment
-        bool ON = true;                                      // Simulate the machine at it's operating part load ratio
         Real64 DesignWaterFlowRate = 0.0;                    // Design water flow rate through the evaporative fluid cooler [m3/s]
         Real64 DesignSprayWaterFlowRate = 0.0;               // Design spray water flow rate through the evaporative fluid cooler [m3/s]
         Real64 DesWaterMassFlowRate = 0.0;                   // Design water flow rate through the evaporative fluid cooler [kg/s]
@@ -154,7 +152,6 @@ namespace EvaporativeFluidCoolers {
         Real64 HighSpeedUserSpecifiedDesignCapacity = 0.0; // User specified design capacity [W]
         Real64 LowSpeedUserSpecifiedDesignCapacity = 0.0;  // User specified design capacity for at low speed for
         // two speed fluid cooler[W]
-        Real64 Concentration = 0.0;           // fluid/glycol concentration - percent
         Fluid::GlycolProps *glycol = nullptr; // Index to Property arrays
         Real64 SizFac = 0.0;                  // sizing factor
         int WaterInletNodeNum = 0;            // Node number on the water inlet side of the evaporative fluid cooler
@@ -195,7 +192,6 @@ namespace EvaporativeFluidCoolers {
         bool MyOneTimeFlag = true;
         bool MyEnvrnFlag = true;
         bool OneTimeFlagForEachEvapFluidCooler = true;
-        bool CheckEquipName = true;
         Real64 fluidCoolerInletWaterTemp = 0.0;  // Evaporative fluid cooler inlet water temperature (C)
         Real64 fluidCoolerOutletWaterTemp = 0.0; // Evaporative fluid cooler outlet water temperature (C)
         Real64 FanEnergy = 0.0;                  // Evaporative fluid cooler fan energy consumption (J)

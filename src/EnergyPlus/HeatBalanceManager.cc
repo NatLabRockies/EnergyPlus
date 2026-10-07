@@ -53,8 +53,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/string.functions.hh>
 
@@ -3510,27 +3508,29 @@ namespace HeatBalanceManager {
             }
 
             for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                AverageZoneTemp = sum(state.dataHeatBalMgr->TempZoneRpt(ZoneNum, {1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                  double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                Real64 SumZoneTemp = 0.0;
+                Real64 SumZoneLoad = 0.0;
                 for (int Num = 1; Num <= state.dataHeatBalMgr->CountWarmupDayPoints; ++Num) {
+                    SumZoneTemp += state.dataHeatBalMgr->TempZoneRpt(ZoneNum, Num);
                     if (state.dataHeatBalMgr->MaxLoadZoneRpt(ZoneNum, Num) > 1.e-4) {
                         state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) /= state.dataHeatBalMgr->MaxLoadZoneRpt(ZoneNum, Num);
                     } else {
                         state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) = 0.0;
                     }
+                    SumZoneLoad += state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num);
                 }
-                AverageZoneLoad = sum(state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, {1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                  double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                AverageZoneTemp = SumZoneTemp / double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                AverageZoneLoad = SumZoneLoad / double(state.dataHeatBalMgr->CountWarmupDayPoints);
                 StdDevZoneTemp = 0.0;
                 StdDevZoneLoad = 0.0;
                 for (int Num = 1; Num <= state.dataHeatBalMgr->CountWarmupDayPoints; ++Num) {
                     state.dataHeatBalMgr->TempZoneRptStdDev(Num) = pow_2(state.dataHeatBalMgr->TempZoneRpt(ZoneNum, Num) - AverageZoneTemp);
                     state.dataHeatBalMgr->LoadZoneRptStdDev(Num) = pow_2(state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) - AverageZoneLoad);
+                    StdDevZoneTemp += state.dataHeatBalMgr->TempZoneRptStdDev(Num);
+                    StdDevZoneLoad += state.dataHeatBalMgr->LoadZoneRptStdDev(Num);
                 }
-                StdDevZoneTemp = std::sqrt(sum(state.dataHeatBalMgr->TempZoneRptStdDev({1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                           double(state.dataHeatBalMgr->CountWarmupDayPoints));
-                StdDevZoneLoad = std::sqrt(sum(state.dataHeatBalMgr->LoadZoneRptStdDev({1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                           double(state.dataHeatBalMgr->CountWarmupDayPoints));
+                StdDevZoneTemp = std::sqrt(StdDevZoneTemp / double(state.dataHeatBalMgr->CountWarmupDayPoints));
+                StdDevZoneLoad = std::sqrt(StdDevZoneLoad / double(state.dataHeatBalMgr->CountWarmupDayPoints));
 
                 constexpr const char *Format_731(" Warmup Convergence Information,{},{},{:.10G},{:.10G},{},{},{:.10G},{:.10G},{},{}\n");
                 print(state.files.eio,
@@ -3939,7 +3939,7 @@ namespace HeatBalanceManager {
         Array1D<Real64> TVisCenter(2);                 // Center of glass visible transmittance for glazing system
         Array1D<Real64> TsolTemp(Window::numPhis + 1); // Solar transmittance vs incidence angle; diffuse trans.
         std::array<Real64, Window::numPhis> Tsol;
-        Array2D<Real64> AbsSolTemp(Window::maxGlassLayers, Window::numPhis + 1);     // Solar absorptance vs inc. angle in each glass layer
+        Array1D<Array1D<Real64>> AbsSolTemp(Window::maxGlassLayers);                 // Solar absorptance vs inc. angle in each glass layer
         Array1D<std::array<Real64, Window::numPhis>> AbsSol(Window::maxGlassLayers); // Solar absorptance vs inc. angle in each glass layer
         Array1D<Real64> RfsolTemp(Window::numPhis + 1);                              // Front solar reflectance vs inc. angle
         std::array<Real64, Window::numPhis> Rfsol;
@@ -3951,6 +3951,12 @@ namespace HeatBalanceManager {
         std::array<Real64, Window::numPhis> Rfvis;
         Array1D<Real64> RbvisTemp(Window::numPhis + 1); // Back visible reflectance vs inc. angle
         std::array<Real64, Window::numPhis> Rbvis;
+
+        for (int iGlass = 1; iGlass <= Window::maxGlassLayers; ++iGlass) {
+            AbsSolTemp(iGlass).allocate(Window::numPhis + 1);
+        }
+
+        auto const outsideUnitInterval = [](Real64 const v) { return v < 0.0 || v > 1.0; };
 
         std::array<Real64, Window::numPhis> tsolFit;  // Fitted solar transmittance vs incidence angle
         std::array<Real64, Window::numPhis> tvisFit;  // Fitted visible transmittance vs incidence angle
@@ -4620,7 +4626,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(TsolTemp, 0.0) || any_gt(TsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(TsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of TSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
@@ -4630,13 +4636,13 @@ namespace HeatBalanceManager {
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
                     NextLine = W5DataFile.readLine();
                     ++FileLineCount;
-                    if (!readItem(NextLine.data.substr(5), AbsSolTemp(IGlass, _))) {
+                    if (!readItem(NextLine.data.substr(5), AbsSolTemp(IGlass))) {
                         ShowSevereError(
                             state, std::format("HeatBalanceManager: SearchWindow5DataFile: Error in Read of AbsSol values. For Glass={}", IGlass));
                         ShowContinueError(state,
                                           std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
                         ErrorsFound = true;
-                    } else if (any_lt(AbsSolTemp(IGlass, _), 0.0) || any_gt(AbsSolTemp(IGlass, _), 1.0)) {
+                    } else if (std::ranges::any_of(AbsSolTemp(IGlass), outsideUnitInterval)) {
                         ShowSevereError(
                             state,
                             std::format(
@@ -4657,7 +4663,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 1, DataLine(1).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RfsolTemp, 0.0) || any_gt(RfsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(RfsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of RfSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 1, DataLine(1).substr(0, 100)));
@@ -4669,7 +4675,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 2, DataLine(2).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RbsolTemp, 0.0) || any_gt(RbsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(RbsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of RbSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 2, DataLine(2).substr(0, 100)));
@@ -4680,7 +4686,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 3, DataLine(3).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(TvisTemp, 0.0) || any_gt(TvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(TvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Tvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 3, DataLine(3).substr(0, 100)));
@@ -4691,7 +4697,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 4, DataLine(4).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RfvisTemp, 0.0) || any_gt(RfvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(RfvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Rfvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 4, DataLine(4).substr(0, 100)));
@@ -4702,7 +4708,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 5, DataLine(5).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RbvisTemp, 0.0) || any_gt(RbvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(RbvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Rbvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 5, DataLine(5).substr(0, 100)));
@@ -4729,7 +4735,7 @@ namespace HeatBalanceManager {
 
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
                     for (int iPhi = 0; iPhi < Window::numPhis; ++iPhi) {
-                        AbsSol(IGlass)[iPhi] = AbsSolTemp(IGlass, iPhi + 1);
+                        AbsSol(IGlass)[iPhi] = AbsSolTemp(IGlass)(iPhi + 1);
                     }
                 }
 
@@ -5824,8 +5830,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(6));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolFrtTransNrows = NumRows;
-                thisConstruct.BSDFInput.SolFrtTransNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5867,8 +5871,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(7));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolBkReflNrows = NumRows;
-                thisConstruct.BSDFInput.SolBkReflNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5905,8 +5907,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(8));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisFrtTransNrows = NumRows;
-                thisConstruct.BSDFInput.VisFrtTransNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5943,8 +5943,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(9));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisBkReflNrows = NumRows;
-                thisConstruct.BSDFInput.VisBkReflNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5983,7 +5981,6 @@ namespace HeatBalanceManager {
 
                     // Simon: Load only if optical layer
                     if (mod(Layer, 2) != 0) {
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);
 
                         ++AlphaIndex;
                         // *******************************************************************************
@@ -6017,7 +6014,6 @@ namespace HeatBalanceManager {
                                             NBasis));
                         }
 
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).AbsNcols = NumCols;
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbs.allocate(NumCols, NumRows);
                         if (thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbsIndex == 0) {
                             ErrorsFound = true;
@@ -6090,8 +6086,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(6));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolFrtTransNrows = NBasis;
-                thisConstruct.BSDFInput.SolFrtTransNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -6133,8 +6127,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(7));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolBkReflNrows = NBasis;
-                thisConstruct.BSDFInput.SolBkReflNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -6175,8 +6167,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(8));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisFrtTransNrows = NBasis;
-                thisConstruct.BSDFInput.VisFrtTransNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -6217,8 +6207,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(9));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisBkReflNrows = NBasis;
-                thisConstruct.BSDFInput.VisBkReflNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -6270,7 +6258,6 @@ namespace HeatBalanceManager {
                     currentOpticalLayer = int(Layer / 2) + 1;
 
                     if (mod(Layer, 2) != 0) {
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);
 
                         // *******************************************************************************
                         // Front absorptance matrix
@@ -6304,7 +6291,6 @@ namespace HeatBalanceManager {
                                             NBasis));
                         }
 
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).AbsNcols = NumCols;
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbs.allocate(NumCols, NumRows);
 
                         if (thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbsIndex == 0) {

@@ -49,7 +49,7 @@
 #define ThermalISO15099Calc_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -100,11 +100,11 @@ namespace ThermalISO15099Calc {
                        Real64 heightt,
                        Real64 width,
                        const Array1D<Real64> &presure,
-                       Array2A_int iprop,
-                       Array2A<Real64> frct,
-                       Array2A<Real64> xgcon,
-                       Array2A<Real64> xgvis,
-                       Array2A<Real64> xgcp,
+                       Array2D_int const &iprop,
+                       Array2D<Real64> const &frct,
+                       Array2D<Real64> const &xgcon,
+                       Array2D<Real64> const &xgvis,
+                       Array2D<Real64> const &xgcp,
                        const Array1D<Real64> &xwght,
                        const Array1D<Real64> &gama,
                        const Array1D_int &nmix,
@@ -195,14 +195,14 @@ namespace ThermalISO15099Calc {
                  Real64 height,
                  Real64 heightt,
                  Real64 width,
-                 Array2_int const &iprop,
-                 Array2<Real64> const &frct,
+                 Array2D_int const &iprop,
+                 Array2D<Real64> const &frct,
                  const Array1D<Real64> &presure,
                  const Array1D_int &nmix,
                  const Array1D<Real64> &wght,
-                 Array2<Real64> const &gcon,
-                 Array2<Real64> const &gvis,
-                 Array2<Real64> const &gcp,
+                 Array2D<Real64> const &gcon,
+                 Array2D<Real64> const &gvis,
+                 Array2D<Real64> const &gcp,
                  const Array1D<Real64> &gama,
                  const Array1D_int &SupportPillar,
                  const Array1D<Real64> &PillarSpacing,
@@ -308,14 +308,14 @@ namespace ThermalISO15099Calc {
                 Array1D<Real64> const &Radiation,
                 Real64 trmout,
                 Real64 trmin,
-                Array2_int const &iprop,
-                Array2<Real64> const &frct,
+                Array2D_int const &iprop,
+                Array2D<Real64> const &frct,
                 const Array1D<Real64> &presure,
                 const Array1D_int &nmix,
                 const Array1D<Real64> &wght,
-                Array2<Real64> const &gcon,
-                Array2<Real64> const &gvis,
-                Array2<Real64> const &gcp,
+                Array2D<Real64> const &gcon,
+                Array2D<Real64> const &gvis,
+                Array2D<Real64> const &gcp,
                 const Array1D<Real64> &gama,
                 const Array1D_int &SupportPillar,
                 const Array1D<Real64> &PillarSpacing,
@@ -341,14 +341,14 @@ namespace ThermalISO15099Calc {
                             const Array1D<TARCOGLayerType> &LayerType, // Layer type
                             const Array1D<Real64> &scon,               // Layer thermal conductivity
                             const Array1D<Real64> &thick,              // Layer thickness
-                            Array2A_int iprop,                         // Gas type in gaps
-                            Array2A<Real64> frct,                      // Fraction of gas
+                            Array2D_int const &iprop,                  // Gas type in gaps
+                            Array2D<Real64> const &frct,               // Fraction of gas
                             const Array1D_int &nmix,                   // Gas mixture
                             const Array1D<Real64> &pressure,           // Gas pressure [Pa]
                             const Array1D<Real64> &wght,               // Molecular weight
-                            Array2A<Real64> gcon,                      // Gas specific conductivity
-                            Array2A<Real64> gvis,                      // Gas specific viscosity
-                            Array2A<Real64> gcp,                       // Gas specific heat
+                            Array2D<Real64> const &gcon,               // Gas specific conductivity
+                            Array2D<Real64> const &gvis,               // Gas specific viscosity
+                            Array2D<Real64> const &gcp,                // Gas specific heat
                             const Array1D<Real64> &EffectiveOpenness,  // Layer effective openneess [m2]
                             Array1D<Real64> const &theta,              // Layer surface temperatures [K]
                             Array1D<Real64> &sconScaled,               // Layer conductivity divided by thickness
@@ -363,14 +363,14 @@ namespace ThermalISO15099Calc {
                Real64 tilt,
                Real64 wsi,
                Real64 height,
-               Array2A_int iprop,
-               Array2A<Real64> frct,
+               Array2D_int const &iprop,
+               Array2D<Real64> const &frct,
                const Array1D<Real64> &presure,
                const Array1D_int &nmix,
                const Array1D<Real64> &wght,
-               Array2A<Real64> gcon,
-               Array2A<Real64> gvis,
-               Array2A<Real64> gcp,
+               Array2D<Real64> const &gcon,
+               Array2D<Real64> const &gvis,
+               Array2D<Real64> const &gcp,
                Real64 &hcin,
                int ibc,
                int &nperr,
@@ -383,15 +383,15 @@ namespace ThermalISO15099Calc {
                int nlayer,
                Real64 height,
                const Array1D<Real64> &gap,
-               Array2A_int iprop,
-               Array2A<Real64> frct,
+               Array2D_int const &iprop,
+               Array2D<Real64> const &frct,
                Real64 VacuumPressure,
                const Array1D<Real64> &presure,
                const Array1D_int &nmix,
                const Array1D<Real64> &wght,
-               Array2A<Real64> gcon,
-               Array2A<Real64> gvis,
-               Array2A<Real64> gcp,
+               Array2D<Real64> const &gcon,
+               Array2D<Real64> const &gvis,
+               Array2D<Real64> const &gcp,
                const Array1D<Real64> &gama,
                Array1D<Real64> &hcgas,
                Array1D<Real64> &Rayleigh,
@@ -436,7 +436,7 @@ namespace ThermalISO15099Calc {
                                const Array1D<Real64> &Rf,
                                int &);
 
-    void CalculateFuncResults(int nlayer, Array2<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes);
+    void CalculateFuncResults(int nlayer, Array2D<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes);
 } // namespace ThermalISO15099Calc
 struct ThermalISO15099CalcData : BaseGlobalStruct
 {

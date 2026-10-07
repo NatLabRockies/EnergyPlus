@@ -29,16 +29,16 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        os: [macos-15-intel, macos-14]
+        os: [macos-15-intel, macos-15]
         include:
         - os: macos-15-intel
-          macos_dev_target: 13.3
+          macos_dev_target: '13.3'
           allow_failure: false
           arch: x86_64
           python-arch: x64
           pretty: "Mac x64"
-        - os: macos-14
-          macos_dev_target: 14.0
+        - os: macos-15
+          macos_dev_target: '14.0'
           allow_failure: false
           arch: arm64
           python-arch: arm64
@@ -284,15 +284,15 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        os: [macos-15-intel, macos-14]
+        os: [macos-15-intel, macos-15]
         include:
           - os: macos-15-intel
-            macos_dev_target: 13.3
+            macos_dev_target: '13.3'
             arch: x86_64
             python-arch: x64
             test_key: mac12
-          - os: macos-14
-            macos_dev_target: 14.0
+          - os: macos-15
+            macos_dev_target: '14.0'
             arch: arm64
             python-arch: arm64
             test_key: mac14-arm64

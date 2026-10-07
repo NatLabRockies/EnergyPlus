@@ -8573,7 +8573,6 @@ TEST_F(EnergyPlusFixture, VRFTU_CalcVRFSupplementalHeatingCoilWater)
     state->dataWaterCoils->WaterCoil(CoilNum).Name = thisVRFTU.SuppHeatCoilName;
     state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
     state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilTypeA = "Heating";
     state->dataWaterCoils->WaterCoil(CoilNum).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
 

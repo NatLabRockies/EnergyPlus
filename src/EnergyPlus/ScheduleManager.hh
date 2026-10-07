@@ -50,7 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -430,8 +429,9 @@ namespace Sched {
     );
 
     void ProcessIntervalFields(EnergyPlusData &state,
-                               Array1S_string const Untils,
-                               Array1S<Real64> const Numbers,
+                               Array1D_string const &Alphas,
+                               Array1D<Real64> const &Numbers,
+                               int const firstUntilAlphaIndex, // index in Alphas of the first "until" field
                                int const NumUntils,
                                int const NumNumbers,
                                std::array<Real64, Constant::iMinutesInDay> &minuteVals,

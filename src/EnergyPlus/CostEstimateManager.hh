@@ -79,22 +79,18 @@ namespace CostEstimateManager {
     struct CostLineItemStruct
     {
         // Members
-        std::string LineName;       // object name (needed ?)
-        ParentObject ParentObjType; // parent reference to IDD object type
-        std::string ParentObjName;  // parent instance in IDF
-        int ParentObjIDinList = 1;
-        Real64 PerSquareMeter = 0.0;     // cost per square meter
-        Real64 PerEach = 0.0;            // cost per each
-        Real64 PerKiloWattCap = 0.0;     // cost per kW of nominal capacity
-        Real64 PerKWCapPerCOP = 0.0;     // cost per kW of nominal capacity per COP
-        Real64 PerCubicMeter = 0.0;      // cost per cubic meter
-        Real64 PerCubMeterPerSec = 0.0;  // cost per cubic meter per second
-        Real64 PerUAinWattperDelK = 0.0; // cost per (UA) in Watt/deltaK
-        int LineNumber = -1;             // number of line item in detail list
-        Real64 Qty = 0.0;                // quantity in calculations (can be input)
-        std::string Units;               // Reported units
-        Real64 ValuePer = 0.0;           // Cost used in final calculation
-        Real64 LineSubTotal = 0.0;       // line item total  Qty * ValuePer
+        std::string LineName;        // object name (needed ?)
+        ParentObject ParentObjType;  // parent reference to IDD object type
+        std::string ParentObjName;   // parent instance in IDF
+        Real64 PerSquareMeter = 0.0; // cost per square meter
+        Real64 PerEach = 0.0;        // cost per each
+        Real64 PerKiloWattCap = 0.0; // cost per kW of nominal capacity
+        Real64 PerKWCapPerCOP = 0.0; // cost per kW of nominal capacity per COP
+        int LineNumber = -1;         // number of line item in detail list
+        Real64 Qty = 0.0;            // quantity in calculations (can be input)
+        std::string Units;           // Reported units
+        Real64 ValuePer = 0.0;       // Cost used in final calculation
+        Real64 LineSubTotal = 0.0;   // line item total  Qty * ValuePer
     };
 
     struct CostAdjustmentStruct
