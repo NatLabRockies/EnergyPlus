@@ -200,11 +200,17 @@ Coil:Cooling:ITE:ColdPlate,
        \key ConstantFlow
        \key VariableFlow
        \default ConstantFlow
-  A9 ; \field End-Use Subcategory
+  A9 , \field End-Use Subcategory
        \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
        \type alpha
        \retaincase
        \default General
+  A10; \field IT Equipment Load Schedule Name
+       \note Optional schedule specifying an IT equipment heat load in watts added to any load set by
+       \note a paired ElectricEquipment:ITE:LiquidCooled object. When both are present their
+       \note contributions are summed. When no paired object exists this schedule is the sole load source.
+       \type object-list
+       \object-list ScheduleNames
 ```
 
 ## Outputs Description ##
@@ -223,6 +229,7 @@ The following output variables will be added:
 | Coil Cooling ITE Cold Plate Mass Flow Rate | kg/s | Average |
 | Coil Cooling ITE Cold Plate Auxiliary Electric Power | W | Average |
 | Coil Cooling ITE Cold Plate Auxiliary Electric Energy | J | Sum |
+| Coil Cooling ITE Cold Plate Effective Thermal Resistance | K/W | Average |
 
 `Auxiliary Electric Energy` is metered under `Electricity` / `Cooling` and will appear in the ABUPS End Uses by Subcategory table under the sub-category specified in the `End-Use Subcategory` field.
 
