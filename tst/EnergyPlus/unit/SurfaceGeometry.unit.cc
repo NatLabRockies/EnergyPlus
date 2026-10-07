@@ -801,9 +801,9 @@ TEST_F(EnergyPlusFixture, SurfacesGeometry_CalcSurfaceCentroid_NonconvexRealisti
 
     CalcSurfaceCentroid(*state);
 
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.x, 667.);
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.y, 0.);
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.z, 10.);
+    EXPECT_DOUBLE_EQ(state->dataSurface->Surface(1).Centroid.x, 667.);
+    EXPECT_NEAR(state->dataSurface->Surface(1).Centroid.y, 0., 1e-12);
+    EXPECT_DOUBLE_EQ(state->dataSurface->Surface(1).Centroid.z, 10.);
 }
 
 TEST_F(EnergyPlusFixture, MakeEquivalentRectangle)

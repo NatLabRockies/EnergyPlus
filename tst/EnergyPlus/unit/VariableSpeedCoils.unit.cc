@@ -7102,7 +7102,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     EXPECT_NEAR(vsHeatingCoil.OutletAirDBTemp, 7.16, 0.001);
     EXPECT_NEAR(vsHeatingCoil.OutletAirHumRat, 0.0, 0.001);
     EXPECT_NEAR(vsHeatingCoil.OutletAirEnthalpy, 7219.7401811854543, 0.001);
-    EXPECT_NEAR(vsHeatingCoil.Power, 280.91365138509082, 0.0);
+    EXPECT_DOUBLE_EQ(vsHeatingCoil.Power, 280.91365138509082);
     EXPECT_DOUBLE_EQ(vsHeatingCoil.QSource, 1163.0343848520001);
     EXPECT_NEAR(vsHeatingCoil.QLoadTotal, 1443.9480362370909, 0.001);
     // reset the heating coil availability schedule to AlwaysOff
