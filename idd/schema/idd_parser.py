@@ -97,6 +97,7 @@ class IddParsingError(Exception):
 class MissingSemiColonException(IddParsingError):
     pass
 
+
 # tokens
 TOKEN_NONE = 0
 TOKEN_END = 1
@@ -916,11 +917,11 @@ def eat_comment(data):
 def handle_obsolete(string, obj_name):
     if len(string) < 6:
         raise ValueError(f"In object '{obj_name}', insufficient data for /obsolete")
-    if string[:5] != "New=>":
-        raise ValueError(f"In object '{obj_name}', expected '=>' for /obsolete, got '{string[:5]}' instead")
+    if string[:5].lower() != "new=>":
+        raise ValueError(f"In object '{obj_name}', expected 'New=>' for /obsolete, got '{string[:5]}' instead")
     obj_string = string[5:].strip()
     if not obj_string:
-        raise ValueError(f"In object '{obj_name}', expected non-empty string after '=>' for /obsolete")
+        raise ValueError(f"In object '{obj_name}', expected non-empty string after 'New=>' for /obsolete")
     if obj_string != "deleted" and obj_string.lower() == "deleted":
         warnings.warn(f"In object '{obj_name}', '{obj_string}' converted to 'deleted' for /obsolete", SyntaxWarning)
         obj_string = "deleted"

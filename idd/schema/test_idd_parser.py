@@ -103,8 +103,9 @@ Obj2,
     }
 
 
-def test_obsolete_replacement_is_normalized():
-    assert idd_parser.handle_obsolete("New=>Replacement:Object", "Old:Object") == "Replacement:Object"
+@pytest.mark.parametrize("prefix", ["New=>", "new=>"])
+def test_obsolete_replacement_is_normalized(prefix):
+    assert idd_parser.handle_obsolete(f"{prefix}  Replacement:Object  ", "Old:Object") == "Replacement:Object"
 
 
 def test_obsolete_mixed_case_deleted_is_normalized_in_schema():
@@ -138,7 +139,7 @@ def test_obsolete_deleted_canonical_case_does_not_warn():
     ("value", "message"),
     [
         ("New=>", "insufficient data"),
-        ("Old=>Replacement:Object", "expected '=>'"),
+        ("Old=>Replacement:Object", "expected 'New=>'"),
         ("New=>   ", "expected non-empty string"),
     ],
 )
