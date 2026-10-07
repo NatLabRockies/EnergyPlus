@@ -152,21 +152,13 @@ namespace DataPhotovoltaics {
     {
         // Members
         Real64 Insolation;      // radiation [W/m2]
-        Real64 ArrayCurrent;    // array current at current conditions [A]
-        Real64 ArrayVoltage;    // array voltage at current conditions [V]
-        Real64 ArrayPower;      // array power at current conditions [W]
         Real64 ArrayEfficiency; // array efficiency at current conditions [0..1]
-        Real64 CellTemp;        // array cell temperature at current conditions [C]
         Real64 CellTempK;       // array cell temperature (for setting last cell temp) [K]
         Real64 TimeElapsed;     // time previous update of last cell temp
         Real64 LastCellTempK;   // array cell temperature at previous conditions [K]
-        Real64 ArrayIsc;        // array short circuit current at current conditions [A]
-        Real64 ArrayVoc;        // array open circuit voltage at current conditions [V]
 
         // Default Constructor
-        TRNSYSPVCalcStruct()
-            : Insolation(0.0), ArrayCurrent(0.0), ArrayVoltage(0.0), ArrayPower(0.0), ArrayEfficiency(0.0), CellTemp(0.0), CellTempK(0.0),
-              TimeElapsed(0.0), LastCellTempK(0.0), ArrayIsc(0.0), ArrayVoc(0.0)
+        TRNSYSPVCalcStruct() : Insolation(0.0), ArrayEfficiency(0.0), CellTempK(0.0), TimeElapsed(0.0), LastCellTempK(0.0)
         {
         }
     };
@@ -290,12 +282,9 @@ namespace DataPhotovoltaics {
         Real64 CellTemp;        // array cell temperature at current conditions [C]
         Real64 ArrayIsc;        // array short circuit current at current conditions [A]
         Real64 ArrayVoc;        // array open circuit voltage at current conditions [V]
-        Real64 ArrayCurrent;
-        Real64 ArrayVoltage;
 
         // Default Constructor
-        PVReportVariables()
-            : DCPower(0.0), DCEnergy(0.0), ArrayEfficiency(0.0), CellTemp(0.0), ArrayIsc(0.0), ArrayVoc(0.0), ArrayCurrent(0.0), ArrayVoltage(0.0)
+        PVReportVariables() : DCPower(0.0), DCEnergy(0.0), ArrayEfficiency(0.0), CellTemp(0.0), ArrayIsc(0.0), ArrayVoc(0.0)
         {
         }
     };

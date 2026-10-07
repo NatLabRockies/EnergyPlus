@@ -68,13 +68,11 @@
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
-#include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
-#include <EnergyPlus/SimAirServingZones.hh>
 #include <EnergyPlus/StandardRatings.hh>
 #include <EnergyPlus/WaterManager.hh>
 
@@ -158,7 +156,6 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
 
     // initialize reclaim heat parameters
     this->reclaimHeat.Name = this->name;
-    this->reclaimHeat.SourceType = state.dataCoilCoolingDX->coilCoolingDXObjectName;
 
     // other construction below
     this->evapInletNodeIndex = Node::GetOnlySingleNode(state,
@@ -206,7 +203,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
     if (!input_data.condensate_collection_water_storage_tank_name.empty()) {
         WaterManager::SetupTankSupplyComponent(state,
                                                this->name,
-                                               state.dataCoilCoolingDX->coilCoolingDXObjectName,
+                                               this->reclaimHeat.SourceType,
                                                input_data.condensate_collection_water_storage_tank_name,
                                                errorsFound,
                                                this->condensateTankIndex,
@@ -216,7 +213,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
     if (!input_data.evaporative_condenser_supply_water_storage_tank_name.empty()) {
         WaterManager::SetupTankDemandComponent(state,
                                                this->name,
-                                               state.dataCoilCoolingDX->coilCoolingDXObjectName,
+                                               this->reclaimHeat.SourceType,
                                                input_data.evaporative_condenser_supply_water_storage_tank_name,
                                                errorsFound,
                                                this->evaporativeCondSupplyTankIndex,
@@ -236,16 +233,12 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
         // Setup zone data here
     }
 
-    Node::TestCompSet(state,
-                      state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                      this->name,
-                      input_data.evaporator_inlet_node_name,
-                      input_data.evaporator_outlet_node_name,
-                      "Air Nodes");
+    Node::TestCompSet(
+        state, this->reclaimHeat.SourceType, this->name, input_data.evaporator_inlet_node_name, input_data.evaporator_outlet_node_name, "Air Nodes");
 
     if (errorsFound) {
         ShowFatalError(state,
-                       std::string{routineName} + "Errors found in getting " + state.dataCoilCoolingDX->coilCoolingDXObjectName +
+                       std::string{routineName} + "Errors found in getting " + this->reclaimHeat.SourceType +
                            " input. Preceding condition(s) causes termination.");
     }
 }

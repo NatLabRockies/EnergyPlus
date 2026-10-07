@@ -1251,10 +1251,6 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
         zoneSizing.spaceConcurrence = zoneSizingInput.spaceConcurrence;
         zoneSizing.zoneSizingMethod = zoneSizingInput.zoneSizingMethod;
         zoneSizing.zoneLatentSizing = zoneSizingInput.zoneLatentSizing;
-        zoneSizing.zoneRHDehumidifySetPoint = zoneSizingInput.zoneRHDehumidifySetPoint;
-        zoneSizing.zoneRHHumidifySetPoint = zoneSizingInput.zoneRHHumidifySetPoint;
-        zoneSizing.zoneRHDehumidifySched = zoneSizingInput.zoneRHDehumidifySched;
-        zoneSizing.zoneRHHumidifySched = zoneSizingInput.zoneRHHumidifySched;
         zoneSizing.ZnLatCoolDgnSAMethod = zoneSizingInput.ZnLatCoolDgnSAMethod;
         zoneSizing.ZnLatHeatDgnSAMethod = zoneSizingInput.ZnLatHeatDgnSAMethod;
         zoneSizing.heatCoilSizingMethod = zoneSizingInput.heatCoilSizingMethod;
@@ -1286,10 +1282,6 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
         calcZoneSizing.spaceConcurrence = zoneSizingInput.spaceConcurrence;
         calcZoneSizing.zoneSizingMethod = zoneSizingInput.zoneSizingMethod;
         calcZoneSizing.zoneLatentSizing = zoneSizingInput.zoneLatentSizing;
-        calcZoneSizing.zoneRHDehumidifySetPoint = zoneSizingInput.zoneRHDehumidifySetPoint;
-        calcZoneSizing.zoneRHHumidifySetPoint = zoneSizingInput.zoneRHHumidifySetPoint;
-        calcZoneSizing.zoneRHDehumidifySched = zoneSizingInput.zoneRHDehumidifySched;
-        calcZoneSizing.zoneRHHumidifySched = zoneSizingInput.zoneRHHumidifySched;
         calcZoneSizing.ZnLatCoolDgnSAMethod = zoneSizingInput.ZnLatCoolDgnSAMethod;
         calcZoneSizing.LatentCoolDesHumRat = zoneSizingInput.LatentCoolDesHumRat;
         calcZoneSizing.CoolDesHumRatDiff = zoneSizingInput.CoolDesHumRatDiff;
@@ -1341,10 +1333,6 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
     zsFinalSizing.spaceConcurrence = zoneSizingInput.spaceConcurrence;
     zsFinalSizing.zoneSizingMethod = zoneSizingInput.zoneSizingMethod;
     zsFinalSizing.zoneLatentSizing = zoneSizingInput.zoneLatentSizing;
-    zsFinalSizing.zoneRHDehumidifySetPoint = zoneSizingInput.zoneRHDehumidifySetPoint;
-    zsFinalSizing.zoneRHHumidifySetPoint = zoneSizingInput.zoneRHHumidifySetPoint;
-    zsFinalSizing.zoneRHDehumidifySched = zoneSizingInput.zoneRHDehumidifySched;
-    zsFinalSizing.zoneRHHumidifySched = zoneSizingInput.zoneRHHumidifySched;
     zsFinalSizing.ZnLatCoolDgnSAMethod = zoneSizingInput.ZnLatCoolDgnSAMethod;
     zsFinalSizing.LatentCoolDesHumRat = zoneSizingInput.LatentCoolDesHumRat;
     zsFinalSizing.CoolDesHumRatDiff = zoneSizingInput.CoolDesHumRatDiff;
@@ -1384,10 +1372,6 @@ void fillZoneSizingFromInput(EnergyPlusData &state,
     zsCalcFinalSizing.spaceConcurrence = zoneSizingInput.spaceConcurrence;
     zsCalcFinalSizing.zoneSizingMethod = zoneSizingInput.zoneSizingMethod;
     zsCalcFinalSizing.zoneLatentSizing = zoneSizingInput.zoneLatentSizing;
-    zsCalcFinalSizing.zoneRHDehumidifySetPoint = zoneSizingInput.zoneRHDehumidifySetPoint;
-    zsCalcFinalSizing.zoneRHHumidifySetPoint = zoneSizingInput.zoneRHHumidifySetPoint;
-    zsCalcFinalSizing.zoneRHDehumidifySched = zoneSizingInput.zoneRHDehumidifySched;
-    zsCalcFinalSizing.zoneRHHumidifySched = zoneSizingInput.zoneRHHumidifySched;
     zsCalcFinalSizing.ZnLatCoolDgnSAMethod = zoneSizingInput.ZnLatCoolDgnSAMethod;
     zsCalcFinalSizing.LatentCoolDesHumRat = zoneSizingInput.LatentCoolDesHumRat;
     zsCalcFinalSizing.CoolDesHumRatDiff = zoneSizingInput.CoolDesHumRatDiff;
@@ -1566,7 +1550,6 @@ void updateZoneSizingEndDay(DataSizing::ZoneSizingData &zsCalcSizing,
                 zsCalcSizing.ZoneTempAtLatentHeatPeak = zsCalcSizing.HeatZoneTempSeq(TimeStepIndex);
                 zsCalcSizing.OutTempAtLatentHeatPeak = zsCalcSizing.HeatOutTempSeq(TimeStepIndex);
                 zsCalcSizing.ZoneHumRatAtLatentHeatPeak = zsCalcSizing.HeatZoneHumRatSeq(TimeStepIndex);
-                zsCalcSizing.OutHumRatAtLatentHeatPeak = zsCalcSizing.HeatOutHumRatSeq(TimeStepIndex);
                 zsCalcSizing.ZoneRetTempAtLatentHeatPeak = zsCalcSizing.HeatZoneRetTempSeq(TimeStepIndex);
                 zsCalcSizing.TimeStepNumAtLatentHeatMax = TimeStepIndex;
             }
@@ -1628,7 +1611,6 @@ void updateZoneSizingEndDay(DataSizing::ZoneSizingData &zsCalcSizing,
                 zsCalcSizing.ZoneTempAtLatentCoolPeak = zsCalcSizing.CoolZoneTempSeq(TimeStepIndex);
                 zsCalcSizing.OutTempAtLatentCoolPeak = zsCalcSizing.CoolOutTempSeq(TimeStepIndex);
                 zsCalcSizing.ZoneHumRatAtLatentCoolPeak = zsCalcSizing.CoolZoneHumRatSeq(TimeStepIndex);
-                zsCalcSizing.OutHumRatAtLatentCoolPeak = zsCalcSizing.CoolOutHumRatSeq(TimeStepIndex);
                 zsCalcSizing.ZoneRetTempAtLatentCoolPeak = zsCalcSizing.CoolZoneRetTempSeq(TimeStepIndex);
                 zsCalcSizing.TimeStepNumAtLatentCoolMax = TimeStepIndex;
             }
@@ -1890,11 +1872,9 @@ void updateZoneSizingEndDay(DataSizing::ZoneSizingData &zsCalcSizing,
             if (zsCalcSizing.HeatZoneTempSeq(TimeStepIndex) < zsCalcSizing.ZoneTempAtLatentHeatPeak || FirstIteration) {
                 zsCalcSizing.ZoneTempAtLatentHeatPeak = zsCalcSizing.HeatZoneTempSeq(TimeStepIndex);
                 zsCalcSizing.OutTempAtLatentHeatPeak = zsCalcSizing.HeatOutTempSeq(TimeStepIndex);
-                zsCalcSizing.OutHumRatAtLatentHeatPeak = zsCalcSizing.HeatOutHumRatSeq(TimeStepIndex);
             }
             if (zsCalcSizing.HeatOutTempSeq(TimeStepIndex) <= zsCalcFinalSizing.OutTempAtLatentHeatPeak) {
                 zsCalcFinalSizing.OutTempAtLatentHeatPeak = zsCalcSizing.HeatOutTempSeq(TimeStepIndex);
-                zsCalcFinalSizing.OutHumRatAtLatentHeatPeak = zsCalcSizing.HeatOutHumRatSeq(TimeStepIndex);
                 zsCalcFinalSizing.LatHeatDesDay = zsCalcSizing.LatHeatDesDay;
                 zsCalcFinalSizing.LatentHeatDDNum = zsCalcSizing.LatentHeatDDNum;
                 zsCalcFinalSizing.cLatentHeatDDDate = desDayWeath.DateString;
@@ -1944,7 +1924,6 @@ void updateZoneSizingEndDay(DataSizing::ZoneSizingData &zsCalcSizing,
             if (zsCalcSizing.CoolZoneTempSeq(TimeStepIndex) > zsCalcSizing.ZoneTempAtLatentCoolPeak || FirstIteration) {
                 zsCalcSizing.ZoneTempAtLatentCoolPeak = zsCalcSizing.CoolZoneTempSeq(TimeStepIndex);
                 zsCalcSizing.OutTempAtLatentCoolPeak = zsCalcSizing.CoolOutTempSeq(TimeStepIndex);
-                zsCalcSizing.OutHumRatAtLatentCoolPeak = zsCalcSizing.CoolOutHumRatSeq(TimeStepIndex);
                 FirstIteration = false;
             }
             if (zsCalcSizing.OutTempAtLatentCoolPeak >= zsCalcFinalSizing.OutTempAtLatentCoolPeak) {
@@ -3719,7 +3698,6 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                 zoneEqSizing.DesHeatingLoad = 0.0;
                 zoneEqSizing.CoolingAirVolFlow = 0.0;
                 zoneEqSizing.HeatingAirVolFlow = 0.0;
-                zoneEqSizing.SystemAirVolFlow = 0.0;
                 zoneEqSizing.AirFlow = false;
                 zoneEqSizing.CoolingAirFlow = false;
                 zoneEqSizing.HeatingAirFlow = false;
@@ -3727,7 +3705,6 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                 zoneEqSizing.Capacity = false;
                 zoneEqSizing.CoolingCapacity = false;
                 zoneEqSizing.HeatingCapacity = false;
-                zoneEqSizing.SystemCapacity = false;
                 zoneEqSizing.DesignSizeFromParent = false;
             }
 

@@ -3126,7 +3126,6 @@ TEST_F(EnergyPlusFixture, StratifiedTank_GSHP_DesuperheaterSourceHeat)
     WaterThermalTanks::GetWaterThermalTankInput(*state);
     // Test if the new data Structure for water to air heat pump coils successfully initialized
     EXPECT_EQ(state->dataHeatBal->HeatReclaimSimple_WAHPCoil(1).Name, "GSHP_COIL1");
-    EXPECT_EQ(state->dataHeatBal->HeatReclaimSimple_WAHPCoil(1).SourceType, "Coil:Cooling:WaterToAirHeatPump:EquationFit");
     // Air node
     state->dataLoopNodes->Node(5).MassFlowRate = 0.005;
     state->dataLoopNodes->Node(5).Temp = 28.0;
@@ -3511,7 +3510,6 @@ TEST_F(EnergyPlusFixture, Desuperheater_Multispeed_Coil_Test)
     WaterThermalTanks::GetWaterThermalTankInput(*state);
     // Source name and type successfully passed to DataHeatBalance::HeatReclaimDXCoil data struct
     EXPECT_EQ(state->dataHeatBal->HeatReclaimDXCoil(1).Name, "MULTISPEED_COIL");
-    EXPECT_EQ(state->dataHeatBal->HeatReclaimDXCoil(1).SourceType, "Coil:Cooling:DX:MultiSpeed");
 
     // Initiate conditions for multispeed coil calculation
     state->dataEnvrn->OutDryBulbTemp = 32.0;
@@ -3924,7 +3922,6 @@ TEST_F(EnergyPlusFixture, Desuperheater_WAHP_VSEQ_Coil_Test)
 
     DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state->dataHeatBal->HeatReclaimVS_Coil(DXNum);
     EXPECT_EQ(HeatReclaim.Name, "VARSPEED_WAHP_COIL");
-    EXPECT_EQ(HeatReclaim.SourceType, "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit");
 
     // Initiate conditions for multispeed coil calculation
     state->dataEnvrn->OutDryBulbTemp = 32.0;

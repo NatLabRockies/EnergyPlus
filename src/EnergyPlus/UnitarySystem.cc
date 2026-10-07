@@ -1564,8 +1564,6 @@ namespace UnitarySystems {
             select_EqSizing->OAVolFlow = 0.0; // UnitarySys doesn't have OA
         } else if (state.dataSize->CurZoneEqNum > 0) {
             select_EqSizing = &state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
-            state.dataSize->ZoneEqUnitarySys = true;
-            // UnitarySystem never set this flag. Probably should for zone equipment.
             if ((this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) &&
                 this->m_IsDXCoil) {
                 state.dataSize->ZoneEqDXCoil = true;
@@ -16302,7 +16300,6 @@ namespace UnitarySystems {
 
         // reset to 1 in case blow through fan configuration (fan resets to 1, but for blow thru fans coil sets back down < 1)
         state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
-        state.dataSize->ZoneEqUnitarySys = false;
     }
 
     void UnitarySys::unitarySystemHeatRecovery(EnergyPlusData &state)

@@ -7483,7 +7483,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         select_EqSizing = &state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum);
     } else if (state.dataSize->CurZoneEqNum > 0) {
         select_EqSizing = &ZoneEqSizing(state.dataSize->CurZoneEqNum);
-        state.dataSize->ZoneEqUnitarySys = true;
     } else {
         assert(false);
     }

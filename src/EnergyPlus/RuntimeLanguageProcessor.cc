@@ -3017,7 +3017,6 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                                 // This object requires an initial value.
                                 ExternalInterfaceInitializeErlVariable(state, VariableNum, SetErlValueNumber(rNumericArgs(1)), false);
                             } else {
-                                state.dataRuntimeLang->ErlVariable(VariableNum).SetByGlobalVariable = true;
                             }
                         }
                     }

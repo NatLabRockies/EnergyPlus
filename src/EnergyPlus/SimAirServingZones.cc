@@ -1433,8 +1433,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
     int const numPrimaryAirSys = state.dataHVACGlobal->NumPrimaryAirSys;
 
     bool ErrorsFound = false;
-    state.dataHVACGlobal->AirLoopInit = true;
-
     // Do the one time initializations
     if (state.dataSimAirServingZones->InitAirLoopsOneTimeFlag) {
 
@@ -1683,9 +1681,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
                                 cooledZone(NumZonesCool).termUnitSizingIndex =
                                     state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).AirDistUnitCool(ZoneInNum).TermUnitSizingIndex;
                                 if (AirLoopNum > 0) {
-                                    if (thisPrimaryAirSys.OASysExists) {
-                                        state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).ZoneHasAirLoopWithOASys = true;
-                                    }
                                 }
                                 state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).InletNodeAirLoopNum(ZoneInNum) = AirLoopNum;
                                 FoundSupPathZoneConnect = true;
@@ -3396,7 +3391,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
     // (1) update branch connection with (BeforeBranchSim)
     // (2) simulate each component
     // (3) update branch connection with (AfterBranchSim) to enforce continuity through splitter
-    // Sets current branch number to CurBranchNum defined in MODULE DataSizing
     // Sets duct type of current branch to CurDuctType defined in MODULE DataSizing
     // Upon exiting, resets both counters to 0.
 
@@ -3406,7 +3400,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
 
         UpdateBranchConnections(state, AirLoopNum, BranchNum, BeforeBranchSim);
 
-        state.dataSize->CurBranchNum = BranchNum;
         state.dataSize->CurDuctType = primaryAirSystems.Branch(BranchNum).DuctType;
 
         // Loop over components in branch
@@ -3433,7 +3426,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
 
     } // End of branch loop
 
-    state.dataSize->CurBranchNum = 0;
     state.dataSize->CurDuctType = HVAC::AirDuctType::Invalid;
 }
 
@@ -4234,7 +4226,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
             sysSizing.AirPriLoopName = primaryAirSystems.Name;
             sysSizing.loadSizingType = sysSizInput.loadSizingType;
             sysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-            sysSizing.CoolCapControl = sysSizInput.CoolCapControl;
             sysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
             sysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
             sysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -4297,7 +4288,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
         // move data from system sizing input
         finalSysSizing.loadSizingType = sysSizInput.loadSizingType;
         finalSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-        finalSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
         finalSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
         finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         finalSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -4346,7 +4336,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
 
         calcSysSizing.loadSizingType = sysSizInput.loadSizingType;
         calcSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-        calcSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
         calcSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
         calcSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         calcSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -6459,7 +6448,6 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 if (sysSizing.CoinCoolMassFlow > state.dataSize->CalcSysSizing(AirLoopNum).CoinCoolMassFlow) {
                     state.dataSize->CalcSysSizing(AirLoopNum).CoinCoolMassFlow = sysSizing.CoinCoolMassFlow;
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).CoolFlowPeakDD = DDNum;
-                    state.dataSize->SysSizPeakDDNum(AirLoopNum).cCoolFlowPeakDDDate = state.dataSize->DesDayWeath(DDNum).DateString;
                 }
 
                 if (sysSizing.HeatCap > state.dataSize->CalcSysSizing(AirLoopNum).HeatCap) {

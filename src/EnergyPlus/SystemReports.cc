@@ -126,8 +126,6 @@ void InitEnergyReports(EnergyPlusData &state)
     // Once all compsets have been established (second iteration) find all components
     // subcomponents, etc.
 
-    int constexpr EnergyTransfer(1);
-
     if (!state.dataSysRpts->VentReportStructureCreated) {
         return;
     }
@@ -328,7 +326,6 @@ void InitEnergyReports(EnergyPlusData &state)
                     auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(ListNum);
                     for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumMeteredVars; ++VarNum) {
                         if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
-                            thisZoneEquipList.EquipData(AirDistUnitNum).EnergyTransComp = EnergyTransfer;
                             const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
                             const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
                             int Idx = 0;
@@ -341,7 +338,6 @@ void InitEnergyReports(EnergyPlusData &state)
                             if (MatchFound) {
                                 UpdateZoneCompPtrArray(state, Idx, ListNum, AirDistUnitNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                             }
-                            thisZoneEquipList.EquipData(AirDistUnitNum).ZoneEqToPlantPtr = Idx;
                             break;
                         }
                     }
@@ -350,7 +346,6 @@ void InitEnergyReports(EnergyPlusData &state)
                              ++VarNum) {
                             if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).resource ==
                                 Constant::eResource::EnergyTransfer) {
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).EnergyTransComp = EnergyTransfer;
                                 const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
                                 const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
                                 int Idx = 0;
@@ -364,7 +359,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                     UpdateZoneSubCompPtrArray(
                                         state, Idx, ListNum, AirDistUnitNum, SubEquipNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                                 }
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).ZoneEqToPlantPtr = Idx;
                                 break;
                             }
                         }
@@ -380,10 +374,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                         .SubSubEquipData(SubSubEquipNum)
                                         .MeteredVar(VarNum)
                                         .resource == Constant::eResource::EnergyTransfer) {
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .EnergyTransComp = EnergyTransfer;
                                     const std::string &CompType =
                                         thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).SubSubEquipData(SubSubEquipNum).TypeOf;
                                     const std::string &CompName =
@@ -407,10 +397,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                                                      MatchBranch,
                                                                      MatchComp);
                                     }
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .ZoneEqToPlantPtr = Idx;
                                     break;
                                 }
                             }
@@ -2385,7 +2371,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 thisEquipData.InletNodeNums.allocate(NumInlets);
                 thisEquipData.NumInlets = NumInlets;
                 thisEquipData.InletNodeNums = InletNodeNumbers;
-                thisEquipData.Parent = IsParent;
                 NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
                 thisEquipData.NumMeteredVars = NumVariables;
                 if (NumVariables > 0) {

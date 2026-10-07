@@ -704,7 +704,6 @@ namespace WaterManager {
             }
 
             if (NumIrrigation == 1) {
-                state.dataWaterData->AnyIrrigationInModel = true;
                 state.dataInputProcessing->inputProcessor->getObjectItem(
                     state, cCurrentModuleObject, 1, cAlphaArgs, NumAlphas, rNumericArgs, NumNumbers, IOStatus);
 
@@ -1194,7 +1193,6 @@ namespace WaterManager {
         switch (state.dataWaterData->WaterStorage(TankNum).ThermalMode) {
         case TankThermalMode::Scheduled: {
             state.dataWaterData->WaterStorage(TankNum).Twater = state.dataWaterData->WaterStorage(TankNum).tempSched->getCurrentVal();
-            state.dataWaterData->WaterStorage(TankNum).TouterSkin = state.dataWaterData->WaterStorage(TankNum).Twater;
         } break;
         case TankThermalMode::ZoneCoupled: {
             ShowFatalError(state, "WaterUse:Storage (Water Storage Tank) zone thermal model incomplete");
@@ -1638,7 +1636,6 @@ namespace WaterManager {
             for (TankNum = 1; TankNum <= state.dataWaterData->NumWaterStorageTanks; ++TankNum) {
                 state.dataWaterData->WaterStorage(TankNum).LastTimeStepVolume = state.dataWaterData->WaterStorage(TankNum).InitialVolume;
                 state.dataWaterData->WaterStorage(TankNum).ThisTimeStepVolume = state.dataWaterData->WaterStorage(TankNum).InitialVolume;
-                state.dataWaterData->WaterStorage(TankNum).LastTimeStepTemp = state.dataWaterData->WaterStorage(TankNum).InitialTankTemp;
             }
             state.dataWaterManager->MyWarmupFlag = false;
         }

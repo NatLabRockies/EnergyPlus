@@ -401,8 +401,6 @@ namespace SurfaceGeometry {
                     (thisSurface.Class != SurfaceClass::TDD_Dome)) {
                     thisZone.ExtWindowArea += thisSurface.GrossArea;
                     thisSpace.extWindowArea += thisSurface.GrossArea;
-                    thisZone.ExtWindowArea_Multiplied =
-                        thisZone.ExtWindowArea + thisSurface.GrossArea * thisSurface.Multiplier * thisZone.Multiplier * thisZone.ListMultiplier;
                     if (DetailedWWR) {
                         print(state.files.debug,
                               "{},Window,{:.2f},{:.1f}\n",
@@ -2311,7 +2309,6 @@ namespace SurfaceGeometry {
                     }
                     if (thisSurf.Class == SurfaceClass::Roof) {
                         thisZone.CeilingArea += thisSurf.Area;
-                        thisZone.HasRoof = true;
                     }
                 }
                 if (thisSpace.userEnteredFloorArea != Constant::AutoCalculate) {
@@ -2431,15 +2428,6 @@ namespace SurfaceGeometry {
                 } else {
                     thisZone.FloorArea = zoneCalcFloorArea;
                 }
-                Real64 totSpacesFloorArea = 0.0;
-                for (int spaceNum : thisZone.spaceIndexes) {
-                    totSpacesFloorArea += state.dataHeatBal->space(spaceNum).FloorArea;
-                }
-                if (totSpacesFloorArea > 0.0) {
-                    for (int spaceNum : thisZone.spaceIndexes) {
-                        state.dataHeatBal->space(spaceNum).fracZoneFloorArea = state.dataHeatBal->space(spaceNum).FloorArea / totSpacesFloorArea;
-                    }
-                } // else leave fractions at zero
             }
         }
 
@@ -3152,7 +3140,6 @@ namespace SurfaceGeometry {
                         if (thisSpace.TDDDomeFirst == 0) {
                             thisSpace.TDDDomeFirst = SurfNum;
                         }
-                        thisSpace.TDDDomeLast = SurfNum;
                     } else {
                         thisSpace.OpaqOrWinSurfaceLast = SurfNum;
                     }
@@ -7729,7 +7716,6 @@ namespace SurfaceGeometry {
                 // endif
             }
             state.dataHeatBal->ExtVentedCavity(Item).Tilt = AvgTilt;
-            state.dataHeatBal->ExtVentedCavity(Item).Azimuth = AvgAzimuth;
 
             // find area weighted centroid.
             //            ExtVentedCavity( Item ).Centroid.z = sum( Surface( ExtVentedCavity( Item ).SurfPtrs ).Centroid.z * Surface(

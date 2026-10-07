@@ -273,7 +273,6 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.CoolHeatType = "COOLING";
                 // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
                 state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).Name = varSpeedCoil.Name;
-                state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).SourceType = CurrentModuleObject;
 
                 varSpeedCoil.coilType = HVAC::CoilType::CoolingWAHPVariableSpeedEquationFit;
                 varSpeedCoil.VarSpeedCoilType = HVAC::coilTypeNames[(int)varSpeedCoil.coilType];
@@ -702,7 +701,6 @@ namespace VariableSpeedCoils {
 
                 // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
                 state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).Name = varSpeedCoil.Name;
-                state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).SourceType = CurrentModuleObject;
 
                 varSpeedCoil.CoolHeatType = "COOLING";
 

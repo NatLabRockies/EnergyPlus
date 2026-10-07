@@ -327,8 +327,7 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
     auto &s_ip = state.dataInputProcessing->inputProcessor;
 
     s_ipsc->cCurrentModuleObject = cZControlTypes(static_cast<int>(ZoneControlTypes::TStat));
-    // Update Num in state and make local convenience copy
-    int NumTStatStatements = state.dataZoneCtrls->NumTStatStatements = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    int NumTStatStatements = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
     TStatObjects.allocate(NumTStatStatements);
 
     // Pre-scan for use of Zone lists in TStat statements (i.e. Global application of TStat)
@@ -905,14 +904,12 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         }
         ComfortTStatObjects(Item).Name = s_ipsc->cAlphaArgs(1);
         if (Item1 > 0) {
-            ComfortTStatObjects(Item).ComfortControlledZoneStartPtr = state.dataZoneCtrls->NumComfortControlledZones + 1;
             ++state.dataZoneCtrls->NumComfortControlledZones;
             ComfortTStatObjects(Item).NumOfZones = 1;
             ComfortTStatObjects(Item).ZoneListActive = false;
             ComfortTStatObjects(Item).ZoneOrZoneListPtr = Item1;
         } else if (ZLItem > 0) {
             auto const &ZnList = state.dataHeatBal->ZoneList(ZLItem);
-            ComfortTStatObjects(Item).ComfortControlledZoneStartPtr = state.dataZoneCtrls->NumComfortControlledZones + 1;
             state.dataZoneCtrls->NumComfortControlledZones += ZnList.NumOfZones;
             ComfortTStatObjects(Item).NumOfZones = ZnList.NumOfZones;
             ComfortTStatObjects(Item).ZoneListActive = true;
@@ -1020,7 +1017,6 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
                         ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                         ErrorsFound = true;
                     } else if (comfortZone.averageMethod == DataZoneControls::AverageMethod::SPE) {
-                        comfortZone.AverageObjectName = s_ipsc->cAlphaArgs(4);
                         if (Util::FindItem(s_ipsc->cAlphaArgs(4), state.dataHeatBal->People) == 0) {
                             ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                             ErrorsFound = true;
@@ -1947,13 +1943,11 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
             ZLItem = Util::FindItemInList(s_ipsc->cAlphaArgs(2), ZoneList);
         }
         if (Item1 > 0) {
-            state.dataZoneCtrls->StagedTStatObjects(Item).StageControlledZoneStartPtr = s_ztpc->NumStageCtrZone + 1;
             ++s_ztpc->NumStageCtrZone;
             state.dataZoneCtrls->StagedTStatObjects(Item).NumOfZones = 1;
             state.dataZoneCtrls->StagedTStatObjects(Item).ZoneListActive = false;
             state.dataZoneCtrls->StagedTStatObjects(Item).ZoneOrZoneListPtr = Item1;
         } else if (ZLItem > 0) {
-            state.dataZoneCtrls->StagedTStatObjects(Item).TempControlledZoneStartPtr = s_ztpc->NumStageCtrZone + 1;
             s_ztpc->NumStageCtrZone += ZoneList(ZLItem).NumOfZones;
             state.dataZoneCtrls->StagedTStatObjects(Item).NumOfZones = ZoneList(ZLItem).NumOfZones;
             state.dataZoneCtrls->StagedTStatObjects(Item).ZoneListActive = true;
@@ -4867,8 +4861,6 @@ void InverseModelTemperature(EnergyPlusData &state,
             Real64 CpAir = Psychrometrics::PsyCpAirFnW(state.dataEnvrn->OutHumRat);
             Real64 AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(
                 state, state.dataEnvrn->OutBaroPress, zone.OutDryBulbTemp, state.dataEnvrn->OutHumRat, RoutineNameInfiltration);
-            zone.delta_T = delta_T;
-
             // s4 - Set ACH to 0 when delta_T <= 0.5, add max and min limits to ach
             Real64 M_inf = 0.0;
             if (std::abs(delta_T) > 0.5) {
@@ -6065,25 +6057,21 @@ void CalcZoneAirComfortSetPoints(EnergyPlusData &state)
         } break;
 
         case HVAC::SetptType::SingleHeat: {
-            zoneComfortControlsFanger.FangerType = (int)HVAC::SetptType::SingleHeat;
             zoneComfortControlsFanger.LowPMV = comfortZone.setpts[(int)HVAC::SetptType::SingleHeat].heatSetptSched->getCurrentVal();
             zoneComfortControlsFanger.HighPMV = -999.0;
         } break;
 
         case HVAC::SetptType::SingleCool: {
-            zoneComfortControlsFanger.FangerType = (int)HVAC::SetptType::SingleCool;
             zoneComfortControlsFanger.LowPMV = -999.0;
             zoneComfortControlsFanger.HighPMV = comfortZone.setpts[(int)HVAC::SetptType::SingleCool].coolSetptSched->getCurrentVal();
         } break;
 
         case HVAC::SetptType::SingleHeatCool: {
-            zoneComfortControlsFanger.FangerType = (int)HVAC::SetptType::SingleHeatCool;
             zoneComfortControlsFanger.LowPMV = zoneComfortControlsFanger.HighPMV =
                 comfortZone.setpts[(int)HVAC::SetptType::SingleHeatCool].coolSetptSched->getCurrentVal();
         } break;
 
         case HVAC::SetptType::DualHeatCool: {
-            zoneComfortControlsFanger.FangerType = (int)HVAC::SetptType::DualHeatCool;
             zoneComfortControlsFanger.LowPMV = comfortZone.setpts[(int)HVAC::SetptType::DualHeatCool].heatSetptSched->getCurrentVal();
             zoneComfortControlsFanger.HighPMV = comfortZone.setpts[(int)HVAC::SetptType::DualHeatCool].coolSetptSched->getCurrentVal();
             if (zoneComfortControlsFanger.LowPMV > zoneComfortControlsFanger.HighPMV) {

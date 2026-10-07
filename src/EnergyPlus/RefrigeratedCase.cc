@@ -2706,7 +2706,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
             RefrigRack(RackNum).Name = Alphas(1);
             RefrigRack(RackNum).MyIdx = RackNum;
             state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum).Name = Alphas(1);
-            state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum).SourceType = CurrentModuleObject;
 
             if (lAlphaBlanks(2)) {
                 RefrigRack(RackNum).HeatRejectionLocation = HeatRejLocation::Outdoors;
@@ -3258,7 +3257,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // set CondenserType and rated temperature difference (51.7 - 35)C per ARI 460
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Air;
-                state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).SourceType = CurrentModuleObject;
                 Condenser(CondNum).RatedDelT = CondARI460DelT; //= 16.7d0 ,Rated sat cond temp - dry bulb air T for air-cooled Condensers, ARI460
                 Condenser(CondNum).RatedTCondense = CondARI460Tcond;
                 if (Condenser(CondNum).CapCurvePtr > 0) {
@@ -3409,7 +3407,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // set CondenserType and rated Heat Rejection per ARI 490 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Evap;
-                state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).SourceType = CurrentModuleObject;
                 Condenser(CondNum).RatedTCondense = CondARI490Tcond;
                 Condenser(CondNum).RatedDelT = CondARI490DelT;
 
@@ -3681,7 +3678,6 @@ void GetRefrigerationInput(EnergyPlusData &state)
 
                 // set CondenserType and rated Heat Rejection per ARI 450 rating
                 Condenser(CondNum).CondenserType = DataHeatBalance::RefrigCondenserType::Water;
-                state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).SourceType = CurrentModuleObject;
                 if ((!lNumericBlanks(1)) && (Numbers(1) > 0.0)) {
                     Condenser(CondNum).RatedCapacity = Numbers(1);
                 } else {

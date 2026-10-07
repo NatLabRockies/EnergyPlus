@@ -138,11 +138,8 @@ struct SystemVarsData : BaseGlobalStruct
     fs::path envinputpath2;
     bool TestAllPaths = false;
     int iEnvSetThreads = 0;
-    bool lEnvSetThreadsInput = false;
     int iepEnvSetThreads = 0;
-    bool lepSetThreadsInput = false;
     int iIDFSetThreads = 0;
-    bool lIDFSetThreadsInput = false;
     int inumActiveSims = 1;
     bool lnumActiveSims = false;
     int MaxNumberOfThreads = 1;
@@ -194,11 +191,8 @@ struct SystemVarsData : BaseGlobalStruct
         lMinimalShadowing = false;
         TestAllPaths = false;
         iEnvSetThreads = 0;
-        lEnvSetThreadsInput = false;
         iepEnvSetThreads = 0;
-        lepSetThreadsInput = false;
         iIDFSetThreads = 0;
-        lIDFSetThreadsInput = false;
         inumActiveSims = 1;
         lnumActiveSims = false;
         MaxNumberOfThreads = 1;
