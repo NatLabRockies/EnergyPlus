@@ -116,7 +116,10 @@ namespace LiquidCooledITEPlantComponents {
         void
         simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
         void onInitLoopEquip(EnergyPlusData &state, const PlantLocation &calledFromLocation) override;
-        void oneTimeInit(EnergyPlusData &state) override;
+        void oneTimeInit([[maybe_unused]] EnergyPlusData &state) override
+        {
+        }
+        void oneTimeInit_new(EnergyPlusData &state) override;
         void sizeColdPlate(EnergyPlusData &state);
         void doPhysics(EnergyPlusData &state);
         void report(EnergyPlusData &state);

@@ -172,10 +172,6 @@ void CoilCoolingITEColdPlateData::simulate(EnergyPlusData &state,
                                            [[maybe_unused]] Real64 &CurLoad,
                                            [[maybe_unused]] bool RunFlag)
 {
-    if (this->oneTimeInitFlag) {
-        this->oneTimeInit(state);
-    }
-
     if (this->myEnvrnFlag && state.dataGlobal->BeginEnvrnFlag && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
         static constexpr std::string_view routineName("CoilCoolingITEColdPlateData::simulate");
         Real64 const rho = this->plantLoc.loop->glycol->getDensity(state, state.dataLoopNodes->Node(this->inletNode).Temp, routineName);
@@ -218,9 +214,8 @@ void CoilCoolingITEColdPlateData::onInitLoopEquip(EnergyPlusData &state, [[maybe
     }
 }
 
-void CoilCoolingITEColdPlateData::oneTimeInit(EnergyPlusData &state)
+void CoilCoolingITEColdPlateData::oneTimeInit_new(EnergyPlusData &state)
 {
-    this->oneTimeInitFlag = false;
     this->setupOutputVariables(state);
 }
 
@@ -440,11 +435,14 @@ void CoilCoolingITEColdPlateData::processInputForCoilCoolingITEColdPlate(EnergyP
         thisColdPlate.name = Util::makeUPPER(thisObjectName);
 
         // Get schedules
-        if (fields.contains("availability_schedule")) {
-            thisColdPlate.availabilitySchedule = Sched::GetSchedule(state, fields.at("availability_schedule").get<std::string>());
+        if (fields.contains("availability_schedule_name")) {
+            std::string const schedName = Util::makeUPPER(fields.at("availability_schedule_name").get<std::string>());
+            if (!schedName.empty()) {
+                thisColdPlate.availabilitySchedule = Sched::GetSchedule(state, schedName);
+            }
         }
         if (fields.contains("it_equipment_load_schedule_name")) {
-            std::string const schedName = fields.at("it_equipment_load_schedule_name").get<std::string>();
+            std::string const schedName = Util::makeUPPER(fields.at("it_equipment_load_schedule_name").get<std::string>());
             if (!schedName.empty()) {
                 thisColdPlate.itLoadSchedule = Sched::GetSchedule(state, schedName);
             }
