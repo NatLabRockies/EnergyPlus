@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 620" role="img" aria-labelledby="title description">
+  <title id="title">Physical airflow compared with the EnergyPlus timestep representation</title>
+  <desc id="description">Two panels share one aligned airflow-rate axis. The left panel shows conceptual physical switching from DX-only airflow to a lower airflow during DX plus supplemental heat, then back to DX-only airflow. The right panel shows the proposed EnergyPlus calculation over one timestep: node and DX-coil airflow use the PLR-weighted average, while the supplemental coil is evaluated at its specified airflow.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#263238" />
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #263238; }
+      .title { font-size: 24px; font-weight: 700; }
+      .panel { font-size: 19px; font-weight: 700; }
+      .label { font-size: 16px; }
+      .small { font-size: 14px; }
+      .equation { font-size: 19px; font-weight: 600; }
+    </style>
+  </defs>
+  <rect width="1500" height="620" fill="#ffffff" />
+  <text x="775" y="38" text-anchor="middle" class="title">Physical operation and EnergyPlus airflow for one timestep</text>
+
+  <text x="425" y="82" text-anchor="middle" class="panel">Conceptual physical operation</text>
+  <text x="1090" y="82" text-anchor="middle" class="panel">Proposed EnergyPlus calculation</text>
+
+  <line x1="115" y1="390" x2="115" y2="112" stroke="#263238" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="42" y="253" text-anchor="middle" class="label" transform="rotate(-90 42 253)">Airflow rate</text>
+  <line x1="145" y1="390" x2="700" y2="390" stroke="#263238" stroke-width="2" />
+  <line x1="800" y1="390" x2="1420" y2="390" stroke="#263238" stroke-width="2" marker-end="url(#arrow)" />
+
+  <path d="M160 155 H345 V295 H510 V155 H690" fill="none" stroke="#087e8b" stroke-width="5" stroke-linejoin="round" />
+  <text x="175" y="137" class="label" fill="#075b64">ṁ<tspan baseline-shift="sub" font-size="12">DXHeat</tspan></text>
+  <text x="427" y="318" text-anchor="middle" class="label" fill="#075b64">ṁ<tspan baseline-shift="sub" font-size="12">SuppHeat</tspan></text>
+  <text x="252" y="424" text-anchor="middle" class="label">DX only</text>
+  <text x="427" y="424" text-anchor="middle" class="label">DX + Supp</text>
+  <text x="600" y="424" text-anchor="middle" class="label">DX only</text>
+  <line x1="345" y1="390" x2="345" y2="402" stroke="#263238" stroke-width="2" />
+  <line x1="510" y1="390" x2="510" y2="402" stroke="#263238" stroke-width="2" />
+  <text x="422" y="474" text-anchor="middle" class="small">Physical timestep</text>
+
+  <line x1="840" y1="155" x2="1385" y2="155" stroke="#3973ac" stroke-width="3" stroke-dasharray="10 7" />
+  <text x="850" y="137" class="label" fill="#3973ac">DX-only reference: ṁ<tspan baseline-shift="sub" font-size="12">DXOnly</tspan></text>
+  <line x1="840" y1="190" x2="1385" y2="190" stroke="#087e8b" stroke-width="5" />
+  <text x="1137" y="219" text-anchor="middle" class="label" fill="#075b64">ṁ<tspan baseline-shift="sub" font-size="12">node</tspan> = ṁ<tspan baseline-shift="sub" font-size="12">DXHeat</tspan> = ṁ<tspan baseline-shift="sub" font-size="12">avg</tspan></text>
+  <line x1="840" y1="295" x2="1385" y2="295" stroke="#c94c4c" stroke-width="3" stroke-dasharray="10 7" />
+  <text x="850" y="277" class="label" fill="#c94c4c">Supp-only reference: ṁ<tspan baseline-shift="sub" font-size="12">SuppHeat</tspan></text>
+  <text x="1112" y="424" text-anchor="middle" class="label">DX + Supp</text>
+  <text x="1112" y="450" text-anchor="middle" class="small">(e.g., PLR<tspan baseline-shift="sub" font-size="10">DXOnly</tspan> = 0.75; PLR<tspan baseline-shift="sub" font-size="10">SuppHeat</tspan> = 0.25)</text>
+  <text x="1112" y="474" text-anchor="middle" class="small">EnergyPlus timestep</text>
+
+  <rect x="170" y="490" width="1160" height="48" rx="5" fill="#eef4f3" stroke="#b8cfcb" />
+  <text x="750" y="520" text-anchor="middle" class="equation">ṁ<tspan baseline-shift="sub" font-size="13">avg</tspan> = PLR<tspan baseline-shift="sub" font-size="13">SuppHeat</tspan> · ṁ<tspan baseline-shift="sub" font-size="13">SuppHeat</tspan> + PLR<tspan baseline-shift="sub" font-size="13">DXOnly</tspan> · ṁ<tspan baseline-shift="sub" font-size="13">DXOnly</tspan></text>
+  <text x="750" y="565" text-anchor="middle" class="small">PLR<tspan baseline-shift="sub" font-size="10">DXOnly</tspan> = 1 − PLR<tspan baseline-shift="sub" font-size="10">SuppHeat</tspan>. EnergyPlus uses the weighted airflow for the timestep; it does not explicitly switch between sub-timestep operating intervals.</text>
+  <line x1="300" y1="596" x2="350" y2="596" stroke="#3973ac" stroke-width="3" stroke-dasharray="10 7" />
+  <text x="362" y="601" class="small" fill="#3973ac">ṁ<tspan baseline-shift="sub" font-size="10">node</tspan> during "DX only"</text>
+  <line x1="790" y1="596" x2="840" y2="596" stroke="#c94c4c" stroke-width="3" stroke-dasharray="10 7" />
+  <text x="852" y="601" class="small" fill="#c94c4c">ṁ<tspan baseline-shift="sub" font-size="10">node</tspan> during "Supp only"</text>
+</svg>
