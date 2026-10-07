@@ -1,4 +1,4 @@
-Fan:SystemModel Night Ventilation Performance Fields
+Fan:SystemModel Night Ventilation Mode Fields
 =====================================================
 
 **Joe Robertson, National Laboratory of the Rockies**
@@ -41,6 +41,8 @@ None of these fields affect the flow rate the fan is asked to move; that continu
 The `Night Ventilation Mode Maximum Air Flow Rate` field only clips that requested flow to no more than the specified value, exactly as `FanPerformance:NightVentilation`'s `Maximum Flow Rate` field is documented to do for the legacy fan types.
 
 The previously unused `Night Ventilation Mode Flow Fraction` field is removed since it duplicated `AvailabilityManager:NightVentilation`'s own flow fraction field and was never consumed.
+
+![Legacy night-ventilation performance fields carried into Fan:SystemModel, with new fields highlighted and flow-request control retained by AvailabilityManager:NightVentilation.](NFP-FanSystemModel-NightVentilation.png)
 
 ## Approach ##
 
