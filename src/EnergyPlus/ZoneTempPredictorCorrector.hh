@@ -51,7 +51,6 @@
 // C++ Headers
 #include <string>
 #include <unordered_set>
-#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -59,7 +58,6 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
@@ -70,6 +68,9 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace ZoneTempPredictorCorrector {
+
+    constexpr Real64 peopleActivityLevelDefault = 130.0; // Watts per person
+    constexpr Real64 peopleSensibleFracDefault = 0.6;
 
     struct ZoneSetptScheds
     {

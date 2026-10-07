@@ -48,13 +48,9 @@
 // C++ Headers
 #include <format>
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array.functions.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HybridModel.hh>
@@ -62,6 +58,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+#include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 namespace EnergyPlus {
 
@@ -334,16 +331,19 @@ namespace HybridModel {
                         } else {
                             ShowWarningError(
                                 state,
-                                std::format("Field \"{}\": default people activity level is not provided, default value of 130W/person will be used.",
-                                            cAlphaFieldNames(9)));
+                                std::format(
+                                    "Field \"{}\": default people activity level is not provided, default value of {:.1f}W/person will be used.",
+                                    cAlphaFieldNames(9),
+                                    ZoneTempPredictorCorrector::peopleActivityLevelDefault));
                         }
                         if (peopleSensibleFractionSched != nullptr) {
                             hmZone.peopleSensibleFracSched = peopleSensibleFractionSched;
                         } else {
                             ShowWarningError(
                                 state,
-                                std::format("Field \"{}\": default people sensible heat rate is not provided, default value of 0.6 will be used.",
-                                            cAlphaFieldNames(10)));
+                                std::format("Field \"{}\": default people sensible heat rate is not provided, default value of {:.1f} will be used.",
+                                            cAlphaFieldNames(10),
+                                            ZoneTempPredictorCorrector::peopleSensibleFracDefault));
                         }
                         if (peopleRadiantFractionSched != nullptr) {
                             hmZone.peopleRadiantFracSched = peopleRadiantFractionSched;
