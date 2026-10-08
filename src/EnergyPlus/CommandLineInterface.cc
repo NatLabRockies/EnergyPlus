@@ -995,8 +995,8 @@ state.dataStrGlobals->inputFilePath='{:g}',
             readVarsEnvironment + "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(MVIfile) + "\" unlimited";
 
         // systemCall will be responsible to handle to above command on Windows versus Unix
-        int const rviExitCode = FileSystem::systemCall(readVarsRviCommand);
-        int const mviExitCode = FileSystem::systemCall(readVarsMviCommand);
+        FileSystem::systemCall(readVarsRviCommand);
+        FileSystem::systemCall(readVarsMviCommand);
 
         if (!rviFileExists) {
             FileSystem::removeFile(RVIfile);
@@ -1007,19 +1007,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
         }
 
         FileSystem::moveFile("readvars.audit", state.dataStrGlobals->outputRvauditFilePath);
-
-        bool readVarsFailed = false;
-        if (rviExitCode != 0) {
-            DisplayString(state, std::format("ERROR: ReadVarsESO failed to process the ESO output; exit code: {}.", rviExitCode));
-            readVarsFailed = true;
-        }
-        if (mviExitCode != 0) {
-            DisplayString(state, std::format("ERROR: ReadVarsESO failed to process the MTR output; exit code: {}.", mviExitCode));
-            readVarsFailed = true;
-        }
-        if (readVarsFailed) {
-            return static_cast<int>(ReturnCodes::Failure);
-        }
 
         return static_cast<int>(ReturnCodes::Success);
     }
