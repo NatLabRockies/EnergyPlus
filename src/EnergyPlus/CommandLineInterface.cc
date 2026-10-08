@@ -939,22 +939,28 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
     int runReadVarsESO(EnergyPlusData &state)
     {
-        fs::path readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
+        fs::path const readVarsPath =
+            (state.dataStrGlobals->exeDirectoryPath / "python_lib" / "bin" / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
 
         if (!FileSystem::fileExists(readVarsPath)) {
-            readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "PostProcess" / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
-            if (!FileSystem::fileExists(readVarsPath)) {
-                // should report the error differently if the user is calling into E+ through EXE or DLL
-                if (state.dataGlobal->eplusRunningViaAPI) {
-                    DisplayString(
-                        state,
-                        "ERROR: Could not find ReadVarsESO executable.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
-                } else {
-                    DisplayString(state, std::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath)));
-                }
-                return static_cast<int>(ReturnCodes::Failure);
+            // should report the error differently if the user is calling into E+ through EXE or DLL
+            if (state.dataGlobal->eplusRunningViaAPI) {
+                DisplayString(state,
+                              std::format("ERROR: Could not find ReadVarsESO program at: {}. When calling through C API, make sure to call "
+                                          "setEnergyPlusRootDirectory.",
+                                          FileSystem::getAbsolutePath(readVarsPath)));
+            } else {
+                DisplayString(state, std::format("ERROR: Could not find ReadVarsESO program at: {}.", FileSystem::getAbsolutePath(readVarsPath)));
             }
+            return static_cast<int>(ReturnCodes::Failure);
         }
+
+        fs::path const pythonLibPath = state.dataStrGlobals->exeDirectoryPath / "python_lib";
+#ifdef _WIN32
+        std::string const readVarsEnvironment = "set \"PYTHONPATH=" + FileSystem::toString(pythonLibPath) + "\" && ";
+#else
+        std::string const readVarsEnvironment = "PYTHONPATH=\"" + FileSystem::toString(pythonLibPath) + "\" ";
+#endif
 
         fs::path const RVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".rvi");
         fs::path const MVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".mvi");
@@ -974,7 +980,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!mviFileExists) {
             std::ofstream ofs{MVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", MVIfile));
             } else {
                 ofs << FileSystem::toString(state.files.mtr.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.mtr_csv.filePath) << '\n';
@@ -983,8 +989,10 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
         // We quote the paths in case we have spaces
         // "/Path/to/ReadVarEso" "/Path/to/folder with spaces/file.rvi" unlimited
-        std::string const readVarsRviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(RVIfile) + "\" unlimited";
-        std::string const readVarsMviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(MVIfile) + "\" unlimited";
+        std::string const readVarsRviCommand =
+            readVarsEnvironment + "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(RVIfile) + "\" unlimited";
+        std::string const readVarsMviCommand =
+            readVarsEnvironment + "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(MVIfile) + "\" unlimited";
 
         // systemCall will be responsible to handle to above command on Windows versus Unix
         FileSystem::systemCall(readVarsRviCommand);
@@ -999,6 +1007,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         }
 
         FileSystem::moveFile("readvars.audit", state.dataStrGlobals->outputRvauditFilePath);
+
         return static_cast<int>(ReturnCodes::Success);
     }
 

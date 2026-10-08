@@ -195,6 +195,10 @@ if(BUILD_TESTING)
   option(ENABLE_REGRESSION_TESTING "Enable Regression Tests" OFF)
   option(ENABLE_REVERSE_DD_TESTING "Enable Reverse Design Day Tests" OFF)
   option(BUILD_WCE_TESTING "Build testing targets for Windows Calculation Engine" OFF)
+  if(ENABLE_REVERSE_DD_TESTING AND NOT PYTHON_CLI)
+    message(AUTHOR_WARNING "Reverse design day testing requires PYTHON_CLI in order to call ReadVarsESO, turning it off.")
+    set(ENABLE_REVERSE_DD_TESTING OFF)
+  endif()
   if(ENABLE_REGRESSION_TESTING)
     if(CMAKE_CL_64)
       set(ARCH_FLAG "-64bit")
@@ -243,11 +247,11 @@ if(ENABLE_REGRESSION_TESTING)
     message(AUTHOR_WARNING "Regression testing is enabled, but no script or baseline has been provided, turning it off.")
     set(DO_REGRESSION_TESTING OFF)
   else()
-    if(BUILD_FORTRAN)
+    if(PYTHON_CLI)
       # No Problem
       set(DO_REGRESSION_TESTING ON)
     else()
-      message(AUTHOR_WARNING "For regression testing, you must enable BUILD_FORTRAN in order to call ReadVarEso, turning it off.")
+      message(AUTHOR_WARNING "For regression testing, you must enable PYTHON_CLI in order to call ReadVarsESO, turning it off.")
       set(DO_REGRESSION_TESTING OFF)
     endif()
   endif()
@@ -335,10 +339,6 @@ if(BUILD_FORTRAN)
   cmake_add_fortran_subdirectory(
     src/ExpandObjects
     PROJECT ExpandObjects
-    NO_EXTERNAL_INSTALL)
-  cmake_add_fortran_subdirectory(
-    src/ReadVars
-    PROJECT ReadVars
     NO_EXTERNAL_INSTALL)
   set(TRANSITION_EXTRA_FLAGS "-DCMAKE_VERSION_MAJOR:STRING=${CMAKE_VERSION_MAJOR}" "-DCMAKE_VERSION_MINOR:STRING=${CMAKE_VERSION_MINOR}"
                              "-DCMAKE_VERSION_PATCH:STRING=${CMAKE_VERSION_PATCH}")

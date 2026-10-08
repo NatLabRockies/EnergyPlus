@@ -124,7 +124,6 @@ if [ ! "$link_directory" = "n" ]; then
 	ln -sf "${install_directory}/PreProcess/IDFVersionUpdater/IDFVersionUpdater" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/PreProcess/ParametricPreprocessor/ParametricPreprocessor" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/PreProcess/FMUParser/parser" "${link_directory}" 2> /dev/null > /dev/null || link_err
-	ln -sf "${install_directory}/PostProcess/ReadVarsESO" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/runenergyplus" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/runepmacro" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/runreadvars" "${link_directory}" 2> /dev/null > /dev/null || link_err
@@ -146,7 +145,6 @@ if [ ! "$link_directory" = "n" ]; then
 		rm -f "${link_directory}/IDFVersionUpdater"
 		rm -f "${link_directory}/ParametricPreprocessor"
 		rm -f "${link_directory}/parser"
-		rm -f "${link_directory}/ReadVarsESO"
 		rm -f "${link_directory}/runenergyplus"
 		rm -f "${link_directory}/runepmacro"
 		rm -f "${link_directory}/runreadvars"

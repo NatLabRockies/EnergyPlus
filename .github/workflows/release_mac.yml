@@ -212,7 +212,7 @@ jobs:
           "energyplus" "libenergyplusapi.dylib"
           "ExpandObjects" "ConvertInputFormat"
           "PreProcess/IDFVersionUpdater/Transition-V23-1-0-to-V23-2-0"
-          "PostProcess/ReadVarsESO" "PostProcess/HVAC-Diagram"
+          "PostProcess/HVAC-Diagram"
         )
 
         TGZ_DIR=$(find _CPack_Packages/Darwin/TGZ -name "EnergyPlus*" -type d -maxdepth 1)
@@ -363,7 +363,6 @@ jobs:
         codesign -dvvv ./test_install/libenergyplusapi.dylib
         codesign -dvvv ./test_install/libpython*.dylib
         codesign -dvvv ./test_install/ConvertInputFormat
-        codesign -dvvv ./test_install/PostProcess/ReadVarsESO
         echo "::endgroup::"
 
         begin_group "Full Check signature of installed DMG for all executables and resolve otool libraries"

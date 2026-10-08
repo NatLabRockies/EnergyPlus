@@ -124,8 +124,8 @@
 :   5.  If available Copy %1.rvi (post processor commands) into Eplusout.inp
 :       If available Copy %1.mvi (post processor commands) into eplusmtr.inp
 :       or create appropriate input to get meter output from eplusout.mtr
-:   6.  Execute ReadVarsESO.exe (the Post Processing Program)
-:       Execute ReadVarsESO.exe (the Post Processing Program) for meter output
+:   6.  Execute ReadVarsESO (the Post Processing Program)
+:       Execute ReadVarsESO (the Post Processing Program) for meter output
 :   7.  Copy Eplusout.* to %1.*
 :   8.  Clean up directory.
 :
@@ -137,6 +137,7 @@
 
  SET program_path=%~dp0
  IF "%epPath%" NEQ "" SET program_path=%epPath%
+ SET "PYTHONPATH=%program_path%python_lib;%PYTHONPATH%"
 
 : Set flag if the current directory is the same directory that EnergyPlus and the 
 : batch file are located.
@@ -386,12 +387,12 @@ IF EXIST ip.err DEL ip.err
 IF EXIST convert.txt DEL convert.txt
 :skipConv
 
-IF EXIST eplusout.inp "%program_path%postprocess\ReadVarsESO.exe" eplusout.inp %rvset%
-IF NOT EXIST eplusout.inp "%program_path%postprocess\ReadVarsESO.exe" " " %rvset%
-IF EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.exe" eplusmtr.inp %rvset%
+IF EXIST eplusout.inp "%program_path%python_lib\bin\ReadVarsESO.exe" eplusout.inp %rvset%
+IF NOT EXIST eplusout.inp "%program_path%python_lib\bin\ReadVarsESO.exe" " " %rvset%
+IF EXIST eplusmtr.inp "%program_path%python_lib\bin\ReadVarsESO.exe" eplusmtr.inp %rvset%
 IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
 IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
-IF NOT EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.exe" test.mvi %rvset%
+IF NOT EXIST eplusmtr.inp "%program_path%python_lib\bin\ReadVarsESO.exe" test.mvi %rvset%
 :skipReadVars
 
 "%program_path%postprocess\HVAC-Diagram.exe"

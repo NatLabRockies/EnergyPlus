@@ -123,6 +123,18 @@ PRG_X=ExpandObjects
 PRG_M=EPMacro
 # Name of ReadVarsESO executable
 PRG_R=ReadVarsESO
+
+# ReadVarsESO is installed by pip under python_lib/bin. Resolve the installation
+# directory from this script when ENERGYPLUS_DIR was not supplied, including
+# when the script was reached through its /usr/local/bin symlink.
+READVARS_ROOT="$ENERGYPLUS_DIR"
+if $auto_eplus_dir; then
+  READVARS_SCRIPT="$0"
+  if [ -n "`readlink "$0"`" ]; then
+    READVARS_SCRIPT=`readlink "$0"`
+  fi
+  READVARS_ROOT=$(cd "$(dirname "$READVARS_SCRIPT")"; pwd)
+fi
 # Name of hvac-diagram executable
 PRG_H=HVAC-Diagram
 # Name of Basement executable
@@ -599,13 +611,8 @@ fi
 #if %maxcol%==250     SET rvset=
 #if %maxcol%==nolimit SET rvset=unlimited
 
-if $auto_eplus_dir; then
-  "$ENERGYPLUS_DIR/bin/$PRG_R" eplusout.inp unlimited
-  "$ENERGYPLUS_DIR/bin/$PRG_R" eplusmtr.inp unlimited
-else
-  "$ENERGYPLUS_DIR/PostProcess/$PRG_R" eplusout.inp unlimited
-  "$ENERGYPLUS_DIR/PostProcess/$PRG_R" eplusmtr.inp unlimited
-fi
+PYTHONPATH="$READVARS_ROOT/python_lib${PYTHONPATH:+:$PYTHONPATH}" "$READVARS_ROOT/python_lib/bin/$PRG_R" eplusout.inp unlimited
+PYTHONPATH="$READVARS_ROOT/python_lib${PYTHONPATH:+:$PYTHONPATH}" "$READVARS_ROOT/python_lib/bin/$PRG_R" eplusmtr.inp unlimited
 
 if [ -f eplusout.bnd ]; then
   if $auto_eplus_dir; then

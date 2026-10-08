@@ -55,6 +55,7 @@
 
 import argparse
 import platform
+import stat
 from pathlib import Path
 from subprocess import run
 from sys import executable
@@ -63,15 +64,32 @@ PKGS = {
     "energyplus_launch": "3.7.4",
     "energyplus_transition_tools": "3.0.0",
     "ghedesigner": "2.1.1",
+    "readvars": "0.0.2",
 }
+
+
+def readvars_executable(python_lib_dir: Path) -> Path:
+    executable_name = "ReadVarsESO.exe" if platform.system() == "Windows" else "ReadVarsESO"
+    return python_lib_dir / "bin" / executable_name
+
+
+def prepare_readvars_executable(python_lib_dir: Path) -> None:
+    executable_path = readvars_executable(python_lib_dir)
+    if not executable_path.is_file():
+        raise FileNotFoundError(f"ReadVarsESO executable was not installed at the expected location: {executable_path}")
+    if platform.system() != "Windows":
+        executable_path.chmod(executable_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
 def install_packages(python_lib_dir: Path):
     # expecting one command line argument - the path to the python_lib folder to place the pip package
     pkgs_to_install = {k: v for k, v in PKGS.items() if not (python_lib_dir / f"{k}-{v}.dist-info").exists()}
+    if not readvars_executable(python_lib_dir).is_file():
+        pkgs_to_install["readvars"] = PKGS["readvars"]
 
     if not pkgs_to_install:
         print("PYTHON: All CLI packages found and up to date, no pip install needed")
+        prepare_readvars_executable(python_lib_dir)
         return
 
     to_install = [f"{n}=={v}" for n, v in pkgs_to_install.items()]
@@ -93,6 +111,7 @@ def install_packages(python_lib_dir: Path):
 
     print(f"PYTHON: CLI packages not found or out of date, pip installing these now: {to_install}")
     run([executable, "-m", "pip", "install", f"--target={python_lib_dir}", "--upgrade", *to_install], check=True)
+    prepare_readvars_executable(python_lib_dir)
 
 
 def existing_dir(path_str):

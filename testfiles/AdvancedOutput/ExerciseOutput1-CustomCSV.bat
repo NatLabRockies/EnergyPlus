@@ -1,5 +1,7 @@
 @echo off
-set post_proc=C:\EnergyPlusV7-1-0\PostProcess\
+set energyplus_dir=C:\EnergyPlusV7-1-0
+set post_proc=%energyplus_dir%\python_lib\bin\
+set "PYTHONPATH=%energyplus_dir%\python_lib;%PYTHONPATH%"
 
 :  Batch File for writing custom RVI results out to CSVs
 :
@@ -47,27 +49,27 @@ IF EXIST eplusout.csv DEL eplusout.csv
 @echo .
 @echo =====  Extracting Results
 @echo .
-IF EXIST "%2.rvi" %post_proc%ReadVarsESO.exe "%2.rvi" timestep
+IF EXIST "%2.rvi" "%post_proc%ReadVarsESO.exe" "%2.rvi" timestep
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_timestep.csv"
-IF EXIST "%2.rvi" %post_proc%ReadVarsESO.exe "%2.rvi" hourly
+IF EXIST "%2.rvi" "%post_proc%ReadVarsESO.exe" "%2.rvi" hourly
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_hourly.csv"
-IF EXIST "%2.rvi" %post_proc%ReadVarsESO.exe "%2.rvi" daily
+IF EXIST "%2.rvi" "%post_proc%ReadVarsESO.exe" "%2.rvi" daily
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_daily.csv"
-IF EXIST "%2.rvi" %post_proc%ReadVarsESO.exe "%2.rvi" monthly
+IF EXIST "%2.rvi" "%post_proc%ReadVarsESO.exe" "%2.rvi" monthly
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_monthly.csv"
-IF EXIST "%2.rvi" %post_proc%ReadVarsESO.exe "%2.rvi" annual
+IF EXIST "%2.rvi" "%post_proc%ReadVarsESO.exe" "%2.rvi" annual
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_annual.csv"
 @echo .
 
-IF EXIST "%2.mvi" %post_proc%ReadVarsESO.exe "%2.mvi" timestep
+IF EXIST "%2.mvi" "%post_proc%ReadVarsESO.exe" "%2.mvi" timestep
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_Meter_timestep.csv"
-IF EXIST "%2.mvi" %post_proc%ReadVarsESO.exe "%2.mvi" hourly
+IF EXIST "%2.mvi" "%post_proc%ReadVarsESO.exe" "%2.mvi" hourly
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_Meter_hourly.csv"
-IF EXIST "%2.mvi" %post_proc%ReadVarsESO.exe "%2.mvi" daily
+IF EXIST "%2.mvi" "%post_proc%ReadVarsESO.exe" "%2.mvi" daily
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_Meter_daily.csv"
-IF EXIST "%2.mvi" %post_proc%ReadVarsESO.exe "%2.mvi" monthly
+IF EXIST "%2.mvi" "%post_proc%ReadVarsESO.exe" "%2.mvi" monthly
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_Meter_monthly.csv"
-IF EXIST "%2.mvi" %post_proc%ReadVarsESO.exe "%2.mvi" annual
+IF EXIST "%2.mvi" "%post_proc%ReadVarsESO.exe" "%2.mvi" annual
 IF EXIST eplusout.csv MOVE eplusout.csv "%1_%2_Meter_annual.csv"
 @echo .
 
