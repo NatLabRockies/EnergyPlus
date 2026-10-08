@@ -10,22 +10,19 @@ Fan:SystemModel Night Ventilation Mode Fields
 `FanPerformance:NightVentilation` lets a modeler specify an alternate fan efficiency, pressure rise, motor efficiency, motor-in-airstream fraction, and maximum flow rate that apply only while `AvailabilityManager:NightVentilation` has forced the fan into night ventilation mode.
 It is documented as applying to `Fan:ConstantVolume`, `Fan:VariableVolume`, `Fan:ZoneExhaust`, and `Fan:OnOff`.
 
-`Fan:SystemModel`, the newer, more general fan object intended to eventually replace the legacy fan types, instead has its own inline night ventilation fields (`Night Ventilation Mode Pressure Rise` and `Night Ventilation Mode Flow Fraction`).
-However, `Night Ventilation Mode Flow Fraction` was never actually read by the alternate-performance code path; night vent flow for `Fan:SystemModel` is, and always has been, driven entirely by `AvailabilityManager:NightVentilation`'s own `Night Venting Flow Fraction` field.
-The field was effectively dead input that could mislead modelers into thinking it had an effect. In addition, `Fan:SystemModel` had no way to specify alternate fan/motor efficiencies for night vent mode, unlike the legacy fan performance object, and no way to cap the night ventilation flow rate independent of the availability manager.
+`Fan:SystemModel` was intended to replace the legacy fan objects and their separate night-ventilation performance object. Today it supports a night pressure-rise override, but its `Night Ventilation Mode Flow Fraction` input is unused; requested flow is controlled by `AvailabilityManager:NightVentilation`. It cannot specify alternate night efficiency or motor performance, or independently cap night flow, so it is less capable in this mode than `Fan:VariableVolume` with `FanPerformance:NightVentilation`.
 
-This is a regression from the original design intent. The FY2016 NFP that introduced `Fan:SystemModel` ("A New Versatile Fan", B. Griffith) lists not requiring a separate `FanPerformance:NightVentilation` object as one of its justifications, and its field description for `Night Ventilation Mode Flow Fraction` says that field and `Night Ventilation Mode Pressure Rise` together "replace the `FanPerformance:NightVentilation` object which is not needed with this fan."
-That original 2015/2016 IDD proposal never included alternate total efficiency, motor efficiency, or motor-in-airstream-fraction fields either, so even as designed, `Fan:SystemModel` could not fully stand in for `FanPerformance:NightVentilation`. With the flow fraction field also going unwired, the original goal was never actually delivered.
+The FY2016 NFP, "A New Versatile Fan," explicitly says the new fan should make `FanPerformance:NightVentilation` unnecessary, but its proposed interface listed only pressure rise and flow fraction. This points to an incomplete replacement scope rather than an intentional change to night-ventilation behavior.
+
+The comparison below illustrates this capability gap.
+
+![Fan power comparison for Fan:VariableVolume with alternate night total efficiency and flow limits, versus Fan:SystemModel with a night pressure-rise override only.](NFP-FanSystemModel-NightVentilation-Comparisons.png)
 
 This work (tracked under issue #11798, and related to the broader inconsistency reported in issue #11808 across fan types) reworks the `Fan:SystemModel` night ventilation inputs so that:
 
 1. The dead `Night Ventilation Mode Flow Fraction` field is removed.
 2. `Fan:SystemModel` gains the same alternate total efficiency, motor efficiency, and motor-in-airstream-fraction inputs that `FanPerformance:NightVentilation` already offers to the legacy fan types.
 3. `Fan:SystemModel` gains an optional, autosizable maximum air flow rate cap for night ventilation mode, mirroring `FanPerformance:NightVentilation`'s `Maximum Flow Rate` field, so that a fan's night-vent flow can be limited independently of (and in addition to) whatever flow fraction `AvailabilityManager:NightVentilation` requests.
-
-## E-mail and Conference Call Conclusions ##
-
-N/A - self-contained defect/enhancement, no external design discussion recorded.
 
 ## Overview ##
 
@@ -42,7 +39,7 @@ The `Night Ventilation Mode Maximum Air Flow Rate` field only clips that request
 
 The previously unused `Night Ventilation Mode Flow Fraction` field is removed since it duplicated `AvailabilityManager:NightVentilation`'s own flow fraction field and was never consumed.
 
-![Legacy night-ventilation performance fields carried into Fan:SystemModel, with new fields highlighted and flow-request control retained by AvailabilityManager:NightVentilation.](NFP-FanSystemModel-NightVentilation.png)
+![Legacy night-ventilation performance fields carried into Fan:SystemModel, with new fields highlighted and flow-request control retained by AvailabilityManager:NightVentilation.](NFP-FanSystemModel-NightVentilation-FieldChanges.png)
 
 ## Approach ##
 
@@ -86,6 +83,8 @@ In `Fan:SystemModel`, `Night Ventilation Mode Flow Fraction` is removed and repl
        \minimum 0.0
        \maximum 1.0
 ```
+
+`Fan:SystemModel`'s existing `\min-fields` remains 14; the added fields follow that position, so minimal-field objects remain valid.
 
 ### Fans.cc / Fans.hh ###
 
@@ -137,45 +136,11 @@ The `V26.2 -> V27.1` `FAN:SYSTEMMODEL` rule inserts a blank `Night Ventilation M
 
 ## Input Output Reference Documentation ##
 
-Added to `doc/input-output-reference/src/overview/group-fans.tex`:
-
-> **Field: Night Ventilation Mode Fan Total Efficiency**
->
-> This optional numeric field is the fan total efficiency used when operating in night mode using AvailabilityManager:NightVentilation. If left blank, the Fan Total Efficiency field described above is used.
-
-> **Field: Night Ventilation Mode Maximum Air Flow Rate**
->
-> This optional numeric field is autosizable and is the maximum air flow rate, in m3/s, allowed for the fan when operating in night mode using AvailabilityManager:NightVentilation. If this field is left blank or autosized, the Design Maximum Air Flow Rate field described above is used and no additional flow cap is applied. The night venting flow rate itself is established by the AvailabilityManager:NightVentilation object's Night Venting Flow Fraction field; this field simply caps that flow to no more than the value specified here.
-
-> **Field: Night Ventilation Mode Motor Efficiency**
->
-> This optional numeric field is the fan motor efficiency used when operating in night mode using AvailabilityManager:NightVentilation. If left blank, the Motor Efficiency field described above is used.
-
-> **Field: Night Ventilation Mode Motor In Air Stream Fraction**
->
-> This optional numeric field is the fraction of motor heat that enters the air stream when operating in night mode using AvailabilityManager:NightVentilation. If left blank, the Motor In Air Stream Fraction field described above is used. A value of 0.0 means the fan motor is outside the air stream; a value of 1.0 means it is inside the air stream.
-
-The `Night Ventilation Mode Flow Fraction` paragraph is removed.
-
-## Input Description ##
-
-See IDD changes above. `\min-fields` for `Fan:SystemModel` is unaffected (14, well below the new fields' positions), so no existing minimal-field objects are impacted.
+Updated `doc/input-output-reference/src/overview/group-fans.tex` with descriptions and fallback behavior for the new fields, and removed the unused `Night Ventilation Mode Flow Fraction` description.
 
 ## Outputs Description ##
 
 No new output variables. Existing predefined tabular report entries (e.g., Fan Total Efficiency, Autosized flag) are unaffected; they continue to report the normal (non-night-vent) design values.
-
-## Engineering Reference ##
-
-No new engineering reference section is required beyond what already documents the night ventilation calculation path; the added field only clips the mass flow rate used in the existing power/temperature-rise equations:
-
-$$ \dot{m}_{fan} = \min\left(\dot{m}_{requested},\ \dot{m}_{max,nightvent}\right) $$
-
-where $\dot{m}_{max,nightvent}$ defaults to the fan's normal design maximum mass flow rate unless a smaller `Night Ventilation Mode Maximum Air Flow Rate` is specified.
-
-## Example File and Transition Changes ##
-
-No new example files added; all affected `Fan:SystemModel` objects in existing `testfiles/*.idf` were updated in place (see Testing section). Transition rule changes are covered in the Approach section above.
 
 ## References ##
 
