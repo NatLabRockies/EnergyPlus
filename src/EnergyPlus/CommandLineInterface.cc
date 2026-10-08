@@ -945,14 +945,12 @@ state.dataStrGlobals->inputFilePath='{:g}',
         if (!FileSystem::fileExists(readVarsPath)) {
             // should report the error differently if the user is calling into E+ through EXE or DLL
             if (state.dataGlobal->eplusRunningViaAPI) {
-                DisplayString(
-                    state,
-                    std::format("ERROR: Could not find ReadVarsESO program at: {}. When calling through C API, make sure to call "
-                                "setEnergyPlusRootDirectory.",
-                                FileSystem::getAbsolutePath(readVarsPath)));
-            } else {
                 DisplayString(state,
-                              std::format("ERROR: Could not find ReadVarsESO program at: {}.", FileSystem::getAbsolutePath(readVarsPath)));
+                              std::format("ERROR: Could not find ReadVarsESO program at: {}. When calling through C API, make sure to call "
+                                          "setEnergyPlusRootDirectory.",
+                                          FileSystem::getAbsolutePath(readVarsPath)));
+            } else {
+                DisplayString(state, std::format("ERROR: Could not find ReadVarsESO program at: {}.", FileSystem::getAbsolutePath(readVarsPath)));
             }
             return static_cast<int>(ReturnCodes::Failure);
         }
