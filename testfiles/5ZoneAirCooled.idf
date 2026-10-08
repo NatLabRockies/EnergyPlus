@@ -100,7 +100,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -3424,6 +3424,8 @@
   Output:Variable,*,Boiler NaturalGas Rate,hourly;
 
   Output:Variable,*,Boiler Heating Rate,hourly;
+
+  Output:Variable,*,Boiler Coefficient of Performance,hourly;
 
   Output:Variable,*,Chiller Electricity Rate,hourly;
 

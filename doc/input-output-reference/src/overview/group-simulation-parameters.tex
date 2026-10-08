@@ -260,6 +260,10 @@ The value in this field is an overall parameter for all types of environments in
 
 This field specifies the minimum number of ``warmup'' days before EnergyPlus will check if it has achieved convergence and can thus start simulating the particular environment (design day, annual run) in question. Although some older investigations indicated that 6 warmup days is generally enough on the minimum end of the spectrum, current thinking is that the convergence checks (controlled by convergence tolerance values above) can be relied on to determine a minimum number of warm days. An arbitrary high minimum can lead to excessive run times for lightweight buildings that may converge quickly and not need many warmup days. Therefore the default is reduced from 6 to just 1. A value of 6 here will replicate older behavior if field was being left blank. Users may wish to increase the value in certain situations when, based on the output variables described in the Output Details document, it is determined that EnergyPlus has not converged. While this parameter should be less than the previous maximum parameter, a value greater than the value entered in the field ``Maximum Number of Warmup Days'' above may be used when users wish to increase warmup days more than the previous field. In this particular case, the previous field will be automatically reset to the value entered in this field and EnergyPlus will run exactly the number of warmup days specified in this field.
 
+\paragraph{Field: Construction Assignment Set Name}\label{building-field-construction-assignment-set-name}
+
+This optional field references a \hyperref[constructionassignmentset]{ConstructionAssignmentSet} object. It provides inherited construction assignments for any surface or sub-surface in the building whose \emph{Construction Name} field is left blank and which does not inherit a set from its Space (ref: the \emph{Construction Assignment Set Name} field on the \hyperref[space]{Space} object, which takes precedence over this one). If a surface's construction cannot be resolved through an explicit assignment, its Space's set, or this Building-level set, a fatal error results.
+
 An example from an IDF:
 
 \begin{lstlisting}
@@ -986,7 +990,7 @@ Although this input field may eventually affect all coils, the current implement
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{SystemLoad} - \textnormal{OutputOff}}{\textnormal{OutputFull} - \textnormal{OutputOff}}
+    \textrm{PLR} = \frac{\textrm{SystemLoad} - \textrm{OutputOff}}{\textrm{OutputFull} - \textrm{OutputOff}}
 \end{equation}
 
 where
@@ -1002,7 +1006,7 @@ OutputFull = System output at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{SystemLoad} - \textnormal{OutputFull}_{i-1}}{\textnormal{OutputFull}_{i} - \textnormal{OutputFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{SystemLoad} - \textrm{OutputFull}_{i-1}}{\textrm{OutputFull}_{i} - \textrm{OutputFull}_{i-1}}
 \end{equation}
 
 where
@@ -1022,7 +1026,7 @@ When coils of Coil:Cooling:DX:VariableSpeed, Coil:Heating:DX:SingleSpeed, and Co
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{DesOutTemp} - \textnormal{InletTemp}}{\textnormal{OutTempFull} - \textnormal{InletTemp}}
+    \textrm{PLR} = \frac{\textrm{DesOutTemp} - \textrm{InletTemp}}{\textrm{OutTempFull} - \textrm{InletTemp}}
 \end{equation}
 
 where
@@ -1038,7 +1042,7 @@ OutTemptFull = Outlet temperature at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{DesOutTemp} - \textnormal{OutTempFull}_{i-1}}{\textnormal{OutTempFull}_{i} - \textnormal{OutTempFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{DesOutTemp} - \textrm{OutTempFull}_{i-1}}{\textrm{OutTempFull}_{i} - \textrm{OutTempFull}_{i-1}}
 \end{equation}
 
 where
@@ -1194,7 +1198,7 @@ HVACSystemRootFindingAlgorithm,
 
 \subsection{Meter:Custom}\label{metercustom}
 
-A custom meter allows the user to group variables or meters onto a virtual meter that can be used just like a normal meter created by EnergyPlus. For consistency, the items being grouped must all be similar. A Meter:Custom cannot reference another Meter:Custom.
+A custom meter allows the user to group variables or meters onto a virtual meter that can be used just like a normal meter created by EnergyPlus. For consistency, the items being grouped must all be similar. A Meter:Custom cannot reference another Meter:Custom or a Meter:CustomDecrement.
 
 \subsubsection{Inputs}\label{inputs-17-008}
 
@@ -1261,7 +1265,7 @@ Additionally, no regular expression can contain a ``,'' because the Input Proces
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name}
 
-This field must be a valid output variable name or a valid meter name. If a Meter:Custom references another Meter:Custom it will generate a warning and not produce any output.
+This field must be a valid output variable name or a valid meter name. If a Meter:Custom references another Meter:Custom or a Meter:CustomDecrement it will generate a warning and not produce any output.
 For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
 \begin{lstlisting}
  Zone,Sum,Exterior Equipment Electricity Energy [J]
@@ -1269,7 +1273,7 @@ For output variables, only summed variables are valid. For example from the rdd 
 
 \subsection{Meter:CustomDecrement}\label{metercustomdecrement}
 
-The decrement custom meter is very similar to the custom meter specification but additionally allows a predefined meter to be used as the ``source'' meter and the remaining items subtract from that predefined meter.
+The decrement custom meter is very similar to the custom meter specification but additionally allows a predefined meter to be used as the ``source'' meter and the remaining items subtract from that predefined meter. A Meter:CustomDecrement cannot reference another Meter:CustomDecrement, either as the Source Meter Name or in the group(s) Key Name-Output Variable/Meter Name fields, though it may reference a Meter:Custom.
 
 \subsubsection{Inputs}\label{inputs-18-008}
 
@@ -1316,7 +1320,7 @@ A resource type should be specified for the meter. All assignments to this meter
 
 \paragraph{Field: Source Meter Name}\label{field-source-meter-name}
 
-This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter.
+This name specifies the meter that will be used as the main source for the decrement custom meter. The remainder of the fields are subtracted from the value of this meter to create the meter value named above. The Source Meter is not changed in any way by including this custom meter. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate an error.
 
 \paragraph{Field: group(s) Key Name-Output Variable/Meter Name}\label{field-groups-key-name-output-variablemeter-name-1}
 
@@ -1338,7 +1342,7 @@ Additionally, no regular expression can contain a ``,'' because the Input Proces
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name-1}
 
-This field must be a valid output variable name or a valid meter name. Additionally, it must be contained on the Source Meter. Note that, if an error occurs, only the Variable in error will show -- confusing things if what was entered was a meter name. For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
+This field must be a valid output variable name or a valid meter name. Additionally, it must be contained on the Source Meter. Note that, if an error occurs, only the Variable in error will show -- confusing things if what was entered was a meter name. This field may reference a Meter:Custom, but if it references another Meter:CustomDecrement it will generate a warning and not produce any output. For output variables, only summed variables are valid. For example from the rdd output, any Sum type variable is valid:
 \begin{lstlisting}
  Zone,Sum,Exterior Equipment Electricity Energy [J]
 \end{lstlisting}

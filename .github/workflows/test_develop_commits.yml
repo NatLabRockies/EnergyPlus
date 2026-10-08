@@ -29,9 +29,9 @@ jobs:
 #          nproc: 3
 #          pretty: "Standard Build on Mac x64"
 #          alternate: false
-#          build-type: release
+#          build-type: Release
 #          run-tests: true
-        - os: macos-14
+        - os: macos-15
           macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
@@ -39,8 +39,9 @@ jobs:
           nproc: 3
           pretty: "Standard Build on Mac arm64"
           alternate: false
-          build-type: release
+          build-type: Release
           run-tests: true
+          link-with-python: true
 #        - os: ubuntu-24.04
 #          arch: x86_64
 #          python-arch: x64
@@ -48,17 +49,29 @@ jobs:
 #          nproc: 4
 #          pretty: "Standard Build on Ubuntu 24.04"
 #          alternate: false
-#          build-type: release
+#          build-type: Release
 #          run-tests: true
+#          link-with-python: true
         - os: windows-2022
           arch: x86_64
           python-arch: x64
           generator: "Visual Studio 17 2022"
           nproc: 4
-          pretty: "Standard Build on Windows VS 2022"
+          pretty: "Standard Build on Windows VS 2022 - Debug"
           alternate: false
-          build-type: debug
+          build-type: Debug
           run-tests: false
+          link-with-python: true
+        - os: windows-2022
+          arch: x86_64
+          python-arch: x64
+          generator: "Visual Studio 17 2022"
+          nproc: 4
+          pretty: "Standard Build on Windows VS 2022 - Debug, No Python"
+          alternate: false
+          build-type: Debug
+          run-tests: false
+          link-with-python: false
         - os: ubuntu-24.04
           arch: x86_64
           python-arch: x64
@@ -66,8 +79,9 @@ jobs:
           nproc: 4
           pretty: "Alternate Build on Ubuntu 24.04"
           alternate: true
-          build-type: release
-          run-tests: true
+          build-type: Release
+          run-tests: false
+          link-with-python: false
 
     steps:
 
@@ -105,8 +119,8 @@ jobs:
         -G "${{ matrix.generator }}"
         -DCMAKE_BUILD_TYPE:STRING="${{ matrix.build-type }}"
         -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }}
-        -DLINK_WITH_PYTHON:BOOL=ON
-        -DPYTHON_CLI:BOOL=ON
+        -DLINK_WITH_PYTHON:BOOL=${{ matrix.link-with-python }}
+        -DPYTHON_CLI:BOOL=${{ matrix.link-with-python }}
         -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
         -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/
         -DBUILD_TESTING:BOOL=ON
@@ -122,7 +136,7 @@ jobs:
       run: >
         cmake
         -DCMAKE_BUILD_TYPE="${{ matrix.build-type }}"
-        -DLINK_WITH_PYTHON=OFF
+        -DLINK_WITH_PYTHON=${{ matrix.link-with-python }}
         -DUSE_PSYCHROMETRICS_CACHING=OFF
         -DUSE_GLYCOL_CACHING=OFF
         -DOPENGL_REQUIRED=OFF

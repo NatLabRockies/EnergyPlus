@@ -2114,7 +2114,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 // Get complete list of components for complex branches
                 if (Node::IsParentObject(state, TypeOfComp, NameOfComp)) {
 
-                    state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Parent = true;
                     NumChildren = Node::GetNumChildren(state, TypeOfComp, NameOfComp);
 
                     SubCompTypes.allocate(NumChildren);
@@ -2159,7 +2158,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
 
                 } else {
                     NumChildren = 0;
-                    state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Parent = false;
                 }
                 state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).NumSubComps = NumChildren;
 
@@ -4383,7 +4381,6 @@ void MatchPlantSys(EnergyPlusData &state,
             auto &thisComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum);
             for (int VarNum = 1; VarNum <= thisComp.NumMeteredVars; ++VarNum) {
                 if (thisComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
-                    thisComp.EnergyTransComp = EnergyTrans;
                     const std::string &CompType = thisComp.TypeOf;
                     const std::string &CompName = thisComp.Name;
                     bool MatchFound = false; // Set to .TRUE. when a match is found
@@ -4396,7 +4393,6 @@ void MatchPlantSys(EnergyPlusData &state,
                     if (MatchFound) {
                         UpdateAirSysCompPtrArray(state, Idx, AirLoopNum, BranchNum, CompNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                     }
-                    thisComp.AirSysToPlantPtr = Idx;
                     break;
                 }
             }

@@ -2361,19 +2361,64 @@ models for convection coefficients.
 Material Surface Properties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three actuators are available for controlling the surface properties
-material related to absorptance. Those material layers used in a
-Construction object that lie at the outside and the inside of the
-assembly determine the surface properties of a heat transfer surface. 
-Actuators called “Material” are available with the control types
-“Surface Property Solar Absorptance,” “Surface Property Thermal
-Absorptance,” and “Surface Property Visible Absorptance.”  These are
-dimensionless parameters between 0.0 and 1.0.  These actuators are
-useful for modeling switchable coatings such as thermochromic paints.
-Note that for a single-layer construction, both the inside and outside
-properties will be overwritten. For overwriting outside properties
-alone, please use “MaterialProperty:VariableAbsorptance” (see
-InputOutputReference).
+Nine actuators with the component type ``Material`` are available for
+controlling material absorptance. The actuator unique identifier is a
+material name, not a surface name. Therefore, an actuator affects every
+opaque Construction in which that material is exposed on the
+corresponding face. The first layer of a Construction supplies its
+outside-face properties, and the last layer supplies its inside-face
+properties. In a single-layer Construction, the same material supplies
+both faces.
+
+For each of the Solar, Thermal, and Visible properties, the available
+control types are as follows:
+
+-  ``Surface Property <Property> Absorptance`` is the legacy control
+   type and applies the same value to both faces of the material.
+
+-  ``Surface Property <Property> Absorptance Outside Face`` applies
+   only when the material is the outside layer of a Construction.
+
+-  ``Surface Property <Property> Absorptance Inside Face`` applies only
+   when the material is the inside layer of a Construction.
+
+A face-specific actuator takes precedence over a legacy actuator when
+both are active for the same property and face. Setting the
+face-specific actuator to ``Null`` relinquishes its control: an active
+legacy actuator then supplies the value. If both actuators are
+``Null``, EnergyPlus restores the value supplied by the material input.
+The actuator values are dimensionless, and the effective value is
+limited to the range 0.0001 through 0.9999.
+
+For example, consider a single-layer Construction with an active legacy
+Thermal actuator set to 0.30 and an active Inside Face Thermal actuator
+set to 0.60. The effective outside-face value is 0.30 and the
+inside-face value is 0.60. Setting the Inside Face actuator to ``Null``
+makes both faces 0.30; subsequently setting the legacy actuator to
+``Null`` restores the material input values.
+
+Use the ``BeginZoneTimestepBeforeInitHeatBalance`` calling point to
+apply a new value during the current zone timestep. A value assigned at
+a later calling point is not applied to the surface heat balance until
+the next initialization.
+
+For a surface whose exposed materials have a referenced face-specific
+Thermal actuator, EnergyPlus registers the ``Surface Thermal
+Absorptance Outside Face`` and ``Surface Thermal Absorptance Inside
+Face`` output variables. A referenced face-specific Solar actuator
+similarly registers the ``Surface Solar Absorptance Outside Face`` and
+``Surface Solar Absorptance Inside Face`` output variables. A property
+without a referenced face-specific actuator retains its legacy
+unqualified output-variable name.
+
+These actuators are useful for modeling switchable coatings such as
+thermochromic paints. For schedule- or curve-based control of Thermal
+and Solar absorptance, ``MaterialProperty:VariableAbsorptance`` provides
+a dedicated alternative. That object is evaluated after the EMS
+material actuators at the surface level. If both mechanisms target the
+same property and face, ``MaterialProperty:VariableAbsorptance``
+determines the effective value; overlapping controls should therefore
+be used only when this precedence is intended.
 
 Surface Construction State
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

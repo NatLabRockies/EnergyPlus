@@ -83,20 +83,8 @@
 					<td><em>N</em>D Real Array class template</td>
 				</tr>
 				<tr class="table_text">
-					<td><font color="#16694A"><b>Array<em>N</em>A</b></font></td>
-					<td><em>N</em>D Argument (contiguous proxy) Array class template</td>
-				</tr>
-				<tr class="table_text">
 					<td><font color="#16694A"><b>Array<em>N</em>.all</b></font></td>
 					<td><em>N</em>D Array master wrapper</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>Array<em>N</em>S</b></font></td>
-					<td><em>N</em>D Slice Array class template</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>MArray<em>N</em></b></font></td>
-					<td><em>N</em>D Member array class template</td>
 				</tr>
 				<tr class="table_text">
 					<td>ArrayInitializer</td>
@@ -131,18 +119,6 @@
 					<td>Fast 4-element vector</td>
 				</tr>
 				<tr class="table_text">
-					<td><font color="#16694A"><b>CArray</b></font></td>
-					<td>C-style array wrapper</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>CArrayA</b></font></td>
-					<td>C-style array wrapper with alignment support</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>CArrayP</b></font></td>
-					<td>C-style array wrapper/proxy</td>
-				</tr>
-				<tr class="table_text">
 					<td><font color="#16694A"><b>ChunkVector</b></font></td>
 					<td>Chunk-contiguous 1D vector</td>
 				</tr>
@@ -163,10 +139,6 @@
 					<td>Sticky (persistent) initializer wrapper class</td>
 				</tr>
 				<tr class="table_text">
-					<td><font color="#16694A"><b>Cstring</b></font></td>
-					<td>C-style string (char*) memory managed wrapper class</td>
-				</tr>
-				<tr class="table_text">
 					<td><b><font color="#16694A">string.constants</font></b></td>
 					<td>Useful std::string constants</td>
 				</tr>
@@ -185,10 +157,6 @@
 				<tr class="table_text">
 					<td><font color="#16694A"><b>Fmath</b></font></td>
 					<td>Math intrinsics/other functions</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>numeric</b></font></td>
-					<td>Numeric intrinsics: kind-related, digits, huge, ...</td>
 				</tr>
 				<tr class="table_text">
 					<td><font color="#16694A"><b>bit</b></font></td>
@@ -263,32 +231,12 @@
 					<td>Random number functions</td>
 				</tr>
 				<tr class="table_text">
-					<td><font color="#16694A"><b>command</b></font></td>
-					<td>Command line functions</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>environment</b></font></td>
-					<td>Environment variable functions</td>
-				</tr>
-				<tr class="table_text">
 					<td><font color="#16694A"><b>Optional</b></font></td>
 					<td>Optional argument wrapper class template</td>
 				</tr>
 				<tr class="table_text">
 					<td><font color="#16694A"><b>Required</b></font></td>
 					<td>Required argument wrapper class template</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>Reference</b></font></td>
-					<td>Reference (POINTER) wrapper class template</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>array.iterator</b></font></td>
-					<td>C array begin and end iterator functions</td>
-				</tr>
-				<tr class="table_text">
-					<td><font color="#16694A"><b>floops</b></font></td>
-					<td>Fortran DO loop logic support</td>
 				</tr>
 				<tr class="table_text">
 					<td><font color="#16694A"><b>rvalue_cast</b></font></td>
@@ -331,7 +279,7 @@
 			<h3>IndexRange</h3>
 			<p class="body">The IndexRange classes encapsulate the arbitrary index range that Fortran arrays can use for each dimension (unlike the zero-based array indexing of native C/C++ arrays).</p>
 			<p class="body"><b>Zero-sized</b> index ranges are indicated by index ranges of the form [<i>lower</i>,<i>lower</i>-1]. (Zero-sized Arrays are supported.)</p>
-			<p class="body">&quot;<b>Unbounded</b>&quot; index ranges, having unknown upper bounds, have an index range of the form [<i>lower</i>,<i>lower</i>-2] with size given by a constant named <span class="source">npos</span> that is defined as the unsigned type size_t cast of -1. Unbounded argument Arrays are created when a bare array element is passed (the &quot;faster&quot; method) to an argument array pass-by-value function argument.</p>
+			<p class="body">&quot;<b>Unbounded</b>&quot; index ranges, having unknown upper bounds, have an index range of the form [<i>lower</i>,<i>lower</i>-2] with size given by a constant named <span class="source">npos</span> that is defined as the unsigned type size_t cast of -1.</p>
 			<hr />
 			<h3>Array Hierarchy</h3>
 			<h4>Design</h4>
@@ -340,19 +288,15 @@
 				<li>Fortran-compatibility:
 				<ul class="body">
 					<li>Arbitrary index ranges for each dimension</li>
-					<li>Array passing &quot;tricks&quot;</li>
 					<li>Fortran 90+ array slicing and member array support</li>
 					<li>Note: This ObjexxFCL variant uses row-major array layout, unlike Fortran's column-major layout</li>
 				</ul>
 				<li>Fast, near-Fortran run-time performance</li>
 			</ul>
-			<p class="body">The data is stored in a dynamically allocated array that is owned by the corresponding real array and pointed to, but not owned, by any argument arrays that might refer to the real array. The row-major ordering is obtained by the formulas giving the index into the linear array from the set of array dimensional indexes.</p>
+			<p class="body">The data is stored in a dynamically allocated array that is owned by the corresponding real array The row-major ordering is obtained by the formulas giving the index into the linear array from the set of array dimensional indexes.</p>
 			<p class="body">On the assumption that <b>subscripting</b> calls are the most common and performance-critical, the Array design uses some cached values to speed up the subscript operations. The size of all but the last dimension's index ranges are cached and an offset pointer into the data array is cached. The const subscript operator returns its value by reference, which may have a small performance cost for built-in numeric types on some platforms but is necessary to support the passing of array elements to array arguments. Linear (one-dimensional) indexing is provided for very fast access to a sequence of array elements whose linear index is easily calculated.</p>
-			<p class="body">The <b>argument Arrays</b> are proxy objects that provide a view to the contiguous data of another array but act as if it is their own data. Argument Arrays don't automatically reattach to arrays that are resized. Argument Arrays are quickly constructed for use in function argument lists.</p>
-			<p class="body">Real and argument Arrays can be passed by reference when the function array type will always match that of the caller; a reference to the common Array base class can be passed any Arrays of the same rank and can perform all of the common array operations.</p>
-			<p class="body">The argument arrays &quot;work&quot; by grabbing a pointer to the passed array, array section, or element and, when possible, extracting the size of the actual data section. They can then reinterpret the pointed to data as an array of their declared rank. Since function argument declarations cannot contain constructor arguments, when the passed array is not of the same rank and dimensions as the argument array, or when array sections or elements will be passed, it is necessary to set the argument array dimensions with a call to the <span class="source">dim</span> member function, as in <span class="source">A.dim(3,4)</span>, before the array is used in the function.</p>
-			<p class="body">When array elements are passed to argument arrays the argument array can only extract the address of that element for its data pointer and it has indeterminate size. The <span class="source">dim</span> call can set a size but this cannot be checked against the actual underlying data array. The loss of size information will propagate through subsequent passing of that argument array, eliminating the possibility of bounds checking for those arrays. For this reason the argument, <span class="source">a</span>, member function is provided to pass &quot;safer&quot;, as in <span class="source">A.a(2,3)</span>: an ArrayTail proxy object is constructed and passed that contains the data pointer and size information. There is a performance cost for the construction of ArrayTails that remains in release builds so there is a definite tradeoff.</p>
-			<p class="body">Array <b>assignment</b> operators have value semantics but, unlike Fortran, will resize a real array if necessary. Real arrays can also be resized by the dimension member function. Resizing real Arrays invalidates any argument or slice arrays attached to them.</p>
+			<p class="body">Real Arrays can be passed by reference when the function array type will always match that of the caller; a reference to the common Array base class can be passed any Arrays of the same rank and can perform all of the common array operations.</p>
+			<p class="body">Array <b>assignment</b> operators have value semantics but, unlike Fortran, will resize a real array if necessary. Real arrays can also be resized by the dimension member function. Resizing real Arrays invalidates any slice arrays attached to them.</p>
 			<p class="body">In order to achieve maximal run-time performance no <b>array bounds checks</b> are performed for any Array classes in release builds (when NDEBUG is defined). Bounds are checked by asserts in debug builds. All new code using Arrays should be tested with debug builds.</p>
 			<p class="body">The Array implementation is heavily tuned for performance and thus has some unusual features:</p>
 			<ul class="body">
@@ -369,11 +313,6 @@
 			</ul>
 			<p class="body">Objexx has developed some of these and can develop custom extensions for clients.</p>
 			<p class="body">In many cases it may make more sense to interface with existing matrix and numerical libraries. Arrays provide access to their row-major data arrays so they can work directly with libraries that accept arrays with this ordering. Copy in/out semantics will be required to interface with other array representations such as nested std::vectors, TNT, and Blitz++: this should be done as non-member functions declared and defined in separate files to avoid unnecessary dependencies.</p>
-			<h4>Slices</h4>
-			<p class="body">The ArrayS hierarchy is a new system that provides the ObjexxFCL array slice (section) support. Array slices are generally non-contiguous and thus cannot use the fast contiguous implementation of the Arrays and can't efficiently provide linear indexing. For these reasons ArrayS is currently a separate hierarchy from Array. This requires a lot of duplicated code for both types and can create overload complexities in application code, so an effort to integrate slice arrays into the Array hierarchy is planned.</p>
-			<p class="body">Slice arrays have the same characteristics as Fortran slices: some operations are slower and memory cache performance can be degraded. Unlike Fortran, ObjexxFCL does not allow passing slices to contiguous arrays.</p>
-			<p class="body">In Fortran if you pass an array slice to a contiguous array argument, like an assumed size array, the compiler will allow it but perform slow copy in, copy out semantics. ObjexxFCL supports such usage if the slice is actually contiguous. Otherwise the best solution is probably providing the necessary slice array argument overloads.</p>
-			<p class="body">ObjexxFCL slices use an efficient representation for good performance. This requires "drilling" into the underlying array data rather than resolving lookup calls through, possibly many, layer of slices.</p>
 			<hr />
 			<h3>ChunkVector</h3>
 			<p class="body">ChunkVector is designed to support very large 1D arrays. It uses a std::vector of Chunk objects of user-controllable size to avoid trying to allocate massive contiguous blocks of memory in a possibly fragmented memory environment. By using power-of-two Chunk sizes the 2-level indexing can be done with bit shift operations and provides speed competitive with that of std::vector. As of v.2.4.0 ChunkVector was rewritten to hold Chunk objects, which handle their own memory management, so that some problems with using nested std::vectors for the Chunks could be avoided, including:</p>

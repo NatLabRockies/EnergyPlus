@@ -273,7 +273,7 @@ def main() -> int:
         type=handle_msvc_arg,
         choices=list(MSVC),
         default=None,
-        help="For MSVC builds, this is the Visual Studio version ('16', '17')",
+        help="For MSVC builds, this is the Visual Studio version ('16', '17', '18')",
     )
     parser.add_argument("--verbose", action="store_true", help="If specified, get verbose output")
     args = parser.parse_args()

@@ -433,6 +433,16 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with S, insert the rules here
 
+              CASE('SPACE')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:6)=InArgs(1:6)   ! Name, Zone Name, Ceiling Height, Volume, Floor Area, Space Type
+                  IF (CurArgs > 6) THEN
+                    OutArgs(7) = ''            ! new Construction Assignment Set Name field (blank)
+                    OutArgs(8:CurArgs+1)=InArgs(7:CurArgs)  ! shift Tag fields up by one
+                    CurArgs = CurArgs + 1
+                  END IF
+
               ! If your original object starts with T, insert the rules here
 
               ! If your original object starts with U, insert the rules here

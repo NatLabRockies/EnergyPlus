@@ -830,6 +830,8 @@ void SimOAController(EnergyPlusData &state, std::string const &CtrlName, int &Ct
                             "following types: Coil:Cooling:DX:MultiSpeed,"
                             " Coil:Cooling:DX:VariableSpeed, or Coil:Cooling:DX. EconomizerFirst will not be enforced.",
                             state.dataMixedAir->OAController(OAControllerNum).Name));
+                    state.dataMixedAir->OAController(OAControllerNum).EconomizerStagingType =
+                        HVAC::EconomizerStagingType::InterlockedWithMechanicalCooling;
                 }
             }
             primaryAirSystems.EconomizerStagingCheckFlag = true;
@@ -1033,8 +1035,10 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
                     // check outlet node is same as next components inlet node
                     if (OASys.ComponentType(CompNum) == "COILSYSTEM:COOLING:WATER" && CompNum < OASys.NumComponents) {
                         if (OASys.compPointer[CompNum] != nullptr) {
-                            int const equipIndex = OASys.compPointer[CompNum]->getEquipIndex();
-                            companionCoilAirInletNodeNum = state.dataUnitarySystems->unitarySys[equipIndex].m_HRcoolCoilAirInNode;
+                            // compPointer[CompNum] already points at the correct UnitarySys object (matched by name in UnitarySys::factory())
+                            if (auto *unitarySysPtr = dynamic_cast<UnitarySystems::UnitarySys *>(OASys.compPointer[CompNum])) {
+                                companionCoilAirInletNodeNum = unitarySysPtr->m_HRcoolCoilAirInNode;
+                            }
                         }
                     }
                     if (OASys.ComponentType(CompNum) == "SOLARCOLLECTOR:UNGLAZEDTRANSPIRED") {
@@ -2615,19 +2619,15 @@ void InitOAController(EnergyPlusData &state, int const OAControllerNum, bool con
         thisOAController.SizeOAController(state);
         if (AirLoopNum > 0) {
             state.dataAirLoop->AirLoopControlInfo(AirLoopNum).OACtrlNum = OAControllerNum;
-            state.dataAirLoop->AirLoopControlInfo(AirLoopNum).OACtrlName = thisOAController.Name;
             if (thisOAController.Lockout == LockoutType::LockoutWithHeatingPossible) {
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithHeating = true;
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithCompressor = false;
-                state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanNotLockoutEcono = false;
             } else if (thisOAController.Lockout == LockoutType::LockoutWithCompressorPossible) {
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithHeating = false;
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithCompressor = true;
-                state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanNotLockoutEcono = false;
             } else {
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithHeating = false;
                 state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanLockoutEconoWithCompressor = false;
-                state.dataAirLoop->AirLoopControlInfo(AirLoopNum).CanNotLockoutEcono = true;
             }
         }
         if ((thisOAController.MaxOA - thisOAController.MinOA) < -HVAC::SmallAirVolFlow) {
@@ -2737,8 +2737,8 @@ void InitOAController(EnergyPlusData &state, int const OAControllerNum, bool con
             } else {
                 OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchEcoRetTemp, equipName, "-");
             }
-            for (auto curOaSys : state.dataAirLoop->OutsideAirSys) {
-                for (auto curCtrlName : curOaSys.ControllerName) {
+            for (const auto &curOaSys : state.dataAirLoop->OutsideAirSys) {
+                for (const auto &curCtrlName : curOaSys.ControllerName) {
                     if (curCtrlName == thisOAController.Name) {
                         OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchEcoOAsysNm, equipName, curOaSys.Name);
                     }
@@ -3433,7 +3433,6 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
             curAirLoopControlInfo.HighHumCtrlActive = false;  // DataAirLoop variable (AirloopHVAC)
             curAirLoopControlInfo.ResimAirLoopFlag = false;   // DataAirLoop variable (AirloopHVAC)
             curAirLoopFlow.OAFrac = 0.0;                      // DataAirLoop variable (AirloopHVAC)
-            curAirLoopFlow.OAMinFrac = 0.0;                   // DataAirLoop variable (AirloopHVAC)
             curAirLoopFlow.MinOutAir = 0.0;
             curAirLoopFlow.OAFlow = 0.0;
         }
@@ -3629,7 +3628,6 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
         auto &curAirLoopControlInfo(state.dataAirLoop->AirLoopControlInfo(AirLoopNum));
         auto &curAirLoopFlow(state.dataAirLoop->AirLoopFlow(AirLoopNum));
 
-        curAirLoopFlow.OAMinFrac = OutAirMinFrac;
         if (this->FixedMin) {
             curAirLoopFlow.MinOutAir = min(OutAirMinFrac * curAirLoopFlow.DesSupply, this->MixMassFlow);
         } else {

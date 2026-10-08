@@ -120,8 +120,6 @@ namespace Pumps {
         Sched::Schedule *minRPMSched = nullptr;
         Sched::Schedule *maxRPMSched = nullptr;
         ControlTypeVFD VFDControlType = ControlTypeVFD::Invalid; // VFDControlType
-        Real64 MaxRPM = 0.0;                                     // Maximum RPM range value - schedule limit
-        Real64 MinRPM = 0.0;                                     // Minimum RPM range value - schedule limit
         Real64 PumpActualRPM = 0.0;                              // RPM recalculated from final flow through the loop
     };
 
@@ -142,6 +140,7 @@ namespace Pumps {
         int NumPumpsInBank = 0;                       // Node number on the inlet side of the plant
         int PowerErrIndex1 = 0;                       // for recurring errors
         int PowerErrIndex2 = 0;                       // for recurring errors
+        int PLRErrIndex = 0;                          // for recurring errors
         Real64 MinVolFlowRateFrac = 0.0;              // minimum schedule value fraction modifier
         Real64 NomVolFlowRate = 0.0;                  // design nominal capacity of Pump
         bool NomVolFlowRateWasAutoSized = false;      // true if previous was autosize on input
@@ -180,7 +179,6 @@ namespace Pumps {
         bool CheckEquipName = true;
         bool HasVFD = false;
         PumpVFDControlData VFD;
-        bool OneTimePressureWarning = true;
         bool HeatLossesToZone = false;        // if true then pump losses added to surrounding zone
         int ZoneNum = 0;                      // index for zone surrounding pump
         Real64 SkinLossRadFraction = 0.0;     // radiative split for skin losses to zone

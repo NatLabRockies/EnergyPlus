@@ -73,7 +73,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/module-developer/src/appendix-e-test-file-documentation.tex
     ${PROJECT_SOURCE_DIR}/module-developer/src/appendix-f-new-or-changed-proposal-feature.tex
     ${PROJECT_SOURCE_DIR}/module-developer/src/appendix-g.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of included images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14
@@ -81,3 +81,7 @@ set(INCLUDED_IMAGES ${PROJECT_SOURCE_DIR}/module-developer/media/image001.png ${
                     ${PROJECT_SOURCE_DIR}/module-developer/media/image003.jpg)
 
 create_doc_target("module-developer" "ModuleDeveloper")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("module-developer" "module-developer")
+endif()

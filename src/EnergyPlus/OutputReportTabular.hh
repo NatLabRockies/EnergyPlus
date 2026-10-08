@@ -54,9 +54,7 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Array2S.hh>
 #include <ObjexxFCL/Array3D.hh>
 #include <ObjexxFCL/Optional.hh>
 
@@ -377,7 +375,6 @@ namespace OutputReportTabular {
     {
         // Members
         std::string varName;                     // name of variable
-        std::string colHead;                     // column header (not used for user defined monthly)
         int varNum;                              // variable or meter number
         OutputProcessor::VariableType typeOfVar; // 0=not found, 1=integer, 2=real, 3=meter
         OutputProcessor::StoreType avgSum;       // Variable  is Averaged=1 or Summed=2
@@ -532,7 +529,6 @@ namespace OutputReportTabular {
         Real64 hvacLossInstantSeq = 0.0;
 
         Real64 powerGenInstantSeq = 0.0;
-        Real64 powerGenRadSeq = 0.0;
         Real64 infilInstantSeq = 0.0;
         Real64 infilLatentSeq = 0.0;
 
@@ -962,7 +958,7 @@ namespace OutputReportTabular {
     void WriteTextLine(EnergyPlusData &state, std::string const &lineOfText, bool const useBold = false);
 
     void WriteTable(EnergyPlusData &state,
-                    Array2S_string const body, // row,column
+                    Array2D_string const &body, // row,column
                     const Array1D_string &rowLabels,
                     const Array1D_string &columnLabels,
                     Array1D_int &widthColumn,
@@ -1125,7 +1121,6 @@ struct OutputReportTabularData : BaseGlobalStruct
         OutputReportTabular::maxNumStyles, OutputReportTabular::TableStyle::Invalid); // see list of parameters
 
     Real64 timeInYear = 0.0;
-    int defaultSigDigits = 2;
     bool formatReals_Tabular = true;
     bool formatReals_JSON = true;
     bool formatReals_SQLite = true;
@@ -1315,7 +1310,6 @@ struct OutputReportTabularData : BaseGlobalStruct
     bool initAdjFenDone = false;
     int numPeopleAdaptive = 0;
 
-    Real64 BigNum = 0.0;
     int ErrCount1 = 0;
     Array1D<OutputProcessor::VariableType> MonthlyColumnsTypeOfVar;
     Array1D<OutputProcessor::TimeStepType> MonthlyColumnsStepType;
@@ -1390,7 +1384,6 @@ struct OutputReportTabularData : BaseGlobalStruct
     int indexUnitConvWCS = 0;
     Real64 curValueSIWCS = 0.0;
     Real64 curValueWCS = 0.0;
-    Real64 BigNumRMG = 0.0;
     int foundGsui = 0;
     int iUnitGsui = 0;
     int foundGsum = 0;
@@ -1584,7 +1577,6 @@ struct OutputReportTabularData : BaseGlobalStruct
         this->initAdjFenDone = false;
         this->numPeopleAdaptive = 0;
 
-        this->BigNum = 0.0;
         this->ErrCount1 = 0;
         this->MonthlyColumnsTypeOfVar.clear();
         this->MonthlyColumnsStepType.clear();
@@ -1661,7 +1653,6 @@ struct OutputReportTabularData : BaseGlobalStruct
         this->indexUnitConvWCS = 0;
         this->curValueSIWCS = 0.0;
         this->curValueWCS = 0.0;
-        this->BigNumRMG = 0.0;
         this->foundGsui = 0;
         this->iUnitGsui = 0;
         this->foundGsum = 0;

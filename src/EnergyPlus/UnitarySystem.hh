@@ -157,6 +157,10 @@ namespace UnitarySystems {
         Real64 cool_conv_tol = 0.001;
 
         UnitarySysInputSpec() = default;
+        UnitarySysInputSpec(UnitarySysInputSpec const &) = default;
+        UnitarySysInputSpec(UnitarySysInputSpec &&) = default;
+        UnitarySysInputSpec &operator=(UnitarySysInputSpec const &) = default;
+        UnitarySysInputSpec &operator=(UnitarySysInputSpec &&) = default;
         ~UnitarySysInputSpec() = default;
     };
 
@@ -385,7 +389,12 @@ namespace UnitarySystems {
         Real64 m_EMSOverrideCoilSpeedNumValue = 0.0;
         bool m_EMSOverrideSuppCoilSpeedNumOn = false;
         Real64 m_EMSOverrideSuppCoilSpeedNumValue = 0.0;
-        int m_CoilSpeedErrIdx = 0;
+        // Recurring "wrong EMS-overridden coil speed" warnings: one index per distinct message text
+        // (previously a single shared m_CoilSpeedErrIdx, which corrupted the "shown once" gating between messages)
+        int m_CoilSpeedErrIdxHeating = 0;
+        int m_CoilSpeedErrIdxCooling = 0;
+        int m_CoilSpeedErrIdxSuppHeat = 0;
+        int m_CoilSpeedErrIdxCoolingBelowZero = 0;
 
         Real64 m_DehumidInducedHeatingDemandRate = 0.0;
 
@@ -545,7 +554,6 @@ namespace UnitarySystems {
         std::vector<Real64> m_HeatVolumeFlowRate;
         std::vector<Real64> m_HeatMassFlowRate;
         std::vector<Real64> m_MSHeatingSpeedRatio;
-        std::vector<Real64> m_HeatingVolFlowRatio;
         std::vector<int> m_IterationMode;  // array of operating mode each iteration
         std::vector<Real64> FullOutput;    // Full output for different speed
         std::vector<Real64> FullLatOutput; // Full latent output for different speed
@@ -560,10 +568,6 @@ namespace UnitarySystems {
             int m_HXAssistedSensPLRFailIndex = 0;   // used in HX Assisted calculations
             int m_HXAssistedSensPLRFail2 = 0;       // used in HX Assisted calculations
             int m_HXAssistedSensPLRFailIndex2 = 0;  // used in HX Assisted calculations
-            int m_HXAssistedLatPLRIter = 0;         // used in HX Assisted calculations
-            int m_HXAssistedLatPLRIterIndex = 0;    // used in HX Assisted calculations
-            int m_HXAssistedLatPLRFail = 0;         // used in HX Assisted calculations
-            int m_HXAssistedLatPLRFailIndex = 0;    // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRIter = 0;       // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRIterIndex = 0;  // used in HX Assisted calculations
             int m_HXAssistedCRLatPLRFail = 0;       // used in HX Assisted calculations
@@ -948,6 +952,10 @@ namespace UnitarySystems {
         int getEquipIndex() override;
 
         UnitarySys() = default;
+        UnitarySys(UnitarySys const &) = default;
+        UnitarySys(UnitarySys &&) = default;
+        UnitarySys &operator=(UnitarySys const &) = default;
+        UnitarySys &operator=(UnitarySys &&) = default;
         virtual ~UnitarySys() = default;
     };
 

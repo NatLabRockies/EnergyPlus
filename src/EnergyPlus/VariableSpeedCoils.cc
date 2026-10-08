@@ -5141,29 +5141,30 @@ namespace VariableSpeedCoils {
         case HVAC::CoilType::CoolingDXVariableSpeed:
             CondenserType.push_back(varSpeedCoil.CondenserType);
             if (varSpeedCoil.RatedCapCoolTotal > 0.0) {
-                StandardRatings::CalcDXCoilStandardRating(state,
-                                                          varSpeedCoil.Name,
-                                                          varSpeedCoil.coilType,
-                                                          varSpeedCoil.NumOfSpeeds,
-                                                          varSpeedCoil.MSRatedTotCap,
-                                                          varSpeedCoil.MSRatedCOP,
-                                                          varSpeedCoil.MSCCapAirFFlow,
-                                                          varSpeedCoil.MSCCapFTemp,
-                                                          varSpeedCoil.MSEIRAirFFlow,
-                                                          varSpeedCoil.MSEIRFTemp,
-                                                          varSpeedCoil.PLFFPLR,
-                                                          varSpeedCoil.MSRatedAirVolFlowRate,
-                                                          varSpeedCoil.MSRatedEvaporatorFanPowerPerVolumeFlowRate2017,
-                                                          varSpeedCoil.MSRatedEvaporatorFanPowerPerVolumeFlowRate2023,
-                                                          CondenserType,
-                                                          0, // varSpeedCoil.RegionNum, // ??
-                                                          varSpeedCoil.MinOATCompressor,
-                                                          varSpeedCoil.OATempCompressorOn,
-                                                          false, // varSpeedCoil.OATempCompressorOnOffBlank, // ??
-                                                          varSpeedCoil.DefrostControl,
-                                                          ObjexxFCL::Optional_bool_const(),
-                                                          varSpeedCoil.RatedCapCoolTotal,
-                                                          varSpeedCoil.RatedAirVolFlowRate);
+                StandardRatings::CalcDXCoilStandardRating(
+                    state,
+                    varSpeedCoil.Name,
+                    varSpeedCoil.coilType,
+                    varSpeedCoil.NumOfSpeeds,
+                    varSpeedCoil.MSRatedTotCap,
+                    varSpeedCoil.MSRatedCOP,
+                    varSpeedCoil.MSCCapAirFFlow,
+                    varSpeedCoil.MSCCapFTemp,
+                    varSpeedCoil.MSEIRAirFFlow,
+                    varSpeedCoil.MSEIRFTemp,
+                    Array1D_int(varSpeedCoil.NumOfSpeeds, varSpeedCoil.PLFFPLR), // one PLF curve for the whole coil
+                    varSpeedCoil.MSRatedAirVolFlowRate,
+                    varSpeedCoil.MSRatedEvaporatorFanPowerPerVolumeFlowRate2017,
+                    varSpeedCoil.MSRatedEvaporatorFanPowerPerVolumeFlowRate2023,
+                    CondenserType,
+                    0, // varSpeedCoil.RegionNum, // ??
+                    varSpeedCoil.MinOATCompressor,
+                    varSpeedCoil.OATempCompressorOn,
+                    false, // varSpeedCoil.OATempCompressorOnOffBlank, // ??
+                    varSpeedCoil.DefrostControl,
+                    ObjexxFCL::Optional_bool_const(),
+                    varSpeedCoil.RatedCapCoolTotal,
+                    varSpeedCoil.RatedAirVolFlowRate);
             }
             break;
         default:

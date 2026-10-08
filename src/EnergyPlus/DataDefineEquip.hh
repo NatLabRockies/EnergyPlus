@@ -95,7 +95,6 @@ namespace DataDefineEquip {
         std::string Name;         // Name or identifier of this piece of equipment
         int OutletNodeNum = 0;    // index of outlet node
         int NumComponents = 0;    // number of subcomponents (=1)
-        int NumControls = 0;      // number of controls (not used; =0)
         Array1D_string EquipType; // Pointer identifying type of subcomponent
         Array1D<DataDefineEquip::ZnAirLoopEquipType> EquipTypeEnum;
         ///// Note use of shared_ptr here is not a good pattern, not to be replicated without further discussion.
@@ -117,7 +116,6 @@ namespace DataDefineEquip {
         Real64 MaxAvailDelta = 0.0;               // change in max avail mass low rate due to leaks [kg/s]
         Real64 MinAvailDelta = 0.0;               // change in min avail mass low rate due to leaks [kg/s]
         int InletNodeNum = 0;                     // index of inlet node 1
-        int InletNodeNum2 = 0;                    // index of inlet node 2 (used for dual duct airterminals)
         int ZoneEqNum = 0;                        // index of zone equipment object for this terminal unit
         int AirLoopNum = 0;                       // index to airloop that this terminal unit is connected to
         Real64 LeakLoadMult = 0.0;                // zome load multiplier to adjust for downstream leak
@@ -125,7 +123,6 @@ namespace DataDefineEquip {
         bool DownStreamLeak = false;              // if true, there is an downstream leak
         int RetPlenumNum = 0;                     // return plenum number that this ADU can leak to, zero if none
         int ZoneNum = 0;                          // index of the zone object for this terminal unit
-        bool AccountForDOAS = false;              // if true user has asked for DOAS
         Real64 HeatRate = 0.0;                    // [W]
         Real64 CoolRate = 0.0;                    // [W]
         Real64 HeatGain = 0.0;                    // [J]

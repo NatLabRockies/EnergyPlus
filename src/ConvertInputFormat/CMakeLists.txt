@@ -30,7 +30,7 @@ set_target_properties(ConvertInputFormat PROPERTIES FOLDER Auxiliary)
 
 install(TARGETS ConvertInputFormat DESTINATION ./)
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target(ConvertInputFormat "." Unspecified)
 endif()

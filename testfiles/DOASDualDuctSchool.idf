@@ -42,7 +42,7 @@
 ! WeatherFileName=USA_IL_Chicago-OHare_TMY2.epw
 ! Number of Zones: 11
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,6;
 

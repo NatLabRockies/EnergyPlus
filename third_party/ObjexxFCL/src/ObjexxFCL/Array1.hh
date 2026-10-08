@@ -16,8 +16,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1.fwd.hh>
 #include <ObjexxFCL/Array.hh>
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/MArray1.hh>
 
 // C++ Headers
 #include <cmath>
@@ -26,7 +24,6 @@ namespace ObjexxFCL {
 
 // Forward
 template< typename > class Array1D;
-template< typename > class Array1A;
 
 // Array1: 1D Array Abstract Base Class
 template< typename T >
@@ -41,7 +38,6 @@ private: // Friend
 
 	template< typename > friend class Array1;
 	template< typename > friend class Array1D;
-	template< typename > friend class Array1A;
 
 protected: // Types
 
@@ -52,8 +48,6 @@ public: // Types
 
 	typedef  typename Super::Base  Base;
 	typedef  typename Super::IR  IR;
-	typedef  typename Super::IS  IS;
-	typedef  typename Super::DS  DS;
 
 	// STL Style
 	typedef  typename Super::value_type  value_type;
@@ -92,7 +86,6 @@ protected: // Types
 
 	using Super::shift_set;
 	using Super::size_of;
-	using Super::slice_k;
 	using Super::swapB;
 
 	using Super::capacity_;
@@ -126,22 +119,6 @@ protected: // Creation
 	Array1( Array1< U > const & a ) :
 	 Super( a ),
 	 I_( a.I_ )
-	{}
-
-	// Slice Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	explicit
-	Array1( Array1S< U > const & a ) :
-	 Super( a ),
-	 I_( a.u() )
-	{}
-
-	// MArray Constructor Template
-	template< class A, typename M >
-	explicit
-	Array1( MArray1< A, M > const & a ) :
-	 Super( a ),
-	 I_( a.u() )
 	{}
 
 	// IndexRange Constructor
@@ -180,41 +157,6 @@ protected: // Creation
 	 I_( static_cast< int >( s ) )
 	{}
 
-	// std::vector Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array1( std::vector< U > const & v ) :
-	 Super( v ),
-	 I_( static_cast< int >( v.size() ) )
-	{}
-
-	// Vector2 Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array1( Vector2< U > const & v ) :
-	 Super( v ),
-	 I_( 2 )
-	{}
-
-	// Vector3 Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array1( Vector3< U > const & v ) :
-	 Super( v ),
-	 I_( 3 )
-	{}
-
-	// Vector4 Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array1( Vector4< U > const & v ) :
-	 Super( v ),
-	 I_( 4 )
-	{}
-
-	// Iterator Range Constructor Template
-	template< class Iterator, typename = decltype( *std::declval< Iterator & >(), void(), ++std::declval< Iterator & >(), void() ) >
-	Array1( Iterator const beg, Iterator const end ) :
-	 Super( beg, end ),
-	 I_( static_cast< int >( size_ ) )
-	{}
-
 	// Default Proxy Constructor
 	Array1( ProxySentinel proxy ) :
 	 Super( proxy )
@@ -224,12 +166,6 @@ protected: // Creation
 	Array1( Array1 const & a, ProxySentinel proxy ) :
 	 Super( a, proxy ),
 	 I_( a.I_ )
-	{}
-
-	// Slice Proxy Constructor
-	Array1( Array1S< T > const & a, ProxySentinel proxy ) :
-	 Super( a, proxy ),
-	 I_( a.u() )
 	{}
 
 	// Base Proxy Constructor
@@ -246,12 +182,6 @@ protected: // Creation
 
 	// Copy + IndexRange Proxy Constructor
 	Array1( Array1 const & a, IR const & I, ProxySentinel proxy ) :
-	 Super( a, proxy ),
-	 I_( I )
-	{}
-
-	// Slice + IndexRange Proxy Constructor
-	Array1( Array1S< T > const & a, IR const & I, ProxySentinel proxy ) :
 	 Super( a, proxy ),
 	 I_( I )
 	{}
@@ -303,52 +233,6 @@ public: // Assignment: Array
 		return *this;
 	}
 
-	// Slice Assignment
-	Array1 &
-	operator =( Array1S< T > const & a )
-	{
-		size_type l( 0u );
-		if ( ( conformable( a ) ) || ( ! dimension_assign( a.I() ) ) ) {
-			if ( overlap( a ) ) { // Overlap-safe
-				CArrayA< T > c( a.size() );
-				for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-					c[ l ] = a( i );
-				}
-				for ( size_type i = 0; i < c.size(); ++i ) {
-					data_[ i ] = c[ i ];
-				}
-			} else { // Not overlap-safe
-				for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-					data_[ l ] = a( i );
-				}
-			}
-		} else {
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				new ( data_ + l ) T( a( i ) );
-			}
-		}
-		return *this;
-	}
-
-	// Slice Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator =( Array1S< U > const & a )
-	{
-		size_type l( 0u );
-		if ( ( conformable( a ) ) || ( ! dimension_assign( a.I() ) ) ) {
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				data_[ l ] = a( i );
-			}
-		} else {
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				new ( data_ + l ) T( a( i ) );
-			}
-		}
-		return *this;
-	}
-
-
 	// Initializer List Assignment Template
 	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
 	Array1 &
@@ -367,441 +251,6 @@ public: // Assignment: Array
 		return *this;
 	}
 
-	// std::vector Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator =( std::vector< U > const & v )
-	{
-		Super::operator =( v );
-		return *this;
-	}
-
-	// Vector2 Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator =( Vector2< U > const & v )
-	{
-		Super::operator =( v );
-		return *this;
-	}
-
-	// Vector3 Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator =( Vector3< U > const & v )
-	{
-		Super::operator =( v );
-		return *this;
-	}
-
-	// Vector4 Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator =( Vector4< U > const & v )
-	{
-		Super::operator =( v );
-		return *this;
-	}
-
-	// += Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( Array1< U > const & a )
-	{
-		assert( conformable( a ) );
-		Super::operator +=( a );
-		return *this;
-	}
-
-	// -= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( Array1< U > const & a )
-	{
-		assert( conformable( a ) );
-		Super::operator -=( a );
-		return *this;
-	}
-
-	// *= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( Array1< U > const & a )
-	{
-		assert( conformable( a ) );
-		Super::operator *=( a );
-		return *this;
-	}
-
-	// /= Array Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( Array1< U > const & a )
-	{
-		assert( conformable( a ) );
-		Super::operator /=( a );
-		return *this;
-	}
-
-	// += Slice
-	Array1 &
-	operator +=( Array1S< T > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		if ( overlap( a ) ) { // Overlap-safe
-			CArrayA< T > c( a.size() );
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				c[ l ] = a( i );
-			}
-			for ( size_type i = 0; i < c.size(); ++i ) {
-				data_[ i ] += c[ i ];
-			}
-		} else { // Not overlap-safe
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				data_[ l ] += a( i );
-			}
-		}
-		return *this;
-	}
-
-	// -= Slice
-	Array1 &
-	operator -=( Array1S< T > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		if ( overlap( a ) ) { // Overlap-safe
-			CArrayA< T > c( a.size() );
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				c[ l ] = a( i );
-			}
-			for ( size_type i = 0; i < c.size(); ++i ) {
-				data_[ i ] -= c[ i ];
-			}
-		} else { // Not overlap-safe
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				data_[ l ] -= a( i );
-			}
-		}
-		return *this;
-	}
-
-	// *= Slice
-	Array1 &
-	operator *=( Array1S< T > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		if ( overlap( a ) ) { // Overlap-safe
-			CArrayA< T > c( a.size() );
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				c[ l ] = a( i );
-			}
-			for ( size_type i = 0; i < c.size(); ++i ) {
-				data_[ i ] *= c[ i ];
-			}
-		} else { // Not overlap-safe
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				data_[ l ] *= a( i );
-			}
-		}
-		return *this;
-	}
-
-	// /= Slice
-	Array1 &
-	operator /=( Array1S< T > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		if ( overlap( a ) ) { // Overlap-safe
-			CArrayA< T > c( a.size() );
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				assert( a( i ) != T( 0 ) );
-				c[ l ] = a( i );
-			}
-			for ( size_type i = 0; i < c.size(); ++i ) {
-				data_[ i ] /= c[ i ];
-			}
-		} else { // Not overlap-safe
-			for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-				assert( a( i ) != T( 0 ) );
-				data_[ l ] /= a( i );
-			}
-		}
-		return *this;
-	}
-
-	// += Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( Array1S< U > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-			data_[ l ] += a( i );
-		}
-		return *this;
-	}
-
-	// -= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( Array1S< U > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-			data_[ l ] -= a( i );
-		}
-		return *this;
-	}
-
-	// *= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( Array1S< U > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-			data_[ l ] *= a( i );
-		}
-		return *this;
-	}
-
-	// /= Slice Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( Array1S< U > const & a )
-	{
-		assert( conformable( a ) );
-		size_type l( 0u );
-		for ( int i = 1, e = a.u(); i <= e; ++i, ++l ) {
-			assert( a( i ) != T( 0 ) );
-			data_[ l ] /= a( i );
-		}
-		return *this;
-	}
-
-	// += Initializer List Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( std::initializer_list< U > const l )
-	{
-		Super::operator +=( l );
-		return *this;
-	}
-
-	// -= Initializer List Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( std::initializer_list< U > const l )
-	{
-		Super::operator -=( l );
-		return *this;
-	}
-
-	// *= Initializer List Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( std::initializer_list< U > const l )
-	{
-		Super::operator *=( l );
-		return *this;
-	}
-
-	// /= Initializer List Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( std::initializer_list< U > const l )
-	{
-		Super::operator /=( l );
-		return *this;
-	}
-
-	// += std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( std::array< U, s > const & a )
-	{
-		Super::operator +=( a );
-		return *this;
-	}
-
-	// -= std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( std::array< U, s > const & a )
-	{
-		Super::operator -=( a );
-		return *this;
-	}
-
-	// *= std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( std::array< U, s > const & a )
-	{
-		Super::operator *=( a );
-		return *this;
-	}
-
-	// /= std::array Template
-	template< typename U, Size s, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( std::array< U, s > const & a )
-	{
-		Super::operator /=( a );
-		return *this;
-	}
-
-	// += std::vector Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( std::vector< U > const & v )
-	{
-		Super::operator +=( v );
-		return *this;
-	}
-
-	// -= std::vector Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( std::vector< U > const & v )
-	{
-		Super::operator -=( v );
-		return *this;
-	}
-
-	// *= std::vector Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( std::vector< U > const & v )
-	{
-		Super::operator *=( v );
-		return *this;
-	}
-
-	// /= std::vector Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( std::vector< U > const & v )
-	{
-		Super::operator /=( v );
-		return *this;
-	}
-
-	// += Vector2 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( Vector2< U > const & v )
-	{
-		Super::operator +=( v );
-		return *this;
-	}
-
-	// -= Vector2 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( Vector2< U > const & v )
-	{
-		Super::operator -=( v );
-		return *this;
-	}
-
-	// *= Vector2 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( Vector2< U > const & v )
-	{
-		Super::operator *=( v );
-		return *this;
-	}
-
-	// /= Vector2 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( Vector2< U > const & v )
-	{
-		Super::operator /=( v );
-		return *this;
-	}
-
-	// += Vector3 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( Vector3< U > const & v )
-	{
-		Super::operator +=( v );
-		return *this;
-	}
-
-	// -= Vector3 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( Vector3< U > const & v )
-	{
-		Super::operator -=( v );
-		return *this;
-	}
-
-	// *= Vector3 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( Vector3< U > const & v )
-	{
-		Super::operator *=( v );
-		return *this;
-	}
-
-	// /= Vector3 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( Vector3< U > const & v )
-	{
-		Super::operator /=( v );
-		return *this;
-	}
-
-	// += Vector4 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator +=( Vector4< U > const & v )
-	{
-		Super::operator +=( v );
-		return *this;
-	}
-
-	// -= Vector4 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator -=( Vector4< U > const & v )
-	{
-		Super::operator -=( v );
-		return *this;
-	}
-
-	// *= Vector4 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator *=( Vector4< U > const & v )
-	{
-		Super::operator *=( v );
-		return *this;
-	}
-
-	// /= Vector4 Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array1 &
-	operator /=( Vector4< U > const & v )
-	{
-		Super::operator /=( v );
-		return *this;
-	}
-
 public: // Assignment: Value
 
 	// = Value
@@ -809,38 +258,6 @@ public: // Assignment: Value
 	operator =( T const & t )
 	{
 		Super::operator =( t );
-		return *this;
-	}
-
-	// += Value
-	Array1 &
-	operator +=( T const & t )
-	{
-		Super::operator +=( t );
-		return *this;
-	}
-
-	// -= Value
-	Array1 &
-	operator -=( T const & t )
-	{
-		Super::operator -=( t );
-		return *this;
-	}
-
-	// *= Value
-	Array1 &
-	operator *=( T const & t )
-	{
-		Super::operator *=( t );
-		return *this;
-	}
-
-	// /= Value
-	Array1 &
-	operator /=( T const & t )
-	{
-		Super::operator /=( t );
 		return *this;
 	}
 
@@ -870,68 +287,6 @@ public: // Subscript
 	}
 
 
-public: // Slice Proxy Generators
-
-	// array( s ) const
-	Array1S< T >
-	operator ()( IS const & s ) const
-	{
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-	// array( s )
-	Array1S< T >
-	operator ()( IS const & s )
-	{
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) // VC++2013 bug work-around
-
-	// array( {s} ) const
-	Array1S< T >
-	operator ()( std::initializer_list< int > const l ) const
-	{
-		IS const s( l );
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-	// array( {s} )
-	Array1S< T >
-	operator ()( std::initializer_list< int > const l )
-	{
-		IS const s( l );
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-#else
-
-	// array( {s} ) const
-	template< typename U, class = typename std::enable_if< std::is_constructible< int, U >::value >::type >
-	Array1S< T >
-	operator ()( std::initializer_list< U > const l ) const
-	{
-		IS const s( l );
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-	// array( {s} )
-	template< typename U, class = typename std::enable_if< std::is_constructible< int, U >::value >::type >
-	Array1S< T >
-	operator ()( std::initializer_list< U > const l )
-	{
-		IS const s( l );
-		DS const d( I_, s );
-		return Array1S< T >( data_, -shift_, d );
-	}
-
-#endif
-
 public: // Predicate
 
 	// Contains Indexed Element?
@@ -949,28 +304,12 @@ public: // Predicate
 		return ( size_ == a.size() );
 	}
 
-	// Conformable?
-	template< typename U >
-	bool
-	conformable( Array1S< U > const & a ) const
-	{
-		return ( size_ == a.size() );
-	}
-
 	// Equal Dimensions?
 	template< typename U >
 	bool
 	equal_dimensions( Array1< U > const & a ) const
 	{
 		return ( I_ == a.I_ );
-	}
-
-	// Equal Dimensions?
-	template< typename U >
-	bool
-	equal_dimensions( Array1S< U > const & a ) const
-	{
-		return ( ( l() == 1 ) && ( u() == a.u() ) );
 	}
 
 public: // Inspector
@@ -1103,18 +442,6 @@ public: // Inspector
 		return I_.isize();
 	}
 
-	// Length
-	T
-	length() const
-	{
-		T length_sq( T( 0 ) );
-		for ( int i = l(), e = u(); i <= e; ++i ) {
-			T const length_i( sdata_[ i ] );
-			length_sq += length_i * length_i;
-		}
-		return std::sqrt( length_sq );
-	}
-
 public: // Modifier
 
 	// Clear
@@ -1127,88 +454,11 @@ public: // Modifier
 		return *this;
 	}
 
-	// Normalize to Unit Length
-	Array1 &
-	normalize()
-	{
-		T const length_( length() );
-		assert( length_ > T( 0 ) );
-		operator /=( length_ );
-		return *this;
-	}
-
-public: // MArray Generators
-
-	// Template Helpers
-	template< typename U > class Wrapper {};
-	typedef  typename std::conditional< std::is_class< T >::value, T, Wrapper< T > >::type  ClassT;
-
-	// MArray Generator
-	template< typename M >
-	MArray1< Array1 const, M >
-	ma( M ClassT::* pmem ) const
-	{
-		return MArray1< Array1 const, M >( *this, pmem );
-	}
-
-	// MArray Generator
-	template< typename M >
-	MArray1< Array1, M >
-	ma( M ClassT::* pmem )
-	{
-		return MArray1< Array1, M >( *this, pmem );
-	}
-
 public: // Comparison: Predicate
-
-	// Array1 == Array1
-	friend
-	bool
-	eq( Array1 const & a, Array1 const & b )
-	{
-		assert( a.size_bounded() );
-		assert( a.conformable( b ) );
-		return eq( static_cast< Super const & >( a ), static_cast< Super const & >( b ) );
-	}
 
 
 public: // Comparison: Predicate: Any
 
-	// Array1 == Array1
-	friend
-	bool
-	any_eq( Array1 const & a, Array1 const & b )
-	{
-		assert( a.size_bounded() );
-		assert( a.conformable( b ) );
-		return any_eq( static_cast< Super const & >( a ), static_cast< Super const & >( b ) );
-	}
-
-
-public: // Comparison: Predicate: Slice
-
-	// Array1 == Array1S
-	friend
-	bool
-	eq( Array1 const & a, Array1S< T > const & b )
-	{
-		assert( a.size_bounded() );
-		assert( a.conformable( b ) );
-		if ( a.empty() ) return true;
-		size_type l( 0u );
-		for ( int i = 1, e = b.u(); i <= e; ++i, ++l ) {
-			if ( ! ( a[ l ] == b( i ) ) ) return false;
-		}
-		return true;
-	}
-
-	// Array1S == Array1
-	friend
-	bool
-	eq( Array1S< T > const & a, Array1 const & b )
-	{
-		return eq( b, a );
-	}
 
 protected: // Functions
 
@@ -1248,24 +498,6 @@ conformable( Array1< U > const & a, Array1< V > const & b )
 	return a.conformable( b );
 }
 
-// Conformable?
-template< typename U, typename V >
-inline
-bool
-conformable( Array1< U > const & a, Array1S< V > const & b )
-{
-	return a.conformable( b );
-}
-
-// Conformable?
-template< typename U, typename V >
-inline
-bool
-conformable( Array1S< U > const & a, Array1< V > const & b )
-{
-	return b.conformable( a );
-}
-
 // Equal Dimensions?
 template< typename U, typename V >
 inline
@@ -1273,462 +505,6 @@ bool
 equal_dimensions( Array1< U > const & a, Array1< V > const & b )
 {
 	return a.equal_dimensions( b );
-}
-
-// Magnitude
-template< typename T >
-inline
-T
-magnitude( Array1< T > const & a )
-{
-	T mag_sq( T( 0 ) );
-	for ( int i = a.l(), e = a.u(); i <= e; ++i ) {
-		T const mag_i( a( i ) );
-		mag_sq += mag_i * mag_i;
-	}
-	return std::sqrt( mag_sq );
-}
-
-// Magnitude Squared
-template< typename T >
-inline
-T
-magnitude_squared( Array1< T > const & a )
-{
-	T mag_sq( T( 0 ) );
-	for ( int i = a.l(), e = a.u(); i <= e; ++i ) {
-		T const mag_i( a( i ) );
-		mag_sq += mag_i * mag_i;
-	}
-	return mag_sq;
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1< T > const & a, Array1< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return std::sqrt( distance_sq );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1< T > const & a, Array1S< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return std::sqrt( distance_sq );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1S< T > const & a, Array1< T > const & b )
-{
-	return distance( b, a );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1< T > const & a, Vector2< T > const & b )
-{
-	assert( a.size() == 2u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return std::sqrt( distance_sq );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Vector2< T > const & a, Array1< T > const & b )
-{
-	return distance( b, a );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1< T > const & a, Vector3< T > const & b )
-{
-	assert( a.size() == 3u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return std::sqrt( distance_sq );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Vector3< T > const & a, Array1< T > const & b )
-{
-	return distance( b, a );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Array1< T > const & a, Vector4< T > const & b )
-{
-	assert( a.size() == 4u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return std::sqrt( distance_sq );
-}
-
-// Distance
-template< typename T >
-inline
-T
-distance( Vector4< T > const & a, Array1< T > const & b )
-{
-	return distance( b, a );
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1< T > const & a, Array1< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return distance_sq;
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1< T > const & a, Array1S< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return distance_sq;
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1S< T > const & a, Array1< T > const & b )
-{
-	return distance_squared( b, a );
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1< T > const & a, Vector2< T > const & b )
-{
-	assert( a.size() == 2u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return distance_sq;
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Vector2< T > const & a, Array1< T > const & b )
-{
-	return distance_squared( b, a );
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1< T > const & a, Vector3< T > const & b )
-{
-	assert( a.size() == 3u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return distance_sq;
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Vector3< T > const & a, Array1< T > const & b )
-{
-	return distance_squared( b, a );
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Array1< T > const & a, Vector4< T > const & b )
-{
-	assert( a.size() == 4u );
-	T distance_sq( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		T const distance_i( a( i ) - b( j ) );
-		distance_sq += distance_i * distance_i;
-	}
-	return distance_sq;
-}
-
-// Distance Squared
-template< typename T >
-inline
-T
-distance_squared( Vector4< T > const & a, Array1< T > const & b )
-{
-	return distance_squared( b, a );
-}
-
-// Dot Product
-template< typename T >
-inline
-T
-dot( Array1< T > const & a, Array1< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T result( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		result += a( i ) * b( j );
-	}
-	return result;
-}
-
-// Dot Product
-template< typename T >
-inline
-T
-dot( Array1< T > const & a, Array1S< T > const & b )
-{
-	assert( a.size() == b.size() );
-	T result( T( 0 ) );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		result += a( i ) * b( j );
-	}
-	return result;
-}
-
-// Dot Product
-template< typename T >
-inline
-T
-dot( Array1S< T > const & a, Array1< T > const & b )
-{
-	return dot( b, a );
-}
-
-// Dot Product of Boolean Arrays
-inline
-bool
-dot( Array1< bool > const & a, Array1< bool > const & b )
-{
-	assert( a.size() == b.size() );
-	bool result( false );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		if ( a( i ) && b( j ) ) {
-			result = true;
-			break;
-		}
-	}
-	return result;
-}
-
-// Dot Product of Boolean Arrays
-inline
-bool
-dot( Array1< bool > const & a, Array1S< bool > const & b )
-{
-	assert( a.size() == b.size() );
-	bool result( false );
-	for ( int i = a.l(), j = b.l(), e = a.u(); i <= e; ++i, ++j ) {
-		if ( a( i ) && b( j ) ) {
-			result = true;
-			break;
-		}
-	}
-	return result;
-}
-
-// Dot Product of Boolean Arrays
-inline
-bool
-dot( Array1S< bool > const & a, Array1< bool > const & b )
-{
-	return dot( b, a );
-}
-
-// Dot Product with Vector2
-template< typename T >
-inline
-T
-dot( Array1< T > const & a, Vector2< T > const & b )
-{
-	assert( a.size() == 2u );
-	T result( T( 0 ) );
-	for ( int i = 1, e = a.u(); i <= e; ++i ) {
-		result += a( i ) * b( i );
-	}
-	return result;
-}
-
-// Dot Product with Vector2
-template< typename T >
-inline
-T
-dot( Vector2< T > const & a, Array1< T > const & b )
-{
-	return dot( b, a );
-}
-
-// Dot Product with Vector3
-template< typename T >
-inline
-T
-dot( Array1< T > const & a, Vector3< T > const & b )
-{
-	assert( a.size() == 3u );
-	T result( T( 0 ) );
-	for ( int i = 1, e = a.u(); i <= e; ++i ) {
-		result += a( i ) * b( i );
-	}
-	return result;
-}
-
-// Dot Product with Vector3
-template< typename T >
-inline
-T
-dot( Vector3< T > const & a, Array1< T > const & b )
-{
-	return dot( b, a );
-}
-
-// Dot Product with Vector4
-template< typename T >
-inline
-T
-dot( Array1< T > const & a, Vector4< T > const & b )
-{
-	assert( a.size() == 4u );
-	T result( T( 0 ) );
-	for ( int i = 1, e = a.u(); i <= e; ++i ) {
-		result += a( i ) * b( i );
-	}
-	return result;
-}
-
-// Dot Product with Vector4
-template< typename T >
-inline
-T
-dot( Vector4< T > const & a, Array1< T > const & b )
-{
-	return dot( b, a );
-}
-
-// Dot Product (Fortran Intrinsic Name)
-template< typename T >
-inline
-T
-dot_product( Array1< T > const & a, Array1< T > const & b )
-{
-	return dot( a, b );
-}
-
-// Dot Product (Fortran Intrinsic Name)
-template< typename T >
-inline
-T
-dot_product( Array1< T > const & a, Array1S< T > const & b )
-{
-	return dot( a, b );
-}
-
-// Dot Product (Fortran Intrinsic Name)
-template< typename T >
-inline
-T
-dot_product( Array1S< T > const & a, Array1< T > const & b )
-{
-	return dot( a, b );
-}
-
-// Dot Product of Boolean Arrays (Fortran Intrinsic Name)
-inline
-bool
-dot_product( Array1< bool > const & a, Array1< bool > const & b )
-{
-	return dot( a, b );
-}
-
-// Dot Product of Boolean Arrays (Fortran Intrinsic Name)
-inline
-bool
-dot_product( Array1< bool > const & a, Array1S< bool > const & b )
-{
-	return dot( a, b );
-}
-
-// Dot Product of Boolean Arrays (Fortran Intrinsic Name)
-inline
-bool
-dot_product( Array1S< bool > const & a, Array1< bool > const & b )
-{
-	return dot( a, b );
-}
-
-// Cross Product of 2-Tuples
-template< typename T >
-inline
-T
-cross2( Vector2< T > const & a, Array1< T > const & b )
-{
-	return cross2( b, a );
 }
 
 } // ObjexxFCL

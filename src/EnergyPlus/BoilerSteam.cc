@@ -432,6 +432,13 @@ namespace BoilerSteam {
                             OutputProcessor::StoreType::Average,
                             this->Name);
         SetupOutputVariable(state,
+                            "Boiler Steam Coefficient of Performance",
+                            Constant::Units::None,
+                            this->BoilerCOP,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
+                            this->Name);
+        SetupOutputVariable(state,
                             "Boiler Steam Inlet Temperature",
                             Constant::Units::C,
                             this->BoilerInletTemp,
@@ -859,6 +866,7 @@ namespace BoilerSteam {
         this->BoilerMassFlowRate = state.dataLoopNodes->Node(BoilerOutletNode).MassFlowRate;
         this->BoilerEnergy = this->BoilerLoad * ReportingConstant;
         this->FuelConsumed = this->FuelUsed * ReportingConstant;
+        this->BoilerCOP = (this->FuelUsed) > 0 ? this->BoilerLoad / this->FuelUsed : 0.0;
     }
 
 } // namespace BoilerSteam

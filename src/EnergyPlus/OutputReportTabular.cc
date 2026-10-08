@@ -52,7 +52,9 @@
 #include <cmath>
 #include <format>
 #include <iomanip>
+#include <limits>
 #include <map>
+#include <numeric>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
@@ -60,10 +62,8 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/member.functions.hh>
-#include <ObjexxFCL/numeric.hh>
 #include <ObjexxFCL/string.functions.hh>
 #include <ObjexxFCL/time.hh>
 
@@ -877,11 +877,11 @@ void InitializeTabularMonthly(EnergyPlusData &state)
                         ort->MonthlyColumns(mColumn).duration = 0.0;
                     } break;
                     case AggType::Maximum: {
-                        ort->MonthlyColumns(mColumn).reslt = -HUGE_(state.dataOutRptTab->BigNum);
+                        ort->MonthlyColumns(mColumn).reslt = std::numeric_limits<Real64>::lowest();
                         ort->MonthlyColumns(mColumn).timeStamp = 0;
                     } break;
                     case AggType::Minimum: {
-                        ort->MonthlyColumns(mColumn).reslt = HUGE_(state.dataOutRptTab->BigNum);
+                        ort->MonthlyColumns(mColumn).reslt = std::numeric_limits<Real64>::max();
                         ort->MonthlyColumns(mColumn).timeStamp = 0;
                     } break;
                     case AggType::ValueWhenMaxMin: {
@@ -910,11 +910,11 @@ void InitializeTabularMonthly(EnergyPlusData &state)
                         ort->MonthlyColumns(mColumn).duration = 0.0;
                     } break;
                     case AggType::MaximumDuringHoursShown: {
-                        ort->MonthlyColumns(mColumn).reslt = -HUGE_(state.dataOutRptTab->BigNum);
+                        ort->MonthlyColumns(mColumn).reslt = std::numeric_limits<Real64>::lowest();
                         ort->MonthlyColumns(mColumn).timeStamp = 0;
                     } break;
                     case AggType::MinimumDuringHoursShown: {
-                        ort->MonthlyColumns(mColumn).reslt = HUGE_(state.dataOutRptTab->BigNum);
+                        ort->MonthlyColumns(mColumn).reslt = std::numeric_limits<Real64>::max();
                         ort->MonthlyColumns(mColumn).timeStamp = 0;
                     } break;
                     default:
@@ -1046,13 +1046,12 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
     // na
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    int NumParams = 0;            // Number of elements combined
-    int NumAlphas = 0;            // Number of elements in the alpha array
-    int NumNums = 0;              // Number of elements in the numeric array
-    Array1D_string AlphArray;     // character string data
-    Array1D<Real64> NumArray;     // numeric data
-    int IOStat = -1;              // IO Status when calling get input subroutine
-    Real64 constexpr bigVal(0.0); // used with HUGE: Value doesn't matter, only type: Initialize so compiler doesn't warn about use uninitialized
+    int NumParams = 0;        // Number of elements combined
+    int NumAlphas = 0;        // Number of elements in the alpha array
+    int NumNums = 0;          // Number of elements in the numeric array
+    Array1D_string AlphArray; // character string data
+    Array1D<Real64> NumArray; // numeric data
+    int IOStat = -1;          // IO Status when calling get input subroutine
 
     Array1D_int objVarIDs;
     Array1D_string objNames;
@@ -1222,8 +1221,8 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
 
     // initialize statistics counters
     for (auto &e : ort->BinStatistics) {
-        e.minimum = HUGE_(bigVal);
-        e.maximum = -HUGE_(bigVal);
+        e.minimum = std::numeric_limits<Real64>::max();
+        e.maximum = std::numeric_limits<Real64>::lowest();
         e.n = 0;
         e.sum = 0.0;
         e.sum2 = 0.0;
@@ -9913,9 +9912,17 @@ void writeBEPSEndUseBySubCatOrSpaceType(EnergyPlusData &state,
             rowHeadTemp(i) = rowHeadTemp(i) + ":" + tableBody(1, i);
         }
 
-        // Erase the SubCategory (first column), using slicing
-        Array2D_string tableBodyTemp(tableBody({2, _, _}, {_, _, _}));
-        Array1D_string columnHeadTemp(columnHead({2, _, _}));
+        // Erase the SubCategory (first column)
+        Array2D_string tableBodyTemp(tableBody.u1() - 1, tableBody.u2());
+        for (int col = 2; col <= tableBody.u1(); ++col) {
+            for (int row = 1; row <= tableBody.u2(); ++row) {
+                tableBodyTemp(col - 1, row) = tableBody(col, row);
+            }
+        }
+        Array1D_string columnHeadTemp(columnHead.u() - 1);
+        for (int col = 2; col <= columnHead.u(); ++col) {
+            columnHeadTemp(col - 1) = columnHead(col);
+        }
         if (style.produceSQLite) {
             if (state.dataSQLiteProcedures->sqlite) {
                 state.dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
@@ -10740,9 +10747,17 @@ void WriteDemandEndUseSummary(EnergyPlusData &state)
             rowHeadTemp(i) = rowHeadTemp(i) + ":" + tableBody(1, i);
         }
 
-        // Erase the SubCategory (first column), using slicing
-        Array2D_string tableBodyTemp(tableBody({2, _, _}, {_, _, _}));
-        Array1D_string columnHeadTemp(columnHead({2, _, _}));
+        // Erase the SubCategory (first column)
+        Array2D_string tableBodyTemp(tableBody.u1() - 1, tableBody.u2());
+        for (int col = 2; col <= tableBody.u1(); ++col) {
+            for (int row = 1; row <= tableBody.u2(); ++row) {
+                tableBodyTemp(col - 1, row) = tableBody(col, row);
+            }
+        }
+        Array1D_string columnHeadTemp(columnHead.u() - 1);
+        for (int col = 2; col <= columnHead.u(); ++col) {
+            columnHeadTemp(col - 1) = columnHead(col);
+        }
 
         if (currentStyle.produceSQLite) {
             if (state.dataSQLiteProcedures->sqlite) {
@@ -10933,7 +10948,7 @@ void WriteCompCostTable(EnergyPlusData &state)
         }
 
         // holds interim value for construction component costs: reference bldg.
-        Real64 const RefBldgConstCost = sum(TableBodyData(1, {1, 3}));
+        Real64 const RefBldgConstCost = TableBodyData(1, 1) + TableBodyData(1, 2) + TableBodyData(1, 3);
 
         tableBody(1, 3) = RealToStr(currentStyle.formatReals, TableBodyData(1, 3), 2);
         TableBodyData(1, 4) = RefBldgConstCost * state.dataCostEstimateManager->RefrncBldg.DesignFeeFrac;
@@ -10946,7 +10961,10 @@ void WriteCompCostTable(EnergyPlusData &state)
         tableBody(1, 7) = RealToStr(currentStyle.formatReals, TableBodyData(1, 7), 2);
         TableBodyData(1, 8) = RefBldgConstCost * state.dataCostEstimateManager->RefrncBldg.CommissioningFrac;
         tableBody(1, 8) = RealToStr(currentStyle.formatReals, TableBodyData(1, 8), 2);
-        state.dataCostEstimateManager->RefrncBldg.GrandTotal = sum(TableBodyData(1, {1, 8}));
+        state.dataCostEstimateManager->RefrncBldg.GrandTotal = 0.0;
+        for (int col = 1; col <= 8; ++col) {
+            state.dataCostEstimateManager->RefrncBldg.GrandTotal += TableBodyData(1, col);
+        }
         TableBodyData(1, 9) = state.dataCostEstimateManager->RefrncBldg.GrandTotal;
         tableBody(1, 9) = RealToStr(currentStyle.formatReals, TableBodyData(1, 9), 2);
         if (ort->buildingConditionedFloorArea > 0.0) {
@@ -10968,7 +10986,7 @@ void WriteCompCostTable(EnergyPlusData &state)
         tableBody(2, 3) = RealToStr(currentStyle.formatReals, TableBodyData(2, 3), 2);
 
         // holds interim value for construction component costs: current bldg.
-        Real64 const CurntBldgConstCost = sum(TableBodyData(2, {1, 3}));
+        Real64 const CurntBldgConstCost = TableBodyData(2, 1) + TableBodyData(2, 2) + TableBodyData(2, 3);
 
         TableBodyData(2, 4) = CurntBldgConstCost * state.dataCostEstimateManager->CurntBldg.DesignFeeFrac;
         tableBody(2, 4) = RealToStr(currentStyle.formatReals, TableBodyData(2, 4), 2);
@@ -10982,7 +11000,10 @@ void WriteCompCostTable(EnergyPlusData &state)
         TableBodyData(2, 8) = CurntBldgConstCost * state.dataCostEstimateManager->CurntBldg.CommissioningFrac;
         tableBody(2, 8) = RealToStr(currentStyle.formatReals, TableBodyData(2, 8), 2);
 
-        state.dataCostEstimateManager->CurntBldg.GrandTotal = sum(TableBodyData(2, {1, 8}));
+        state.dataCostEstimateManager->CurntBldg.GrandTotal = 0.0;
+        for (int col = 1; col <= 8; ++col) {
+            state.dataCostEstimateManager->CurntBldg.GrandTotal += TableBodyData(2, col);
+        }
         TableBodyData(2, 9) = state.dataCostEstimateManager->CurntBldg.GrandTotal;
         tableBody(2, 9) = RealToStr(currentStyle.formatReals, TableBodyData(2, 9), 2);
         if (ort->buildingConditionedFloorArea > 0) {
@@ -10990,7 +11011,9 @@ void WriteCompCostTable(EnergyPlusData &state)
         }
         tableBody(2, 10) = RealToStr(currentStyle.formatReals, TableBodyData(2, 10), 2);
 
-        TableBodyData(3, {1, 10}) = TableBodyData(2, {1, 10}) - TableBodyData(1, {1, 10});
+        for (int col = 1; col <= 10; ++col) {
+            TableBodyData(3, col) = TableBodyData(2, col) - TableBodyData(1, col);
+        }
         tableBody(3, 1) = RealToStr(currentStyle.formatReals, TableBodyData(3, 1), 2);
         tableBody(3, 2) = RealToStr(currentStyle.formatReals, TableBodyData(3, 2), 2);
         tableBody(3, 3) = RealToStr(currentStyle.formatReals, TableBodyData(3, 3), 2);
@@ -16128,7 +16151,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::Latent, LoadCompRow::People) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::Latent, LoadCompRow::People) = true;
-        AvgData = peopleDelaySeq(_);
+        AvgData = peopleDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::People) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::People) = true;
@@ -16146,7 +16169,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensRA, LoadCompRow::Lights) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensRA, LoadCompRow::Lights) = true;
-        AvgData = lightDelaySeq(_);
+        AvgData = lightDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::Lights) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::Lights) = true;
@@ -16164,7 +16187,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::Latent, LoadCompRow::Equip) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::Latent, LoadCompRow::Equip) = true;
-        AvgData = equipDelaySeq(_);
+        AvgData = equipDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::Equip) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::Equip) = true;
@@ -16210,7 +16233,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensInst, LoadCompRow::HvacLoss) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensInst, LoadCompRow::HvacLoss) = true;
-        AvgData = hvacLossDelaySeq(_);
+        AvgData = hvacLossDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::HvacLoss) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::HvacLoss) = true;
@@ -16222,7 +16245,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensInst, LoadCompRow::PowerGen) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensInst, LoadCompRow::PowerGen) = true;
-        AvgData = powerGenDelaySeq(_);
+        AvgData = powerGenDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::PowerGen) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::PowerGen) = true;
@@ -16287,7 +16310,7 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
         resCellsUsd(LoadCompCol::SensInst, LoadCompRow::FeneCond) = true;
 
         // FENESTRATION SOLAR
-        AvgData = feneSolarDelaySeq(_);
+        AvgData = feneSolarDelaySeq;
         General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
         resultCells(LoadCompCol::SensDelay, LoadCompRow::FeneSolr) = AvgData(timeOfMax);
         resCellsUsd(LoadCompCol::SensDelay, LoadCompRow::FeneSolr) = true;
@@ -16306,7 +16329,9 @@ void ComputeTableBodyUsingMovingAvg(EnergyPlusData &state,
                         curExtBoundCond = DataSurfaces::Ground;
                     }
                 }
-                AvgData = surfDelaySeq(_, kSurf);
+                for (int iTS = 1; iTS <= numTSinDay; ++iTS) {
+                    AvgData(iTS) = surfDelaySeq(iTS, kSurf);
+                }
                 General::MovingAvg(AvgData, state.dataSize->NumTimeStepsInAvg);
                 Real64 singleSurfDelay = AvgData(timeOfMax);
                 switch (state.dataSurface->Surface(kSurf).Class) {
@@ -17431,7 +17456,7 @@ void WriteTextLine(EnergyPlusData &state, std::string const &lineOfText, bool co
 }
 
 void WriteTable(EnergyPlusData &state,
-                Array2S_string const body, // row,column
+                Array2D_string const &body, // row,column
                 const Array1D_string &rowLabels,
                 const Array1D_string &columnLabels,
                 Array1D_int &widthColumn,
@@ -17487,8 +17512,8 @@ void WriteTable(EnergyPlusData &state,
 
     // create blank string
     // get sizes of arrays
-    int rowsBody = isize(body, 2);
-    int colsBody = isize(body, 1);
+    int rowsBody = body.isize2();
+    int colsBody = body.isize1();
     int rowsRowLabels = isize(rowLabels);
     int colsColumnLabels = isize(columnLabels);
     int const colsWidthColumn = isize(widthColumn);
@@ -18209,10 +18234,10 @@ void ResetMonthlyGathering(EnergyPlusData &state)
                 ort->MonthlyColumns(curCol).duration = 0.0;
                 if (ort->MonthlyColumns(curCol).aggType == AggType::Maximum ||
                     ort->MonthlyColumns(curCol).aggType == AggType::MaximumDuringHoursShown) {
-                    ort->MonthlyColumns(curCol).reslt = -HUGE_(state.dataOutRptTab->BigNumRMG);
+                    ort->MonthlyColumns(curCol).reslt = std::numeric_limits<Real64>::lowest();
                 } else if (ort->MonthlyColumns(curCol).aggType == AggType::Minimum ||
                            ort->MonthlyColumns(curCol).aggType == AggType::MinimumDuringHoursShown) {
-                    ort->MonthlyColumns(curCol).reslt = HUGE_(state.dataOutRptTab->BigNumRMG);
+                    ort->MonthlyColumns(curCol).reslt = std::numeric_limits<Real64>::max();
                 } else {
                     ort->MonthlyColumns(curCol).reslt = 0.0;
                 }
@@ -18226,7 +18251,6 @@ void ResetBinGathering(EnergyPlusData const &state)
     // Jason Glazer - October 2015
     // Reset all timebins gathering arrays to zero for multi-year simulations
     // so that only last year is reported in tabular reports
-    Real64 constexpr bigVal(0.0); // used with HUGE: Value doesn't matter, only type: Initialize so compiler doesn't warn about use uninitialized
     auto const &ort = state.dataOutRptTab;
 
     // clear the binning arrays to zeros
@@ -18245,8 +18269,8 @@ void ResetBinGathering(EnergyPlusData const &state)
 
     // re-initialize statistics counters
     for (auto &e : ort->BinStatistics) {
-        e.minimum = HUGE_(bigVal);
-        e.maximum = -HUGE_(bigVal);
+        e.minimum = std::numeric_limits<Real64>::max();
+        e.maximum = std::numeric_limits<Real64>::lowest();
         e.n = 0;
         e.sum = 0.0;
         e.sum2 = 0.0;
@@ -18425,8 +18449,6 @@ void ResetRemainingPredefinedEntries(EnergyPlusData &state)
     // Reset all entries that are added to the predefined reports in the FillRemainingPredefinedEntries() function to zero for multi-year
     // simulations so that only last year is reported in tabular reports
 
-    Real64 constexpr bigVal(0.0); // used with HUGE: Value doesn't matter, only type: Initialize so compiler doesn't warn about use uninitialized
-
     for (int iLight = 1; iLight <= state.dataHeatBal->TotLights; ++iLight) {
         state.dataHeatBal->Lights(iLight).SumTimeNotZeroCons = 0.;
         state.dataHeatBal->Lights(iLight).SumConsumption = 0.;
@@ -18441,16 +18463,16 @@ void ResetRemainingPredefinedEntries(EnergyPlusData &state)
 
                 thisZonePreDefRep.MechVentVolTotalOcc = 0.;
                 thisZonePreDefRep.MechVentVolTotalOccStdDen = 0.;
-                thisZonePreDefRep.MechVentVolMin = HUGE_(bigVal);
+                thisZonePreDefRep.MechVentVolMin = std::numeric_limits<Real64>::max();
                 thisZonePreDefRep.InfilVolTotalOcc = 0.;
                 thisZonePreDefRep.InfilVolTotalOccStdDen = 0.;
-                thisZonePreDefRep.InfilVolMin = HUGE_(bigVal);
+                thisZonePreDefRep.InfilVolMin = std::numeric_limits<Real64>::max();
                 thisZonePreDefRep.AFNInfilVolTotalOcc = 0.;
                 thisZonePreDefRep.AFNInfilVolTotalOccStdDen = 0.;
-                thisZonePreDefRep.AFNInfilVolMin = HUGE_(bigVal);
+                thisZonePreDefRep.AFNInfilVolMin = std::numeric_limits<Real64>::max();
                 thisZonePreDefRep.SimpVentVolTotalOcc = 0.;
                 thisZonePreDefRep.SimpVentVolTotalOccStdDen = 0.;
-                thisZonePreDefRep.SimpVentVolMin = HUGE_(bigVal);
+                thisZonePreDefRep.SimpVentVolMin = std::numeric_limits<Real64>::max();
                 thisZonePreDefRep.AFNVentVolTotalOccStdDen = 0.;
                 thisZonePreDefRep.TotTimeOcc = 0.;
             }
@@ -18798,7 +18820,7 @@ void SetupUnitConversions(EnergyPlusData &state)
     //    na
     auto &ort = state.dataOutRptTab;
 
-    ort->UnitConvSize = 118;
+    ort->UnitConvSize = 120;
     ort->UnitConv.allocate(ort->UnitConvSize);
     ort->UnitConv(1).siName = "%";
     ort->UnitConv(2).siName = "°C";
@@ -18918,6 +18940,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).siName = "MM";
     ort->UnitConv(117).siName = "MM";
     ort->UnitConv(118).siName = "°C·hr";
+    ort->UnitConv(119).siName = "W/M-K";
+    ort->UnitConv(120).siName = "M2-K/W";
 
     ort->UnitConv(1).ipName = "%";
     ort->UnitConv(2).ipName = "F";
@@ -19037,6 +19061,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).ipName = "in";
     ort->UnitConv(117).ipName = "ft";
     ort->UnitConv(118).ipName = "°F·hr";
+    ort->UnitConv(119).ipName = "Btu-in/hr-ft2-F";
+    ort->UnitConv(120).ipName = "ft2-F-hr/Btu";
 
     ort->UnitConv(1).mult = 1.0;
     ort->UnitConv(2).mult = 1.8;
@@ -19156,6 +19182,8 @@ void SetupUnitConversions(EnergyPlusData &state)
     ort->UnitConv(116).mult = 0.03937;
     ort->UnitConv(117).mult = 0.003281;
     ort->UnitConv(118).mult = 1.8;
+    ort->UnitConv(119).mult = 6.933471;
+    ort->UnitConv(120).mult = 5.678263;
 
     ort->UnitConv(2).offset = 32.0;
     ort->UnitConv(11).offset = 32.0;

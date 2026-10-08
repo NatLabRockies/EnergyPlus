@@ -129,7 +129,7 @@ The porosity of a material (P) is an input variable and defined as the maximum f
 
 The thermal conductivity (k\(^{w}\)) of the cell is determined by interpolating between data points of thermal conductivity versus the moisture content of the material, entered into EnergyPlus via the MaterialProperty:HeatAndMoistureTransfer:ThermalConductivity object. The moisture content is determined via the sorption isotherm which gives the moisture content as a function of Relative Humidity.
 
-\subsubsection{Moisture Dependent Moisture Diffusion Coefficient μ}\label{moisture-dependent-moisture-diffusion-coefficient-ux3bc}
+\subsubsection{Moisture Dependent Moisture Diffusion Coefficient \(\mu\)}\label{moisture-dependent-moisture-diffusion-coefficient-ux3bc}
 
 This is used in the third term of Equation~\ref{eq:HAMTHeatBalanceEquation} to describe the heat transfer due to vapor movement. It is determined by interpolating between data points of moisture diffusion coefficient versus the moisture content of the material, entered into EnergyPlus via the MaterialProperty:HeatAndMoistureTransfer:Diffusion object. A simple linear interpolation is used to obtain the conductivity between measured points.
 

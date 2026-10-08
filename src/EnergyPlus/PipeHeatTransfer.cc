@@ -206,10 +206,6 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
     static constexpr std::string_view routineName = "GetPipeHeatTransfer";
 
-    // SUBROUTINE PARAMETER DEFINITIONS:
-    int constexpr NumPipeSections(20);
-    int constexpr NumberOfDepthNodes(8); // Number of nodes in the cartesian grid-Should be an even # for now
-
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool ErrorsFound(false); // Set to true if errors in input,
 
@@ -631,8 +627,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
             state.dataPipeHT->PipeHT(Item).SoilDepth = matSoil->Thickness;
             state.dataPipeHT->PipeHT(Item).SoilCp = matSoil->SpecHeat;
             state.dataPipeHT->PipeHT(Item).SoilConductivity = matSoil->Conductivity;
-            state.dataPipeHT->PipeHT(Item).SoilThermAbs = matSoil->AbsorpThermal;
-            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = matSoil->AbsorpSolar;
+            state.dataPipeHT->PipeHT(Item).SoilThermAbs = matSoil->AbsorpThermalOut;
+            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = matSoil->AbsorpSolarOut;
             state.dataPipeHT->PipeHT(Item).SoilRoughness = matSoil->Roughness;
             state.dataPipeHT->PipeHT(Item).PipeDepth = state.dataPipeHT->PipeHT(Item).SoilDepth + state.dataPipeHT->PipeHT(Item).PipeID / 2.0;
             state.dataPipeHT->PipeHT(Item).DomainDepth = state.dataPipeHT->PipeHT(Item).PipeDepth * 2.0;
@@ -670,12 +666,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         // Select number of pipe sections.  Hanby's optimal number of 20 section is selected.
         state.dataPipeHT->PipeHT(Item).NumSections = NumPipeSections;
 
-        // For buried pipes, we need to allocate the cartesian finite difference array
-        state.dataPipeHT->PipeHT(Item).T.allocate(state.dataPipeHT->PipeHT(Item).PipeNodeWidth,
-                                                  state.dataPipeHT->PipeHT(Item).NumDepthNodes,
-                                                  state.dataPipeHT->PipeHT(Item).NumSections,
-                                                  TimeIndex::Tentative);
-        state.dataPipeHT->PipeHT(Item).T = 0.0;
+        // The cartesian finite difference array for buried pipes (TGrid) is fixed-size and zero-initialized
 
     } // PipeUG input loop
 

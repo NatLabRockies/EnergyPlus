@@ -808,7 +808,17 @@ TEST_F(EnergyPlusFixture, SeriesPIUZoneOAVolumeFlowRateTest)
     EXPECT_EQ(PriMinMassFlow, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
     EXPECT_EQ(expect_OutdoorAirFlowRate, thisSeriesAT.OutdoorAirFlowRate);
 
-    // test 3: - Cooling load, at maximum primary air flow rate
+    // test 3: No heating load at 0 primary flow rate
+    FirstHVACIteration = true;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 0.0;
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = 0.0;
+    PoweredInductionUnits::InitPIU(*state, PIUNum, FirstHVACIteration);
+    PoweredInductionUnits::CalcSeriesPIU(*state, PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(thisSeriesAT.OutAirNode).MassFlowRate); // fails prior to MinAvail fix for 0 flow #11737
+
+    // test 4: - Cooling load, at maximum primary air flow rate
     // set cooling zone and AT unit inlet conditions
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 24.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0080;
@@ -3145,7 +3155,6 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
 
     auto &siz = state->dataSize->TermUnitFinalZoneSizing;
     siz.allocate(2);
-    siz(1).DesCoolVolFlowMin = 0.15;
     siz(1).MinOA = 0.05;
     siz(1).CoolDesTemp = 12.5;
     siz(1).HeatDesTemp = 40.0;
@@ -3164,8 +3173,8 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
 
     piu(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.2500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));

@@ -2514,19 +2514,27 @@ void InitializeCFSStateData(EnergyPlusData &state,
 
             // Fill up state data for current window element data
             StateRefPoint.NSky(curWinEl) = NSky;
-            StateRefPoint.SkyIndex({1, NSky}, curWinEl) = TmpSkyInd({1, NSky});
+            for (int i = 1; i <= NSky; ++i) {
+                StateRefPoint.SkyIndex(i, curWinEl) = TmpSkyInd(i);
+            }
 
             StateRefPoint.NGnd(curWinEl) = NGnd;
-            StateRefPoint.GndIndex({1, NGnd}, curWinEl) = TmpGndInd({1, NGnd});
-            StateRefPoint.GndPt({1, NGnd}, curWinEl) = TmpGndPt({1, NGnd});
-            StateRefPoint.GndObstrMultiplier({1, NGnd}, curWinEl) = TmpGndMultiplier({1, NGnd});
+            for (int i = 1; i <= NGnd; ++i) {
+                StateRefPoint.GndIndex(i, curWinEl) = TmpGndInd(i);
+                StateRefPoint.GndPt(i, curWinEl) = TmpGndPt(i);
+                StateRefPoint.GndObstrMultiplier(i, curWinEl) = TmpGndMultiplier(i);
+            }
 
             StateRefPoint.NReflSurf(curWinEl) = NReflSurf;
-            StateRefPoint.RefSurfIndex({1, NReflSurf}, curWinEl) = TmpRfSfInd({1, NReflSurf});
-            StateRefPoint.RefRayNHits({1, NReflSurf}, curWinEl) = TmpRfRyNH({1, NReflSurf});
-            StateRefPoint.HitSurfNo({1, MaxTotHits}, {1, NReflSurf}, curWinEl) = TmpHSurfNo({1, MaxTotHits}, {1, NReflSurf});
-            StateRefPoint.HitSurfDSq({1, MaxTotHits}, {1, NReflSurf}, curWinEl) = TmpHSurfDSq({1, MaxTotHits}, {1, NReflSurf});
-            StateRefPoint.HitPt({1, MaxTotHits}, {1, NReflSurf}, curWinEl) = TmpHitPt({1, MaxTotHits}, {1, NReflSurf});
+            for (int i = 1; i <= NReflSurf; ++i) {
+                StateRefPoint.RefSurfIndex(i, curWinEl) = TmpRfSfInd(i);
+                StateRefPoint.RefRayNHits(i, curWinEl) = TmpRfRyNH(i);
+                for (int j = 1; j <= MaxTotHits; ++j) {
+                    StateRefPoint.HitSurfNo(j, i, curWinEl) = TmpHSurfNo(j, i);
+                    StateRefPoint.HitSurfDSq(j, i, curWinEl) = TmpHSurfDSq(j, i);
+                    StateRefPoint.HitPt(j, i, curWinEl) = TmpHitPt(j, i);
+                }
+            }
         } // do IY = 1, NWY
     } // do IX = 1, NWX
 }
@@ -3012,7 +3020,7 @@ void FigureDayltgCoeffsAtPointsForSunPosition(
                 // Exterior building surface is nearest hit
                 if (!state.dataConstruction->Construct(ObsConstrNum).TypeIsWindow) {
                     // Obstruction is not a window, i.e., is an opaque surface
-                    ObsVisRefl = 1.0 - s_mat->materials(state.dataConstruction->Construct(ObsConstrNum).LayerPoint(1))->AbsorpVisible;
+                    ObsVisRefl = 1.0 - s_mat->materials(state.dataConstruction->Construct(ObsConstrNum).LayerPoint(1))->AbsorpVisibleOut;
                 } else {
                     // Obstruction is a window; assume it is bare
                     ObsVisRefl = state.dataConstruction->Construct(ObsConstrNum).ReflectVisDiffFront;
@@ -4746,7 +4754,6 @@ void GetDaylightingControls(EnergyPlusData &state, bool &ErrorsFound)
             sumFracs += refPt.fracZoneDaylit;
         }
 
-        daylightControl.sumFracLights = sumFracs;
         if ((1.0 - sumFracs) > FractionTolerance) {
             ShowWarningError(state, "GetDaylightingControls: Fraction of zone or space controlled by the Daylighting reference points is < 1.0.");
             ShowContinueError(state,
@@ -7457,7 +7464,7 @@ void DayltgInterReflectedIllum(EnergyPlusData &state,
                         // Exterior building surface is nearest hit
                         if (!state.dataConstruction->Construct(ObsConstrNum).TypeIsWindow) {
                             // Obstruction is not a window, i.e., is an opaque surface
-                            ObsVisRefl = 1.0 - s_mat->materials(state.dataConstruction->Construct(ObsConstrNum).LayerPoint(1))->AbsorpVisible;
+                            ObsVisRefl = 1.0 - s_mat->materials(state.dataConstruction->Construct(ObsConstrNum).LayerPoint(1))->AbsorpVisibleOut;
                         } else {
                             // Obstruction is a window; assume it is bare
                             ObsVisRefl = state.dataConstruction->Construct(ObsConstrNum).ReflectVisDiffFront;

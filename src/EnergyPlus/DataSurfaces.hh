@@ -61,6 +61,7 @@
 using ObjexxFCL::Vector4;
 
 // EnergyPlus Headers
+#include <EnergyPlus/ConstructionAssignmentSet.hh>
 #include <EnergyPlus/ConvectionConstants.hh>
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
@@ -157,7 +158,11 @@ namespace DataSurfaces {
         Detached_B,
         Detached_F,
         Window,
+        FixedWindow,
+        OperableWindow,
+        Skylight,
         GlassDoor,
+        OverheadDoor,
         Door,
         Shading,
         Overhang,
@@ -166,6 +171,25 @@ namespace DataSurfaces {
         TDD_Diffuser,
         Num // The counter representing the total number of surface class, always stays at the bottom
     };
+
+    // Window-like surface classes
+    constexpr bool SurfaceClassIsWindow(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::Window || surfClass == SurfaceClass::FixedWindow || surfClass == SurfaceClass::OperableWindow ||
+                surfClass == SurfaceClass::Skylight);
+    }
+
+    // Glazed surfaces include windows and glazed doors
+    constexpr bool SurfaceClassIsGlazed(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::GlassDoor || SurfaceClassIsWindow(surfClass));
+    }
+
+    // Door surfaces include opaque doors, overhead doors, and glass doors
+    constexpr bool SurfaceClassIsDoor(SurfaceClass const surfClass)
+    {
+        return (surfClass == SurfaceClass::Door || surfClass == SurfaceClass::OverheadDoor || surfClass == SurfaceClass::GlassDoor);
+    }
 
     // A coarse grain version of SurfaceClass
     enum class FWC
@@ -517,28 +541,6 @@ namespace DataSurfaces {
         // Constructor
         Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v, Vector2D const &vl, Vector2D const &vu);
 
-    public: // Predicates
-            // Bounding box contains a point?
-        bool bb_contains(Vector2D const &v) const
-        {
-            return (vl.x <= v.x) && (v.x <= vu.x) && (vl.y <= v.y) && (v.y <= vu.y);
-        }
-
-    public: // Comparison
-            // Equality
-        friend bool operator==(Surface2D const &a, Surface2D const &b)
-        {
-            auto const &v1 = a.vertices;
-            auto const &v2 = b.vertices;
-            return eq(v1, v2);
-        }
-
-        // Inequality
-        friend bool operator!=(Surface2D const &a, Surface2D const &b)
-        {
-            return !(a == b);
-        }
-
     public:                                              // Data
         int axis = 0;                                    // Axis of projection (0=x, 1=y, 2=z)
         Vertices vertices;                               // Vertices
@@ -700,6 +702,8 @@ namespace DataSurfaces {
 
         std::vector<int> ConstituentSurfaceNums; // A vector of surface numbers which reference this surface for representative calculations
         int ConstructionStoredInputValue;        // holds the original value for Construction per surface input
+        // Reported as the "Construction Assignment Source" column in the EnvelopeSummary report.
+        ConstructionAssignments::SearchDistanceType ConstructionAssignmentSource = ConstructionAssignments::SearchDistanceType::Invalid;
         SurfaceClass Class;
         SurfaceClass OriginalClass;
 
@@ -879,9 +883,8 @@ namespace DataSurfaces {
 
     struct SurfaceWindowRefPt
     {
-        Real64 solidAng = 0.0;    // Solid angle subtended by window from daylit ref points 1 and 2
-        Real64 solidAngWtd = 0.0; // Solid angle subtended by window from ref pts weighted by glare pos factor
-        std::array<std::array<Real64, (int)WinCover::Num>, (int)Lum::Num> lums = {{{0.0, 0.0}}};
+        Real64 solidAng = 0.0;        // Solid angle subtended by window from daylit ref points 1 and 2
+        Real64 solidAngWtd = 0.0;     // Solid angle subtended by window from ref pts weighted by glare pos factor
         Real64 illumFromWinRep = 0.0; // Illuminance from window at reference point N [lux]
         Real64 lumWinRep = 0.0;       // Window luminance as viewed from reference point N [cd/m2]
     };
@@ -927,9 +930,6 @@ namespace DataSurfaces {
         std::array<Real64, (int)FWC::Num> EnclAreaReflProdMinusThisSurf = {0.0, 0.0, 0.0};
 
         BSDFWindowDescript ComplexFen; // Data for complex fenestration, see DataBSDFWindow.cc for declaration
-        bool hasShade = false;
-        bool hasBlind = false;
-        bool hasScreen = false;
     };
 
     struct SurfaceShade
@@ -1204,7 +1204,6 @@ namespace DataSurfaces {
         Real64 SurfFilmCoef;                       // Combined convective/radiative film coefficient if >0, else use other coefficients
         Real64 WindSpeedCoef;                      // Coefficient modifying the wind speed term (s/m)
         Real64 ZoneAirTempCoef;                    // Coefficient modifying the zone air temperature part of the equation
-        std::string ConstTempScheduleName;         // Schedule name for scheduled outside temp
         Sched::Schedule *constTempSched = nullptr; // Index for scheduled outside temp.
         bool SinusoidalConstTempCoef;              // If true then ConstTempCoef varies by sine wave
         Real64 SinusoidPeriod;                     // period of sine wave variation  (hr)

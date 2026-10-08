@@ -139,6 +139,8 @@ namespace AirflowNetwork {
     using DataSurfaces::ExternalEnvironment;
     using DataSurfaces::OtherSideCoefNoCalcExt;
     using DataSurfaces::SurfaceClass;
+    using DataSurfaces::SurfaceClassIsDoor;
+    using DataSurfaces::SurfaceClassIsWindow;
     using Fans::GetFanIndex;
     using Psychrometrics::PsyCpAirFnW;
     using Psychrometrics::PsyHFnTdbW;
@@ -482,8 +484,6 @@ namespace AirflowNetwork {
 
                 auto *fan = m_state.dataFans->fans(fanIndex);
 
-                Real64 flowRate = fan->maxAirFlowRate;
-                flowRate *= m_state.dataEnvrn->StdRhoAir;
                 int inletNode = fan->inletNodeNum;
                 int outletNode = fan->outletNodeNum;
                 HVAC::FanType fanType = fan->type;
@@ -525,7 +525,6 @@ namespace AirflowNetwork {
                 MultizoneCompExhaustFanData(i).FlowCoef = coeff;      // flow coefficient
                 MultizoneCompExhaustFanData(i).FlowExpo = expnt;      // Flow exponent
 
-                MultizoneCompExhaustFanData(i).FlowRate = flowRate;
                 MultizoneCompExhaustFanData(i).InletNode = inletNode;
                 MultizoneCompExhaustFanData(i).OutletNode = outletNode;
 
@@ -865,7 +864,6 @@ namespace AirflowNetwork {
                 MultizoneCompDetOpeningData(i).name = thisObjectName; // Name of large detailed opening component
                 MultizoneCompDetOpeningData(i).FlowCoef = coeff;      // Air Mass Flow Coefficient When Window or Door Is Closed
                 MultizoneCompDetOpeningData(i).FlowExpo = expnt;      // Air Mass Flow exponent When Window or Door Is Closed
-                MultizoneCompDetOpeningData(i).TypeName = LVOstring;  // Large vertical opening type
                 MultizoneCompDetOpeningData(i).LVOType = LVOtype;     // Large vertical opening type number
                 MultizoneCompDetOpeningData(i).LVOValue = extra;      // Extra crack length for LVO type 1 with multiple openable
                                                                       // parts, or Height of pivoting axis for LVO type 2
@@ -1117,8 +1115,6 @@ namespace AirflowNetwork {
                 MultizoneSurfaceELAData(i).DischCoeff = cd;       // Discharge coefficient
                 MultizoneSurfaceELAData(i).RefDeltaP = dp;        // Reference pressure difference
                 MultizoneSurfaceELAData(i).FlowExpo = expnt;      // Air Mass Flow exponent
-                MultizoneSurfaceELAData(i).TestDeltaP = 0.0;      // Testing pressure difference
-                MultizoneSurfaceELAData(i).TestDisCoef = 0.0;     // Testing Discharge coefficient
 
                 // Add the element to the lookup table, check for name overlaps
                 if (elements.find(thisObjectName) == elements.end()) {
@@ -1322,15 +1318,11 @@ namespace AirflowNetwork {
                 DisSysCompDuctData(i).UMoisture = Um;          // Overall moisture transmittance [kg/m2]
                 DisSysCompDuctData(i).OutsideConvCoeff = hout; // Outside convection coefficient [W/m2.K]
                 DisSysCompDuctData(i).InsideConvCoeff = hin;   // Inside convection coefficient [W/m2.K]
-                DisSysCompDuctData(i).MThermal = 0.0;          // Thermal capacity [J/K]
-                DisSysCompDuctData(i).MMoisture = 0.0;         // Moisture capacity [kg]
                 DisSysCompDuctData(i).LamDynCoef = 64.0;       // Laminar dynamic loss coefficient
                 DisSysCompDuctData(i).LamFriCoef = dlc;        // Laminar friction loss coefficient
                 DisSysCompDuctData(i).InitLamCoef = 128.0;     // Coefficient of linear initialization
                 DisSysCompDuctData(i).RelRough = e / D;        // e/D: relative roughness
-                DisSysCompDuctData(i).RelL = L / D;            // L/D: relative length
                 DisSysCompDuctData(i).A1 = 1.14 - 0.868589 * std::log(DisSysCompDuctData(i).RelRough); // 1.14 - 0.868589*ln(e/D)
-                DisSysCompDuctData(i).g = DisSysCompDuctData(i).A1;                                    // 1/sqrt(Darcy friction factor)
 
                 // Add the element to the lookup table, check for name overlaps
                 if (elements.find(thisObjectName) == elements.end()) {
@@ -3486,8 +3478,6 @@ namespace AirflowNetwork {
 
         // Write wind pressure coefficients in the EIO file
         if (!simulation_control.DuctLoss) {
-            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction>, Wind Direction #1 to n (degree)\n");
-            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction, ");
 
             int numWinDirs = 11;
             Real64 angleDelta = 30.0;
@@ -3496,13 +3486,23 @@ namespace AirflowNetwork {
                 angleDelta = 10.0;
             }
 
-            for (int i = 0; i < numWinDirs; ++i) {
-                print(m_state.files.eio, "{:.1f},", i * angleDelta);
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction (degrees)>");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Wind Direction #{}", j);
             }
-            print(m_state.files.eio, "{:.1f}\n", numWinDirs * angleDelta);
+            print(m_state.files.eio, ", Wind Direction #{}\n", numWinDirs + 1);
 
-            print(m_state.files.eio,
-                  "! <AirflowNetwork Model:Wind Pressure Coefficients>, Name, Wind Pressure Coefficients #1 to n (dimensionless)\n");
+            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction (degrees)");
+            for (int j = 0; j < numWinDirs; ++j) {
+                print(m_state.files.eio, ",{:.2f}", j * angleDelta);
+            }
+            print(m_state.files.eio, ",{:.2f}\n", numWinDirs * angleDelta);
+
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Pressure Coefficients (dimensionless)>, Name");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Coefficient #{}", j);
+            }
+            print(m_state.files.eio, ", Coefficient #{}\n", numWinDirs + 1);
 
             // The old version used to write info with single-sided natural ventilation specific labeling, this version no longer does that.
             std::set<int> curves;
@@ -3510,8 +3510,8 @@ namespace AirflowNetwork {
                 curves.insert(MultizoneExternalNodeData(i).curve);
             }
             for (auto index : curves) {
-                print(m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients, {}, ", Curve::GetCurveName(m_state, index));
-
+                print(
+                    m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients (dimensionless), {}, ", Curve::GetCurveName(m_state, index));
                 for (int j = 0; j < numWinDirs; ++j) {
                     print(m_state.files.eio, "{:.2f},", Curve::CurveValue(m_state, index, j * angleDelta));
                 }
@@ -3630,8 +3630,7 @@ namespace AirflowNetwork {
         for (int i = 1; i <= AirflowNetworkNumOfSurfaces; ++i) {
             int j = MultizoneSurfaceData(i).SurfNum;
             auto const &surf = m_state.dataSurface->Surface(j);
-            if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                surf.OriginalClass == SurfaceClass::GlassDoor) {
+            if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) {
                 for (n = 1; n <= AirflowNetworkNumOfZones; ++n) {
                     if (MultizoneZoneData(n).ZoneNum == m_state.dataSurface->Surface(j).Zone) {
                         if (MultizoneZoneData(n).OccupantVentilationControlNum > 0 && MultizoneSurfaceData(i).OccupantVentilationControlNum == 0) {
@@ -4080,35 +4079,37 @@ namespace AirflowNetwork {
                 this_VF_object.LinkageSurfaceData.allocate(numSurfaces);
 
                 for (int surfNum = 1; surfNum < NumAlphas; ++surfNum) {
-                    this_VF_object.LinkageSurfaceData(surfNum).SurfaceName = Alphas(surfNum + 1); // Surface name
-                    this_VF_object.LinkageSurfaceData(surfNum).SurfaceNum = Util::FindItemInList(Alphas(surfNum + 1), m_state.dataSurface->Surface);
+                    auto &linkageSurface = this_VF_object.LinkageSurfaceData(surfNum);
+                    linkageSurface.SurfaceName = Alphas(surfNum + 1);
+                    linkageSurface.SurfaceNum = Util::FindItemInList(linkageSurface.SurfaceName, m_state.dataSurface->Surface);
 
-                    if (this_VF_object.LinkageSurfaceData(surfNum).SurfaceNum == 0) {
-                        ShowFatalError(
-                            m_state, "Surface " + Alphas(surfNum + 1) + " not found. See: " + CurrentModuleObject + " " + this_VF_object.LinkageName);
+                    if (linkageSurface.SurfaceNum == 0) {
+                        ShowFatalError(m_state,
+                                       "Surface " + linkageSurface.SurfaceName + " not found. See: " + CurrentModuleObject + " " +
+                                           this_VF_object.LinkageName);
                     }
 
                     // Surface view factor
-                    if (!m_state.dataSurface->Surface(this_VF_object.LinkageSurfaceData(surfNum).SurfaceNum).HeatTransSurf) {
+                    if (!m_state.dataSurface->Surface(linkageSurface.SurfaceNum).HeatTransSurf) {
                         ShowWarningError(m_state,
-                                         "Surface=" + Alphas(surfNum + 1) + " is not a heat transfer surface. Check input in: " +
+                                         "Surface=" + linkageSurface.SurfaceName + " is not a heat transfer surface. Check input in: " +
                                              CurrentModuleObject + " " + this_VF_object.LinkageName);
                         ShowContinueError(m_state, "Using value of 0 for view factor");
-                        this_VF_object.LinkageSurfaceData(surfNum).ViewFactor = 0;
+                        linkageSurface.ViewFactor = 0;
                     } else if (Numbers(surfNum + 2) > 1) {
                         ShowWarningError(m_state,
-                                         "View factor for surface " + Alphas(surfNum + 1) +
+                                         "View factor for surface " + linkageSurface.SurfaceName +
                                              " greater than 1. Check input in: " + CurrentModuleObject + " " + this_VF_object.LinkageName);
                         ShowContinueError(m_state, "Using value of 1 for view factor");
-                        this_VF_object.LinkageSurfaceData(surfNum).ViewFactor = 1;
+                        linkageSurface.ViewFactor = 1;
                     } else if (Numbers(surfNum + 2) < 0) {
                         ShowWarningError(m_state,
-                                         "View factor for surface " + Alphas(surfNum + 1) + " less than 0. Check input in: " + CurrentModuleObject +
-                                             " " + this_VF_object.LinkageName);
+                                         "View factor for surface " + linkageSurface.SurfaceName +
+                                             " less than 0. Check input in: " + CurrentModuleObject + " " + this_VF_object.LinkageName);
                         ShowContinueError(m_state, "Using value of 0 for view factor");
-                        this_VF_object.LinkageSurfaceData(surfNum).ViewFactor = 0;
+                        linkageSurface.ViewFactor = 0;
                     } else {
-                        this_VF_object.LinkageSurfaceData(surfNum).ViewFactor = Numbers(surfNum + 2);
+                        linkageSurface.ViewFactor = Numbers(surfNum + 2);
                     }
                 }
             }
@@ -4162,9 +4163,6 @@ namespace AirflowNetwork {
                     ShowContinueError(m_state, "..invalid " + cAlphaFields(2) + " = \"" + PressureControllerData(i).ZoneName + "\"");
                     ErrorsFound = true;
                 }
-
-                PressureControllerData(i).ControlObjectType = Alphas(3); // Control Object Type
-                PressureControllerData(i).ControlObjectName = Alphas(4); // Control Object Name
 
                 {
                     // This SELECT_CASE_var will go on input refactor, no need to fix
@@ -4385,9 +4383,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DOP;
             AirflowNetworkCompData(i).TypeNum = i;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         int j = AirflowNetworkNumOfDetOpenings;
@@ -4398,9 +4393,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SOP;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += AirflowNetworkNumOfSimOpenings;
@@ -4411,9 +4403,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SCR;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += AirflowNetworkNumOfSurCracks;
@@ -4424,9 +4413,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::SEL;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += AirflowNetworkNumOfSurELA;
@@ -4437,9 +4423,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::EXF;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += AirflowNetworkNumOfExhFan;
@@ -4450,9 +4433,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::HOP;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += AirflowNetworkNumOfHorOpenings;
@@ -4463,9 +4443,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::PLR;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += DisSysNumOfLeaks;
@@ -4476,9 +4453,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::ELR;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += DisSysNumOfELRs;
@@ -4489,9 +4463,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DWC;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += DisSysNumOfDucts;
@@ -4502,9 +4473,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::DMP;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += DisSysNumOfDampers;
@@ -4515,9 +4483,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::CVF;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
             AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::FAN;
         }
 
@@ -4529,9 +4494,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::FAN;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
             AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::FAN;
         }
 
@@ -4543,9 +4505,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::CPD;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += DisSysNumOfCPDs;
@@ -4556,9 +4515,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::COI;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
             AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::COI;
         }
 
@@ -4570,9 +4526,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::TMU;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
             AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::RHT;
         }
 
@@ -4584,9 +4537,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::HEX;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
             AirflowNetworkCompData(i).EPlusTypeNum = iEPlusComponentType::HEX;
         }
 
@@ -4598,9 +4548,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::OAF;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         j += NumOfOAFans;
@@ -4611,9 +4558,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(i).CompTypeNum = iComponentTypeNum::REL;
             AirflowNetworkCompData(i).TypeNum = n;
             AirflowNetworkCompData(i).EPlusName = "";
-            AirflowNetworkCompData(i).EPlusCompName = "";
-            AirflowNetworkCompData(i).EPlusType = "";
-            AirflowNetworkCompData(i).CompNum = i;
         }
 
         // This is also a bit of a hack to keep things working, this needs to be removed ASAP
@@ -4626,9 +4570,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(ii).CompTypeNum = iComponentTypeNum::SMF;
             AirflowNetworkCompData(ii).TypeNum = type_i;
             AirflowNetworkCompData(ii).EPlusName = "";
-            AirflowNetworkCompData(ii).EPlusCompName = "";
-            AirflowNetworkCompData(ii).EPlusType = "";
-            AirflowNetworkCompData(ii).CompNum = ii;
             ++ii;
             ++type_i;
         }
@@ -4640,9 +4581,6 @@ namespace AirflowNetwork {
             AirflowNetworkCompData(ii).CompTypeNum = iComponentTypeNum::SVF;
             AirflowNetworkCompData(ii).TypeNum = type_i;
             AirflowNetworkCompData(ii).EPlusName = "";
-            AirflowNetworkCompData(ii).EPlusCompName = "";
-            AirflowNetworkCompData(ii).EPlusType = "";
-            AirflowNetworkCompData(ii).CompNum = ii;
             ++ii;
             ++type_i;
         }
@@ -4717,8 +4655,7 @@ namespace AirflowNetwork {
                         ShowContinueError(m_state, "10 deg of being horizontal. Airflows through large horizontal openings are poorly");
                         ShowContinueError(m_state, "modeled in the AirflowNetwork model resulting in only one-way airflow.");
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -4726,7 +4663,7 @@ namespace AirflowNetwork {
                         ErrorsFound = true;
                     }
 
-                    if (surf.OriginalClass == SurfaceClass::Door || surf.OriginalClass == SurfaceClass::GlassDoor) {
+                    if (SurfaceClassIsDoor(surf.OriginalClass)) {
                         if (MultizoneCompDetOpeningData(AirflowNetworkCompData(compnum).TypeNum).LVOType == 2) {
                             ShowSevereError(m_state,
                                             std::format(RoutineName) +
@@ -4748,8 +4685,7 @@ namespace AirflowNetwork {
                         ErrorsFound = true;
                     }
 
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -4796,8 +4732,7 @@ namespace AirflowNetwork {
                                           "with the object of AirflowNetwork:Multizone:Component:HorizontalOpening = " +
                                               AirflowNetworkCompData(compnum).Name);
                     }
-                    if (!(surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::GlassDoor ||
-                          surf.OriginalClass == SurfaceClass::Door || surf.IsAirBoundarySurf)) {
+                    if (!(SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf)) {
                         ShowSevereError(m_state,
                                         std::format(RoutineName) +
                                             "AirflowNetworkComponent: The opening must be assigned to a window, door, glassdoor or air boundary at " +
@@ -6582,8 +6517,7 @@ namespace AirflowNetwork {
             }
             j = MultizoneSurfaceData(i).SurfNum;
             auto const &surf = m_state.dataSurface->Surface(j);
-            if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                surf.OriginalClass == SurfaceClass::GlassDoor || surf.IsAirBoundarySurf) {
+            if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass) || surf.IsAirBoundarySurf) {
                 if (MultizoneSurfaceData(i).OccupantVentilationControlNum > 0) {
                     if (MultizoneSurfaceData(i).OpeningStatus == OpenStatus::FreeOperation) {
                         if (MultizoneSurfaceData(i).OpeningProbStatus == ProbabilityCheck::ForceChange) {
@@ -6670,8 +6604,7 @@ namespace AirflowNetwork {
                 }
                 j = MultizoneSurfaceData(i).SurfNum;
                 auto const &surf = m_state.dataSurface->Surface(j);
-                if (surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                    surf.OriginalClass == SurfaceClass::GlassDoor) {
+                if (SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) {
                     if (MultizoneSurfaceData(i).HybridCtrlGlobal) {
                         MultizoneSurfaceData(i).OpenFactor = GlobalOpenFactor;
                     }
@@ -10783,10 +10716,7 @@ namespace AirflowNetwork {
                         auto it = std::find_if(m_state.dataCoilCoolingDX->coilCoolingDXs.begin(),
                                                m_state.dataCoilCoolingDX->coilCoolingDXs.end(),
                                                [&mycoil](const CoilCoolingDX &coil) { return coil.name == mycoil; });
-                        if (it != m_state.dataCoilCoolingDX->coilCoolingDXs.end()) {
-                            // Set the airloop number on the CoilCoolingDX object, which is used to collect the runtime fraction
-                            it->airLoopNum = DisSysCompCoilData(i).AirLoopNum;
-                        } else {
+                        if (it == m_state.dataCoilCoolingDX->coilCoolingDXs.end()) {
                             ShowSevereError(m_state, "SetDXCoilAirLoopNumber: Could not find Coil \"Name=\"" + DisSysCompCoilData(i).name + "\"");
                         }
                     }
@@ -11392,20 +11322,10 @@ namespace AirflowNetwork {
                             if (PressureControllerData(i).ControlTypeSet == PressureCtrlRelief) {
                                 PressureControllerData(i).OANodeNum =
                                     m_state.dataAirSystemsData->PrimaryAirSystems(PressureControllerData(i).AirLoopNum).OAMixOAInNodeNum;
-                                for (n = 1; n <= NumOfReliefFans; ++n) {
-                                    if (DisSysCompReliefAirData(n).OutletNode == PressureControllerData(i).OANodeNum) {
-                                        DisSysCompReliefAirData(n).PressCtrlNum = i;
-                                    }
-                                }
                             }
                             if (PressureControllerData(i).ControlTypeSet == PressureCtrlExhaust) {
                                 PressureControllerData(i).OANodeNum =
                                     m_state.dataZoneEquip->ZoneEquipConfig(PressureControllerData(i).ZoneNum).ExhaustNode(1);
-                                for (n = 1; n <= AirflowNetworkNumOfExhFan; ++n) {
-                                    if (MultizoneCompExhaustFanData(n).EPlusZoneNum == PressureControllerData(i).ZoneNum) {
-                                        MultizoneCompExhaustFanData(n).PressCtrlNum = i;
-                                    }
-                                }
                             }
                         }
                     }
@@ -11707,8 +11627,7 @@ namespace AirflowNetwork {
                                 if (ControlType == GlobalCtrlType) {
                                     MultizoneSurfaceData(ANSurfaceNum).HybridCtrlGlobal = true;
                                     if (hybridVentMgr.Master == ActualZoneNum) {
-                                        if ((surf.OriginalClass == SurfaceClass::Window || surf.OriginalClass == SurfaceClass::Door ||
-                                             surf.OriginalClass == SurfaceClass::GlassDoor) &&
+                                        if ((SurfaceClassIsWindow(surf.OriginalClass) || SurfaceClassIsDoor(surf.OriginalClass)) &&
                                             surf.ExtBoundCond == ExternalEnvironment) {
                                             MultizoneSurfaceData(ANSurfaceNum).HybridCtrlMaster = true;
                                             Found = true;
@@ -11789,26 +11708,17 @@ namespace AirflowNetwork {
         {
             // Members
             int SurfNum;          // row index of the external opening in the Surface array
-            std::string SurfName; // Surface name
-            int MSDNum;           // row index of the external opening in the MultizoneSurfaceData array
             int ZoneNum;          // EnergyPlus zone number
             int MZDZoneNum;       // row index of the zone in the MultizoneZoneData array
             int ExtNodeNum;       // External node number; = row index in MultizoneExternalNodeData array +
                                   // AirflowNetworkNumOfZones
             std::string ZoneName; // EnergyPlus zone name
             int facadeNum;
-            int curve;                     // wind pressure coefficient curve index
-            iComponentTypeNum CompTypeNum; // Opening type (detailed, simple, etc.)
-            Real64 NodeHeight;             // Elevation of the opening node
-            Real64 OpeningArea;            // Opening area (=Height*Width)
-            Real64 Height;                 // Opening height = MultizoneSurfaceData()%Height
-            Real64 Width;                  // Opening width  = MultizoneSurfaceData()%Width
-            Real64 DischCoeff;             // Opening discharge coefficient
+            Real64 NodeHeight; // Elevation of the opening node
+            Real64 DischCoeff; // Opening discharge coefficient
 
             // Default Constructor
-            AFNExtSurfacesProp()
-                : SurfNum(0), MSDNum(0), ZoneNum(0), MZDZoneNum(0), ExtNodeNum(0), facadeNum(0), curve(0), CompTypeNum(iComponentTypeNum::Invalid),
-                  NodeHeight(0.0), OpeningArea(0.0), Height(0.0), Width(0.0), DischCoeff(0.0)
+            AFNExtSurfacesProp() : SurfNum(0), ZoneNum(0), MZDZoneNum(0), ExtNodeNum(0), facadeNum(0), NodeHeight(0.0), DischCoeff(0.0)
             {
             }
         };
@@ -11930,24 +11840,15 @@ namespace AirflowNetwork {
                         m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).ZoneName, MultizoneZoneData, &MultizoneZoneProp::ZoneName);
                     if (MultizoneZoneData(MZDZoneNum).SingleSidedCpType == "ADVANCED") {
                         if (DetOpenNum > 0) {
-                            AFNExtSurfaces(ExtOpenNum).MSDNum = SrfNum;
                             AFNExtSurfaces(ExtOpenNum).SurfNum = MultizoneSurfaceData(SrfNum).SurfNum;
                             AFNExtSurfaces(ExtOpenNum).NodeHeight = m_state.dataSurface->Surface(AFNExtSurfaces(ExtOpenNum).SurfNum).Centroid.z;
-                            AFNExtSurfaces(ExtOpenNum).SurfName = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).Name;
                             AFNExtSurfaces(ExtOpenNum).ZoneNum = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).Zone;
                             AFNExtSurfaces(ExtOpenNum).ZoneName = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).ZoneName;
                             AFNExtSurfaces(ExtOpenNum).MZDZoneNum =
                                 Util::FindItemInList(AFNExtSurfaces(ExtOpenNum).ZoneName, MultizoneZoneData, &MultizoneZoneProp::ZoneName);
-                            AFNExtSurfaces(ExtOpenNum).CompTypeNum = iComponentTypeNum::DOP;
-                            AFNExtSurfaces(ExtOpenNum).Height = MultizoneSurfaceData(SrfNum).Height;
-                            AFNExtSurfaces(ExtOpenNum).Width = MultizoneSurfaceData(SrfNum).Width;
-                            AFNExtSurfaces(ExtOpenNum).OpeningArea =
-                                MultizoneSurfaceData(SrfNum).Width * MultizoneSurfaceData(SrfNum).Height * MultizoneSurfaceData(SrfNum).OpenFactor;
                             AFNExtSurfaces(ExtOpenNum).ExtNodeNum = MultizoneSurfaceData(ExtOpenNum).NodeNums[1];
                             AFNExtSurfaces(ExtOpenNum).facadeNum =
                                 MultizoneExternalNodeData(AFNExtSurfaces(ExtOpenNum).ExtNodeNum - AirflowNetworkNumOfZones).facadeNum;
-                            AFNExtSurfaces(ExtOpenNum).curve =
-                                MultizoneExternalNodeData(AFNExtSurfaces(ExtOpenNum).ExtNodeNum - AirflowNetworkNumOfZones).curve;
                             AFNExtSurfaces(ExtOpenNum).DischCoeff = MultizoneCompDetOpeningData(DetOpenNum).DischCoeff2;
                             ++ExtOpenNum;
                         }
@@ -11956,21 +11857,12 @@ namespace AirflowNetwork {
                     SimOpenNum = Util::FindItemInList(
                         MultizoneSurfaceData(SrfNum).OpeningName, MultizoneCompSimpleOpeningData, &AirflowNetwork::SimpleOpening::name);
                     if (SimOpenNum > 0) {
-                        AFNExtSurfaces(ExtOpenNum).MSDNum = SrfNum;
                         AFNExtSurfaces(ExtOpenNum).SurfNum = MultizoneSurfaceData(SrfNum).SurfNum;
-                        AFNExtSurfaces(ExtOpenNum).SurfName = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).Name;
                         AFNExtSurfaces(ExtOpenNum).ZoneNum = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).Zone;
                         AFNExtSurfaces(ExtOpenNum).ZoneName = m_state.dataSurface->Surface(MultizoneSurfaceData(SrfNum).SurfNum).ZoneName;
                         AFNExtSurfaces(ExtOpenNum).MZDZoneNum =
                             Util::FindItemInList(AFNExtSurfaces(ExtOpenNum).ZoneName, MultizoneZoneData, &MultizoneZoneProp::ZoneName);
-                        AFNExtSurfaces(ExtOpenNum).CompTypeNum = iComponentTypeNum::SOP;
-                        AFNExtSurfaces(ExtOpenNum).Height = MultizoneSurfaceData(SrfNum).Height;
-                        AFNExtSurfaces(ExtOpenNum).Width = MultizoneSurfaceData(SrfNum).Width;
-                        AFNExtSurfaces(ExtOpenNum).OpeningArea =
-                            MultizoneSurfaceData(SrfNum).Width * MultizoneSurfaceData(SrfNum).Height * MultizoneSurfaceData(SrfNum).OpenFactor;
                         AFNExtSurfaces(ExtOpenNum).ExtNodeNum = MultizoneSurfaceData(ExtOpenNum).NodeNums[1];
-                        AFNExtSurfaces(ExtOpenNum).curve =
-                            MultizoneExternalNodeData(AFNExtSurfaces(ExtOpenNum).ExtNodeNum - AirflowNetworkNumOfZones).curve;
                         AFNExtSurfaces(ExtOpenNum).DischCoeff = MultizoneCompSimpleOpeningData(SimOpenNum).DischCoeff;
                         ++ExtOpenNum;
                     }
@@ -13108,30 +13000,22 @@ namespace AirflowNetwork {
                 disSysCompDuct.hydraulicDiameter = SupplyTrunkD;
                 disSysCompDuct.A = SupplyTrunkArea;
                 disSysCompDuct.RelRough = disSysCompDuct.roughness / SupplyTrunkD;       // e/D: relative roughness
-                disSysCompDuct.RelL = disSysCompDuct.L / SupplyTrunkD;                   // L/D: relative length
                 disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
-                disSysCompDuct.g = disSysCompDuct.A1;                                    // 1/sqrt(Darcy friction factor)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::SupplyBranch) {
                 disSysCompDuct.hydraulicDiameter = SupplyBranchD;
                 disSysCompDuct.A = SupplyBranchArea;
                 disSysCompDuct.RelRough = disSysCompDuct.roughness / SupplyBranchD;      // e/D: relative roughness
-                disSysCompDuct.RelL = disSysCompDuct.L / SupplyBranchD;                  // L/D: relative length
                 disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
-                disSysCompDuct.g = disSysCompDuct.A1;                                    // 1/sqrt(Darcy friction factor)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::ReturnTrunk) {
                 disSysCompDuct.hydraulicDiameter = ReturnTrunkD;
                 disSysCompDuct.A = ReturnTrunkArea;
                 disSysCompDuct.RelRough = disSysCompDuct.roughness / ReturnTrunkD;       // e/D: relative roughness
-                disSysCompDuct.RelL = disSysCompDuct.L / ReturnTrunkD;                   // L/D: relative length
                 disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
-                disSysCompDuct.g = disSysCompDuct.A1;                                    // 1/sqrt(Darcy friction factor)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::ReturnBranch) {
                 disSysCompDuct.hydraulicDiameter = ReturnBranchD;
                 disSysCompDuct.A = ReturnBranchArea;
                 disSysCompDuct.RelRough = disSysCompDuct.roughness / ReturnBranchD;      // e/D: relative roughness
-                disSysCompDuct.RelL = disSysCompDuct.L / ReturnBranchD;                  // L/D: relative length
                 disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
-                disSysCompDuct.g = disSysCompDuct.A1;                                    // 1/sqrt(Darcy friction factor)
             }
         }
 
@@ -13497,7 +13381,6 @@ namespace AirflowNetwork {
 
         dos.allocate(AirflowNetworkNumOfLinks, n);
 
-        PB = 101325.0;
         //   LIST = 5
         // LIST = 0;
 

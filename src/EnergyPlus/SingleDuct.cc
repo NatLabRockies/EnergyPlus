@@ -2410,6 +2410,25 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
 
     auto &TermUnitSizing(state.dataSize->TermUnitSizing);
 
+    // if a sizing run has been done, check if system sizing has been done for this system
+    int inletAirLoopNum = 0;
+    bool SizingDesRunThisAirSys = false;
+    if (state.dataSize->SysSizingRunDone) {
+        inletAirLoopNum = state.dataZoneEquip->ZoneEquipConfig(this->CtrlZoneNum).InletNodeAirLoopNum(this->CtrlZoneInNodeIndex);
+        if (inletAirLoopNum > 0) {
+            CheckThisAirSystemForSizing(state, inletAirLoopNum, SizingDesRunThisAirSys);
+        }
+
+        // get system sizing id if a sizing run has been done for this system
+        if (SizingDesRunThisAirSys) {
+            SysSizNum = Util::FindItemInList(
+                state.dataSize->FinalSysSizing(inletAirLoopNum).AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
+            if (SysSizNum == 0) {
+                SysSizNum = 1; // use first when none applicable
+            }
+        }
+    }
+
     if (this->MaxAirVolFlowRate == AutoSize) {
         IsAutoSize = true;
     }
@@ -2424,15 +2443,24 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
 
             CheckZoneSizing(state, this->sysType, this->SysName);
 
-            Real64 heatingMaxFlow;
-            if (this->DamperHeatingAction == Action::ReverseWithLimits &&
-                state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlow >
-                    state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlowMax) {
-                heatingMaxFlow = state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlowMax;
+            bool const is100PercentOA = (SizingDesRunThisAirSys && state.dataSize->SysSizInput(SysSizNum).loadSizingType == LoadSizing::Ventilation &&
+                                         state.dataSize->SysSizInput(SysSizNum).CoolOAOption == OAControl::AllOA &&
+                                         state.dataSize->SysSizInput(SysSizNum).HeatOAOption == OAControl::AllOA &&
+                                         !state.dataAirSystemsData->PrimaryAirSystems(inletAirLoopNum).isAllOA);
+            if (is100PercentOA) {
+                MaxAirVolFlowRateDes = state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).MinOA;
             } else {
-                heatingMaxFlow = state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlow;
+                Real64 heatingMaxFlow;
+                if (this->DamperHeatingAction == Action::ReverseWithLimits &&
+                    state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlow >
+                        state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlowMax) {
+                    heatingMaxFlow = state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlowMax;
+                } else {
+                    heatingMaxFlow = state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesHeatVolFlow;
+                }
+                MaxAirVolFlowRateDes =
+                    max(state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesCoolVolFlow, heatingMaxFlow);
             }
-            MaxAirVolFlowRateDes = max(state.dataSize->TermUnitFinalZoneSizing(state.dataSize->CurTermUnitSizingNum).DesCoolVolFlow, heatingMaxFlow);
 
             if (MaxAirVolFlowRateDes < SmallAirVolFlow) {
                 MaxAirVolFlowRateDes = 0.0;
@@ -2535,24 +2563,6 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
         this->ZoneTurndownMinAirFrac = this->zoneTurndownMinAirFracSched->getCurrentVal();
     } else {
         this->ZoneTurndownMinAirFrac = 1.0;
-    }
-
-    // if a sizing run has been done, check if system sizing has been done for this system
-    bool SizingDesRunThisAirSys = false;
-    if (state.dataSize->SysSizingRunDone) {
-        int inletAirLoopNum = state.dataZoneEquip->ZoneEquipConfig(this->CtrlZoneNum).InletNodeAirLoopNum(this->CtrlZoneInNodeIndex);
-        if (inletAirLoopNum > 0) {
-            CheckThisAirSystemForSizing(state, inletAirLoopNum, SizingDesRunThisAirSys);
-        }
-
-        // get system sizing id if a sizing run has been done for this system
-        if (SizingDesRunThisAirSys) {
-            SysSizNum = Util::FindItemInList(
-                state.dataSize->FinalSysSizing(inletAirLoopNum).AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
-            if (SysSizNum == 0) {
-                SysSizNum = 1; // use first when none applicable
-            }
-        }
     }
 
     IsAutoSize = false;
@@ -4580,19 +4590,19 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                                                MaxHeatMassFlow,
                                                state.dataSingleDuct->sd_airterminal(this->SysNum).solveRootStats);
                 if (SolFlag == General::SOLVEROOT_ERROR_ITER) {
-                    if (this->IterationLimit == 0) {
+                    if (this->IterationLimitSteamCoil == 0) {
                         ShowWarningError(state, std::format("Steam heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating air flow rate");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Steam heating coil iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimit);
+                        state, "Steam heating coil iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimitSteamCoil);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
-                    if (this->IterationFailed == 0) {
+                    if (this->IterationFailedSteamCoil == 0) {
                         ShowWarningError(state, std::format("Steam heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Bad air flow limits");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Steam heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailed);
+                        state, "Steam heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailedSteamCoil);
                 }
             } else {
                 MassFlow = MaxHeatMassFlow;
@@ -4629,19 +4639,20 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                     state, UnitFlowToler, 50, SolFlag, f, 0.0, 1.0, state.dataSingleDuct->sd_airterminal(this->SysNum).solveRootStats);
                 MassFlow = state.dataLoopNodes->Node(SysInletNode).MassFlowRate;
                 if (SolFlag == General::SOLVEROOT_ERROR_ITER) {
-                    if (this->IterationLimit == 0) {
+                    if (this->IterationLimitHeatingCoil == 0) {
                         ShowWarningError(state, std::format("Heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Iteration limit exceeded in calculating air flow rate");
                     }
-                    ShowRecurringWarningErrorAtEnd(
-                        state, "Heating coil control iteration limit exceeded in VS VAV terminal unit " + this->SysName, this->IterationLimit);
+                    ShowRecurringWarningErrorAtEnd(state,
+                                                   "Heating coil control iteration limit exceeded in VS VAV terminal unit " + this->SysName,
+                                                   this->IterationLimitHeatingCoil);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
-                    if (this->IterationFailed == 0) {
+                    if (this->IterationFailedHeatingCoil == 0) {
                         ShowWarningError(state, std::format("Heating coil control failed in VS VAV terminal unit {}", this->SysName));
                         ShowContinueError(state, "  Bad air flow limits");
                     }
                     ShowRecurringWarningErrorAtEnd(
-                        state, "Heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailed);
+                        state, "Heating coil control failed in VS VAV terminal unit " + this->SysName, this->IterationFailedHeatingCoil);
                 }
             } else {
                 MassFlow = MaxHeatMassFlow;
@@ -5916,14 +5927,14 @@ void SingleDuctAirTerminal::reportTerminalUnit(EnergyPlusData &state)
     auto &adu = state.dataDefineEquipment->AirDistUnit(this->ADUNum);
     if (!state.dataSize->TermUnitFinalZoneSizing.empty()) {
         auto &sizing = state.dataSize->TermUnitFinalZoneSizing(adu.TermUnitSizingNum);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, sizing.DesCoolVolFlowMin);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA);
+        Real64 minZoneFlow = this->MaxAirVolFlowRate * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, minZoneFlow, 4);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA, 4);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupCoolingSP, adu.Name, sizing.CoolDesTemp);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupHeatingSP, adu.Name, sizing.HeatDesTemp);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatingCap, adu.Name, sizing.DesHeatLoad);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolingCap, adu.Name, sizing.DesCoolLoad);
 
-        Real64 minZoneFlow = this->MaxAirVolFlowRate * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerZone, sizing.ZoneName, minZoneFlow, 6);
         Real64 minZoneFlowPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? minZoneFlow / sizing.TotalZoneFloorArea : 0.0;
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerArea, sizing.ZoneName, minZoneFlowPerFloorArea, 6);

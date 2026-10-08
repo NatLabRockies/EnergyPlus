@@ -346,7 +346,6 @@ void GetWaterCoilInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
 
-        waterCoil.WaterCoilModelA = "SIMPLE";
         waterCoil.WaterCoilModel = CoilModel::HeatingSimple; // 'SIMPLE'
         waterCoil.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
 
@@ -518,7 +517,6 @@ void GetWaterCoilInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
 
-        waterCoil.WaterCoilModelA = "DETAILED FLAT FIN";
         waterCoil.WaterCoilModel = CoilModel::CoolingDetailed; // 'DETAILED FLAT FIN'
         waterCoil.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
 
@@ -743,7 +741,6 @@ void GetWaterCoilInput(EnergyPlusData &state)
             ErrorsFound = true;
         }
 
-        waterCoil.WaterCoilModelA = "Cooling";
         waterCoil.WaterCoilModel = CoilModel::CoolingSimple; // 'Cooling'
         waterCoil.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
 

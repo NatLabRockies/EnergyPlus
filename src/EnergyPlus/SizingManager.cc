@@ -1302,8 +1302,7 @@ void ManageSystemVentilationAdjustments(EnergyPlusData &state)
             }
             for (int zoneNum = 1; zoneNum <= AirToZoneNodeInfo(AirLoopNum).NumZonesHeated; ++zoneNum) {
                 int termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(zoneNum);
-                int MatchingCooledZoneNum = General::FindNumberInList(
-                    termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, AirToZoneNodeInfo(AirLoopNum).NumZonesCooled);
+                int MatchingCooledZoneNum = General::FindNumberInList(termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                 if (MatchingCooledZoneNum == 0) {
                     state.dataSize->VpzClgSumBySys(AirLoopNum) += state.dataSize->VdzClgByZone(termUnitSizingIndex);
                 }
@@ -1323,8 +1322,7 @@ void ManageSystemVentilationAdjustments(EnergyPlusData &state)
             }
             for (int zoneNum = 1; zoneNum <= AirToZoneNodeInfo(AirLoopNum).NumZonesHeated; ++zoneNum) {
                 int termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(zoneNum);
-                int MatchingCooledZoneNum = General::FindNumberInList(
-                    termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, AirToZoneNodeInfo(AirLoopNum).NumZonesCooled);
+                int MatchingCooledZoneNum = General::FindNumberInList(termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                 if (MatchingCooledZoneNum == 0) {
                     state.dataSize->VpsHtgBySys(AirLoopNum) += state.dataSize->VpzMinHtgByZone(termUnitSizingIndex);
                     state.dataSize->VpzHtgSumBySys(AirLoopNum) += state.dataSize->VpzHtgByZone(termUnitSizingIndex);
@@ -1467,8 +1465,7 @@ void ManageSystemVentilationAdjustments(EnergyPlusData &state)
             }
             for (int zoneNum = 1; zoneNum <= AirToZoneNodeInfo(AirLoopNum).NumZonesHeated; ++zoneNum) {
                 int termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(zoneNum);
-                int MatchingCooledZoneNum = General::FindNumberInList(
-                    termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, AirToZoneNodeInfo(AirLoopNum).NumZonesCooled);
+                int MatchingCooledZoneNum = General::FindNumberInList(termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                 if (MatchingCooledZoneNum == 0) {
                     state.dataSize->VpzClgSumBySys(AirLoopNum) += state.dataSize->VdzClgByZone(termUnitSizingIndex);
                     state.dataSize->VpsHtgBySys(AirLoopNum) += state.dataSize->VpzMinHtgByZone(termUnitSizingIndex);
@@ -1667,8 +1664,7 @@ void ManageSystemVentilationAdjustments(EnergyPlusData &state)
                     termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(zoneNum);
                 } else {
                     termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(zoneNum);
-                    MatchingCooledZoneNum = General::FindNumberInList(
-                        termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, AirToZoneNodeInfo(AirLoopNum).NumZonesCooled);
+                    MatchingCooledZoneNum = General::FindNumberInList(termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                 }
                 if (MatchingCooledZoneNum == 0) {
                     auto const &thisTermUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(termUnitSizingIndex);
@@ -1757,8 +1753,7 @@ void ManageSystemVentilationAdjustments(EnergyPlusData &state)
                     termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex(airLoopZoneNum);
                 } else {
                     termUnitSizingIndex = AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(airLoopZoneNum);
-                    MatchingCooledZoneNum = General::FindNumberInList(
-                        termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, AirToZoneNodeInfo(AirLoopNum).NumZonesCooled);
+                    MatchingCooledZoneNum = General::FindNumberInList(termUnitSizingIndex, AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                 }
                 if (MatchingCooledZoneNum == 0) {
                     auto const &thisTermUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(termUnitSizingIndex);
@@ -5415,12 +5410,6 @@ void UpdateTermUnitFinalZoneSizing(EnergyPlusData &state)
                 max(thisTUFZSizing.DesHeatMaxAirFlow,
                     thisTUFZSizing.DesHeatMaxAirFlow2,
                     max(thisTUFZSizing.DesCoolVolFlow, thisTUFZSizing.DesHeatVolFlow) * thisTUFZSizing.DesHeatMaxAirFlowFrac);
-            // Outdoor air fractions
-            if (thisTUFZSizing.DesCoolVolFlow > 0.0) {
-                thisTUFZSizing.DesCoolOAFlowFrac = min(thisFZSizing.MinOA / thisTUFZSizing.DesCoolVolFlow, 1.0);
-            } else {
-                thisTUFZSizing.DesCoolOAFlowFrac = 0.0;
-            }
             if (thisTUFZSizing.DesHeatVolFlow > 0.0) {
                 thisTUFZSizing.DesHeatOAFlowFrac = min(thisFZSizing.MinOA / thisTUFZSizing.DesHeatVolFlow, 1.0);
             } else {

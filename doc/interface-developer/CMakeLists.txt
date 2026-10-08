@@ -20,7 +20,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/interface-developer/src/running-energyplus.tex
     ${PROJECT_SOURCE_DIR}/interface-developer/src/licensing.tex
     ${PROJECT_SOURCE_DIR}/interface-developer/src/appendix-a-simple-idf-file.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of included images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14
@@ -28,3 +28,7 @@ set(INCLUDED_IMAGES ${PROJECT_SOURCE_DIR}/interface-developer/media/image001.png
                     ${PROJECT_SOURCE_DIR}/interface-developer/media/image003.png)
 
 create_doc_target("interface-developer" "InterfaceDeveloper")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("interface-developer" "interface-developer")
+endif()

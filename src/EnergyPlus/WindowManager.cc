@@ -476,7 +476,7 @@ namespace Window {
                 } else {
                     TauShIR = matShade->TransThermal;
                 }
-                EpsShIR = matShade->AbsorpThermal;
+                EpsShIR = matShade->AbsorpThermalOut;
                 RhoShIR = max(0.0, 1.0 - TauShIR - EpsShIR);
                 if (ExtShade || ExtScreen) { // Exterior shade or screen
                     EpsGlIR = s_mat->materials(thisConstruct.LayerPoint(2))->AbsorpThermalFront;
@@ -969,7 +969,7 @@ namespace Window {
             if (IntShade) {
                 auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
                 assert(matSh != nullptr);
-                ShadeAbs = matSh->AbsorpSolar;
+                ShadeAbs = matSh->AbsorpSolarIn;
                 ShadeTrans = matSh->Trans;
                 ShadeTransVis = matSh->TransVis;
                 ShadeRefl = matSh->ReflectShade;
@@ -1019,7 +1019,7 @@ namespace Window {
             } else if (ExtShade) {
                 auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
                 assert(matSh != nullptr);
-                ShadeAbs = matSh->AbsorpSolar;
+                ShadeAbs = matSh->AbsorpSolarOut;
                 ShadeTrans = matSh->Trans;
                 ShadeTransVis = matSh->TransVis;
                 ShadeRefl = matSh->ReflectShade;
@@ -1067,7 +1067,7 @@ namespace Window {
             } else if (BGShade) {
                 auto const *matSh = dynamic_cast<Material::MaterialShade const *>(s_mat->materials(constr.LayerPoint(ShadeLayNum)));
                 assert(matSh != nullptr);
-                ShadeAbs = matSh->AbsorpSolar;
+                ShadeAbs = matSh->AbsorpSolarOut;
                 ShadeTrans = matSh->Trans;
                 ShadeTransVis = matSh->TransVis;
                 ShadeRefl = matSh->ReflectShade;
@@ -1546,7 +1546,7 @@ namespace Window {
                 EpsGlIR = s_mat->materials(state.dataConstruction->Construct(ConstrNumSh).LayerPoint(TotLay - 1))->AbsorpThermalBack;
                 RhoGlIR = 1 - EpsGlIR;
                 TauShIR = matFen->TransThermal;
-                EpsShIR = matFen->AbsorpThermal;
+                EpsShIR = matFen->AbsorpThermalIn;
                 RhoShIR = max(0.0, 1.0 - TauShIR - EpsShIR);
                 surfShade.effShadeEmi = EpsShIR * (1.0 + RhoGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR));
                 surfShade.effGlassEmi = EpsGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR);
@@ -2384,11 +2384,11 @@ namespace Window {
                             wm->tir[wm->nglface] = matScreen->DfTrans;
                             wm->tir[wm->nglface + 1] = matScreen->DfTrans;
                         } else {
-                            wm->emis[wm->nglface] = matShade->AbsorpThermal;
+                            wm->emis[wm->nglface] = matShade->AbsorpThermalOut;
                             wm->tir[wm->nglface] = matShade->TransThermal;
                             wm->tir[wm->nglface + 1] = matShade->TransThermal;
                         }
-                        wm->emis[wm->nglface + 1] = matShade->AbsorpThermal;
+                        wm->emis[wm->nglface + 1] = matShade->AbsorpThermalIn;
 
                     } else {
                         if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
@@ -4610,7 +4610,7 @@ namespace Window {
 
             for (int i = 0; i < NMix; ++i) {
                 auto const &wmgasI = wm->gaps[iGap].gases[i];
-                for (int j = 0; j <= NMix; ++j) {
+                for (int j = 0; j < NMix; ++j) {
                     auto const &wmgasJ = wm->gaps[iGap].gases[j];
                     // numerator of equation 61
                     phimup = pow_2(1.0 + std::sqrt(fvis[i] / fvis[j]) * root_4(wmgasJ.wght / wmgasI.wght));
@@ -6858,7 +6858,7 @@ namespace Window {
                                   matShade->Name,
                                   matShade->Thickness,
                                   matShade->Conductivity,
-                                  matShade->AbsorpThermal,
+                                  matShade->AbsorpThermalOut,
                                   matShade->Trans,
                                   matShade->TransVis,
                                   matShade->ReflectShade);
@@ -6895,7 +6895,7 @@ namespace Window {
                                   matScreen->Name,
                                   matScreen->Thickness,
                                   matScreen->Conductivity,
-                                  matScreen->AbsorpThermal,
+                                  matScreen->AbsorpThermalOut,
                                   btar.BmTrans,
                                   btar.RefSolFront,
                                   btar.RefVisFront,
@@ -7904,21 +7904,6 @@ namespace Window {
         // "Solar-Thermal Window Blind Model for DOE-2," H. Simmler, U. Fischer and
         // F. Winkelmann, Lawrence Berkeley National Laboratory, Jan. 1996.
 
-        struct BlindInputs
-        {
-            Real64 slatWidth;
-            Real64 slatSeparation;
-            Real64 BmDfTrans;
-            Real64 BmDfRefFront;
-            Real64 BmDfRefBack;
-            Real64 DfDfTrans;
-            Real64 DfDfRefFront;
-            Real64 DfDfRefBack;
-            Real64 DfDfTransIR;
-            Real64 DfEmissFront;
-            Real64 DfEmissBack;
-        };
-
         // The slat input properties are:
         // c(1)    0. (unused)
         // c(2)    Slat width (m)
@@ -7937,27 +7922,6 @@ namespace Window {
         // c(13)   trans diff-diff
         // c(14)   emiss front diff
         // c(15)   emiss back diff
-
-        struct BlindOutputs
-        {
-            Real64 BmBmTransFront;
-            Real64 BmBmRefFront;
-            Real64 BmBmTransBack;
-            Real64 BmBmRefBack;
-            Real64 BmDfTransFront;
-            Real64 BmDfRefFront;
-            Real64 BmDfTransBack;
-            Real64 BmDfRefBack;
-            Real64 DfDfTransFront;
-            Real64 DfDfRefFront;
-            Real64 DfDfTransBack;
-            Real64 DfDfRefBack;
-
-            Real64 TransFrontIR;
-            Real64 TransBackIR;
-            Real64 EmissFrontIR;
-            Real64 EmissBackIR;
-        };
 
         // The calculated blind properties are:
         //      The following are solar or visible properties

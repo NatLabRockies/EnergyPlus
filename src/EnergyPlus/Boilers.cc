@@ -490,6 +490,13 @@ void BoilerSpecs::SetupOutputVars(EnergyPlusData &state)
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         this->Name);
+    SetupOutputVariable(state,
+                        "Boiler Coefficient of Performance",
+                        Constant::Units::None,
+                        this->BoilerCOP,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Average,
+                        this->Name);
     if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
         SetupEMSInternalVariable(state, "Boiler Nominal Capacity", this->Name, "[W]", this->NomCap);
     }
@@ -499,8 +506,7 @@ void BoilerSpecs::oneTimeInit(EnergyPlusData &state)
 {
     // Locate the boilers on the plant loops for later usage
     bool errFlag = false;
-    PlantUtilities::ScanPlantLoopsForObject(
-        state, this->Name, DataPlant::PlantEquipmentType::Boiler_Simple, this->plantLoc, errFlag, _, this->TempUpLimitBoilerOut, _, _, _);
+    PlantUtilities::ScanPlantLoopsForObject(state, this->Name, this->Type, this->plantLoc, errFlag, _, this->TempUpLimitBoilerOut, _, _, _);
     if (errFlag) {
         ShowFatalError(state, "InitBoiler: Program terminated due to previous condition(s).");
     }
@@ -1044,6 +1050,9 @@ void BoilerSpecs::UpdateBoilerRecords(EnergyPlusData &state,
     this->FuelConsumed = this->FuelUsed * ReportingConstant;
     this->ParasiticElecConsumption = this->ParasiticElecPower * ReportingConstant;
     this->ParasiticFuelConsumption = this->ParasiticFuelRate * ReportingConstant;
+    this->BoilerCOP = (this->FuelUsed + this->ParasiticElecPower + this->ParasiticFuelRate) > 0
+                          ? this->BoilerLoad / (this->FuelUsed + this->ParasiticElecPower + this->ParasiticFuelRate)
+                          : 0.0;
 }
 
 } // namespace EnergyPlus::Boilers

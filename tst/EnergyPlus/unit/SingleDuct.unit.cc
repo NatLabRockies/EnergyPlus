@@ -2542,6 +2542,34 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
     EXPECT_EQ(ZoneDesTemp, 17.0);
     EXPECT_EQ(ZoneDesHumRat, 0.008);
     EXPECT_NEAR(DesCoilLoad, 120.5, 0.1);
+
+    // Check TU sizing
+    auto &tu1 = state->dataSingleDuct->sd_airterminal(1);
+    Real64 minOA = state->dataSize->TermUnitFinalZoneSizing(1).MinOA;
+    Real64 maxAirFlow = tu1.MaxAirVolFlowRate;
+    EXPECT_NEAR(minOA, 0.05, 0.001);
+    EXPECT_NEAR(maxAirFlow, 0.327, 0.001);
+
+    // reset to autosize for next test
+    tu1.MaxAirVolFlowRate = DataSizing::AutoSize;
+    tu1.MaxHeatAirVolFlowRate = DataSizing::AutoSize;
+    tu1.ZoneMinAirFracDes = DataSizing::AutoSize;
+    tu1.ZoneFixedMinAir = DataSizing::AutoSize;
+    // expect a TU connected to a 100% OA system to size to the OA flow rate, not the zone design flow rate
+    state->dataSize->SysSizInput(1).loadSizingType = LoadSizing::Ventilation;
+    state->dataSize->SysSizInput(1).CoolOAOption = OAControl::AllOA;
+    state->dataSize->SysSizInput(1).HeatOAOption = OAControl::AllOA;
+    EXPECT_FALSE(state->dataAirSystemsData->PrimaryAirSystems(1).isAllOA);
+    state->dataSize->CurTermUnitSizingNum = 1;
+    state->files.eio.ensure_open(*state, "OpenOutputFiles", state->files.outputControl.eio);
+    tu1.SizeSys(*state);
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.MaxHeatAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.ZoneMinAirFracDes, 1.0, 0.001);
+    EXPECT_EQ(tu1.ZoneMinAirFracMethod, SingleDuct::MinFlowFraction::Constant);
+    EXPECT_NEAR(tu1.ZoneFixedMinAir, 0.0, 0.001);
+    // minimum flow is actually MaxAirVolFlowRate * ZoneMinAirFracDes * ZoneTurndownMinAirFrac
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate * tu1.ZoneMinAirFracDes * tu1.ZoneTurndownMinAirFrac, 0.05, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, TerminalUnitMixerInitTest)
@@ -3125,8 +3153,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
 
     sdat(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.0480", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));
@@ -3150,7 +3178,6 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     adu(2).Name = "ADU b";
     adu(2).TermUnitSizingNum = 2;
 
-    siz(2).DesCoolVolFlowMin = 0.16;
     siz(2).MinOA = 0.06;
     siz(2).CoolDesTemp = 12.6;
     siz(2).HeatDesTemp = 41.0;
@@ -3177,8 +3204,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
 
     sdat(2).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.16", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
-    EXPECT_EQ("0.06", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
+    EXPECT_EQ("0.0496", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
+    EXPECT_EQ("0.0600", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
     EXPECT_EQ("12.60", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU b"));
     EXPECT_EQ("41.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU b"));
     EXPECT_EQ("2100.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU b"));

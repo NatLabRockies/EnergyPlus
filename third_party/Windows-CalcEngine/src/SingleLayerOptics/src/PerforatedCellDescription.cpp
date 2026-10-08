@@ -32,9 +32,6 @@ namespace SingleLayerOptics
                                                        const double t_Thickness,
                                                        const double t_Radius) :
         CPerforatedCellDescription(t_x, t_y, t_Thickness),
-        m_x(t_x),
-        m_y(t_y),
-        m_Thickness(t_Thickness),
         m_Radius(t_Radius)
     {}
 
@@ -106,9 +103,6 @@ namespace SingleLayerOptics
                                                              const double t_XHole,
                                                              const double t_YHole) :
         CPerforatedCellDescription(t_x, t_y, t_Thickness),
-        m_x(t_x),
-        m_y(t_y),
-        m_Thickness(t_Thickness),
         m_XHole(t_XHole),
         m_YHole(t_YHole)
     {}

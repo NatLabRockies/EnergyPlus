@@ -39,7 +39,7 @@ set(VERSIONS
     2_0_0  2_1_0  2_2_0  3_0_0  3_1_0  4_0_0  5_0_0  6_0_0  7_0_0  7_1_0  7_2_0
     8_0_0  8_1_0  8_2_0  8_3_0  8_4_0  8_5_0  8_6_0  8_7_0  8_8_0  8_9_0
     9_0_0  9_1_0  9_2_0  9_3_0  9_4_0  9_5_0  9_6_0
-    22_1_0 22_2_0 23_1_0 23_2_0 24_1_0 24_2_0 25_1_0 25_2_0 26_1_0 26_2_0
+    22_1_0 22_2_0 23_1_0 23_2_0 24_1_0 24_2_0 25_1_0 25_2_0 26_1_0 26_2_0 27_1_0
 )
 list(LENGTH VERSIONS VERSIONS_SIZE)
 math(EXPR end "${VERSIONS_SIZE} - 1")
@@ -73,7 +73,7 @@ foreach(i RANGE 1 ${end})
       install_target_prereqs("${LAST_NAME}" PreProcess/IDFVersionUpdater)
     endif()
 
-    if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+    if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
       include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
       register_install_codesign_target("${LAST_NAME}" PreProcess/IDFVersionUpdater Unspecified)
     endif()
@@ -94,7 +94,7 @@ if(NOT ${FORTRAN_STATIC_EXE})
   install_target_prereqs("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater)
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
   register_install_codesign_target("${FORMATTER_ONLY_EXECUTABLE}" PreProcess/IDFVersionUpdater Unspecified)
 endif()
@@ -119,6 +119,7 @@ install(FILES "InputRulesFiles/Rules24-2-0-to-25-1-0.md" DESTINATION "PreProcess
 install(FILES "InputRulesFiles/Rules25-1-0-to-25-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "InputRulesFiles/Rules25-2-0-to-26-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "InputRulesFiles/Rules26-1-0-to-26-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "InputRulesFiles/Rules26-2-0-to-27-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 
 install(FILES "OutputRulesFiles/OutputChanges9-0-0-to-9-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges9-1-0-to-9-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
@@ -136,6 +137,7 @@ install(FILES "OutputRulesFiles/OutputChanges24-2-0-to-25-1-0.md" DESTINATION "P
 install(FILES "OutputRulesFiles/OutputChanges25-1-0-to-25-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges25-2-0-to-26-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "OutputRulesFiles/OutputChanges26-1-0-to-26-2-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "OutputRulesFiles/OutputChanges26-2-0-to-27-1-0.md" DESTINATION "PreProcess/IDFVersionUpdater")
 
 install(FILES "SupportFiles/Report Variables 9-0-0 to 9-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 9-1-0 to 9-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
@@ -153,3 +155,23 @@ install(FILES "SupportFiles/Report Variables 24-2-0 to 25-1-0.csv" DESTINATION "
 install(FILES "SupportFiles/Report Variables 25-1-0 to 25-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 25-2-0 to 26-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
 install(FILES "SupportFiles/Report Variables 26-1-0 to 26-2-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
+install(FILES "SupportFiles/Report Variables 26-2-0 to 27-1-0.csv" DESTINATION "PreProcess/IDFVersionUpdater/")
+
+if(BUILD_TESTING)
+  if(Pytest_AVAILABLE)
+    # Keep the support files needed by historical transition tests beside the executables.
+    # The top-level build only copies the IDD for the immediately previous release.
+    file(COPY
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../idd/versions/V26-1-0-Energy+.idd"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../idd/versions/V26-2-0-Energy+.idd"
+      "${CMAKE_CURRENT_SOURCE_DIR}/SupportFiles/Report Variables 26-1-0 to 26-2-0.csv"
+      DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    )
+    add_test(NAME Transition.transition_tests
+      COMMAND ${Python_EXECUTABLE} -m pytest --verbose
+              --transition-cli-dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+              "${CMAKE_CURRENT_SOURCE_DIR}/tests/"
+    )
+    set_tests_properties(Transition.transition_tests PROPERTIES TIMEOUT 120)
+  endif()
+endif()

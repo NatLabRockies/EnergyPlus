@@ -48,10 +48,10 @@
 // C++ Headers
 #include <cmath>
 #include <format>
+#include <limits>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
-#include <ObjexxFCL/numeric.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
@@ -285,9 +285,7 @@ namespace Dayltg {
                 state.dataDaylightingDevicesData->TDDPipe(PipeNum).TransSolHorizon = CalcTDDTransSolHorizon(state, PipeNum);
 
                 // Initialize thermal properties
-                Real64 SumTZoneLengths = 0.0;
                 for (int TZoneNum = 1; TZoneNum <= state.dataDaylightingDevicesData->TDDPipe(PipeNum).NumOfTZones; ++TZoneNum) {
-                    SumTZoneLengths += state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZoneLength(TZoneNum);
 
                     SetupZoneInternalGain(state,
                                           state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZone(TZoneNum),
@@ -296,9 +294,6 @@ namespace Dayltg {
                                           &state.dataDaylightingDevicesData->TDDPipe(PipeNum).TZoneHeatGain(TZoneNum));
 
                 } // TZoneNum
-
-                state.dataDaylightingDevicesData->TDDPipe(PipeNum).ExtLength =
-                    state.dataDaylightingDevicesData->TDDPipe(PipeNum).TotLength - SumTZoneLengths;
 
                 // Setup report variables: CurrentModuleObject='DaylightingDevice:Tubular'
                 SetupOutputVariable(state,
@@ -1068,9 +1063,10 @@ namespace Dayltg {
 
         // FUNCTION PARAMETER DEFINITIONS:
         Real64 constexpr N(100000.0); // Number of integration points
-        Real64 constexpr xTol(150.0); // Tolerance factor to skip iterations where dT is approximately 0
+        // Tolerance factor to skip iterations where dT is approximately 0
         // Must be >= 1.0, increase this number to decrease the execution time
-        Real64 const myLocalTiny(TINY(1.0));
+        Real64 constexpr xTol(150.0);
+        Real64 const myLocalTiny(std::numeric_limits<Real64>::min());
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 i; // Integration interval between points

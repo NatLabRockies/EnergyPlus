@@ -100,7 +100,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -3451,6 +3451,8 @@
   Output:Variable,*,Boiler Heating Rate,Hourly;
 
   Output:Variable,*,Boiler Steam Efficiency,Hourly;
+
+  Output:Variable,*,Boiler Steam Coefficient of Performance,Hourly;
 
 ! Reporting NODES Values
 

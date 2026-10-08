@@ -1730,12 +1730,6 @@ namespace FanCoilUnits {
 
                     if (DoWaterCoilSizing) {
                         SizingMethod = HVAC::CoolingCapacitySizing;
-                        if (state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolMassFlow > 0.0) {
-                            state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolOAFlowFrac =
-                                min(fanCoil.OutAirVolFlow / state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolMassFlow, 1.0);
-                        } else {
-                            state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolOAFlowFrac = 0.0;
-                        }
                         if (fanCoil.HVACSizingIndex > 0) {
                             zoneHVACIndex = fanCoil.HVACSizingIndex;
                             int CapSizingMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingCapMethod;

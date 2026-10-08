@@ -6,7 +6,6 @@ etoolbox
 iftex
 fontspec
 l3packages
-l3backend
 xkeyval
 geometry
 graphics

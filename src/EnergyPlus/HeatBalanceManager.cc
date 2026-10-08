@@ -53,17 +53,17 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
+#include <EnergyPlus/ConstructionAssignmentSet.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -273,6 +273,8 @@ namespace HeatBalanceManager {
 
         GetConstructData(state, ErrorsFound); // Read constructs from input file/transfer from legacy data structure
 
+        ConstructionAssignments::GetConstructionAssignmentSetData(state, ErrorsFound);
+
         GetBuildingData(state, ErrorsFound); // Read building data from input file
 
         DataSurfaces::GetVariableAbsorptanceSurfaceList(state);
@@ -386,6 +388,7 @@ namespace HeatBalanceManager {
                                                                       state.dataConstruction->Construct.end(),
                                                                       [](Construction::ConstructionProps const &e) { return e.IsUsed; });
         if (Unused > 0) {
+            ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::NominallyUnusedConstructions)];
             if (!state.dataGlobal->DisplayExtraWarnings) {
                 ShowWarningError(state, std::format("CheckUsedConstructions: There are {} nominally unused constructions in input.", Unused));
                 ShowContinueError(state, "For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;");
@@ -702,6 +705,9 @@ namespace HeatBalanceManager {
             state.dataHeatBal->MaxNumberOfWarmupDays = DataHeatBalance::DefaultMaxNumberOfWarmupDays;
             state.dataHeatBal->MinNumberOfWarmupDays = DataHeatBalance::DefaultMinNumberOfWarmupDays;
         }
+
+        // Construction Assignment Set Name (resolved after ConstructionAssignmentSet data is loaded in GetConstructionAssignmentSetData)
+        state.dataConstructionAssignments->buildingConstructionAssignmentSetName = AlphaName(4);
 
         constexpr const char *Format_720(" Building Information,{},{:.3f},{},{:#G},{:#G},{},{},{}\n");
         constexpr const char *Format_721("! <Building Information>, Building Name,North Axis {{deg}},Terrain,  Loads Convergence Tolerance "
@@ -2077,6 +2083,7 @@ namespace HeatBalanceManager {
 
         // allocate the array the holds the predefined report data
         state.dataHeatBal->ZonePreDefRep.allocate(state.dataGlobal->NumOfZones);
+        state.dataHeatBal->ZnAirRpt.allocate(state.dataGlobal->NumOfZones);
 
         // Now get Space data after Zones are set up, because Space is optional, Zones are not
         GetSpaceData(state, ErrorsFound);
@@ -2282,6 +2289,231 @@ namespace HeatBalanceManager {
         }
     }
 
+    void getZoneMRTCalculationData(EnergyPlusData &state)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Rick Strand, UIUC
+        //       DATE WRITTEN   July 2026
+
+        // PURPOSE OF THIS SUBROUTINE:
+        // Get the input for the object/method being used to calculate the ZoneMRT
+
+        static constexpr std::string_view routineName = "getZoneMRTCalculationData";
+        std::string const cCurrentModuleObject = "ZoneMRTCalculation";
+        auto &s_ip = state.dataInputProcessing->inputProcessor;
+        bool errorsFound = false;
+        auto const peopleInputInstances = s_ip->epJSON.find("People");
+        auto isPeopleInputObjectName = [&peopleInputInstances, &s_ip](std::string const &peopleName) {
+            if (peopleInputInstances == s_ip->epJSON.end()) {
+                return false;
+            }
+            for (auto peopleInputInstance = peopleInputInstances.value().begin(); peopleInputInstance != peopleInputInstances.value().end();
+                 ++peopleInputInstance) {
+                if (Util::SameString(peopleInputInstance.key(), peopleName)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        auto const instances = s_ip->epJSON.find(cCurrentModuleObject);
+        if (instances != s_ip->epJSON.end()) {
+            auto &instancesValue = instances.value();
+            for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto const &fields = instance.value();
+                auto const &thisZoneName = fields.find("zone_name");
+                std::string zone_name = thisZoneName.value().get<std::string>();
+                DataHeatBalance::ZoneMRTData thisZnMRTObj;
+                thisZnMRTObj.name = Util::makeUPPER(zone_name);
+                s_ip->markObjectAsUsed(cCurrentModuleObject, instance.key());
+                auto peoplePairs = fields.find("people_names");
+                if (peoplePairs == fields.end() || peoplePairs.value().empty()) {
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" must include at least one People name and MRT weighting factor pair.",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZnMRTObj.name));
+                    errorsFound = true;
+                } else {
+                    auto &peoplePairsArray = peoplePairs.value();
+                    thisZnMRTObj.numPeople = peoplePairsArray.size();
+                    for (auto &peoplePair : peoplePairsArray) {
+                        DataHeatBalance::ZoneMRTPeopleData thisPplData;
+                        auto peopleName = peoplePair.find("people_name");
+                        if (peopleName != peoplePair.end()) {
+                            std::string people_name = peopleName.value().get<std::string>();
+                            if (!people_name.empty()) {
+                                thisPplData.name = Util::makeUPPER(people_name);
+                            }
+                        }
+                        auto peopleMRTWeightFactor = peoplePair.find("mrt_weighting_factor");
+                        if (peopleMRTWeightFactor != peoplePair.end()) {
+                            thisPplData.fracMRT = peopleMRTWeightFactor.value().get<Real64>();
+                        }
+                        thisZnMRTObj.zoneMRTPeople.push_back(thisPplData);
+                    }
+                }
+                state.dataHeatBal->zoneMRTCalc.push_back(thisZnMRTObj);
+            } // for (instance)
+        }
+
+        state.dataHeatBal->totZoneMRT = state.dataHeatBal->zoneMRTCalc.size();
+
+        for (int mrtNum = 1; mrtNum <= state.dataHeatBal->totZoneMRT; mrtNum++) { // set up and check zone and people indices
+            auto &thisZoneMRT = state.dataHeatBal->zoneMRTCalc(mrtNum);
+            bool thisZoneMRTErrorsFound = false;
+            thisZoneMRT.zoneIndex = Util::FindItemInList(thisZoneMRT.name, state.dataHeatBal->Zone);
+            if (thisZoneMRT.zoneIndex <= 0) { // zone was not found so produce an error message alerting the user of the problem
+                ShowSevereError(
+                    state,
+                    std::format(
+                        "{}, {}=\"{}\" does not reference a Zone defined in this input file.", routineName, cCurrentModuleObject, thisZoneMRT.name));
+                ShowContinueError(state, "The Zone Name field accepts a Zone name only; Space and SpaceList names are not supported.");
+                errorsFound = true;
+            } else { // zone was found, set the flag to make sure the user specified MRT for this zone is calculated
+                state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc = true;
+            }
+            for (int mrtNum2 = 1; mrtNum2 < mrtNum; ++mrtNum2) {
+                auto &thisZoneMRT2 = state.dataHeatBal->zoneMRTCalc(mrtNum2);
+                if (thisZoneMRT.zoneIndex > 0 &&
+                    thisZoneMRT.zoneIndex ==
+                        thisZoneMRT2.zoneIndex) { // zone was already referenced by another ZoneMRTCalculation object--not allowed
+                    ShowSevereError(
+                        state,
+                        std::format(
+                            "{}, Zone=\"{}\" is referenced by more than one {} object.", routineName, thisZoneMRT.name, cCurrentModuleObject));
+                    ShowContinueError(state, "Only one ZoneMRTCalculation object is allowed for each Zone.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                }
+            }
+            if (thisZoneMRT.zoneIndex <= 0 || thisZoneMRT.numPeople <= 0) {
+                continue;
+            }
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                auto &thisPeople = state.dataHeatBal->zoneMRTCalc(mrtNum).zoneMRTPeople(pNum);
+                thisPeople.peopleIndex = Util::FindItemInList(thisPeople.name, state.dataHeatBal->People);
+                if (thisPeople.peopleIndex <= 0) { // people name was not matched so produce an error message
+                    if (isPeopleInputObjectName(thisPeople.name)) {
+                        ShowSevereError(state,
+                                        std::format("{}, {}=\"{}\" references People=\"{}\", but that input object was expanded across "
+                                                    "multiple Spaces.",
+                                                    routineName,
+                                                    cCurrentModuleObject,
+                                                    thisZoneMRT.name,
+                                                    thisPeople.name));
+                        ShowContinueError(state, "The original People input name is not supported after expansion into separate People instances.");
+                        ShowContinueError(state,
+                                          std::format("For an explicitly defined Space, reference an expanded instance using \"<Space Name> "
+                                                      "{}\" or reference a People object assigned directly to that Space in Zone=\"{}\".",
+                                                      thisPeople.name,
+                                                      thisZoneMRT.name));
+                    } else {
+                        ShowSevereError(state,
+                                        std::format("{}, {}=\"{}\" references People=\"{}\", but no People object or expanded People "
+                                                    "instance has that name.",
+                                                    routineName,
+                                                    cCurrentModuleObject,
+                                                    thisZoneMRT.name,
+                                                    thisPeople.name));
+                        ShowContinueError(state, "Check the People Name and the ZoneMRTCalculation naming rules in the Input Output Reference.");
+                    }
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr != thisZoneMRT.zoneIndex) {
+                    auto const &peopleZone = state.dataHeatBal->Zone(state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr);
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\" in Zone=\"{}\".",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name,
+                                                peopleZone.Name));
+                    ShowContinueError(state, "Every referenced People instance must belong to the Zone named by ZoneMRTCalculation.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex > 0 &&
+                           state.dataHeatBal->space(state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex).isRemainderSpace) {
+                    auto const &remainderSpace = state.dataHeatBal->space(state.dataHeatBal->People(thisPeople.peopleIndex).spaceIndex);
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\" in internally generated remainder Space=\"{}\".",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name,
+                                                remainderSpace.Name));
+                    ShowContinueError(state, "ZoneMRTCalculation does not support People instances in an automatically generated remainder Space.");
+                    ShowContinueError(state,
+                                      std::format("Reference a People instance associated with Zone=\"{}\" or with an explicitly defined Space "
+                                                  "in that Zone.",
+                                                  thisZoneMRT.name));
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                } else if (state.dataHeatBal->People(thisPeople.peopleIndex).MRTCalcType == DataHeatBalance::CalcMRT::Invalid) {
+                    ShowSevereError(state,
+                                    std::format("{}, {}=\"{}\" references People=\"{}\", which does not select a Thermal Comfort Model Type.",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name));
+                    ShowContinueError(state,
+                                      "ZoneMRTCalculation currently requires each referenced People instance to select at least one thermal "
+                                      "comfort model so that its MRT method is calculated.");
+                    errorsFound = true;
+                    thisZoneMRTErrorsFound = true;
+                }
+            }
+            if (thisZoneMRTErrorsFound) {
+                continue;
+            }
+            // Now that error checking is done, calculate sums and fractions that will be used throughout the simulation
+            Real64 constexpr tolerance = 0.000001;
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                thisZoneMRT.sumFracZoneMRT += thisZoneMRT.zoneMRTPeople(pNum).fracMRT;
+            }
+            if ((thisZoneMRT.sumFracZoneMRT - 1.0) > tolerance) {
+                ShowSevereError(state,
+                                std::format("{}, {}=\"{}\" object has individual People MRT weighting factors that sum up to greater than 1.0.",
+                                            routineName,
+                                            cCurrentModuleObject,
+                                            thisZoneMRT.name));
+                ShowContinueError(state,
+                                  std::format("The weighting factors for this object will be reset to zero and the standard zone MRT will be used."));
+                // do not set errorsFound equal to true here as this is not will not cause any issues elsewhere
+                for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                    thisZoneMRT.zoneMRTPeople(pNum).fracMRT = 0.0;
+                }
+                thisZoneMRT.sumFracZoneMRT = 0.0;
+            }
+            if ((1.0 - thisZoneMRT.sumFracZoneMRT) > tolerance) {
+                ShowWarningMessage(state,
+                                   std::format("{}, {}=\"{}\" object has individual People MRT weighting factors that sum up to less than 1.0.",
+                                               routineName,
+                                               cCurrentModuleObject,
+                                               thisZoneMRT.name));
+                ShowContinueError(state, std::format("The remaining fraction of the MRT calculation will use the standard zone MRT."));
+                // do not set errorsFound equal to true here because this is possible and potentially intentional on the part of the user
+            }
+            thisZoneMRT.fracZoneStdMRT = max(1.0 - thisZoneMRT.sumFracZoneMRT, 0.0);
+        }
+
+        if (errorsFound) {
+            ShowFatalError(state, std::format("{} Errors found getting inputs. Previous error(s) cause program termination.", routineName));
+        }
+
+        for (auto &thisZoneMRT : state.dataHeatBal->zoneMRTCalc) { // Set up the output variables
+            if (state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc) {
+                SetupOutputVariable(state,
+                                    "Zone Standard Mean Radiant Temperature",
+                                    Constant::Units::C,
+                                    state.dataZoneTempPredictorCorrector->zoneHeatBalance(thisZoneMRT.zoneIndex).stdMRT,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    thisZoneMRT.name);
+            }
+        }
+    }
+
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
@@ -2468,6 +2700,25 @@ namespace HeatBalanceManager {
                     ++state.dataGlobal->numSpaceTypes;
                     state.dataHeatBal->spaceTypes(state.dataGlobal->numSpaceTypes) = thisSpace.spaceType;
                     thisSpace.spaceTypeNum = state.dataGlobal->numSpaceTypes;
+                }
+
+                std::string dcsName = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "construction_assignment_set_name");
+                if (!dcsName.empty()) {
+                    auto &dcSets = state.dataConstructionAssignments->constructionAssignmentSets;
+                    auto it = std::find_if(dcSets.begin(), dcSets.end(), [&dcsName](const ConstructionAssignments::ConstructionAssignmentSetData &d) {
+                        return d.Name == dcsName;
+                    });
+                    if (it == dcSets.end()) {
+                        ShowSevereError(state,
+                                        std::format(R"({}{}="{}", invalid construction_assignment_set_name="{}" not found.)",
+                                                    RoutineName,
+                                                    cCurrentModuleObject,
+                                                    thisSpace.Name,
+                                                    dcsName));
+                        ErrorsFound = true;
+                    } else {
+                        thisSpace.constructionAssignmentSetIndex = static_cast<int>(std::distance(dcSets.begin(), it));
+                    }
                 }
 
                 auto extensibles = objectFields.find("tags");
@@ -3133,6 +3384,8 @@ namespace HeatBalanceManager {
                 if (state.dataGlobal->DayOfSim >= state.dataHeatBal->MaxNumberOfWarmupDays && state.dataGlobal->WarmupFlag) {
                     // Check convergence for individual zone
                     if (sum(state.dataHeatBalMgr->WarmupConvergenceValues(ZoneNum).PassFlag) != 8) { // pass=2 * 4 values for convergence
+                        ++state.dataErrTracking
+                              ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::LoadsInitializationDidNotConverge)];
                         ShowSevereError(
                             state,
                             std::format("CheckWarmupConvergence: Loads Initialization, Zone=\"{}\" did not converge after {} warmup days.",
@@ -3255,27 +3508,29 @@ namespace HeatBalanceManager {
             }
 
             for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
-                AverageZoneTemp = sum(state.dataHeatBalMgr->TempZoneRpt(ZoneNum, {1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                  double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                Real64 SumZoneTemp = 0.0;
+                Real64 SumZoneLoad = 0.0;
                 for (int Num = 1; Num <= state.dataHeatBalMgr->CountWarmupDayPoints; ++Num) {
+                    SumZoneTemp += state.dataHeatBalMgr->TempZoneRpt(ZoneNum, Num);
                     if (state.dataHeatBalMgr->MaxLoadZoneRpt(ZoneNum, Num) > 1.e-4) {
                         state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) /= state.dataHeatBalMgr->MaxLoadZoneRpt(ZoneNum, Num);
                     } else {
                         state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) = 0.0;
                     }
+                    SumZoneLoad += state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num);
                 }
-                AverageZoneLoad = sum(state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, {1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                  double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                AverageZoneTemp = SumZoneTemp / double(state.dataHeatBalMgr->CountWarmupDayPoints);
+                AverageZoneLoad = SumZoneLoad / double(state.dataHeatBalMgr->CountWarmupDayPoints);
                 StdDevZoneTemp = 0.0;
                 StdDevZoneLoad = 0.0;
                 for (int Num = 1; Num <= state.dataHeatBalMgr->CountWarmupDayPoints; ++Num) {
                     state.dataHeatBalMgr->TempZoneRptStdDev(Num) = pow_2(state.dataHeatBalMgr->TempZoneRpt(ZoneNum, Num) - AverageZoneTemp);
                     state.dataHeatBalMgr->LoadZoneRptStdDev(Num) = pow_2(state.dataHeatBalMgr->LoadZoneRpt(ZoneNum, Num) - AverageZoneLoad);
+                    StdDevZoneTemp += state.dataHeatBalMgr->TempZoneRptStdDev(Num);
+                    StdDevZoneLoad += state.dataHeatBalMgr->LoadZoneRptStdDev(Num);
                 }
-                StdDevZoneTemp = std::sqrt(sum(state.dataHeatBalMgr->TempZoneRptStdDev({1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                           double(state.dataHeatBalMgr->CountWarmupDayPoints));
-                StdDevZoneLoad = std::sqrt(sum(state.dataHeatBalMgr->LoadZoneRptStdDev({1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
-                                           double(state.dataHeatBalMgr->CountWarmupDayPoints));
+                StdDevZoneTemp = std::sqrt(StdDevZoneTemp / double(state.dataHeatBalMgr->CountWarmupDayPoints));
+                StdDevZoneLoad = std::sqrt(StdDevZoneLoad / double(state.dataHeatBalMgr->CountWarmupDayPoints));
 
                 constexpr const char *Format_731(" Warmup Convergence Information,{},{},{:.10G},{:.10G},{},{},{:.10G},{:.10G},{},{}\n");
                 print(state.files.eio,
@@ -3684,7 +3939,7 @@ namespace HeatBalanceManager {
         Array1D<Real64> TVisCenter(2);                 // Center of glass visible transmittance for glazing system
         Array1D<Real64> TsolTemp(Window::numPhis + 1); // Solar transmittance vs incidence angle; diffuse trans.
         std::array<Real64, Window::numPhis> Tsol;
-        Array2D<Real64> AbsSolTemp(Window::maxGlassLayers, Window::numPhis + 1);     // Solar absorptance vs inc. angle in each glass layer
+        Array1D<Array1D<Real64>> AbsSolTemp(Window::maxGlassLayers);                 // Solar absorptance vs inc. angle in each glass layer
         Array1D<std::array<Real64, Window::numPhis>> AbsSol(Window::maxGlassLayers); // Solar absorptance vs inc. angle in each glass layer
         Array1D<Real64> RfsolTemp(Window::numPhis + 1);                              // Front solar reflectance vs inc. angle
         std::array<Real64, Window::numPhis> Rfsol;
@@ -3696,6 +3951,12 @@ namespace HeatBalanceManager {
         std::array<Real64, Window::numPhis> Rfvis;
         Array1D<Real64> RbvisTemp(Window::numPhis + 1); // Back visible reflectance vs inc. angle
         std::array<Real64, Window::numPhis> Rbvis;
+
+        for (int iGlass = 1; iGlass <= Window::maxGlassLayers; ++iGlass) {
+            AbsSolTemp(iGlass).allocate(Window::numPhis + 1);
+        }
+
+        auto const outsideUnitInterval = [](Real64 const v) { return v < 0.0 || v > 1.0; };
 
         std::array<Real64, Window::numPhis> tsolFit;  // Fitted solar transmittance vs incidence angle
         std::array<Real64, Window::numPhis> tvisFit;  // Fitted visible transmittance vs incidence angle
@@ -4147,7 +4408,8 @@ namespace HeatBalanceManager {
                     if (mat->Thickness <= 0.0) {
                     }
                     mat->Roughness = Material::SurfaceRoughness::VerySmooth;
-                    mat->AbsorpThermal = mat->AbsorpThermalBack;
+                    mat->AbsorpThermalIn = mat->AbsorpThermalBack;
+                    mat->AbsorpThermalOut = mat->AbsorpThermalFront;
                     if (mat->Thickness <= 0.0) {
                         ShowSevereError(
                             state,
@@ -4364,7 +4626,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(TsolTemp, 0.0) || any_gt(TsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(TsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of TSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
@@ -4374,13 +4636,13 @@ namespace HeatBalanceManager {
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
                     NextLine = W5DataFile.readLine();
                     ++FileLineCount;
-                    if (!readItem(NextLine.data.substr(5), AbsSolTemp(IGlass, _))) {
+                    if (!readItem(NextLine.data.substr(5), AbsSolTemp(IGlass))) {
                         ShowSevereError(
                             state, std::format("HeatBalanceManager: SearchWindow5DataFile: Error in Read of AbsSol values. For Glass={}", IGlass));
                         ShowContinueError(state,
                                           std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount, NextLine.data.substr(0, 100)));
                         ErrorsFound = true;
-                    } else if (any_lt(AbsSolTemp(IGlass, _), 0.0) || any_gt(AbsSolTemp(IGlass, _), 1.0)) {
+                    } else if (std::ranges::any_of(AbsSolTemp(IGlass), outsideUnitInterval)) {
                         ShowSevereError(
                             state,
                             std::format(
@@ -4401,7 +4663,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 1, DataLine(1).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RfsolTemp, 0.0) || any_gt(RfsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(RfsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of RfSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 1, DataLine(1).substr(0, 100)));
@@ -4413,7 +4675,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 2, DataLine(2).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RbsolTemp, 0.0) || any_gt(RbsolTemp, 1.0)) {
+                } else if (std::ranges::any_of(RbsolTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of RbSol values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 2, DataLine(2).substr(0, 100)));
@@ -4424,7 +4686,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 3, DataLine(3).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(TvisTemp, 0.0) || any_gt(TvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(TvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Tvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 3, DataLine(3).substr(0, 100)));
@@ -4435,7 +4697,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 4, DataLine(4).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RfvisTemp, 0.0) || any_gt(RfvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(RfvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Rfvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 4, DataLine(4).substr(0, 100)));
@@ -4446,7 +4708,7 @@ namespace HeatBalanceManager {
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 5, DataLine(5).substr(0, 100)));
                     ErrorsFound = true;
-                } else if (any_lt(RbvisTemp, 0.0) || any_gt(RbvisTemp, 1.0)) {
+                } else if (std::ranges::any_of(RbvisTemp, outsideUnitInterval)) {
                     ShowSevereError(state, "HeatBalanceManager: SearchWindow5DataFile: Error in Read of Rbvis values. (out of range [0,1])");
                     ShowContinueError(state,
                                       std::format("Line (~{}) in error (first 100 characters)={}", FileLineCount + 5, DataLine(5).substr(0, 100)));
@@ -4473,7 +4735,7 @@ namespace HeatBalanceManager {
 
                 for (IGlass = 1; IGlass <= NGlass(IGlSys); ++IGlass) {
                     for (int iPhi = 0; iPhi < Window::numPhis; ++iPhi) {
-                        AbsSol(IGlass)[iPhi] = AbsSolTemp(IGlass, iPhi + 1);
+                        AbsSol(IGlass)[iPhi] = AbsSolTemp(IGlass)(iPhi + 1);
                     }
                 }
 
@@ -5568,8 +5830,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(6));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolFrtTransNrows = NumRows;
-                thisConstruct.BSDFInput.SolFrtTransNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5611,8 +5871,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(7));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolBkReflNrows = NumRows;
-                thisConstruct.BSDFInput.SolBkReflNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5649,8 +5907,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(8));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisFrtTransNrows = NumRows;
-                thisConstruct.BSDFInput.VisFrtTransNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5687,8 +5943,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(9));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisBkReflNrows = NumRows;
-                thisConstruct.BSDFInput.VisBkReflNcols = NumCols;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5727,7 +5981,6 @@ namespace HeatBalanceManager {
 
                     // Simon: Load only if optical layer
                     if (mod(Layer, 2) != 0) {
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);
 
                         ++AlphaIndex;
                         // *******************************************************************************
@@ -5761,7 +6014,6 @@ namespace HeatBalanceManager {
                                             NBasis));
                         }
 
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).AbsNcols = NumCols;
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbs.allocate(NumCols, NumRows);
                         if (thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbsIndex == 0) {
                             ErrorsFound = true;
@@ -5834,8 +6086,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(6));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolFrtTransNrows = NBasis;
-                thisConstruct.BSDFInput.SolFrtTransNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5877,8 +6127,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.SolBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(7));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.SolBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.SolBkReflNrows = NBasis;
-                thisConstruct.BSDFInput.SolBkReflNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5919,8 +6167,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisFrtTransIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(8));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisFrtTransIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisFrtTransNrows = NBasis;
-                thisConstruct.BSDFInput.VisFrtTransNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -5961,8 +6207,6 @@ namespace HeatBalanceManager {
                 // *******************************************************************************
                 thisConstruct.BSDFInput.VisBkReflIndex = MatrixDataManager::MatrixIndex(state, locAlphaArgs(9));
                 MatrixDataManager::Get2DMatrixDimensions(state, thisConstruct.BSDFInput.VisBkReflIndex, NumRows, NumCols);
-                thisConstruct.BSDFInput.VisBkReflNrows = NBasis;
-                thisConstruct.BSDFInput.VisBkReflNcols = NBasis;
 
                 if (NumRows != NBasis) {
                     ErrorsFound = true;
@@ -6014,7 +6258,6 @@ namespace HeatBalanceManager {
                     currentOpticalLayer = int(Layer / 2) + 1;
 
                     if (mod(Layer, 2) != 0) {
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);
 
                         // *******************************************************************************
                         // Front absorptance matrix
@@ -6048,7 +6291,6 @@ namespace HeatBalanceManager {
                                             NBasis));
                         }
 
-                        thisConstruct.BSDFInput.Layer(currentOpticalLayer).AbsNcols = NumCols;
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbs.allocate(NumCols, NumRows);
 
                         if (thisConstruct.BSDFInput.Layer(currentOpticalLayer).FrtAbsIndex == 0) {
@@ -6176,9 +6418,9 @@ namespace HeatBalanceManager {
                   "! <Construction CTF>,Construction Name,Index,#Layers,#CTFs,Time Step {{hours}},ThermalConductance "
                   "{{w/m2-K}},OuterThermalAbsorptance,InnerThermalAbsorptance,OuterSolarAbsorptance,InnerSolarAbsorptance,Roughness\n");
             print(state.files.eio,
-                  "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{w/m-K}},Density {{kg/m3}},Specific Heat "
-                  "{{J/kg-K}},ThermalResistance {{m2-K/w}}\n");
-            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/w}}\n");
+                  "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{W/m-K}},Density {{kg/m3}},Specific Heat "
+                  "{{J/kg-K}},ThermalResistance {{m2-K/W}}\n");
+            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/W}}\n");
             print(state.files.eio, "! <CTF>,Time,Outside,Cross,Inside,Flux (except final one)\n");
 
             int cCounter = 0; // just used to keep construction index in output report

@@ -11286,11 +11286,26 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                       localNcomp,
                                       CyclingRatio);
 
-                converged_10 = (std::abs(localNcomp - Ncomp_new) <= (Tolerance * Ncomp_new)) || (Counter >= 30);
-                if (!converged_10) {
-                    Ncomp_new = localNcomp;
+                converged_10 = std::abs(localNcomp - Ncomp_new) <= (Tolerance * Ncomp_new);
+                Ncomp_new = localNcomp;
+                ++Counter;
+            } while (!converged_10 && Counter <= 30);
+
+            if (!converged_10 && !FirstHVACIteration && !state.dataGlobal->WarmupFlag) {
+                if (this->CondenserCoolingIterLimitErrIdx == 0) {
+                    ShowWarningMessage(state, std::format("{} \"{}\":", cVRFTypes(VRF_HeatPump), this->Name));
+                    ShowContinueError(
+                        state,
+                        std::format("...{}: Iteration limit exceeded calculating cooling mode compressor power, maximum iterations = {}",
+                                    RoutineName,
+                                    Counter - 1));
                 }
-            } while (!converged_10);
+                ShowRecurringWarningErrorAtEnd(state,
+                                               std::format("{} \"{}\" -- Cooling mode compressor power iteration limit exceeded error continues...",
+                                                           cVRFTypes(VRF_HeatPump),
+                                                           this->Name),
+                                               this->CondenserCoolingIterLimitErrIdx);
+            }
 
             // Update h_IU_evap_in in iterations Label12
             h_IU_evap_in_new = this->refrig->getSatEnthalpy(state, this->CondensingTemp - this->SC, 0.0, RoutineName);
@@ -11504,12 +11519,26 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                       Ncomp_new,
                                       CyclingRatio);
 
-                converged_20 = (std::abs(Ncomp_new - localNcomp) <= (Tolerance * localNcomp)) || (Counter >= 30);
-                Counter = Counter + 1;
-                if (!converged_20) {
-                    localNcomp = Ncomp_new;
+                converged_20 = std::abs(Ncomp_new - localNcomp) <= (Tolerance * localNcomp);
+                localNcomp = Ncomp_new;
+                ++Counter;
+            } while (!converged_20 && Counter <= 30);
+
+            if (!converged_20 && !FirstHVACIteration && !state.dataGlobal->WarmupFlag) {
+                if (this->CondenserHeatingIterLimitErrIdx == 0) {
+                    ShowWarningMessage(state, std::format("{} \"{}\":", cVRFTypes(VRF_HeatPump), this->Name));
+                    ShowContinueError(
+                        state,
+                        std::format("...{}: Iteration limit exceeded calculating heating mode compressor power, maximum iterations = {}",
+                                    RoutineName,
+                                    Counter - 1));
                 }
-            } while (!converged_20);
+                ShowRecurringWarningErrorAtEnd(state,
+                                               std::format("{} \"{}\" -- Heating mode compressor power iteration limit exceeded error continues...",
+                                                           cVRFTypes(VRF_HeatPump),
+                                                           this->Name),
+                                               this->CondenserHeatingIterLimitErrIdx);
+            }
 
             // Update h_comp_out in iteration Label23
             P_comp_in = this->refrig->getSatPressure(state, this->EvaporatingTemp, RoutineName);

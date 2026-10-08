@@ -69,59 +69,61 @@ The data mapping between EnergyPlus and the external interface is defined in an 
 
 The file has the following header:
 
-\textless{}?xml version = ``1.0'' encoding = ``ISO-8859-1''?\textgreater{}
-
-\textless{}!DOCTYPE BCVTB-variables SYSTEM ``variables.dtd''\textgreater{}
+\begin{lstlisting}
+<?xml version = "1.0" encoding = "ISO-8859-1"?>
+<!DOCTYPE BCVTB-variables SYSTEM "variables.dtd">
+\end{lstlisting}
 
 Following the header is an element of the form
 
-\textless{}BCVTB-variables\textgreater{}
-
-\textless{}/BCVTB-variables\textgreater{}
+\begin{lstlisting}
+<BCVTB-variables>
+</BCVTB-variables>
+\end{lstlisting}
 
 This element will contain child elements that define the variable mapping. In between the element tags, a user needs to specify how the exchanged data is mapped to EnergyPlus objects. Hence, the order of these elements matter, and it need to be the same as the order of the elements in the input and output signal vector of the BCVTB actor that calls EnergyPlus. The exchanged variables are declared in elements that are called ``variable'' and have an attribute ``source.'' As described above, the external interface can send data to ExternalInterface:Schedule, ExternalInterface:Actuator, ExternalInterface:Variable. For these objects, the ``source'' attribute needs to be set to ``Ptolemy,'' because they are computed in Ptolemy. The xml elements for these objects look as follows:
 
 For ExternalInterface:Schedule, use
 
-\textless{}variable source = ``Ptolemy''\textgreater{}
-
-~~~ \textless{}EnergyPlus schedule = ``NAME''/\textgreater{}
-
-~ \textless{}/variable\textgreater{}
+\begin{lstlisting}
+<variable source = "Ptolemy">
+  <EnergyPlus schedule = "NAME"/>
+</variable>
+\end{lstlisting}
 
 where NAME needs to be the EnergyPlus schedule name. For ExternalInterface:Actuator, use
 
-\textless{}variable source = ``Ptolemy''\textgreater{}
-
-~~~ \textless{}EnergyPlus actuator = ``NAME'' /\textgreater{}
-
-~ \textless{}/variable\textgreater{}
+\begin{lstlisting}
+<variable source = "Ptolemy">
+  <EnergyPlus actuator = "NAME" />
+</variable>
+\end{lstlisting}
 
 where NAME needs to be the EnergyPlus actuator name. For ExternalInterface:Variable, use
 
-~ \textless{}variable source = ``Ptolemy''\textgreater{}
-
-~~~ \textless{}EnergyPlus variable = ``NAME''/\textgreater{}
-
-~ \textless{}/variable\textgreater{}
+\begin{lstlisting}
+<variable source = "Ptolemy">
+  <EnergyPlus variable = "NAME"/>
+</variable>
+\end{lstlisting}
 
 where NAME needs to be the EnergyPlus Energy Runtime Language (Erl) variable name.
 
 The external interface can also read data from any Output:Variable and EnergyManagementSystem:OutputVariable. For these objects, set the ``source'' attribute to ``EnergyPlus,'' because they are computed by EnergyPlus. To read an Output:Variable, use
 
-~ \textless{}variable source = ``EnergyPlus''\textgreater{}
-
-~~~ \textless{}EnergyPlus name = ``NAME'' type = ``TYPE''/\textgreater{}
-
-~ \textless{}/variable\textgreater{}
+\begin{lstlisting}
+<variable source = "EnergyPlus">
+  <EnergyPlus name = "NAME" type = "TYPE"/>
+</variable>
+\end{lstlisting}
 
 where NAME needs to be the EnergyPlus ``Key Value'' (such as ZONE ONE) and TYPE needs to be the EnergyPlus ``Variable Name'' (such as Zone Air Temperature). To read an EnergyManagementSystem:OutputVariable, use
 
-\textless{}variable source = ``EnergyPlus''\textgreater{}
-
-~~~ \textless{}EnergyPlus name = ``EMS'' type = ``TYPE''/\textgreater{}
-
-\textless{}/variable\textgreater{}
+\begin{lstlisting}
+<variable source = "EnergyPlus">
+  <EnergyPlus name = "EMS" type = "TYPE"/>
+</variable>
+\end{lstlisting}
 
 i.e., the attribute ``name'' must be EMS, and the attribute ``type'' must be set to the EMS variable name.
 

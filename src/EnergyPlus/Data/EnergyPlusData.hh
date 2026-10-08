@@ -108,6 +108,7 @@ struct DataZoneEnergyDemandsData;
 struct DataZoneEquipmentData;
 struct DaylightingDevicesData;
 struct DaylightingData;
+struct ConstructionAssignmentsData;
 struct DefineEquipData;
 struct DemandManagerData;
 struct DesiccantDehumidifiersData;
@@ -366,6 +367,7 @@ struct EnergyPlusData : BaseGlobalStruct
     std::unique_ptr<DataZoneEquipmentData> dataZoneEquip;
     std::unique_ptr<DaylightingDevicesData> dataDaylightingDevices;
     std::unique_ptr<DaylightingData> dataDayltg;
+    std::unique_ptr<ConstructionAssignmentsData> dataConstructionAssignments;
     std::unique_ptr<DefineEquipData> dataDefineEquipment;
     std::unique_ptr<DemandManagerData> dataDemandManager;
     std::unique_ptr<DesiccantDehumidifiersData> dataDesiccantDehumidifiers;

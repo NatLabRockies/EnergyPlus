@@ -536,8 +536,10 @@ void GetExhaustAbsorberInput(EnergyPlusData &state)
         thisChiller.SizFac = s_ipsc->rNumericArgs(16);
         thisChiller.TypeOf = s_ipsc->cAlphaArgs(17);
 
-        if (Util::SameString(s_ipsc->cAlphaArgs(17), "Generator:MicroTurbine")) {
+        if (Util::SameString(thisChiller.TypeOf, "Generator:MicroTurbine")) {
             thisChiller.CompType_Num = GeneratorType::Microturbine;
+        }
+        if (thisChiller.CompType_Num == GeneratorType::Microturbine) {
             thisChiller.ExhaustSourceName = s_ipsc->cAlphaArgs(18);
 
             auto *thisMTG = MicroturbineElectricGenerator::MTGeneratorSpecs::factory(state, thisChiller.ExhaustSourceName);
@@ -1524,9 +1526,8 @@ void ExhaustAbsorberSpecs::calcChiller(EnergyPlusData &state, Real64 &MyLoad)
     bool lIsEnterCondensTemp = this->isEnterCondensTemp;           // if using entering condenser water temperature is TRUE, exiting is FALSE
     bool lIsWaterCooled = this->isWaterCooled;                     // if water cooled it is TRUE
     Real64 lCHWLowLimitTemp = this->CHWLowLimitTemp;
-    Real64 lHeatElectricPower = this->HeatElectricPower;               // parasitic electric power used  for heating
-    Real64 lHeatThermalEnergyUseRate = this->HeatThermalEnergyUseRate; // instantaneous use of exhaust for period for heating
-    Real64 lHeatPartLoadRatio = this->HeatPartLoadRatio;               // operating part load ratio (load/capacity for heating)
+    Real64 lHeatElectricPower = this->HeatElectricPower; // parasitic electric power used  for heating
+    Real64 lHeatPartLoadRatio = this->HeatPartLoadRatio; // operating part load ratio (load/capacity for heating)
 
     // initialize entering conditions
     Real64 lChillReturnTemp = state.dataLoopNodes->Node(lChillReturnNodeNum).Temp;
@@ -1822,8 +1823,7 @@ void ExhaustAbsorberSpecs::calcChiller(EnergyPlusData &state, Real64 &MyLoad)
     this->ExhaustInFlow = lExhaustInFlow;
     this->ExhHeatRecPotentialCool = lExhHeatRecPotentialCool;
 
-    // write the combined heating and cooling ThermalEnergy used and electric used
-    this->ThermalEnergyUseRate = lCoolThermalEnergyUseRate + lHeatThermalEnergyUseRate;
+    // write the combined heating and cooling electric use
     this->ElectricPower = lCoolElectricPower + lHeatElectricPower;
 }
 
@@ -2019,8 +2019,7 @@ void ExhaustAbsorberSpecs::calcHeater(EnergyPlusData &state, Real64 &MyLoad, boo
     this->HeatingCapacity = lAvailableHeatingCapacity;
     this->FractionOfPeriodRunning = lFractionOfPeriodRunning;
 
-    // write the combined heating and cooling ThermalEnergy used and electric used
-    this->ThermalEnergyUseRate = this->CoolThermalEnergyUseRate + lHeatThermalEnergyUseRate;
+    // write the combined heating and cooling electric use
     this->ElectricPower = this->CoolElectricPower + lHeatElectricPower;
     this->ExhaustInTemp = lExhaustInTemp;
     this->ExhaustInFlow = lExhaustInFlow;
@@ -2054,8 +2053,6 @@ void ExhaustAbsorberSpecs::updateCoolRecords(EnergyPlusData &state, Real64 MyLoa
     Real64 RptConstant = state.dataHVACGlobal->TimeStepSysSec;
     this->CoolingEnergy = this->CoolingLoad * RptConstant;
     this->TowerEnergy = this->TowerLoad * RptConstant;
-    this->ThermalEnergy = this->ThermalEnergyUseRate * RptConstant;
-    this->CoolThermalEnergy = this->CoolThermalEnergyUseRate * RptConstant;
     this->ElectricEnergy = this->ElectricPower * RptConstant;
     this->CoolElectricEnergy = this->CoolElectricPower * RptConstant;
     if (this->CoolThermalEnergyUseRate != 0.0) {
@@ -2081,8 +2078,6 @@ void ExhaustAbsorberSpecs::updateHeatRecords(EnergyPlusData &state, Real64 MyLoa
     // convert power to energy and instantaneous use to use over the time step
     Real64 RptConstant = state.dataHVACGlobal->TimeStepSysSec;
     this->HeatingEnergy = this->HeatingLoad * RptConstant;
-    this->ThermalEnergy = this->ThermalEnergyUseRate * RptConstant;
-    this->HeatThermalEnergy = this->HeatThermalEnergyUseRate * RptConstant;
     this->ElectricEnergy = this->ElectricPower * RptConstant;
     this->HeatElectricEnergy = this->HeatElectricPower * RptConstant;
 }

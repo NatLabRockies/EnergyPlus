@@ -106,9 +106,10 @@ struct HeatBalSurfData : BaseGlobalStruct
     Array1D<Real64> SurfTempTerm;    // TempTerm for heatbalance equation
     Array1D<Real64> SurfTempDiv;     // Divisor for heatbalance equation
     // end group added to support CalcHeatBalanceInsideSurf2CTFOnly
-    Array1D<Real64> SurfTempIn;           // Temperature of the Inside Surface for each heat transfer surface
+    Array1D<Real64> SurfTempIn;           // Inside construction face temperature; behind interior movable insulation when present
     Array1D<Real64> SurfTempInsOld;       // SurfTempIn from previous iteration for convergence check
-    Array1D<Real64> SurfTempInTmp;        // Inside Surface Temperature Of Each Heat Transfer Surface
+    Array1D<Real64> SurfTempInTmp;        // Zone-facing surface temperature; movable insulation face temperature when present
+    Array1D<Real64> SurfTempInTmpOld;     // SurfTempInTmp from previous iteration for convergence check
     Array1D<Real64> SurfHConvExt;         // Outside Convection Coefficient
     Array1D<Real64> SurfWinCoeffAdjRatio; // Convective Coefficient Adjustment Ratio assuming highly conductive frames
                                           // Only applicable for exterior window surfaces

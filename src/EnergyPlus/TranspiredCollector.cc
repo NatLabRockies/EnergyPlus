@@ -49,6 +49,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1198,7 +1199,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction; // index of construction in main construction structure
-            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             TscollK = state.dataTranspiredCollector->UTSC(UTSCNum).TcollLast + Constant::Kelvin;
             HPlenARR(ThisSurf) = Sigma * AbsExt * AbsThermSurf * (pow_4(TscollK) - pow_4(TsoK)) / (TscollK - TsoK);
@@ -1213,23 +1214,23 @@ namespace TranspiredCollector {
         // now figure area-weighted averages from underlying surfaces.
         //        Vwind = sum( LocalWindArr * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum; //Autodesk:F2C++ Array subscript usage:
         // Replaced by below
-        Vwind = sum(LocalWindArr * Area) / AreaSum;
+        Vwind = std::inner_product(LocalWindArr.begin(), LocalWindArr.end(), Area.begin(), 0.0) / AreaSum;
         LocalWindArr.deallocate();
         //        HrSky = sum( HSkyARR * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum; //Autodesk:F2C++ Array subscript usage: Replaced
         // by  below
-        HrSky = sum(HSkyARR * Area) / AreaSum;
+        HrSky = std::inner_product(HSkyARR.begin(), HSkyARR.end(), Area.begin(), 0.0) / AreaSum;
         HSkyARR.deallocate();
         //        HrGround = sum( HGroundARR * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum; //Autodesk:F2C++ Array subscript usage:
         // Replaced by below
-        HrGround = sum(HGroundARR * Area) / AreaSum;
+        HrGround = std::inner_product(HGroundARR.begin(), HGroundARR.end(), Area.begin(), 0.0) / AreaSum;
         HGroundARR.deallocate();
         //        HrAtm = sum( HAirARR * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum; //Autodesk:F2C++ Array subscript usage: Replaced
         // by  below
-        HrAtm = sum(HAirARR * Area) / AreaSum;
+        HrAtm = std::inner_product(HAirARR.begin(), HAirARR.end(), Area.begin(), 0.0) / AreaSum;
         HAirARR.deallocate();
         //        HrPlen = sum( HPlenARR * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum; //Autodesk:F2C++ Array subscript usage:
         // Replaced  by below
-        HrPlen = sum(HPlenARR * Area) / AreaSum;
+        HrPlen = std::inner_product(HPlenARR.begin(), HPlenARR.end(), Area.begin(), 0.0) / AreaSum;
         HPlenARR.deallocate();
 
         //        Isc = sum( SurfQRadSWOutIncident( UTSC( UTSCNum ).SurfPtrs ) * Surface( UTSC( UTSCNum ).SurfPtrs ).Area ) / AreaSum;
@@ -1809,7 +1810,7 @@ namespace TranspiredCollector {
                                       HAirARR(ThisSurf),
                                       HSrdSurfARR(ThisSurf));
             int ConstrNum = state.dataSurface->Surface(SurfPtr).Construction;
-            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermal;
+            Real64 AbsThermSurf = s_mat->materials(state.dataConstruction->Construct(ConstrNum).LayerPoint(1))->AbsorpThermalOut;
             Real64 TsoK = state.dataHeatBalSurf->SurfOutsideTempHist(1)(SurfPtr) + Constant::Kelvin;
             Real64 TsBaffK = TmpTsBaf + Constant::Kelvin;
             if (TsBaffK == TsoK) {        // avoid divide by zero
@@ -1849,17 +1850,20 @@ namespace TranspiredCollector {
                       &DataSurfaces::SurfaceData::Area,
                       SurfPtrARR)); // Autodesk:F2C++ Copy of subscripted Area array for use below: This makes a copy so review wrt performance
         // now figure area-weighted averages from underlying surfaces.
-        Real64 Vwind = sum(LocalWindArr * Area) / A; // area weighted average of wind velocity
+        Real64 Vwind = std::inner_product(LocalWindArr.begin(), LocalWindArr.end(), Area.begin(), 0.0) / A; // area weighted average of wind velocity
         LocalWindArr.deallocate();
-        Real64 HrSky = sum(HSkyARR * Area) / A; // radiation coeff for sky, area-weighted average
+        Real64 HrSky = std::inner_product(HSkyARR.begin(), HSkyARR.end(), Area.begin(), 0.0) / A; // radiation coeff for sky, area-weighted average
         HSkyARR.deallocate();
-        Real64 HrGround = sum(HGroundARR * Area) / A; // radiation coeff for ground, area-weighted average
+        Real64 HrGround =
+            std::inner_product(HGroundARR.begin(), HGroundARR.end(), Area.begin(), 0.0) / A; // radiation coeff for ground, area-weighted average
         HGroundARR.deallocate();
-        Real64 HrAtm = sum(HAirARR * Area) / A; // radiation coeff for air (bulk atmosphere), area-weighted average
+        Real64 HrAtm = std::inner_product(HAirARR.begin(), HAirARR.end(), Area.begin(), 0.0) /
+                       A; // radiation coeff for air (bulk atmosphere), area-weighted average
         HAirARR.deallocate();
-        Real64 HrPlen = sum(HPlenARR * Area) / A; // radiation coeff for plenum surfaces, area-weighted average
+        Real64 HrPlen =
+            std::inner_product(HPlenARR.begin(), HPlenARR.end(), Area.begin(), 0.0) / A; // radiation coeff for plenum surfaces, area-weighted average
         HPlenARR.deallocate();
-        Real64 HExt = sum(HExtARR * Area) / A; // dummy for call to InitExteriorConvectionCoeff
+        Real64 HExt = std::inner_product(HExtARR.begin(), HExtARR.end(), Area.begin(), 0.0) / A; // dummy for call to InitExteriorConvectionCoeff
         HExtARR.deallocate();
         HSrdSurfARR.deallocate();
 

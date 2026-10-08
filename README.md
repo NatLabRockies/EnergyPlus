@@ -36,20 +36,30 @@ Iteration **(pre-)releases** may be created during a development cycle, however 
 If an interim release is intended for active use by users, such as a bug-fix-only or performance-only re-release, it will be clearly specified on the release notes and a public announcement will accompany this type of release.
 Our releases are now built by GitHub Actions.
 
-## Core Documentation
-
-Program documentation is installed alongside the program, with the pdfs also available [online](https://energyplus.net/documentation).
-Big Ladder also produces html based documentation [online](http://bigladdersoftware.com/epx/docs/).
-
-## API Documentation
+## Documentation
 
 [![Read the Docs](https://img.shields.io/readthedocs/energyplus?label=docs%20%28latest%29&color=5AC451)](https://energyplus.readthedocs.io/en/latest/)
 [![Read the Docs](https://img.shields.io/readthedocs/energyplus?label=docs%20%28stable%29&color=5AC451)](https://energyplus.readthedocs.io/en/stable/)
 
-An API has been developed to allow access to internal EnergyPlus functionality and open up the possibility for new workflow opportunities around EnergyPlus.
-A C API is developed to expose the C++ functions, then Python bindings are built on top of that to maximize the accessibility.
-Documentation is being built and posted on ReadTheDocs and that documentation will continue to be expanded over time as the API grows.
-The badges above here show the status, and link out to, the `latest` documentation (most recent commit to the `develop` branch) as well as the `stable` documentation (most recent release tag).
+The [EnergyPlus documentation site](https://energyplus.readthedocs.io/en/latest/) brings together
+introductory material, user and developer guides, input-schema documentation, and the C and Python
+API references. Start with the [Quick Start Guide](https://energyplus.readthedocs.io/en/latest/quick_start/quick_start.html)
+to install EnergyPlus and run a first simulation, or browse the complete documentation for detailed
+modeling and development guidance.
+
+Key references include:
+
+- [Getting Started](https://energyplus.readthedocs.io/en/latest/guides/getting-started/index.html) —  a comprehensive introduction to EnergyPlus concepts, workflows, input files, and output files.
+- [Input Output Reference](https://energyplus.readthedocs.io/en/latest/guides/input-output-reference/index.html) —  an encyclopedic reference to EnergyPlus input objects and output reports.
+- [Engineering Reference](https://energyplus.readthedocs.io/en/latest/guides/engineering-reference/index.html) —  the theoretical background, algorithms, and calculation methods used by EnergyPlus.
+- [EnergyPlus epJSON input schema](https://energyplus.readthedocs.io/en/latest/schema.html) —  searchable definitions for EnergyPlus input objects and fields.
+- [C API reference](https://energyplus.readthedocs.io/en/latest/c.html) — the native API for embedding EnergyPlus and accessing runtime, data-transfer, functional, and callback interfaces.
+- [Python API reference](https://energyplus.readthedocs.io/en/latest/api.html) — Python bindings for the EnergyPlus C API and supporting functionality.
+
+The [`latest`](https://energyplus.readthedocs.io/en/latest/) documentation follows the `develop` branch, while [`stable`](https://energyplus.readthedocs.io/en/stable/) follows the most recent release.
+PDF documentation is also included with the packages on the [EnergyPlus releases page](https://github.com/NatLabRockies/EnergyPlus/releases). Big Ladder maintains an independent [archive of web-based EnergyPlus documentation](https://bigladdersoftware.com/epx/docs/) for released versions.
+
+For local build instructions and information about contributing documentation, see the [documentation contributor guide](doc/readthedocs/README.md).
 
 ## License & Contributing Development
 

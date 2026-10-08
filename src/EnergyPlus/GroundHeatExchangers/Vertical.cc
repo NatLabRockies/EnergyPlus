@@ -143,7 +143,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
         if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
 #ifndef PYTHON_CLI
             ShowFatalError(state, "Attempted to use borehole field design in a build without PYTHON_CLI, which is invalid");
-#endif
+#else
             // g-functions won't be calculated until after sizing is complete
             bool foundSizing = false;
             bool objTypeFound = j.find("ghe_vertical_sizing_object_type") != j.end();
@@ -305,6 +305,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 ShowSevereError(state, "Something went wrong creating response factor for GroundHeatExchanger, check previous errors.");
                 errorsFound = true;
             }
+#endif
 
         } else if (j.find("ghe_vertical_array_object_name") != j.end()) {
             // Response factors come from array object

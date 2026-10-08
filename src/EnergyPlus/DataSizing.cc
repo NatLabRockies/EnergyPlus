@@ -353,7 +353,6 @@ void TermUnitZoneSizingData::copyFromZoneSizing(ZoneSizingData const &sourceData
     this->DesHeatOAFlowFrac = sourceData.DesHeatOAFlowFrac;
     this->DesCoolMassFlow = sourceData.DesCoolMassFlow;
     this->DesCoolMassFlowNoOA = sourceData.DesCoolMassFlowNoOA;
-    this->DesCoolOAFlowFrac = sourceData.DesCoolOAFlowFrac;
     this->DesHeatLoad = sourceData.DesHeatLoad;
     this->NonAirSysDesHeatLoad = sourceData.NonAirSysDesHeatLoad;
     this->DesCoolLoad = sourceData.DesCoolLoad;

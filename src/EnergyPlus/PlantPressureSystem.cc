@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 
 // C++ Headers
@@ -906,7 +907,8 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
         // Calculate System Mass Flow Rate
         LocalSystemMassFlow = std::sqrt(SystemPressureDrop / LoopEffectiveK);
 
-        MassFlowIterativeHistory = eoshift(MassFlowIterativeHistory, -1, LocalSystemMassFlow);
+        std::shift_right(MassFlowIterativeHistory.begin(), MassFlowIterativeHistory.end(), 1);
+        MassFlowIterativeHistory(1) = LocalSystemMassFlow;
 
         PhiSystem = LocalSystemMassFlow / (NodeDensity * PumpSpeed * PumpImpellerDia);
 
