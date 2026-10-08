@@ -64,7 +64,7 @@ PKGS = {
     "energyplus_launch": "3.7.4",
     "energyplus_transition_tools": "3.0.0",
     "ghedesigner": "2.1.1",
-    "readvars": "0.0.1",
+    "readvars": "0.0.2",
 }
 
 
