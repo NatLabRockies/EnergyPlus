@@ -63882,13 +63882,10 @@ Coil:Cooling:ITE:ColdPlate,
        \minimum> 0.0
   A5 , \field Thermal Resistance Modifier Curve Name
        \note Optional curve modifying thermal resistance as a function of flow rate ratio (flow / nominal flow).
-       \note For univariate curves, flow rate ratio is used as the independent variable.
-       \note For bivariate curves, flow rate ratio is the first independent variable
-       \note and heat transfer rate ratio (heat transfer rate / nominal heat transfer rate) is the second.
+       \note The flow rate ratio is used as the independent variable.
        \note If blank, a modifier of 1.0 is used.
        \type object-list
        \object-list UnivariateFunctions
-       \object-list BivariateFunctions
   A6 , \field Thermal Resistance Method
        \note Standard: R = (Tc - Tf,in) / q_dot
        \note where Tc is the chip case temperature, Tf,in is the coolant inlet temperature, and q_dot is the heat transfer rate.
@@ -63898,6 +63895,7 @@ Coil:Cooling:ITE:ColdPlate,
        \key LMTD
        \default Standard
   N4 , \field Nominal Liquid Flow Rate
+       \required-field
        \note Nominal volumetric liquid coolant flow rate through the cold plate.
        \type real
        \units m3/s
