@@ -97,8 +97,10 @@ namespace LiquidCooledITEPlantComponents {
         int outletNode = 0;
         int thermalResistanceModifierCurveIndex = 0;
 
+        Real64 nominalMassFlowRate = 0.0; // nominal coolant mass flow rate [kg/s]
+        Real64 maximumMassFlowRate = 0.0; // maximum coolant mass flow rate [kg/s]
+
         bool myPlantScanFlag = true;             // false once ScanPlantLoopsForObject has run
-        bool mySizingFlag = true;                // false once sizeColdPlate has finalized
         bool myEnvrnFlag = true;                 // reset to true each BeginEnvrnFlag cycle
         Real64 loadFromITEquipment = 0.0;        // IT load set by the paired ElectricEquipment:ITE:LiquidCooled object [W]
         Real64 heatRemovedByFluid = 0.0;         // heat actually transferred to the coolant [W]
@@ -124,12 +126,14 @@ namespace LiquidCooledITEPlantComponents {
         }
         void oneTimeInit_new(EnergyPlusData &state) override;
         void sizeColdPlate(EnergyPlusData &state);
+        void setMassFlowRates(EnergyPlusData &state);
         void doPhysics(EnergyPlusData &state);
         void report(EnergyPlusData &state);
         static void processInputForCoilCoolingITEColdPlate(EnergyPlusData &state);
         static PlantComponent *factory(EnergyPlusData &state, const std::string &objectName);
         Real64 getDesignLoad(EnergyPlusData &state, Real64 inletFluidTemperature, Real64 outletFluidTemperature);
-        Real64 getThermalResistanceModifier(EnergyPlusData &state, Real64 flowRatio) const;
+        Real64 getAdjustedThermalResistance(EnergyPlusData &state, Real64 flowRatio) const;
+        Real64 getReferenceTemperature(EnergyPlusData &state) const;
         void setupOutputVariables(EnergyPlusData &state);
     };
 
