@@ -2090,7 +2090,7 @@ void InverseModelCO2(EnergyPlusData &state,
             Real64 ActivityLevel = state.dataHeatBal->Zone(ZoneNum).ZonePeopleActivityLevel;
             Real64 CO2GenRate = (hmZone.peopleCO2GenRateSched != nullptr) ? hmZone.peopleCO2GenRateSched->getCurrentVal() : 0.0;
             if (ActivityLevel <= 0.0) {
-                ActivityLevel = 130.0; // 130.0 is the default people activity level [W]
+                ActivityLevel = ZoneTempPredictorCorrector::peopleActivityLevelDefault;
             }
             if (CO2GenRate <= 0.0) {
                 CO2GenRate = 0.0000000382; // 0.0000000382 is the default CO2, generation rate [m3/(s*W)]
