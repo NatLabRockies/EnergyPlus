@@ -181,6 +181,7 @@ set(test_src
     IntegratedHeatPump.unit.cc
     InternalHeatGains.unit.cc
     KusudaAchenbachGroundTemperatureModel.unit.cc
+    LiquidCooledITEPlantComponents.unit.cc
     LowTempRadiantSystem.unit.cc
     Material.unit.cc
     MicroCHPElectricGenerator.unit.cc
