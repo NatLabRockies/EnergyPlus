@@ -235,27 +235,16 @@ Let:
 - $\dot m_s$ be the supplemental heating operating mass flow rate.
 - $\dot m_o$ be the off-cycle or no-load mass flow rate.
 
-For the concurrent DX-plus-supplemental case only, define the effective
-supplemental-heating condition weight as:
-
-$$
-W_s=PLR_{SuppHeat}
-$$
-
-and the effective DX-only condition weight as:
-
-$$
-W_{DXOnly}=1-W_s
-$$
-
-These weights average the two concurrent-heating airflow and fan-power
-conditions in the original proposal. They do not select the exclusive DX-only
-or supplemental-only cases, and they are not automatically physical runtime
-fractions. For example, a
-supplemental heater that modulates at 50% capacity for the whole timestep may
-have a physical runtime fraction of 1.0 while the proposal still uses
-$W_s=0.5$ as the effective supplemental-heating weight. Conversely, a heater
-that operates at full capacity for half the timestep may have both
+For the concurrent DX-plus-supplemental case only, use $PLR_{SuppHeat}$ as the
+effective supplemental-heating condition weight and $1-PLR_{SuppHeat}$ as the
+effective DX-only condition weight. These weights average the two
+concurrent-heating airflow and fan-power conditions in the original proposal.
+They do not select the exclusive DX-only or supplemental-only cases, and they
+are not automatically physical runtime fractions. For example, a supplemental
+heater that modulates at 50% capacity for the whole timestep may have a
+physical runtime fraction of 1.0 while the proposal still uses
+$PLR_{SuppHeat}=0.5$ as the effective supplemental-heating weight. Conversely,
+a heater that operates at full capacity for half the timestep may have both
 $PLR_{SuppHeat}=0.5$ and a physical runtime fraction of 0.5.
 
 The physical runtime fraction, if needed by a coil or fan model, must be
@@ -264,43 +253,43 @@ from $PLR_{SuppHeat}$ unless the supplemental heater is explicitly assumed to
 operate at full capacity whenever it is on. Compressor lockout selects the
 supplemental-only case; it does not make the DX-only weight apply to that case.
 
-For concurrent operation, the represented heating airflow and fan power are:
+For concurrent operation, the represented heating airflow is:
 
 $$
-\dot m_{avg,concurrent}=W_s\dot m_s+W_{DXOnly}\dot m_p
+\dot m_{avg,concurrent}=PLR_{SuppHeat}\dot m_s+(1-PLR_{SuppHeat})\dot m_p
 $$
 
 The corresponding fan-power approximation is:
 
 $$
-P_{fan,concurrent}=W_sP_s+W_{DXOnly}P_{DXOnly}
+P_{fan,concurrent}=PLR_{SuppHeat}P_s+(1-PLR_{SuppHeat})P_{DXOnly}
 $$
 
-For example, if $\dot m_p=1.0$, $\dot m_s=1.5$, and $W_s=0.25$,
-the average flow is $1.125$.
+For example, if $\dot m_p=1.0$, $\dot m_s=1.5$, and
+$PLR_{SuppHeat}=0.25$, the average flow is $1.125$.
 
 The concurrent equations above describe the represented heating portion. If the
 timestep also contains an off/no-load portion, let $F_h$ be the timestep weight
 of the represented heating operation and $F_o=1-F_h$ the off/no-load weight.
 Determine these timestep weights from the fan/system operating-state logic;
-do not infer $F_o$ from $1-W_s$, since $W_s$ only partitions concurrent
-heating.
+do not infer $F_o$ from $1-PLR_{SuppHeat}$, since $PLR_{SuppHeat}$ only
+partitions concurrent heating.
 The timestep-average flow and fan power are then:
 
 $$
-\dot m_{avg}=F_h(W_s\dot m_s+W_{DXOnly}\dot m_p)+F_o\dot m_o
+\dot m_{avg}=F_h(PLR_{SuppHeat}\dot m_s+(1-PLR_{SuppHeat})\dot m_p)+F_o\dot m_o
 $$
 
 $$
-P_{fan,avg}=F_h(W_sP_s+W_{DXOnly}P_{DXOnly})+F_oP_o
+P_{fan,avg}=F_h(PLR_{SuppHeat}P_s+(1-PLR_{SuppHeat})P_{DXOnly})+F_oP_o
 $$
 
-For DX-only operation, set $W_s=0$ and $W_{DXOnly}=1$ for the heating portion.
-For supplemental-only operation, set $W_s=1$ and $W_{DXOnly}=0$. When neither
-heater operates, $F_h=0$; $\dot m_o$ and $P_o$ follow the existing fan mode:
-no-load airflow and its fan power for a continuous fan, or zero airflow and
-zero fan power for a cycling fan. The off/no-load weight must not be folded into
-the DX-only or supplemental-only weight.
+For DX-only operation, set $PLR_{SuppHeat}=0$ for the heating portion. For
+supplemental-only operation, set $PLR_{SuppHeat}=1$. When neither heater
+operates, $F_h=0$; $\dot m_o$ and $P_o$ follow the existing fan mode: no-load
+airflow and its fan power for a continuous fan, or zero airflow and zero fan
+power for a cycling fan. The off/no-load weight must not be folded into the
+DX-only or supplemental-only weight.
 
 The primary/DX heating coil will use $\dot m_p$ in the DX-only case and the
 calculated air-node airflow in the concurrent case. The supplemental coil will
@@ -321,14 +310,14 @@ compressor-off/no-load contribution separately. Outlet enthalpy will be
 averaged on a dry-air mass and energy basis:
 
 $$
-h_{out,avg}=\frac{F_h\sum_{i\in\{s,DXOnly\}}W_i\dot m_i h_{out,i}+F_o\dot m_o h_o}
-{F_h\sum_{i\in\{s,DXOnly\}}W_i\dot m_i+F_o\dot m_o}
+h_{out,avg}=\frac{F_h[PLR_{SuppHeat}\dot m_s h_{out,s}+(1-PLR_{SuppHeat})\dot m_p h_{out,DXOnly}]+F_o\dot m_o h_o}
+{F_h[PLR_{SuppHeat}\dot m_s+(1-PLR_{SuppHeat})\dot m_p]+F_o\dot m_o}
 $$
 
 Humidity ratio will be averaged on the same dry-air mass basis, including the
 off/no-load mode. Use physical mode runtime fractions for exclusive operating
-states when available; use $W_s$ and $W_{DXOnly}$ only for the concurrent
-two-condition approximation.
+states when available; use $PLR_{SuppHeat}$ and its complement only for the
+concurrent two-condition approximation.
 
 The supply fan design flow will be the maximum of the cooling, primary
 heating, supplemental heating, and no-load operating flows. A hard-sized fan
@@ -406,11 +395,13 @@ heating component operates. Any off/no-load timestep contribution is accounted
 for separately from the concurrent DX/supplemental weights. The supplemental
 coil should continue to be simulated at the resolved supplemental airflow.
 
-The fan calculation must evaluate power at each operating airflow rather than
-at the timestep-average airflow. Extend `Fan:SystemModel` to accept a third
-operating mode for supplemental airflow, alongside its existing
-compressor-on/primary and compressor-off/no-load modes, and weight each mode's
-power contribution for the timestep.
+**Fan power (`Fans.cc`)**
+
+Extend `Fan:SystemModel` to accept a third operating mode for supplemental
+airflow, alongside its existing compressor-on/primary and
+compressor-off/no-load modes. The fan calculation must evaluate power at each
+operating airflow rather than at the timestep-average airflow, then weight each
+mode's power contribution for the timestep.
 
 Conceptually, pass three flow-and-weight pairs to the fan:
 
@@ -530,9 +521,9 @@ following outputs will be added:
 The condition-weight output will report the effective supplemental-condition
 weight used by the airflow model:
 
-- DX-only or no-heating operation: $W_s=0$.
-- Concurrent DX and supplemental heating: $W_s=PLR_{SuppHeat}$.
-- Supplemental-only operation: $W_s=1$.
+- DX-only or no-heating operation: 0.
+- Concurrent DX and supplemental heating: $PLR_{SuppHeat}$.
+- Supplemental-only operation: 1.
 
 These values identify the selected airflow condition; they are not physical
 runtime fractions. The supplemental-only value is 1 even if the coil modulates
@@ -548,8 +539,8 @@ effective-weighted energy use.
 ## Engineering Reference ##
 
 The Unitary System section will document DX-only, supplemental-only, concurrent,
-and no-heating airflow selection; three-mode fan-power evaluation; component
-airflow ratios; and mass and enthalpy averaging equations in
+and no-heating airflow selection; three-mode fan-power evaluation; and mass and
+enthalpy averaging equations in
 `doc/engineering-reference/src/simulation-models-encyclopedic-reference-002/air-system-compound-component-groups.tex`.
 
 ## Example File and Transition Changes ##
