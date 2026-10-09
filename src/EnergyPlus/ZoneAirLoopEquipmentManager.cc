@@ -73,6 +73,7 @@
 #include <EnergyPlus/UserDefinedComponents.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
+#include <EnergyPlus/ZonePlenum.hh>
 
 namespace EnergyPlus {
 
@@ -501,6 +502,18 @@ namespace ZoneAirLoopEquipmentManager {
                         ShowContinueError(state, "The return air temperature of the ITE will not be overwritten.");
                         ShowFatalError(state, "Preceding condition causes termination.");
                     }
+                }
+            }
+            {
+                auto const &leakADU = state.dataDefineEquipment->AirDistUnit(AirDistUnitNum);
+                if ((leakADU.UpStreamLeak || leakADU.DownStreamLeak) && !ZonePlenum::zoneReturnFeedsPlenum(state, ControlledZoneNum)) {
+                    ShowWarningError(state,
+                                     std::format("No return plenum found for simple duct leakage for ZoneHVAC:AirDistributionUnit={} in Zone={}",
+                                                 leakADU.Name,
+                                                 state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneName));
+                    ShowContinueError(state,
+                                      "The leaked air is not recovered by a return path. It is treated as lost from the air loop and is not "
+                                      "included in the system return flow.");
                 }
             }
             state.dataDefineEquipment->AirDistUnit(AirDistUnitNum).EachOnceFlag = false;
