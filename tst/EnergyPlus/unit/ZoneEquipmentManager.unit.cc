@@ -79,6 +79,7 @@
 #include <EnergyPlus/ThermalChimney.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
+#include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -4988,6 +4989,253 @@ TEST_F(EnergyPlusFixture, ZoneAirLoopEquipmentGetInputTest)
     EXPECT_EQ(airDistUnit_VAV.EquipType(1), "AIRTERMINAL:SINGLEDUCT:VAV:REHEAT");
     EXPECT_ENUM_EQ(airDistUnit_VAV.EquipTypeEnum(1), DataDefineEquip::ZnAirLoopEquipType::SingleDuctVAVReheat);
     EXPECT_TRUE(airDistUnit_VAV.IsConstLeakageRate);
+}
+
+// Two zones that each have one return node and an exhaust fan (so the zone equipment list is valid), used by the duct leakage tests
+static std::string const ductLeakZonesIdf = R"IDF(
+Zone,
+  Space 1;                 !- Name
+Zone,
+  Space 2;                 !- Name
+ZoneHVAC:EquipmentConnections,
+ Space 1,                  !- Zone Name
+ Space 1 Equipment,        !- Zone Conditioning Equipment List Name
+ Space 1 In Node,          !- Zone Air Inlet Node or NodeList Name
+ Space 1 Exh Nodes,        !- Zone Air Exhaust Node or NodeList Name
+ Space 1 Node,             !- Zone Air Node Name
+ Space 1 Ret Node;         !- Zone Return Air Node Name
+ZoneHVAC:EquipmentConnections,
+ Space 2,                  !- Zone Name
+ Space 2 Equipment,        !- Zone Conditioning Equipment List Name
+ Space 2 In Node,          !- Zone Air Inlet Node or NodeList Name
+ Space 2 Exh Nodes,        !- Zone Air Exhaust Node or NodeList Name
+ Space 2 Node,             !- Zone Air Node Name
+ Space 2 Ret Node;         !- Zone Return Air Node Name
+ZoneHVAC:EquipmentList,
+ Space 1 Equipment,        !- Name
+ SequentialLoad,           !- Load Distribution Scheme
+ Fan:ZoneExhaust,          !- Zone Equipment 1 Object Type
+ Exhaust Fan 1,            !- Zone Equipment 1 Name
+ 1,                        !- Zone Equipment 1 Cooling Sequence
+ 1,                        !- Zone Equipment 1 Heating or No - Load Sequence
+ ,                         !- Zone Equipment 1 Sequential Cooling Fraction
+ ;                         !- Zone Equipment 1 Sequential Heating or No-Load Fraction
+ZoneHVAC:EquipmentList,
+ Space 2 Equipment,        !- Name
+ SequentialLoad,           !- Load Distribution Scheme
+ Fan:ZoneExhaust,          !- Zone Equipment 1 Object Type
+ Exhaust Fan 2,            !- Zone Equipment 1 Name
+ 1,                        !- Zone Equipment 1 Cooling Sequence
+ 1,                        !- Zone Equipment 1 Heating or No - Load Sequence
+ ,                         !- Zone Equipment 1 Sequential Cooling Fraction
+ ;                         !- Zone Equipment 1 Sequential Heating or No-Load Fraction
+Fan:ZoneExhaust,
+Exhaust Fan 1,             !- Name
+,                          !- Availability Schedule Name
+0.338,                     !- Fan Total Efficiency
+125.0000,                  !- Pressure Rise{Pa}
+0.3000,                    !- Maximum Flow Rate{m3/s}
+Exhaust Fan 1 Inlet Node,  !- Air Inlet Node Name
+Exhaust Fan 1 Outlet Node, !- Air Outlet Node Name
+Zone Exhaust Fans;         !- End - Use Subcategory
+Fan:ZoneExhaust,
+Exhaust Fan 2,             !- Name
+,                          !- Availability Schedule Name
+0.338,                     !- Fan Total Efficiency
+125.0000,                  !- Pressure Rise{Pa}
+0.3000,                    !- Maximum Flow Rate{m3/s}
+Exhaust Fan 2 Inlet Node,  !- Air Inlet Node Name
+Exhaust Fan 2 Outlet Node, !- Air Outlet Node Name
+Zone Exhaust Fans;         !- End - Use Subcategory
+NodeList,
+  Space 1 Exh Nodes,       !- Name
+  Space 1 ZoneHVAC Exh Node, !- Node 1 Name
+  Exhaust Fan 1 Inlet Node; !- Node 2 Name
+NodeList,
+  Space 2 Exh Nodes,       !- Name
+  Space 2 ZoneHVAC Exh Node, !- Node 1 Name
+  Exhaust Fan 2 Inlet Node; !- Node 2 Name
+)IDF";
+
+// Declare an AirLoopHVAC:ReturnPlenum that has the return node of the given zone as an inlet
+static void addReturnPlenumForZone(EnergyPlus::EnergyPlusData &state, int const zoneNum)
+{
+    state.dataZonePlenum->GetInputFlag = false;
+    state.dataZonePlenum->NumZoneReturnPlenums = 1;
+    state.dataZonePlenum->ZoneRetPlenCond.allocate(1);
+    auto &plenum = state.dataZonePlenum->ZoneRetPlenCond(1);
+    plenum.NumInletNodes = 1;
+    plenum.InletNode.allocate(1);
+    plenum.InletNode(1) = state.dataZoneEquip->ZoneEquipConfig(zoneNum).ReturnNode(1);
+}
+
+TEST_F(EnergyPlusFixture, ZonePlenum_zoneReturnFeedsPlenumTest)
+{
+    ASSERT_TRUE(process_idf(ductLeakZonesIdf));
+    state->init_state(*state);
+    bool ErrorsFound = false;
+    GetZoneData(*state, ErrorsFound);
+    AllocateHeatBalArrays(*state);
+    GetZoneEquipmentData(*state);
+
+    // No return plenums in the model
+    state->dataZonePlenum->GetInputFlag = false;
+    state->dataZonePlenum->NumZoneReturnPlenums = 0;
+    EXPECT_FALSE(ZonePlenum::zoneReturnFeedsPlenum(*state, 1));
+    EXPECT_FALSE(ZonePlenum::zoneReturnFeedsPlenum(*state, 2));
+    EXPECT_FALSE(ZonePlenum::zoneReturnFeedsPlenum(*state, 0));  // invalid index
+    EXPECT_FALSE(ZonePlenum::zoneReturnFeedsPlenum(*state, 99)); // invalid index
+
+    // A plenum for zone 1 only
+    addReturnPlenumForZone(*state, 1);
+    EXPECT_TRUE(ZonePlenum::zoneReturnFeedsPlenum(*state, 1));
+    EXPECT_FALSE(ZonePlenum::zoneReturnFeedsPlenum(*state, 2));
+}
+
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_CalcZoneMassBalance_DuctLeakReturnFlowTest)
+{
+    ASSERT_TRUE(process_idf(ductLeakZonesIdf));
+    EXPECT_FALSE(has_err_output());
+    state->init_state(*state);
+    bool ErrorsFound = false;
+    GetZoneData(*state, ErrorsFound);
+    AllocateHeatBalArrays(*state);
+    GetZoneEquipmentData(*state);
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+    GetSimpleAirModelInputs(*state, ErrorsFound);
+
+    state->dataHVACGlobal->NumPrimaryAirSys = 1;
+    state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
+    state->dataAirSystemsData->PrimaryAirSystems(1).OASysExists = false;
+    state->dataAirLoop->AirLoopFlow.allocate(1);
+    state->dataAirLoop->AirLoopFlow(1).DesReturnFrac = 1.0;
+    state->dataGlobal->DoingSizing = false;
+    state->dataGlobal->isPulseZoneSizing = false;
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataEnvrn->OutBaroPress = 100000.0;
+
+    // Both zones are served by air loop 1
+    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
+        auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(zoneNum);
+        zoneEquipConfig.ReturnNodeAirLoopNum(1) = 1;
+        zoneEquipConfig.ReturnNodeInletNum(1) = 1;
+        state->dataLoopNodes->Node(zoneEquipConfig.InletNode(1)).MassFlowRate = 1.0;
+        state->dataLoopNodes->Node(zoneEquipConfig.ExhaustNode(1)).MassFlowRate = 0.0;
+        state->dataLoopNodes->Node(zoneEquipConfig.ZoneNode).Temp = 20.0;
+        state->dataLoopNodes->Node(zoneEquipConfig.ZoneNode).HumRat = 0.004;
+    }
+
+    // One ADU per zone. Each leaks 0.1 kg/s upstream and 0.05 kg/s downstream
+    state->dataDefineEquipment->AirDistUnit.allocate(2);
+    for (int aduNum = 1; aduNum <= 2; ++aduNum) {
+        auto &adu = state->dataDefineEquipment->AirDistUnit(aduNum);
+        adu.AirLoopNum = 1;
+        adu.ZoneEqNum = aduNum;
+        adu.UpStreamLeak = true;
+        adu.DownStreamLeak = true;
+        adu.MassFlowRateSup = 1.1;
+        adu.MassFlowRateUpStrLk = 0.1;
+        adu.MassFlowRateDnStrLk = 0.05;
+    }
+
+    auto &airLoopFlow = state->dataAirLoop->AirLoopFlow(1);
+    // The air loop flow totals are accumulated by CalcZoneMassBalance and reset by InitZoneEquipment before each HVAC pass
+    auto resetAndCalcZoneMassBalance = [&]() {
+        airLoopFlow.SupFlow = 0.0;
+        airLoopFlow.RecircFlow = 0.0;
+        airLoopFlow.LeakFlow = 0.0;
+        CalcZoneMassBalance(*state, false);
+    };
+
+    // Case 1: no return plenum. The leaked air never reaches a return node so it must not be counted in the system return flow.
+    state->dataZonePlenum->GetInputFlag = false;
+    state->dataZonePlenum->NumZoneReturnPlenums = 0;
+    resetAndCalcZoneMassBalance();
+    EXPECT_NEAR(airLoopFlow.SupFlow, 2.2, 1.0e-9);
+    EXPECT_NEAR(airLoopFlow.LeakFlow, 0.0, 1.0e-9);
+    EXPECT_NEAR(airLoopFlow.SysRetFlow, airLoopFlow.ZoneRetFlow - airLoopFlow.RecircFlow, 1.0e-9);
+
+    // Case 2: mixed. Only zone 1 returns through a plenum, so only the ADU in zone 1 contributes to LeakFlow.
+    addReturnPlenumForZone(*state, 1);
+    resetAndCalcZoneMassBalance();
+    EXPECT_NEAR(airLoopFlow.LeakFlow, 0.15, 1.0e-9);
+    EXPECT_NEAR(airLoopFlow.SysRetFlow, airLoopFlow.ZoneRetFlow - airLoopFlow.RecircFlow + 0.15, 1.0e-9);
+
+    // Case 3: both zones have a plenum, the legacy behavior of counting all leakage in the system return flow is kept
+    state->dataZonePlenum->ZoneRetPlenCond.deallocate();
+    state->dataZonePlenum->NumZoneReturnPlenums = 2;
+    state->dataZonePlenum->ZoneRetPlenCond.allocate(2);
+    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
+        auto &plenum = state->dataZonePlenum->ZoneRetPlenCond(zoneNum);
+        plenum.NumInletNodes = 1;
+        plenum.InletNode.allocate(1);
+        plenum.InletNode(1) = state->dataZoneEquip->ZoneEquipConfig(zoneNum).ReturnNode(1);
+    }
+    resetAndCalcZoneMassBalance();
+    EXPECT_NEAR(airLoopFlow.LeakFlow, 0.30, 1.0e-9);
+    EXPECT_NEAR(airLoopFlow.SysRetFlow, airLoopFlow.ZoneRetFlow - airLoopFlow.RecircFlow + 0.30, 1.0e-9);
+}
+
+TEST_F(EnergyPlusFixture, ZoneAirLoopEquipment_DuctLeakNoReturnPlenumWarningTest)
+{
+    ASSERT_TRUE(process_idf(ductLeakZonesIdf));
+    EXPECT_FALSE(has_err_output());
+    state->init_state(*state);
+    bool ErrorsFound = false;
+    GetZoneData(*state, ErrorsFound);
+    AllocateHeatBalArrays(*state);
+    GetZoneEquipmentData(*state);
+
+    state->dataZonePlenum->GetInputFlag = false;
+    state->dataZonePlenum->NumZoneReturnPlenums = 0;
+    state->dataSize->TermUnitSizing.allocate(1);
+
+    state->dataDefineEquipment->AirDistUnit.allocate(1);
+    auto &adu = state->dataDefineEquipment->AirDistUnit(1);
+    adu.Name = "Test ADU";
+    adu.TermUnitSizingNum = 1;
+    adu.OutletNodeNum = state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1);
+
+    std::string const expectedWarning = delimited_string({
+        "   ** Warning ** No return plenum found for simple duct leakage for ZoneHVAC:AirDistributionUnit=Test ADU in Zone=SPACE 1",
+        "   **   ~~~   ** The leaked air is not recovered by a return path. It is treated as lost from the air loop and is not included in the "
+        "system return flow.",
+    });
+
+    struct LeakCase
+    {
+        bool upstream;
+        bool downstream;
+        bool expectWarning;
+    };
+    for (auto const &c : std::vector<LeakCase>{{true, false, true}, {false, true, true}, {true, true, true}, {false, false, false}}) {
+        // Re-arm the one-time initialization
+        adu.EachOnceFlag = true;
+        state->dataZoneAirLoopEquipmentManager->InitAirDistUnitsFlag = true;
+        state->dataZoneAirLoopEquipmentManager->numADUInitialized = 0;
+        adu.UpStreamLeak = c.upstream;
+        adu.DownStreamLeak = c.downstream;
+
+        ZoneAirLoopEquipmentManager::InitZoneAirLoopEquipment(*state, 1, 1);
+        if (c.expectWarning) {
+            EXPECT_TRUE(compare_err_stream(expectedWarning, true)) << "upstream=" << c.upstream << " downstream=" << c.downstream;
+        } else {
+            EXPECT_FALSE(has_err_output()) << "upstream=" << c.upstream << " downstream=" << c.downstream;
+        }
+        // Leakage stays active, the warning does not disable it
+        EXPECT_EQ(adu.UpStreamLeak, c.upstream);
+        EXPECT_EQ(adu.DownStreamLeak, c.downstream);
+    }
+
+    // With a return plenum on the zone's return node there is no warning
+    addReturnPlenumForZone(*state, 1);
+    adu.EachOnceFlag = true;
+    state->dataZoneAirLoopEquipmentManager->InitAirDistUnitsFlag = true;
+    state->dataZoneAirLoopEquipmentManager->numADUInitialized = 0;
+    adu.UpStreamLeak = true;
+    adu.DownStreamLeak = true;
+    ZoneAirLoopEquipmentManager::InitZoneAirLoopEquipment(*state, 1, 1);
+    EXPECT_FALSE(has_err_output());
 }
 
 TEST_F(EnergyPlusFixture, SpaceHVACSplitterTest)
