@@ -49,7 +49,7 @@
 #define TARCOGArgs_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
@@ -94,11 +94,11 @@ int ArgCheck(EnergyPlusData &state,
              Real64 heightt,
              Real64 width,
              const Array1D<Real64> &presure,
-             Array2A_int iprop,
-             Array2A<Real64> frct,
-             Array2A<Real64> xgcon,
-             Array2A<Real64> xgvis,
-             Array2A<Real64> xgcp,
+             Array2D_int const &iprop,
+             Array2D<Real64> const &frct,
+             Array2D<Real64> const &xgcon,
+             Array2D<Real64> const &xgvis,
+             Array2D<Real64> const &xgcp,
              const Array1D<Real64> &xwght,
              const Array1D<Real64> &gama,
              const Array1D_int &nmix,

@@ -66,6 +66,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
@@ -1285,6 +1286,8 @@ namespace InternalHeatGains {
                 if (state.dataHeatBal->Zone(Loop).TotOccupants > 0.0) {
                     if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0 &&
                         state.dataHeatBal->Zone(Loop).FloorArea / state.dataHeatBal->Zone(Loop).TotOccupants < 0.1) {
+                        ++state.dataErrTracking
+                              ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::OccupantDensityExtremelyHigh)];
                         ShowWarningError(
                             state, std::format("{}Zone=\"{}\" occupant density is extremely high.", RoutineName, state.dataHeatBal->Zone(Loop).Name));
                         if (state.dataHeatBal->Zone(Loop).FloorArea > 0.0) {

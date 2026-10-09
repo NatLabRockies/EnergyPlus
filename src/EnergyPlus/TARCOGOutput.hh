@@ -49,7 +49,7 @@
 #define TARCOGOutput_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -137,11 +137,11 @@ namespace TARCOGOutput {
                              const Array1D<Real64> &tvent,
                              const Array1D<Real64> &presure,
                              const Array1D_int &nmix,
-                             Array2A_int iprop,
-                             Array2A<Real64> frct,
-                             Array2A<Real64> xgcon,
-                             Array2A<Real64> xgvis,
-                             Array2A<Real64> xgcp,
+                             Array2D_int const &iprop,
+                             Array2D<Real64> const &frct,
+                             Array2D<Real64> const &xgcon,
+                             Array2D<Real64> const &xgvis,
+                             Array2D<Real64> const &xgcp,
                              const Array1D<Real64> &xwght);
 
     void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
@@ -156,13 +156,13 @@ namespace TARCOGOutput {
                                 int nlayer,
                                 const Array1D<TARCOGParams::TARCOGLayerType> &LayerType,
                                 const Array1D_int &nmix,
-                                Array2A<Real64> frct,
+                                Array2D<Real64> const &frct,
                                 const Array1D<Real64> &thick,
                                 const Array1D<Real64> &scon,
                                 const Array1D<Real64> &gap,
-                                Array2A<Real64> xgcon,
-                                Array2A<Real64> xgvis,
-                                Array2A<Real64> xgcp,
+                                Array2D<Real64> const &xgcon,
+                                Array2D<Real64> const &xgvis,
+                                Array2D<Real64> const &xgcp,
                                 const Array1D<Real64> &xwght);
 
     void WriteOutputArguments(InputOutputFile &OutArgumentsFile,
@@ -285,11 +285,11 @@ namespace TARCOGOutput {
                               const Array1D<Real64> &tvent,
                               const Array1D<Real64> &presure,
                               const Array1D_int &nmix,
-                              Array2A_int iprop,
-                              Array2A<Real64> frct,
-                              Array2A<Real64> xgcon,
-                              Array2A<Real64> xgvis,
-                              Array2A<Real64> xgcp,
+                              Array2D_int const &iprop,
+                              Array2D<Real64> const &frct,
+                              Array2D<Real64> const &xgcon,
+                              Array2D<Real64> const &xgvis,
+                              Array2D<Real64> const &xgcp,
                               const Array1D<Real64> &xwght,
                               const Array1D<Real64> &gama);
 

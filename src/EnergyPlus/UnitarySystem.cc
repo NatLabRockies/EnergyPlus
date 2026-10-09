@@ -4911,13 +4911,7 @@ namespace UnitarySystems {
                                 this->m_ControlType = UnitarySysCtrlType::Load;
                             }
                         }
-                        newCoil.setData(this->m_FanIndex, this->m_FanType, this->m_FanName, this->m_SuppCoilPlantLoc.loopNum);
-
-                        // Push heating coil PLF curve index to DX coil
-                        //                    if ( HeatingCoilPLFCurveIndex > 0 ) {
-                        //                        SetDXCoolingCoilData( UnitarySystem( UnitarySysNum ).CoolingCoilIndex, ErrorsFound,
-                        //                        HeatingCoilPLFCurveIndex );
-                        //                    }
+                        newCoil.setData(this->m_FanIndex, this->m_FanType, this->m_FanName);
                     }
 
                     if (state.dataGlobal->DoCoilDirectSolutions && this->m_NumOfSpeedCooling > 1) {
@@ -8702,11 +8696,11 @@ namespace UnitarySystems {
             this->m_CoolingSpeedNum = SpeedNumEMS;
         }
         if (useMaxedSpeed) {
-            this->m_CoilSpeedErrIdx++;
+            int &coilSpeedErrIdx = state.dataUnitarySystems->HeatingLoad ? this->m_CoilSpeedErrIdxHeating : this->m_CoilSpeedErrIdxCooling;
             ShowRecurringWarningErrorAtEnd(state,
                                            "Wrong coil speed EMS override value, for unit=\"" + useMaxedSpeedCoilName +
                                                "\". Exceeding maximum coil speed level. Speed level is set to the maximum coil speed level allowed.",
-                                           this->m_CoilSpeedErrIdx,
+                                           coilSpeedErrIdx,
                                            this->m_EMSOverrideCoilSpeedNumValue,
                                            this->m_EMSOverrideCoilSpeedNumValue,
                                            _,
@@ -12637,12 +12631,11 @@ namespace UnitarySystems {
         }
         this->m_SuppHeatingSpeedNum = SpeedNumEMS;
         if (useMaxedSpeed) {
-            this->m_CoilSpeedErrIdx++;
             ShowRecurringWarningErrorAtEnd(state,
                                            std::format("Wrong coil speed EMS override value, for unit=\"{}\". Exceeding maximum coil speed "
                                                        "level. Speed level is set to the maximum coil speed level allowed.",
                                                        this->m_SuppHeatCoilName),
-                                           this->m_CoilSpeedErrIdx,
+                                           this->m_CoilSpeedErrIdxSuppHeat,
                                            this->m_EMSOverrideSuppCoilSpeedNumValue,
                                            this->m_EMSOverrideSuppCoilSpeedNumValue,
                                            _,
@@ -12852,7 +12845,7 @@ namespace UnitarySystems {
                         this->m_CoolingSpeedNum = this->m_NumOfSpeedCooling;
                         this->m_SpeedNum = this->m_NumOfSpeedCooling;
                         useMaxedSpeed = true;
-                        if (this->m_CoilSpeedErrIdx == 0) {
+                        if (this->m_CoilSpeedErrIdxCooling == 0) {
                             ShowWarningMessage(state, std::format("Wrong coil speed EMS override value, for unit=\"{}", this->m_CoolingCoilName));
                             ShowContinueError(state,
                                               "  Exceeding maximum coil speed level. Speed level is set to the maximum coil speed level allowed.");
@@ -12861,7 +12854,7 @@ namespace UnitarySystems {
                             state,
                             "Wrong coil speed EMS override value, for unit=\"" + this->m_CoolingCoilName +
                                 "\". Exceeding maximum coil speed level. Speed level is set to the maximum coil speed level allowed.",
-                            this->m_CoilSpeedErrIdx,
+                            this->m_CoilSpeedErrIdxCooling,
                             this->m_EMSOverrideCoilSpeedNumValue,
                             this->m_EMSOverrideCoilSpeedNumValue,
                             _,
@@ -12872,14 +12865,14 @@ namespace UnitarySystems {
                     if (this->m_SpeedNum < 0) {
                         this->m_CoolingSpeedNum = 0;
                         this->m_SpeedNum = 0;
-                        if (this->m_CoilSpeedErrIdx == 0) {
+                        if (this->m_CoilSpeedErrIdxCoolingBelowZero == 0) {
                             ShowWarningMessage(state, std::format("Wrong coil speed EMS override value, for unit=\"{}", this->m_CoolingCoilName));
                             ShowContinueError(state, "  Input speed value is below zero. Speed level is set to zero.");
                         }
                         ShowRecurringWarningErrorAtEnd(state,
                                                        "Wrong coil speed EMS override value, for unit=\"" + this->m_CoolingCoilName +
                                                            "\". Input speed value is below zero. Speed level is set to zero.",
-                                                       this->m_CoilSpeedErrIdx,
+                                                       this->m_CoilSpeedErrIdxCoolingBelowZero,
                                                        this->m_EMSOverrideCoilSpeedNumValue,
                                                        this->m_EMSOverrideCoilSpeedNumValue,
                                                        _,
@@ -14649,13 +14642,12 @@ namespace UnitarySystems {
                         if (this->m_SpeedNum > this->m_NumOfSpeedHeating) {
                             this->m_HeatingSpeedNum = this->m_NumOfSpeedHeating;
                             this->m_SpeedNum = this->m_NumOfSpeedHeating;
-                            this->m_CoilSpeedErrIdx++;
                             useMaxedSpeed = true;
                             ShowRecurringWarningErrorAtEnd(
                                 state,
                                 "Wrong coil speed EMS override value, for unit=\"" + this->m_HeatingCoilName +
                                     "\". Exceeding maximum coil speed level. Speed level is set to the maximum coil speed level allowed.",
-                                this->m_CoilSpeedErrIdx,
+                                this->m_CoilSpeedErrIdxHeating,
                                 this->m_EMSOverrideCoilSpeedNumValue,
                                 this->m_EMSOverrideCoilSpeedNumValue,
                                 _,

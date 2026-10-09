@@ -1408,7 +1408,6 @@ namespace Avail {
             availMgr.availStatus = Status::NoAction;
             availMgr.StartTime = 0;
             availMgr.StopTime = 0;
-            availMgr.ReqSupplyFrac = 1.0;
             availMgr.availManagers.allocate(availMgr.NumAvailManagers);
             for (int Num = 1; Num <= availMgr.NumAvailManagers; ++Num) {
                 auto &am = availMgr.availManagers(Num);

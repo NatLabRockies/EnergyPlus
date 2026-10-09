@@ -170,7 +170,6 @@ namespace RoomAir {
         // Members
         std::string Name;
         std::string ZoneName;
-        int ZonePtr = 0; // Pointer to the zone number for this statement
         RoomAirModel AirModel = RoomAirModel::Mixing;
         CouplingScheme TempCoupleScheme = CouplingScheme::Direct;
         bool SimAirModel = false; // FALSE if Mixing air model is currently used and
@@ -185,15 +184,12 @@ namespace RoomAir {
         int ZonePtr = 0;                              // Pointer to the zone number for this statement
         AirNodeType ClassType = AirNodeType::Invalid; // depending on type of model
         Real64 Height = 0.0;                          // height
-        Real64 ZoneVolumeFraction = 0.0;              // portion of zone air volume associated with this node
         Array1D_bool SurfMask;                        // limit of 60 surfaces at current sizing
-        bool IsZone = false;                          // TRUE if this node is zone node
     };
 
     struct DispVentData
     {
         // Members
-        std::string ZoneName;                  // Name of zone
         int ZonePtr = 0;                       // Pointer to the zone number for this statement
         Sched::Schedule *gainsSched = nullptr; // Schedule for internal gain fraction to occupied zone
         Real64 NumPlumesPerOcc = 0.0;          // Effective number of plumes per occupant
@@ -205,7 +201,6 @@ namespace RoomAir {
     struct CrossVentData
     {
         // Members
-        std::string ZoneName;                   // Name of zone
         int ZonePtr = 0;                        // Pointer to the zone number for this statement
         Sched::Schedule *gainsSched = nullptr;  // Schedule for internal gain fraction to occupied zone
         Comfort VforComfort = Comfort::Invalid; // Use Recirculation or Jet velocity and temperatures
@@ -216,7 +211,6 @@ namespace RoomAir {
     {
         // Members
         int FlowFlag = 0;   // Equal to 1 if the opening has inflow, else equal to 0.
-        Real64 Width = 0.0; // Width of the opening [m]
         Real64 Area = 0.0;  // Area of the opening [m2]
         Real64 Fin = 0.0;   // Inflow volume flux through the opening [m3/s]
         Real64 Uin = 0.0;   // Inflow air velocity through the opening [m/s]
@@ -234,7 +228,6 @@ namespace RoomAir {
         // Members
         Real64 Width = 0.0;
         Real64 Height = 0.0;
-        int Shadow = 0;
         Real64 Zmin = 0.0;
         Real64 Zmax = 0.0;
     };
@@ -356,7 +349,6 @@ namespace RoomAir {
         Real64 Texhaust = 23.0;           // temperature for exhaust air node
         Array1D<SurfaceAssocNested> Surf; // nested struct w/ surface info
         int totNumSurfs = 0;              // total surfs for this zone
-        int firstSurfID = 0;              // Index of first surface
         // report
         Real64 Gradient = 0.0; // result for modeled gradient if using two-gradient interpolation
     };
@@ -367,7 +359,6 @@ namespace RoomAir {
         // user variables
         int AFNSimuID = 0;     // point to this linkage in AirflowNetworkLinkSimu structure
         int AFNDataID = 0;     // point to this linkage in AirflowNetworkLinkageData structure
-        int AFNReportID = 0;   // point to this linkage in AirflowNetworkLinkReport structure
         Real64 MdotIn = 0.0;   // mass flow rate of air into control volume(neg means leaving control volume) (kg / s)
         Real64 TempIn = 0.0;   // drybulb temperature of air into control volume
         Real64 HumRatIn = 0.0; // humidity ratio of air into control volume
@@ -379,7 +370,6 @@ namespace RoomAir {
         // user variables
         DataHeatBalance::IntGainType type = DataHeatBalance::IntGainType::Invalid; // Internal type
         std::string Name;                                                          // Intenral gain name
-        bool UseRoomAirModelTempForGains = false;                                  // TRUE if user inputs temp for gains
         bool FractionCheck = false;                                                // TRUE if a fraction of internal gain for each object is checked
     };
 
@@ -388,7 +378,6 @@ namespace RoomAir {
         // Members
         // user variables
         std::string Name;                                                                           // HVAC system name
-        std::string ObjectTypeName;                                                                 // HVAC object type name
         std::string SupplyNodeName;                                                                 // HVAC system supply node name
         std::string ReturnNodeName;                                                                 // HVAC system return node name
         DataZoneEquipment::ZoneEquipType zoneEquipType = DataZoneEquipment::ZoneEquipType::Invalid; // HVAC type num
@@ -473,22 +462,15 @@ namespace RoomAir {
     {
         // Members
         // user variables
-        bool IsUsed = false;                   // true. if RoomAirflowNetwork model used in zone
-        std::string Name;                      // Name
-        std::string ZoneName;                  // Zone name in building
-        int ZoneID = 0;                        // Index of Zone in Heat Balance
-        int ActualZoneID = 0;                  // Index of controlled zones in ZoneCOnfigure
-        Sched::Schedule *availSched = nullptr; // index of availability schedule
-        int ControlAirNodeID = 0;              // index of roomair node that is HVAC control sensor location
-        int NumOfAirNodes = 0;                 // Number of air nodes
-        Array1D<AFNAirNodeNested> Node;        // Node struct
-        int ZoneNodeID = 0;                    // index in system Node array for this zone
-        Real64 TairMean = 0.0;                 // comes from MAT
-        Real64 Tstat = 0.0;                    // temperature for thermostat
-        Real64 Tleaving = 0.0;                 // temperature for return air node
-        Real64 Texhaust = 0.0;                 // temperature for exhaust air node
-        int totNumSurfs = 0;                   // total surfs for this zone
-        int firstSurfID = 0;                   // Index of first surface
+        bool IsUsed = false;            // true. if RoomAirflowNetwork model used in zone
+        std::string Name;               // Name
+        std::string ZoneName;           // Zone name in building
+        int ZoneID = 0;                 // Index of Zone in Heat Balance
+        int ActualZoneID = 0;           // Index of controlled zones in ZoneCOnfigure
+        int ControlAirNodeID = 0;       // index of roomair node that is HVAC control sensor location
+        int NumOfAirNodes = 0;          // Number of air nodes
+        Array1D<AFNAirNodeNested> Node; // Node struct
+        int totNumSurfs = 0;            // total surfs for this zone
     };
 
     struct BegEnd

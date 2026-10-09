@@ -12,85 +12,34 @@ set(src
   src/ObjexxFCL/Array.functions.hh
   src/ObjexxFCL/Array.fwd.hh
   src/ObjexxFCL/Array.hh
-  src/ObjexxFCL/array.iterator.hh
   src/ObjexxFCL/Array1.all.fwd.hh
   src/ObjexxFCL/Array1.all.hh
   src/ObjexxFCL/Array1.fwd.hh
   src/ObjexxFCL/Array1.hh
-  src/ObjexxFCL/Array1A.fwd.hh
-  src/ObjexxFCL/Array1A.hh
   src/ObjexxFCL/Array1D.fwd.hh
   src/ObjexxFCL/Array1D.hh
-  src/ObjexxFCL/Array1S.fwd.hh
-  src/ObjexxFCL/Array1S.hh
   src/ObjexxFCL/Array2.all.fwd.hh
   src/ObjexxFCL/Array2.all.hh
   src/ObjexxFCL/Array2.fwd.hh
   src/ObjexxFCL/Array2.hh
-  src/ObjexxFCL/Array2A.fwd.hh
-  src/ObjexxFCL/Array2A.hh
   src/ObjexxFCL/Array2D.fwd.hh
   src/ObjexxFCL/Array2D.hh
-  src/ObjexxFCL/Array2S.fwd.hh
-  src/ObjexxFCL/Array2S.hh
   src/ObjexxFCL/Array3.all.fwd.hh
   src/ObjexxFCL/Array3.fwd.hh
   src/ObjexxFCL/Array3.hh
   src/ObjexxFCL/Array3D.fwd.hh
   src/ObjexxFCL/Array3D.hh
-  src/ObjexxFCL/Array3S.fwd.hh
-  src/ObjexxFCL/Array3S.hh
-  src/ObjexxFCL/Array4.all.fwd.hh
-  src/ObjexxFCL/Array4.fwd.hh
-  src/ObjexxFCL/Array4.hh
-  src/ObjexxFCL/Array4D.fwd.hh
-  src/ObjexxFCL/Array4D.hh
-  src/ObjexxFCL/Array4S.fwd.hh
-  src/ObjexxFCL/Array4S.hh
-  src/ObjexxFCL/ArrayRS.fwd.hh
-  src/ObjexxFCL/ArrayRS.hh
-  src/ObjexxFCL/ArrayS.all.fwd.hh
-  src/ObjexxFCL/ArrayS.all.hh
-  src/ObjexxFCL/ArrayS.functions.hh
-  src/ObjexxFCL/ArrayS.fwd.hh
-  src/ObjexxFCL/ArrayS.hh
   src/ObjexxFCL/BArray.fwd.hh
   src/ObjexxFCL/BArray.hh
-  src/ObjexxFCL/CArray.fwd.hh
-  src/ObjexxFCL/CArray.hh
-  src/ObjexxFCL/CArrayA.fwd.hh
-  src/ObjexxFCL/CArrayA.hh
   src/ObjexxFCL/char.functions.hh
-  src/ObjexxFCL/command.cc
-  src/ObjexxFCL/command.hh
-  src/ObjexxFCL/Cstring.cc
-  src/ObjexxFCL/Cstring.fwd.hh
-  src/ObjexxFCL/Cstring.hh
-  src/ObjexxFCL/DimensionSlice.fwd.hh
-  src/ObjexxFCL/DimensionSlice.hh
-  src/ObjexxFCL/environment.cc
-  src/ObjexxFCL/environment.hh
   src/ObjexxFCL/Fmath.hh
-  src/ObjexxFCL/Index.cc
   src/ObjexxFCL/Index.fwd.hh
   src/ObjexxFCL/Index.hh
   src/ObjexxFCL/IndexRange.cc
   src/ObjexxFCL/IndexRange.fwd.hh
   src/ObjexxFCL/IndexRange.hh
-  src/ObjexxFCL/IndexSlice.cc
-  src/ObjexxFCL/IndexSlice.fwd.hh
-  src/ObjexxFCL/IndexSlice.hh
   src/ObjexxFCL/InitializerSentinel.hh
-  src/ObjexxFCL/MArray.all.fwd.hh
-  src/ObjexxFCL/MArray.fwd.hh
-  src/ObjexxFCL/MArray.hh
-  src/ObjexxFCL/MArray1.fwd.hh
-  src/ObjexxFCL/MArray1.hh
-  src/ObjexxFCL/MArrayR.fwd.hh
-  src/ObjexxFCL/MArrayR.hh
   src/ObjexxFCL/member.functions.hh
-  src/ObjexxFCL/numeric.cc
-  src/ObjexxFCL/numeric.hh
   src/ObjexxFCL/ObjexxFCL.fwd.hh
   src/ObjexxFCL/ObjexxFCL.hh
   src/ObjexxFCL/ObjexxFCL.Project.hh
@@ -100,8 +49,6 @@ set(src
   src/ObjexxFCL/ProxySentinel.hh
   src/ObjexxFCL/random.cc
   src/ObjexxFCL/random.hh
-  src/ObjexxFCL/Reference.fwd.hh
-  src/ObjexxFCL/Reference.hh
   src/ObjexxFCL/string.functions.cc
   src/ObjexxFCL/string.functions.hh
   src/ObjexxFCL/time.cc
@@ -119,36 +66,19 @@ set(src
 set( test_src
   tst/unit/Array.unit.cc
   tst/unit/Array1.unit.cc
-  tst/unit/Array1S.unit.cc
   tst/unit/Array2.unit.cc
   tst/unit/Array3.unit.cc
-  tst/unit/Array4.unit.cc
-  tst/unit/Array5.unit.cc
-  tst/unit/ArrayS.unit.cc
-  tst/unit/CArray.unit.cc
-  tst/unit/CArrayA.unit.cc
   tst/unit/char.functions.unit.cc
-  tst/unit/command.unit.cc
-  tst/unit/Cstring.unit.cc
-  tst/unit/DimensionSlice.unit.cc
-  tst/unit/environment.unit.cc
-  tst/unit/floops.unit.cc
   tst/unit/Fmath.unit.cc
   tst/unit/Index.unit.cc
   tst/unit/IndexRange.unit.cc
-  tst/unit/IndexSlice.unit.cc
   tst/unit/main.cc
-  tst/unit/MArray.unit.cc
   tst/unit/member.functions.unit.cc
-  tst/unit/numeric.unit.cc
   tst/unit/ObjexxFCL.unit.hh
   tst/unit/Optional.unit.cc
   tst/unit/random.unit.cc
-  tst/unit/Reference.Optional.unit.cc
-  tst/unit/Reference.unit.cc
   tst/unit/string.functions.unit.cc
   tst/unit/time.unit.cc
-  tst/unit/TypeTraits.unit.cc
   tst/unit/Vector2.unit.cc
   tst/unit/Vector3.unit.cc
   tst/unit/Vector4.unit.cc

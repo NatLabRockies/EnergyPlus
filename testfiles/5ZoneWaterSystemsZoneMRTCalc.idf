@@ -100,7 +100,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -2618,19 +2618,19 @@
     PIERCE;                  !- Thermal Comfort Model 1 Type
 
   ComfortViewFactorAngles,
-    These Angle Factors, !- name of angle factor list
-    C1-1, !- Surface name 1
-    0.50, !- Angle factor for surface 1
-    F1-1, !- Surface name 2
-    0.50; !- Angle factor for surface 2
+    These Angle Factors,     !- Name
+    C1-1,                    !- Surface 1 Name
+    0.50,                    !- Angle Factor 1
+    F1-1,                    !- Surface 2 Name
+    0.50;                    !- Angle Factor 2
 
   ZoneMRTCalculation,
     SPACE1-1,                !- Zone Name
-    SPACE1-1 People 1,       !- People Name 1
+    SPACE1-1 People 1,       !- People 1 Name
     0.3,                     !- MRT Weighting Factor 1
-    SPACE1-1 People 2,       !- People Name 2
+    SPACE1-1 People 2,       !- People 2 Name
     0.3,                     !- MRT Weighting Factor 2
-    SPACE1-1 People 3,       !- People Name 3
+    SPACE1-1 People 3,       !- People 3 Name
     0.4;                     !- MRT Weighting Factor 3
 
   Lights,

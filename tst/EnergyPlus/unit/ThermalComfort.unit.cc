@@ -771,8 +771,8 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT)
     state->dataThermalComforts->AngleFactorList.allocate(1);
     state->dataSurface->TotSurfaces = 3;
     state->dataGlobal->NumOfZones = 1;
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
     state->dataHeatBal->Zone.allocate(1);
@@ -796,9 +796,12 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT)
     state->dataHeatBal->Zone(1).spaceIndexes.emplace_back(1);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 3;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 15.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(2) = 15.0;
+    state->dataHeatBalSurf->SurfTempInTmp(3) = 10.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(1) = 1.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(2) = 0.9;
+    state->dataHeatBalSurf->SurfAbsThermalInt(3) = 0.8;
 
     state->dataViewFactor->EnclRadInfo.allocate(state->dataGlobal->NumOfZones);
     state->dataViewFactor->EnclRadInfo(1).SurfacePtr.dimension(3);
@@ -857,16 +860,19 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcAngleFactorMRT)
     state->dataThermalComforts->AngleFactorList(1).AngleFactor(3) = 0.2;
 
     state->dataSurface->TotSurfaces = state->dataThermalComforts->AngleFactorList(1).TotAngleFacSurfaces;
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->Surface.deallocate();
     state->dataConstruction->Construct.deallocate();
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
 
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 15.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(2) = 15.0;
+    state->dataHeatBalSurf->SurfTempInTmp(3) = 10.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(1) = 1.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(2) = 0.9;
+    state->dataHeatBalSurf->SurfAbsThermalInt(3) = 0.8;
     state->dataSurface->Surface(1).Construction = 1;
     state->dataSurface->Surface(2).Construction = 2;
     state->dataSurface->Surface(3).Construction = 3;
@@ -1898,8 +1904,8 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT_Enclosure_Based)
     state->dataGlobal->NumOfZones = 2;
     state->dataGlobal->numSpaces = 2;
 
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.dimension(state->dataSurface->TotSurfaces, 0.9);
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
     state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
@@ -1983,19 +1989,12 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT_Enclosure_Based)
     state->dataHeatBal->space.allocate(1);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 6;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(4) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(5) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(6) = 10.0; // this should air boundary
-
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(7) = 20.0; // this should air boundary
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(8) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(9) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(10) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(11) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(12) = 20.0;
+    for (int surfNum = 1; surfNum <= 6; ++surfNum) {
+        state->dataHeatBalSurf->SurfTempInTmp(surfNum) = 10.0;
+    }
+    for (int surfNum = 7; surfNum <= 12; ++surfNum) {
+        state->dataHeatBalSurf->SurfTempInTmp(surfNum) = 20.0;
+    }
 
     state->dataViewFactor->EnclRadInfo.allocate(1); // (state->dataGlobal->NumOfZones);
     state->dataViewFactor->EnclRadInfo(1).SurfacePtr.dimension(12);

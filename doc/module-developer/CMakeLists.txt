@@ -81,3 +81,7 @@ set(INCLUDED_IMAGES ${PROJECT_SOURCE_DIR}/module-developer/media/image001.png ${
                     ${PROJECT_SOURCE_DIR}/module-developer/media/image003.jpg)
 
 create_doc_target("module-developer" "ModuleDeveloper")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("module-developer" "module-developer")
+endif()

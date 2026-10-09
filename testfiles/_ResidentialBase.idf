@@ -10,7 +10,7 @@
 !
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.2;
+  Version,27.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -4373,78 +4373,78 @@
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:YEAR:RULES ===========
 
   Schedule:Year:Rules,
-    trans schedule winter=0.85 summer=0.7,      !- Name
-    Fractional,                                 !- Schedule Type Limits Name
-    trans schedule winter=0.85 summer=0.7 default day; !- Default Day Schedule Name
+    trans schedule winter=0.85 summer=0.7,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    trans schedule winter=0.85 summer=0.7 default day;  !- Default Day Schedule Name
 
   Schedule:Week:Rule,
-    trans schedule winter=0.85 summer=0.7 rule, !- Name
-    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
-    2,                                          !- Rule Priority Order
-    trans schedule winter=0.85 summer=0.7 allday1, !- Day Schedule Name
-    Yes,                                        !- Apply Sunday
-    Yes,                                        !- Apply Monday
-    Yes,                                        !- Apply Tuesday
-    Yes,                                        !- Apply Wednesday
-    Yes,                                        !- Apply Thursday
-    Yes,                                        !- Apply Friday
-    Yes,                                        !- Apply Saturday
-    1,                                          !- Start Month
-    1,                                          !- Start Day
-    4,                                          !- End Month
-    30;                                         !- End Day
+    trans schedule winter=0.85 summer=0.7 rule,  !- Name
+    trans schedule winter=0.85 summer=0.7,  !- Schedule Year Rules Name
+    2,                       !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday1,  !- Day Schedule Name
+    Yes,                     !- Apply Sunday
+    Yes,                     !- Apply Monday
+    Yes,                     !- Apply Tuesday
+    Yes,                     !- Apply Wednesday
+    Yes,                     !- Apply Thursday
+    Yes,                     !- Apply Friday
+    Yes,                     !- Apply Saturday
+    1,                       !- Start Month 1
+    1,                       !- Start Day 1
+    4,                       !- End Month 1
+    30;                      !- End Day 1
 
   Schedule:Week:Rule,
-    trans schedule winter=0.85 summer=0.7 rule 1, !- Name
-    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
-    1,                                          !- Rule Priority Order
-    trans schedule winter=0.85 summer=0.7 allday121, !- Day Schedule Name
-    Yes,                                        !- Apply Sunday
-    Yes,                                        !- Apply Monday
-    Yes,                                        !- Apply Tuesday
-    Yes,                                        !- Apply Wednesday
-    Yes,                                        !- Apply Thursday
-    Yes,                                        !- Apply Friday
-    Yes,                                        !- Apply Saturday
-    5,                                          !- Start Month
-    1,                                          !- Start Day
-    10,                                         !- End Month
-    31;                                         !- End Day
+    trans schedule winter=0.85 summer=0.7 rule 1,  !- Name
+    trans schedule winter=0.85 summer=0.7,  !- Schedule Year Rules Name
+    1,                       !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday121,  !- Day Schedule Name
+    Yes,                     !- Apply Sunday
+    Yes,                     !- Apply Monday
+    Yes,                     !- Apply Tuesday
+    Yes,                     !- Apply Wednesday
+    Yes,                     !- Apply Thursday
+    Yes,                     !- Apply Friday
+    Yes,                     !- Apply Saturday
+    5,                       !- Start Month 1
+    1,                       !- Start Day 1
+    10,                      !- End Month 1
+    31;                      !- End Day 1
 
   Schedule:Week:Rule,
-    trans schedule winter=0.85 summer=0.7 rule 2, !- Name
-    trans schedule winter=0.85 summer=0.7,      !- Schedule Year Rules Name
-    0,                                          !- Rule Priority Order
-    trans schedule winter=0.85 summer=0.7 allday305, !- Day Schedule Name
-    Yes,                                        !- Apply Sunday
-    Yes,                                        !- Apply Monday
-    Yes,                                        !- Apply Tuesday
-    Yes,                                        !- Apply Wednesday
-    Yes,                                        !- Apply Thursday
-    Yes,                                        !- Apply Friday
-    Yes,                                        !- Apply Saturday
-    11,                                         !- Start Month
-    1,                                          !- Start Day
-    12,                                         !- End Month
-    31;                                         !- End Day
+    trans schedule winter=0.85 summer=0.7 rule 2,  !- Name
+    trans schedule winter=0.85 summer=0.7,  !- Schedule Year Rules Name
+    0,                       !- Rule Priority Order
+    trans schedule winter=0.85 summer=0.7 allday305,  !- Day Schedule Name
+    Yes,                     !- Apply Sunday
+    Yes,                     !- Apply Monday
+    Yes,                     !- Apply Tuesday
+    Yes,                     !- Apply Wednesday
+    Yes,                     !- Apply Thursday
+    Yes,                     !- Apply Friday
+    Yes,                     !- Apply Saturday
+    11,                      !- Start Month 1
+    1,                       !- Start Day 1
+    12,                      !- End Month 1
+    31;                      !- End Day 1
 
   Schedule:Year:Rules,
-    clothes dryer schedule,                     !- Name
-    Fractional,                                 !- Schedule Type Limits Name
-    clothes dryer schedule default day;         !- Default Day Schedule Name
+    clothes dryer schedule,  !- Name
+    Fractional,              !- Schedule Type Limits Name
+    clothes dryer schedule default day;  !- Default Day Schedule Name
 
   Schedule:Week:Rule,
-    clothes dryer schedule rule,                !- Name
-    clothes dryer schedule,                     !- Schedule Year Rules Name
-    0,                                          !- Rule Priority Order
-    clothes dryer schedule allday1,             !- Day Schedule Name
-    Yes,                                        !- Apply Sunday
-    Yes,                                        !- Apply Monday
-    Yes,                                        !- Apply Tuesday
-    Yes,                                        !- Apply Wednesday
-    Yes,                                        !- Apply Thursday
-    Yes,                                        !- Apply Friday
-    Yes;                                        !- Apply Saturday
+    clothes dryer schedule rule,  !- Name
+    clothes dryer schedule,  !- Schedule Year Rules Name
+    0,                       !- Rule Priority Order
+    clothes dryer schedule allday1,  !- Day Schedule Name
+    Yes,                     !- Apply Sunday
+    Yes,                     !- Apply Monday
+    Yes,                     !- Apply Tuesday
+    Yes,                     !- Apply Wednesday
+    Yes,                     !- Apply Thursday
+    Yes,                     !- Apply Friday
+    Yes;                     !- Apply Saturday
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:CONSTANT ===========
 
@@ -7228,9 +7228,9 @@
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:PROGRAMCALLINGMANAGER ===========
 
   EnergyManagementSystem:ProgramCallingManager,
-    init calling manager,  !- Name
-    BeginNewEnvironment,  !- EnergyPlus Model Calling Point
-    init;  !- Program Name 1
+    init calling manager,    !- Name
+    BeginNewEnvironment,     !- EnergyPlus Model Calling Point
+    init;                    !- Program Name 1
 
   EnergyManagementSystem:ProgramCallingManager,
     attic_unvented_1_duct_leakage_imbalance_infil_program calling manager,  !- Name
@@ -7290,11 +7290,11 @@
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:PROGRAM ===========
 
   EnergyManagementSystem:Program,
-    init,  !- Name
-    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVDZ = 0.0,   !- Program Line 1
-    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVDZ = 0.0,   !- Program Line 2
-    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVCOND = 0.0, !- <none>
-    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVCOND = 0.0; !- <none>
+    init,                    !- Name
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVDZ = 0.0,  !- Program Line 1
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVDZ = 0.0,  !- Program Line 2
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKSUPFANEQUIVCOND = 0.0,  !- <none>
+    Set CENTRAL_AC_AND_FURNACE_AIRLOOP_0_DUCTIMBALLKEXHFANEQUIVCOND = 0.0;  !- <none>
 
   EnergyManagementSystem:Program,
     attic_unvented_1_duct_leakage_imbalance_infil_program,  !- Name

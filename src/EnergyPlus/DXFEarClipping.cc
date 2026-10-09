@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 
 // ObjexxFCL Headers
@@ -237,7 +238,7 @@ namespace DXFEarClipping {
         removed = false;
         while (nvertcur > 3) {
             generate_ears(state, nsides, vertex, ears, nears, r_angles, nrangles, c_vertices, ncverts, removed, earverts, rangles);
-            if (!any_gt(ears, 0)) {
+            if (!std::ranges::any_of(ears, [](int const v) { return v > 0; })) {
                 ShowWarningError(state,
                                  std::format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
                                              surfname,

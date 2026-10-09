@@ -7793,7 +7793,7 @@ TEST_F(EnergyPlusFixture, CFS_InteriorSolarDistribution_Test)
 
     HeatBalanceSurfaceManager::InitSolarHeatGains(*state);
 
-    state->dataHeatBal->SurfWinBackSurfaces(1, 1, 1, 7) = 11;
+    state->dataHeatBal->SurfWinBackSurfOverlaps(1, 1, 1, 7).backSurfNum = 11;
 
     SolarShading::CalcInteriorSolarDistribution(*state);
 

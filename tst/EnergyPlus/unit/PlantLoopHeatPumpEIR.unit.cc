@@ -3454,6 +3454,15 @@ TEST_F(EnergyPlusFixture, TestConcurrentOperationChecking)
     EIRPlantLoopHeatPump *coil3 = &state->dataEIRPlantLoopHeatPump->heatPumps[2];
     EIRPlantLoopHeatPump *coil4 = &state->dataEIRPlantLoopHeatPump->heatPumps[3];
 
+    // give them distinct names -- GetInput guarantees uniqueness for real objects, and the
+    // concurrent-operation warning text embeds the coil's own name, so two coils sharing a
+    // (default-empty) name here would produce identical message text, which isn't representative
+    // of any real input file.
+    coil1->name = "COIL 1";
+    coil2->name = "COIL 2";
+    coil3->name = "COIL 3";
+    coil4->name = "COIL 4";
+
     // pair up the last two
     coil3->companionHeatPumpCoil = coil4;
     coil4->companionHeatPumpCoil = coil3;
@@ -3472,7 +3481,7 @@ TEST_F(EnergyPlusFixture, TestConcurrentOperationChecking)
     ASSERT_EQ(0, coil1->recurringConcurrentOperationWarningIndex);
     ASSERT_EQ(0, coil2->recurringConcurrentOperationWarningIndex);
     ASSERT_EQ(1, coil3->recurringConcurrentOperationWarningIndex);
-    ASSERT_EQ(1, coil4->recurringConcurrentOperationWarningIndex);
+    ASSERT_EQ(2, coil4->recurringConcurrentOperationWarningIndex);
 }
 
 TEST_F(EnergyPlusFixture, ConstructionFullObjectsHeatingAndCooling_AirSource)

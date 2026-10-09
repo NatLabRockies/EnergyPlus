@@ -70,9 +70,6 @@ namespace BaseboardElectric {
         Sched::Schedule *availSched = nullptr;
         Real64 NominalCapacity = 0.0;
         Real64 BaseboardEfficiency = 0.0;
-        Real64 AirInletTemp = 0.0;
-        Real64 AirInletHumRat = 0.0;
-        Real64 AirOutletTemp = 0.0;
         Real64 Power = 0.0;
         Real64 Energy = 0.0;
         Real64 ElecUseLoad = 0.0;
@@ -90,7 +87,7 @@ namespace BaseboardElectric {
 
     void GetBaseboardInput(EnergyPlusData &state);
 
-    void InitBaseboard(EnergyPlusData &state, int BaseboardNum, int ControlledZoneNum);
+    void InitBaseboard(EnergyPlusData &state, int BaseboardNum);
 
     void SizeElectricBaseboard(EnergyPlusData &state, int BaseboardNum);
 

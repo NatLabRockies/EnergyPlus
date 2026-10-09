@@ -44,7 +44,7 @@
 ! Renewable Energy, Office of Building Technologies.
 ! Number of Zones: 18
 
-  Version,26.2;
+  Version,27.1;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation

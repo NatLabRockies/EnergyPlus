@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 #include <string>
 
@@ -195,7 +196,8 @@ namespace BranchInputManager {
             ErrFound = true;
         } else {
             BranchNames = "";
-            BranchNames({1, NumBranchNames}) = state.dataBranchInputManager->BranchList(Found).BranchNames({1, NumBranchNames});
+            const auto &srcBranchNames = state.dataBranchInputManager->BranchList(Found).BranchNames;
+            std::copy(srcBranchNames.begin(), srcBranchNames.end(), BranchNames.begin());
         }
 
         if (ErrFound) {
@@ -444,7 +446,7 @@ namespace BranchInputManager {
                                DataBranchAirLoopPlant::PressureCurveType &PressCurveType, // Index of pressure curve object
                                int &PressCurveIndex,                                      // Index of pressure curve object
                                int &NumComps,                                             // Number of Components on Branch
-                               Array1D<ComponentData> const &BComponents,                 // Component data returned
+                               Array1D<ComponentData> &BComponents,                       // Component data returned
                                bool &ErrorsFound // True when Loop Name is already assigned and this not same loop
     )
     {
@@ -479,7 +481,8 @@ namespace BranchInputManager {
                 PressCurveType = state.dataBranchInputManager->Branch(Found).PressureCurveType;
                 PressCurveIndex = state.dataBranchInputManager->Branch(Found).PressureCurveIndex;
                 NumComps = state.dataBranchInputManager->Branch(Found).NumOfComponents;
-                BComponents({1, NumComps}) = state.dataBranchInputManager->Branch(Found).Component({1, NumComps});
+                const auto &srcComponents = state.dataBranchInputManager->Branch(Found).Component;
+                std::copy(srcComponents.begin(), srcComponents.end(), BComponents.begin());
             } else if (state.dataBranchInputManager->Branch(Found).AssignedLoopName != LoopName) {
                 ShowSevereError(state, std::format("Attempt to assign branch to two different loops, Branch={}", BranchName));
                 ShowContinueError(state,
@@ -491,7 +494,8 @@ namespace BranchInputManager {
                 PressCurveType = state.dataBranchInputManager->Branch(Found).PressureCurveType;
                 PressCurveIndex = state.dataBranchInputManager->Branch(Found).PressureCurveIndex;
                 NumComps = state.dataBranchInputManager->Branch(Found).NumOfComponents;
-                BComponents({1, NumComps}) = state.dataBranchInputManager->Branch(Found).Component({1, NumComps});
+                const auto &srcComponents = state.dataBranchInputManager->Branch(Found).Component;
+                std::copy(srcComponents.begin(), srcComponents.end(), BComponents.begin());
             }
         }
     }
@@ -1349,7 +1353,7 @@ namespace BranchInputManager {
                                             state.dataBranchInputManager->BranchList(BCount).Name));
                 ErrFound = true;
             } else {
-                state.dataBranchInputManager->BranchList(BCount).BranchNames({1, NumAlphas - 1}) = Alphas({2, NumAlphas});
+                std::copy(Alphas.begin() + 1, Alphas.begin() + NumAlphas, state.dataBranchInputManager->BranchList(BCount).BranchNames.begin());
                 for (Loop = 1; Loop <= state.dataBranchInputManager->BranchList(BCount).NumOfBranchNames; ++Loop) {
                     // If NumOfBranches = 0 then Branches haven't been read yet.
                     if ((int)state.dataBranchInputManager->Branch.size() == 0) {
@@ -1859,7 +1863,8 @@ namespace BranchInputManager {
             TestName = state.dataBranchInputManager->Splitters(Count).InletBranchName;
             std::string BranchListName = std::string();
             for (Loop1 = 1; Loop1 <= (int)state.dataBranchInputManager->BranchList.size(); ++Loop1) {
-                if (any_eq(state.dataBranchInputManager->BranchList(Loop1).BranchNames, TestName)) {
+                if (std::ranges::any_of(state.dataBranchInputManager->BranchList(Loop1).BranchNames,
+                                        [&](auto const &elem) { return elem == TestName; })) {
                     BranchListName = state.dataBranchInputManager->BranchList(Loop1).Name;
                     break;
                 }
@@ -1894,7 +1899,8 @@ namespace BranchInputManager {
                 TestName = state.dataBranchInputManager->Splitters(Count).OutletBranchNames(Loop);
                 BranchListName = std::string();
                 for (Loop1 = 1; Loop1 <= (int)state.dataBranchInputManager->BranchList.size(); ++Loop1) {
-                    if (any_eq(state.dataBranchInputManager->BranchList(Loop1).BranchNames, TestName)) {
+                    if (std::ranges::any_of(state.dataBranchInputManager->BranchList(Loop1).BranchNames,
+                                            [&](auto const &elem) { return elem == TestName; })) {
                         BranchListName = state.dataBranchInputManager->BranchList(Loop1).Name;
                         break;
                     }
@@ -2114,7 +2120,8 @@ namespace BranchInputManager {
             TestName = state.dataBranchInputManager->Mixers(Count).OutletBranchName;
             std::string BranchListName = std::string();
             for (Loop1 = 1; Loop1 <= (int)state.dataBranchInputManager->BranchList.size(); ++Loop1) {
-                if (any_eq(state.dataBranchInputManager->BranchList(Loop1).BranchNames, TestName)) {
+                if (std::ranges::any_of(state.dataBranchInputManager->BranchList(Loop1).BranchNames,
+                                        [&](auto const &elem) { return elem == TestName; })) {
                     BranchListName = state.dataBranchInputManager->BranchList(Loop1).Name;
                     break;
                 }
@@ -2149,7 +2156,8 @@ namespace BranchInputManager {
                 TestName = state.dataBranchInputManager->Mixers(Count).InletBranchNames(Loop);
                 BranchListName = std::string();
                 for (Loop1 = 1; Loop1 <= (int)state.dataBranchInputManager->BranchList.size(); ++Loop1) {
-                    if (any_eq(state.dataBranchInputManager->BranchList(Loop1).BranchNames, TestName)) {
+                    if (std::ranges::any_of(state.dataBranchInputManager->BranchList(Loop1).BranchNames,
+                                            [&](auto const &elem) { return elem == TestName; })) {
                         BranchListName = state.dataBranchInputManager->BranchList(Loop1).Name;
                         break;
                     }
@@ -2689,7 +2697,6 @@ namespace BranchInputManager {
                         MatchNodeName = state.dataBranchInputManager->Branch(Found).Component(Loop).OutletNodeName;
                     }
                 }
-                state.dataBranchInputManager->Branch(Found).FluidType = BranchFluidType;
                 BranchOutletNodeName = MatchNodeName;
                 if (state.dataBranchInputManager->Branch(Found).AssignedLoopName.empty()) {
                     BranchLoopName = "**Unknown**";

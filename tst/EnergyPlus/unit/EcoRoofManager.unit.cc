@@ -214,7 +214,6 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_UpdateSoilProps)
     WaterManager::GetWaterManagerInput(*state);
     state->dataGlobal->TimeStepZoneSec = 900;
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
     state->dataEnvrn->Month = 1;
     state->dataGlobal->TimeStep = 2;
 

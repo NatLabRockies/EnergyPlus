@@ -51,3 +51,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/output-details-and-examples/media/image027.jpg)
 
 create_doc_target("output-details-and-examples" "OutputDetailsAndExamples")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("output-details-and-examples" "output-details-and-examples")
+endif()

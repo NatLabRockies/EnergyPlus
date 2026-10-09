@@ -609,8 +609,6 @@ namespace DataSizing {
         int TimeStepNumAtCoolNoDOASMax = 0;                // time step number (in day) at cooling peak without DOAS
         int HeatNoDOASDDNum = 0;                           // design day index of design day causing heating peak without DOAS
         int CoolNoDOASDDNum = 0;                           // design day index of design day causing cooling peak without DOAS
-        std::string cHeatNoDOASDDDate;                     // date of design day causing heating peak without DOAS
-        std::string cCoolNoDOASDDDate;                     // date of design day causing cooling peak without DOAS
         Array1D<Real64> HeatLoadNoDOASSeq;                 // daily sequence of zone heating load No DOAS (zone time step)
         Array1D<Real64> CoolLoadNoDOASSeq;                 // daily sequence of zone cooling load No DOAS (zone time step)
         Array1D<Real64> LatentHeatLoadSeq;                 // daily sequence of zone latent heating load (zone time step) [W]
@@ -790,8 +788,6 @@ namespace DataSizing {
         Real64 ScaledCoolingCapacity;   // - scaled maximum cooling capacity of zone HVAC equipment, W
         Real64 ScaledHeatingCapacity;   // - scaled maximum heating capacity of zone HVAC equipment, W
         bool RequestAutoSize;           // - true if autosizing is requested
-        HeatCoilSizMethod heatCoilSizingMethod = HeatCoilSizMethod::Invalid; // Used for sizing heat pumps
-        Real64 maxHeatCoilToCoolingLoadSizingRatio = 0.0;                    // Used for sizing heat pumps
 
         // Default Constructor
         ZoneHVACSizingData()
@@ -851,16 +847,14 @@ namespace DataSizing {
         SysOAMethod SystemOAMethod = SysOAMethod::Invalid; // System Outdoor Air Method; 1 = SOAM_ZoneSum, 2 = SOAM_VRP, 9 = SOAM_SP
         Real64 MaxZoneOAFraction = 0.0;                    // maximum value of min OA for zones served by system
         bool OAAutoSized = false;                          // Set to true if design OA vol flow is set to 'autosize' in Sizing:System
-        int CoolingCapMethod = 0;           // - Method for cooling capacity scaledsizing calculation (CoolingDesignCapacity, CapacityPerFloorArea,
-                                            // FractionOfAutosizedCoolingCapacity)
-        int HeatingCapMethod = 0;           // - Method for heatiing capacity scaledsizing calculation (HeatingDesignCapacity, CapacityPerFloorArea,
-                                            // FracOfAutosizedHeatingCapacity)
-        Real64 ScaledCoolingCapacity = 0.0; // - scaled maximum cooling capacity of cooling coil in an air loop
-        Real64 ScaledHeatingCapacity = 0.0; // - scaled maximum heating capacity of cooling coil in an air loop
-        Real64 FloorAreaOnAirLoopCooled = 0.0; // total floor of cooled zones served by an airloop
-        Real64 FloorAreaOnAirLoopHeated = 0.0; // total floor of heated zones served by an airloop
-        Real64 FlowPerFloorAreaCooled = 0.0;   // ratio of cooling supply air flow rate to total floor area of cooled zones served by an airloop
-        Real64 FlowPerFloorAreaHeated = 0.0;   // ratio of cooling supply air flow rate to total floor area of cooled zones served by an airloop
+        int CoolingCapMethod = 0;            // - Method for cooling capacity scaledsizing calculation (CoolingDesignCapacity, CapacityPerFloorArea,
+                                             // FractionOfAutosizedCoolingCapacity)
+        int HeatingCapMethod = 0;            // - Method for heatiing capacity scaledsizing calculation (HeatingDesignCapacity, CapacityPerFloorArea,
+                                             // FracOfAutosizedHeatingCapacity)
+        Real64 ScaledCoolingCapacity = 0.0;  // - scaled maximum cooling capacity of cooling coil in an air loop
+        Real64 ScaledHeatingCapacity = 0.0;  // - scaled maximum heating capacity of cooling coil in an air loop
+        Real64 FlowPerFloorAreaCooled = 0.0; // ratio of cooling supply air flow rate to total floor area of cooled zones served by an airloop
+        Real64 FlowPerFloorAreaHeated = 0.0; // ratio of cooling supply air flow rate to total floor area of cooled zones served by an airloop
         Real64 FractionOfAutosizedCoolingAirflow = 1.0;            // fraction of of cooling supply air flow rate an airloop
         Real64 FractionOfAutosizedHeatingAirflow = 1.0;            // fraction of of heating supply air flow rate an airloop
         Real64 FlowPerCoolingCapacity = 0.0;                       // ratio of cooling supply air flow rate to cooling capacity of an airloop
@@ -1007,11 +1001,6 @@ namespace DataSizing {
         bool sysSizeHeatingDominant = false;
         bool sysSizeCoolingDominant = false;
 
-        Real64 CoinCoolCoilMassFlow = 0.0; // coincident volume flow at time of cooling coil sensible+latent peak [m3/s]
-        Real64 CoinHeatCoilMassFlow = 0.0; // coincident volume flow at time of heating coil sensible peak [m3/s]
-        Real64 DesCoolCoilVolFlow = 0.0;   // design cooling air volume flow rate at time of coil sens+latent peak [m3/s]
-        Real64 DesHeatCoilVolFlow = 0.0;   // design heating air volume flow rate at time of coil sens peak [m3/s]
-        Real64 DesMainCoilVolFlow = 0.0;   // design main supply duct volume flow at time of coil peak [m3/s]
         // These are for reporting purposes
 
         int SysHeatCoilTimeStepPk = 0; // timestep in day of heating coil peak
@@ -1063,10 +1052,9 @@ namespace DataSizing {
         int NumTimeStepsInAvg = 1;                        // number of zone timesteps in the averaging window for coincident plant flow
         int SizingFactorOption = 0;                       // option for what sizing factor to apply
         // Calculated
-        Real64 DesVolFlowRate = 0.0;    // loop design flow rate in m3/s
-        bool VolFlowSizingDone = false; // flag to indicate when this loop has finished sizing flow rate
-        Real64 PlantSizFac = 0.0;       // hold the loop and pump sizing factor
-        Real64 DesCapacity = 0.0;       // final capacity in W
+        Real64 DesVolFlowRate = 0.0; // loop design flow rate in m3/s
+        Real64 PlantSizFac = 0.0;    // hold the loop and pump sizing factor
+        Real64 DesCapacity = 0.0;    // final capacity in W
     };
 
     // based on ZoneSizingData but only have member variables that are related to the CheckSum/
@@ -1195,7 +1183,6 @@ namespace DataSizing {
     {
         // Members
         std::string Name;
-        std::string ZoneADEffSchName;              // - Zone air distribution effectiveness schedule name
         Real64 ZoneADEffCooling;                   // - Zone air distribution effectiveness in cooling mode
         Real64 ZoneADEffHeating;                   // - Zone air distribution effectiveness in heating mode
         Real64 ZoneSecondaryRecirculation;         // - Zone air secondary recirculation ratio
@@ -1256,7 +1243,6 @@ struct SizingData : BaseGlobalStruct
     int CurBranchNum = 0;                                       // Index of branch being simulated (or 0 if not air loop)
     HVAC::AirDuctType CurDuctType = HVAC::AirDuctType::Invalid; // Duct type of current branch
     int CurLoopNum = 0;                                         // the current plant loop index
-    int CurCondLoopNum = 0;                                     // the current condenser loop number
     int CurEnvirNumSimDay = 0;                                  // current environment number for day simulated
     int CurOverallSimDay = 0;                                   // current day of simulation
     int NumTimeStepsInAvg = 0;                                  // number of time steps in the averaging window for the design flow and load sequences

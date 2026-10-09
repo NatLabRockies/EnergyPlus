@@ -58,12 +58,14 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
@@ -79,6 +81,7 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SolarShading.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
@@ -232,11 +235,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     EXPECT_TRUE(compare_err_stream(error_string01, true));
     EXPECT_TRUE(testZone.TempOutOfBoundsReported);
 
+    auto forceReissuingCompleteErrorMessages = [this]() {
+        state->dataErrTracking->NumRecurringErrors = 0;
+        state->dataErrTracking->RecurringErrors.clear();
+        state->dataSurface->SurfLowTempErrCount(1) = 0;
+        state->dataSurface->SurfHighTempErrCount(1) = 0;
+    };
+
     // to hot - subsequent times
     surfTemp = 201;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = true;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -251,8 +260,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     // to cold - first time
     surfTemp = -101;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = false;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -271,8 +279,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
     // to cold - subsequent times
     surfTemp = -101;
     state->dataGlobal->WarmupFlag = false;
-    state->dataSurface->SurfLowTempErrCount(1) = 0;
-    state->dataSurface->SurfHighTempErrCount(1) = 0;
+    forceReissuingCompleteErrorMessages();
     testZone.TempOutOfBoundsReported = true;
     testZone.FloorArea = 1000;
     testZone.IsControlled = true;
@@ -2805,6 +2812,15 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
                           "    A1 - 1 IN STUCCO,        !- Outside Layer",
                           "    GP01;                    !- Layer 3",
 
+                          "  ConstructionProperty:InternalHeatSource,",
+                          "    PV Source,               !- Name",
+                          "    EXTWALL:LIVING,          !- Construction Name",
+                          "    1,                       !- Thermal Source Present After Layer Number",
+                          "    1,                       !- Temperature Calculation Requested After Layer Number",
+                          "    1,                       !- Dimensions for the CTF Calculation",
+                          "    0.1524,                  !- Tube Spacing {m}",
+                          "    0.0;                     !- Two-Dimensional Temperature Calculation Position",
+
                           "  Construction,",
                           "    FLOOR:LIVING,            !- Name",
                           "    CC03,                    !- Outside Layer",
@@ -2976,6 +2992,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
 
+    // IsUsedCTF is only set once surfaces are set up, so CTFs can only be calculated after SetupZoneGeometry.
+    HeatBalanceManager::InitConductionTransferFunctions(*state);
+
     // Clear schedule type warnings
     EXPECT_TRUE(has_err_output(true));
 
@@ -3076,6 +3095,52 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     EXPECT_EQ(-0.1, state->dataHeatBalSurf->SurfQAdditionalHeatSourceOutside(1));
     CalcHeatBalanceInsideSurf(*state);
     EXPECT_EQ(0.1, state->dataHeatBalSurf->SurfQAdditionalHeatSourceInside(6));
+
+    // Apply a PV sink after the initial surface pass, as happens when PV is recalculated during HVAC simulation.
+    auto const surfaceTemperatureBeforePV = state->dataHeatBalSurf->SurfTempOut(1);
+    state->dataHeatBal->AnyInternalHeatSourceInInput = true;
+    // SurfQsrcHist is only allocated when AnyInternalHeatSourceInInput is set, so allocate it before reading it below.
+    state->dataHeatBalSurf->SurfQsrcHist.dimension(state->dataSurface->TotSurfaces, Construction::MaxCTFTerms, 0.0);
+    auto const sourceHistoryBeforePV = state->dataHeatBalSurf->SurfQsrcHist(1, 1);
+    state->dataHeatBalFanSys->QPVSysSource.dimension(state->dataSurface->TotSurfaces, 0.0);
+    state->dataHeatBalFanSys->QPVSysSource(1) = -100.0;
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+
+    // UpdateFinalSurfaceHeatBalance must consume the request and incorporate the PV sink into the surface balance.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_NE(sourceHistoryBeforePV, state->dataHeatBalSurf->SurfQsrcHist(1, 1));
+    EXPECT_NE(surfaceTemperatureBeforePV, state->dataHeatBalSurf->SurfTempOut(1));
+
+    // A source change that isn't yet converged leaves a request for the next zone time step's
+    // final surface heat balance update rather than looping within this call.
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->NumPVs = 1;
+    auto &pv = state->dataPhotovoltaic->PVarray(1);
+    pv.PVModelType = DataPhotovoltaics::PVModel::Simple;
+    pv.CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    pv.SurfacePtr = 1;
+    pv.SimplePVModule.EfficencyInputMode = DataPhotovoltaics::Efficiency::Fixed;
+    pv.SimplePVModule.AreaCol = 1.0;
+    pv.SimplePVModule.PVEfficiency = 0.1;
+    pv.SurfaceCouplingSource = 0.0;
+    state->dataHeatBal->SurfQRadSWOutIncident(1) = 1000.0;
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+
+    // The first update consumes the resim request, but the PV sink changes from its initial value,
+    // so another update is requested for a later pass.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+
+    // A subsequent update under the same conditions converges: the PV output is stable and no
+    // further resimulation is requested.
+    UpdateFinalSurfaceHeatBalance(*state);
+
+    EXPECT_DOUBLE_EQ(100.0, pv.SurfaceCouplingSource);
+    EXPECT_FALSE(pv.SurfaceCouplingNeedsResim);
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestReportIntMovInsInsideSurfTemp)
@@ -8634,7 +8699,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestUpdateVariableAbsorptanc
     EXPECT_NEAR(state->dataHeatBalSurf->SurfAbsSolarInt(1), 0.2, 1e-6);
 }
 
-TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorptanceOutputs)
+TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalOutputs)
 {
     std::string const idf_objects = delimited_string({
         "Output:Variable,*,Surface Thermal Absorptance,Timestep;",
@@ -8643,6 +8708,8 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
         "Output:Variable,*,Surface Thermal Absorptance Inside Face,Timestep;",
         "Output:Variable,*,Surface Solar Absorptance Outside Face,Timestep;",
         "Output:Variable,*,Surface Solar Absorptance Inside Face,Timestep;",
+        "Output:Variable,*,Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient,Timestep;",
+        "Output:Variable,*,Surface Outside Face Surrounding Surfaces Average Temperature,Timestep;",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -8727,6 +8794,7 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
         surface.HeatTransSurf = true;
         surface.Construction = constructionNumbers[surfaceNum - 1];
         surface.ExtBoundCond = surfaceNum == 4 ? 1 : DataSurfaces::ExternalEnvironment;
+        surface.SurfHasSurroundingSurfProperty = surfaceNum == 1;
     }
 
     AllocateSurfaceHeatBalArrays(*state);
@@ -8746,6 +8814,12 @@ TEST_F(EnergyPlusFixture, AllocateSurfaceHeatBalArraysRegistersConditionalAbsorp
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Thermal Absorptance Inside Face"));
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Solar Absorptance Outside Face"));
     EXPECT_FALSE(outputIsRegistered("BULK SURFACE", "Surface Solar Absorptance Inside Face"));
+
+    EXPECT_TRUE(outputIsRegistered("BULK SURFACE", "Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient"));
+    EXPECT_TRUE(outputIsRegistered("BULK SURFACE", "Surface Outside Face Surrounding Surfaces Average Temperature"));
+    EXPECT_FALSE(
+        outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient"));
+    EXPECT_FALSE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Outside Face Surrounding Surfaces Average Temperature"));
 
     EXPECT_FALSE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Thermal Absorptance"));
     EXPECT_TRUE(outputIsRegistered("EXPLICIT THERMAL SURFACE", "Surface Thermal Absorptance Outside Face"));

@@ -77,12 +77,6 @@ void BaseSizerWithScalableInputs::initializeWithinEP(EnergyPlusData &state,
     this->dataFlowPerHeatingCapacity = state.dataSize->DataFlowPerHeatingCapacity;
     this->dataAutosizedHeatingCapacity = state.dataSize->DataAutosizedHeatingCapacity;
 
-    this->dataCoilSizingAirInTemp = state.dataSize->DataCoilSizingAirInTemp;
-    this->dataCoilSizingAirInHumRat = state.dataSize->DataCoilSizingAirInHumRat;
-    this->dataCoilSizingAirOutTemp = state.dataSize->DataCoilSizingAirOutTemp;
-    this->dataCoilSizingAirOutHumRat = state.dataSize->DataCoilSizingAirOutHumRat;
-    this->dataCoilSizingFanCoolLoad = state.dataSize->DataCoilSizingFanCoolLoad;
-    this->dataCoilSizingCapFT = state.dataSize->DataCoilSizingCapFT;
     this->dataTotCapCurveIndex = state.dataSize->DataTotCapCurveIndex;
     this->dataTotCapCurveValue = state.dataSize->DataTotCapCurveValue;
     this->dataFracOfAutosizedCoolingCapacity = state.dataSize->DataFracOfAutosizedCoolingCapacity;

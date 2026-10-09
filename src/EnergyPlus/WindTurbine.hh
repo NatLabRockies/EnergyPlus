@@ -109,7 +109,6 @@ namespace WindTurbine {
         std::array<Real64, 6> PowerCoeffs = {0.0}; // Empirical power coefficients for analytical calculation
         Real64 TotPower = 0.0;                     // Maximum power produced from the wind in Watts
         Real64 Power = 0.0;                        // Actual power wind turbine supplies to the building in Watts
-        Real64 TotEnergy = 0.0;                    // Maximum energy produced from the wind in Joules
         Real64 Energy = 0.0;                       // Actual energy wind turbine supplies to the building in Joules
         Real64 LocalWindSpeed = 0.0;               // Local wind speed estimated at the particular height in m/s
         Real64 LocalAirDensity = 0.0;              // Local air density estimated at the particular height kg/m3
@@ -120,11 +119,9 @@ namespace WindTurbine {
         Real64 TipSpeedRatio = 0.0;                // Relative flow velocity for VAWTs in m/s
         Real64 WSFactor = 0.0;                     // Relative flow velocity for VAWTs in m/s
         Real64 AngOfAttack = 0.0;                  // Angle of attack in degree
-        Real64 IntRelFlowVel = 0.0;                // Integral of relative flow velocity
         Real64 TanForce = 0.0;                     // Tangential force
         Real64 NorForce = 0.0;                     // Normal force in N.m
         Real64 TotTorque = 0.0;                    // Total torque in N.m
-        Real64 AzimuthAng = 0.0;                   // Azimuth angle between blades
     };
 
     void SimWindTurbine(EnergyPlusData &state,

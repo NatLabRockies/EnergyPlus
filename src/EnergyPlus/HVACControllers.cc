@@ -52,7 +52,6 @@
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Fmath.hh>
-#include <ObjexxFCL/numeric.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers

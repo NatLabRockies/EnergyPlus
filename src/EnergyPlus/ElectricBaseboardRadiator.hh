@@ -67,7 +67,6 @@ namespace ElectricBaseboardRadiator {
     {
         // Members
         std::string EquipName;
-        int EquipType = 0;
         std::string Schedule;
         Array1D_string SurfaceName;
         Array1D_int SurfacePtr;

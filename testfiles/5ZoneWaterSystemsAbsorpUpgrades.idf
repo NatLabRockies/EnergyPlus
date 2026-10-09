@@ -101,7 +101,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -2009,13 +2009,13 @@
   ! Only the outside face varies; the inside face retains the constant GP01 values.
 
   MaterialProperty:VariableAbsorptance,
-    variableGP01,           !- Name
-    GP01,                   !- Reference Material Name
-    Scheduled,              !- Control Signal
-    ,                       !- Thermal Absorptance Function Name
-    OutAbsTherm,            !- Thermal Absorptance Schedule Name
-    ,                       !- Solar Absorptance Function Name
-    OutAbsSolar;            !- Solar Absorptance Schedule Name
+    variableGP01,            !- Name
+    GP01,                    !- Reference Material Name
+    Scheduled,               !- Control Signal
+    ,                        !- Thermal Absorptance Function Name
+    OutAbsTherm,             !- Thermal Absorptance Schedule Name
+    ,                        !- Solar Absorptance Function Name
+    OutAbsSolar;             !- Solar Absorptance Schedule Name
 
   Material,
     GP02,                    !- Name
@@ -2042,54 +2042,54 @@
   ! The outside and inside faces follow separate schedules.
 
   MaterialProperty:VariableAbsorptance,
-    variableCC03,           !- Name
-    CC03,                   !- Reference Material Name
-    Scheduled,              !- Control Signal
-    ,                       !- Thermal Absorptance Function Name
-    OutAbsTherm,            !- Thermal Absorptance Schedule Name
-    ,                       !- Solar Absorptance Function Name
-    OutAbsSolar,            !- Solar Absorptance Schedule Name
-    Scheduled,              !- Control Signal Inside Face
-    ,                       !- Thermal Absorptance Function Name Inside Face
-    InAbsTherm,             !- Thermal Absorptance Schedule Name Inside Face
-    ,                       !- Solar Absorptance Function Name Inside Face
-    InAbsSolar;             !- Solar Absorptance Schedule Name Inside Face
+    variableCC03,            !- Name
+    CC03,                    !- Reference Material Name
+    Scheduled,               !- Control Signal
+    ,                        !- Thermal Absorptance Function Name
+    OutAbsTherm,             !- Thermal Absorptance Schedule Name
+    ,                        !- Solar Absorptance Function Name
+    OutAbsSolar,             !- Solar Absorptance Schedule Name
+    Scheduled,               !- Control Signal Inside Face
+    ,                        !- Thermal Absorptance Function Name Inside Face
+    InAbsTherm,              !- Thermal Absorptance Schedule Name Inside Face
+    ,                        !- Solar Absorptance Function Name Inside Face
+    InAbsSolar;              !- Solar Absorptance Schedule Name Inside Face
 
   Schedule:Compact,
-    OutAbsTherm,  !- Name
+    OutAbsTherm,             !- Name
     Any Number,              !- Schedule Type Limits Name
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    UNTIL: 8:00,0.1,         !- Field 5
-    UNTIL: 16:00,0.5,        !- Field 9
-    UNTIL: 24:00,0.1;        !- Field 13
+    UNTIL: 8:00,0.1,         !- Field 3
+    UNTIL: 16:00,0.5,        !- Field 5
+    UNTIL: 24:00,0.1;        !- Field 7
 
   Schedule:Compact,
-    OutAbsSolar,  !- Name
+    OutAbsSolar,             !- Name
     Any Number,              !- Schedule Type Limits Name
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    UNTIL: 8:00,0.3,         !- Field 5
-    UNTIL: 16:00,0.6,        !- Field 9
-    UNTIL: 24:00,0.3;        !- Field 13
+    UNTIL: 8:00,0.3,         !- Field 3
+    UNTIL: 16:00,0.6,        !- Field 5
+    UNTIL: 24:00,0.3;        !- Field 7
 
   Schedule:Compact,
-    InAbsTherm,  !- Name
+    InAbsTherm,              !- Name
     Any Number,              !- Schedule Type Limits Name
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    UNTIL: 8:00,0.42,        !- Field 5
-    UNTIL: 16:00,0.64,       !- Field 9
-    UNTIL: 24:00,0.43;       !- Field 13
+    UNTIL: 8:00,0.42,        !- Field 3
+    UNTIL: 16:00,0.64,       !- Field 5
+    UNTIL: 24:00,0.43;       !- Field 7
 
   Schedule:Compact,
-    InAbsSolar,  !- Name
+    InAbsSolar,              !- Name
     Any Number,              !- Schedule Type Limits Name
     THROUGH: 12/31,          !- Field 1
     FOR: AllDays,            !- Field 2
-    UNTIL: 8:00,0.33,        !- Field 5
-    UNTIL: 16:00,0.63,       !- Field 9
-    UNTIL: 24:00,0.33;        !- Field 13
+    UNTIL: 8:00,0.33,        !- Field 3
+    UNTIL: 16:00,0.63,       !- Field 5
+    UNTIL: 24:00,0.33;       !- Field 7
 
   Material:NoMass,
     MAT-SB-U,                !- Name
@@ -2644,6 +2644,7 @@
     CLOTHING_SCH,            !- Clothing Insulation Schedule Name
     AIR_VELO_SCH,            !- Air Velocity Schedule Name
     FANGER;                  !- Thermal Comfort Model 1 Type
+
   Lights,
     SPACE1-1 Lights 1,       !- Name
     SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
@@ -6186,3 +6187,4 @@
   Output:Meter:MeterFileOnly,NaturalGas:Facility,runperiod;
 
   Output:Meter:MeterFileOnly,NaturalGas:Plant,runperiod;
+

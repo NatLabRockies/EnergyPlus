@@ -177,8 +177,7 @@ public:
     int supplyInletNodeFlow_LogIndex; // loop flow rate index for vector of log objects in the logger framework
     int supplyInletNodeTemp_LogIndex; // loop return temperature index for vector of log objects in the logger framework
     // variables related to loop demand
-    int loopDemand_LogIndex; // Loop demand load index for vector of log objects in the logger framework
-    bool peakDemandAndFlowMismatch;
+    int loopDemand_LogIndex;                       // Loop demand load index for vector of log objects in the logger framework
     ZoneTimestepObject NewFoundMaxDemandTimeStamp; // result for max loop demand, as a timestamp object
 
     Real64 peakDemandReturnTemp;

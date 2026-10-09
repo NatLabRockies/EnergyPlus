@@ -103,7 +103,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -1871,16 +1871,16 @@
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd,                 !- Activity Level Schedule Name
-    ,                        !- Carbon dioxide generation rate
-    ,                        !- Enable ASHRAE55 comfort warnings
-    EnclosureAveraged,       !- MRT Calculation Type
+    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
+    ,                        !- Enable ASHRAE 55 Comfort Warnings
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
-    WorfEffSched,            !- Work Efficiency Schedule
+    WorfEffSched,            !- Work Efficiency Schedule Name
     ,                        !- Clothing Insulation Calculation Method
     ,                        !- Clothing Insulation Calculation Method Schedule Name
     CloSched,                !- Clothing Insulation Schedule Name
     AirVelSched,             !- Air Velocity Schedule Name
-    PIERCE;                  !- Thermal Comfort Model
+    PIERCE;                  !- Thermal Comfort Model 1 Type
 
   People,
     Space 5 Office People,   !- Name
@@ -1893,19 +1893,19 @@
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd,                 !- Activity Level Schedule Name
-    ,
-    ,
-    SurfaceWeighted,         !- MRT Calculation Type
+    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
+    ,                        !- Enable ASHRAE 55 Comfort Warnings
+    SurfaceWeighted,         !- Mean Radiant Temperature Calculation Type
     F5-1a,                   !- Surface Name/Angle Factor List Name
-    WorfEffSched,            !- Work Efficiency Schedule
+    WorfEffSched,            !- Work Efficiency Schedule Name
     ,                        !- Clothing Insulation Calculation Method
     ,                        !- Clothing Insulation Calculation Method Schedule Name
     CloSched,                !- Clothing Insulation Schedule Name
     AirVelSched,             !- Air Velocity Schedule Name
-    KSU;                     !- Thermal Comfort Model
+    KSU;                     !- Thermal Comfort Model 1 Type
 
   People,
-    Space 5 Conference People, !- Name
+    Space 5 Conference People,  !- Name
     Space 5 Conference,      !- Zone or ZoneList or Space or SpaceList Name
     OCCUPY-1,                !- Number of People Schedule Name
     people,                  !- Number of People Calculation Method
@@ -1915,44 +1915,44 @@
     0.3,                     !- Fraction Radiant
     ,                        !- Sensible Heat Fraction
     ActSchd,                 !- Activity Level Schedule Name
-    ,
-    ,
-    SurfaceWeighted,         !- MRT Calculation Type
+    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
+    ,                        !- Enable ASHRAE 55 Comfort Warnings
+    SurfaceWeighted,         !- Mean Radiant Temperature Calculation Type
     F5-1b,                   !- Surface Name/Angle Factor List Name
-    WorfEffSched,            !- Work Efficiency Schedule
+    WorfEffSched,            !- Work Efficiency Schedule Name
     ,                        !- Clothing Insulation Calculation Method
     ,                        !- Clothing Insulation Calculation Method Schedule Name
     CloSched,                !- Clothing Insulation Schedule Name
     AirVelSched,             !- Air Velocity Schedule Name
-    FANGER;                  !- Thermal Comfort Model
+    FANGER;                  !- Thermal Comfort Model 1 Type
 
   Schedule:Compact,
     WorfEffSched,            !- Name
     Any Number,              !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00, 0.0;       !- Field 3
+    Until: 24:00,0.0;        !- Field 3
 
   Schedule:Compact,
-    CloSched,                 !- Name
+    CloSched,                !- Name
     Any Number,              !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00, 1.0;       !- Field 3
+    Until: 24:00,1.0;        !- Field 3
 
   Schedule:Compact,
     AirVelSched,             !- Name
     Any Number,              !- Schedule Type Limits Name
     Through: 12/31,          !- Field 1
     For: AllDays,            !- Field 2
-    Until: 24:00, 0.3;       !- Field 3
+    Until: 24:00,0.3;        !- Field 3
 
   ZoneMRTCalculation,
-    Zone 5,
-    Space 5 Office People,
-    0.6,
-    Space 5 Conference People,
-    0.4;
+    Zone 5,                  !- Zone Name
+    Space 5 Office People,   !- People 1 Name
+    0.6,                     !- MRT Weighting Factor 1
+    Space 5 Conference People,  !- People 2 Name
+    0.4;                     !- MRT Weighting Factor 2
 
   People,
     ZoneList People,         !- Name
