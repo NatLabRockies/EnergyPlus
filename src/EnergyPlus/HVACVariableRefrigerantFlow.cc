@@ -2344,6 +2344,8 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (thisVrfSys.HeatRecoveryUsed) {
+            // Heat recovery operating limits are independent of the cooling-only and heating-only limits
+            // Equipment can often operate in heat recovery mode outside the heat pump mode limits
             if (lNumericFieldBlanks(29)) {
                 thisVrfSys.MinOATHeatRecovery = max(thisVrfSys.MinOATCooling, thisVrfSys.MinOATHeating);
             } else {
