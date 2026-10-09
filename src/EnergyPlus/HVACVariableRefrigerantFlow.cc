@@ -2344,45 +2344,25 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (thisVrfSys.HeatRecoveryUsed) {
-            if (lAlphaFieldBlanks(29)) {
+            if (lNumericFieldBlanks(29)) {
                 thisVrfSys.MinOATHeatRecovery = max(thisVrfSys.MinOATCooling, thisVrfSys.MinOATHeating);
             } else {
                 thisVrfSys.MinOATHeatRecovery = rNumericArgs(29);
-                if (thisVrfSys.MinOATHeatRecovery < thisVrfSys.MinOATCooling || thisVrfSys.MinOATHeatRecovery < thisVrfSys.MinOATHeating) {
-                    ShowWarningError(state,
-                                     std::format("{} = \"{}\", {} is less than the minimum temperature in heat pump mode.",
-                                                 cCurrentModuleObject,
-                                                 thisVrfSys.Name,
-                                                 cNumericFieldNames(29)));
-                    ShowContinueError(state, std::format("...{} = {:.2f} C", cNumericFieldNames(29), thisVrfSys.MinOATHeatRecovery));
-                    ShowContinueError(state, std::format("...Minimum Outdoor Temperature in Cooling Mode = {:.2f} C", thisVrfSys.MinOATCooling));
-                    ShowContinueError(state, std::format("...Minimum Outdoor Temperature in Heating Mode = {:.2f} C", thisVrfSys.MinOATHeating));
-                    ShowContinueError(state,
-                                      "...Minimum Outdoor Temperature in Heat Recovery Mode reset to greater of cooling or heating minimum "
-                                      "temperature and simulation continues.");
-                    thisVrfSys.MinOATHeatRecovery = max(thisVrfSys.MinOATCooling, thisVrfSys.MinOATHeating);
-                    ShowContinueError(state, std::format("... adjusted {} = {:.2f} C", cNumericFieldNames(29), thisVrfSys.MinOATHeatRecovery));
-                }
             }
-            if (lAlphaFieldBlanks(30)) {
+            if (lNumericFieldBlanks(30)) {
                 thisVrfSys.MaxOATHeatRecovery = min(thisVrfSys.MaxOATCooling, thisVrfSys.MaxOATHeating);
             } else {
                 thisVrfSys.MaxOATHeatRecovery = rNumericArgs(30);
-                if (thisVrfSys.MaxOATHeatRecovery > thisVrfSys.MaxOATCooling || thisVrfSys.MaxOATHeatRecovery > thisVrfSys.MaxOATHeating) {
-                    ShowWarningError(state,
-                                     std::format("{} = \"{}\", {} is greater than the maximum temperature in heat pump mode.",
-                                                 cCurrentModuleObject,
-                                                 thisVrfSys.Name,
-                                                 cNumericFieldNames(30)));
-                    ShowContinueError(state, std::format("...{} = {:.2f} C", cNumericFieldNames(30), thisVrfSys.MaxOATHeatRecovery));
-                    ShowContinueError(state, std::format("...Maximum Outdoor Temperature in Cooling Mode = {:.2f} C", thisVrfSys.MaxOATCooling));
-                    ShowContinueError(state, std::format("...Maximum Outdoor Temperature in Heating Mode = {:.2f} C", thisVrfSys.MaxOATHeating));
-                    ShowContinueError(state,
-                                      "...Maximum Outdoor Temperature in Heat Recovery Mode reset to lesser of cooling or heating minimum "
-                                      "temperature and simulation continues.");
-                    thisVrfSys.MaxOATHeatRecovery = min(thisVrfSys.MaxOATCooling, thisVrfSys.MaxOATHeating);
-                    ShowContinueError(state, std::format("... adjusted {} = {:.2f} C", cNumericFieldNames(30), thisVrfSys.MaxOATHeatRecovery));
-                }
+            }
+            if ((!lNumericFieldBlanks(29) || !lNumericFieldBlanks(30)) && thisVrfSys.MinOATHeatRecovery >= thisVrfSys.MaxOATHeatRecovery) {
+                ShowSevereError(state, std::format("{} = \"{}\"", cCurrentModuleObject, thisVrfSys.Name));
+                ShowContinueError(state,
+                                  std::format("... {} ({:.2f} C) must be less than {} ({:.2f} C).",
+                                              cNumericFieldNames(29),
+                                              thisVrfSys.MinOATHeatRecovery,
+                                              cNumericFieldNames(30),
+                                              thisVrfSys.MaxOATHeatRecovery));
+                ErrorsFound = true;
             }
 
             thisVrfSys.HRCAPFTCool = GetCurveIndex(state, cAlphaArgs(40));
