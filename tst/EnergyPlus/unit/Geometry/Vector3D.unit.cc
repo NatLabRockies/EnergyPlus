@@ -45,87 +45,107 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef Vectors_hh_INCLUDED
-#define Vectors_hh_INCLUDED
+// Google Test Headers
+#include <gtest/gtest.h>
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
+#include "GeometryFixture.hh"
 
 // EnergyPlus Headers
-#include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataVectorTypes.hh>
-#include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 
-namespace EnergyPlus {
+using namespace EnergyPlus;
 
-// Fwd decl
-struct EnergyPlusData;
-
-namespace Vectors {
-
-    // Using/Aliasing
-    using DataVectorTypes::Polyhedron;
-    using DataVectorTypes::Vector;
-
-    // Functions
-
-    Real64 AreaPolygon(int const n, Array1D<Vector> &p);
-
-    Real64 VecSquaredLength(Vector const &vec);
-
-    Real64 VecLength(Vector const &vec);
-
-    Vector VecNegate(Vector const &vec);
-
-    Vector VecNormalize(Vector const &vec);
-
-    void VecRound(Vector &vec, Real64 const roundto);
-
-    void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
-                                 Real64 &Azimuth,             // Outward Normal Azimuth Angle
-                                 Real64 &Tilt,                // Tilt angle of surface
-                                 Vector &lcsx,
-                                 Vector &lcsy,
-                                 Vector &lcsz,
-                                 Vector const &NewellSurfaceNormalVector);
-
-    void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellAreaVector);
-
-    void CreateNewellSurfaceNormalVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellSurfaceNormalVector);
-
-    void CompareTwoVectors(Vector const &vector1, // standard vector
-                           Vector const &vector2, // standard vector
-                           bool &areSame,         // true if the two vectors are the same within specified tolerance
-                           Real64 const tolerance // specified tolerance
-    );
-
-    void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar, Real64 &MaxDist, int &ErrorVertex);
-
-    std::vector<int>
-    PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> const &QuerySurf, int const QuerySides, bool &ErrorFound);
-
-    Real64 CalcPolyhedronVolume(EnergyPlusData const &state, Polyhedron const &Poly);
-
-} // namespace Vectors
-
-struct VectorsData : BaseGlobalStruct
+TEST(Vector3Test, Basic)
 {
-    Vectors::Vector p0 = Vectors::Vector(0.0, 0.0, 0.0);
+    Vector3D d; // Default construction zero-initializes
+    EXPECT_EQ(0.0, d.x);
+    EXPECT_EQ(0.0, d.y);
+    EXPECT_EQ(0.0, d.z);
+    Vector3D v(15.0); // Uniform value construction
+    EXPECT_EQ(15.0, v.x);
+    EXPECT_EQ(15.0, v.y);
+    EXPECT_EQ(15.0, v.z);
+    v = {1.0, 2.0, 3.0};
+    EXPECT_EQ(1.0, v[0]);
+    EXPECT_EQ(2.0, v[1]);
+    EXPECT_EQ(3.0, v[2]);
+    v[1] = 5.0;
+    EXPECT_EQ(5.0, v.y);
+    EXPECT_DOUBLE_EQ(5.0, Vector3D(3.0, 4.0, 0.0).length());
+    EXPECT_DOUBLE_EQ(25.0, Vector3D(3.0, 4.0, 0.0).length_squared());
+}
 
-    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
-    {
-    }
+TEST(Vector3Test, Comparisons)
+{
+    Vector3D v(1.0, 2.0, 3.0);
+    Vector3D w(1.0, 2.0, 3.0);
+    EXPECT_EQ(v, w);
+    EXPECT_FALSE(v != w);
+    v.z = 0.0;
+    EXPECT_TRUE(v != w);
+    EXPECT_FALSE(v == w);
+}
 
-    void init_state([[maybe_unused]] EnergyPlusData &state) override
-    {
-    }
+TEST(Vector3Test, Operators)
+{
+    Vector3D v(1.0, 12.0, 4.0);
+    Vector3D w(2.0, 6.0, 1.0);
+    EXPECT_EQ(Vector3D(3.0, 18.0, 5.0), v + w);
+    EXPECT_EQ(Vector3D(-1.0, 6.0, 3.0), v - w);
+    EXPECT_EQ(Vector3D(-1.0, -12.0, -4.0), -v);
+    EXPECT_EQ(Vector3D(2.0, 24.0, 8.0), v * 2.0);
+    EXPECT_EQ(Vector3D(2.0, 24.0, 8.0), 2.0 * v);
+    EXPECT_EQ(Vector3D(0.5, 6.0, 2.0), v / 2.0);
+    Vector3D u(v);
+    u += w;
+    EXPECT_EQ(Vector3D(3.0, 18.0, 5.0), u);
+    u -= w;
+    EXPECT_EQ(v, u);
+    u *= 2.0;
+    EXPECT_EQ(Vector3D(2.0, 24.0, 8.0), u);
+    u /= 2.0;
+    EXPECT_EQ(v, u);
+    EXPECT_EQ(Vector3D(1.5, 9.0, 2.5), 0.5 * (v + w)); // midpoint
+}
 
-    void clear_state() override
-    {
-        this->p0 = Vectors::Vector(0.0, 0.0, 0.0);
-    }
-};
+TEST(Vector3Test, DotCrossDistance)
+{
+    Vector3D x(3.0, 0.0, 0.0);
+    Vector3D y(0.0, 2.0, 0.0);
+    EXPECT_EQ(0.0, x.dot(y));
+    EXPECT_EQ(Vector3D(0.0, 0.0, 6.0), x.cross(y));
+    EXPECT_EQ(Vector3D(0.0, 0.0, -6.0), y.cross(x));
+    Vector3D v(3.0, 3.0, 3.0);
+    Vector3D w(3.0, 2.0, 3.0);
+    EXPECT_DOUBLE_EQ(1.0, v.distance(w));
+    EXPECT_DOUBLE_EQ(1.0, v.distance_squared(w));
+}
 
-} // namespace EnergyPlus
+TEST(Vector3Test, Normalize)
+{
+    Vector3D v(0.0, 3.0, 4.0);
+    EXPECT_DOUBLE_EQ(1.0, v.normalized().length());
+    EXPECT_DOUBLE_EQ(10.0, v.normalized(10.0).length());
+    Vector3D n(v);
+    n.normalize();
+    EXPECT_DOUBLE_EQ(0.6, n.y);
+    EXPECT_DOUBLE_EQ(0.8, n.z);
+}
 
-#endif
+TEST(Vector3Test, Constexpr)
+{
+    constexpr Vector3D a(1.0, 2.0, 3.0);
+    constexpr Vector3D b(4.0, 5.0, 6.0);
+    static_assert(Vector3D() == Vector3D(0.0, 0.0, 0.0));
+    static_assert(a + b == Vector3D(5.0, 7.0, 9.0));
+    static_assert(b - a == Vector3D(3.0, 3.0, 3.0));
+    static_assert(2.0 * a == Vector3D(2.0, 4.0, 6.0));
+    static_assert(-a == Vector3D(-1.0, -2.0, -3.0));
+    static_assert(a.dot(b) == 32.0);
+    static_assert(a.cross(b) == Vector3D(-3.0, 6.0, -3.0));
+    static_assert(a.length_squared() == 14.0);
+    static_assert(a.distance_squared(b) == 27.0);
+    static_assert(a[2] == 3.0);
+    static_assert(a != b);
+    SUCCEED();
+}

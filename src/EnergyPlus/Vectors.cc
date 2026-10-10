@@ -51,6 +51,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/Geometry/Plane.hh>
 #include <EnergyPlus/Vectors.hh>
 
 namespace EnergyPlus::Vectors {
@@ -96,13 +97,6 @@ namespace EnergyPlus::Vectors {
 // Using/Aliasing
 using namespace DataVectorTypes;
 
-// MODULE PARAMETER DEFINITIONS
-
-// Object Data
-Vector const XUnit(1.0, 0.0, 0.0);
-Vector const YUnit(0.0, 1.0, 0.0);
-Vector const ZUnit(0.0, 0.0, 1.0);
-
 Real64 AreaPolygon(int const n, Array1D<Vector> &p)
 {
 
@@ -118,19 +112,19 @@ Real64 AreaPolygon(int const n, Array1D<Vector> &p)
     Vector edge0 = p[1] - p[0];
     Vector edge1 = p[2] - p[0];
 
-    Vector edgex = cross(edge0, edge1);
+    Vector edgex = edge0.cross(edge1);
     Vector nor = VecNormalize(edgex);
 
     //  Initialize csum
     Vector csum;
-    csum = 0.0;
+    csum = Vector3D(0.0);
 
     for (int i = 0; i <= n - 2; ++i) {
-        csum += cross(p[i], p[i + 1]);
+        csum += p[i].cross(p[i + 1]);
     }
-    csum += cross(p[n - 1], p[0]);
+    csum += p[n - 1].cross(p[0]);
 
-    Real64 areap = 0.5 * std::abs(dot(nor, csum));
+    Real64 areap = 0.5 * std::abs(nor.dot(csum));
 
     return areap;
 }
@@ -239,9 +233,9 @@ void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
 
     lcsx = VecNormalize(Surf(3) - Surf(2));
     lcsz = NewellSurfaceNormalVector;
-    lcsy = cross(lcsz, lcsx);
+    lcsy = lcsz.cross(lcsx);
 
-    Real64 costheta = dot(lcsz, ZUnit);
+    Real64 costheta = lcsz.dot(Vector3D::UnitZ());
 
     //    if ( fabs(costheta) < 1.0d0) { // normal cases
     Real64 constexpr epsilon = 1.12e-16;
@@ -249,11 +243,11 @@ void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
     if (std::abs(costheta) < 1.0 - epsilon) { // Autodesk Added - 1.12e-16 to treat 1 bit from 1.0 as 1.0 to correct different behavior seen in
                                               // release vs debug build due to slight precision differences: May want larger epsilon here
         // azimuth
-        Vector x2 = cross(ZUnit, lcsz);
-        rotang_0 = std::atan2(dot(x2, YUnit), dot(x2, XUnit));
+        Vector x2 = Vector3D::UnitZ().cross(lcsz);
+        rotang_0 = std::atan2(x2.dot(Vector3D::UnitY()), x2.dot(Vector3D::UnitX()));
     } else {
         // azimuth
-        rotang_0 = std::atan2(dot(lcsx, YUnit), dot(lcsx, XUnit));
+        rotang_0 = std::atan2(lcsx.dot(Vector3D::UnitY()), lcsx.dot(Vector3D::UnitX()));
     }
 
     Real64 tlt = std::acos(NewellSurfaceNormalVector.z);
@@ -284,66 +278,6 @@ void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
     Tilt = tlt;
 }
 
-void PlaneEquation(Array1D<Vector> &verts, // Structure of the surface
-                   int const nverts,       // Number of vertices in the surface
-                   PlaneEq &plane,         // Equation of plane from inputs
-                   bool &error             // returns true for degenerate surface
-)
-{
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // This subroutine calculates the plane equation for a given surface (which should be planar).
-
-    // REFERENCE:
-    // Graphic Gems
-
-    // Argument array dimensioning
-    EP_SIZE_CHECK(verts, nverts);
-
-    Vector normal = Vector(0.0, 0.0, 0.0);
-    Vector refpt = Vector(0.0, 0.0, 0.0);
-    for (int i = 0; i <= nverts - 1; ++i) {
-        Vector const &u(verts[i]);
-        Vector const &v(i < nverts - 1 ? verts[i + 1] : verts[0]);
-        normal.x += (u.y - v.y) * (u.z + v.z);
-        normal.y += (u.z - v.z) * (u.x + v.x);
-        normal.z += (u.x - v.x) * (u.y + v.y);
-        refpt += u;
-    }
-    // normalize the polygon normal to obtain the first
-    //  three coefficients of the plane equation
-    Real64 lenvec = VecLength(normal);
-    error = false;
-    if (lenvec != 0.0) { // should this be >0
-        plane.x = normal.x / lenvec;
-        plane.y = normal.y / lenvec;
-        plane.z = normal.z / lenvec;
-        // compute the last coefficient of the plane equation
-        lenvec *= nverts;
-        plane.w = -dot(refpt, normal) / lenvec;
-    } else {
-        error = true;
-    }
-}
-
-Real64 Pt2Plane(Vector const &pt,   // Point for determining the distance
-                PlaneEq const &pleq // Equation of the plane
-)
-{
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // This subroutine calculates the distance from a point to the plane (of a surface).  Used to determine the reveal of a heat transfer subsurface.
-
-    // REFERENCE:
-    // Graphic Gems
-
-    Real64 PtDist; // Distance of the point to the plane
-
-    PtDist = (pleq.x * pt.x) + (pleq.y * pt.y) + (pleq.z * pt.z) + pleq.w;
-
-    return PtDist;
-}
-
 void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellAreaVector)
 {
 
@@ -357,12 +291,12 @@ void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vect
     // REFERENCES:
     // Collaboration with Bill Carroll, LBNL.
 
-    OutNewellAreaVector = 0.0;
+    OutNewellAreaVector = Vector3D(0.0);
 
     Vector V1 = VList(2) - VList(1);
     for (int Vert = 3; Vert <= NSides; ++Vert) {
         Vector V2 = VList(Vert) - VList(1);
-        OutNewellAreaVector += cross(V1, V2);
+        OutNewellAreaVector += V1.cross(V2);
         V1 = V2;
     }
 
@@ -393,7 +327,7 @@ void CreateNewellSurfaceNormalVector(Array1D<Vector> const &VList, int const NSi
     //    Returning Normalize(Normal)
     // End Function
 
-    OutNewellSurfaceNormalVector = 0.0;
+    OutNewellSurfaceNormalVector = Vector3D(0.0);
     Real64 xvalue = 0.0;
     Real64 yvalue = 0.0;
     Real64 zvalue = 0.0;
@@ -462,18 +396,22 @@ void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar,
     // Argument array dimensioning
     EP_SIZE_CHECK(Surf, NSides);
 
-    bool plerror;
-    PlaneEq NewellPlane;
+    assert(Surf.size() == static_cast<std::size_t>(NSides)); // Plane::fromVertices uses all the vertices
 
     IsCoPlanar = true;
     MaxDist = 0.0;
     ErrorVertex = 0;
 
-    // Use first three to determine plane
-    PlaneEquation(Surf, NSides, NewellPlane, plerror);
+    if (NSides < 3) {
+        return; // No plane to compare against
+    }
+    Plane const NewellPlane(Plane::fromVertices(Surf));
+    if (NewellPlane.isDegenerate()) {
+        return; // No plane to compare against: degenerate surfaces are reported elsewhere
+    }
 
     for (int vert = 1; vert <= NSides; ++vert) {
-        Real64 dist = Pt2Plane(Surf(vert), NewellPlane);
+        Real64 dist = NewellPlane.signedDistance(Surf(vert));
         if (std::abs(dist) > MaxDist) {
             MaxDist = std::abs(dist);
             ErrorVertex = vert;
@@ -488,13 +426,18 @@ void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar,
 std::vector<int>
 PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> const &QuerySurf, int const QuerySides, bool &ErrorFound)
 {
+    assert(BaseSurf.size() == static_cast<std::size_t>(BaseSides)); // Plane::fromVertices uses all the vertices
     std::vector<int> pointIndices;
 
-    PlaneEq NewellPlane;
-    PlaneEquation(BaseSurf, BaseSides, NewellPlane, ErrorFound);
+    // Note: ErrorFound is assigned, not or'ed, as it was with the former PlaneEquation
+    Plane const NewellPlane(BaseSides >= 3 ? Plane::fromVertices(BaseSurf) : Plane());
+    ErrorFound = NewellPlane.isDegenerate();
+    if (ErrorFound) {
+        return pointIndices;
+    }
 
     for (int vert = 1; vert <= QuerySides; ++vert) {
-        Real64 dist = Pt2Plane(QuerySurf(vert), NewellPlane);
+        Real64 dist = NewellPlane.signedDistance(QuerySurf(vert));
         if (std::abs(dist) < Constant::SmallDistance) { // point on query surface is co-planar with base surface
             pointIndices.push_back(vert);
         }
@@ -522,7 +465,7 @@ Real64 CalcPolyhedronVolume(EnergyPlusData const &state, Polyhedron const &Poly)
 
     for (int NFace = 1; NFace <= Poly.NumSurfaceFaces; ++NFace) {
         p3FaceOrigin = Poly.SurfaceFace(NFace).FacePoints(2);
-        Real64 PyramidVolume = dot(Poly.SurfaceFace(NFace).NewellAreaVector, (p3FaceOrigin - state.dataVectors->p0));
+        Real64 PyramidVolume = Poly.SurfaceFace(NFace).NewellAreaVector.dot((p3FaceOrigin - state.dataVectors->p0));
         Volume += PyramidVolume / 3.0;
     }
     return Volume;

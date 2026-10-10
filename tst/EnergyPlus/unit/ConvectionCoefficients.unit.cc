@@ -3204,7 +3204,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofPerimeter_PerfectSquare_Rotated)
         if (i == surface.Sides) {
             inext = 1;
         }
-        actual_roof_perimeter += distance(surface.Vertex(i), surface.Vertex(inext));
+        actual_roof_perimeter += surface.Vertex(i).distance(surface.Vertex(inext));
     }
     EXPECT_NEAR(80.0, actual_roof_perimeter, 0.0001);
 
@@ -3425,7 +3425,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofPerimeter_WeirderShape)
         if (i == surface.Sides) {
             inext = 1;
         }
-        actual_roof_perimeter += distance(surface.Vertex(i), surface.Vertex(inext));
+        actual_roof_perimeter += surface.Vertex(i).distance(surface.Vertex(inext));
     }
     EXPECT_NEAR(126.92728, actual_roof_perimeter, 0.0001);
 
@@ -3447,10 +3447,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 0.0;
         surf1.Azimuth = 0.0;
         surf1.Area = 400.0;
-        surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-        surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-        surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+        surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+        surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+        surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+        surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3474,10 +3474,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 0.0;
         surf2.Azimuth = 0.0;
         surf2.Area = 400.0;
-        surf2.Vertex(1) = Vector3<Real64>(30.0, 10.0, 3.0);
-        surf2.Vertex(2) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf2.Vertex(3) = Vector3<Real64>(10.0, -10.0, 3.0);
-        surf2.Vertex(4) = Vector3<Real64>(30.0, -10.0, 3.0);
+        surf2.Vertex(1) = Vector3D(30.0, 10.0, 3.0);
+        surf2.Vertex(2) = Vector3D(10.0, 10.0, 3.0);
+        surf2.Vertex(3) = Vector3D(10.0, -10.0, 3.0);
+        surf2.Vertex(4) = Vector3D(30.0, -10.0, 3.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3501,10 +3501,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf3.Tilt = 0.0;
         surf3.Azimuth = 0.0;
         surf3.Area = 400.0;
-        surf3.Vertex(1) = Vector3<Real64>(50.0, 10.0, 6.0);
-        surf3.Vertex(2) = Vector3<Real64>(30.0, 10.0, 6.0);
-        surf3.Vertex(3) = Vector3<Real64>(30.0, -10.0, 6.0);
-        surf3.Vertex(4) = Vector3<Real64>(50.0, -10.0, 6.0);
+        surf3.Vertex(1) = Vector3D(50.0, 10.0, 6.0);
+        surf3.Vertex(2) = Vector3D(30.0, 10.0, 6.0);
+        surf3.Vertex(3) = Vector3D(30.0, -10.0, 6.0);
+        surf3.Vertex(4) = Vector3D(50.0, -10.0, 6.0);
         surf3.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf3.HeatTransSurf = true;
 
@@ -3532,10 +3532,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 22.61986494804042;
         surf1.Azimuth = 270.0;
         surf1.Area = 130.0;
-        surf1.Vertex(1) = Vector3<Real64>(12.0, 10.0, 5.0);
-        surf1.Vertex(2) = Vector3<Real64>(0.0, 10.0, 0.0);
-        surf1.Vertex(3) = Vector3<Real64>(0.0, 0.0, 0.0);
-        surf1.Vertex(4) = Vector3<Real64>(12.0, 0.0, 5.0);
+        surf1.Vertex(1) = Vector3D(12.0, 10.0, 5.0);
+        surf1.Vertex(2) = Vector3D(0.0, 10.0, 0.0);
+        surf1.Vertex(3) = Vector3D(0.0, 0.0, 0.0);
+        surf1.Vertex(4) = Vector3D(12.0, 0.0, 5.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3560,10 +3560,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 22.61986494804042;
         surf2.Azimuth = 90.0;
         surf2.Area = 130.0;
-        surf2.Vertex(1) = Vector3<Real64>(24.0, 10.0, 0.0);
-        surf2.Vertex(2) = Vector3<Real64>(12.0, 10.0, 5.0);
-        surf2.Vertex(3) = Vector3<Real64>(12.0, 0.0, 5.0);
-        surf2.Vertex(4) = Vector3<Real64>(24.0, 0.0, 0.0);
+        surf2.Vertex(1) = Vector3D(24.0, 10.0, 0.0);
+        surf2.Vertex(2) = Vector3D(12.0, 10.0, 5.0);
+        surf2.Vertex(3) = Vector3D(12.0, 0.0, 5.0);
+        surf2.Vertex(4) = Vector3D(24.0, 0.0, 0.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3587,10 +3587,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf3.Tilt = 0.0;
         surf3.Azimuth = 0.0;
         surf3.Area = 260.0;
-        surf3.Vertex(1) = Vector3<Real64>(50.0, 10.0, 0.0);
-        surf3.Vertex(2) = Vector3<Real64>(24.0, 10.0, 0.0);
-        surf3.Vertex(3) = Vector3<Real64>(24.0, 0.0, 0.0);
-        surf3.Vertex(4) = Vector3<Real64>(50.0, 0.0, 0.0);
+        surf3.Vertex(1) = Vector3D(50.0, 10.0, 0.0);
+        surf3.Vertex(2) = Vector3D(24.0, 10.0, 0.0);
+        surf3.Vertex(3) = Vector3D(24.0, 0.0, 0.0);
+        surf3.Vertex(4) = Vector3D(50.0, 0.0, 0.0);
         surf3.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf3.HeatTransSurf = true;
 
@@ -3618,10 +3618,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 0.0;
         surf1.Azimuth = 0.0;
         surf1.Area = 400.0;
-        surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-        surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-        surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+        surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+        surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+        surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+        surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3635,7 +3635,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
     }
 
     {
-        // Same, just translated by Vector3<Real64>(30.0, 0.0, 0.0) so that it's detached
+        // Same, just translated by Vector3D(30.0, 0.0, 0.0) so that it's detached
         state->dataSurface->Surface.resize(2);
         auto &surf2 = state->dataSurface->Surface(2);
         surf2.Name = "Translated Normal Surface not touching";
@@ -3645,10 +3645,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 0.0;
         surf2.Azimuth = 0.0;
         surf2.Area = 400.0;
-        surf2.Vertex(1) = Vector3<Real64>(40.0, 10.0, 3.0);
-        surf2.Vertex(2) = Vector3<Real64>(20.0, 10.0, 3.0);
-        surf2.Vertex(3) = Vector3<Real64>(20.0, -10.0, 3.0);
-        surf2.Vertex(4) = Vector3<Real64>(40.0, -10.0, 3.0);
+        surf2.Vertex(1) = Vector3D(40.0, 10.0, 3.0);
+        surf2.Vertex(2) = Vector3D(20.0, 10.0, 3.0);
+        surf2.Vertex(3) = Vector3D(20.0, -10.0, 3.0);
+        surf2.Vertex(4) = Vector3D(40.0, -10.0, 3.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3762,10 +3762,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofExtConvectionCoefficient)
     surf1.Tilt = 0.0;
     surf1.Azimuth = 0.0;
     surf1.Area = 400.0;
-    surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-    surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-    surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-    surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+    surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+    surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+    surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+    surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
     surf1.ExtBoundCond = DataSurfaces::ExternalEnvironment;
     surf1.HeatTransSurf = true;
     surf1.Construction = 1;

@@ -51,10 +51,10 @@
 // EnergyPlus Headers
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1.fwd.hh>
-#include <ObjexxFCL/Vector3.hh>
 
 // C++ Headers
 #include <cassert>
@@ -89,7 +89,7 @@ class SurfaceOctreeCube
 public: // Types
     using Real = Real64;
     using Surface = DataSurfaces::SurfaceData;
-    using Vertex = ObjexxFCL::Vector3<Real>;
+    using Vertex = Vector3D;
     using Surfaces = std::vector<Surface *>;
     using size_type = Surfaces::size_type;
 
@@ -113,7 +113,7 @@ public: // Creation
 
     // Box Constructor
     SurfaceOctreeCube(std::uint8_t const d, Vertex const &l, Vertex const &u, Real const w)
-        : d_(d), n_(0u), l_(l), u_(u), c_(cen(l, u)), w_(w), r_(0.75 * (w * w))
+        : d_(d), n_(0u), l_(l), u_(u), c_(0.5 * (l + u)), w_(w), r_(0.75 * (w * w))
     {
         for (auto &cube : cubes_) {
             cube = nullptr; // VC++ 2013 compatible initialization
@@ -240,37 +240,37 @@ public: // Methods
     bool segmentIntersectsSphere(Vertex const &a, Vertex const &b) const
     {
         Vertex const ab(b - a);
-        Real const ab_mag_squared(ab.mag_squared());
+        Real const ab_mag_squared(ab.length_squared());
         if (ab_mag_squared == 0.0) { // Segment is a point
-            return ObjexxFCL::distance_squared(a, c_) <= r_;
+            return a.distance_squared(c_) <= r_;
         } // Might pay to check if a or b in sphere first in some applications
         Vertex const ac(c_ - a);
         Real const projection_fac(((ac.x * ab.x) + (ac.y * ab.y) + (ac.z * ab.z)) / ab_mag_squared);
         if ((0.0 <= projection_fac) && (projection_fac <= 1.0)) { // Projected (closest) point is on ab segment
-            return ObjexxFCL::distance_squared(ac, projection_fac * ab) <= r_;
+            return ac.distance_squared(projection_fac * ab) <= r_;
         } // Projection (closest) point is outside of ab segment: Intersects iff a or b are in sphere
-        return (ObjexxFCL::distance_squared(a, c_) <= r_) || (ObjexxFCL::distance_squared(b, c_) <= r_);
+        return (a.distance_squared(c_) <= r_) || (b.distance_squared(c_) <= r_);
     }
 
     // Ray Intersects Enclosing Sphere?
     bool rayIntersectsSphere(Vertex const &a, Vertex const &dir) const
     {
-        assert(std::abs(dir.mag_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
+        assert(std::abs(dir.length_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
         // Might pay to check if a in sphere first in some applications
         Vertex const ac(c_ - a);
         Real const projection_fac((ac.x * dir.x) + (ac.y * dir.y) + (ac.z * dir.z));
         if (0.0 <= projection_fac) { // Projected (closest) point is on ray
-            return ObjexxFCL::distance_squared(ac, projection_fac * dir) <= r_;
+            return ac.distance_squared(projection_fac * dir) <= r_;
         } // Projection (closest) point is outside of ray: Intersects iff a is in sphere
-        return ObjexxFCL::distance_squared(a, c_) <= r_;
+        return a.distance_squared(c_) <= r_;
     }
 
     // Line Intersects Enclosing Sphere?
     bool lineIntersectsSphere(Vertex const &a, Vertex const &dir) const
     {
-        assert(std::abs(dir.mag_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
+        assert(std::abs(dir.length_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
         Vertex const ac(c_ - a);
-        return ac.mag_squared() - ObjexxFCL::square((ac.x * dir.x) + (ac.y * dir.y) + (ac.z * dir.z)) <= r_;
+        return ac.length_squared() - ObjexxFCL::square((ac.x * dir.x) + (ac.y * dir.y) + (ac.z * dir.z)) <= r_;
     }
 
     // Line Segment Intersects Cube?
@@ -282,7 +282,7 @@ public: // Methods
         }
 
         // Use separating axis theorem (faster variants exist)
-        Vertex const m(mid(a, b) - c_);                                 // Mid-point relative to cube center
+        Vertex const m(0.5 * (a + b) - c_);                             // Mid-point relative to cube center
         Vertex const mb(b - c_ - m);                                    // ab mid-point to b half segment vector
         Vertex const e(std::abs(mb.x), std::abs(mb.y), std::abs(mb.z)); // Extent of half ab segment
         Real const h(0.5 * w_);                                         // Half-width
@@ -314,7 +314,7 @@ public: // Methods
     {
         // Note: dir_inv coordinates corresponding to a zero dir coordinate are not used and can be set to zero
 
-        assert(std::abs(dir.mag_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
+        assert(std::abs(dir.length_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
         assert((dir.x == 0.0) || (std::abs(dir_inv.x - (1.0 / dir.x)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.x)));
         assert((dir.y == 0.0) || (std::abs(dir_inv.y - (1.0 / dir.y)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.y)));
         assert((dir.z == 0.0) || (std::abs(dir_inv.z - (1.0 / dir.z)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.z)));
@@ -394,7 +394,7 @@ public: // Methods
     {
         // Note: dir_inv coordinates corresponding to a zero dir coordinate are not used and can be set to zero
 
-        assert(std::abs(dir.mag_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
+        assert(std::abs(dir.length_squared() - 1.0) < 4 * std::numeric_limits<Real>::epsilon()); // Check unit vector
         assert((dir.x == 0.0) || (std::abs(dir_inv.x - (1.0 / dir.x)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.x)));
         assert((dir.y == 0.0) || (std::abs(dir_inv.y - (1.0 / dir.y)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.y)));
         assert((dir.z == 0.0) || (std::abs(dir_inv.z - (1.0 / dir.z)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.z)));

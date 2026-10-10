@@ -3866,7 +3866,7 @@ namespace Weather {
                         CurTime = double(hour) + state.dataEnvrn->TS1TimeOffset;
                     }
 
-                    Vector3<Real64> SUNCOS; // Sun direction cosines
+                    Vector3D SUNCOS; // Sun direction cosines
                     CalculateSunDirectionCosines(
                         state, CurTime, designDay.EquationOfTime, designDay.SinSolarDeclinAngle, designDay.CosSolarDeclinAngle, SUNCOS);
                     Real64 CosZenith = SUNCOS.z; // Cosine of Zenith Angle of Sun
@@ -4236,7 +4236,7 @@ namespace Weather {
                                       Real64 const EqOfTime,     // Equation of Time
                                       Real64 const SinSolDeclin, // Sine of Solar Declination
                                       Real64 const CosSolDeclin, // Cosine of Solar Declination
-                                      Vector3<Real64> &SUNCOS)
+                                      Vector3D &SUNCOS)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4250,8 +4250,6 @@ namespace Weather {
 
         // REFERENCES:
         // "NECAP Engineering Manual", 1974, p.3-117
-
-        EP_SIZE_CHECK(SUNCOS, 3); // NOLINT(misc-static-assert)
 
         // COMPUTE THE HOUR ANGLE
         Real64 H = (15.0 * (12.0 - (TimeValue + EqOfTime)) + (state.dataEnvrn->TimeZoneMeridian - state.dataEnvrn->Longitude)) * Constant::DegToRad;
@@ -4270,7 +4268,7 @@ namespace Weather {
         }
     }
 
-    void DetermineSunUpDown(EnergyPlusData &state, Vector3<Real64> &SunCOS)
+    void DetermineSunUpDown(EnergyPlusData &state, Vector3D &SunCOS)
     {
 
         // SUBROUTINE INFORMATION:

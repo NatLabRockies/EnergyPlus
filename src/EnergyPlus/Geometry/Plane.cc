@@ -45,87 +45,48 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef Vectors_hh_INCLUDED
-#define Vectors_hh_INCLUDED
+// C++ Headers
+#include <cassert>
+#include <cstddef>
+#include <ostream>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 
 // EnergyPlus Headers
-#include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataVectorTypes.hh>
-#include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Plane.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 
 namespace EnergyPlus {
 
-// Fwd decl
-struct EnergyPlusData;
-
-namespace Vectors {
-
-    // Using/Aliasing
-    using DataVectorTypes::Polyhedron;
-    using DataVectorTypes::Vector;
-
-    // Functions
-
-    Real64 AreaPolygon(int const n, Array1D<Vector> &p);
-
-    Real64 VecSquaredLength(Vector const &vec);
-
-    Real64 VecLength(Vector const &vec);
-
-    Vector VecNegate(Vector const &vec);
-
-    Vector VecNormalize(Vector const &vec);
-
-    void VecRound(Vector &vec, Real64 const roundto);
-
-    void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
-                                 Real64 &Azimuth,             // Outward Normal Azimuth Angle
-                                 Real64 &Tilt,                // Tilt angle of surface
-                                 Vector &lcsx,
-                                 Vector &lcsy,
-                                 Vector &lcsz,
-                                 Vector const &NewellSurfaceNormalVector);
-
-    void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellAreaVector);
-
-    void CreateNewellSurfaceNormalVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellSurfaceNormalVector);
-
-    void CompareTwoVectors(Vector const &vector1, // standard vector
-                           Vector const &vector2, // standard vector
-                           bool &areSame,         // true if the two vectors are the same within specified tolerance
-                           Real64 const tolerance // specified tolerance
-    );
-
-    void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar, Real64 &MaxDist, int &ErrorVertex);
-
-    std::vector<int>
-    PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> const &QuerySurf, int const QuerySides, bool &ErrorFound);
-
-    Real64 CalcPolyhedronVolume(EnergyPlusData const &state, Polyhedron const &Poly);
-
-} // namespace Vectors
-
-struct VectorsData : BaseGlobalStruct
+// Plane of a polygon by Newell's method
+Plane Plane::fromVertices(ObjexxFCL::Array1D<Vector3D> const &vertices)
 {
-    Vectors::Vector p0 = Vectors::Vector(0.0, 0.0, 0.0);
-
-    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
-    {
+    using Vector = Vector3D;
+    std::size_t const n = vertices.size();
+    assert(n >= 3);
+    Vector center; // Center (vertex average) point (not mass centroid)
+    double a = 0.0;
+    double b = 0.0;
+    double c = 0.0;
+    double d = 0.0;                       // Plane coefficients
+    for (std::size_t i = 0; i < n; ++i) { // Newell's method for robustness (not speed)
+        Vector const &v = vertices[i];
+        Vector const &w = vertices[(i + 1) % n];
+        a += (v.y - w.y) * (v.z + w.z);
+        b += (v.z - w.z) * (v.x + w.x);
+        c += (v.x - w.x) * (v.y + w.y);
+        center += v;
     }
+    d = -(center.dot(Vector(a, b, c)) / n); // center/n is the center point
+    return {a, b, c, d};                    // a*x + b*y + c*z + d = 0
+}
 
-    void init_state([[maybe_unused]] EnergyPlusData &state) override
-    {
-    }
-
-    void clear_state() override
-    {
-        this->p0 = Vectors::Vector(0.0, 0.0, 0.0);
-    }
-};
+// Stream << Plane output operator
+std::ostream &operator<<(std::ostream &os, Plane const &v)
+{
+    os << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]";
+    return os;
+}
 
 } // namespace EnergyPlus
-
-#endif

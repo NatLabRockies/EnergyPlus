@@ -115,7 +115,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTest)
     state->dataHeatBal->SurfWinBackSurfOverlaps.allocate(HoursInDay, NumTimeSteps, state->dataBSDFWindow->MaxBkSurf, state->dataSurface->TotSurfaces);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
-        state->dataSurface->SurfSunCosHourly(hour) = 0.0;
+        state->dataSurface->SurfSunCosHourly(hour) = Vector3D(0.0);
     }
     // Test non-integrated option first, CalcPerSolarBeam should set OutProjSLFracMult and InOutProjSLFracMult to 1.0 for all hours
     for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
@@ -893,9 +893,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_FigureSolarBeamAtTimestep)
     SolarShading::SkyDifSolarShading(*state);
     state->dataSolarShading->CalcSkyDifShading = false;
 
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(1) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(2) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(3) = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).x = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).y = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).z = 0.1;
     FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
 
     int windowSurfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
@@ -1296,17 +1296,17 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_ExternalShadingIO)
     state->dataSolarShading->CalcSkyDifShading = false;
 
     Sched::UpdateScheduleVals(*state);
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(1) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(2) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(3) = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).x = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).y = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).z = 0.1;
     FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
 
     EXPECT_TRUE(state->dataSysVars->shadingMethod == DataSystemVariables::ShadingMethod::Scheduled);
     EXPECT_DOUBLE_EQ(0.5432, Sched::GetSchedule(*state, "EXTSHADINGSCH:ZN001:ROOF")->getHrTsVal(*state, 9, 4));
-    EXPECT_FALSE(state->dataSolarShading->SUNCOS(3) < 0.00001);
+    EXPECT_FALSE(state->dataSolarShading->SUNCOS.z < 0.00001);
     EXPECT_DOUBLE_EQ(0.00001, DataEnvironment::SunIsUpValue);
 
-    EXPECT_FALSE(state->dataSolarShading->SUNCOS(3) < DataEnvironment::SunIsUpValue);
+    EXPECT_FALSE(state->dataSolarShading->SUNCOS.z < DataEnvironment::SunIsUpValue);
 
     int surfNum = Util::FindItemInList("ZN001:WALL-SOUTH", state->dataSurface->Surface);
     EXPECT_DOUBLE_EQ(1, state->dataHeatBal->SurfSunlitFrac(9, 4, surfNum));
@@ -2081,9 +2081,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonClippingDirect)
     SolarShading::SkyDifSolarShading(*state);
     state->dataSolarShading->CalcSkyDifShading = false;
 
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(1) = 0.20531446332266728;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(2) = -0.84761109808931534;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(3) = 0.48928662105799514;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).x = 0.20531446332266728;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).y = -0.84761109808931534;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).z = 0.48928662105799514;
 
     FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
     int surfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
@@ -3246,7 +3246,7 @@ TEST_F(EnergyPlusFixture, WindowShadingManager_Lum_Test)
     state->dataSolarShading->SurfAnisoSkyMult = 1.0;
     state->dataEnvrn->DifSolarRad = 100.0;
     state->dataEnvrn->BeamSolarRad = 100.0;
-    state->dataEnvrn->SOLCOS = 0.5;
+    state->dataEnvrn->SOLCOS = Vector3D(0.5);
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->HourOfDay = 10;
     state->dataGlobal->TimeStepsInHour = NumTimeSteps;
@@ -3962,8 +3962,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CTRANS)
     Vector expected_lcsz(0.0, 0.0, 1.0);
 
     auto compare_double_vectors = [](Vector const &exp, Vector const &actual) {
-        ASSERT_EQ(exp.size(), actual.size());
-        for (size_t i = 0; i < exp.size(); ++i) {
+        for (size_t i = 0; i < 3; ++i) {
             EXPECT_NEAR(exp[i], actual[i], 0.0000000000000001) << "Failed at index " << i;
         }
     };
@@ -5202,9 +5201,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap2)
     shade2Sched->EMSVal = 1.0;
 
     // Gotten from running 1ZoneUncontrolled.idf with chicago weather on Jan 1 at 12
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(1) = 0.20531446332266728;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(2) = -0.84761109808931534;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(3) = 0.48928662105799514;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).x = 0.20531446332266728;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).y = -0.84761109808931534;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).z = 0.48928662105799514;
     FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
     ReportSurfaceShading(*state);
 
@@ -5551,9 +5550,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap3)
 
     // Use the base transmittance schedules (no EMS override)
     // shade1 transmittance = 0.5, shade2 transmittance = 0.8
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(1) = 0.20531446332266728;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(2) = -0.84761109808931534;
-    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay)(3) = 0.48928662105799514;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).x = 0.20531446332266728;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).y = -0.84761109808931534;
+    state->dataBSDFWindow->SUNCOSTS(state->dataGlobal->TimeStep, state->dataGlobal->HourOfDay).z = 0.48928662105799514;
     FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
     ReportSurfaceShading(*state);
 
@@ -6767,9 +6766,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcBeamSolarOnWinRevealSurface)
     state->dataSurface->SurfWinTanProfileAngVert(2) = 10.0;
     state->dataSurface->SurfWinTanProfileAngHor(1) = 10.0;
     state->dataSurface->SurfWinTanProfileAngHor(2) = 10.0;
-    state->dataEnvrn->SOLCOS(1) = 0.5;
-    state->dataEnvrn->SOLCOS(2) = 0.5;
-    state->dataEnvrn->SOLCOS(3) = 0.5;
+    state->dataEnvrn->SOLCOS.x = 0.5;
+    state->dataEnvrn->SOLCOS.y = 0.5;
+    state->dataEnvrn->SOLCOS.z = 0.5;
     state->dataEnvrn->SunIsUp = true;
     state->dataEnvrn->DifSolarRad = 200.0;
     state->dataEnvrn->BeamSolarRad = 1000.0;
@@ -7221,9 +7220,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcInteriorSolarDistribution_Detaile
     HeatBalanceSurfaceManager::InitSurfaceHeatBalance(*state);
     SolarShading::InitSolarCalculations(*state);
 
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(1) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(2) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(3) = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).x = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).y = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).z = 0.1;
     SolarShading::FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
 
     int windowSurfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
@@ -7592,9 +7591,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcInteriorSolarDistribution_EQL)
     HeatBalanceSurfaceManager::InitSurfaceHeatBalance(*state);
     SolarShading::InitSolarCalculations(*state);
 
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(1) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(2) = 0.1;
-    state->dataBSDFWindow->SUNCOSTS(4, 9)(3) = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).x = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).y = 0.1;
+    state->dataBSDFWindow->SUNCOSTS(4, 9).z = 0.1;
     SolarShading::FigureSolarBeamAtTimestep(*state, state->dataGlobal->HourOfDay, state->dataGlobal->TimeStep);
 
     int windowSurfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);

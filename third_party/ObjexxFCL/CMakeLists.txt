@@ -54,12 +54,6 @@ set(src
   src/ObjexxFCL/time.cc
   src/ObjexxFCL/time.hh
   src/ObjexxFCL/TypeTraits.hh
-  src/ObjexxFCL/Vector2.fwd.hh
-  src/ObjexxFCL/Vector2.hh
-  src/ObjexxFCL/Vector3.fwd.hh
-  src/ObjexxFCL/Vector3.hh
-  src/ObjexxFCL/Vector4.fwd.hh
-  src/ObjexxFCL/Vector4.hh
   src/ObjexxFCL/vectorize.hh
 )
 
@@ -79,9 +73,6 @@ set( test_src
   tst/unit/random.unit.cc
   tst/unit/string.functions.unit.cc
   tst/unit/time.unit.cc
-  tst/unit/Vector2.unit.cc
-  tst/unit/Vector3.unit.cc
-  tst/unit/Vector4.unit.cc
 )
 
 add_library( ${target_name} ${src} )

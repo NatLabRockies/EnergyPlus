@@ -62,7 +62,6 @@
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataSurfaces;
 using DataVectorTypes::Vector;
-using Vector2D = DataSurfaces::Surface2D::Vector2D;
 
 TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
 {
@@ -94,7 +93,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
         EXPECT_DOUBLE_EQ(0.0, hitPt.z);
-        hitPt = 0.0;
+        hitPt = Vector3D(0.0);
         hit = PierceSurface(floor, rayOri, rayDir, 0.9, hitPt); // Distance limit < 1.0 => Doesn't hit
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(0.0, hitPt.x);

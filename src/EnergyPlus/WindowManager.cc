@@ -299,26 +299,26 @@ namespace Window {
         Real64 rfsh;         // Diffuse solar front reflectance of isolated blind
         Real64 rfshGnd;      // Ground and sky diffuse solar front reflectance of isolated blind
         Real64 rfshSky;
-        Real64 rbsh;                          // Diffuse solar back reflectance of isolated blind
-        Real64 ShadeReflFac;                  // Shade/blind solar reflection factor
-        Real64 ShadeTransVis;                 // Visible transmittance of isolated shade/blind
-        Real64 tshv = 0.0;                    // = ShadeTransVis
-        Real64 tshv2;                         // = tshv**2
-        Real64 ShadeReflVis;                  // Visible reflectance of isolated shade
-        Real64 rshv;                          // = ShadeReflVis
-        Real64 rfshv;                         // Diffuse visible front reflectance of isolated blind
-        Real64 rbshv;                         // Diffuse visible back reflectance of isolated blind
-        Real64 ShadeReflFacVis;               // Shade/blind visible reflection factor
-        int SpecDataNum = 0;                  // Spectral data set number
-        int numptDAT;                         // Number of wavelengths in a spectral data set
-        bool StormWinConst;                   // True if a construction with a storm window
-        bool Triangle;                        // True if window is triangular
-        bool Rectangle;                       // True if window is rectangular
-        Vector3<Real64> W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
-        Vector3<Real64> W2 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W3 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
-        Vector3<Real64> W23 = {0.0, 0.0, 0.0};
+        Real64 rbsh;                   // Diffuse solar back reflectance of isolated blind
+        Real64 ShadeReflFac;           // Shade/blind solar reflection factor
+        Real64 ShadeTransVis;          // Visible transmittance of isolated shade/blind
+        Real64 tshv = 0.0;             // = ShadeTransVis
+        Real64 tshv2;                  // = tshv**2
+        Real64 ShadeReflVis;           // Visible reflectance of isolated shade
+        Real64 rshv;                   // = ShadeReflVis
+        Real64 rfshv;                  // Diffuse visible front reflectance of isolated blind
+        Real64 rbshv;                  // Diffuse visible back reflectance of isolated blind
+        Real64 ShadeReflFacVis;        // Shade/blind visible reflection factor
+        int SpecDataNum = 0;           // Spectral data set number
+        int numptDAT;                  // Number of wavelengths in a spectral data set
+        bool StormWinConst;            // True if a construction with a storm window
+        bool Triangle;                 // True if window is triangular
+        bool Rectangle;                // True if window is rectangular
+        Vector3D W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
+        Vector3D W2 = {0.0, 0.0, 0.0};
+        Vector3D W3 = {0.0, 0.0, 0.0};
+        Vector3D W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
+        Vector3D W23 = {0.0, 0.0, 0.0};
 
         // Spectral data wavelengths for each glass layer in a glazing system
         std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt = {0.0};

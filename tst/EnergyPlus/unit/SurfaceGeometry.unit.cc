@@ -95,9 +95,6 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->MaxVerticesPerSurface = 5;
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->ShadeV.allocate(state->dataSurface->TotSurfaces);
-    for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
-        state->dataSurface->Surface(SurfNum).Vertex.allocate(state->dataSurface->MaxVerticesPerSurface);
-    }
 
     bool ErrorsFound(false);
     int ThisSurf(0);
@@ -107,6 +104,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -134,6 +132,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 8.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -161,6 +160,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -188,6 +188,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 3;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -211,6 +212,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 5;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -1083,8 +1085,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometryUnitTests_isAlmostEqual3dPt)
 
 TEST_F(EnergyPlusFixture, SurfaceGeometryUnitTests_isAlmostEqual2dPt)
 {
-    DataVectorTypes::Vector_2d a;
-    DataVectorTypes::Vector_2d b;
+    Vector2D a;
+    Vector2D b;
 
     a.x = 0.;
     a.y = 0.;

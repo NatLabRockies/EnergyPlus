@@ -3576,7 +3576,7 @@ void CalcScreenTransmittance([[maybe_unused]] EnergyPlusData &state,
     }
 } // CalcScreenTransmittance()
 
-void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3<Real64> const &solcos, Real64 &phi, Real64 &theta)
+void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3D const &solcos, Real64 &phi, Real64 &theta)
 {
     phi = std::abs(std::acos(solcos.z) - phiWin);
     theta = std::abs(std::atan2(solcos.x, solcos.y) - thetaWin);

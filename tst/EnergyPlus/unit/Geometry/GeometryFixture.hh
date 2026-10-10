@@ -45,87 +45,33 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef Vectors_hh_INCLUDED
-#define Vectors_hh_INCLUDED
+#ifndef GeometryFixture_hh_INCLUDED
+#define GeometryFixture_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
-// EnergyPlus Headers
-#include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataVectorTypes.hh>
-#include <EnergyPlus/EnergyPlus.hh>
+// Google Test Headers
+#include <gtest/gtest.h>
 
 namespace EnergyPlus {
 
-// Fwd decl
-struct EnergyPlusData;
-
-namespace Vectors {
-
-    // Using/Aliasing
-    using DataVectorTypes::Polyhedron;
-    using DataVectorTypes::Vector;
-
-    // Functions
-
-    Real64 AreaPolygon(int const n, Array1D<Vector> &p);
-
-    Real64 VecSquaredLength(Vector const &vec);
-
-    Real64 VecLength(Vector const &vec);
-
-    Vector VecNegate(Vector const &vec);
-
-    Vector VecNormalize(Vector const &vec);
-
-    void VecRound(Vector &vec, Real64 const roundto);
-
-    void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
-                                 Real64 &Azimuth,             // Outward Normal Azimuth Angle
-                                 Real64 &Tilt,                // Tilt angle of surface
-                                 Vector &lcsx,
-                                 Vector &lcsy,
-                                 Vector &lcsz,
-                                 Vector const &NewellSurfaceNormalVector);
-
-    void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellAreaVector);
-
-    void CreateNewellSurfaceNormalVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellSurfaceNormalVector);
-
-    void CompareTwoVectors(Vector const &vector1, // standard vector
-                           Vector const &vector2, // standard vector
-                           bool &areSame,         // true if the two vectors are the same within specified tolerance
-                           Real64 const tolerance // specified tolerance
-    );
-
-    void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar, Real64 &MaxDist, int &ErrorVertex);
-
-    std::vector<int>
-    PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> const &QuerySurf, int const QuerySides, bool &ErrorFound);
-
-    Real64 CalcPolyhedronVolume(EnergyPlusData const &state, Polyhedron const &Poly);
-
-} // namespace Vectors
-
-struct VectorsData : BaseGlobalStruct
+class GeometryFixture : public testing::Test
 {
-    Vectors::Vector p0 = Vectors::Vector(0.0, 0.0, 0.0);
-
-    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+protected:
+    static void SetUpTestCase()
+    {
+    }
+    static void TearDownTestCase()
     {
     }
 
-    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    void SetUp() override
     {
     }
 
-    void clear_state() override
+    void TearDown() override
     {
-        this->p0 = Vectors::Vector(0.0, 0.0, 0.0);
     }
 };
 
 } // namespace EnergyPlus
 
-#endif
+#endif // GeometryFixture_hh_INCLUDED

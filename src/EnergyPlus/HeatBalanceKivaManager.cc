@@ -382,8 +382,8 @@ void KivaInstanceMap::setBoundaryConditions(EnergyPlusData &state)
     bcs->outdoorTemp = state.dataEnvrn->OutDryBulbTemp + Constant::Kelvin;
     bcs->localWindSpeed = DataEnvironment::WindSpeedAt(state, instance.ground->foundation.grade.roughness);
     bcs->windDirection = state.dataEnvrn->WindDir * Constant::DegToRad;
-    bcs->solarAzimuth = std::atan2(state.dataEnvrn->SOLCOS(1), state.dataEnvrn->SOLCOS(2));
-    bcs->solarAltitude = Constant::PiOvr2 - std::acos(state.dataEnvrn->SOLCOS(3));
+    bcs->solarAzimuth = std::atan2(state.dataEnvrn->SOLCOS.x, state.dataEnvrn->SOLCOS.y);
+    bcs->solarAltitude = Constant::PiOvr2 - std::acos(state.dataEnvrn->SOLCOS.z);
     bcs->directNormalFlux = state.dataEnvrn->BeamSolarRad;
     bcs->diffuseHorizontalFlux = state.dataEnvrn->DifSolarRad;
     bcs->skyEmissivity = pow4(state.dataEnvrn->SkyTempKelvin) / pow4(bcs->outdoorTemp);
@@ -758,7 +758,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                 }
                 auto const &v = surface.Vertex[i];
                 auto const &vNext = surface.Vertex[iNext];
-                totalPerimeter += distance(v, vNext);
+                totalPerimeter += v.distance(vNext);
             }
 
             if (useDetailedExposedPerimeter) {
@@ -827,7 +827,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                         int p2 = i == coplanarPoints.size() - 1 ? coplanarPoints[0] : coplanarPoints[i + 1]; // next coplanar point
 
                         if (p2 == pC) { // if next coplanar point is the next consecutive point
-                            perimeter += distance(v(p), v(p2));
+                            perimeter += v(p).distance(v(p2));
                         }
                     }
 
@@ -845,7 +845,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                             zs.push_back(i);
                         }
                         sort(zs.begin(), zs.end(), [v](int a, int b) { return v[a].z < v[b].z; });
-                        perimeter = distance(v[zs[0]], v[zs[1]]);
+                        perimeter = v[zs[0]].distance(v[zs[1]]);
                     }
 
                     Real64 surfHeight = Surfaces(wl).get_average_height(state);

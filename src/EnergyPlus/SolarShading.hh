@@ -413,7 +413,7 @@ struct SolarShadingData : BaseGlobalStruct
     int NumTooManyFigures = 0;
     int NumTooManyVertices = 0;
     int NumBaseSubSurround = 0;
-    Vector3<Real64> SUNCOS;   // Direction cosines of solar position
+    Vector3D SUNCOS;          // Direction cosines of solar position
     Real64 XShadowProjection; // X projection of a shadow (formerly called C)
     Real64 YShadowProjection; // Y projection of a shadow (formerly called S)
     Array1D<Real64> XTEMP;    // Temporary 'X' values for HC vertices of the overlap

@@ -120,19 +120,19 @@ void SurfaceOctreeCube::init(EPVector<Surface> &surfaces)
     for (Surface const *surface_p : surfaces_) { // Surfaces
         auto const &vertices(surface_p->Vertex);
         for (auto const &vertex : vertices) { // Expand cube to hold surface vertices
-            l_.min(vertex);
-            u_.max(vertex);
+            l_ = Vertex(std::min(l_.x, vertex.x), std::min(l_.y, vertex.y), std::min(l_.z, vertex.z));
+            u_ = Vertex(std::max(u_.x, vertex.x), std::max(u_.y, vertex.y), std::max(u_.z, vertex.z));
         }
     }
-    c_ = cen(l_, u_); // Center vertex
+    c_ = 0.5 * (l_ + u_); // Center vertex
 
     // Expand bounding box to cube with uniform side width
     Vertex const diagonal(u_ - l_); // Diagonal
     w_ = ObjexxFCL::max(diagonal.x, diagonal.y, diagonal.z);
     r_ = 0.75 * (w_ * w_);
     Real const h(0.5 * w_); // Half-width
-    l_ = c_ - h;
-    u_ = c_ + h;
+    l_ = c_ - Vertex(h);
+    u_ = c_ + Vertex(h);
 
     assert(valid());
 
@@ -144,12 +144,10 @@ void SurfaceOctreeCube::init(EPVector<Surface> &surfaces)
 bool SurfaceOctreeCube::valid() const
 {
     if (((l_.x <= c_.x) && (l_.y <= c_.y) && (l_.z <= c_.z)) && ((c_.x <= u_.x) && (c_.y <= u_.y) && (c_.z <= u_.z))) {
-        Real const tol2(
-            std::max(std::max(ObjexxFCL::magnitude_squared(l_), ObjexxFCL::magnitude_squared(u_)) * (4 * std::numeric_limits<Real>::epsilon()),
-                     2 * std::numeric_limits<Real>::min()));
-        if (ObjexxFCL::distance_squared(c_, cen(l_, u_)) <= tol2) {
-            Real const tol(std::max(std::sqrt(std::max(ObjexxFCL::magnitude_squared(l_), ObjexxFCL::magnitude_squared(u_))) *
-                                        (4 * std::numeric_limits<Real>::epsilon()),
+        Real const tol2(std::max(std::max(l_.length_squared(), u_.length_squared()) * (4 * std::numeric_limits<Real>::epsilon()),
+                                 2 * std::numeric_limits<Real>::min()));
+        if (c_.distance_squared(0.5 * (l_ + u_)) <= tol2) {
+            Real const tol(std::max(std::sqrt(std::max(l_.length_squared(), u_.length_squared())) * (4 * std::numeric_limits<Real>::epsilon()),
                                     2 * std::numeric_limits<Real>::min()));
             Vertex const d(u_ - l_);                                                                            // Diagonal
             return (std::abs(d.x - w_) <= tol) && (std::abs(d.x - d.y) <= tol) && (std::abs(d.x - d.z) <= tol); // Uniform side widths?
@@ -196,10 +194,10 @@ void SurfaceOctreeCube::surfaceBranch(Surface &surface)
     Vertex sl(surface.Vertex[0]), su(surface.Vertex[0]); // Surface bounding box corners
     auto const &vertices(surface.Vertex);                // Surface vertices
     for (auto const &vertex : vertices) {                // Expand bounding box to hold surface vertices
-        sl.min(vertex);
-        su.max(vertex);
+        sl = Vertex(std::min(sl.x, vertex.x), std::min(sl.y, vertex.y), std::min(sl.z, vertex.z));
+        su = Vertex(std::max(su.x, vertex.x), std::max(su.y, vertex.y), std::max(su.z, vertex.z));
     }
-    Vertex const ctr(cen(sl, su));
+    Vertex const ctr(0.5 * (sl + su));
     std::uint8_t const i(ctr.x <= c_.x ? 0 : 1);
     std::uint8_t const j(ctr.y <= c_.y ? 0 : 1);
     std::uint8_t const k(ctr.z <= c_.z ? 0 : 1);

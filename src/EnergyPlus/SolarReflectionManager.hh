@@ -51,11 +51,11 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Vector3.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
@@ -68,25 +68,25 @@ namespace SolarReflectionManager {
     struct SolReflRecSurfData
     {
         // Members
-        int SurfNum;                     // Number of heat transfer surface
-        std::string SurfName;            // Name of heat transfer surface
-        int NumRecPts;                   // Number of receiving points
-        Array1D<Vector3<Real64>> RecPt;  // Coordinates of receiving point on receiving surface in global CS (m)
-        Vector3<Real64> NormVec;         // Unit outward normal to receiving surface
-        Real64 ThetaNormVec;             // Azimuth of surface normal (radians)
-        Real64 PhiNormVec;               // Altitude of surface normal (radians)
-        int NumReflRays;                 // Number of rays from this receiving surface
-        Array1D<Vector3<Real64>> RayVec; // Unit vector in direction of ray from receiving surface
-        Array1D<Real64> CosIncAngRay;    // Cosine of angle between ray and receiving surface outward normal
-        Array1D<Real64> dOmegaRay;       // Delta solid angle associated with ray
-        Array2D<Vector3<Real64>> HitPt;  // For each receiving point and ray, coords of hit point on obstruction
+        int SurfNum;                  // Number of heat transfer surface
+        std::string SurfName;         // Name of heat transfer surface
+        int NumRecPts;                // Number of receiving points
+        Array1D<Vector3D> RecPt;      // Coordinates of receiving point on receiving surface in global CS (m)
+        Vector3D NormVec;             // Unit outward normal to receiving surface
+        Real64 ThetaNormVec;          // Azimuth of surface normal (radians)
+        Real64 PhiNormVec;            // Altitude of surface normal (radians)
+        int NumReflRays;              // Number of rays from this receiving surface
+        Array1D<Vector3D> RayVec;     // Unit vector in direction of ray from receiving surface
+        Array1D<Real64> CosIncAngRay; // Cosine of angle between ray and receiving surface outward normal
+        Array1D<Real64> dOmegaRay;    // Delta solid angle associated with ray
+        Array2D<Vector3D> HitPt;      // For each receiving point and ray, coords of hit point on obstruction
         // that is closest to receiving point (m)
         Array2D_int HitPtSurfNum; // Number of surface containing the hit point for a ray, except:
         //  0 => ray does not hit an obstruction, but hits sky
         //  -1 => ray does not hit an obstruction, but hits ground
-        Array2D<Real64> HitPtSolRefl;          // Beam-to-diffuse solar reflectance at hit point
-        Array2D<Real64> RecPtHitPtDis;         // Distance from receiving point to hit point (m)
-        Array2D<Vector3<Real64>> HitPtNormVec; // Hit point's surface normal unit vector pointing into hemisphere
+        Array2D<Real64> HitPtSolRefl;   // Beam-to-diffuse solar reflectance at hit point
+        Array2D<Real64> RecPtHitPtDis;  // Distance from receiving point to hit point (m)
+        Array2D<Vector3D> HitPtNormVec; // Hit point's surface normal unit vector pointing into hemisphere
         //  containing the receiving point
         Array1D_int PossibleObsSurfNums; // Surface numbers of possible obstructions for a receiving surf
         int NumPossibleObs;              // Number of possible obstructions for a receiving surface
@@ -125,18 +125,18 @@ struct SolarReflectionManagerData : BaseGlobalStruct
     Array1D<SolarReflectionManager::SolReflRecSurfData> SolReflRecSurf;
 
     // static variables extracted from functions
-    int IHr = 0;            // Hour number
-    Vector3<Real64> SunVec; // Unit vector to sun
-    int RecSurfNum = 0;     // Receiving surface number
-    int SurfNum = 0;        // Heat transfer surface number corresponding to RecSurfNum
-    int RecPtNum = 0;       // Receiving point number
-    int NumRecPts = 0;      // Number of receiving points on a receiving surface
-    int HitPtSurfNum = 0;   // Surface number of hit point: -1 = ground,
+    int IHr = 0;          // Hour number
+    Vector3D SunVec;      // Unit vector to sun
+    int RecSurfNum = 0;   // Receiving surface number
+    int SurfNum = 0;      // Heat transfer surface number corresponding to RecSurfNum
+    int RecPtNum = 0;     // Receiving point number
+    int NumRecPts = 0;    // Number of receiving points on a receiving surface
+    int HitPtSurfNum = 0; // Surface number of hit point: -1 = ground,
     // 0 = sky or obstruction with receiving point below ground level,
     // >0 = obstruction with receiving point above ground level
     int RayNum = 0;                  // Ray number
-    Vector3<Real64> OriginThisRay;   // Origin point of a ray (m)
-    Vector3<Real64> ObsHitPt;        // Hit point on obstruction (m)
+    Vector3D OriginThisRay;          // Origin point of a ray (m)
+    Vector3D ObsHitPt;               // Hit point on obstruction (m)
     int ObsSurfNum = 0;              // Obstruction surface number
     Real64 CosIncBmAtHitPt = 0.0;    // Cosine of incidence angle of beam solar at hit point
     Real64 CosIncBmAtHitPt2 = 0.0;   // Cosine of incidence angle of beam solar at hit point, the mirrored shading surface
@@ -144,12 +144,12 @@ struct SolarReflectionManagerData : BaseGlobalStruct
     Real64 dReflBeamToDiffSol = 0.0; // Contribution to reflection factor at a receiving point from beam solar reflected from a hit point
     Real64 SunLitFract = 0.0;        // Sunlit fraction
     int NumHr = 0;                   // Hour number
-    Vector3<Real64> SunVect;         // Unit vector to sun
-    Vector3<Real64> SunVecMir;       // Unit vector to sun mirrored by a reflecting surface
-    Vector3<Real64> RecPt;           // Receiving point (m)
-    Vector3<Real64> HitPtRefl;       // Hit point on a reflecting surface (m)
-    Vector3<Real64> HitPtObs;        // Hit point on obstruction (m)
-    Vector3<Real64> ReflNorm;        // Unit normal to reflecting surface
+    Vector3D SunVect;                // Unit vector to sun
+    Vector3D SunVecMir;              // Unit vector to sun mirrored by a reflecting surface
+    Vector3D RecPt;                  // Receiving point (m)
+    Vector3D HitPtRefl;              // Hit point on a reflecting surface (m)
+    Vector3D HitPtObs;               // Hit point on obstruction (m)
+    Vector3D ReflNorm;               // Unit normal to reflecting surface
     Real64 SpecReflectance = 0.0;    // Specular reflectance of a reflecting surface
     int ConstrNumRefl = 0;           // Construction number of a reflecting surface
     Real64 CosIncAngRefl = 0.0;      // Cosine of incidence angle of beam on reflecting surface
@@ -166,13 +166,13 @@ struct SolarReflectionManagerData : BaseGlobalStruct
     // >0 = obstruction with receiving point above ground level
     int HitPtSurfNumX = 0;           // For a shading surface, HitPtSurfNum for original surface, HitPitSurfNum + 1 for mirror surface
     int iRayNum = 0;                 // Ray number
-    Vector3<Real64> HitPntRefl;      // Coordinates of hit point on obstruction or ground (m)
-    Vector3<Real64> HitPntObs;       // Hit point on an obstruction (m)
+    Vector3D HitPntRefl;             // Coordinates of hit point on obstruction or ground (m)
+    Vector3D HitPntObs;              // Hit point on an obstruction (m)
     Real64 SkyReflSolRadiance = 0.0; // Reflected radiance at hit point divided by unobstructed sky diffuse horizontal irradiance
     Real64 dReflSkySol = 0.0;        // Contribution to reflection factor at a receiving point from sky solar reflected from a hit point
-    Vector3<Real64> URay;            // Unit vector along ray from ground hit point
-    Vector3<Real64> SurfVertToGndPt; // Vector from a vertex of possible obstructing surface to ground hit point (m)
-    Vector3<Real64> SurfVert;        // Surface vertex (m)
+    Vector3D URay;                   // Unit vector along ray from ground hit point
+    Vector3D SurfVertToGndPt;        // Vector from a vertex of possible obstructing surface to ground hit point (m)
+    Vector3D SurfVert;               // Surface vertex (m)
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -185,15 +185,15 @@ struct SolarReflectionManagerData : BaseGlobalStruct
     void clear_state() override
     {
         this->IHr = 0;
-        this->SunVec = 0.0;
+        this->SunVec = Vector3D(0.0);
         this->RecSurfNum = 0;
         this->SurfNum = 0;
         this->RecPtNum = 0;
         this->NumRecPts = 0;
         this->HitPtSurfNum = 0;
         this->RayNum = 0;
-        this->OriginThisRay = 0.0;
-        this->ObsHitPt = 0.0;
+        this->OriginThisRay = Vector3D(0.0);
+        this->ObsHitPt = Vector3D(0.0);
         this->ObsSurfNum = 0;
         this->CosIncBmAtHitPt = 0.0;
         this->CosIncBmAtHitPt2 = 0.0;
@@ -201,12 +201,12 @@ struct SolarReflectionManagerData : BaseGlobalStruct
         this->dReflBeamToDiffSol = 0.0;
         this->SunLitFract = 0.0;
         this->NumHr = 0;
-        this->SunVect = 0.0;
-        this->SunVecMir = 0.0;
-        this->RecPt = 0.0;
-        this->HitPtRefl = 0.0;
-        this->HitPtObs = 0.0;
-        this->ReflNorm = 0.0;
+        this->SunVect = Vector3D(0.0);
+        this->SunVecMir = Vector3D(0.0);
+        this->RecPt = Vector3D(0.0);
+        this->HitPtRefl = Vector3D(0.0);
+        this->HitPtObs = Vector3D(0.0);
+        this->ReflNorm = Vector3D(0.0);
         this->SpecReflectance = 0.0;
         this->ConstrNumRefl = 0;
         this->CosIncAngRefl = 0.0;
@@ -221,13 +221,13 @@ struct SolarReflectionManagerData : BaseGlobalStruct
         this->HitPntSurfNum = 0;
         this->HitPtSurfNumX = 0;
         this->iRayNum = 0;
-        this->HitPntRefl = 0.0;
-        this->HitPntObs = 0.0;
+        this->HitPntRefl = Vector3D(0.0);
+        this->HitPntObs = Vector3D(0.0);
         this->SkyReflSolRadiance = 0.0;
         this->dReflSkySol = 0.0;
-        this->URay = 0.0;
-        this->SurfVertToGndPt = 0.0;
-        this->SurfVert = 0.0;
+        this->URay = Vector3D(0.0);
+        this->SurfVertToGndPt = Vector3D(0.0);
+        this->SurfVert = Vector3D(0.0);
     }
 
     // Default Constructor
