@@ -295,7 +295,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPumpSizingMinVolFlowRate)
         "PowerPerFlowPerPressure, !- Design Power Sizing Method",
         ",                        !- Design Electric Power per Unit Flow Rate",
         "1.3,                     !- Design Shaft Power per Unit Flow Rate per Unit Head",
-        "0.3,                     !- Design Minimum Flow Rate Sizing Factor",
+        "0.3,                     !- Design Minimum Flow Rate Fraction",
         "Pump Energy;             !- End-Use Subcategory",
 
     });
@@ -341,7 +341,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPumpSizingPowerPerPressureTest)
         "PowerPerFlowPerPressure, !- Design Power Sizing Method",
         ",                        !- Design Electric Power per Unit Flow Rate",
         "1.3,                     !- Design Shaft Power per Unit Flow Rate per Unit Head",
-        ";                        !- Design Minimum Flow Rate Sizing Factor",
+        ";                        !- Design Minimum Flow Rate Fraction",
 
     });
 
@@ -384,7 +384,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPumpSizingPowerDefault)
         ",                        !- Design Power Sizing Method",
         ",                        !- Design Electric Power per Unit Flow Rate",
         ",                        !- Design Shaft Power per Unit Flow Rate per Unit Head",
-        ";                        !- Design Minimum Flow Rate Sizing Factor",
+        ";                        !- Design Minimum Flow Rate Fraction",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -426,7 +426,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedPumpSizingPower22W_per_GPM)
         "PowerPerFlow,            !- Design Power Sizing Method",
         ",                        !- Design Electric Power per Unit Flow Rate",
         ",                        !- Design Shaft Power per Unit Flow Rate per Unit Head",
-        "0.0;                     !- Design Minimum Flow Rate Sizing Factor",
+        "0.0;                     !- Design Minimum Flow Rate Fraction",
     });
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
