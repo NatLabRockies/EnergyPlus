@@ -15,6 +15,8 @@
 #ifndef BIGINTEGER_H_INCLUDED
 #define BIGINTEGER_H_INCLUDED
 
+#include <cassert>
+
 #if defined(_MSC_VER) && defined(_M_AMD64)
 #include <intrin.h> // for _umul128
 #pragma intrinsic(_umul128)

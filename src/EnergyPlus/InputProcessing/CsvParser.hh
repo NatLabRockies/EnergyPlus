@@ -94,7 +94,6 @@ private:
     size_t csv_size = 0;
     char delimiter = ',';
     int rows_to_skip = 0;
-    char s[129] = {};
     std::vector<std::pair<std::string, bool>> errors_;   // the boolean is for continuing lines
     std::vector<std::pair<std::string, bool>> warnings_; // the boolean is for continuing lines
 

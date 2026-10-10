@@ -71,7 +71,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Output:Diagnostics,
     DisplayExtrawarnings;    !- Key 1

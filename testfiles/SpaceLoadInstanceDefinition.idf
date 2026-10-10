@@ -68,7 +68,7 @@
 !       - 1 assigned a SpaceList "1BR SpaceList": 2 in 1BR apartments
 !       - 1 assigned directed to the Space "Space2-2BR": 3 people
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,4;
 

@@ -1889,14 +1889,24 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_UserDefinedDuctViewFactors)
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).DuctExposureFraction, 1.0);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).DuctEmittance, 0.9);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(1).SurfaceName, "ATTIC FLOOR");
+    EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(1).SurfaceNum,
+              Util::FindItemInList("ATTIC FLOOR", state->dataSurface->Surface));
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(1).ViewFactor, 0.483577);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(2).SurfaceName, "ATTIC ROOF NORTH");
+    EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(2).SurfaceNum,
+              Util::FindItemInList("ATTIC ROOF NORTH", state->dataSurface->Surface));
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(2).ViewFactor, 0.237692);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(3).SurfaceName, "ATTIC ROOF SOUTH");
+    EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(3).SurfaceNum,
+              Util::FindItemInList("ATTIC ROOF SOUTH", state->dataSurface->Surface));
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(3).ViewFactor, 0.237692);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(4).SurfaceName, "EAST WALL ATTIC");
+    EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(4).SurfaceNum,
+              Util::FindItemInList("EAST WALL ATTIC", state->dataSurface->Surface));
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(4).ViewFactor, 0.02052);
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(5).SurfaceName, "WEST WALL ATTIC");
+    EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(5).SurfaceNum,
+              Util::FindItemInList("WEST WALL ATTIC", state->dataSurface->Surface));
     EXPECT_EQ(state->afn->AirflowNetworkLinkageViewFactorData(1).LinkageSurfaceData(5).ViewFactor, 0.02052);
 
     Real64 constexpr tol = 0.01;

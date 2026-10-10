@@ -50,7 +50,6 @@
 #include <utility>
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/environment.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -93,7 +92,6 @@ namespace DataSystemVariables {
     constexpr const char *cIgnoreDiffuseRadiation("IgnoreDiffuseRadiation");
     constexpr const char *cSutherlandHodgman("SutherlandHodgman");
     constexpr const char *cSlaterBarsky("SlaterBarsky");
-    constexpr const char *cMinimalSurfaceVariables("CreateMinimalSurfaceVariables");
     constexpr const char *cMinimalShadowing("MinimalShadowing");
     constexpr const char *cInputPath1("epin");       // EP-Launch setting.  Full path + project name
     constexpr const char *cInputPath2("input_path"); // RunEplus.bat setting.  Full path
@@ -107,10 +105,7 @@ namespace DataSystemVariables {
     //  each individual HVAC controller with all controller iterations
 
     constexpr const char *MinReportFrequencyEnvVar("MINREPORTFREQUENCY"); // environment var for reporting frequency.
-    constexpr const char *
-        cDisplayInputInAuditEnvVar("DISPLAYINPUTINAUDIT"); // environmental variable that enables the echoing of the input file into the audit file
-
-    constexpr const char *ciForceTimeStepEnvVar("CI_FORCE_TIME_STEP"); // environment var forcing 30 minute time steps on CI for efficiency
+    constexpr const char *ciForceTimeStepEnvVar("CI_FORCE_TIME_STEP");    // environment var forcing 30 minute time steps on CI for efficiency
 
     constexpr const char *cBufferedErrFileEnvVar("BufferedErrFile"); // environment var to enable buffered eplusout.err
 
@@ -141,17 +136,11 @@ namespace DataSystemVariables {
 
         if (state.dataSysVars->firstTime) {
             state.files.audit.ensure_open(state, "CheckForActualFilePath", state.files.outputControl.audit);
-            std::string tmp;
 
             // epin is passed from Epl-run.bat as the path to the IDF file minus its extension, so take the parent directory
-            get_environment_variable(cInputPath1, tmp);
-            state.dataSysVars->envinputpath1 = FileSystem::getParentDirectoryPath(fs::path(tmp));
-
-            get_environment_variable(cInputPath2, tmp);
-            state.dataSysVars->envinputpath2 = fs::path(tmp);
-
-            get_environment_variable(cProgramPath, tmp);
-            state.dataStrGlobals->ProgramPath = fs::path(tmp);
+            state.dataSysVars->envinputpath1 = FileSystem::getParentDirectoryPath(fs::path(Util::getEnvVar(cInputPath1)));
+            state.dataSysVars->envinputpath2 = fs::path(Util::getEnvVar(cInputPath2));
+            state.dataStrGlobals->ProgramPath = fs::path(Util::getEnvVar(cProgramPath));
             state.dataSysVars->firstTime = false;
         }
 
@@ -205,25 +194,19 @@ namespace DataSystemVariables {
     void processEnvironmentVariables(EnergyPlusData &state)
     {
 
-        std::string cEnvValue;
-
-        get_environment_variable(DDOnlyEnvVar, cEnvValue);
-        state.dataSysVars->DDOnly = env_var_on(cEnvValue); // Yes or True
+        state.dataSysVars->DDOnly = env_var_on(Util::getEnvVar(DDOnlyEnvVar)); // Yes or True
         if (state.dataGlobal->DDOnlySimulation) {
             state.dataSysVars->DDOnly = true;
         }
 
-        get_environment_variable(ReverseDDEnvVar, cEnvValue);
-        state.dataSysVars->ReverseDD = env_var_on(cEnvValue); // Yes or True
+        state.dataSysVars->ReverseDD = env_var_on(Util::getEnvVar(ReverseDDEnvVar)); // Yes or True
 
-        get_environment_variable(FullAnnualSimulation, cEnvValue);
-        state.dataSysVars->FullAnnualRun = env_var_on(cEnvValue); // Yes or True
+        state.dataSysVars->FullAnnualRun = env_var_on(Util::getEnvVar(FullAnnualSimulation)); // Yes or True
         if (state.dataGlobal->AnnualSimulation) {
             state.dataSysVars->FullAnnualRun = true;
         }
 
-        get_environment_variable(cDisplayAllWarnings, cEnvValue);
-        state.dataGlobal->DisplayAllWarnings = env_var_on(cEnvValue); // Yes or True
+        state.dataGlobal->DisplayAllWarnings = env_var_on(Util::getEnvVar(cDisplayAllWarnings)); // Yes or True
         if (state.dataGlobal->DisplayAllWarnings) {
             state.dataGlobal->DisplayAllWarnings = true;
             state.dataGlobal->DisplayExtraWarnings = true;
@@ -231,132 +214,99 @@ namespace DataSystemVariables {
             state.dataGlobal->DisplayUnusedObjects = true;
         }
 
-        get_environment_variable(cDisplayExtraWarnings, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDisplayExtraWarnings); !cEnvValue.empty()) {
             state.dataGlobal->DisplayExtraWarnings = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cDisplayUnusedObjects, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDisplayUnusedObjects); !cEnvValue.empty()) {
             state.dataGlobal->DisplayUnusedObjects = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cDisplayUnusedSchedules, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDisplayUnusedSchedules); !cEnvValue.empty()) {
             state.dataGlobal->DisplayUnusedSchedules = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cDisplayZoneAirHeatBalanceOffBalance, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDisplayZoneAirHeatBalanceOffBalance); !cEnvValue.empty()) {
             state.dataGlobal->DisplayZoneAirHeatBalanceOffBalance = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cDisplayAdvancedReportVariables, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDisplayAdvancedReportVariables); !cEnvValue.empty()) {
             state.dataGlobal->DisplayAdvancedReportVariables = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cReportDuringWarmup, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cReportDuringWarmup); !cEnvValue.empty()) {
             state.dataSysVars->ReportDuringWarmup = env_var_on(cEnvValue); // Yes or True
         }
         if (state.dataSysVars->ReverseDD) {
             state.dataSysVars->ReportDuringWarmup = false; // force to false for ReverseDD runs
         }
 
-        get_environment_variable(cReportDuringWarmup, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cReportDuringWarmup); !cEnvValue.empty()) {
             state.dataSysVars->ReportDuringWarmup = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cReportDuringHVACSizingSimulation, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cReportDuringHVACSizingSimulation); !cEnvValue.empty()) {
             state.dataSysVars->ReportDuringHVACSizingSimulation = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cIgnoreSolarRadiation, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cIgnoreSolarRadiation); !cEnvValue.empty()) {
             state.dataEnvrn->IgnoreSolarRadiation = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cMinimalSurfaceVariables, cEnvValue);
-        if (!cEnvValue.empty()) {
-            state.dataGlobal->CreateMinimalSurfaceVariables = env_var_on(cEnvValue); // Yes or True
-        }
-
-        get_environment_variable(cSortIDD, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cSortIDD); !cEnvValue.empty()) {
             state.dataSysVars->SortedIDD = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(MinReportFrequencyEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(MinReportFrequencyEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->MinReportFrequency = cEnvValue; // turned into value later
         }
 
-        get_environment_variable(cDeveloperFlag, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cDeveloperFlag); !cEnvValue.empty()) {
             state.dataSysVars->DeveloperFlag = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cIgnoreBeamRadiation, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cIgnoreBeamRadiation); !cEnvValue.empty()) {
             state.dataEnvrn->IgnoreBeamRadiation = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cIgnoreDiffuseRadiation, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cIgnoreDiffuseRadiation); !cEnvValue.empty()) {
             state.dataEnvrn->IgnoreDiffuseRadiation = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cSutherlandHodgman, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cSutherlandHodgman); !cEnvValue.empty()) {
             state.dataSysVars->SutherlandHodgman = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cSlaterBarsky, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cSlaterBarsky); !cEnvValue.empty()) {
             state.dataSysVars->SlaterBarsky = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cMinimalShadowing, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cMinimalShadowing); !cEnvValue.empty()) {
             state.dataSysVars->lMinimalShadowing = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cTimingFlag, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cTimingFlag); !cEnvValue.empty()) {
             state.dataSysVars->TimingFlag = env_var_on(cEnvValue); // Yes or True
         }
 
         // Initialize env flags for air loop simulation debugging
-        get_environment_variable(TrackAirLoopEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(TrackAirLoopEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->TrackAirLoopEnvFlag = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(TraceAirLoopEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(TraceAirLoopEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->TraceAirLoopEnvFlag = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(TraceHVACControllerEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(TraceHVACControllerEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->TraceHVACControllerEnvFlag = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cDisplayInputInAuditEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
-            state.dataGlobal->DisplayInputInAudit = env_var_on(cEnvValue); // Yes or True
-        }
-
-        get_environment_variable(ciForceTimeStepEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(ciForceTimeStepEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->ciForceTimeStep = env_var_on(cEnvValue); // Yes or True
         }
 
-        get_environment_variable(cBufferedErrFileEnvVar, cEnvValue);
-        if (!cEnvValue.empty()) {
+        if (std::string const cEnvValue = Util::getEnvVar(cBufferedErrFileEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->BufferedErrFileEnvVar = env_var_on(cEnvValue); // Yes or True
         }
     }

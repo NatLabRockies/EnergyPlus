@@ -155,6 +155,9 @@ def make_build_dir_and_build(cmake_build_dir: str, verbose: bool, bitness: Bitne
     is_windows = platform.system() == "Windows"
     if is_windows:
         command_line.extend(["-G", msvc_version.generator_name(), "-A", bitness.value])
+        toolset = msvc_version.toolset_name()
+        if toolset:
+            command_line.extend(["-T", toolset])
 
     try:
         my_check_call(verbose, command_line, cwd=cmake_build_dir, env=my_env)

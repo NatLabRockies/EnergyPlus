@@ -49,9 +49,7 @@
 #define HeatBalanceIntRadExchange_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/Array2A.hh>
-#include <ObjexxFCL/Array2S.hh>
+#include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -68,7 +66,7 @@ struct EnergyPlusData;
 namespace HeatBalanceIntRadExchange {
 
     void CalcInteriorRadExchange(EnergyPlusData &state,
-                                 Array1S<Real64> const SurfaceTemp,                  // Current surface temperatures
+                                 Array1D<Real64> const &SurfaceTemp,                 // Current surface temperatures
                                  int const SurfIterations,                           // Number of iterations in calling subroutine
                                  Array1D<Real64> &NetLWRadToSurf,                    // Net long wavelength radiant exchange from other surfaces
                                  ObjexxFCL::Optional_int_const ZoneToResimulate = _, // if passed in, then only calculate for this zone
@@ -91,7 +89,7 @@ namespace HeatBalanceIntRadExchange {
     void GetInputViewFactors(EnergyPlusData &state,
                              std::string const &EnclosureName, // Needed to check for user input view factors.
                              int const N,                      // NUMBER OF SURFACES
-                             Array2A<Real64> F,                // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
+                             Array2D<Real64> &F,               // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
                              const Array1D_int &SPtr,          // pointer to actual surface number
                              bool &NoUserInputF,               // Flag signifying no input F's for this
                              bool &ErrorsFound                 // True when errors are found in number of fields vs max args
@@ -100,7 +98,7 @@ namespace HeatBalanceIntRadExchange {
     void GetInputViewFactorsbyName(EnergyPlusData &state,
                                    std::string const &ZoneName, // Needed to check for user input view factors.
                                    int const N,                 // NUMBER OF SURFACES
-                                   Array2A<Real64> F,           // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
+                                   Array2D<Real64> &F,          // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
                                    const Array1D_int &SPtr,     // pointer to actual surface number
                                    bool &NoUserInputF,          // Flag signifying no input F's for this
                                    bool &ErrorsFound            // True when errors are found in number of fields vs max args
@@ -111,14 +109,14 @@ namespace HeatBalanceIntRadExchange {
                                     const Array1D<Real64> &A,       // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
                                     const Array1D<Real64> &Azimuth, // Facing angle of the surface (in degrees)
                                     const Array1D<Real64> &Tilt,    // Tilt angle of the surface (in degrees)
-                                    Array2A<Real64> F,              // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
+                                    Array2D<Real64> &F,             // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
                                     const Array1D_int &SPtr         // pointer to REAL(r64) surface number (for error message)
     );
 
     void FixViewFactors(EnergyPlusData &state,
                         int const N,                      // NUMBER OF SURFACES
                         const Array1D<Real64> &A,         // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
-                        Array2A<Real64> F,                // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
+                        Array2D<Real64> &F,               // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
                         std::string &enclName,            // Name of Enclosure being fixed
                         std::vector<int> const &zoneNums, // Zones which are part of this enclosure
                         Real64 &OriginalCheckValue,       // check of SUM(F) - N
@@ -137,9 +135,9 @@ namespace HeatBalanceIntRadExchange {
     void CalcScriptF(EnergyPlusData &state,
                      int const N,              // Number of surfaces
                      Array1D<Real64> const &A, // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
-                     Array2<Real64> const &F,  // DIRECT VIEW FACTOR MATRIX (N X N)
+                     Array2D<Real64> const &F, // DIRECT VIEW FACTOR MATRIX (N X N)
                      Array1D<Real64> &EMISS,   // VECTOR OF SURFACE EMISSIVITIES
-                     Array2<Real64> &ScriptF   // MATRIX OF SCRIPT F FACTORS (N X N) //Tuned Transposed
+                     Array2D<Real64> &ScriptF  // MATRIX OF SCRIPT F FACTORS (N X N) //Tuned Transposed
     );
 
     void CalcFMRT(EnergyPlusData &state,
@@ -154,8 +152,8 @@ namespace HeatBalanceIntRadExchange {
                 Array1D<Real64> &Fp           // VECTOR OF OPPENHEIM RESISTNACE VALUES
     );
 
-    void CalcMatrixInverse(Array2<Real64> &A, // Matrix: Gets reduced to L\U form
-                           Array2<Real64> &I  // Returned as inverse matrix
+    void CalcMatrixInverse(Array2D<Real64> &A, // Matrix: Gets reduced to L\U form
+                           Array2D<Real64> &I  // Returned as inverse matrix
     );
 
     int GetRadiantSystemSurface(EnergyPlusData &state,

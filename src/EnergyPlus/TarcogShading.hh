@@ -49,7 +49,7 @@
 #define TarcogShading_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
@@ -72,14 +72,14 @@ namespace TarcogShading {
                  Array1D<Real64> &hgas,
                  Array1D<Real64> &hcgas,
                  Array1D<Real64> const &hrgas,
-                 Array2<Real64> const &frct,
-                 Array2_int const &iprop,
+                 Array2D<Real64> const &frct,
+                 Array2D_int const &iprop,
                  Array1D<Real64> const &pressure,
                  Array1D_int const &nmix,
                  const Array1D<Real64> &xwght,
-                 Array2<Real64> const &xgcon,
-                 Array2<Real64> const &xgvis,
-                 Array2<Real64> const &xgcp,
+                 Array2D<Real64> const &xgcon,
+                 Array2D<Real64> const &xgvis,
+                 Array2D<Real64> const &xgcp,
                  int const nlayer,
                  Real64 const width,
                  Real64 const height,
@@ -107,9 +107,9 @@ namespace TarcogShading {
                            Real64 const press,
                            int const nmix,
                            const Array1D<Real64> &xwght,
-                           Array2A<Real64> const xgcon,
-                           Array2A<Real64> const xgvis,
-                           Array2A<Real64> const xgcp,
+                           Array2D<Real64> const &xgcon,
+                           Array2D<Real64> const &xgvis,
+                           Array2D<Real64> const &xgcp,
                            Real64 const s,
                            Real64 const H,
                            Real64 const hc,
@@ -132,9 +132,9 @@ namespace TarcogShading {
                    Real64 const press2,
                    int const nmix2,
                    const Array1D<Real64> &xwght,
-                   Array2A<Real64> const xgcon,
-                   Array2A<Real64> const xgvis,
-                   Array2A<Real64> const xgcp,
+                   Array2D<Real64> const &xgcon,
+                   Array2D<Real64> const &xgvis,
+                   Array2D<Real64> const &xgcp,
                    Real64 &Atop,
                    Real64 &Abot,
                    Real64 const Al,
@@ -170,9 +170,9 @@ namespace TarcogShading {
                      Real64 const press2,
                      int const nmix2,
                      const Array1D<Real64> &xwght,
-                     Array2A<Real64> const xgcon,
-                     Array2A<Real64> const xgvis,
-                     Array2A<Real64> const xgcp,
+                     Array2D<Real64> const &xgcon,
+                     Array2D<Real64> const &xgvis,
+                     Array2D<Real64> const &xgcp,
                      Real64 &Atop,
                      Real64 &Abot,
                      Real64 const Al,

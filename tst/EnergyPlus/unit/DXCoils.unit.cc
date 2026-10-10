@@ -3639,7 +3639,6 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_TwoSpeed)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->SysSizInput.allocate(1);
@@ -3868,7 +3867,6 @@ TEST_F(SQLiteFixture, DXCoils_TestComponentSizingOutput_SingleSpeed)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->SysSizInput.allocate(1);
@@ -5005,7 +5003,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     state->dataSize->SysSizInput.allocate(1);
     state->dataSize->SysSizInput(1).AirLoopNum = state->dataSize->CurSysNum;
@@ -5291,7 +5288,6 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilPartialAutoSizeOutput)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     state->dataSize->SysSizInput.allocate(1);
     state->dataSize->SysSizInput(1).AirLoopNum = state->dataSize->CurSysNum;
@@ -7483,7 +7479,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     // set companion dx cooling coil
     state->dataDXCoils->DXCoil(1).CompanionUpstreamDXCoil = 0;
@@ -7742,7 +7737,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test1)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     // set companion dx cooling coil
     state->dataDXCoils->DXCoil(1).CompanionUpstreamDXCoil = 0;
@@ -8003,7 +7997,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test2)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
 
     // set companion dx cooling coil
     state->dataDXCoils->DXCoil(1).CompanionUpstreamDXCoil = 0;

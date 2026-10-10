@@ -195,11 +195,11 @@ void Calc_ISO15099(EnergyPlusData &state,
                    Real64 const heightt,
                    Real64 const width,
                    const Array1D<Real64> &presure,
-                   Array2A_int const iprop,
-                   Array2A<Real64> const frct,
-                   Array2A<Real64> const xgcon,
-                   Array2A<Real64> const xgvis,
-                   Array2A<Real64> const xgcp,
+                   Array2D_int const &iprop,
+                   Array2D<Real64> const &frct,
+                   Array2D<Real64> const &xgcon,
+                   Array2D<Real64> const &xgvis,
+                   Array2D<Real64> const &xgcp,
                    const Array1D<Real64> &xwght,
                    const Array1D<Real64> &gama,
                    const Array1D_int &nmix,
@@ -271,11 +271,6 @@ void Calc_ISO15099(EnergyPlusData &state,
     EP_SIZE_CHECK(emis, maxlay2);
     EP_SIZE_CHECK(asol, maxlay);
     EP_SIZE_CHECK(presure, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(nmix, maxlay1);
@@ -1185,14 +1180,14 @@ void therm1d(EnergyPlusData &state,
              Real64 const height,
              Real64 const heightt,
              Real64 const width,
-             Array2_int const &iprop,
-             Array2<Real64> const &frct,
+             Array2D_int const &iprop,
+             Array2D<Real64> const &frct,
              const Array1D<Real64> &presure,
              const Array1D_int &nmix,
              const Array1D<Real64> &wght,
-             Array2<Real64> const &gcon,
-             Array2<Real64> const &gvis,
-             Array2<Real64> const &gcp,
+             Array2D<Real64> const &gcon,
+             Array2D<Real64> const &gvis,
+             Array2D<Real64> const &gcp,
              const Array1D<Real64> &gama,
              const Array1D_int &SupportPillar,
              const Array1D<Real64> &PillarSpacing,
@@ -2177,14 +2172,14 @@ void hatter(EnergyPlusData &state,
             Array1D<Real64> const &Radiation,
             Real64 const trmout,
             Real64 const trmin,
-            Array2_int const &iprop,
-            Array2<Real64> const &frct,
+            Array2D_int const &iprop,
+            Array2D<Real64> const &frct,
             const Array1D<Real64> &presure,
             const Array1D_int &nmix,
             const Array1D<Real64> &wght,
-            Array2<Real64> const &gcon,
-            Array2<Real64> const &gvis,
-            Array2<Real64> const &gcp,
+            Array2D<Real64> const &gcon,
+            Array2D<Real64> const &gvis,
+            Array2D<Real64> const &gcp,
             const Array1D<Real64> &gama,
             const Array1D_int &SupportPillar,
             const Array1D<Real64> &PillarSpacing,
@@ -2385,14 +2380,14 @@ void effectiveLayerCond(EnergyPlusData &state,
                         const Array1D<TARCOGLayerType> &LayerType, // Layer type
                         const Array1D<Real64> &scon,               // Layer thermal conductivity
                         const Array1D<Real64> &thick,              // Layer thickness
-                        Array2A_int const iprop,                   // Gas type in gaps
-                        Array2A<Real64> const frct,                // Fraction of gas
+                        Array2D_int const &iprop,                  // Gas type in gaps
+                        Array2D<Real64> const &frct,               // Fraction of gas
                         const Array1D_int &nmix,                   // Gas mixture
                         const Array1D<Real64> &pressure,           // Gas pressure [Pa]
                         const Array1D<Real64> &wght,               // Molecular weight
-                        Array2A<Real64> const gcon,                // Gas specific conductivity
-                        Array2A<Real64> const gvis,                // Gas specific viscosity
-                        Array2A<Real64> const gcp,                 // Gas specific heat
+                        Array2D<Real64> const &gcon,               // Gas specific conductivity
+                        Array2D<Real64> const &gvis,               // Gas specific viscosity
+                        Array2D<Real64> const &gcp,                // Gas specific heat
                         const Array1D<Real64> &EffectiveOpenness,  // Layer effective openness [m2]
                         Array1D<Real64> const &theta,              // Layer surface temperatures [K]
                         Array1D<Real64> &sconScaled,               // Layer conductivity divided by thickness
@@ -2447,14 +2442,14 @@ void filmi(EnergyPlusData &state,
            Real64 const tilt,
            Real64 const wsi,
            Real64 const height,
-           Array2A_int const iprop,
-           Array2A<Real64> const frct,
+           Array2D_int const &iprop,
+           Array2D<Real64> const &frct,
            const Array1D<Real64> &presure,
            const Array1D_int &nmix,
            const Array1D<Real64> &wght,
-           Array2A<Real64> const gcon,
-           Array2A<Real64> const gvis,
-           Array2A<Real64> const gcp,
+           Array2D<Real64> const &gcon,
+           Array2D<Real64> const &gvis,
+           Array2D<Real64> const &gcp,
            Real64 &hcin,
            int const ibc,
            int &nperr,
@@ -2482,14 +2477,9 @@ void filmi(EnergyPlusData &state,
 
     // Using
     // Argument array dimensioning
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
     EP_SIZE_CHECK(wght, maxgas);
-    gcon.dim(3, maxgas);
-    gvis.dim(3, maxgas);
-    gcp.dim(3, maxgas);
 
     // Locals
     Real64 tiltr;
@@ -2589,15 +2579,15 @@ void filmg(EnergyPlusData &state,
            int const nlayer,
            Real64 const height,
            const Array1D<Real64> &gap,
-           Array2A_int const iprop,
-           Array2A<Real64> const frct,
+           Array2D_int const &iprop,
+           Array2D<Real64> const &frct,
            Real64 const VacuumPressure,
            const Array1D<Real64> &presure,
            const Array1D_int &nmix,
            const Array1D<Real64> &wght,
-           Array2A<Real64> const gcon,
-           Array2A<Real64> const gvis,
-           Array2A<Real64> const gcp,
+           Array2D<Real64> const &gcon,
+           Array2D<Real64> const &gvis,
+           Array2D<Real64> const &gcp,
            const Array1D<Real64> &gama,
            Array1D<Real64> &hcgas,
            Array1D<Real64> &Rayleigh,
@@ -2636,14 +2626,9 @@ void filmg(EnergyPlusData &state,
     EP_SIZE_CHECK(theta, maxlay2);
     EP_SIZE_CHECK(Tgap, maxlay1);
     EP_SIZE_CHECK(gap, MaxGap);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
     EP_SIZE_CHECK(wght, maxgas);
-    gcon.dim(3, maxgas);
-    gvis.dim(3, maxgas);
-    gcp.dim(3, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(hcgas, maxlay1);
     EP_SIZE_CHECK(Rayleigh, maxlay);
@@ -3045,7 +3030,7 @@ void storeIterationResults(EnergyPlusData &state,
     // close(IterationCSVFileNumber)
 }
 
-void CalculateFuncResults(int const nlayer, Array2<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes)
+void CalculateFuncResults(int const nlayer, Array2D<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes)
 {
     // Tuned Rewritten to traverse a in unit stride order
     int const nlayer4(4 * nlayer);

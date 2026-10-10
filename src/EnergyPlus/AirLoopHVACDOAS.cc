@@ -470,7 +470,6 @@ namespace AirLoopHVACDOAS {
                             thisDOAS.m_FanInletNodeNum = thisOutsideAirSys.InletNodeNum(CompNum);
                             thisDOAS.m_FanOutletNodeNum = thisOutsideAirSys.OutletNodeNum(CompNum);
                             FanOrder = CompNum;
-                            thisDOAS.FanName = CompName;
                             thisDOAS.m_FanTypeNum = SimAirServingZones::CompType::Fan_System_Object;
                             thisDOAS.m_FanIndex = Fans::GetFanIndex(state, CompName);
                         }
@@ -485,7 +484,6 @@ namespace AirLoopHVACDOAS {
                             thisDOAS.m_FanInletNodeNum = thisOutsideAirSys.InletNodeNum(CompNum);
                             thisDOAS.m_FanOutletNodeNum = thisOutsideAirSys.OutletNodeNum(CompNum);
                             FanOrder = CompNum;
-                            thisDOAS.FanName = CompName;
                             thisDOAS.m_FanTypeNum = SimAirServingZones::CompType::Fan_ComponentModel;
                             thisDOAS.m_FanIndex = Fans::GetFanIndex(state, CompName);
                         }

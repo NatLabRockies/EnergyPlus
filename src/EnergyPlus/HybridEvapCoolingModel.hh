@@ -376,9 +376,6 @@ namespace HybridEvapCoolingModel {
         bool DehumidificationRequested;
         bool HumidificationRequested;
         // non-initializer
-        std::vector<int> Tsa_curve_pointer;
-        std::vector<int> HRsa_curve_pointer;
-        std::vector<int> Psa_curve_pointer;
         std::vector<CMode> OperatingModes;
         std::vector<CSetting> CurrentOperatingSettings;
 
@@ -437,9 +434,6 @@ namespace HybridEvapCoolingModel {
 
         bool optimal_EnvCondMet;
         bool RunningPeakCapacity_EnvCondMet;
-
-        std::vector<Real64> PolygonXs;
-        std::vector<Real64> PolygonYs;
     };
 } // namespace HybridEvapCoolingModel
 } // namespace EnergyPlus

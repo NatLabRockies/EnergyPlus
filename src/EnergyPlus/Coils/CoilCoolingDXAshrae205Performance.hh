@@ -72,7 +72,6 @@ struct CoilCoolingDX205Performance : public CoilCoolingDXPerformanceBase
     std::pair<EnergyPlusData *, std::string> logger_context;
     Btwxt::InterpolationMethod interpolation_type{Btwxt::InterpolationMethod::linear};
     Real64 rated_total_cooling_capacity;
-    Real64 rated_steady_state_heating_capacity;
 
     int numSpeeds() override
     {

@@ -50,7 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -83,8 +82,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        RefTemp refTempType = RefTemp::Invalid;
-        bool suppressRainChange = false;
         RefWind windSpeedType = RefWind::Invalid;
         int hfFnWindSpeedCurveNum = 0;
         int hnFnTempDiffCurveNum = 0;
@@ -197,7 +194,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        bool suppressRainChange = false;
 
         std::array<HcExt, static_cast<int>(ExtConvClass2::Num)> extConvClass2EqNums = {
             HcExt::SparrowWindward,                      // WindConvection_WindwardWall
@@ -289,7 +285,7 @@ namespace Convect {
                                     int SurfNum,                                       // surface number for which coefficients are being calculated
                                     const Array1D<Real64> &SurfaceTemperatures,        // Temperature of surfaces for evaluation of HcIn
                                     Array1D<Real64> &HcIn,                             // Interior Convection Coeff Array
-                                    ObjexxFCL::Optional<Array1S<Real64> const> Vhc = _ // Velocity array for forced convection coeff calculation
+                                    ObjexxFCL::Optional<Array1D<Real64> const> Vhc = _ // Velocity array for forced convection coeff calculation
     );
 
     Real64 CalcZoneSupplyAirTemp(EnergyPlusData &state, int ZoneNum);
@@ -783,7 +779,6 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;
-    bool FirstRoofSurf = true;
 
     // Object Data
     Convect::IntAdaptiveConvAlgo intAdaptiveConvAlgo; // stores rules for Hc model equations

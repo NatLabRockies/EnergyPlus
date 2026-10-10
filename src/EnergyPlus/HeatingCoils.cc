@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -1645,7 +1646,7 @@ namespace HeatingCoils {
             heatingCoil.MSNominalCapacity(heatingCoil.NumOfStages) = TempCap;
             bool IsAutoSize = false;
             int NumOfStages; // total number of stages of multi-stage heating coil
-            if (any_eq(heatingCoil.MSNominalCapacity, DataSizing::AutoSize)) {
+            if (std::ranges::any_of(heatingCoil.MSNominalCapacity, [&](auto const &elem) { return elem == DataSizing::AutoSize; })) {
                 IsAutoSize = true;
             }
             if (IsAutoSize) {
