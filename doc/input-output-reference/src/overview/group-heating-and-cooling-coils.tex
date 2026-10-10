@@ -9511,7 +9511,7 @@ The heat load of the IT equipment is the sum of two optional contributions: the 
 
 The cold plate is characterized by a case-to-fluid thermal resistance, \(R\) which is defined by one of two methods selected in the field \emph{Thermal Resistance Method}.
 
-The heat removed by the coolant is the lesser of the IT load and the heat the cold plate can transfer when the case temperature is at the \emph{Maximum Case Temperature}. Any heat that is not removed by the coolant is added to the zone named in the field \emph{Zone Name} as a convective internal gain. This includes all of the load when the cold plate is not available or when there is no flow. 
+The heat removed by the coolant is the lesser of the IT load and the heat the cold plate can transfer when the case temperature is at the \emph{Maximum Case Temperature}. Any heat that is not removed by the coolant is added to the zone named in the field \emph{Zone Name} as a convective internal gain. This includes all of the load when the cold plate is not available or when there is no flow.
 
 The coolant flow can be operated in one of two modes. In \textbf{ConstantFlow} mode the cold plate requests the nominal flow rate whenever it is available and there is a load. In \textbf{VariableFlow} mode the flow rate is adjusted to the lowest flow that removes the entire load while the case is at the \emph{Target Case Operating Temperature}. If the load cannot be met at the target temperature, the flow is increased until the case temperature reaches the \emph{Maximum Case Temperature}, and if the load still cannot be met, the maximum flow rate is used and the remaining heat is added to the zone.
 
@@ -9555,7 +9555,7 @@ This choice field specifies how the thermal resistance is defined. The choices a
 
 \paragraph{Field: Nominal Liquid Flow Rate}\label{field-nominal-liquid-flow-rate-coilcoolingitecoldplate}
 
-This numeric field contains the nominal volumetric flow rate of liquid coolant through the cold plate, in m\(^{3}\)/s. It is the flow rate at which the \emph{Nominal Thermal Resistance} applies, and the flow rate that is requested in \textbf{ConstantFlow} mode. The value must be greater than 0. This field is required and is autosizable. If this field is autosized, a \hyperref[sizingplant]{Sizing:Plant} object is required for the plant loop. 
+This numeric field contains the nominal volumetric flow rate of liquid coolant through the cold plate, in m\(^{3}\)/s. It is the flow rate at which the \emph{Nominal Thermal Resistance} applies, and the flow rate that is requested in \textbf{ConstantFlow} mode. The value must be greater than 0. This field is required and is autosizable. If this field is autosized, a \hyperref[sizingplant]{Sizing:Plant} object is required for the plant loop.
 
 \paragraph{Field: Maximum Liquid Flow Rate}\label{field-maximum-liquid-flow-rate-coilcoolingitecoldplate}
 
