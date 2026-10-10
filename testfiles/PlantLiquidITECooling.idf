@@ -1,0 +1,1005 @@
+! PlantLiquidITECooling.idf
+!
+! Basic file description:  This file demonstrates the use of the Coil:Cooling:ITE:ColdPlate object, which models a
+!                          direct-to-chip (D2C) liquid cooling cold plate for liquid-cooled IT equipment.
+!                          It is based on PlantLoadProfile.idf, but has been modified to also include a zone,
+!                          taken from the one zone example files (e.g. 1ZoneDataCenterCRAC_wPumpedDXCoolingCoil.idf).
+!
+!                          This file is not intended to represent an actual data center. The building, loads, schedules,
+!                          temperatures and equipment are simplified, and are only meant to exercise the cold plate object.
+!
+! Highlights:              The cold plate is on the demand side of a coolant distribution unit (CDU) loop, which
+!                          circulates a 25% propylene glycol mixture (PG25, defined with FluidProperties:GlycolConcentration).
+!                          The supply side of the CDU loop has a variable speed pump and a HeatExchanger:FluidToFluid,
+!                          which connects the CDU loop to the Main Loop, a chilled water plant loop served by an
+!                          air-cooled constant COP chiller. The chiller operates in ConstantFlow mode, so the Main Loop
+!                          runs at a constant flow rate. Both loops are controlled to a 30 C supply temperature,
+!                          which is typical of warm water cooling in liquid-cooled data centers.
+!
+!                          The IT equipment load is represented by a schedule (see the field IT Equipment Load Schedule Name),
+!                          so no ElectricEquipment:ITE:LiquidCooled object is used. The cold plate has an availability
+!                          schedule, and is only available between 08:00 and 20:00 on weekdays. Heat that is not removed by the
+!                          coolant, which includes all of the load while the cold plate is unavailable, is added to the zone.
+!                          The zone has no HVAC system, so its temperature floats.
+!
+!                          The flow rates of the cold plate are autosized, based on the Sizing:Plant objects, and the cold
+!                          plate flow is variable to maintain the target case operating temperature.
+!
+!                          The thermal resistance modifier curve (Curve:Exponent) was obtained by fitting an exponent curve
+!                          through data published in peer-reviewed sources. It is intended to represent a typical modification
+!                          of the thermal resistance with the flow rate for the "Standard" thermal resistance approach.
+!
+! Simulation Location/Run: Miami Intl Ap FL USA WMO=722020, 2 design days, 1 run period.
+!
+! Design Days:             Miami Intl Ap FL USA Annual Heating 99.6%, MaxDB=8.7°C
+!                          Miami Intl Ap FL USA Annual Cooling (DB=>MWB) .4%, MaxDB=33.2°C MWB=25.3°C
+!
+! Run Period (Weather File): Full annual simulation, USA_FL_Miami.Intl.AP.722020_TMY3.epw
+!
+! Run Control:             No zone or plant sizing calculations. The design days and the weather file run period are simulated.
+!
+! Building:                Fictional 1 zone building with resistive walls based on the 1ZoneUncontrolled example.
+!                          No windows. No internal mass. The building is oriented due north.
+!
+! Floor Area:              232.26 m2
+! Number of Stories:       1
+!
+! Plant:                   CDU loop (PG25): variable speed pump and heat exchanger on the supply side, cold plate on the
+!                          demand side. Main Loop (water): constant flow chiller and pump on the supply side, heat exchanger
+!                          on the demand side.
+
+  Version,
+    26.2;                    !- Version Identifier
+
+  Building,
+    Plant Load Profile Example,  !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.04,                    !- Temperature Convergence Tolerance Value {deltaC}
+    FullInteriorAndExterior, !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  Timestep,
+    6;                       !- Number of Timesteps per Hour
+
+  Site:Location,
+    Miami Intl Ap FL USA WMO=722020,  !- Name
+    25.82,                   !- Latitude {deg}
+    -80.30,                  !- Longitude {deg}
+    -5.00,                   !- Time Zone {hr}
+    11.00;                   !- Elevation {m}
+
+ ! Miami Intl Ap Annual Cooling Design Conditions Wind Speed=4.5m/s Wind Dir=140
+ ! Hottest Month=July
+ ! Miami Intl Ap FL USA Annual Cooling (DB=>MWB) .4%, MaxDB=33.2°C MWB=25.3°C
+
+  SizingPeriod:DesignDay,
+    Miami Intl Ap Ann Clg .4% Condns DB=>MWB,  !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    33.2,                    !- Maximum Dry-Bulb Temperature {C}
+    6.7,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    25.3,                    !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    101217.,                 !- Barometric Pressure {Pa}
+    4.5,                     !- Wind Speed {m/s}
+    140,                     !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.00;                    !- Sky Clearness
+
+ ! Miami Intl Ap FL USA Annual Heating Design Conditions Wind Speed=3.8m/s Wind Dir=340
+ ! Coldest Month=January
+ ! Miami Intl Ap FL USA Annual Heating 99.6%, MaxDB=8.7°C
+
+  SizingPeriod:DesignDay,
+    Miami Intl Ap Ann Htg 99.6% Condns DB,  !- Name
+    1,                       !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    8.7,                     !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    8.7,                     !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    101217.,                 !- Barometric Pressure {Pa}
+    3.8,                     !- Wind Speed {m/s}
+    340,                     !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    0.00;                    !- Sky Clearness
+
+  RunPeriod,
+    Run Period 1,            !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    ,                        !- End Year
+    Tuesday,                 !- Day of Week for Start Day
+    Yes,                     !- Use Weather File Holidays and Special Days
+    Yes,                     !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+  SimulationControl,
+    NO,                      !- Do Zone Sizing Calculation
+    NO,                      !- Do System Sizing Calculation
+    NO,                      !- Do Plant Sizing Calculation
+    YES,                     !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  PlantLoop,
+    CDU,                     !- Name
+    UserDefinedFluidType,    !- Fluid Type
+    PG25,                    !- User Defined Fluid Type
+    CDULoopOperation,        !- Plant Equipment Operation Scheme Name
+    CDU Supply Outlet Pipe Outlet Node,  !- Loop Temperature Setpoint Node Name
+    100.0,                   !- Maximum Loop Temperature {C}
+    0.0,                     !- Minimum Loop Temperature {C}
+    autosize,                !- Maximum Loop Flow Rate {m3/s}
+    0.0,                     !- Minimum Loop Flow Rate {m3/s}
+    Autocalculate,           !- Plant Loop Volume {m3}
+    CDU Pump Inlet Node,     !- Plant Side Inlet Node Name
+    CDU Supply Outlet Pipe Outlet Node,  !- Plant Side Outlet Node Name
+    CDUSupplyBranchList,     !- Plant Side Branch List Name
+    CDUSupplyConnectors,     !- Plant Side Connector List Name
+    CDU Demand Inlet Pipe Inlet Node,  !- Demand Side Inlet Node Name
+    CDU Demand Outlet Pipe Outlet Node,  !- Demand Side Outlet Node Name
+    CDUDemandBranchList,     !- Demand Side Branch List Name
+    CDUDemandConnectors;     !- Demand Side Connector List Name
+
+  Branch,
+    CDUSupplyInlet,          !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    CDUPump,                 !- Component 1 Name
+    CDU Pump Inlet Node,     !- Component 1 Inlet Node Name
+    CDU Pump Outlet Node;    !- Component 1 Outlet Node Name
+
+  Pump:VariableSpeed,
+    CDUPump,                 !- Name
+    CDU Pump Inlet Node,     !- Inlet Node Name
+    CDU Pump Outlet Node,    !- Outlet Node Name
+    autosize,                !- Design Maximum Flow Rate {m3/s}
+    0.1,                     !- Design Pump Head {Pa}
+    autosize,                !- Design Power Consumption {W}
+    0.9,                     !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    Continuous;              !- Pump Control Type
+
+  BranchList,
+    CDUSupplyBranchList,     !- Name
+    CDUSupplyInlet,          !- Branch 1 Name
+    CDUCoolingBranch,        !- Branch 2 Name
+    CDUSupplyOutletBranch;   !- Branch 3 Name
+
+  ConnectorList,
+    CDUSupplyConnectors,     !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    CDUSupplySplitter,       !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    CDUSupplyMixer;          !- Connector 2 Name
+
+  Connector:Splitter,
+    CDUSupplySplitter,       !- Name
+    CDUSupplyInlet,          !- Inlet Branch Name
+    CDUCoolingBranch;        !- Outlet Branch 1 Name
+
+  Branch,
+    CDUCoolingBranch,        !- Name
+    ,                        !- Pressure Drop Curve Name
+    HeatExchanger:FluidToFluid,  !- Component 1 Object Type
+    CDUHX,                   !- Component 1 Name
+    CDU HX Supply Inlet Node,  !- Component 1 Inlet Node Name
+    CDU HX Supply Outlet Node;  !- Component 1 Outlet Node Name
+
+  HeatExchanger:FluidToFluid,
+    CDUHX,                   !- Name
+    ,                        !- Availability Schedule Name
+    CDU HX Demand Inlet Node,  !- Loop Demand Side Inlet Node Name
+    CDU HX Demand Outlet Node,  !- Loop Demand Side Outlet Node Name
+    autosize,                !- Loop Demand Side Design Flow Rate {m3/s}
+    CDU HX Supply Inlet Node,  !- Loop Supply Side Inlet Node Name
+    CDU HX Supply Outlet Node,  !- Loop Supply Side Outlet Node Name
+    autosize,                !- Loop Supply Side Design Flow Rate {m3/s}
+    Ideal,                   !- Heat Exchange Model Type
+    autosize,                !- Heat Exchanger U-Factor Times Area Value {W/K}
+    UncontrolledOn,          !- Control Type
+    ,                        !- Heat Exchanger Setpoint Node Name
+    0.01,                    !- Minimum Temperature Difference to Activate Heat Exchanger {deltaC}
+    LoopToLoop;              !- Heat Transfer Metering End Use Type
+
+  Connector:Mixer,
+    CDUSupplyMixer,          !- Name
+    CDUSupplyOutletBranch,   !- Outlet Branch Name
+    CDUCoolingBranch;        !- Inlet Branch 1 Name
+
+  Branch,
+    CDUSupplyOutletBranch,   !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    CDUSupplyOutletPipe,     !- Component 1 Name
+    CDU Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    CDU Supply Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    CDUSupplyOutletPipe,     !- Name
+    CDU Supply Outlet Pipe Inlet Node,  !- Inlet Node Name
+    CDU Supply Outlet Pipe Outlet Node;  !- Outlet Node Name
+
+  Branch,
+    CDUDemandInletPipeBranch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    CDUDemandInletPipe,      !- Component 1 Name
+    CDU Demand Inlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    CDU Demand Inlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    CDUDemandInletPipe,      !- Name
+    CDU Demand Inlet Pipe Inlet Node,  !- Inlet Node Name
+    CDU Demand Inlet Pipe Outlet Node;  !- Outlet Node Name
+
+  ConnectorList,
+    CDUDemandConnectors,     !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    CDUDemandSplitter,       !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    CDUDemandMixer;          !- Connector 2 Name
+
+  Connector:Splitter,
+    CDUDemandSplitter,       !- Name
+    CDUDemandInletPipeBranch,  !- Inlet Branch Name
+    ColdPlateBranch;         !- Outlet Branch 1 Name
+
+  Connector:Mixer,
+    CDUDemandMixer,          !- Name
+    CDUDemandOutletBranch,   !- Outlet Branch Name
+    ColdPlateBranch;         !- Inlet Branch 1 Name
+
+  Branch,
+    ColdPlateBranch,         !- Name
+    ,                        !- Pressure Drop Curve Name
+    Coil:Cooling:ITE:Coldplate,  !- Component 1 Object Type
+    ColdPlate,               !- Component 1 Name
+    Cold Plate Inlet Node,   !- Component 1 Inlet Node Name
+    Cold Plate Outlet Node;  !- Component 1 Outlet Node Name
+
+  Branch,
+    CDUDemandOutletBranch,   !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    CDUDemandOutletPipe,     !- Component 1 Name
+    CDU Demand Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    CDU Demand Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    CDUDemandOutletPipe,     !- Name
+    CDU Demand Outlet Pipe Inlet Node,  !- Inlet Node Name
+    CDU Demand Outlet Pipe Outlet Node;  !- Outlet Node Name
+
+  BranchList,
+    CDUDemandBranchList,     !- Name
+    CDUDemandInletPipeBranch,  !- Branch 1 Name
+    ColdPlateBranch,         !- Branch 2 Name
+    CDUDemandOutletBranch;   !- Branch 3 Name
+
+  PlantLoop,
+    Main Loop,               !- Name
+    Water,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Main Loop Operation,     !- Plant Equipment Operation Scheme Name
+    Supply Outlet Pipe Outlet Node,  !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    0.003,                   !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    autocalculate,           !- Plant Loop Volume {m3}
+    Pump Inlet Node,         !- Plant Side Inlet Node Name
+    Supply Outlet Pipe Outlet Node,  !- Plant Side Outlet Node Name
+    Supply Branches,         !- Plant Side Branch List Name
+    Supply Connectors,       !- Plant Side Connector List Name
+    Demand Inlet Pipe Inlet Node,  !- Demand Side Inlet Node Name
+    Demand Outlet Pipe Outlet Node,  !- Demand Side Outlet Node Name
+    DemandBranches,          !- Demand Side Branch List Name
+    DemandConnectors,        !- Demand Side Connector List Name
+    OPTIMAL;                 !- Load Distribution Scheme
+
+  FluidProperties:GlycolConcentration,
+    PG25,                    !- Name
+    PropyleneGlycol,         !- Glycol Type
+    ,                        !- User Defined Glycol Name
+    0.25;                    !- Glycol Concentration
+
+  Sizing:Plant,
+    CDU,                     !- Plant or Condenser Loop Name
+    Cooling,                 !- Loop Type
+    30,                      !- Design Loop Exit Temperature {C}
+    15;                      !- Loop Design Temperature Difference {deltaC}
+
+  Sizing:Plant,
+    Main Loop,               !- Plant or Condenser Loop Name
+    Cooling,                 !- Loop Type
+    30,                      !- Design Loop Exit Temperature {C}
+    15;                      !- Loop Design Temperature Difference {deltaC}
+
+  SetpointManager:Scheduled,
+    Main Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    MainLoopTempSch,         !- Schedule Name
+    Main Loop Setpoint Node List;  !- Setpoint Node or NodeList Name
+
+  NodeList,
+    Main Loop Setpoint Node List,  !- Name
+    Supply Outlet Pipe Outlet Node;  !- Node 1 Name
+
+  SetpointManager:Scheduled,
+    CDULoopSetpointManager,  !- Name
+    Temperature,             !- Control Variable
+    MainLoopTempSch,         !- Schedule Name
+    CDU Supply Outlet Pipe Outlet Node;  !- Setpoint Node or NodeList Name
+
+  PlantEquipmentOperationSchemes,
+    CDULoopOperation,        !- Name
+    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+    CDUEquipmentOperation,   !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:CoolingLoad,
+    CDUEquipmentOperation,   !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    CDUEquipment;            !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    CDUEquipment,            !- Name
+    HeatExchanger:FluidToFluid,  !- Equipment 1 Object Type
+    CDUHX;                   !- Equipment 1 Name
+
+  PlantEquipmentOperationSchemes,
+    Main Loop Operation,     !- Name
+    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+    PlantEquipmentOperation, !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:CoolingLoad,
+    PlantEquipmentOperation, !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    CoolingPlantEquipment;   !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    CoolingPlantEquipment,   !- Name
+    Chiller:ConstantCOP,     !- Equipment 1 Object Type
+    SupplySideCoolingEquipment;  !- Equipment 1 Name
+
+  BranchList,
+    Supply Branches,         !- Name
+    Supply Inlet Branch,     !- Branch 1 Name
+    CoolingBranch,           !- Branch 2 Name
+    SupplyOutletBranch;      !- Branch 3 Name
+
+  ConnectorList,
+    Supply Connectors,       !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Supply Splitter,         !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Supply Mixer;            !- Connector 2 Name
+
+  Connector:Splitter,
+    Supply Splitter,         !- Name
+    Supply Inlet Branch,     !- Inlet Branch Name
+    CoolingBranch;           !- Outlet Branch 1 Name
+
+  Connector:Mixer,
+    Supply Mixer,            !- Name
+    SupplyOutletBranch,      !- Outlet Branch Name
+    CoolingBranch;           !- Inlet Branch 1 Name
+
+  Branch,
+    Supply Inlet Branch,     !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    Pump,                    !- Component 1 Name
+    Pump Inlet Node,         !- Component 1 Inlet Node Name
+    Pump Outlet Node;        !- Component 1 Outlet Node Name
+
+  Pump:VariableSpeed,
+    Pump,                    !- Name
+    Pump Inlet Node,         !- Inlet Node Name
+    Pump Outlet Node,        !- Outlet Node Name
+    autosize,                !- Design Maximum Flow Rate {m3/s}
+    0.1,                     !- Design Pump Head {Pa}
+    autosize,                !- Design Power Consumption {W}
+    0.9,                     !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    Continuous;              !- Pump Control Type
+
+  Branch,
+    CoolingBranch,           !- Name
+    ,                        !- Pressure Drop Curve Name
+    Chiller:ConstantCOP,     !- Component 1 Object Type
+    SupplySideCoolingEquipment,  !- Component 1 Name
+    Supply Side Cooling Equipment Inlet Node,  !- Component 1 Inlet Node Name
+    Supply Side Cooling Equipment Outlet Node;  !- Component 1 Outlet Node Name
+
+  OutdoorAir:Node,
+    Chiller Condenser Outdoor Air Node;  !- Name
+
+  Chiller:ConstantCOP,
+    SupplySideCoolingEquipment,  !- Name
+    autosize,                !- Nominal Capacity {W}
+    5,                       !- Nominal COP {W/W}
+    autosize,                !- Design Chilled Water Flow Rate {m3/s}
+    autosize,                !- Design Condenser Water Flow Rate {m3/s}
+    Supply Side Cooling Equipment Inlet Node,  !- Chilled Water Inlet Node Name
+    Supply Side Cooling Equipment Outlet Node,  !- Chilled Water Outlet Node Name
+    Chiller Condenser Outdoor Air Node,  !- Condenser Inlet Node Name
+    ,                        !- Condenser Outlet Node Name
+    AirCooled,               !- Condenser Type
+    ConstantFlow,            !- Chiller Flow Mode
+    1.0;                     !- Sizing Factor
+
+  Branch,
+    SupplyOutletBranch,      !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    SupplyOutletPipe,        !- Component 1 Name
+    Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Supply Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    SupplyOutletPipe,        !- Name
+    Supply Outlet Pipe Inlet Node,  !- Inlet Node Name
+    Supply Outlet Pipe Outlet Node;  !- Outlet Node Name
+
+  BranchList,
+    DemandBranches,          !- Name
+    DemandInletBranch,       !- Branch 1 Name
+    HXBranch,                !- Branch 2 Name
+    DemandOutletBranch;      !- Branch 3 Name
+
+  ConnectorList,
+    DemandConnectors,        !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    DemandSplitter,          !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    DemandMixer;             !- Connector 2 Name
+
+  Connector:Splitter,
+    DemandSplitter,          !- Name
+    DemandInletBranch,       !- Inlet Branch Name
+    HXBranch;                !- Outlet Branch 1 Name
+
+  Connector:Mixer,
+    DemandMixer,             !- Name
+    DemandOutletBranch,      !- Outlet Branch Name
+    HXBranch;                !- Inlet Branch 1 Name
+
+  Branch,
+    DemandInletBranch,       !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    DemandInletPipe,         !- Component 1 Name
+    Demand Inlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Demand Inlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    DemandInletPipe,         !- Name
+    Demand Inlet Pipe Inlet Node,  !- Inlet Node Name
+    Demand Inlet Pipe Outlet Node;  !- Outlet Node Name
+
+  Branch,
+    HXBranch,                !- Name
+    ,                        !- Pressure Drop Curve Name
+    HeatExchanger:FluidToFluid,  !- Component 1 Object Type
+    CDUHX,                   !- Component 1 Name
+    CDU HX Demand Inlet Node,  !- Component 1 Inlet Node Name
+    CDU HX Demand Outlet Node;  !- Component 1 Outlet Node Name
+
+  Curve:Exponent,
+    ColdPlateThermalResistanceModifier,  !- Name
+    0,                       !- Coefficient1 Constant
+    1,                       !- Coefficient2 Constant
+    -0.452,                  !- Coefficient3 Constant
+    0.2,                     !- Minimum Value of x
+    999;                     !- Maximum Value of x
+
+  Schedule:Compact,
+    ITELoad,                 !- Name
+    Any Number,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: Saturday Sunday,           !- Field 2
+    Until: 24:00,            !- Field 3
+    0.0,                    !- Field 4
+    For: Weekdays,           !- Field 5
+    Until: 08:00,            !- Field 6
+    1500,                    !- Field 7
+    Until: 14:00,            !- Field 8
+    2000,                    !- Field 9
+    Until: 24:00,            !- Field 10
+    1500;                    !- Field 11
+
+  Schedule:Compact,
+    ColdPlateAvailability,   !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 08:00,            !- Field 3
+    0.0,                     !- Field 4
+    Until: 20:00,            !- Field 5
+    1.0,                     !- Field 6
+    Until: 24:00,            !- Field 7
+    0.0;                     !- Field 8
+
+  Coil:Cooling:ITE:ColdPlate,
+    ColdPlate,               !- Name
+    ColdPlateAvailability,   !- Availability Schedule Name
+    Cold Plate Inlet Node,   !- Inlet Node
+    Cold Plate Outlet Node,  !- Outlet Node
+    0.025,                   !- Nominal Thermal Resistance {K/W}
+    85,                      !- Maximum Case Temperature {C}
+    80,                      !- Target Case Operating Temperature {C}
+    ColdPlateThermalResistanceModifier,  !- Thermal Resistance Modifier Curve Name
+    LMTD,                    !- Thermal Resistance Method
+    autosize,                !- Nominal Liquid Flow Rate {m3/s}
+    autosize,                !- Maximum Liquid Flow Rate {m3/s}
+    30,                      !- Auxiliary Electric Power {W}
+    Zone One,                !- Zone Name
+    VariableFlow,            !- Flow Mode
+    ColdPlateAuxiliary,      !- End-Use Subcategory
+    ITELoad;                 !- IT Equipment Load Schedule Name
+
+  Branch,
+    DemandOutletBranch,      !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic,          !- Component 1 Object Type
+    DemandOutletPipe,        !- Component 1 Name
+    Demand Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Demand Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    DemandOutletPipe,        !- Name
+    Demand Outlet Pipe Inlet Node,  !- Inlet Node Name
+    Demand Outlet Pipe Outlet Node;  !- Outlet Node Name
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  ScheduleTypeLimits,
+    On/Off,                  !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    DISCRETE;                !- Numeric Type
+
+  Schedule:Compact,
+    MainLoopTempSch,         !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,            !- Field 3
+    30;                      !- Field 4
+
+  Schedule:Compact,
+    AlwaysOnSchedule,        !- Name
+    On/Off,                  !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,            !- Field 3
+    1;                       !- Field 4
+
+  Material:NoMass,
+    R13LAYER,                !- Name
+    Rough,                   !- Roughness
+    2.290965,                !- Thermal Resistance {m2-K/W}
+    0.9000000,               !- Thermal Absorptance
+    0.7500000,               !- Solar Absorptance
+    0.7500000;               !- Visible Absorptance
+
+  Material:NoMass,
+    R31LAYER,                !- Name
+    Rough,                   !- Roughness
+    5.456,                   !- Thermal Resistance {m2-K/W}
+    0.9000000,               !- Thermal Absorptance
+    0.7500000,               !- Solar Absorptance
+    0.7500000;               !- Visible Absorptance
+
+  Material,
+    C5 - 4 IN HW CONCRETE,   !- Name
+    MediumRough,             !- Roughness
+    0.1014984,               !- Thickness {m}
+    1.729577,                !- Conductivity {W/m-K}
+    2242.585,                !- Density {kg/m3}
+    836.8000,                !- Specific Heat {J/kg-K}
+    0.9000000,               !- Thermal Absorptance
+    0.6500000,               !- Solar Absorptance
+    0.6500000;               !- Visible Absorptance
+
+  Construction,
+    R13WALL,                 !- Name
+    R13LAYER;                !- Outside Layer
+
+  Construction,
+    FLOOR,                   !- Name
+    C5 - 4 IN HW CONCRETE;   !- Outside Layer
+
+  Construction,
+    ROOF31,                  !- Name
+    R31LAYER;                !- Outside Layer
+
+  Zone,
+    ZONE ONE,                !- Name
+    0,                       !- Direction of Relative North {deg}
+    0,                       !- X Origin {m}
+    0,                       !- Y Origin {m}
+    0,                       !- Z Origin {m}
+    1,                       !- Type
+    1,                       !- Multiplier
+    autocalculate,           !- Ceiling Height {m}
+    autocalculate;           !- Volume {m3}
+
+  ScheduleTypeLimits,
+    Fraction,                !- Name
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
+    CONTINUOUS;              !- Numeric Type
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    World;                   !- Coordinate System
+
+  BuildingSurface:Detailed,
+    Zn001:Wall001,           !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0.5000000,               !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0,                       !- Vertex 1 X-coordinate {m}
+    0,                       !- Vertex 1 Y-coordinate {m}
+    4.572000,                !- Vertex 1 Z-coordinate {m}
+    0,                       !- Vertex 2 X-coordinate {m}
+    0,                       !- Vertex 2 Y-coordinate {m}
+    0,                       !- Vertex 2 Z-coordinate {m}
+    15.24000,                !- Vertex 3 X-coordinate {m}
+    0,                       !- Vertex 3 Y-coordinate {m}
+    0,                       !- Vertex 3 Z-coordinate {m}
+    15.24000,                !- Vertex 4 X-coordinate {m}
+    0,                       !- Vertex 4 Y-coordinate {m}
+    4.572000;                !- Vertex 4 Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Wall002,           !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0.5000000,               !- View Factor to Ground
+    4,                       !- Number of Vertices
+    15.24000,                !- Vertex 1 X-coordinate {m}
+    0,                       !- Vertex 1 Y-coordinate {m}
+    4.572000,                !- Vertex 1 Z-coordinate {m}
+    15.24000,                !- Vertex 2 X-coordinate {m}
+    0,                       !- Vertex 2 Y-coordinate {m}
+    0,                       !- Vertex 2 Z-coordinate {m}
+    15.24000,                !- Vertex 3 X-coordinate {m}
+    15.24000,                !- Vertex 3 Y-coordinate {m}
+    0,                       !- Vertex 3 Z-coordinate {m}
+    15.24000,                !- Vertex 4 X-coordinate {m}
+    15.24000,                !- Vertex 4 Y-coordinate {m}
+    4.572000;                !- Vertex 4 Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Wall003,           !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0.5000000,               !- View Factor to Ground
+    4,                       !- Number of Vertices
+    15.24000,                !- Vertex 1 X-coordinate {m}
+    15.24000,                !- Vertex 1 Y-coordinate {m}
+    4.572000,                !- Vertex 1 Z-coordinate {m}
+    15.24000,                !- Vertex 2 X-coordinate {m}
+    15.24000,                !- Vertex 2 Y-coordinate {m}
+    0,                       !- Vertex 2 Z-coordinate {m}
+    0,                       !- Vertex 3 X-coordinate {m}
+    15.24000,                !- Vertex 3 Y-coordinate {m}
+    0,                       !- Vertex 3 Z-coordinate {m}
+    0,                       !- Vertex 4 X-coordinate {m}
+    15.24000,                !- Vertex 4 Y-coordinate {m}
+    4.572000;                !- Vertex 4 Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Wall004,           !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0.5000000,               !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0,                       !- Vertex 1 X-coordinate {m}
+    15.24000,                !- Vertex 1 Y-coordinate {m}
+    4.572000,                !- Vertex 1 Z-coordinate {m}
+    0,                       !- Vertex 2 X-coordinate {m}
+    15.24000,                !- Vertex 2 Y-coordinate {m}
+    0,                       !- Vertex 2 Z-coordinate {m}
+    0,                       !- Vertex 3 X-coordinate {m}
+    0,                       !- Vertex 3 Y-coordinate {m}
+    0,                       !- Vertex 3 Z-coordinate {m}
+    0,                       !- Vertex 4 X-coordinate {m}
+    0,                       !- Vertex 4 Y-coordinate {m}
+    4.572000;                !- Vertex 4 Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Flr001,            !- Name
+    Floor,                   !- Surface Type
+    FLOOR,                   !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    1.000000,                !- View Factor to Ground
+    4,                       !- Number of Vertices
+    15.24000,                !- Vertex 1 X-coordinate {m}
+    0.000000,                !- Vertex 1 Y-coordinate {m}
+    0.0,                     !- Vertex 1 Z-coordinate {m}
+    0.000000,                !- Vertex 2 X-coordinate {m}
+    0.000000,                !- Vertex 2 Y-coordinate {m}
+    0.0,                     !- Vertex 2 Z-coordinate {m}
+    0.000000,                !- Vertex 3 X-coordinate {m}
+    15.24000,                !- Vertex 3 Y-coordinate {m}
+    0.0,                     !- Vertex 3 Z-coordinate {m}
+    15.24000,                !- Vertex 4 X-coordinate {m}
+    15.24000,                !- Vertex 4 Y-coordinate {m}
+    0.0;                     !- Vertex 4 Z-coordinate {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Roof001,           !- Name
+    Roof,                    !- Surface Type
+    ROOF31,                  !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0,                       !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0.000000,                !- Vertex 1 X-coordinate {m}
+    15.24000,                !- Vertex 1 Y-coordinate {m}
+    4.572,                   !- Vertex 1 Z-coordinate {m}
+    0.000000,                !- Vertex 2 X-coordinate {m}
+    0.000000,                !- Vertex 2 Y-coordinate {m}
+    4.572,                   !- Vertex 2 Z-coordinate {m}
+    15.24000,                !- Vertex 3 X-coordinate {m}
+    0.000000,                !- Vertex 3 Y-coordinate {m}
+    4.572,                   !- Vertex 3 Z-coordinate {m}
+    15.24000,                !- Vertex 4 X-coordinate {m}
+    15.24000,                !- Vertex 4 Y-coordinate {m}
+    4.572;                   !- Vertex 4 Z-coordinate {m}
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Heat Transfer Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Heat Transfer Energy,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Zone Heat Gain Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Zone Heat Gain Energy,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Case Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Inlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Outlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Auxiliary Electric Power,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Auxiliary Electric Energy,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Pump Mass Flow Rate,     !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Zone Air Temperature,    !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Chiller Evaporator Cooling Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Coil Cooling ITE Cold Plate Effective Thermal Resistance,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Chiller Evaporator Outlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Supply Outlet Pipe Outlet Node,  !- Key Value
+    System Node Temperature, !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Supply Outlet Pipe Outlet Node,  !- Key Value
+    System Node Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Cold Plate Inlet Node,   !- Key Value
+    System Node Temperature, !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Cold Plate Inlet Node,   !- Key Value
+    System Node Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Demand Inlet Pipe Inlet Node,  !- Key Value
+    System Node Temperature, !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    Demand Inlet Pipe Inlet Node,  !- Key Value
+    System Node Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Heat Transfer Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Heat Transfer Energy,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Supply Side Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Supply Side Inlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Supply Side Outlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Demand Side Mass Flow Rate,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Demand Side Inlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Loop Demand Side Outlet Temperature,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Operation Status,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Variable,
+    *,                       !- Key Value
+    Fluid Heat Exchanger Effectiveness,  !- Variable Name
+    hourly;                  !- Reporting Frequency
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
+
+  Output:VariableDictionary,
+    IDF;                     !- Key Field
