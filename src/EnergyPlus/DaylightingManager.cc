@@ -50,6 +50,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <numeric>
 #include <string>
 
 // ObjexxFCL Headers
@@ -1199,6 +1200,8 @@ void CalcDayltgCoeffsMapPoints(EnergyPlusData &state, int const mapNum)
     int iHrEnd = state.dataSysVars->DetailedSolarTimestepIntegration ? state.dataGlobal->HourOfDay : Constant::iHoursInDay;
 
     for (int iHr = iHrBeg; iHr <= iHrEnd; ++iHr) {
+        // The array elements are reset below; cppcheck does not recognize mutation through this ObjexxFCL alias.
+        // cppcheck-suppress constVariableReference
         auto &daylFacHr = illumMap.daylFac[iHr];
         for (int iWin = 1; iWin <= numExtWins; ++iWin) {
             for (int iRefPt = 1; iRefPt <= numRefPts; ++iRefPt) {
@@ -4968,13 +4971,9 @@ void GetInputDayliteRefPt(EnergyPlusData &state, bool &ErrorsFound)
 
 bool doesDayLightingUseDElight(EnergyPlusData const &state)
 {
-    auto const &dl = state.dataDayltg;
-    for (auto const &znDayl : dl->daylightControl) {
-        if (znDayl.DaylightMethod == DaylightingMethod::DElight) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(state.dataDayltg->daylightControl.begin(), state.dataDayltg->daylightControl.end(), [](auto const &daylightControl) {
+        return daylightControl.DaylightMethod == DaylightingMethod::DElight;
+    });
 }
 
 void CheckTDDsAndLightShelvesInDaylitZones(EnergyPlusData &state)
@@ -6419,13 +6418,9 @@ void DayltgInteriorIllum(EnergyPlusData &state,
     // Check if glare level is less than maximum allowed at each ref pt.  If maximum
     // is exceeded at either ref pt, attempt to reduce glare to acceptable level by closing
     // shading device on windows that have shades that have not already been closed.
-    GlareFlag = false;
-    for (auto const &refPt : thisDayltgCtrl.refPts) {
-        if (refPt.glareIndex > thisDayltgCtrl.MaxGlareallowed) {
-            GlareFlag = true;
-            break;
-        }
-    }
+    GlareFlag = std::any_of(thisDayltgCtrl.refPts.begin(),
+                            thisDayltgCtrl.refPts.end(),
+                            [maxGlareAllowed = thisDayltgCtrl.MaxGlareallowed](auto const &refPt) { return refPt.glareIndex > maxGlareAllowed; });
 
     if (GlareFlag) {
         bool blnCycle = false;
@@ -9713,9 +9708,7 @@ void DayltgSetupAdjZoneListsAndPointers(EnergyPlusData &state)
 
         for (auto &refPt : illumMap.refPts) {
             refPt.winLums.allocate(numExtWin);
-            for (auto &winLums : refPt.winLums) {
-                winLums = {0.0, 0.0};
-            }
+            std::fill(refPt.winLums.begin(), refPt.winLums.end(), std::array<Real64, (int)DataSurfaces::WinCover::Num>{0.0, 0.0});
         }
 
         for (int iHr = 1; iHr <= Constant::iHoursInDay; ++iHr) {
@@ -9959,13 +9952,10 @@ void CalcMinIntWinSolidAngs(EnergyPlusData &state)
 
             // This is an interior window in enclNum
             int const winAdjEnclNum = s_surf->Surface(surf.ExtBoundCond).SolarEnclIndex;
-            bool IntWinNextToIntWinAdjZone = false; // True if an interior window is next to a zone with one or more exterior windows
-            for (int adjEnclNum : thisEnclDaylight.AdjIntWinEnclNums) {
-                if (winAdjEnclNum == adjEnclNum) {
-                    IntWinNextToIntWinAdjZone = true;
-                    break;
-                }
-            }
+            // True if an interior window is next to a zone with one or more exterior windows
+            bool IntWinNextToIntWinAdjZone = std::any_of(thisEnclDaylight.AdjIntWinEnclNums.begin(),
+                                                         thisEnclDaylight.AdjIntWinEnclNums.end(),
+                                                         [winAdjEnclNum](int adjEnclNum) { return winAdjEnclNum == adjEnclNum; });
 
             if (!IntWinNextToIntWinAdjZone) {
                 continue;

@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -2805,14 +2806,9 @@ namespace HeatBalFiniteDiffManager {
         if (state.dataConstruction->Construct(constructionNum).IsCondFD) {
             return true;
         }
-        for (auto const &thisSurface : state.dataSurface->Surface) {
-            if (thisSurface.Construction == constructionNum) {
-                if (thisSurface.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::CondFD) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return std::any_of(state.dataSurface->Surface.begin(), state.dataSurface->Surface.end(), [constructionNum](auto const &surface) {
+            return surface.Construction == constructionNum && surface.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::CondFD;
+        });
     }
 
 } // namespace HeatBalFiniteDiffManager

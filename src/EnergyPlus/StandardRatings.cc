@@ -5393,7 +5393,6 @@ namespace StandardRatings {
                     Curve::CurveValue(state, CapFTempCurveIndex(nsp), IndoorCoilInletAirWetBulbTempRated, OutdoorCoilInletAirDryBulbTempTestA2) *
                     TotCapFlowModFac -
                 FanPowerPerEvapAirFlowRateFromInput_2023(nsp) * RatedAirVolFlowRate(nsp);
-            StandardRatingsResult["NetCoolingCapRatedMaxSpeed2023"] = NetCoolingCapRated2023;
             // TODO: Commercial and industrial unitary air-conditioning condensing units with a capacity greater than 135,000 Btu/h (39564.59445
             // Watts) as defined in ANSI/AHRI Standard 365(I-P). | Scope 2.2.6 (ANSI/AHRI 340-360 2022)
 
@@ -5427,7 +5426,6 @@ namespace StandardRatings {
                                                  RatedCOP,
                                                  EIRFTempCurveIndex,
                                                  PLFFPLRCurveIndex);
-                StandardRatingsResult["NetCoolingCapRatedMaxSpeed2023"] = NetCoolingCapRatedMaxSpeed2023;
             }
             // Gross total cooling capacity is greater than 65,000 Btu/h (19049.61955 Watts)
             // Section 2.1 (ANSI/AHRI 210-240 2023)
@@ -5569,7 +5567,6 @@ namespace StandardRatings {
                     Curve::CurveValue(state, CapFTempCurveIndex(nsp), IndoorCoilInletAirWetBulbTempRated, OutdoorCoilInletAirDryBulbTempTestA2) *
                     TotCapFlowModFac -
                 FanPowerPerEvapAirFlowRateFromInput_2023(nsp) * LoopVolumetricAirFlowRateAtSpeedLevel(nsp);
-            StandardRatingsResult["NetCoolingCapRatedMaxSpeed2023"] = NetCoolingCapRatedMaxSpeed2023;
             // TODO: Commercial and industrial unitary air-conditioning condensing units with a capacity greater than 135,000 Btu/h (39564.59445
             // Watts) as defined in ANSI/AHRI Standard 365(I-P). | Scope 2.2.6 (ANSI/AHRI 340-360 2022)
 
@@ -5595,7 +5592,6 @@ namespace StandardRatings {
                                                     RatedCOP,
                                                     EIRFTempCurveIndex,
                                                     VSPLRFPLF);
-                StandardRatingsResult["NetCoolingCapRatedMaxSpeed2023"] = NetCoolingCapRatedMaxSpeed2023;
             }
             // IEER Calculation 2022
             std::tie(IEER_2022, NetCoolingCapRatedMaxSpeed2023, EER_2022) =

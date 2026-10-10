@@ -6642,7 +6642,7 @@ void GetRefrigerationInput(EnergyPlusData &state)
                                             cAlphaFieldNames(AlphaNum),
                                             Alphas(AlphaNum)));
                 ErrorsFound = true;
-            } else if (GCNum != 0) { //  Gas Cooler attached to Transcritical Refrigeration System
+            } else { // Gas Cooler attached to Transcritical Refrigeration System
                 TransSystem(TransRefrigSysNum).GasCoolerNum(NumGasCoolers) = GCNum;
                 TransSystem(TransRefrigSysNum).NumGasCoolers = 1;
                 // Now take care of case where multiple systems share a gas cooler
@@ -10703,6 +10703,8 @@ void RefrigRackData::CalcRackSystem(EnergyPlusData &state)
     // however, be repeated when the last chiller set is called from ZoneEquipmentManager
     // that's why important where init goes, don't want to zero out data should keep
     if (state.dataRefrigCase->UseSysTimeStep) {
+        // CalculateAirChillerSets mutates each set; cppcheck does not model mutation through the ObjexxFCL alias.
+        // cppcheck-suppress constVariableReference
         auto &AirChillerSet = state.dataRefrigCase->AirChillerSet;
         for (int CoilSetIndex = 1; CoilSetIndex <= state.dataRefrigCase->NumRefrigChillerSets; ++CoilSetIndex) {
             AirChillerSet(CoilSetIndex).CalculateAirChillerSets(state);
@@ -10721,6 +10723,8 @@ void RefrigRackData::CalcRackSystem(EnergyPlusData &state)
     } // System(SysNum)%NumCoils > 0
 
     if (this->NumCases > 0) {
+        // CalculateCase mutates each case; cppcheck does not model mutation through the ObjexxFCL alias.
+        // cppcheck-suppress constVariableReference
         auto &RefrigCase = state.dataRefrigCase->RefrigCase;
         for (int caseNum = 1; caseNum <= this->NumCases; ++caseNum) {
             int CaseID = this->CaseNum(caseNum);
@@ -10750,6 +10754,8 @@ void RefrigRackData::CalcRackSystem(EnergyPlusData &state)
     } // Numcases on rack > 0
 
     if (this->NumWalkIns > 0) {
+        // CalculateWalkIn mutates each walk-in; cppcheck does not model mutation through the ObjexxFCL alias.
+        // cppcheck-suppress constVariableReference
         auto &WalkIn = state.dataRefrigCase->WalkIn;
         for (int WalkInIndex = 1; WalkInIndex <= this->NumWalkIns; ++WalkInIndex) {
             int WalkInID = this->WalkInNum(WalkInIndex);

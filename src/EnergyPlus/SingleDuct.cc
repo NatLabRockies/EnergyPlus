@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -2327,9 +2328,9 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
     // Do a check and make sure that the max and min available(control) flow is
     //  between the physical max and min while operating.
     this->sd_airterminalInlet.AirMassFlowRateMaxAvail = min(this->AirMassFlowRateMax, state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail);
-    this->sd_airterminalInlet.AirMassFlowRateMinAvail =
-        min(max(state.dataLoopNodes->Node(OutletNode).MassFlowRateMin, state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail),
-            this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
+    this->sd_airterminalInlet.AirMassFlowRateMinAvail = std::clamp(state.dataLoopNodes->Node(OutletNode).MassFlowRateMin,
+                                                                   state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail,
+                                                                   this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
 
     // Do the following initializations (every time step): This should be the info from
     // the previous components outlets or the node data in this section.

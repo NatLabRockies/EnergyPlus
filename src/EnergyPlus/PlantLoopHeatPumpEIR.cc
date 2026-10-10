@@ -299,7 +299,7 @@ void EIRPlantLoopHeatPump::setOperatingFlowRatesASHP(EnergyPlusData &state, bool
         // apply min/max operating limits based on source side entering fluid temperature
         // or if parallel configuration and no/very small load, the unit is turned off
         bool tempOutOfRange = this->minSourceTempLimit > this->sourceSideInletTemp || this->maxSourceTempLimit < this->sourceSideInletTemp;
-        auto &comp = DataPlant::CompData::getPlantComponent(state, this->loadSidePlantLoc);
+        auto const &comp = DataPlant::CompData::getPlantComponent(state, this->loadSidePlantLoc);
         bool loadIndicator = false;
         if (this->sysControlType == ControlType::Setpoint) {
             Real64 leavingSetpoint = this->getLoadSideOutletSetPointTemp(state);

@@ -4805,11 +4805,10 @@ void reportAirLoopToplogy(EnergyPlusData &state)
         for (int BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
             auto &pasBranch = pas.Branch(BranchNum);
             if (pas.Splitter.Exists) {
-                for (int outNum : pas.Splitter.BranchNumOut) {
-                    if (outNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Splitter.BranchNumOut.begin(), pas.Splitter.BranchNumOut.end(), [BranchNum](int outNum) {
+                        return outNum == BranchNum;
+                    })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
                 }
             }
             for (int CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
@@ -4839,11 +4838,8 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                 }
             }
             if (pas.Mixer.Exists) {
-                for (int inNum : pas.Mixer.BranchNumIn) {
-                    if (inNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Mixer.BranchNumIn.begin(), pas.Mixer.BranchNumIn.end(), [BranchNum](int inNum) { return inNum == BranchNum; })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
                 }
             }
         }

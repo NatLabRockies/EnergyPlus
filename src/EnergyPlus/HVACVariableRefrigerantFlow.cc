@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -4220,7 +4221,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
             if (thisVrfTU.suppHeatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel ||
                 thisVrfTU.suppHeatCoilType == HVAC::CoilType::HeatingElectric) {
-                errFlag = false;
                 if (errFlag) {
                     ShowContinueError(state, "Occurs in " + cCurrentModuleObject + " = " + thisVrfTU.Name);
                     ErrorsFound = true;
@@ -5841,7 +5841,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                                             // //, loc_controlZoneName));
                                             errorsFound = true;
                                         }
-                                    } else if (AirLoopFound) { // control zone name not entered in TU object input
+                                    } else { // control zone name not entered in TU object input
                                         vrfTU.isSetPointControlled = true;
                                     }
                                 }
@@ -6075,7 +6075,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                                 state, std::format("ZoneHVAC:TerminalUnit:VariableRefrigerantFlow: Missing temperature setpoint for {}", vrfTU.Name));
                             ShowContinueError(state, "...use a Setpoint Manager to establish a setpoint at the TU or coil(s) outlet node.");
                             ErrorsFound = true;
-                        } else if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                        } else {
                             bool SPNotFound = false;
                             EMSManager::CheckIfNodeSetPointManagedByEMS(state, vrfTU.VRFTUOutletNodeNum, HVAC::CtrlVarType::Temp, SetPointErrorFlag);
                             SPNotFound = SPNotFound || SetPointErrorFlag;
@@ -10814,7 +10814,7 @@ void VRFTerminalUnitEquipment::CalcVRFIUVariableTeTc(EnergyPlusData &state,
         Tout = T_TU_in - QZnReqSenCoolingLoad * 1.2 / Garate / 1005;
         Th2 = T_coil_in - (T_coil_in - Tout) / (1 - BFC);
         DeltaT = C3Tevap * SH * SH + C2Tevap * SH + C1Tevap;
-        EvapTemp = max(min((Th2 - DeltaT), EvapTempMax), EvapTempMin);
+        EvapTemp = std::clamp((Th2 - DeltaT), EvapTempMin, EvapTempMax);
 
     } else {
         // 1.2) Cooling coil is not running
@@ -10831,7 +10831,7 @@ void VRFTerminalUnitEquipment::CalcVRFIUVariableTeTc(EnergyPlusData &state,
         Tout = T_TU_in + QZnReqSenHeatingLoad / Garate / 1005;
         Th2 = T_coil_in + (Tout - T_coil_in) / (1 - BFH);
         DeltaT = C3Tcond * SC * SC + C2Tcond * SC + C1Tcond;
-        CondTemp = max(min((Th2 + DeltaT), CondTempMax), CondTempMin);
+        CondTemp = std::clamp((Th2 + DeltaT), CondTempMin, CondTempMax);
     } else {
         // 2.2) Heating coil is not running
         CondTemp = T_coil_in;
@@ -11151,13 +11151,13 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
         // Condenser (OU side) operation ranges
         CapMaxPc = min(Psuction + this->CompMaxDeltaP, RefMaxPc);
-        CapMaxTc = this->refrig->getSatTemperature(state, max(min(CapMaxPc, RefPHigh), RefPLow), RoutineName);
+        CapMaxTc = this->refrig->getSatTemperature(state, std::clamp(CapMaxPc, RefPLow, RefPHigh), RoutineName);
         CapMinTc = OutdoorDryBulb + this->SC;
         CapMinPc = this->refrig->getSatPressure(state, CapMinTc, RoutineName);
 
         // Evaporator (IU side) operation ranges
         CapMinPe = max(CapMinPc - this->CompMaxDeltaP, RefMinPe);
-        CapMinTe = this->refrig->getSatTemperature(state, max(min(CapMinPe, RefPHigh), RefPLow), RoutineName);
+        CapMinTe = this->refrig->getSatTemperature(state, std::clamp(CapMinPe, RefPLow, RefPHigh), RoutineName);
 
         // Evaporative capacity ranges
         CompEvaporatingCAPSpdMin = this->CoffEvapCap * this->RatedEvapCapacity * CurveValue(state, this->OUCoolingCAPFT(1), CapMinTc, CapMinTe);
@@ -11185,9 +11185,9 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             if (Q_c_TU_PL > CompEvaporatingCAPSpdMax) {
                 // Required load is beyond the max system capacity
 
-                RefTSat = this->refrig->getSatTemperature(state, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                 h_IU_evap_out = this->refrig->getSupHeatEnthalpy(
-                    state, max(RefTSat, this->IUEvaporatingTemp + 3), max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                    state, max(RefTSat, this->IUEvaporatingTemp + 3), std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                 SH_IU_merged = 3;
                 m_ref_IU_evap = TU_CoolingLoad / (h_IU_evap_out - h_IU_evap_in);
 
@@ -11199,11 +11199,11 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                         auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
                         CoolCoilIndex = vrfTU.CoolCoilIndex;
 
-                        RefTSat = this->refrig->getSatTemperature(state, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                        RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                         h_IU_evap_out_i = this->refrig->getSupHeatEnthalpy(
                             state,
                             max(RefTSat, this->IUEvaporatingTemp + state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH),
-                            max(min(Pevap, RefPHigh), RefPLow),
+                            std::clamp(Pevap, RefPLow, RefPHigh),
                             RoutineName);
 
                         if (h_IU_evap_out_i > h_IU_evap_in) {
@@ -11221,9 +11221,9 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                     h_IU_evap_out = h_IU_evap_out / m_ref_IU_evap;
                     SH_IU_merged = SH_IU_merged / m_ref_IU_evap;
                 } else {
-                    RefTSat = this->refrig->getSatTemperature(state, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                    RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                     h_IU_evap_out = this->refrig->getSupHeatEnthalpy(
-                        state, max(RefTSat, this->IUEvaporatingTemp + 3), max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                        state, max(RefTSat, this->IUEvaporatingTemp + 3), std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                     SH_IU_merged = 3;
                     m_ref_IU_evap = TU_CoolingLoad / (h_IU_evap_out - h_IU_evap_in);
                 }
@@ -11232,19 +11232,19 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             // *Calculate piping loss
             this->VRFOU_PipeLossC(state,
                                   m_ref_IU_evap,
-                                  max(min(Pevap, RefPHigh), RefPLow),
+                                  std::clamp(Pevap, RefPLow, RefPHigh),
                                   h_IU_evap_out,
                                   SH_IU_merged,
                                   OutdoorDryBulb,
                                   Pipe_Q_c,
                                   Pipe_DeltP_c,
                                   h_comp_in);
-            Tsuction = this->refrig->getSatTemperature(state, max(min(Pevap - Pipe_DeltP_c, RefPHigh), RefPLow), RoutineName);
+            Tsuction = this->refrig->getSatTemperature(state, std::clamp(Pevap - Pipe_DeltP_c, RefPLow, RefPHigh), RoutineName);
             Psuction = Pevap - Pipe_DeltP_c; // This Psuction is used for rps > min; will be updated for rps = min
 
             // Perform iteration to calculate T_comp_in
             T_comp_in = this->refrig->getSupHeatTemp(
-                state, max(min(Pevap - Pipe_DeltP_c, RefPHigh), RefPLow), h_comp_in, Tsuction + 3, Tsuction + 30, RoutineName);
+                state, std::clamp(Pevap - Pipe_DeltP_c, RefPLow, RefPHigh), h_comp_in, Tsuction + 3, Tsuction + 30, RoutineName);
             SH_Comp = T_comp_in - Tsuction; // This is used for rps > min; will be updated for rps = min
 
             Q_c_TU_PL = TU_CoolingLoad + Pipe_Q_c;
@@ -11252,7 +11252,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
             // *Calculate capacity modification factor
             C_cap_operation = this->VRFOU_CapModFactor(
-                state, h_comp_in, h_IU_evap_in, max(min(Psuction, RefPHigh), RefPLow), Tsuction + SH_Comp, Tsuction + 8, CapMinTc - 5);
+                state, h_comp_in, h_IU_evap_in, std::clamp(Psuction, RefPLow, RefPHigh), Tsuction + SH_Comp, Tsuction + 8, CapMinTc - 5);
 
             // Iteration_Ncomp: Perform iterations to calculate localNcomp (Label10)
             Counter = 1;
@@ -11375,7 +11375,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
         h_IU_cond_in_low = this->refrig->getSatEnthalpy(state, this->IUCondensingTemp, 1.0, RoutineName); // Quality=1
         h_IU_cond_in = h_IU_cond_in_low;
 
-        bool converged_23;
         do {
             m_ref_IU_cond = 0;
             h_IU_cond_out_ave = 0;
@@ -11387,7 +11386,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
                 h_IU_cond_out =
                     this->refrig->getSatEnthalpy(state,
-                                                 this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName) - 5.0,
+                                                 this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) - 5.0,
                                                  0.0,
                                                  RoutineName); // Quality=0
                 h_IU_cond_out_ave = h_IU_cond_out;
@@ -11402,7 +11401,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                         HeatCoilIndex = vrfTU.HeatCoilIndex;
                         h_IU_cond_out_i =
                             this->refrig->getSatEnthalpy(state,
-                                                         this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName) -
+                                                         this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) -
                                                              state.dataDXCoils->DXCoil(HeatCoilIndex).ActualSC,
                                                          0.0,
                                                          RoutineName); // Quality=0
@@ -11419,7 +11418,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                 } else {
                     h_IU_cond_out_ave =
                         this->refrig->getSatEnthalpy(state,
-                                                     this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName) - 5.0,
+                                                     this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) - 5.0,
                                                      0.0,
                                                      RoutineName); // Quality=0
                     SC_IU_merged = 5;
@@ -11429,15 +11428,15 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
             // *Calculate piping loss
             this->VRFOU_PipeLossH(
-                state, m_ref_IU_cond, max(min(Pcond, RefPHigh), RefPLow), h_IU_cond_in, OutdoorDryBulb, Pipe_Q_h, Pipe_DeltP_h, h_comp_out);
+                state, m_ref_IU_cond, std::clamp(Pcond, RefPLow, RefPHigh), h_IU_cond_in, OutdoorDryBulb, Pipe_Q_h, Pipe_DeltP_h, h_comp_out);
 
             Pdischarge = max(Pcond + Pipe_DeltP_h, Pcond); // affected by piping loss
-            Tdischarge = this->refrig->getSatTemperature(state, max(min(Pdischarge, RefPHigh), RefPLow), RoutineName);
+            Tdischarge = this->refrig->getSatTemperature(state, std::clamp(Pdischarge, RefPLow, RefPHigh), RoutineName);
 
             // Evaporative capacity ranges_Min
             // suction pressure lower bound need to be no less than both terms in the following
             CapMinPe = max(Pdischarge - this->CompMaxDeltaP, RefMinPe);
-            CapMinTe = this->refrig->getSatTemperature(state, max(min(CapMinPe, RefPHigh), RefPLow), RoutineName);
+            CapMinTe = this->refrig->getSatTemperature(state, std::clamp(CapMinPe, RefPLow, RefPHigh), RoutineName);
             CompEvaporatingCAPSpdMin = this->CoffEvapCap * this->RatedEvapCapacity * CurveValue(state, this->OUCoolingCAPFT(1), Tdischarge, CapMinTe);
             CompEvaporatingPWRSpdMin = this->RatedCompPower * CurveValue(state, this->OUCoolingPWRFT(1), Tdischarge, CapMinTe);
 
@@ -11445,13 +11444,13 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             Q_c_OU = max(0.0, Q_h_TU_PL - CompEvaporatingPWRSpdMin);
 
             // *Calculate capacity modification factor
-            RefTSat = this->refrig->getSatTemperature(state, max(min(CapMinPe, RefPHigh), RefPLow), RoutineName);
+            RefTSat = this->refrig->getSatTemperature(state, std::clamp(CapMinPe, RefPLow, RefPHigh), RoutineName);
             h_comp_in =
-                this->refrig->getSupHeatEnthalpy(state, max(RefTSat, CapMinTe + this->SH), max(min(CapMinPe, RefPHigh), RefPLow), RoutineName);
+                this->refrig->getSupHeatEnthalpy(state, max(RefTSat, CapMinTe + this->SH), std::clamp(CapMinPe, RefPLow, RefPHigh), RoutineName);
             C_cap_operation = this->VRFOU_CapModFactor(state,
                                                        h_comp_in,
                                                        h_IU_cond_out_ave,
-                                                       max(min(CapMinPe, RefPHigh), RefPLow),
+                                                       std::clamp(CapMinPe, RefPLow, RefPHigh),
                                                        CapMinTe + this->SH,
                                                        CapMinTe + 8,
                                                        this->IUCondensingTemp - 5);
@@ -11542,12 +11541,12 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
             // Update h_comp_out in iteration Label23
             P_comp_in = this->refrig->getSatPressure(state, this->EvaporatingTemp, RoutineName);
-            RefTSat = this->refrig->getSatTemperature(state, max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
+            RefTSat = this->refrig->getSatTemperature(state, std::clamp(P_comp_in, RefPLow, RefPHigh), RoutineName);
             h_comp_in_new = this->refrig->getSupHeatEnthalpy(
-                state, max(RefTSat, this->SH + this->EvaporatingTemp), max(min(P_comp_in, RefPHigh), RefPLow), RoutineName);
+                state, max(RefTSat, this->SH + this->EvaporatingTemp), std::clamp(P_comp_in, RefPLow, RefPHigh), RoutineName);
             h_comp_out_new = Ncomp_new / m_ref_IU_cond + h_comp_in_new;
 
-            converged_23 = !((std::abs(h_comp_out - h_comp_out_new) > Tolerance * h_comp_out) && (h_IU_cond_in < h_IU_cond_in_up));
+            bool const converged_23 = !((std::abs(h_comp_out - h_comp_out_new) > Tolerance * h_comp_out) && (h_IU_cond_in < h_IU_cond_in_up));
             if (!converged_23) {
                 h_IU_cond_in = h_IU_cond_in + 0.1 * (h_IU_cond_in_up - h_IU_cond_in_low);
             } else {
@@ -11558,7 +11557,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                 break;
             }
 
-        } while (!converged_23);
+        } while (true);
 
         // Key outputs of this subroutine
         Q_c_OU *= CyclingRatio;
@@ -11603,13 +11602,13 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
         // Condenser (OU side) operation ranges
         CapMaxPc = min(Psuction + this->CompMaxDeltaP, RefMaxPc);
-        CapMaxTc = this->refrig->getSatTemperature(state, max(min(CapMaxPc, RefPHigh), RefPLow), RoutineName);
+        CapMaxTc = this->refrig->getSatTemperature(state, std::clamp(CapMaxPc, RefPLow, RefPHigh), RoutineName);
         CapMinTc = OutdoorDryBulb + this->SC;
         CapMinPc = this->refrig->getSatPressure(state, CapMinTc, RoutineName);
 
         // Evaporator (IU side) operation ranges
         CapMinPe = max(CapMinPc - this->CompMaxDeltaP, RefMinPe);
-        CapMinTe = this->refrig->getSatTemperature(state, max(min(CapMinPe, RefPHigh), RefPLow), RoutineName);
+        CapMinTe = this->refrig->getSatTemperature(state, std::clamp(CapMinPe, RefPLow, RefPHigh), RoutineName);
 
         //===**h_comp_out Iteration Starts
 
@@ -11637,7 +11636,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                     HeatCoilIndex = vrfTU.HeatCoilIndex;
                     h_IU_cond_out_i =
                         this->refrig->getSatEnthalpy(state,
-                                                     this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName) -
+                                                     this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) -
                                                          state.dataDXCoils->DXCoil(HeatCoilIndex).ActualSC,
                                                      0.0,
                                                      RoutineName); // Quality=0
@@ -11654,7 +11653,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             } else {
                 h_IU_cond_out_ave =
                     this->refrig->getSatEnthalpy(state,
-                                                 this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName) - 5.0,
+                                                 this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) - 5.0,
                                                  0.0,
                                                  RoutineName); // Quality=0
                 SC_IU_merged = 5;
@@ -11663,9 +11662,9 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
 
             // *PL-h: Calculate piping loss
             this->VRFOU_PipeLossH(
-                state, m_ref_IU_cond, max(min(Pcond, RefPHigh), RefPLow), h_IU_cond_in, OutdoorDryBulb, Pipe_Q_h, Pipe_DeltP_h, h_comp_out);
+                state, m_ref_IU_cond, std::clamp(Pcond, RefPLow, RefPHigh), h_IU_cond_in, OutdoorDryBulb, Pipe_Q_h, Pipe_DeltP_h, h_comp_out);
             Pdischarge = max(Pcond + Pipe_DeltP_h, Pcond); // affected by piping loss
-            Tdischarge = this->refrig->getSatTemperature(state, max(min(Pdischarge, RefPHigh), RefPLow), RoutineName);
+            Tdischarge = this->refrig->getSatTemperature(state, std::clamp(Pdischarge, RefPLow, RefPHigh), RoutineName);
             Q_h_TU_PL = TU_HeatingLoad + Pipe_Q_h;
 
             // *PL-c: Calculate total IU refrigerant flow rate and SH_IU_merged
@@ -11679,11 +11678,11 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                     auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(TUIndex);
                     CoolCoilIndex = vrfTU.CoolCoilIndex;
 
-                    RefTSat = this->refrig->getSatTemperature(state, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                    RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                     h_IU_evap_out_i =
                         this->refrig->getSupHeatEnthalpy(state,
                                                          max(RefTSat, this->IUEvaporatingTemp + state.dataDXCoils->DXCoil(CoolCoilIndex).ActualSH),
-                                                         max(min(Pevap, RefPHigh), RefPLow),
+                                                         std::clamp(Pevap, RefPLow, RefPHigh),
                                                          RoutineName);
 
                     if (h_IU_evap_out_i > h_IU_evap_in) {
@@ -11701,9 +11700,9 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                 h_IU_evap_out = h_IU_evap_out / m_ref_IU_evap;
                 SH_IU_merged = SH_IU_merged / m_ref_IU_evap;
             } else {
-                RefTSat = this->refrig->getSatTemperature(state, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                 h_IU_evap_out = this->refrig->getSupHeatEnthalpy(
-                    state, max(RefTSat, this->IUEvaporatingTemp + 3), max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+                    state, max(RefTSat, this->IUEvaporatingTemp + 3), std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
                 SH_IU_merged = 3;
                 m_ref_IU_evap = TU_CoolingLoad / (h_IU_evap_out - h_IU_evap_in);
             }
@@ -11711,7 +11710,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
             // *PL-c: Calculate piping loss
             this->VRFOU_PipeLossC(state,
                                   m_ref_IU_evap,
-                                  max(min(Pevap, RefPHigh), RefPLow),
+                                  std::clamp(Pevap, RefPLow, RefPHigh),
                                   h_IU_evap_out,
                                   SH_IU_merged,
                                   OutdoorDryBulb,
@@ -11719,7 +11718,7 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                                   Pipe_DeltP_c,
                                   h_IU_PLc_out);
             Psuction = min(Pevap - Pipe_DeltP_c, Pevap); // This Psuction is used for rps > min; will be updated for rps = min
-            Tsuction = this->refrig->getSatTemperature(state, max(min(Psuction, RefPHigh), RefPLow), RoutineName);
+            Tsuction = this->refrig->getSatTemperature(state, std::clamp(Psuction, RefPLow, RefPHigh), RoutineName);
             h_comp_in = h_IU_PLc_out;
             Q_c_TU_PL = TU_CoolingLoad + Pipe_Q_c;
 
@@ -13520,7 +13519,7 @@ void VRFCondenserEquipment::VRFOU_TeModification(
         // Re-calculate piping loss
         this->VRFOU_PipeLossC(state, Pipe_m_ref, Pe_update, Pipe_h_IU_out, Pipe_SH_merged, OutdoorDryBulb, Pipe_Q, Pipe_DeltP, Pipe_h_comp_in);
 
-        Tsuction = this->refrig->getSatTemperature(state, max(min(Pe_update - Pipe_DeltP, RefPHigh), RefPLow), RoutineName);
+        Tsuction = this->refrig->getSatTemperature(state, std::clamp(Pe_update - Pipe_DeltP, RefPLow, RefPHigh), RoutineName);
         converged_11 = !((std::abs(Tsuction - Te_low) > 0.5) && (Te_update < Te_up) && (Te_update > Te_low) && (NumTeIte < MaxNumTeIte));
         Te_update = Te_update - 0.1;
         NumTeIte = NumTeIte + 1;
@@ -13591,12 +13590,12 @@ void VRFCondenserEquipment::VRFOU_CompSpd(
 
     // variable initializations: system operational parameters
     P_suction = this->refrig->getSatPressure(state, T_suction, RoutineName);
-    T_comp_in = this->refrig->getSupHeatTemp(state, max(min(P_suction, RefPHigh), RefPLow), h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
+    T_comp_in = this->refrig->getSupHeatTemp(state, std::clamp(P_suction, RefPLow, RefPHigh), h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
     SH_Comp = T_comp_in - T_suction;
 
     // Calculate capacity modification factor
     C_cap_operation = this->VRFOU_CapModFactor(
-        state, h_comp_in, h_IU_evap_in, max(min(P_suction, RefPHigh), RefPLow), T_suction + SH_Comp, T_suction + 8, T_discharge - 5);
+        state, h_comp_in, h_IU_evap_in, std::clamp(P_suction, RefPLow, RefPHigh), T_suction + SH_Comp, T_suction + 8, T_discharge - 5);
 
     if (Q_type == HXOpMode::EvapMode) {
         // Capacity to meet is for evaporator
@@ -13798,12 +13797,12 @@ void VRFCondenserEquipment::VRFOU_CompCap(
 
     // variable initializations: system operational parameters
     P_suction = this->refrig->getSatPressure(state, T_suction, RoutineName);
-    T_comp_in = this->refrig->getSupHeatTemp(state, max(min(P_suction, RefPHigh), RefPLow), h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
+    T_comp_in = this->refrig->getSupHeatTemp(state, std::clamp(P_suction, RefPLow, RefPHigh), h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
     SH_Comp = T_comp_in - T_suction;
 
     // Calculate capacity modification factor
     C_cap_operation = this->VRFOU_CapModFactor(
-        state, h_comp_in, h_IU_evap_in, max(min(P_suction, RefPHigh), RefPLow), T_suction + SH_Comp, T_suction + 8, T_discharge - 5);
+        state, h_comp_in, h_IU_evap_in, std::clamp(P_suction, RefPLow, RefPHigh), T_suction + SH_Comp, T_suction + 8, T_discharge - 5);
     C_cap_operation = min(1.5, max(0.5, C_cap_operation));
     Q_c_tot = Q_evap_sys / C_cap_operation;
 }
@@ -13914,7 +13913,7 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
 
     // Calculate capacity modification factor
     C_cap_operation = this->VRFOU_CapModFactor(
-        state, Pipe_h_comp_in, Pipe_h_IU_in, max(min(P_suction, RefPHigh), RefPLow), T_suction + Modifi_SH, T_suction + 8, T_discharge - 5);
+        state, Pipe_h_comp_in, Pipe_h_IU_in, std::clamp(P_suction, RefPLow, RefPHigh), T_suction + Modifi_SH, T_suction + 8, T_discharge - 5);
 
     this->adjustedTe = false;
     for (CounterCompSpdTemp = 1; CounterCompSpdTemp <= NumOfCompSpdInput; CounterCompSpdTemp++) {
@@ -13964,7 +13963,7 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                 P_discharge = this->refrig->getSatPressure(state, T_discharge, RoutineName);
                 MinRefriPe = this->refrig->getSatPressure(state, -15, RoutineName);
                 MinOutdoorUnitPe = max(P_discharge - this->CompMaxDeltaP, MinRefriPe);
-                MinOutdoorUnitTe = this->refrig->getSatTemperature(state, max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), RoutineName);
+                MinOutdoorUnitTe = this->refrig->getSatTemperature(state, std::clamp(MinOutdoorUnitPe, RefPLow, RefPHigh), RoutineName);
                 // Te can't be smaller than user input lower bound
                 MinOutdoorUnitTe = max(this->IUEvapTempLow, MinOutdoorUnitTe);
 
@@ -14099,9 +14098,9 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                                         (2 * this->C3Te);
                                 }
 
-                                RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                                RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pipe_Pe_assumed, RefPLow, RefPHigh), RoutineName);
                                 Pipe_h_IU_out_i = this->refrig->getSupHeatEnthalpy(
-                                    state, max(RefTSat, Pipe_Te_assumed + Modifi_SHin), max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                                    state, max(RefTSat, Pipe_Te_assumed + Modifi_SHin), std::clamp(Pipe_Pe_assumed, RefPLow, RefPHigh), RoutineName);
 
                                 if (Pipe_h_IU_out_i > Pipe_h_IU_in) {
                                     Real64 min_speed_capacity = this->CoffEvapCap * this->RatedEvapCapacity *
@@ -14121,15 +14120,15 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                             Pipe_SH_merged = Pipe_SH_merged / Pipe_m_ref;
                         } else {
                             Pipe_SH_merged = this->SH;
-                            RefTSat = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                            RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pipe_Pe_assumed, RefPLow, RefPHigh), RoutineName);
                             Pipe_h_IU_out = this->refrig->getSupHeatEnthalpy(
-                                state, max(RefTSat, Pipe_Te_assumed + Pipe_SH_merged), max(min(Pipe_Pe_assumed, RefPHigh), RefPLow), RoutineName);
+                                state, max(RefTSat, Pipe_Te_assumed + Pipe_SH_merged), std::clamp(Pipe_Pe_assumed, RefPLow, RefPHigh), RoutineName);
                         }
 
                         // Re-calculate piping loss
                         this->VRFOU_PipeLossC(state,
                                               Pipe_m_ref,
-                                              max(min(Pipe_Pe_assumed, RefPHigh), RefPLow),
+                                              std::clamp(Pipe_Pe_assumed, RefPLow, RefPHigh),
                                               Pipe_h_IU_out,
                                               Pipe_SH_merged,
                                               OutdoorDryBulb,
@@ -14137,7 +14136,7 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                                               Pipe_DeltP,
                                               Pipe_h_comp_in);
 
-                        T_suction = this->refrig->getSatTemperature(state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), RoutineName);
+                        T_suction = this->refrig->getSatTemperature(state, std::clamp(Pipe_Pe_assumed - Pipe_DeltP, RefPLow, RefPHigh), RoutineName);
 
                         converged_11_2 = !((std::abs(T_suction - SmallLoadTe) > TeTol) && (Pipe_Te_assumed < this->EvaporatingTemp) &&
                                            (Pipe_Te_assumed > SmallLoadTe) && (NumIteTe < MaxNumIteTe));
@@ -14156,7 +14155,7 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
 
                 // Perform iteration to calculate Pipe_T_comp_in( Te'+SH' )
                 Pipe_T_comp_in = this->refrig->getSupHeatTemp(
-                    state, max(min(Pipe_Pe_assumed - Pipe_DeltP, RefPHigh), RefPLow), Pipe_h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
+                    state, std::clamp(Pipe_Pe_assumed - Pipe_DeltP, RefPLow, RefPHigh), Pipe_h_comp_in, T_suction + 3, T_suction + 30, RoutineName);
 
                 Modifi_SH = Pipe_T_comp_in - T_suction;
                 P_suction = Pipe_Pe_assumed - Pipe_DeltP;
@@ -14179,7 +14178,7 @@ void VRFCondenserEquipment::VRFOU_CalcCompC(EnergyPlusData &state,
                 C_cap_operation = this->VRFOU_CapModFactor(state,
                                                            Pipe_h_comp_in,
                                                            Pipe_h_IU_in,
-                                                           max(min(P_suction, RefPHigh), RefPLow),
+                                                           std::clamp(P_suction, RefPLow, RefPHigh),
                                                            T_suction + Modifi_SH,
                                                            T_suction + 8,
                                                            T_discharge - 5);
@@ -14306,11 +14305,16 @@ void VRFCondenserEquipment::VRFOU_CalcCompH(
 
     // Calculate capacity modification factor
     MinOutdoorUnitPe = this->refrig->getSatPressure(state, T_suction, RoutineName);
-    RefTSat = this->refrig->getSatTemperature(state, max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), RoutineName);
+    RefTSat = this->refrig->getSatTemperature(state, std::clamp(MinOutdoorUnitPe, RefPLow, RefPHigh), RoutineName);
     Pipe_h_comp_in =
-        this->refrig->getSupHeatEnthalpy(state, max(RefTSat, T_suction + this->SH), max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), RoutineName);
-    C_cap_operation = this->VRFOU_CapModFactor(
-        state, Pipe_h_comp_in, Pipe_h_out_ave, max(min(MinOutdoorUnitPe, RefPHigh), RefPLow), T_suction + this->SH, T_suction + 8, IUMaxCondTemp - 5);
+        this->refrig->getSupHeatEnthalpy(state, max(RefTSat, T_suction + this->SH), std::clamp(MinOutdoorUnitPe, RefPLow, RefPHigh), RoutineName);
+    C_cap_operation = this->VRFOU_CapModFactor(state,
+                                               Pipe_h_comp_in,
+                                               Pipe_h_out_ave,
+                                               std::clamp(MinOutdoorUnitPe, RefPLow, RefPHigh),
+                                               T_suction + this->SH,
+                                               T_suction + 8,
+                                               IUMaxCondTemp - 5);
 
     // Perform iterations to find the compressor speed that can meet the required heating load, Iteration DoName2
     for (CounterCompSpdTemp = 1; CounterCompSpdTemp <= NumOfCompSpdInput; CounterCompSpdTemp++) {
@@ -14377,13 +14381,13 @@ void VRFCondenserEquipment::VRFOU_CalcCompH(
                 Modifi_Pe = this->refrig->getSatPressure(state, T_suction, RoutineName);
 
                 // Calculate capacity modification factor
-                RefTSat = this->refrig->getSatTemperature(state, max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
-                Pipe_h_comp_in =
-                    this->refrig->getSupHeatEnthalpy(state, max(RefTSat, T_suction + Modifi_SH), max(min(Modifi_Pe, RefPHigh), RefPLow), RoutineName);
+                RefTSat = this->refrig->getSatTemperature(state, std::clamp(Modifi_Pe, RefPLow, RefPHigh), RoutineName);
+                Pipe_h_comp_in = this->refrig->getSupHeatEnthalpy(
+                    state, max(RefTSat, T_suction + Modifi_SH), std::clamp(Modifi_Pe, RefPLow, RefPHigh), RoutineName);
                 C_cap_operation = this->VRFOU_CapModFactor(state,
                                                            Pipe_h_comp_in,
                                                            Pipe_h_out_ave,
-                                                           max(min(Modifi_Pe, RefPHigh), RefPLow),
+                                                           std::clamp(Modifi_Pe, RefPLow, RefPHigh),
                                                            T_suction + Modifi_SH,
                                                            T_suction + 8,
                                                            IUMaxCondTemp - 5);
@@ -14854,7 +14858,7 @@ void VRFCondenserEquipment::VRFHR_OU_HR_Mode(EnergyPlusData &state,
         // enthalpy of OU evaporator/condenser inlets and outlets
         h_OU_evap_in = h_IU_evap_in;
         h_OU_cond_in = h_comp_out;
-        h_OU_evap_out = this->refrig->getSupHeatEnthalpy(state, Tsuction + this->SH, max(min(Psuction, RefPHigh), RefPLow), RoutineName);
+        h_OU_evap_out = this->refrig->getSupHeatEnthalpy(state, Tsuction + this->SH, std::clamp(Psuction, RefPLow, RefPHigh), RoutineName);
         h_OU_cond_out = this->refrig->getSatEnthalpy(state, Tdischarge - this->SC, 0.0, RoutineName);
 
         if ((Q_c_OU == 0) || (h_OU_evap_out - h_OU_evap_in) <= 0) {
@@ -14975,21 +14979,23 @@ void VRFCondenserEquipment::VRFOU_PipeLossC(
             Pipe_viscosity_ref = 16.26; // default superheated vapor viscosity data (MuPa*s) at T=353.15 K, P=2MPa
         }
 
-        Pipe_v_ref = Pipe_m_ref / (Constant::Pi * pow_2(this->RefPipDiaSuc) * 0.25) /
-                     this->refrig->getSupHeatDensity(state, this->EvaporatingTemp + Pipe_SH_merged, max(min(Pevap, RefPHigh), RefPLow), RoutineName);
+        Pipe_v_ref =
+            Pipe_m_ref / (Constant::Pi * pow_2(this->RefPipDiaSuc) * 0.25) /
+            this->refrig->getSupHeatDensity(state, this->EvaporatingTemp + Pipe_SH_merged, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName);
         Pipe_Num_Re = Pipe_m_ref / (Constant::Pi * pow_2(this->RefPipDiaSuc) * 0.25) * this->RefPipDiaSuc / Pipe_viscosity_ref * 1000000;
         Pipe_Num_Pr = Pipe_viscosity_ref * Pipe_cp_ref * 0.001 / Pipe_conductivity_ref;
         Pipe_Num_Nu = 0.023 * std::pow(Pipe_Num_Re, 0.8) * std::pow(Pipe_Num_Pr, 0.3);
         Pipe_Num_St = Pipe_Num_Nu / Pipe_Num_Re / Pipe_Num_Pr;
 
-        Pipe_DeltP = max(
-            0.0,
-            8 * Pipe_Num_St * std::pow(Pipe_Num_Pr, 0.6667) * this->RefPipEquLen / this->RefPipDiaSuc *
-                    this->refrig->getSupHeatDensity(state, this->EvaporatingTemp + Pipe_SH_merged, max(min(Pevap, RefPHigh), RefPLow), RoutineName) *
-                    pow_2(Pipe_v_ref) / 2 -
-                this->RefPipHei *
-                    this->refrig->getSupHeatDensity(state, this->EvaporatingTemp + Pipe_SH_merged, max(min(Pevap, RefPHigh), RefPLow), RoutineName) *
-                    9.80665);
+        Pipe_DeltP = max(0.0,
+                         8 * Pipe_Num_St * std::pow(Pipe_Num_Pr, 0.6667) * this->RefPipEquLen / this->RefPipDiaSuc *
+                                 this->refrig->getSupHeatDensity(
+                                     state, this->EvaporatingTemp + Pipe_SH_merged, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName) *
+                                 pow_2(Pipe_v_ref) / 2 -
+                             this->RefPipHei *
+                                 this->refrig->getSupHeatDensity(
+                                     state, this->EvaporatingTemp + Pipe_SH_merged, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName) *
+                                 9.80665);
 
         Pipe_Coe_k1 = Pipe_Num_Nu * Pipe_viscosity_ref;
         Pipe_Coe_k3 = RefPipInsH * (this->RefPipDiaSuc + 2 * this->RefPipInsThi);
@@ -15016,7 +15022,7 @@ void VRFCondenserEquipment::VRFOU_PipeLossC(
                 Pipe_h_IU_out + Pipe_Q * state.dataHVACGlobal->TimeStepSysSec /
                                     ((Constant::Pi * std::pow(this->RefPipDiaSuc / 2, 2) * this->RefPipLen *
                                       this->refrig->getSupHeatDensity(
-                                          state, this->EvaporatingTemp + Pipe_SH_merged, max(min(Pevap, RefPHigh), RefPLow), RoutineName)));
+                                          state, this->EvaporatingTemp + Pipe_SH_merged, std::clamp(Pevap, RefPLow, RefPHigh), RoutineName)));
         }
 
     } else {
@@ -15089,11 +15095,11 @@ void VRFCondenserEquipment::VRFOU_PipeLossH(
     Real64 RefTHigh = this->refrig->PsHighTempValue; // High Temperature Value for Ps (max in tables)
     Real64 RefPLow = this->refrig->PsLowPresValue;   // Low Pressure Value for Ps (>0.0)
     Real64 RefPHigh = this->refrig->PsHighPresValue; // High Pressure Value for Ps (max in tables)
-    Real64 RefTSat = this->refrig->getSatTemperature(state, max(min(Pcond, RefPHigh), RefPLow), RoutineName);
+    Real64 RefTSat = this->refrig->getSatTemperature(state, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName);
 
     // Perform iteration to calculate Pipe_T_IU_in, given P and h
     Pipe_T_IU_in = this->refrig->getSupHeatTemp(state,
-                                                max(min(Pcond, RefPHigh), RefPLow),
+                                                std::clamp(Pcond, RefPLow, RefPHigh),
                                                 Pipe_h_IU_in,
                                                 max(this->IUCondensingTemp, RefTSat),
                                                 min(this->IUCondensingTemp + 50, RefTHigh),
@@ -15132,7 +15138,7 @@ void VRFCondenserEquipment::VRFOU_PipeLossH(
         }
 
         Pipe_v_ref = Pipe_m_ref / (Constant::Pi * pow_2(this->RefPipDiaDis) * 0.25) /
-                     this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, max(min(Pcond, RefPHigh), RefPLow), RoutineName);
+                     this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName);
         Pipe_Num_Re = Pipe_m_ref / (Constant::Pi * pow_2(this->RefPipDiaDis) * 0.25) * this->RefPipDiaDis / Pipe_viscosity_ref * 1000000;
         Pipe_Num_Pr = Pipe_viscosity_ref * Pipe_cp_ref * 0.001 / Pipe_conductivity_ref;
         Pipe_Num_Nu = 0.023 * std::pow(Pipe_Num_Re, 0.8) * std::pow(Pipe_Num_Pr, 0.4);
@@ -15148,8 +15154,8 @@ void VRFCondenserEquipment::VRFOU_PipeLossH(
         Pipe_DeltP = max(
             0.0,
             8 * Pipe_Num_St * std::pow(Pipe_Num_Pr, 0.6667) * this->RefPipEquLen / this->RefPipDiaDis *
-                    this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, max(min(Pcond, RefPHigh), RefPLow), RoutineName) * pow_2(Pipe_v_ref) / 2 -
-                this->RefPipHei * this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, max(min(Pcond, RefPHigh), RefPLow), RoutineName) * 9.80665);
+                    this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) * pow_2(Pipe_v_ref) / 2 -
+                this->RefPipHei * this->refrig->getSupHeatDensity(state, Pipe_T_IU_in, std::clamp(Pcond, RefPLow, RefPHigh), RoutineName) * 9.80665);
 
         Pipe_h_comp_out = Pipe_h_IU_in + Pipe_Q / Pipe_m_ref;
 

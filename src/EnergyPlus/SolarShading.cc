@@ -6160,13 +6160,8 @@ void SHDGSS(EnergyPlusData &state,
                 }
             } else if (state.dataSysVars->DisableGroupSelfShading) {
                 std::vector<int> DisabledZones = s_surf->SurfShadowDisabledZoneList(CurSurf);
-                bool isDisabledShadowSurf = false;
-                for (int i : DisabledZones) {
-                    if (surface.Zone == i) {
-                        isDisabledShadowSurf = true;
-                        break;
-                    }
-                }
+                bool isDisabledShadowSurf =
+                    std::any_of(DisabledZones.begin(), DisabledZones.end(), [&surface](int zoneNum) { return surface.Zone == zoneNum; });
                 if (isDisabledShadowSurf) {
                     continue; // Disable all shadowing surfaces in all disabled zones.
                 }
@@ -10077,7 +10072,7 @@ void WindowShadingManager(EnergyPlusData &state)
                             Dayltg::ProfileAngle(state, ISurf, state.dataEnvrn->SOLCOS, matBlind->SlatOrientation);
 
                         if (ProfAng > Constant::PiOvr2 || ProfAng < -Constant::PiOvr2) {
-                            ProfAng = min(max(ProfAng, -Constant::PiOvr2), Constant::PiOvr2);
+                            ProfAng = std::clamp(ProfAng, -Constant::PiOvr2, Constant::PiOvr2);
                         }
                         surfShade.blind.profAngIdxLo = int((ProfAng + Constant::PiOvr2) / Material::dProfAng) + 1;
                         surfShade.blind.profAngIdxHi = std::min(Material::MaxProfAngs, surfShade.blind.profAngIdxLo + 1);
@@ -11897,8 +11892,7 @@ void ComputeWinShadeAbsorpFactors(EnergyPlusData &state)
                         auto const *matFenSh = dynamic_cast<Material::MaterialFen const *>(matSh);
                         assert(matFenSh != nullptr);
                         AbsorpEff = matFenSh->AbsorpSolarOut / (matFenSh->AbsorpSolarOut + matFenSh->Trans + 0.0001);
-                        AbsorpEff = min(max(AbsorpEff, 0.0001),
-                                        0.999); // Constrain to avoid problems with following log eval
+                        AbsorpEff = std::clamp(AbsorpEff, 0.0001, 0.999); // Constrain to avoid problems with following log eval
                         s_surf->SurfWinShadeAbsFacFace1(SurfNum) = (1.0 - std::exp(0.5 * std::log(1.0 - AbsorpEff))) / AbsorpEff;
                         s_surf->SurfWinShadeAbsFacFace2(SurfNum) = 1.0 - s_surf->SurfWinShadeAbsFacFace1(SurfNum);
                     }

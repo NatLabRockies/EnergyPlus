@@ -755,7 +755,7 @@ void InvOrdinalDay(int const Number, int &PMonth, int &PDay, int const LeapYr)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WMonth;
     int LeapAddPrev = 0;
-    int LeapAddCur = 0;
+    int LeapAddCur;
 
     if (Number < 1 || Number > 365 + LeapYr) {
         return;

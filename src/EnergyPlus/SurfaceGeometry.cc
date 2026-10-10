@@ -12384,11 +12384,8 @@ namespace SurfaceGeometry {
 
         std::vector<EdgeOfSurf> inBoth;
         for (const auto &e1 : edges1) {
-            for (const auto &e2 : edges2) {
-                if (edgesEqualOnSameSurface(e1, e2)) {
-                    inBoth.push_back(e1);
-                    break;
-                }
+            if (std::any_of(edges2.begin(), edges2.end(), [&e1](auto const &e2) { return edgesEqualOnSameSurface(e1, e2); })) {
+                inBoth.push_back(e1);
             }
         }
         return inBoth;
@@ -12485,19 +12482,10 @@ namespace SurfaceGeometry {
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             for (int jVertex = 1; jVertex <= zonePoly.SurfaceFace(iFace).NSides; ++jVertex) {
                 Vector curVertex = zonePoly.SurfaceFace(iFace).FacePoints(jVertex);
-                if (uniqVertices.empty()) {
+                if (std::none_of(uniqVertices.begin(), uniqVertices.end(), [&curVertex](auto const &uniqueVertex) {
+                        return isAlmostEqual3dPt(curVertex, uniqueVertex);
+                    })) {
                     uniqVertices.emplace_back(curVertex);
-                } else {
-                    bool found = false;
-                    for (const auto &unqV : uniqVertices) {
-                        if (isAlmostEqual3dPt(curVertex, unqV)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        uniqVertices.emplace_back(curVertex);
-                    }
                 }
             }
         }
@@ -12589,17 +12577,9 @@ namespace SurfaceGeometry {
         }
         // now make sure every point has been counted and even number of times (usually twice)
         // if they are then the ceiling and floor are (almost certainly) the same x and y coordinates.
-        bool areFlrAndClgSame = true;
-        if (!floorCeilingXY.empty()) {
-            for (auto const &curFloorCeiling : floorCeilingXY) {
-                if (curFloorCeiling.count % 2 != 0) {
-                    areFlrAndClgSame = false;
-                    break;
-                }
-            }
-        } else {
-            areFlrAndClgSame = false;
-        }
+        bool areFlrAndClgSame = !floorCeilingXY.empty() && std::none_of(floorCeilingXY.begin(), floorCeilingXY.end(), [](auto const &floorCeiling) {
+            return floorCeiling.count % 2 != 0;
+        });
         return areFlrAndClgSame;
     }
 
@@ -14995,13 +14975,11 @@ namespace SurfaceGeometry {
                         int spaceNum1 = min(surf.spaceNum, state.dataSurface->Surface(surf.ExtBoundCond).spaceNum);
                         int spaceNum2 = max(surf.spaceNum, state.dataSurface->Surface(surf.ExtBoundCond).spaceNum);
                         // This pair already saved?
-                        bool found = false;
-                        for (auto const &thisAirBoundaryMixing : state.dataHeatBal->airBoundaryMixing) {
-                            if ((spaceNum1 == thisAirBoundaryMixing.space1) && (spaceNum2 == thisAirBoundaryMixing.space2)) {
-                                found = true;
-                                break;
-                            }
-                        }
+                        bool found = std::any_of(state.dataHeatBal->airBoundaryMixing.begin(),
+                                                 state.dataHeatBal->airBoundaryMixing.end(),
+                                                 [spaceNum1, spaceNum2](auto const &airBoundaryMixing) {
+                                                     return spaceNum1 == airBoundaryMixing.space1 && spaceNum2 == airBoundaryMixing.space2;
+                                                 });
                         if (!found) {
                             // Store the space pairs, schedule, and flow rate to use later to create cross mixing objects
                             DataHeatBalance::AirBoundaryMixingSpecs newAirBoundaryMixing;

@@ -143,7 +143,7 @@ namespace ConstructionAssignments {
         if (surface.Construction > 0) {
             return {.searchDistance = SearchDistanceType::Explicit, .constructionNum = surface.Construction};
         }
-        auto &s_dc = state.dataConstructionAssignments;
+        auto const &s_dc = state.dataConstructionAssignments;
 
         int spaceNum = surface.spaceNum;
         if (spaceNum > 0) {

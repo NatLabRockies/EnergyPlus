@@ -3306,9 +3306,7 @@ namespace Window {
         std::array<Real64, 2> hcvBG; // For between-glass shade/blind, convection coefficient from gap glass or
         //  shade/blind to gap gas on either side of shade/blind (W/m2-K)
 
-        std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface; // Coefficient in equation Aface*thetas = Bface
-        std::array<Real64, maxArraySize> Bface;                           // Coefficient in equation Aface*thetas = Bface
-        std::array<int, maxArraySize> indx;                               // Vector of row permutations in LU decomposition
+        std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition
 
         auto &s_surf = state.dataSurface;
 
@@ -3376,8 +3374,8 @@ namespace Window {
                 wm->hcin = state.dataHeatBalSurf->SurfHConvInt(SurfNum);
             }
 
-            Aface = {{0.0}};
-            Bface = {0.0};
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {}; // Coefficients in Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface = {};                           // Right-hand side of Aface*thetas = Bface
 
             // If interior or exterior shade or blind is present, get heat transfer
             // coefficient from glass and shade/blind to gap between glass and shade/blind,
@@ -5223,10 +5221,10 @@ namespace Window {
 
             // now apply normalization factors to zero incidence angle properties
             tfp = tf0 * TransTmp;
-            tfp = max(min(1.0, tfp), 0.0);
+            tfp = std::clamp(tfp, 0.0, 1.0);
 
             rfp = rf0 * (1. - ReflectTmp) + ReflectTmp;
-            rfp = max(min(0.9999 - tfp, rfp), 0.0);
+            rfp = std::clamp(rfp, 0.0, std::max(0.9999 - tfp, 0.0));
 
             rbp = rfp;
 

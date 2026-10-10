@@ -883,7 +883,7 @@ namespace Photovoltaics {
     void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
     {
         // Recalculate PV that depends on a surface or collector temperature before the heat balance uses its current sink.
-        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        auto const &pv = state.dataPhotovoltaic->PVarray(PVnum);
         switch (pv.CellIntegrationMode) {
         case CellIntegration::SurfaceOutsideFace:
         case CellIntegration::TranspiredCollector:

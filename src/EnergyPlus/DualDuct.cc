@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -979,15 +980,15 @@ namespace DualDuct {
 
             this->dd_airterminalHotAirInlet.AirMassFlowRateMaxAvail =
                 min(state.dataLoopNodes->Node(OutNode).MassFlowRateMax, state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
-            this->dd_airterminalHotAirInlet.AirMassFlowRateMinAvail =
-                min(max(state.dataLoopNodes->Node(OutNode).MassFlowRateMin, state.dataLoopNodes->Node(HotInNode).MassFlowRateMinAvail),
-                    state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
+            this->dd_airterminalHotAirInlet.AirMassFlowRateMinAvail = std::clamp(state.dataLoopNodes->Node(OutNode).MassFlowRateMin,
+                                                                                 state.dataLoopNodes->Node(HotInNode).MassFlowRateMinAvail,
+                                                                                 state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
 
             this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail =
                 min(state.dataLoopNodes->Node(OutNode).MassFlowRateMax, state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
-            this->dd_airterminalColdAirInlet.AirMassFlowRateMinAvail =
-                min(max(state.dataLoopNodes->Node(OutNode).MassFlowRateMin, state.dataLoopNodes->Node(ColdInNode).MassFlowRateMinAvail),
-                    state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
+            this->dd_airterminalColdAirInlet.AirMassFlowRateMinAvail = std::clamp(state.dataLoopNodes->Node(OutNode).MassFlowRateMin,
+                                                                                  state.dataLoopNodes->Node(ColdInNode).MassFlowRateMinAvail,
+                                                                                  state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
 
             // Do the following initializations (every time step): This should be the info from
             // the previous components outlets or the node data in this section.

@@ -1294,10 +1294,8 @@ void FluidCoolerspecs::size(EnergyPlusData &state)
                 }
             }
         } else {
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowSevereError(state, std::format("Autosizing error for fluid cooler object = {}", this->Name));
-                ShowFatalError(state, "Autosizing of fluid cooler UA requires a loop Sizing:Plant object.");
-            }
+            ShowSevereError(state, std::format("Autosizing error for fluid cooler object = {}", this->Name));
+            ShowFatalError(state, "Autosizing of fluid cooler UA requires a loop Sizing:Plant object.");
         }
     }
 

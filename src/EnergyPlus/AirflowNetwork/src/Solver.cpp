@@ -7065,7 +7065,7 @@ namespace AirflowNetwork {
                     // Wind-pressure coefficients for vertical facades, high-rise building
 
                     else if (Util::SameString(simulation_control.BldgType, "HighRise") && FacadeNum <= 4) {
-                        SR = min(max(SideRatio, 0.25), 4.0);
+                        SR = std::clamp(SideRatio, 0.25, 4.0);
                         if (SR >= 0.25 && SR < 1.0) {
                             ISR = 1;
                             WtSR = (1.0 - SR) / 0.75;
@@ -7082,7 +7082,7 @@ namespace AirflowNetwork {
                     else if ((Util::SameString(simulation_control.BldgType, "HighRise") ||
                               Util::SameString(simulation_control.BldgType, "LowRise")) &&
                              FacadeNum == 5) {
-                        SR = min(max(SideRatio, 0.25), 1.0);
+                        SR = std::clamp(SideRatio, 0.25, 1.0);
                         if (SR >= 0.25 && SR < 0.5) {
                             ISR = 1;
                             WtSR = (0.5 - SR) / 0.25;
@@ -7142,7 +7142,7 @@ namespace AirflowNetwork {
             } // End of facade number loop
             // Add a roof
             FacadeNum = 5;
-            SR = min(max(SideRatio, 0.25), 1.0);
+            SR = std::clamp(SideRatio, 0.25, 1.0);
             if (SR >= 0.25 && SR < 0.5) {
                 ISR = 1;
                 WtSR = (0.5 - SR) / 0.25;

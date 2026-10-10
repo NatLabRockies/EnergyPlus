@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -347,40 +348,17 @@ namespace RoomAir {
 
     Real64 sumUFADConvGainPerPlume(EnergyPlusData const &state, int const zoneNum, Real64 const numOccupants)
     {
-        Real64 zoneElecConv(0.0); // zone elec equip design convective gain [W]
-        for (auto const &zoneElectric : state.dataHeatBal->ZoneElectric) {
-            if (zoneElectric.ZonePtr == zoneNum) {
-                zoneElecConv += zoneElectric.DesignLevel * zoneElectric.FractionConvected;
-            }
-        }
+        auto const sumConvectiveGain = [zoneNum](auto const &equipment) {
+            return std::accumulate(equipment.begin(), equipment.end(), 0.0, [zoneNum](Real64 total, auto const &item) {
+                return (item.ZonePtr == zoneNum) ? total + item.DesignLevel * item.FractionConvected : total;
+            });
+        };
 
-        Real64 zoneGasConv(0.0); // zone gas equip design convective gain [W]
-        for (auto const &zoneGas : state.dataHeatBal->ZoneGas) {
-            if (zoneGas.ZonePtr == zoneNum) {
-                zoneGasConv += zoneGas.DesignLevel * zoneGas.FractionConvected;
-            }
-        }
-
-        Real64 zoneOthEqConv(0.0); // zone other equip design convective gain [W]
-        for (auto const &zoneOtherEq : state.dataHeatBal->ZoneOtherEq) {
-            if (zoneOtherEq.ZonePtr == zoneNum) {
-                zoneOthEqConv += zoneOtherEq.DesignLevel * zoneOtherEq.FractionConvected;
-            }
-        }
-
-        Real64 zoneHWEqConv(0.0); // zone hot water equip design convective gain [W]
-        for (auto const &zoneHWEq : state.dataHeatBal->ZoneHWEq) {
-            if (zoneHWEq.ZonePtr == zoneNum) {
-                zoneHWEqConv += zoneHWEq.DesignLevel * zoneHWEq.FractionConvected;
-            }
-        }
-
-        Real64 zoneSteamEqConv(0.0); // zone steam equip design convective gain [W]
-        for (auto const &zoneSteamEq : state.dataHeatBal->ZoneSteamEq) {
-            if (zoneSteamEq.ZonePtr == zoneNum) {
-                zoneSteamEqConv += zoneSteamEq.DesignLevel * zoneSteamEq.FractionConvected;
-            }
-        }
+        Real64 const zoneElecConv = sumConvectiveGain(state.dataHeatBal->ZoneElectric);   // zone elec equip design convective gain [W]
+        Real64 const zoneGasConv = sumConvectiveGain(state.dataHeatBal->ZoneGas);         // zone gas equip design convective gain [W]
+        Real64 const zoneOthEqConv = sumConvectiveGain(state.dataHeatBal->ZoneOtherEq);   // zone other equip design convective gain [W]
+        Real64 const zoneHWEqConv = sumConvectiveGain(state.dataHeatBal->ZoneHWEq);       // zone hot water equip design convective gain [W]
+        Real64 const zoneSteamEqConv = sumConvectiveGain(state.dataHeatBal->ZoneSteamEq); // zone steam equip design convective gain [W]
 
         Real64 numPlumes = (numOccupants > 0.0) ? numOccupants : 1.0;
 

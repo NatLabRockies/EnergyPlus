@@ -740,7 +740,7 @@ namespace Sched {
             if (rowCnt != rowLimitCount) {
                 if (rowCnt < rowLimitCount) {
                     ShowSevereError(state, std::format("{}: {}=\"{}\" {} data values read.", routineName, CurrentModuleObject, Alphas(1), rowCnt));
-                } else if (rowCnt > rowLimitCount) {
+                } else {
                     ShowSevereError(state, std::format("{}: {}=\"{}\" too many data values read.", routineName, CurrentModuleObject, Alphas(1)));
                 }
                 ShowContinueError(
@@ -1567,7 +1567,7 @@ namespace Sched {
                 dayScheds[(int)Sched::DayType::CustomDay1] = customDay1Schedule;
                 dayScheds[(int)Sched::DayType::CustomDay2] = customDay2Schedule;
 
-                for (Sched::WeekRuleSchedule *weekRuleSched : sortedWeekRuleSchedules) {
+                for (Sched::WeekRuleSchedule const *weekRuleSched : sortedWeekRuleSchedules) {
                     if (weekRuleSched != nullptr) {
 
                         if (weekRuleSched->applySunday) {

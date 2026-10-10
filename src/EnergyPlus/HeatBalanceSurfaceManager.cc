@@ -260,10 +260,11 @@ void UpdateVariableAbsorptancesOut(EnergyPlusData &state)
         }
         if (thisMaterial->absorpVarCtrlSignalOut == Material::VariableAbsCtrlSignal::Scheduled) {
             if (thisMaterial->absorpThermalVarSchedOut != nullptr) {
-                state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) = max(min(thisMaterial->absorpThermalVarSchedOut->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) =
+                    std::clamp(thisMaterial->absorpThermalVarSchedOut->getCurrentVal(), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarSchedOut != nullptr) {
-                state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) = max(min(thisMaterial->absorpSolarVarSchedOut->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) = std::clamp(thisMaterial->absorpSolarVarSchedOut->getCurrentVal(), 0.0001, 0.9999);
             }
         } else {
             Real64 triggerValue;
@@ -278,11 +279,11 @@ void UpdateVariableAbsorptancesOut(EnergyPlusData &state)
             }
             if (thisMaterial->absorpThermalVarCurveOut != nullptr) {
                 state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) =
-                    max(min(thisMaterial->absorpThermalVarCurveOut->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpThermalVarCurveOut->value(state, triggerValue), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarCurveOut != nullptr) {
                 state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) =
-                    max(min(thisMaterial->absorpSolarVarCurveOut->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpSolarVarCurveOut->value(state, triggerValue), 0.0001, 0.9999);
             }
         }
     }
@@ -300,10 +301,11 @@ void UpdateVariableAbsorptancesIn(EnergyPlusData &state)
         }
         if (thisMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::Scheduled) {
             if (thisMaterial->absorpThermalVarSchedIn != nullptr) {
-                state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) = max(min(thisMaterial->absorpThermalVarSchedIn->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) =
+                    std::clamp(thisMaterial->absorpThermalVarSchedIn->getCurrentVal(), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarSchedIn != nullptr) {
-                state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) = max(min(thisMaterial->absorpSolarVarSchedIn->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) = std::clamp(thisMaterial->absorpSolarVarSchedIn->getCurrentVal(), 0.0001, 0.9999);
             }
         } else {
             Real64 triggerValue;
@@ -324,11 +326,11 @@ void UpdateVariableAbsorptancesIn(EnergyPlusData &state)
             }
             if (thisMaterial->absorpThermalVarCurveIn != nullptr) {
                 state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) =
-                    max(min(thisMaterial->absorpThermalVarCurveIn->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpThermalVarCurveIn->value(state, triggerValue), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarCurveIn != nullptr) {
                 state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) =
-                    max(min(thisMaterial->absorpSolarVarCurveIn->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpSolarVarCurveIn->value(state, triggerValue), 0.0001, 0.9999);
             }
         }
     }

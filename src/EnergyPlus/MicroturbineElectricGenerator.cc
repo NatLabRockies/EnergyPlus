@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -1370,7 +1371,7 @@ void MTGeneratorSpecs::CalcMTGeneratorModel(EnergyPlusData &state,
         ++AncPowerCalcIterIndex; // Increment iteration loop counter
 
         //     Calculate operating power output (gross)
-        elecPowerGenerated = min(max(0.0, MyLoad + ancillaryPowerRate), FullLoadPowerOutput);
+        elecPowerGenerated = std::clamp(MyLoad + ancillaryPowerRate, 0.0, FullLoadPowerOutput);
 
         //     Calculate PLR, but must be between the minPLR and maxPLR
         if (FullLoadPowerOutput > 0.0) {

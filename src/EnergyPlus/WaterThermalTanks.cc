@@ -48,6 +48,7 @@
 // C++ Headers
 #include <algorithm>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -867,9 +868,9 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                         state.dataHeatBal->HeatReclaimRefrigeratedRack(DesupHtr.ReclaimHeatingSourceIndexNum);
                     if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                         HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                        for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                            num = 0.0;
-                        }
+                        std::fill(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(),
+                                  HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(),
+                                  0.0);
                     }
                     DesupHtr.ValidSourceType = true;
                     HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -899,9 +900,9 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                         state.dataHeatBal->HeatReclaimRefrigCondenser(DesupHtr.ReclaimHeatingSourceIndexNum);
                     if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                         HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                        for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                            num = 0.0;
-                        }
+                        std::fill(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(),
+                                  HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(),
+                                  0.0);
                     }
                     DesupHtr.ValidSourceType = true;
                     HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -934,9 +935,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state.dataHeatBal->HeatReclaimDXCoil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                    for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                        num = 0.0;
-                    }
+                    std::fill(
+                        HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(), HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(), 0.0);
                 }
                 DesupHtr.ValidSourceType = true;
                 HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -963,9 +963,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state.dataHeatBal->HeatReclaimVS_Coil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                    for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                        num = 0.0;
-                    }
+                    std::fill(
+                        HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(), HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(), 0.0);
                 }
                 DesupHtr.ValidSourceType = true;
                 HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -987,9 +986,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                     state.dataHeatBal->HeatReclaimSimple_WAHPCoil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                    for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                        num = 0.0;
-                    }
+                    std::fill(
+                        HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(), HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(), 0.0);
                 }
                 DesupHtr.ValidSourceType = true;
                 HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -1017,9 +1015,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                     state.dataCoilCoolingDX->coilCoolingDXs[DesupHtr.ReclaimHeatingSourceIndexNum].reclaimHeat;
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
-                    for (auto &num : HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat) {
-                        num = 0.0;
-                    }
+                    std::fill(
+                        HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.begin(), HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.end(), 0.0);
                 }
                 DesupHtr.ValidSourceType = true;
                 HeatReclaim.ReclaimEfficiencyTotal += DesupHtr.HeatReclaimRecoveryEff;
@@ -8265,7 +8262,7 @@ void WaterThermalTankData::CalcWaterThermalTankStratified(EnergyPlusData &state)
                     dt = min(dt, dT_max / Denominator);
                 }
             }
-            dt = max(min(SubTimestepMin, TimeRemaining), dt);
+            dt = std::clamp(SubTimestepMin, dt, TimeRemaining);
             dt = min(SubTimestepMax, dt);
         }
 
@@ -11596,11 +11593,10 @@ void WaterThermalTankData::SizeTankForDemandSide(EnergyPlusData &state)
     case SizingMode::PerPerson: {
         // how to get number of people?
 
-        // MJW TODO: this won't compile now: Real64 SumPeopleAllZones = sum(state.dataHeatBal->Zone, &DataHeatBalance::ZoneData::TotOccupants);
-        Real64 SumPeopleAllZones = 0.0;
-        for (auto const &thisZone : state.dataHeatBal->Zone) {
-            SumPeopleAllZones += thisZone.TotOccupants;
-        }
+        Real64 const SumPeopleAllZones =
+            std::accumulate(state.dataHeatBal->Zone.begin(), state.dataHeatBal->Zone.end(), 0.0, [](Real64 total, auto const &zone) {
+                return total + zone.TotOccupants;
+            });
         if (this->VolumeWasAutoSized) {
             tmpTankVolume = this->Sizing.TankCapacityPerPerson * SumPeopleAllZones;
         }
@@ -11642,11 +11638,10 @@ void WaterThermalTankData::SizeTankForDemandSide(EnergyPlusData &state)
     }
     case SizingMode::PerFloorArea: {
 
-        // MJW TODO: this won't compile now: Real64 SumFloorAreaAllZones = sum(state.dataHeatBal->Zone, &DataHeatBalance::ZoneData::FloorArea);
-        Real64 SumFloorAreaAllZones = 0.0;
-        for (auto const &thisZone : state.dataHeatBal->Zone) {
-            SumFloorAreaAllZones += thisZone.FloorArea;
-        }
+        Real64 const SumFloorAreaAllZones =
+            std::accumulate(state.dataHeatBal->Zone.begin(), state.dataHeatBal->Zone.end(), 0.0, [](Real64 total, auto const &zone) {
+                return total + zone.FloorArea;
+            });
         if (this->VolumeWasAutoSized) {
             tmpTankVolume = this->Sizing.TankCapacityPerArea * SumFloorAreaAllZones;
         }
@@ -12396,11 +12391,10 @@ void WaterThermalTankData::SizeStandAloneWaterHeater(EnergyPlusData &state)
         case SizingMode::PerPerson: {
             // how to get number of people?
 
-            // MJW TODO: this won't compile now: Real64 SumPeopleAllZones = sum(state.dataHeatBal->Zone, &DataHeatBalance::ZoneData::TotOccupants);
-            Real64 SumPeopleAllZones = 0.0;
-            for (auto const &thisZone : state.dataHeatBal->Zone) {
-                SumPeopleAllZones += thisZone.TotOccupants;
-            }
+            Real64 const SumPeopleAllZones =
+                std::accumulate(state.dataHeatBal->Zone.begin(), state.dataHeatBal->Zone.end(), 0.0, [](Real64 total, auto const &zone) {
+                    return total + zone.TotOccupants;
+                });
             if (this->VolumeWasAutoSized) {
                 tmpTankVolume = this->Sizing.TankCapacityPerPerson * SumPeopleAllZones;
             }
@@ -12424,11 +12418,10 @@ void WaterThermalTankData::SizeStandAloneWaterHeater(EnergyPlusData &state)
         }
         case SizingMode::PerFloorArea: {
 
-            // MJW TODO: this won't compile now: Real64 SumFloorAreaAllZones = sum(state.dataHeatBal->Zone, &DataHeatBalance::ZoneData::FloorArea);
-            Real64 SumFloorAreaAllZones = 0.0;
-            for (auto const &thisZone : state.dataHeatBal->Zone) {
-                SumFloorAreaAllZones += thisZone.FloorArea;
-            }
+            Real64 const SumFloorAreaAllZones =
+                std::accumulate(state.dataHeatBal->Zone.begin(), state.dataHeatBal->Zone.end(), 0.0, [](Real64 total, auto const &zone) {
+                    return total + zone.FloorArea;
+                });
             if (this->VolumeWasAutoSized) {
                 tmpTankVolume = this->Sizing.TankCapacityPerArea * SumFloorAreaAllZones;
             }
