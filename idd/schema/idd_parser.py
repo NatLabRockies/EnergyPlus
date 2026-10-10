@@ -54,6 +54,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import re
+import warnings
 
 
 def _squiggle_context(data, problem_index, num_context_lines_around=5):
@@ -96,8 +97,6 @@ class IddParsingError(Exception):
 class MissingSemiColonException(IddParsingError):
     pass
 
-
-# Preston Shires
 
 # tokens
 TOKEN_NONE = 0
@@ -218,6 +217,9 @@ def parse_idd(data):
             root["properties"][obj_name] = {}
             root["properties"][obj_name]["patternProperties"] = {}
             root["properties"][obj_name]["group"] = current_group_name
+
+            if "obsolete" in obj_data:
+                root["properties"][obj_name]["obsolete"] = handle_obsolete(obj_data.pop("obsolete"), obj_name)
 
             name_pattern_properties = ".*"
             if "name" in obj_data:
@@ -910,3 +912,17 @@ def eat_comment(data):
         data.index += 1
         if data.index == data.file_size or data.file[data.index] == "\n":
             return
+
+
+def handle_obsolete(string, obj_name):
+    if len(string) < 6:
+        raise ValueError(f"In object '{obj_name}', insufficient data for /obsolete")
+    if string[:5].lower() != "new=>":
+        raise ValueError(f"In object '{obj_name}', expected 'New=>' for /obsolete, got '{string[:5]}' instead")
+    obj_string = string[5:].strip()
+    if not obj_string:
+        raise ValueError(f"In object '{obj_name}', expected non-empty string after 'New=>' for /obsolete")
+    if obj_string != "deleted" and obj_string.lower() == "deleted":
+        warnings.warn(f"In object '{obj_name}', '{obj_string}' converted to 'deleted' for /obsolete", SyntaxWarning)
+        obj_string = "deleted"
+    return obj_string

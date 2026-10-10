@@ -53,6 +53,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import warnings
+
 import idd_parser
 import pytest
 
@@ -71,6 +73,7 @@ OkObject,
       \minimum 1
 
 NotBrokenObject,
+  \obsolete New=>deleted
   A1, \field Name
   N2; \field Last Field
       \maximum 10
@@ -85,6 +88,7 @@ Obj2,
             ".*": {"type": "object", "properties": {"last_field": {"type": "number", "maximum": 10.0}}}
         },
         "group": "test",
+        "obsolete": "deleted",
         "name": {"type": "string"},
         "legacy_idd": {
             "field_info": {
@@ -97,6 +101,51 @@ Obj2,
         },
         "type": "object",
     }
+
+
+@pytest.mark.parametrize("prefix", ["New=>", "new=>"])
+def test_obsolete_replacement_is_normalized(prefix):
+    assert idd_parser.handle_obsolete(f"{prefix}  Replacement:Object  ", "Old:Object") == "Replacement:Object"
+
+
+def test_obsolete_mixed_case_deleted_is_normalized_in_schema():
+    data = idd_parser.Data()
+    data.file = r"""ObsoleteObject,
+  \obsolete New=>DeleteD
+  A1; \field Name
+"""
+    with pytest.warns(SyntaxWarning, match="converted to 'deleted'"):
+        idd_parser.parse_idd(data)
+
+    schema_object = data.schema["properties"]["ObsoleteObject"]
+    assert schema_object["obsolete"] == "deleted"
+    assert "obsolete" not in schema_object["patternProperties"][".*"]
+
+
+@pytest.mark.parametrize("value", ["Deleted", "DELETED", "dElEtEd"])
+def test_obsolete_deleted_is_case_insensitive(value):
+    with pytest.warns(SyntaxWarning, match="converted to 'deleted'"):
+        assert idd_parser.handle_obsolete(f"New=>{value}", "Old:Object") == "deleted"
+
+
+def test_obsolete_deleted_canonical_case_does_not_warn():
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        assert idd_parser.handle_obsolete("New=>deleted", "Old:Object") == "deleted"
+    assert not caught
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ("New=>", "insufficient data"),
+        ("Old=>Replacement:Object", "expected 'New=>'"),
+        ("New=>   ", "expected non-empty string"),
+    ],
+)
+def test_obsolete_invalid_values(value, message):
+    with pytest.raises(ValueError, match=message):
+        idd_parser.handle_obsolete(value, "BrokenObject")
 
 
 def test_broken_idd():
