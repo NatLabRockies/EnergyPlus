@@ -381,7 +381,7 @@ void CoilCoolingITEColdPlateData::setMassFlowRates(EnergyPlusData &state)
 
 void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
 {
-    Real64 massFlowRate = 0.0;
+    Real64 coolantFlow = 0.0;
 
     Real64 const loadFromSchedule = (this->itLoadSchedule != nullptr) ? this->itLoadSchedule->getCurrentVal() : 0.0;
     if (loadFromSchedule < 0.0) {
@@ -418,93 +418,93 @@ void CoilCoolingITEColdPlateData::doPhysics(EnergyPlusData &state)
         this->caseTemperature = (load > 0.0) ? this->maximumCaseTemperature : 0.0;
         this->inletTemp = state.dataLoopNodes->Node(this->inletNode).Temp;
         this->outletTemp = this->inletTemp;
-        PlantUtilities::SetComponentFlowRate(state, massFlowRate, this->inletNode, this->outletNode, this->plantLoc);
+        PlantUtilities::SetComponentFlowRate(state, coolantFlow, this->inletNode, this->outletNode, this->plantLoc);
         return;
     }
 
     this->inletTemp = state.dataLoopNodes->Node(this->inletNode).Temp;
-    Real64 const inletTemp = this->inletTemp;
-    Real64 const cp = this->plantLoc.loop->glycol->getSpecificHeat(state, inletTemp, "CoilCoolingITEColdPlateData::doPhysics");
+    Real64 const coolantInletTemp = this->inletTemp;
+    Real64 const cp = this->plantLoc.loop->glycol->getSpecificHeat(state, coolantInletTemp, "CoilCoolingITEColdPlateData::doPhysics");
 
-    Real64 const nominalMassFlowRate = this->nominalMassFlowRate;
-    Real64 const maximumMassFlowRate = this->maximumMassFlowRate;
+    Real64 const nominalFlow = this->nominalMassFlowRate;
+    Real64 const maximumFlow = this->maximumMassFlowRate;
 
     // Heat removal capacity at a given flow, thermal resistance and case temperature. The coolant cannot leave warmer than the case,
     // so the Standard method is limited by mdot * cp * (T_case - T_in); the LMTD effectiveness already enforces this limit.
-    auto heatTransferCapacity = [this, cp, inletTemp](Real64 const massFlow, Real64 const resistance, Real64 const caseTemp) {
+    auto heatTransferCapacity = [this, cp, coolantInletTemp](Real64 const massFlow, Real64 const resistance, Real64 const caseTemp) {
         if (massFlow <= 0.0) {
             return 0.0;
         }
         Real64 const capacity = (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD)
-                                    ? massFlow * cp * (1.0 - std::exp(-1.0 / (massFlow * cp * resistance))) * (caseTemp - inletTemp)
-                                    : std::min(1.0 / resistance, massFlow * cp) * (caseTemp - inletTemp);
+                                    ? massFlow * cp * (1.0 - std::exp(-1.0 / (massFlow * cp * resistance))) * (caseTemp - coolantInletTemp)
+                                    : std::min(1.0 / resistance, massFlow * cp) * (caseTemp - coolantInletTemp);
         // Coolant warmer than the case cannot remove heat; it must not add heat to the chip either
         return std::max(0.0, capacity);
     };
 
     // Determine the mass flow rate based on the flow mode and the load to be removed
     if (this->flowMode == DataPlant::FlowMode::Constant) {
-        massFlowRate = nominalMassFlowRate;
+        coolantFlow = nominalFlow;
     } else { // Variable flow mode
         // returns the load achievable at a given mass flow rate and target temperature
-        auto loadCalculated = [this, &state, &heatTransferCapacity, nominalMassFlowRate](Real64 const massFlow, Real64 const targetTemp) {
-            Real64 thermalResistance = this->getAdjustedThermalResistance(state, massFlow / nominalMassFlowRate);
-            return heatTransferCapacity(massFlow, thermalResistance, targetTemp);
+        auto loadCalculated = [this, &state, &heatTransferCapacity, nominalFlow](Real64 const massFlow, Real64 const targetTemp) {
+            Real64 coldPlateThermalResistance = this->getAdjustedThermalResistance(state, massFlow / nominalFlow);
+            return heatTransferCapacity(massFlow, coldPlateThermalResistance, targetTemp);
         };
 
         // Finds the flow that removes the load at the given case temperature; false if the load cannot be met at maximum flow.
         // The capacity is zero at zero flow, so the search always starts from zero flow.
         auto solveForFlow = [&](Real64 const targetTemp) {
             auto residual = [&loadCalculated, targetTemp, load](Real64 const massFlow) { return loadCalculated(massFlow, targetTemp) - load; };
-            if (residual(maximumMassFlowRate) < 0.0) {
+            if (residual(maximumFlow) < 0.0) {
                 return false;
             }
             int SolFla;
-            General::SolveRoot(state, 1.0e-3, 500, SolFla, massFlowRate, residual, 0.0, maximumMassFlowRate);
+            General::SolveRoot(state, 1.0e-3, 500, SolFla, coolantFlow, residual, 0.0, maximumFlow);
             return SolFla >= 0;
         };
 
         // First meet the target operating temperature, then allow the case to rise to the maximum temperature;
         // otherwise use the maximum flow rate and the heat that cannot be removed is added to the zone heat gain
         if (!solveForFlow(this->targetCaseOperatingTemperature) && !solveForFlow(this->maximumCaseTemperature)) {
-            massFlowRate = maximumMassFlowRate;
+            coolantFlow = maximumFlow;
         }
     }
-    PlantUtilities::SetComponentFlowRate(state, massFlowRate, this->inletNode, this->outletNode, this->plantLoc);
-    this->massFlowRate = massFlowRate;
+    PlantUtilities::SetComponentFlowRate(state, coolantFlow, this->inletNode, this->outletNode, this->plantLoc);
+    this->massFlowRate = coolantFlow;
 
     // If the flow is zero, all of the load goes to the zone and the maximum case temperature is reported.
     // This is a reporting convention, not a prediction: without cooling a real chip would exceed this limit, and there is no
     // transient chip model (Tc = f(t, load)) to represent the thermal mass or the time taken to heat up.
-    if (massFlowRate <= 0.0) {
+    if (coolantFlow <= 0.0) {
         this->heatRemovedByFluid = 0.0;
         this->zoneHeatGainRate = load;
         this->effectiveThermalResistance = 0.0;
         this->caseTemperature = this->maximumCaseTemperature;
-        this->outletTemp = inletTemp;
+        this->outletTemp = coolantInletTemp;
         return;
     }
 
     // Flow is known check cold plate maximum heat transfer rate
-    Real64 thermalResistance = this->getAdjustedThermalResistance(state, massFlowRate / nominalMassFlowRate);
-    this->effectiveThermalResistance = thermalResistance;
-    Real64 const maxHeatTransferRate = heatTransferCapacity(massFlowRate, thermalResistance, this->maximumCaseTemperature);
+    Real64 coldPlateThermalResistance = this->getAdjustedThermalResistance(state, coolantFlow / nominalFlow);
+    this->effectiveThermalResistance = coldPlateThermalResistance;
+    Real64 const maxHeatTransferRate = heatTransferCapacity(coolantFlow, coldPlateThermalResistance, this->maximumCaseTemperature);
 
     // Determine how much of the load is met by the fluid and how much spills to the zone
     this->heatRemovedByFluid = std::min(load, maxHeatTransferRate);
     this->zoneHeatGainRate = load - this->heatRemovedByFluid;
 
     // Chip case temperature
-    if (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD && massFlowRate > 0.0) {
-        Real64 const effectiveness = 1.0 - std::exp(-1.0 / (massFlowRate * cp * thermalResistance));
-        this->caseTemperature = inletTemp + this->heatRemovedByFluid / (massFlowRate * cp * effectiveness);
+    if (this->thermalResistanceMethod == ThermalResistanceMethod::LMTD && coolantFlow > 0.0) {
+        Real64 const effectiveness = 1.0 - std::exp(-1.0 / (coolantFlow * cp * coldPlateThermalResistance));
+        this->caseTemperature = coolantInletTemp + this->heatRemovedByFluid / (coolantFlow * cp * effectiveness);
     } else {
         // When limited by the coolant energy balance, the coolant leaves at the case temperature
-        this->caseTemperature = inletTemp + this->heatRemovedByFluid * std::max(thermalResistance, 1.0 / (massFlowRate * cp));
+        this->caseTemperature = coolantInletTemp + this->heatRemovedByFluid * std::max(coldPlateThermalResistance, 1.0 / (coolantFlow * cp));
     }
 
     // Store outlet temperature — node update happens in report() via SafeCopyPlantNode
-    this->outletTemp = (massFlowRate > 0.0) ? inletTemp + this->heatRemovedByFluid / (massFlowRate * cp) : inletTemp;
+    this->outletTemp = (coolantFlow > 0.0) ? coolantInletTemp + this->heatRemovedByFluid / (coolantFlow * cp) : coolantInletTemp;
 }
 
 void CoilCoolingITEColdPlateData::report(EnergyPlusData &state)
