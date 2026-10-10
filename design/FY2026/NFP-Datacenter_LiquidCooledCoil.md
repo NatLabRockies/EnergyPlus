@@ -4,7 +4,7 @@ Liquid-Cooled Plant Equipment
 **Jeremy Lerond, Pacific Northwest National Laboratory**
 
  - Original Date: June 2026
- - Revision Date: 07/15/2026
+ - Revision Date: 10/09/2026
 
 ## Justification for New Feature ##
 
