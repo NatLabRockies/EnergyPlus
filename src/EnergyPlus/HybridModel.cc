@@ -55,10 +55,10 @@
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HybridModel.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-#include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 namespace EnergyPlus {
 
@@ -334,7 +334,7 @@ namespace HybridModel {
                                 std::format(
                                     "Field \"{}\": default people activity level is not provided, default value of {:.1f}W/person will be used.",
                                     cAlphaFieldNames(9),
-                                    ZoneTempPredictorCorrector::peopleActivityLevelDefault));
+                                    InternalHeatGains::peopleActivityLevelDefault));
                         }
                         if (peopleSensibleFractionSched != nullptr) {
                             hmZone.peopleSensibleFracSched = peopleSensibleFractionSched;
@@ -343,7 +343,7 @@ namespace HybridModel {
                                 state,
                                 std::format("Field \"{}\": default people sensible heat rate is not provided, default value of {:.1f} will be used.",
                                             cAlphaFieldNames(10),
-                                            ZoneTempPredictorCorrector::peopleSensibleFracDefault));
+                                            InternalHeatGains::peopleSensibleFracDefault));
                         }
                         if (peopleRadiantFractionSched != nullptr) {
                             hmZone.peopleRadiantFracSched = peopleRadiantFractionSched;

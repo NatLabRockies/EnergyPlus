@@ -4951,7 +4951,7 @@ void InverseModelTemperature(EnergyPlusData &state,
             Real64 ActivityLevel = zone.ZonePeopleActivityLevel;
 
             if (FractionSensible <= 0.0) {
-                FractionSensible = peopleSensibleFracDefault;
+                FractionSensible = InternalHeatGains::peopleSensibleFracDefault;
             }
 
             if (FractionRadiation <= 0.0) {
@@ -4961,7 +4961,7 @@ void InverseModelTemperature(EnergyPlusData &state,
             }
 
             if (ActivityLevel <= 0.0) {
-                ActivityLevel = peopleActivityLevelDefault;
+                ActivityLevel = InternalHeatGains::peopleActivityLevelDefault;
             }
 
             if (hmZone.IncludeSystemSupplyParameters) {
@@ -5137,11 +5137,11 @@ void InverseModelHumidity(EnergyPlusData &state,
             ActivityLevel = zone.ZonePeopleActivityLevel;
 
             if (FractionSensible <= 0.0) {
-                FractionSensible = peopleSensibleFracDefault;
+                FractionSensible = InternalHeatGains::peopleSensibleFracDefault;
             }
 
             if (ActivityLevel <= 0.0) {
-                ActivityLevel = peopleActivityLevelDefault;
+                ActivityLevel = InternalHeatGains::peopleActivityLevelDefault;
             }
 
             // Conditionally calculate the humidity-dependent and humidity-independent

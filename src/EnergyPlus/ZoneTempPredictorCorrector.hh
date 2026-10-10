@@ -69,9 +69,6 @@ struct EnergyPlusData;
 
 namespace ZoneTempPredictorCorrector {
 
-    constexpr Real64 peopleActivityLevelDefault = 130.0; // Watts per person
-    constexpr Real64 peopleSensibleFracDefault = 0.6;
-
     struct ZoneSetptScheds
     {
         std::string Name; // Name of the zone

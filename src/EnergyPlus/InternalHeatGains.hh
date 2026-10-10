@@ -69,6 +69,9 @@ struct EnergyPlusData;
 
 namespace InternalHeatGains {
 
+    constexpr Real64 peopleActivityLevelDefault = 130.0; // Watts per person
+    constexpr Real64 peopleSensibleFracDefault = 0.6;
+
     enum class DesignLevelMethod
     {
         Invalid = -1,
