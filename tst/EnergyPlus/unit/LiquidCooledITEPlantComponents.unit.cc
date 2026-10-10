@@ -75,6 +75,9 @@ namespace {
     constexpr Real64 maxCaseTemp = 85.0;        // maximum case temperature [C]
     constexpr Real64 targetCaseTemp = 80.0;     // target case operating temperature [C]
 
+    // The coolant is a 25% propylene glycol mixture. The fluid is the only input object used; the plant and the cold plate are set up in code.
+    constexpr char const *pg25Idf = "FluidProperties:GlycolConcentration,\n  PG25, PropyleneGlycol, , 0.25;\n";
+
     // A plant loop with the cold plate alone on the demand side, and a cold plate with both flow rates autosized
     void setupColdPlate(EnergyPlusData &state, CoilCoolingITEColdPlateData &coldPlate, ThermalResistanceMethod const method)
     {
@@ -83,8 +86,9 @@ namespace {
         state.dataPlnt->TotNumLoops = 1;
         state.dataPlnt->PlantLoop.allocate(1);
         auto &loop = state.dataPlnt->PlantLoop(1);
-        loop.FluidName = "WATER";
-        loop.glycol = Fluid::GetWater(state);
+        loop.FluidName = "PG25";
+        loop.glycol = Fluid::GetGlycol(state, "PG25");
+        EXPECT_NE(nullptr, loop.glycol);
         loop.MaxVolFlowRate = DataSizing::AutoSize;
         loop.PlantSizNum = 1;
         auto &demandSide = loop.LoopSide(DataPlant::LoopSideLocation::Demand);
@@ -138,6 +142,7 @@ namespace {
 
 TEST_F(EnergyPlusFixture, CoilCoolingITEColdPlate_StandardMethod)
 {
+    ASSERT_TRUE(process_idf(pg25Idf));
     CoilCoolingITEColdPlateData coldPlate;
     setupColdPlate(*state, coldPlate, ThermalResistanceMethod::Standard);
 
@@ -161,12 +166,14 @@ TEST_F(EnergyPlusFixture, CoilCoolingITEColdPlate_StandardMethod)
     EXPECT_NEAR(0.0, coldPlate.zoneHeatGainRate, 1.0e-6);
     EXPECT_NEAR(designInletTemp + 1500.0 / (coldPlate.massFlowRate * cp), coldPlate.outletTemp, 1.0e-6);
     EXPECT_NEAR(designInletTemp + 1500.0 * nominalResistance, coldPlate.caseTemperature, 1.0e-6);
+    Real64 const constantFlow = coldPlate.massFlowRate;
 
     // Variable flow: the capacity at the target case temperature is min(1/R, mdot*cp) * (Ttarget - Tin),
     // so a load below the design load is met when mdot*cp = load / (Ttarget - Tin) and the coolant leaves at the case temperature
     coldPlate.flowMode = DataPlant::FlowMode::Variable;
     coldPlate.loadFromITEquipment = 1000.0;
     coldPlate.doPhysics(*state);
+    EXPECT_LT(coldPlate.massFlowRate, constantFlow); // at part load the variable flow is below the constant flow
     EXPECT_NEAR(1000.0 / (targetCaseTemp - designInletTemp) / cp, coldPlate.massFlowRate, 1.0e-5);
     EXPECT_NEAR(1000.0, coldPlate.heatRemovedByFluid, 1.0e-6);
     EXPECT_NEAR(0.0, coldPlate.zoneHeatGainRate, 1.0e-6);
@@ -187,6 +194,7 @@ TEST_F(EnergyPlusFixture, CoilCoolingITEColdPlate_StandardMethod)
 
 TEST_F(EnergyPlusFixture, CoilCoolingITEColdPlate_LMTDMethod)
 {
+    ASSERT_TRUE(process_idf(pg25Idf));
     CoilCoolingITEColdPlateData coldPlate;
     setupColdPlate(*state, coldPlate, ThermalResistanceMethod::LMTD);
 
@@ -226,7 +234,16 @@ TEST_F(EnergyPlusFixture, CoilCoolingITEColdPlate_LMTDMethod)
     EXPECT_NEAR(0.0, coldPlate.zoneHeatGainRate, 1.0e-6);
     EXPECT_NEAR(targetCaseTemp, coldPlate.caseTemperature, 1.0e-3);
 
+    // Variable flow at half the design load: the flow rate drops below the constant (nominal) flow rate and the case stays at the target
+    coldPlate.loadFromITEquipment = 0.5 * designLoad;
+    coldPlate.doPhysics(*state);
+    EXPECT_LT(coldPlate.massFlowRate, coldPlate.nominalMassFlowRate);
+    EXPECT_NEAR(0.5 * designLoad, coldPlate.heatRemovedByFluid, 1.0e-6);
+    EXPECT_NEAR(0.0, coldPlate.zoneHeatGainRate, 1.0e-6);
+    EXPECT_NEAR(targetCaseTemp, coldPlate.caseTemperature, 1.0e-3);
+
     // Maximum flow: the load cannot be met, so the maximum flow is used and the remainder goes to the zone
+    coldPlate.loadFromITEquipment = designLoad;
     capMaximumFlow(*state, coldPlate, 0.25);
     coldPlate.doPhysics(*state);
     Real64 const capacityRate = coldPlate.maximumMassFlowRate * cp;
