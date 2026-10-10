@@ -426,6 +426,8 @@ set(SRC
     IntegratedHeatPump.hh
     InternalHeatGains.cc
     InternalHeatGains.hh
+    LiquidCooledITEPlantComponents.cc
+    LiquidCooledITEPlantComponents.hh
     LowTempRadiantSystem.cc
     LowTempRadiantSystem.hh
     Material.cc

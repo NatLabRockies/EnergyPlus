@@ -136,8 +136,9 @@ namespace InternalHeatGains {
 
     static constexpr std::array<DataHeatBalance::IntGainType, 1> IntGainTypesPeople = {DataHeatBalance::IntGainType::People};
     static constexpr std::array<DataHeatBalance::IntGainType, 1> IntGainTypesLight = {DataHeatBalance::IntGainType::Lights};
-    static constexpr std::array<DataHeatBalance::IntGainType, 7> IntGainTypesEquip = {DataHeatBalance::IntGainType::ElectricEquipment,
+    static constexpr std::array<DataHeatBalance::IntGainType, 8> IntGainTypesEquip = {DataHeatBalance::IntGainType::ElectricEquipment,
                                                                                       DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
+                                                                                      DataHeatBalance::IntGainType::CoilCoolingITEColdPlate,
                                                                                       DataHeatBalance::IntGainType::GasEquipment,
                                                                                       DataHeatBalance::IntGainType::HotWaterEquipment,
                                                                                       DataHeatBalance::IntGainType::SteamEquipment,

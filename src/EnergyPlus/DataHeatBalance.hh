@@ -285,6 +285,7 @@ namespace DataHeatBalance {
         ElectricLoadCenterConverter,
         FanSystemModel,
         IndoorGreen,
+        CoilCoolingITEColdPlate,
         Num
     };
 
@@ -367,7 +368,8 @@ namespace DataHeatBalance {
         "COIL:HEATING:DX:MULTISPEED",
         "ELECTRICLOADCENTER:STORAGE:CONVERTER",
         "FAN:SYSTEMMODEL",
-        "INDOORGREEN"};
+        "INDOORGREEN",
+        "COIL:COOLING:ITE:COLDPLATE"};
 
     static constexpr std::array<std::string_view, static_cast<int>(DataHeatBalance::IntGainType::Num)> IntGainTypeNamesCC = {
         "People",
@@ -425,7 +427,8 @@ namespace DataHeatBalance {
         "Coil:Heating:DX:MultiSpeed",
         "ElectricLoadCenter:Storage:Converter",
         "Fan:SystemModel",
-        "IndoorGreen"};
+        "IndoorGreen",
+        "Coil:Cooling:ITE:ColdPlate"};
 
     // Parameters for checking surface heat transfer models
     constexpr Real64 HighDiffusivityThreshold(1.e-5);   // used to check if Material properties are out of line.

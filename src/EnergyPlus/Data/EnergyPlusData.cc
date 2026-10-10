@@ -177,6 +177,7 @@ EnergyPlusData::EnergyPlusData()
     this->dataIceThermalStorage = std::make_unique<IceThermalStorageData>();
     this->dataIntegratedHP = std::make_unique<IntegratedHeatPumpGlobalData>();
     this->dataInternalHeatGains = std::make_unique<InternalHeatGainsData>();
+    this->dataLiquidCooledITE = std::make_unique<LiquidCooledITEColdPlatesData>();
     this->dataLoopNodes = std::make_unique<LoopNodeData>();
     this->dataLowTempRadSys = std::make_unique<LowTempRadiantSystemData>();
     this->dataMaterial = std::make_unique<MaterialData>();
@@ -437,6 +438,7 @@ void EnergyPlusData::clear_state()
     this->dataInputProcessing->clear_state();
     this->dataIntegratedHP->clear_state();
     this->dataInternalHeatGains->clear_state();
+    this->dataLiquidCooledITE->clear_state();
     this->dataLoopNodes->clear_state();
     this->dataLowTempRadSys->clear_state();
     this->dataMaterial->clear_state();
@@ -714,6 +716,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataInputProcessing->init_constant_state(state);
     this->dataIntegratedHP->init_constant_state(state);
     this->dataInternalHeatGains->init_constant_state(state);
+    this->dataLiquidCooledITE->init_constant_state(state);
     this->dataLoopNodes->init_constant_state(state);
     this->dataLowTempRadSys->init_constant_state(state);
     this->dataMaterial->init_constant_state(state);
@@ -979,6 +982,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataInputProcessing->init_state(state);
     this->dataIntegratedHP->init_state(state);
     this->dataInternalHeatGains->init_state(state);
+    this->dataLiquidCooledITE->init_state(state);
     this->dataLoopNodes->init_state(state);
     this->dataLowTempRadSys->init_state(state);
     this->dataMaterial->init_state(state);
