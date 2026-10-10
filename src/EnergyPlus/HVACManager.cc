@@ -107,8 +107,8 @@
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterManager.hh>
 #include <EnergyPlus/ZoneContaminantPredictorCorrector.hh>
-#include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
+#include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 namespace EnergyPlus::HVACManager {

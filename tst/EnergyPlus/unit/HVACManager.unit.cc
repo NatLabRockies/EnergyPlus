@@ -702,12 +702,12 @@ TEST_F(EnergyPlusFixture, AirloopFlowBalanceTest_DuctLeakageHint)
     state->dataDefineEquipment->AirDistUnit(1).MassFlowRateUpStrLk = 0.0;
     state->dataDefineEquipment->AirDistUnit(1).MassFlowRateDnStrLk = 0.0;
     HVACManager::CheckAirLoopFlowBalance(*state);
-    std::string const expectedNoHint = delimited_string(
-        {"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 1 is unbalanced. Supply is > return plus outdoor air.",
-         "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
-         "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.00000  Return=1.50000  Outdoor Air=0.00000",
-         "   **   ~~~   **   Imbalance=0.50000",
-         "   **   ~~~   **   This error will only be reported once per system."});
+    std::string const expectedNoHint =
+        delimited_string({"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 1 is unbalanced. Supply is > return plus outdoor air.",
+                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+                          "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.00000  Return=1.50000  Outdoor Air=0.00000",
+                          "   **   ~~~   **   Imbalance=0.50000",
+                          "   **   ~~~   **   This error will only be reported once per system."});
     EXPECT_TRUE(compare_err_stream(expectedNoHint, true));
 }
 
