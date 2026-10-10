@@ -1212,8 +1212,7 @@ void GetPlantInput(EnergyPlusData &state)
                         break;
                     }
                     case PlantEquipmentType::CoilCoolingITEColdPlate: {
-                        this_comp.compPtr =
-                            LiquidCooledITEPlantComponents::CoilCoolingITEColdPlateData::factory(state, CompNames(CompNum));
+                        this_comp.compPtr = LiquidCooledITEPlantComponents::CoilCoolingITEColdPlateData::factory(state, CompNames(CompNum));
                         this_comp.CurOpSchemeType = OpScheme::Demand;
                         break;
                     }
