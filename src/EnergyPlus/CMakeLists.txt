@@ -13,6 +13,9 @@ target_architecture(TARGET_ARCH)
 set(PYTHON_API_VERSION_MAJOR 0)
 set(PYTHON_API_VERSION_MINOR 2)
 set(BUILD_PLATFORM_STRING "${SYSTEM_NICKNAME}_${TARGET_ARCH}")
+if(ENABLE_NATIVE_OPTIMIZATION)
+  string(APPEND BUILD_PLATFORM_STRING " With Native Optimizations")
+endif()
 configure_file(DataStringGlobals.in.cc "${CMAKE_CURRENT_BINARY_DIR}/DataStringGlobals.cc")
 configure_file(ConfiguredFunctions.in.cc "${CMAKE_CURRENT_BINARY_DIR}/ConfiguredFunctions.cc")
 
@@ -895,6 +898,7 @@ else() # windows
   add_executable(energyplus main.cc "${CMAKE_CURRENT_BINARY_DIR}/energyplus.rc")
 endif()
 target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
+target_compile_options(energyplus PRIVATE ${ENERGYPLUS_RECORD_SWITCHES_FLAGS})
 
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})

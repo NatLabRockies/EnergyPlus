@@ -7767,8 +7767,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
         mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
         EXPECT_EQ(1.005, thisSys.m_DesignFanVolFlowRate);
-        EXPECT_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
-        EXPECT_EQ(1.005, thisSys.m_MaxHeatAirVolFlow);
+        EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
+        EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxHeatAirVolFlow);
         EXPECT_EQ(1.005, thisSys.m_MaxNoCoolHeatAirVolFlow);
         EXPECT_NEAR(16192.5, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad, 1.0);
     }
@@ -7786,10 +7786,10 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
     mySys->sizeSystem(*state, FirstHVACIteration, AirLoopNum);
 
     EXPECT_EQ(1.005, thisSys.m_DesignFanVolFlowRate);
-    EXPECT_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
+    EXPECT_DOUBLE_EQ(1.005, thisSys.m_MaxCoolAirVolFlow);
     EXPECT_EQ(0.0, thisSys.m_MaxHeatAirVolFlow);
     EXPECT_EQ(1.005, thisSys.m_MaxNoCoolHeatAirVolFlow);
-    EXPECT_EQ(16192.574019749998, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad);
+    EXPECT_DOUBLE_EQ(16192.574019749998, state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesCoolingLoad);
 
     // continue with unit testing of heating only system
     thisSys.m_CoolCoilExists = false;
@@ -12212,24 +12212,24 @@ Curve:Biquadratic,
 
     // expect fan to be sized and speed ratio variables set
     EXPECT_NE(thisSys->m_ActualFanVolFlowRate, DataSizing::AutoSize);
-    EXPECT_EQ(thisSys->m_HeatingFanSpeedRatio, 1.0);
-    EXPECT_EQ(thisSys->m_CoolingFanSpeedRatio, 1.0);
-    EXPECT_EQ(thisSys->m_NoHeatCoolSpeedRatio, 1.0);
+    EXPECT_DOUBLE_EQ(thisSys->m_HeatingFanSpeedRatio, 1.0);
+    EXPECT_DOUBLE_EQ(thisSys->m_CoolingFanSpeedRatio, 1.0);
+    EXPECT_DOUBLE_EQ(thisSys->m_NoHeatCoolSpeedRatio, 1.0);
 
     // multispeed coil speed ratios now match design spec object
     EXPECT_NEAR(thisSys->m_MSCoolingSpeedRatio[1], 0.3333, 0.0001);
     EXPECT_NEAR(thisSys->m_MSCoolingSpeedRatio[2], 0.6667, 0.0001);
-    EXPECT_EQ(thisSys->m_MSCoolingSpeedRatio[3], 1.0);
-    EXPECT_EQ(thisSys->m_MSCoolingSpeedRatio[1], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[0]);
-    EXPECT_EQ(thisSys->m_MSCoolingSpeedRatio[2], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[1]);
-    EXPECT_EQ(thisSys->m_MSCoolingSpeedRatio[3], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[2]);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSCoolingSpeedRatio[3], 1.0);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSCoolingSpeedRatio[1], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[0]);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSCoolingSpeedRatio[2], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[1]);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSCoolingSpeedRatio[3], state->dataUnitarySystems->designSpecMSHP[0].coolingVolFlowRatio[2]);
     // and equally distributed because design spec ratios were autosized, speeds = 3
     EXPECT_NEAR(1.0 / 3, thisSys->m_MSCoolingSpeedRatio[1] / thisSys->m_MSCoolingSpeedRatio[3], 0.00001);
 
     // speed ratios are proportional to heating flow with respect to fan flow
-    EXPECT_EQ(thisSys->m_MSHeatingSpeedRatio[1], thisSys->m_HeatVolumeFlowRate[1] / thisSys->m_ActualFanVolFlowRate);
-    EXPECT_EQ(thisSys->m_MSHeatingSpeedRatio[5], thisSys->m_HeatVolumeFlowRate[5] / thisSys->m_ActualFanVolFlowRate);
-    EXPECT_EQ(thisSys->m_MSHeatingSpeedRatio[10], thisSys->m_HeatVolumeFlowRate[10] / thisSys->m_ActualFanVolFlowRate);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSHeatingSpeedRatio[1], thisSys->m_HeatVolumeFlowRate[1] / thisSys->m_ActualFanVolFlowRate);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSHeatingSpeedRatio[5], thisSys->m_HeatVolumeFlowRate[5] / thisSys->m_ActualFanVolFlowRate);
+    EXPECT_DOUBLE_EQ(thisSys->m_MSHeatingSpeedRatio[10], thisSys->m_HeatVolumeFlowRate[10] / thisSys->m_ActualFanVolFlowRate);
     // and equally distributed because design spec ratios were autosized, speeds = 10
     EXPECT_NEAR(1.0 / 10, thisSys->m_MSHeatingSpeedRatio[1] / thisSys->m_MSHeatingSpeedRatio[10], 0.00001);
 
