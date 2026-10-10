@@ -56,6 +56,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataAirSystems.hh>
+#include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -69,6 +70,7 @@
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
+#include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -641,6 +643,72 @@ TEST_F(EnergyPlusFixture, ExfilAndExhaustReportTest)
     EXPECT_NEAR(0, state->dataHeatBal->ZnAirRpt(2).ExhTotalLoss, 0.01);
     EXPECT_NEAR(35.841882 * 3600, state->dataHeatBal->ZoneTotalExfiltrationHeatLoss, 0.01);
     EXPECT_NEAR(23377.39845 * 3600, state->dataHeatBal->ZoneTotalExhaustHeatLoss, 0.01);
+}
+
+TEST_F(EnergyPlusFixture, AirloopFlowBalanceTest_DuctLeakageHint)
+{
+    state->dataGlobal->isPulseZoneSizing = false;
+    state->dataGlobal->WarmupFlag = false;
+    state->dataHVACGlobal->AirLoopsSimOnce = true;
+    state->dataEnvrn->StdRhoAir = 1.0;
+
+    state->dataHVACGlobal->NumPrimaryAirSys = 1;
+    state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
+    state->dataAirSystemsData->PrimaryAirSystems(1).Name = "System 1";
+    state->dataAirLoop->AirLoopFlow.allocate(1);
+    auto &airLoopFlow = state->dataAirLoop->AirLoopFlow(1);
+    airLoopFlow.SupFlow = 2.0;
+    airLoopFlow.SysRetFlow = 1.5;
+    airLoopFlow.OAFlow = 0.0;
+
+    // Zone 1 has a return node that does not feed a plenum, zone 2 has one that does
+    state->dataZoneEquip->ZoneEquipConfig.allocate(2);
+    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
+        state->dataZoneEquip->ZoneEquipConfig(zoneNum).NumReturnNodes = 1;
+        state->dataZoneEquip->ZoneEquipConfig(zoneNum).ReturnNode.allocate(1);
+        state->dataZoneEquip->ZoneEquipConfig(zoneNum).ReturnNode(1) = zoneNum;
+    }
+    state->dataZonePlenum->GetInputFlag = false;
+    state->dataZonePlenum->NumZoneReturnPlenums = 1;
+    state->dataZonePlenum->ZoneRetPlenCond.allocate(1);
+    state->dataZonePlenum->ZoneRetPlenCond(1).NumInletNodes = 1;
+    state->dataZonePlenum->ZoneRetPlenCond(1).InletNode.allocate(1);
+    state->dataZonePlenum->ZoneRetPlenCond(1).InletNode(1) = 2;
+
+    state->dataDefineEquipment->AirDistUnit.allocate(2);
+    for (int aduNum = 1; aduNum <= 2; ++aduNum) {
+        auto &adu = state->dataDefineEquipment->AirDistUnit(aduNum);
+        adu.AirLoopNum = 1;
+        adu.ZoneEqNum = aduNum;
+        adu.MassFlowRateUpStrLk = 0.3;
+        adu.MassFlowRateDnStrLk = 0.2;
+    }
+
+    // Only the leakage from the ADU in zone 1 (0.5) is reported, the one in zone 2 is recovered by a plenum
+    HVACManager::CheckAirLoopFlowBalance(*state);
+    EXPECT_TRUE(has_err_output(false));
+    std::string const expectedWithHint = delimited_string(
+        {"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 1 is unbalanced. Supply is > return plus outdoor air.",
+         "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+         "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.00000  Return=1.50000  Outdoor Air=0.00000",
+         "   **   ~~~   **   Imbalance=0.50000",
+         "   **   ~~~   **   Simple duct leakage from air distribution units without a return plenum = 0.50000 m3/s at standard density. This "
+         "leaked air is not part of the return flow and must be replaced by outdoor air.",
+         "   **   ~~~   **   This error will only be reported once per system."});
+    EXPECT_TRUE(compare_err_stream(expectedWithHint, true));
+
+    // Without any unrecovered leakage the message has no hint
+    airLoopFlow.FlowError = false;
+    state->dataDefineEquipment->AirDistUnit(1).MassFlowRateUpStrLk = 0.0;
+    state->dataDefineEquipment->AirDistUnit(1).MassFlowRateDnStrLk = 0.0;
+    HVACManager::CheckAirLoopFlowBalance(*state);
+    std::string const expectedNoHint = delimited_string(
+        {"   ** Severe  ** CheckAirLoopFlowBalance: AirLoopHVAC System 1 is unbalanced. Supply is > return plus outdoor air.",
+         "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+         "   **   ~~~   **   Flows [m3/s at standard density]: Supply=2.00000  Return=1.50000  Outdoor Air=0.00000",
+         "   **   ~~~   **   Imbalance=0.50000",
+         "   **   ~~~   **   This error will only be reported once per system."});
+    EXPECT_TRUE(compare_err_stream(expectedNoHint, true));
 }
 
 TEST_F(EnergyPlusFixture, AirloopFlowBalanceTest)
