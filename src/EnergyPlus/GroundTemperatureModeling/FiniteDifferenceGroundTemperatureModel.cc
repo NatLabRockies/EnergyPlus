@@ -280,7 +280,7 @@ namespace GroundTemp {
                     airDensity_num += state.dataEnvrn->OutAirDensity;
                     relHum_num += state.dataEnvrn->OutRelHumValue;
                     windSpeed_num += state.dataEnvrn->WindSpeed;
-                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
+                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
 
                     state.dataGlobal->BeginHourFlag = false;
                     state.dataGlobal->BeginDayFlag = false;

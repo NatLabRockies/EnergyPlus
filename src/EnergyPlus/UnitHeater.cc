@@ -1594,6 +1594,8 @@ namespace UnitHeater {
             AirMassFlow = state.dataLoopNodes->Node(InletNode).MassFlowRate;
             // Set the fan inlet node maximum available mass flow rates for cycling fans
             state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = AirMassFlow;
+            state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail =
+                min(state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail, state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail);
 
             if (QCoilReq < 0.0) {
                 QCoilReq = 0.0; // a heating coil can only heat, not cool

@@ -304,6 +304,10 @@ set(SRC
     GeneratorDynamicsManager.hh
     GeneratorFuelSupply.cc
     GeneratorFuelSupply.hh
+    Geometry/Plane.cc
+    Geometry/Plane.hh
+    Geometry/Vector2D.hh
+    Geometry/Vector3D.hh
     GlobalNames.cc
     GlobalNames.hh
     GroundHeatExchangers/Base.cc

@@ -660,7 +660,7 @@ Real64 PondGroundHeatExchangerData::CalcSolarFlux(EnergyPlusData &state) const
     }
 
     // get the incidence and reflection angles
-    Real64 IncidAngle = std::acos(state.dataEnvrn->SOLCOS(3));
+    Real64 IncidAngle = std::acos(state.dataEnvrn->SOLCOS.z);
     Real64 RefractAngle = std::asin(std::sin(IncidAngle) * AirRefIndex / WaterRefIndex);
 
     // absorbed component: Tau_a
@@ -677,7 +677,7 @@ Real64 PondGroundHeatExchangerData::CalcSolarFlux(EnergyPlusData &state) const
     Real64 Reflectance = Absorbtance - Transmitance;
 
     // apply reflectance to beam and diffuse solar to find flux
-    CalcSolarFlux = (1.0 - Reflectance) * (state.dataEnvrn->SOLCOS(3) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad);
+    CalcSolarFlux = (1.0 - Reflectance) * (state.dataEnvrn->SOLCOS.z * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad);
 
     return CalcSolarFlux;
 }

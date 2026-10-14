@@ -150,7 +150,7 @@ namespace DElightManagerF {
         Real64 SinZoneRelNorth; // Sine of Zone rotation
         Real64 Xb;              // temp var for transformation calc
         Real64 Yb;              // temp var for transformation calc
-        Vector3<Real64> RefPt_WCS_Coord;
+        Vector3D RefPt_WCS_Coord;
         Array1D_int iWndoConstIndexes(100);
         bool lWndoConstFound;      // Flag for non-unique window const index
         std::string cNameWOBlanks; // Name without blanks

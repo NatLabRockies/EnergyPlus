@@ -8262,8 +8262,9 @@ void WaterThermalTankData::CalcWaterThermalTankStratified(EnergyPlusData &state)
                     dt = min(dt, dT_max / Denominator);
                 }
             }
-            dt = std::clamp(SubTimestepMin, dt, TimeRemaining);
-            dt = min(SubTimestepMax, dt);
+            // At least SubTimestepMin, but never more than the time remaining or SubTimestepMax
+            dt = std::max(dt, SubTimestepMin);
+            dt = std::min({dt, TimeRemaining, SubTimestepMax});
         }
 
         // Make initial guess that average and final temperatures over the DataGlobals::TimeStep are equal to the starting temperatures

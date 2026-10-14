@@ -552,8 +552,8 @@ Real64 FigureNDheightInZone(EnergyPlusData &state, int const thisHBsurf) // inde
             if (surf.Class == DataSurfaces::SurfaceClass::Floor) {
                 // Use Average Z for surface, more important for roofs than floors...
                 ++FloorCount;
-                Real64 Z1 = minval(surf.Vertex, &Vector3<Real64>::z);
-                Real64 Z2 = maxval(surf.Vertex, &Vector3<Real64>::z);
+                Real64 Z1 = minval(surf.Vertex, &Vector3D::z);
+                Real64 Z2 = maxval(surf.Vertex, &Vector3D::z);
                 ZFlrAvg += (Z1 + Z2) / 2.0;
             } else if (surf.Class == DataSurfaces::SurfaceClass::Wall) {
                 // Use Wall calculation in case no floor in zone
@@ -562,8 +562,8 @@ Real64 FigureNDheightInZone(EnergyPlusData &state, int const thisHBsurf) // inde
                     ZMax = surf.Vertex(1).z;
                     ZMin = ZMax;
                 }
-                ZMax = max(ZMax, maxval(surf.Vertex, &Vector3<Real64>::z));
-                ZMin = min(ZMin, minval(surf.Vertex, &Vector3<Real64>::z));
+                ZMax = max(ZMax, maxval(surf.Vertex, &Vector3D::z));
+                ZMin = min(ZMin, minval(surf.Vertex, &Vector3D::z));
             }
         }
     }
@@ -575,8 +575,8 @@ Real64 FigureNDheightInZone(EnergyPlusData &state, int const thisHBsurf) // inde
 
     // first check if some basic things are reasonable
 
-    Real64 SurfMinZ = minval(state.dataSurface->Surface(thisHBsurf).Vertex, &Vector3<Real64>::z);
-    Real64 SurfMaxZ = maxval(state.dataSurface->Surface(thisHBsurf).Vertex, &Vector3<Real64>::z);
+    Real64 SurfMinZ = minval(state.dataSurface->Surface(thisHBsurf).Vertex, &Vector3D::z);
+    Real64 SurfMaxZ = maxval(state.dataSurface->Surface(thisHBsurf).Vertex, &Vector3D::z);
 
     if (SurfMinZ < (ZoneZorig - TolValue)) {
         if (state.dataGlobal->DisplayExtraWarnings) {

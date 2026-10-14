@@ -4898,6 +4898,8 @@ void OAMixerProps::UpdateOAMixer(EnergyPlusData &state) const
     state.dataLoopNodes->Node(mixNode).Enthalpy = this->MixEnthalpy;
     state.dataLoopNodes->Node(mixNode).Press = this->MixPressure;
     state.dataLoopNodes->Node(mixNode).MassFlowRateMaxAvail = this->MixMassFlowRate;
+    state.dataLoopNodes->Node(mixNode).MassFlowRateMinAvail =
+        min(state.dataLoopNodes->Node(mixNode).MassFlowRateMinAvail, state.dataLoopNodes->Node(mixNode).MassFlowRateMaxAvail);
     // Move the relief air data to the relief air node
     state.dataLoopNodes->Node(relNode).MassFlowRate = this->RelMassFlowRate;
     state.dataLoopNodes->Node(relNode).Temp = this->RelTemp;
@@ -4905,6 +4907,8 @@ void OAMixerProps::UpdateOAMixer(EnergyPlusData &state) const
     state.dataLoopNodes->Node(relNode).Enthalpy = this->RelEnthalpy;
     state.dataLoopNodes->Node(relNode).Press = this->RelPressure;
     state.dataLoopNodes->Node(relNode).MassFlowRateMaxAvail = this->RelMassFlowRate;
+    state.dataLoopNodes->Node(relNode).MassFlowRateMinAvail =
+        min(state.dataLoopNodes->Node(relNode).MassFlowRateMinAvail, state.dataLoopNodes->Node(relNode).MassFlowRateMaxAvail);
 
     if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
         state.dataLoopNodes->Node(relNode).CO2 = state.dataLoopNodes->Node(retNode).CO2;

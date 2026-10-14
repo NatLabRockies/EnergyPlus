@@ -292,6 +292,8 @@ void InputProcessor::processInput(EnergyPlusData &state)
     // preProcessorCheck() needs getObjectItem() to be functional.
     initializeMaps();
 
+    warnObsoleteObjects(state);
+
     int MaxArgs = 0;
     int MaxAlpha = 0;
     int MaxNumeric = 0;
@@ -325,6 +327,39 @@ void InputProcessor::processInput(EnergyPlusData &state)
     }
 
     reportIDFRecordsStats(state);
+}
+
+void InputProcessor::warnObsoleteObjects(EnergyPlusData &state)
+{
+    auto const &schema_properties = schema().at("properties");
+
+    for (auto const &[objectType, objects] : epJSON.items()) {
+        auto const schema_object_it = schema_properties.find(objectType);
+        if (schema_object_it == schema_properties.end()) {
+            continue;
+        }
+
+        auto const obsolete_it = schema_object_it->find("obsolete");
+        if (obsolete_it == schema_object_it->end() || !obsolete_it->is_string()) {
+            continue;
+        }
+
+        std::string const replacement = obsolete_it->get<std::string>();
+
+        for (auto const &[objectName, object] : objects.items()) {
+            if (replacement == "deleted") {
+                ShowWarningError(
+                    state,
+                    std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete and will be removed in the future.", objectType, objectName));
+            } else if (!replacement.empty()) {
+                ShowWarningError(
+                    state,
+                    std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete. Replace it with {}.", objectType, objectName, replacement));
+            } else {
+                ShowWarningError(state, std::format("warnObsoleteObjects: Object {}=\"{}\" is obsolete.", objectType, objectName));
+            }
+        }
+    }
 }
 
 bool InputProcessor::checkVersionMatch(EnergyPlusData &state)

@@ -921,12 +921,14 @@ namespace DualDuct {
                 this->ZoneMinAirFrac = this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
                 // The last item is to take care of the Min Avail Flow Rates
                 if ((thisHotInNode.MassFlowRate > 0.0) && (schedValue > 0.0)) {
-                    thisHotInNode.MassFlowRateMinAvail = this->dd_airterminalHotAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac;
+                    thisHotInNode.MassFlowRateMinAvail =
+                        min(this->dd_airterminalHotAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac, thisHotInNode.MassFlowRateMaxAvail);
                 } else {
                     thisHotInNode.MassFlowRateMinAvail = 0.0;
                 }
                 if ((thisColdInNode.MassFlowRate > 0.0) && (schedValue > 0.0)) {
-                    thisColdInNode.MassFlowRateMinAvail = this->dd_airterminalColdAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac;
+                    thisColdInNode.MassFlowRateMinAvail =
+                        min(this->dd_airterminalColdAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac, thisColdInNode.MassFlowRateMaxAvail);
                 } else {
                     thisColdInNode.MassFlowRateMinAvail = 0.0;
                 }

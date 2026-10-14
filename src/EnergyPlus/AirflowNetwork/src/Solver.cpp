@@ -9821,6 +9821,7 @@ namespace AirflowNetwork {
                     if (!(AirflowNetworkNodeData(Node1).EPlusTypeNum == iEPlusNodeType::DIN ||
                           AirflowNetworkNodeData(Node1).EPlusTypeNum == iEPlusNodeType::DOU)) {
                         Node(j).MassFlowRateMaxAvail = AirflowNetworkLinkSimu(i).FLOW * LoopPartLoadRatio(AirflowNetworkNodeData(Node1).AirLoopNum);
+                        Node(j).MassFlowRateMinAvail = min(Node(j).MassFlowRateMinAvail, Node(j).MassFlowRateMaxAvail);
                         Node(j).MassFlowRateMax = AirflowNetworkLinkSimu(i).FLOW;
                     }
                 }
@@ -9834,6 +9835,7 @@ namespace AirflowNetwork {
                     if (!(AirflowNetworkNodeData(Node2).EPlusTypeNum == iEPlusNodeType::DIN ||
                           AirflowNetworkNodeData(Node2).EPlusTypeNum == iEPlusNodeType::DOU)) {
                         Node(j).MassFlowRateMaxAvail = AirflowNetworkLinkSimu(i).FLOW * LoopPartLoadRatio(AirflowNetworkNodeData(Node2).AirLoopNum);
+                        Node(j).MassFlowRateMinAvail = min(Node(j).MassFlowRateMinAvail, Node(j).MassFlowRateMaxAvail);
                         Node(j).MassFlowRateMax = AirflowNetworkLinkSimu(i).FLOW;
                     }
                 }

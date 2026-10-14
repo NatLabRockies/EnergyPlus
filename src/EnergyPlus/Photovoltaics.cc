@@ -995,11 +995,11 @@ namespace Photovoltaics {
         thisPVarray.SNLPVinto.IcDiffuse =
             state.dataHeatBal->SurfQRadSWOutIncident(ThisSurf) - state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/ m2)(was kJ/hr m2)
         thisPVarray.SNLPVinto.IncidenceAngle =
-            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;         // (deg) from dataHeatBalance
-        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS(3)) / Constant::DegToRad; //(degrees),
-        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                   //(deg. C)
-        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);                // (m/s)
-        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                    // from DataEnvironment via USE
+            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;        // (deg) from dataHeatBalance
+        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS.z) / Constant::DegToRad; //(degrees),
+        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                  //(deg. C)
+        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);               // (m/s)
+        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                   // from DataEnvironment via USE
 
         if (((thisPVarray.SNLPVinto.IcBeam + thisPVarray.SNLPVinto.IcDiffuse) > DataPhotovoltaics::MinIrradiance) && (RunFlag)) {
 

@@ -111,8 +111,8 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     }
     if (shapeCat == ShapeCat::Rectangular) { // Set side length squared for ray--surface intersection tests
         assert(n == 4u);
-        s1 = edges[0].magnitude_squared();
-        s3 = edges[3].magnitude_squared();
+        s1 = edges[0].length_squared();
+        s3 = edges[3].length_squared();
     } else if ((shapeCat == ShapeCat::Nonconvex) || (n >= nVerticesBig)) { // Set up slabs
         assert(n >= 4u);
         slabYs.reserve(n);
@@ -191,7 +191,7 @@ void SurfaceData::set_computed_geometry()
 {
     if (Vertex.size() >= 3) { // Skip no-vertex "surfaces"
         shapeCat = computed_shapeCat();
-        plane = computed_plane();
+        plane = Plane::fromVertices(Vertex);
         surface2d = computed_surface2d();
     }
 }
@@ -392,33 +392,14 @@ ShapeCat SurfaceData::computed_shapeCat() const
     }
 }
 
-// Computed Plane
-SurfaceData::Plane SurfaceData::computed_plane() const
-{
-    Vertices::size_type const n(Vertex.size());
-    assert(n >= 3);
-    Vector center(0.0);                           // Center (vertex average) point (not mass centroid)
-    Real64 a(0.0), b(0.0), c(0.0), d(0.0);        // Plane coefficients
-    for (Vertices::size_type i = 0; i < n; ++i) { // Newell's method for robustness (not speed)
-        Vector const &v(Vertex[i]);
-        Vector const &w(Vertex[(i + 1) % n]);
-        a += (v.y - w.y) * (v.z + w.z);
-        b += (v.z - w.z) * (v.x + w.x);
-        c += (v.x - w.x) * (v.y + w.y);
-        center += v;
-    }
-    d = -(dot(center, Vector(a, b, c)) / n); // center/n is the center point
-    return Plane(a, b, c, d);                // a*x + b*y + c*z + d = 0
-}
-
 // Computed axis-projected 2D surface
 Surface2D SurfaceData::computed_surface2d() const
 {
     // Project along axis of min surface range for 2D intersection use
     Vertices::size_type const n(Vertex.size());
     assert(n >= 3);
-    assert(plane == computed_plane()); // Set plane first
-    using Vertex2D = ObjexxFCL::Vector2<Real64>;
+    assert(plane == Plane::fromVertices(Vertex)); // Set plane first
+    using Vertex2D = Vector2D;
     using Vertices2D = ObjexxFCL::Array1D<Vertex2D>;
 
     // Select axis to project along
@@ -474,7 +455,7 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (std::abs(SinTilt) < Constant::SmallDistance) {
         return 0.0;
     }
-    using Vertex2D = ObjexxFCL::Vector2<Real64>;
+    using Vertex2D = Vector2D;
     using Vertices2D = ObjexxFCL::Array1D<Vertex2D>;
     Vertices::size_type const n(Vertex.size());
     assert(n >= 3);

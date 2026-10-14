@@ -1602,8 +1602,9 @@ namespace Dayltg {
         NumMatch = 0;
         for (VWin = 1; VWin <= 4; ++VWin) {
             for (VShelf = 1; VShelf <= 4; ++VShelf) {
-                if (distance(state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).Window).Vertex(VWin),
-                             state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf).Vertex(VShelf)) == 0.0) {
+                if (state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).Window)
+                        .Vertex(VWin)
+                        .distance(state.dataSurface->Surface(state.dataDaylightingDevicesData->Shelf(ShelfNum).OutSurf).Vertex(VShelf)) == 0.0) {
                     ++NumMatch;
                 }
             }

@@ -86,7 +86,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     state->dataSolarShading->SurfAnisoSkyMult.allocate(SurfNum);
 
     // Test 1: SOLCOS negative
-    state->dataEnvrn->SOLCOS(3) = -1.0;
+    state->dataEnvrn->SOLCOS.z = -1.0;
     state->dataEnvrn->BeamSolarRad = 321.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.5;
     state->dataEnvrn->DifSolarRad = 124.0;
@@ -97,7 +97,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     EXPECT_NEAR(resultf1, expectedf1, 0.001);
 
     // Test 2: SOLCOS positive
-    state->dataEnvrn->SOLCOS(3) = 0.7;
+    state->dataEnvrn->SOLCOS.z = 0.7;
     state->dataEnvrn->BeamSolarRad = 400.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.6;
     state->dataEnvrn->DifSolarRad = 100.0;
@@ -108,7 +108,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     EXPECT_NEAR(resultf1, expectedf1, 0.001);
 
     // Test 3: inverse of f1 greater than 1
-    state->dataEnvrn->SOLCOS(3) = 1.0;
+    state->dataEnvrn->SOLCOS.z = 1.0;
     state->dataEnvrn->BeamSolarRad = 1500.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.0;
     state->dataEnvrn->DifSolarRad = 0.0;

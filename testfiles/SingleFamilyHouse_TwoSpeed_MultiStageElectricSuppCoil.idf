@@ -2030,6 +2030,8 @@
 
   Output:Variable,*,Heating Coil Heating Energy,TimeStep;
 
+  Output:Variable,*,Heating Coil Runtime Fraction,TimeStep;
+
   Output:Variable,*,Zone Air Temperature,TimeStep;
 
   Output:Variable,*,Zone Air System Sensible Heating Energy,TimeStep;
