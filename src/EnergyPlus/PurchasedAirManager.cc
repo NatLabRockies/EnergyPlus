@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -1332,9 +1333,7 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
     // Using/Aliasing
     using namespace DataSizing;
     using HVAC::CoolingAirflowSizing;
-    using HVAC::CoolingCapacitySizing;
     using HVAC::HeatingAirflowSizing;
-    using HVAC::HeatingCapacitySizing;
     using Psychrometrics::CPCW;
     using Psychrometrics::CPHW;
     using Psychrometrics::PsyCpAirFnW;
@@ -1388,17 +1387,14 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
             int SAFMethod;       // supply air flow rate sizing method (SupplyAirFlowRate, FlowPerFloorArea, FractionOfAutosizedCoolingAirflow,
                                  // FractionOfAutosizedHeatingAirflow, HeatingCapacitySizing, etc.)
             int CapSizingMethod; // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
-            int SizingMethod;    // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing,
-                                 // CoolingCapacitySizing)
 
             FieldNum = 5; // N5 , \field Maximum Heating Air Flow Rate
             PrintFlag = true;
             SizingString = state.dataPurchasedAirMgr->PurchAirNumericFields(PurchAirNum).FieldNames(FieldNum) + " [m3/s]";
             if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).HeatingSAFMethod > 0) {
-                SizingMethod = HeatingAirflowSizing;
                 state.dataSize->ZoneHeatingOnlyFan = true;
                 SAFMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).HeatingSAFMethod;
-                ZoneEqSizing.SizingMethod(SizingMethod) = SAFMethod;
+                ZoneEqSizing.SizingMethod(HeatingAirflowSizing) = SAFMethod;
                 if (SAFMethod == SupplyAirFlowRate || SAFMethod == FlowPerFloorArea || SAFMethod == FractionOfAutosizedHeatingAirflow) {
                     if (SAFMethod == SupplyAirFlowRate) {
                         if ((state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxHeatAirVolFlow == AutoSize) &&
@@ -1447,7 +1443,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         // Invalid sizing method
                     }
                 } else if (SAFMethod == FlowPerHeatingCapacity) {
-                    SizingMethod = HeatingCapacitySizing;
                     TempSize = AutoSize;
                     PrintFlag = false;
                     if ((state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxHeatAirVolFlow == AutoSize) &&
@@ -1459,7 +1454,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         sizerHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                         state.dataSize->DataAutosizedHeatingCapacity = sizerHeatingCapacity.size(state, TempSize, ErrorsFound);
                         state.dataSize->DataFlowPerHeatingCapacity = state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxHeatAirVolFlow;
-                        SizingMethod = HeatingAirflowSizing;
                         PrintFlag = true;
                         TempSize = AutoSize;
                         HeatingAirFlowSizer sizingHeatingAirFlow;
@@ -1494,7 +1488,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         TempSize = AutoSize;
                     }
                 }
-                SizingMethod = HeatingCapacitySizing;
                 SizingString = "";
                 state.dataSize->ZoneHeatingOnlyFan = true;
                 PrintFlag = false;
@@ -1535,9 +1528,8 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
             PrintFlag = true;
             if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod > 0) {
                 state.dataSize->ZoneCoolingOnlyFan = true;
-                SizingMethod = CoolingAirflowSizing;
                 SAFMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod;
-                ZoneEqSizing.SizingMethod(SizingMethod) = SAFMethod;
+                ZoneEqSizing.SizingMethod(CoolingAirflowSizing) = SAFMethod;
                 if (SAFMethod == SupplyAirFlowRate || SAFMethod == FlowPerFloorArea || SAFMethod == FractionOfAutosizedCoolingAirflow) {
                     if (SAFMethod == SupplyAirFlowRate) {
                         if ((state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxCoolAirVolFlow == AutoSize) &&
@@ -1590,7 +1582,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                     if ((state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxCoolAirVolFlow == AutoSize) &&
                         ((PurchAir.CoolingLimit == LimitType::FlowRate) || (PurchAir.CoolingLimit == LimitType::FlowRateAndCapacity) ||
                          (PurchAir.OutdoorAir && PurchAir.EconomizerType != Econ::NoEconomizer))) {
-                        SizingMethod = CoolingCapacitySizing;
                         TempSize = AutoSize;
                         PrintFlag = false;
                         CoolingCapacitySizer sizerCoolingCapacity;
@@ -1640,11 +1631,11 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 SizingString = "";
                 state.dataSize->ZoneCoolingOnlyFan = true;
                 PrintFlag = false;
-                TempSize = PurchAir.MaxCoolTotCap;
+                Real64 const CoolingCapacityTempSize = PurchAir.MaxCoolTotCap;
                 CoolingCapacitySizer sizerCoolingCapacity;
                 sizerCoolingCapacity.overrideSizingString(SizingString);
                 sizerCoolingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
-                MaxCoolTotCapDes = sizerCoolingCapacity.size(state, TempSize, ErrorsFound);
+                MaxCoolTotCapDes = sizerCoolingCapacity.size(state, CoolingCapacityTempSize, ErrorsFound);
                 state.dataSize->ZoneCoolingOnlyFan = false;
                 if (MaxCoolTotCapDes < HVAC::SmallLoad) {
                     MaxCoolTotCapDes = 0.0;
@@ -2063,7 +2054,7 @@ void CalcPurchAirLoads(EnergyPlusData &state,
                             SupplyMassFlowRate = QZnCoolSP / CpAir / DeltaT;
                             if (((PurchAir.CoolingLimit == LimitType::FlowRate) || (PurchAir.CoolingLimit == LimitType::FlowRateAndCapacity)) &&
                                 (PurchAir.MaxCoolMassFlowRate > 0.0)) {
-                                SupplyMassFlowRate = min(max(SupplyMassFlowRate, 0.0), PurchAir.MaxCoolMassFlowRate);
+                                SupplyMassFlowRate = std::clamp(SupplyMassFlowRate, 0.0, PurchAir.MaxCoolMassFlowRate);
                             }
                             if (SupplyMassFlowRate > OAMassFlowRate) {
                                 EconoOn = true;

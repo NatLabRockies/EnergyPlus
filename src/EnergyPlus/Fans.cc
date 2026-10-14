@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -1304,7 +1305,7 @@ void FanComponent::init(EnergyPlusData &state)
     auto const &outletNode = state.dataLoopNodes->Node(outletNodeNum);
 
     massFlowRateMaxAvail = min(outletNode.MassFlowRateMax, inletNode.MassFlowRateMaxAvail);
-    massFlowRateMinAvail = min(max(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail), inletNode.MassFlowRateMaxAvail);
+    massFlowRateMinAvail = std::clamp(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail, inletNode.MassFlowRateMaxAvail);
 
     // Load the node data in this section for the component simulation
     // First need to make sure that the MassFlowRate is between the max and min avail.
@@ -2590,7 +2591,7 @@ void FanSystem::init(EnergyPlusData &state)
     }
 
     massFlowRateMaxAvail = min(outletNode.MassFlowRateMax, inletNode.MassFlowRateMaxAvail);
-    massFlowRateMinAvail = min(max(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail), inletNode.MassFlowRateMaxAvail);
+    massFlowRateMinAvail = std::clamp(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail, inletNode.MassFlowRateMaxAvail);
 
     // Load the node data in this section for the component simulation
     // First need to make sure that the MassFlowRate is between the max and min avail.

@@ -308,12 +308,12 @@ namespace WindowComplexManager {
                 BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf;                    // ShadowComb is organized by base surface
                 int JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf); // these are all proper back surfaces
                 V = state.dataSurface->Surface(JSurf).Centroid - state.dataSurface->Surface(ISurf).Centroid;
-                VLen = magnitude(V);
+                VLen = V.length();
                 // Define the unit vector from the window center to the back
-                state.dataBSDFWindow->ComplexWind(ISurf).sWinSurf(KBkSurf) = Array1D<Real64>{V(1) / VLen, V(2) / VLen, V(3) / VLen};
+                state.dataBSDFWindow->ComplexWind(ISurf).sWinSurf(KBkSurf) = Vector3D(V.x / VLen, V.y / VLen, V.z / VLen);
                 // surface center
                 // Define the back surface cosine(incident angle)
-                state.dataBSDFWindow->ComplexWind(ISurf).sdotN(KBkSurf) = dot(V, state.dataSurface->Surface(JSurf).OutNormVec) / VLen;
+                state.dataBSDFWindow->ComplexWind(ISurf).sdotN(KBkSurf) = V.dot(state.dataSurface->Surface(JSurf).OutNormVec) / VLen;
             }
             for (int IState = 1; IState <= NumStates; ++IState) {
                 // The following assumes identical incoming and outgoing bases.  The logic will need to be
@@ -604,7 +604,7 @@ namespace WindowComplexManager {
                     SunDir = state.dataBSDFWindow->SUNCOSTS(TS, Hour);
                     Theta = 0.0;
                     Phi = 0.0;
-                    if (state.dataBSDFWindow->SUNCOSTS(TS, Hour)(3) > DataEnvironment::SunIsUpValue) {
+                    if (state.dataBSDFWindow->SUNCOSTS(TS, Hour).z > DataEnvironment::SunIsUpValue) {
                         IncRay = FindInBasis(state, SunDir, RayIdentificationType::Front_Incident, iSurf, iState, complexWindowGeom.Inc, Theta, Phi);
                         complexWindowGeom.ThetaBm[lHT] = Theta;
                         complexWindowGeom.PhiBm[lHT] = Phi;
@@ -628,7 +628,7 @@ namespace WindowComplexManager {
                                 continue;
                             }
                             // skip surfaces that face away from the ground point
-                            if (dot(SunDir, state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
+                            if (SunDir.dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
                                 continue;
                             }
                             // Looking for surfaces between GndPt and sun
@@ -658,7 +658,7 @@ namespace WindowComplexManager {
             SunDir = state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay);
             Theta = 0.0;
             Phi = 0.0;
-            if (state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay)(3) > DataEnvironment::SunIsUpValue) {
+            if (state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay).z > DataEnvironment::SunIsUpValue) {
                 IncRay = FindInBasis(state, SunDir, RayIdentificationType::Front_Incident, iSurf, iState, complexWindowGeom.Inc, Theta, Phi);
                 complexWindowGeom.ThetaBm[lHT] = Theta;
                 complexWindowGeom.PhiBm[lHT] = Phi;
@@ -684,7 +684,7 @@ namespace WindowComplexManager {
                         continue;
                     }
                     // skip surfaces that face away from the ground point
-                    if (dot(SunDir, state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
+                    if (SunDir.dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
                         continue;
                     }
                     // Looking for surfaces between GndPt and sun
@@ -1300,7 +1300,6 @@ namespace WindowComplexManager {
 
         // Object Data
         Vector HitPt;             // coords of hit pt (world syst)
-        Vector X;                 // position vector
         Vector VecNorm;           // outer normal vector
         Array1D<Vector> TmpGndPt; // Temporary ground intersection list
         Array2D<Vector> TempV2D;  // Temporary vector 2D array
@@ -1389,7 +1388,7 @@ namespace WindowComplexManager {
                     continue;
                 }
                 //  skip surfaces that face away from the window
-                DotProd = dot(Geom.sInc(IRay), state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector);
+                DotProd = Geom.sInc(IRay).dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector);
                 if (DotProd >= 0.0) {
                     continue;
                 }
@@ -1406,7 +1405,7 @@ namespace WindowComplexManager {
                     TmpHSurfNo(1, NReflSurf) = JSurf;
                     TmpHitPt(1, NReflSurf) = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid; // vector array from window ctr to hit pt
-                    LeastHitDsq = magnitude_squared(V);                     // dist^2 window ctr to hit pt
+                    LeastHitDsq = V.length_squared();                       // dist^2 window ctr to hit pt
                     TmpHSurfDSq(1, NReflSurf) = LeastHitDsq;
                     if (!state.dataSurface->Surface(JSurf).HeatTransSurf && state.dataSurface->Surface(JSurf).shadowSurfSched != nullptr) {
                         TransRSurf = 1.0; // If a shadowing surface may have a scheduled transmittance,
@@ -1416,7 +1415,7 @@ namespace WindowComplexManager {
                     }
                 } else {
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    HitDsq = magnitude_squared(V);
+                    HitDsq = V.length_squared();
                     if (HitDsq >= LeastHitDsq) {
                         if (TransRSurf > 0.0) { // forget the new hit if the closer hit is opaque
                             J = TotHits + 1;
@@ -1601,7 +1600,7 @@ namespace WindowComplexManager {
                     BSHit.HitSurf = JSurf;
                     BSHit.HitPt = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    BSHit.HitDsq = magnitude_squared(V);
+                    BSHit.HitDsq = V.length_squared();
                 } else if (BSHit.HitSurf == state.dataSurface->Surface(JSurf).BaseSurf) {
                     //  another hit, check whether this is a subsurface of a previously hit base surface
                     //  (which would be listed first in the Surface array)
@@ -1611,13 +1610,13 @@ namespace WindowComplexManager {
                     BSHit.HitSurf = JSurf;
                     BSHit.HitPt = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    BSHit.HitDsq = magnitude_squared(V);
+                    BSHit.HitDsq = V.length_squared();
                 } else {
                     ++TotHits;
                     // is the new hit closer than the previous one (i.e., zone not strictly convex)?
                     // if so, take the closer hit
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    HitDsq = magnitude_squared(V);
+                    HitDsq = V.length_squared();
                     if (HitDsq < BSHit.HitDsq) {
                         BSHit.KBkSurf = KBkSurf;
                         BSHit.HitSurf = JSurf;
@@ -1635,7 +1634,7 @@ namespace WindowComplexManager {
                 ++Geom.NSurfInt(KBkSurf);
                 TmpSurfInt(Geom.NSurfInt(KBkSurf), KBkSurf) = IRay;
                 VecNorm = state.dataSurface->Surface(JSurf).OutNormVec;
-                TmpSjdotN(Geom.NSurfInt(KBkSurf), KBkSurf) = dot(Geom.sTrn(IRay), VecNorm);
+                TmpSjdotN(Geom.NSurfInt(KBkSurf), KBkSurf) = Geom.sTrn(IRay).dot(VecNorm);
             }
         } // ray loop
         //  All rays traced, now put away the results in the temporary arrays
@@ -2293,7 +2292,7 @@ namespace WindowComplexManager {
         Phi = 0.0;
 
         // Check if surface and vector are pointing in different directions
-        DotProd = dot(RayToFind, state.dataSurface->Surface(ISurf).NewellSurfaceNormalVector);
+        DotProd = RayToFind.dot(state.dataSurface->Surface(ISurf).NewellSurfaceNormalVector);
         if (DotProd <= 0.0) {
             RayIndex = 0;
             return RayIndex;
@@ -2430,12 +2429,12 @@ namespace WindowComplexManager {
 
         switch (RadType) {
         case RayIdentificationType::Front_Incident: {
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(-RdotY / Sint, -RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2445,11 +2444,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Front_Transmitted: {
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2459,12 +2458,12 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Front_Reflected: {
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2474,11 +2473,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Incident: {
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(-RdotY / Sint, -RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2 * Constant::Pi + Psi;
@@ -2488,12 +2487,12 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Transmitted: { // This is same as front reflected
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2503,11 +2502,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Reflected: { // This is same as front transmitted
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;

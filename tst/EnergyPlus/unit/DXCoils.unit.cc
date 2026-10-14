@@ -344,7 +344,7 @@ TEST_F(EnergyPlusFixture, DXCoils_Test1)
     // EXPECT_FALSE( has_cerr_output() ); // old warning no longer reported
 }
 
-TEST_F(EnergyPlusFixture, DXCoils_Test2)
+TEST_F(EnergyPlusFixture, DXCoils_ZeroSizedHeatingCoilContinuesAfterSevereError)
 {
     int DXCoilNum;
 
@@ -423,6 +423,20 @@ TEST_F(EnergyPlusFixture, DXCoils_Test2)
     EXPECT_DOUBLE_EQ(0.0, state->dataDXCoils->DXCoil(2).RatedTotCap(1));
 
     EXPECT_TRUE(has_eio_output());
+
+    // A zero-sized coil is a severe sizing problem, but it can occur legitimately when a system has no design load.
+    // InitDXCoil must retain the diagnostic without throwing an immediate fatal error.
+    auto &heatingCoil = state->dataDXCoils->DXCoil(DXCoilNum);
+    state->dataGlobal->SysSizingCalc = false;
+    heatingCoil.FindCompanionUpStreamCoil = false;
+    heatingCoil.AirInNode = 1;
+    heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatingCoil.Name, heatingCoil.coilType);
+    state->dataLoopNodes->Node.allocate(1);
+    has_err_output(true);
+
+    EXPECT_NO_THROW(InitDXCoil(*state, DXCoilNum));
+    EXPECT_TRUE(compare_err_stream_substring("has zero rated total capacity", false));
+    EXPECT_TRUE(compare_err_stream_substring("has zero rated air flow rate"));
 
     // EXPECT_TRUE( compare_eio_stream( delimited_string( {
     // 	"! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value",

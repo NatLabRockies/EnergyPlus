@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 
 // ObjexxFCL Headers
@@ -2683,13 +2684,9 @@ void CheckCoilWaterInletNode(EnergyPlusData &state,
         state.dataHVACControllers->GetControllerInputFlag = false;
     }
 
-    NodeNotFound = true;
-    for (auto const &ControllerProps : state.dataHVACControllers->ControllerProps) {
-        if (ControllerProps.ActuatedNode == WaterInletNodeNum) {
-            NodeNotFound = false;
-            break;
-        }
-    }
+    NodeNotFound = std::none_of(state.dataHVACControllers->ControllerProps.begin(),
+                                state.dataHVACControllers->ControllerProps.end(),
+                                [WaterInletNodeNum](auto const &controllerProps) { return controllerProps.ActuatedNode == WaterInletNodeNum; });
 }
 
 void GetControllerNameAndIndex(EnergyPlusData &state,

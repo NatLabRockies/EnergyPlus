@@ -461,7 +461,7 @@ namespace RoomAir {
         // is a Window or Door it looks for the second base surface).
         // Dstar is Droom corrected for wind angle
 
-        Vector3<Real64> baseCentroid;
+        Vector3D baseCentroid;
 
         Wroom = state.dataHeatBal->Zone(ZoneNum).Volume / state.dataHeatBal->Zone(ZoneNum).FloorArea;
         auto const &baseSurface = state.dataSurface->Surface(thisSurface.BaseSurf);
@@ -478,7 +478,7 @@ namespace RoomAir {
             baseCentroid /= double(NSides);
         }
 
-        Vector3<Real64> wallCentroid;
+        Vector3D wallCentroid;
         Real64 const Wroom_2(pow_2(Wroom));
         for (int Ctd = state.dataRoomAir->PosZ_Wall(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Wall(ZoneNum).end; ++Ctd) {
             if ((state.dataSurface->Surface(state.dataRoomAir->APos_Wall(Ctd)).Sides == 3) ||

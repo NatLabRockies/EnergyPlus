@@ -260,10 +260,11 @@ void UpdateVariableAbsorptancesOut(EnergyPlusData &state)
         }
         if (thisMaterial->absorpVarCtrlSignalOut == Material::VariableAbsCtrlSignal::Scheduled) {
             if (thisMaterial->absorpThermalVarSchedOut != nullptr) {
-                state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) = max(min(thisMaterial->absorpThermalVarSchedOut->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) =
+                    std::clamp(thisMaterial->absorpThermalVarSchedOut->getCurrentVal(), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarSchedOut != nullptr) {
-                state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) = max(min(thisMaterial->absorpSolarVarSchedOut->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) = std::clamp(thisMaterial->absorpSolarVarSchedOut->getCurrentVal(), 0.0001, 0.9999);
             }
         } else {
             Real64 triggerValue;
@@ -278,11 +279,11 @@ void UpdateVariableAbsorptancesOut(EnergyPlusData &state)
             }
             if (thisMaterial->absorpThermalVarCurveOut != nullptr) {
                 state.dataHeatBalSurf->SurfAbsThermalExt(surfNum) =
-                    max(min(thisMaterial->absorpThermalVarCurveOut->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpThermalVarCurveOut->value(state, triggerValue), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarCurveOut != nullptr) {
                 state.dataHeatBalSurf->SurfAbsSolarExt(surfNum) =
-                    max(min(thisMaterial->absorpSolarVarCurveOut->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpSolarVarCurveOut->value(state, triggerValue), 0.0001, 0.9999);
             }
         }
     }
@@ -300,10 +301,11 @@ void UpdateVariableAbsorptancesIn(EnergyPlusData &state)
         }
         if (thisMaterial->absorpVarCtrlSignalIn == Material::VariableAbsCtrlSignal::Scheduled) {
             if (thisMaterial->absorpThermalVarSchedIn != nullptr) {
-                state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) = max(min(thisMaterial->absorpThermalVarSchedIn->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) =
+                    std::clamp(thisMaterial->absorpThermalVarSchedIn->getCurrentVal(), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarSchedIn != nullptr) {
-                state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) = max(min(thisMaterial->absorpSolarVarSchedIn->getCurrentVal(), 0.9999), 0.0001);
+                state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) = std::clamp(thisMaterial->absorpSolarVarSchedIn->getCurrentVal(), 0.0001, 0.9999);
             }
         } else {
             Real64 triggerValue;
@@ -324,11 +326,11 @@ void UpdateVariableAbsorptancesIn(EnergyPlusData &state)
             }
             if (thisMaterial->absorpThermalVarCurveIn != nullptr) {
                 state.dataHeatBalSurf->SurfAbsThermalInt(surfNum) =
-                    max(min(thisMaterial->absorpThermalVarCurveIn->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpThermalVarCurveIn->value(state, triggerValue), 0.0001, 0.9999);
             }
             if (thisMaterial->absorpSolarVarCurveIn != nullptr) {
                 state.dataHeatBalSurf->SurfAbsSolarInt(surfNum) =
-                    max(min(thisMaterial->absorpSolarVarCurveIn->value(state, triggerValue), 0.9999), 0.0001);
+                    std::clamp(thisMaterial->absorpSolarVarCurveIn->value(state, triggerValue), 0.0001, 0.9999);
             }
         }
     }
@@ -3026,7 +3028,7 @@ void InitSolarHeatGains(EnergyPlusData &state)
         assert(equal_dimensions(state.dataSurface->SurfReflFacBmToBmSolObs,
                                 state.dataSurface->SurfReflFacBmToDiffSolGnd)); // For linear indexing
         Real64 GndReflSolarRad = 0.0;
-        Real64 GndSolarRadInc = max(state.dataEnvrn->BeamSolarRad * state.dataEnvrn->SOLCOS(3) + state.dataEnvrn->DifSolarRad, 0.0);
+        Real64 GndSolarRadInc = max(state.dataEnvrn->BeamSolarRad * state.dataEnvrn->SOLCOS.z + state.dataEnvrn->DifSolarRad, 0.0);
 
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             state.dataSurface->Surface(SurfNum).IncSolMultiplier = GetSurfIncidentSolarMultiplier(state, SurfNum);
@@ -3066,7 +3068,7 @@ void InitSolarHeatGains(EnergyPlusData &state)
                 state.dataSurface->SurfWinSkyGndSolarInc(SurfNum) =
                     currDifSolarRad * GndSurfReflectance * state.dataSurface->SurfReflFacSkySolGnd(SurfNum);
                 state.dataSurface->SurfWinBmGndSolarInc(SurfNum) =
-                    currBeamSolarRad * state.dataEnvrn->SOLCOS(3) * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
+                    currBeamSolarRad * state.dataEnvrn->SOLCOS.z * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
                 state.dataSurface->SurfBmToBmReflFacObs(SurfNum) =
                     state.dataGlobal->WeightNow * state.dataSurface->SurfReflFacBmToBmSolObs[lSH + SurfNum] +
                     state.dataGlobal->WeightPreviousHour * state.dataSurface->SurfReflFacBmToBmSolObs[lSP + SurfNum];
@@ -3081,7 +3083,7 @@ void InitSolarHeatGains(EnergyPlusData &state)
                     currBeamSolarRad * (state.dataSurface->SurfBmToBmReflFacObs(SurfNum) + state.dataSurface->SurfBmToDiffReflFacObs(SurfNum)) +
                     currDifSolarRad * state.dataSurface->SurfReflFacSkySolObs(SurfNum);
                 state.dataSurface->SurfGndSolarInc(SurfNum) =
-                    currBeamSolarRad * state.dataEnvrn->SOLCOS(3) * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum) +
+                    currBeamSolarRad * state.dataEnvrn->SOLCOS.z * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum) +
                     currDifSolarRad * GndSurfReflectance * state.dataSurface->SurfReflFacSkySolGnd(SurfNum);
                 state.dataSurface->SurfSkyDiffReflFacGnd(SurfNum) = state.dataSurface->SurfReflFacSkySolGnd(SurfNum);
             }
@@ -3209,7 +3211,7 @@ void InitSolarHeatGains(EnergyPlusData &state)
                 state.dataHeatBal->SurfQRadSWOutIncidentGndDiffuse(SurfNum) = state.dataSurface->SurfGndSolarInc(SurfNum);
                 // Incident diffuse solar from beam-to-diffuse reflection from ground
                 state.dataHeatBal->SurfQRadSWOutIncBmToDiffReflGnd(SurfNum) =
-                    currBeamSolarRad * state.dataEnvrn->SOLCOS(3) * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
+                    currBeamSolarRad * state.dataEnvrn->SOLCOS.z * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
                 // Incident diffuse solar from sky diffuse reflection from ground
                 state.dataHeatBal->SurfQRadSWOutIncSkyDiffReflGnd(SurfNum) =
                     currDifSolarRad * GndSurfReflectance * state.dataSurface->SurfSkyDiffReflFacGnd(SurfNum);
@@ -3251,7 +3253,7 @@ void InitSolarHeatGains(EnergyPlusData &state)
             state.dataHeatBal->SurfQRadSWOutIncidentGndDiffuse(SurfNum) = state.dataSurface->SurfGndSolarInc(SurfNum);
             // Incident diffuse solar from beam-to-diffuse reflection from ground
             state.dataHeatBal->SurfQRadSWOutIncBmToDiffReflGnd(SurfNum) =
-                currBeamSolar(SurfNum) * state.dataEnvrn->SOLCOS(3) * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
+                currBeamSolar(SurfNum) * state.dataEnvrn->SOLCOS.z * GndSurfReflectance * state.dataSurface->SurfBmToDiffReflFacGnd(SurfNum);
 
             // Incident diffuse solar from sky diffuse reflection from ground
             state.dataHeatBal->SurfQRadSWOutIncSkyDiffReflGnd(SurfNum) =
@@ -3645,10 +3647,10 @@ void InitSolarHeatGains(EnergyPlusData &state)
                                     // Note that SOLCOS is the current timestep's solar direction cosines.
                                     //                  PhiWin = ASIN(WALCOS(3,SurfNum))
                                     Real64 PhiWin =
-                                        std::asin(Surface(SurfNum).OutNormVec(3)); // Altitude and azimuth angle of outward window normal (radians)
-                                    Real64 ThWin = std::atan2(Surface(SurfNum).OutNormVec(2), Surface(SurfNum).OutNormVec(1));
-                                    Real64 PhiSun = std::asin(state.dataEnvrn->SOLCOS(3)); // Altitude and azimuth angle of sun (radians)
-                                    Real64 ThSun = std::atan2(state.dataEnvrn->SOLCOS(2), state.dataEnvrn->SOLCOS(1));
+                                        std::asin(Surface(SurfNum).OutNormVec.z); // Altitude and azimuth angle of outward window normal (radians)
+                                    Real64 ThWin = std::atan2(Surface(SurfNum).OutNormVec.y, Surface(SurfNum).OutNormVec.x);
+                                    Real64 PhiSun = std::asin(state.dataEnvrn->SOLCOS.z); // Altitude and azimuth angle of sun (radians)
+                                    Real64 ThSun = std::atan2(state.dataEnvrn->SOLCOS.y, state.dataEnvrn->SOLCOS.x);
                                     Real64 const cos_PhiWin(std::cos(PhiWin));
                                     Real64 const cos_PhiSun(std::cos(PhiSun));
                                     CosIncAngHorProj =

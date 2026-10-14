@@ -2122,6 +2122,8 @@
 
   Output:Variable,*,Heating Coil Heating Energy,timestep;
 
+  Output:Variable,*,Heating Coil Runtime Fraction,timestep;
+
   Output:Variable,Outside Air Inlet Node,System Node Mass Flow Rate,timestep;
 
   Output:Variable,Outside Air Inlet Node,System Node Temperature,timestep;

@@ -7781,9 +7781,9 @@ TEST_F(EnergyPlusFixture, CFS_InteriorSolarDistribution_Test)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.01;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
 
-    state->dataEnvrn->SOLCOS(1) = 0.84471127222777276;
-    state->dataEnvrn->SOLCOS(2) = -0.53484539135440257;
-    state->dataEnvrn->SOLCOS(3) = 0.020081681162033127;
+    state->dataEnvrn->SOLCOS.x = 0.84471127222777276;
+    state->dataEnvrn->SOLCOS.y = -0.53484539135440257;
+    state->dataEnvrn->SOLCOS.z = 0.020081681162033127;
     state->dataEnvrn->BeamSolarRad = I_s;
     if (I_s > 0.0) {
         state->dataEnvrn->SunIsUp = true;

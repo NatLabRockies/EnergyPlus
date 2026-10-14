@@ -50,6 +50,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -1241,14 +1242,9 @@ namespace HeatBalanceIntRadExchange {
                     }
                     if (spaceListNum > 0) {
                         for (int sListSpaceNum : state.dataHeatBal->spaceList(spaceListNum).spaces) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == sListSpaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [sListSpaceNum](int enclSpaceNum) { return enclSpaceNum == sListSpaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;
@@ -1257,14 +1253,9 @@ namespace HeatBalanceIntRadExchange {
                     } else if (zoneListNum > 0) {
                         for (int zListZoneNum : state.dataHeatBal->ZoneList(zoneListNum).Zone) {
                             for (int spaceNum : state.dataHeatBal->Zone(zListZoneNum).spaceIndexes) {
-                                // Search for matching spaces
-                                bool thisSpaceFound = false;
-                                for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                    if (enclSpaceNum == spaceNum) {
-                                        thisSpaceFound = true;
-                                        break;
-                                    }
-                                }
+                                bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                                  thisEnclosure.spaceNums.end(),
+                                                                  [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                                 if (!thisSpaceFound) {
                                     anySpaceNotFound = true;
                                     break;
@@ -1276,14 +1267,9 @@ namespace HeatBalanceIntRadExchange {
                         }
                     } else if (inputZoneNum > 0) {
                         for (int spaceNum : state.dataHeatBal->Zone(inputZoneNum).spaceIndexes) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == spaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;
