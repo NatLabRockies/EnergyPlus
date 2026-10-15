@@ -2585,6 +2585,7 @@ void SimAirLoops(EnergyPlusData &state, bool const FirstHVACIteration, bool &Sim
 
     } // End of Air Loop iteration
 
+    state.dataHVACGlobal->NightVentOn = false;
     if ((int)state.dataAirLoopHVACDOAS->airloopDOAS.size() > 0) {
         int index;
         Real64 OAMassFLowrate = 0.0;
@@ -2671,6 +2672,7 @@ void SimAirLoops(EnergyPlusData &state, bool const FirstHVACIteration, bool &Sim
             AirLoopHVACDOAS::CheckConvergence(state);
         }
     }
+    state.dataHVACGlobal->NightVentOn = false;
     // Reset current system number for sizing routines
     state.dataSize->CurSysNum = 0;
 }

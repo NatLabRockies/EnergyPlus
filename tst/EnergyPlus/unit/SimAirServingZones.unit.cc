@@ -2476,4 +2476,15 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
     EXPECT_EQ(0, state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate);
 }
 
+TEST_F(EnergyPlusFixture, SimAirServingZones_ClearsNightVentFlagOnExit)
+{
+    // SimAirLoops must not leak the last air loop's night-ventilation state into later simulations.
+    bool simZoneEquipment = false;
+    state->dataHVACGlobal->NightVentOn = true;
+
+    SimAirServingZones::SimAirLoops(*state, true, simZoneEquipment);
+
+    EXPECT_FALSE(state->dataHVACGlobal->NightVentOn);
+}
+
 } // namespace EnergyPlus
