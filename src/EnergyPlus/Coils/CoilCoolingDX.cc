@@ -156,6 +156,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
 
     // initialize reclaim heat parameters
     this->reclaimHeat.Name = this->name;
+    this->reclaimHeat.SourceType = state.dataCoilCoolingDX->coilCoolingDXObjectName;
 
     // other construction below
     this->evapInletNodeIndex = Node::GetOnlySingleNode(state,

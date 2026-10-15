@@ -1064,6 +1064,7 @@ namespace HeatingCoils {
             // Find the DX equipment index associated with the desuperheater heating coil.
             // The CoilNum may not be found here when zone heating equip. exists. Check again in InitHeatingCoil.
             // (when zone equipment heating coils are included in the input, the air loop DX equipment has not yet been read in)
+            heatingCoil.ReclaimHeatingSourceType = Alphas(5);
             if (Util::SameString(Alphas(5), "Refrigeration:CompressorRack")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COMPRESSORRACK_REFRIGERATEDCASE;
                 // Refrigeration equipment hasn't been loaded yet, so handle this in InitHeatingCoil
@@ -1076,7 +1077,9 @@ namespace HeatingCoils {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_COOLING;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
                 if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil) &&
+                        Util::SameString(state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum).SourceType,
+                                         heatingCoil.ReclaimHeatingSourceType)) {
                         DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
                             state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
                         if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
@@ -1096,14 +1099,13 @@ namespace HeatingCoils {
                         state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
                     }
                 }
-                if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    state.dataHeatingCoils->ValidSourceType(CoilNum) = true;
-                }
             } else if (Util::SameString(Alphas(5), "Coil:Cooling:DX:VariableSpeed")) {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_VARIABLE_COOLING;
                 heatingCoil.ReclaimHeatingSourceIndexNum = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, Alphas(5), Alphas(6), DXCoilErrFlag);
                 if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimVS_Coil)) {
+                    if (allocated(state.dataHeatBal->HeatReclaimVS_Coil) &&
+                        Util::SameString(state.dataHeatBal->HeatReclaimVS_Coil(heatingCoil.ReclaimHeatingSourceIndexNum).SourceType,
+                                         heatingCoil.ReclaimHeatingSourceType)) {
                         DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
                             state.dataHeatBal->HeatReclaimVS_Coil(heatingCoil.ReclaimHeatingSourceIndexNum);
                         if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
@@ -1127,7 +1129,9 @@ namespace HeatingCoils {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_MULTISPEED;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
                 if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil) &&
+                        Util::SameString(state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum).SourceType,
+                                         heatingCoil.ReclaimHeatingSourceType)) {
                         DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
                             state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
                         if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
@@ -1151,7 +1155,9 @@ namespace HeatingCoils {
                 heatingCoil.ReclaimHeatingSource = HeatObjTypes::COIL_DX_MULTIMODE;
                 DXCoils::GetDXCoilIndex(state, Alphas(6), heatingCoil.ReclaimHeatingSourceIndexNum, DXCoilErrFlag, Alphas(5));
                 if (heatingCoil.ReclaimHeatingSourceIndexNum > 0) {
-                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+                    if (allocated(state.dataHeatBal->HeatReclaimDXCoil) &&
+                        Util::SameString(state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum).SourceType,
+                                         heatingCoil.ReclaimHeatingSourceType)) {
                         DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
                             state.dataHeatBal->HeatReclaimDXCoil(heatingCoil.ReclaimHeatingSourceIndexNum);
                         if (!allocated(HeatReclaim.HVACDesuperheaterReclaimedHeat)) {
@@ -1422,7 +1428,9 @@ namespace HeatingCoils {
             switch (heatingCoil.ReclaimHeatingSource) {
             case HeatObjTypes::COMPRESSORRACK_REFRIGERATEDCASE: {
                 for (int RackNum = 1; RackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++RackNum) {
-                    if (!Util::SameString(state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum).Name, heatingCoil.ReclaimHeatingCoilName)) {
+                    auto const &heatReclaim = state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum);
+                    if (!Util::SameString(heatReclaim.Name, heatingCoil.ReclaimHeatingCoilName) ||
+                        !Util::SameString(heatReclaim.SourceType, heatingCoil.ReclaimHeatingSourceType)) {
                         continue;
                     }
                     heatingCoil.ReclaimHeatingSourceIndexNum = RackNum;
@@ -1450,7 +1458,9 @@ namespace HeatingCoils {
             } break;
             case HeatObjTypes::CONDENSER_REFRIGERATION: {
                 for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumRefrigCondensers; ++CondNum) {
-                    if (!Util::SameString(state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name, heatingCoil.ReclaimHeatingCoilName)) {
+                    auto const &heatReclaim = state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum);
+                    if (!Util::SameString(heatReclaim.Name, heatingCoil.ReclaimHeatingCoilName) ||
+                        !Util::SameString(heatReclaim.SourceType, heatingCoil.ReclaimHeatingSourceType)) {
                         continue;
                     }
                     heatingCoil.ReclaimHeatingSourceIndexNum = CondNum;
@@ -1480,7 +1490,9 @@ namespace HeatingCoils {
             case HeatObjTypes::COIL_DX_MULTISPEED:
             case HeatObjTypes::COIL_DX_MULTIMODE: {
                 for (int DXCoilNum = 1; DXCoilNum <= state.dataDXCoils->NumDXCoils; ++DXCoilNum) {
-                    if (!Util::SameString(state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).Name, heatingCoil.ReclaimHeatingCoilName)) {
+                    auto const &heatReclaim = state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum);
+                    if (!Util::SameString(heatReclaim.Name, heatingCoil.ReclaimHeatingCoilName) ||
+                        !Util::SameString(heatReclaim.SourceType, heatingCoil.ReclaimHeatingSourceType)) {
                         continue;
                     }
                     heatingCoil.ReclaimHeatingSourceIndexNum = DXCoilNum;
@@ -1508,7 +1520,9 @@ namespace HeatingCoils {
             } break;
             case HeatObjTypes::COIL_DX_VARIABLE_COOLING: {
                 for (int DXCoilNum = 1; DXCoilNum <= state.dataVariableSpeedCoils->NumVarSpeedCoils; ++DXCoilNum) {
-                    if (!Util::SameString(state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum).Name, heatingCoil.ReclaimHeatingCoilName)) {
+                    auto const &heatReclaim = state.dataHeatBal->HeatReclaimVS_Coil(DXCoilNum);
+                    if (!Util::SameString(heatReclaim.Name, heatingCoil.ReclaimHeatingCoilName) ||
+                        !Util::SameString(heatReclaim.SourceType, heatingCoil.ReclaimHeatingSourceType)) {
                         continue;
                     }
                     heatingCoil.ReclaimHeatingSourceIndexNum = DXCoilNum;

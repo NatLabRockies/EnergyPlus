@@ -117,6 +117,33 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_RoomAirModelType_Test)
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
+
+TEST_F(EnergyPlusFixture, HeatBalanceAirManager_RoomAirModelType_InvalidZone)
+{
+    std::string const idf_objects = delimited_string({
+        "RoomAirModelType,",
+        "  Missing Zone Model,",
+        "  Missing Zone,",
+        "  Mixing,",
+        "  Direct;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+    state->dataGlobal->NumOfZones = 1;
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBal->Zone(1).Name = "ACTUAL ZONE";
+
+    bool errorsFound = false;
+    HeatBalanceAirManager::GetRoomAirModelParameters(*state, errorsFound);
+
+    EXPECT_TRUE(errorsFound);
+    EXPECT_TRUE(compare_err_stream("   ** Severe  ** RoomAirModelType, Zone not found=MISSING ZONE\n"
+                                   "   **   ~~~   ** occurs in RoomAirModelType=MISSING ZONE MODEL\n"
+                                   "   ** Severe  ** Errors found in processing input for RoomAirModelType\n",
+                                   true));
+}
+
 TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
 {
     // Test input processing of Infiltration objects with spaces

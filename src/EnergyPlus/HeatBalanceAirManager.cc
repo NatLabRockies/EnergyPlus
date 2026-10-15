@@ -4472,7 +4472,7 @@ void GetRoomAirModelParameters(EnergyPlusData &state, bool &errFlag) // True if 
             }
 
         } else { // Zone Not Found
-            ShowSevereError(state, std::format("{}, Zone not found={}", cCurrentModuleObject, state.dataRoomAir->AirModel(ZoneNum).ZoneName));
+            ShowSevereError(state, std::format("{}, Zone not found={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(2)));
             ShowContinueError(state, std::format("occurs in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ErrorsFound = true;
         }

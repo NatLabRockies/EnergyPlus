@@ -1404,6 +1404,7 @@ void GetDXCoils(EnergyPlusData &state)
         thisDXCoil.Name = Alphas(1);
         // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
         state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).Name = thisDXCoil.Name;
+        state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).SourceType = CurrentModuleObject;
 
         thisDXCoil.coilType = HVAC::CoilType::CoolingDXTwoStageWHumControl;
         thisDXCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, thisDXCoil.Name, thisDXCoil.coilType);
@@ -2451,6 +2452,7 @@ void GetDXCoils(EnergyPlusData &state)
         thisDXCoil.Name = Alphas(1);
         // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
         state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).Name = thisDXCoil.Name;
+        state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).SourceType = CurrentModuleObject;
 
         thisDXCoil.coilType = HVAC::CoilType::CoolingDXTwoSpeed;
         thisDXCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, thisDXCoil.Name, thisDXCoil.coilType);
@@ -3978,6 +3980,7 @@ void GetDXCoils(EnergyPlusData &state)
         thisDXCoil.Name = Alphas(1);
         // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
         state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).Name = thisDXCoil.Name;
+        state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).SourceType = CurrentModuleObject;
 
         thisDXCoil.coilType = HVAC::CoilType::CoolingDXMultiSpeed;
         thisDXCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, thisDXCoil.Name, thisDXCoil.coilType);
@@ -4537,6 +4540,7 @@ void GetDXCoils(EnergyPlusData &state)
         thisDXCoil.Name = Alphas(1);
         // Initialize DataHeatBalance heat reclaim variable name for use by heat reclaim coils
         state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).Name = thisDXCoil.Name;
+        state.dataHeatBal->HeatReclaimDXCoil(DXCoilNum).SourceType = CurrentModuleObject;
 
         thisDXCoil.coilType = HVAC::CoilType::HeatingDXMultiSpeed;
         thisDXCoil.coilReportNum = ReportCoilSelection::getReportIndex(state, thisDXCoil.Name, thisDXCoil.coilType);
