@@ -118,6 +118,7 @@ add_simulation_test(IDF_FILE 5ZoneVAV-ChilledWaterStorage-Mixed_DCV_MaxZd.idf EP
 add_simulation_test(IDF_FILE 5ZoneVAV-ChilledWaterStorage-Mixed_DCV_MultiPath.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneVAV-ChilledWaterStorage-Stratified.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneVAV-Pri-SecLoop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE 5ZoneVAV-Pri-SecLoop_rvi_mvi.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneVAV-Pri-SecLoop_csv.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneWLHPPlantLoopTower.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneWarmest.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
