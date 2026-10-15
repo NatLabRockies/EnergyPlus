@@ -277,6 +277,20 @@ include(cmake/CompilerFlags.cmake)
 
 add_subdirectory(third_party SYSTEM)
 
+# Link-Time Optimization: enables cross-TU inlining (e.g. Curve::CurveValue into its callers).
+# Set after third_party so only E+'s own targets (and the tests that link them) are affected.
+option(ENABLE_LTO "Enable Link-Time Optimization (IPO) for EnergyPlus targets" OFF)
+mark_as_advanced(ENABLE_LTO)
+if(ENABLE_LTO)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output LANGUAGES CXX)
+  if(NOT ipo_supported)
+    message(FATAL_ERROR "ENABLE_LTO: IPO/LTO is not supported by this compiler: ${ipo_output}")
+  endif()
+  message(STATUS "ENABLE_LTO: enabling Link-Time Optimization")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/src)
 
 # E+ required libraries
