@@ -53027,10 +53027,28 @@ Fan:ZoneExhaust,
        \note If field is used, the exhaust fan will not run if the zone temperature is lower than this limit
        \type object-list
        \object-list ScheduleNames
-  A9 ; \field Balanced Exhaust Fraction Schedule Name
+  A9 , \field Balanced Exhaust Fraction Schedule Name
        \note Used to control fan's impact on flow at the return air node. Enter the portion of the exhaust that is balanced by simple airflows.
        \type object-list
        \object-list ScheduleNames
+  A10, \field Motor Loss Location
+       \note Enter the location of fan motor heat rejection. Input for Motor in Airstream Fraction = 1 will direct all motor heat losses to the airstream.
+       \type choice
+       \key Zone
+       \key Outside
+       \default Outside
+  N4 , \field Motor in Airstream Fraction
+       \note Fraction of motor heat applied to fan exhaust air stream.
+       \note A Motor in Airstream Fraction < 1 will direct remaining fan heat losses to the Motor Loss Location choice.
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 1.0
+  A11; \field Motor Loss Zone Name
+       \type object-list
+       \object-list ZoneNames
+       \note Only used when Motor Loss Location = Zone.
+       \note Zone Name must be a valid zone otherwise remaining motor heat losses is rejected outdoors using 1 - Motor in Airstream Fraction.
 
 FanPerformance:NightVentilation,
        \memo Specifies an alternate set of performance parameters for a fan. These alternate

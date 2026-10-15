@@ -55,9 +55,13 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/Fans.hh>
+#include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/InternalHeatGains.hh>
+#include <EnergyPlus/Psychrometrics.hh>
 
 namespace EnergyPlus {
 
@@ -745,5 +749,86 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteMode_EMSPressureRiseResetTest)
     // negative fan pressure rise results in zero fan power
     locExpectPower = 0.0;
     EXPECT_DOUBLE_EQ(locFanElecPower, locExpectPower); // expects zero fan power
+}
+
+TEST_F(EnergyPlusFixture, ZoneExhaustFan_InputTest)
+{
+
+    std::string const idf_objects = delimited_string({
+
+        "  Zone,",
+        "    Exhaust Zone;           !- Name",
+
+        "  Fan:ZoneExhaust,",
+        "    Exhaust Fan ,           !- Name",
+        "    ,                       !- Availability Schedule Name",
+        "    ,                       !- Fan Total Efficiency",
+        "    100.0,                  !- Pressure Rise",
+        "    1.0 ,                   !- Maximum Air Flow Rate",
+        "    TestFanAirInletNode,    !- Air Inlet Node Name",
+        "    TestFanOutletNode,      !- Air Outlet Node Name",
+        "    ,                       !- End-Use Subcategory",
+        "    ,                       !- Flow Fraction Schedule Name",
+        "    ,                       !- System Availability Manager Coupling Mode",
+        "    ,                       !- Minimum Zone Temperature Limit Schedule Name",
+        "    ,                       !- Balanced Exhaust Fraction Schedule Name",
+        "    Zone,                   !- Motor Loss Location",
+        "    0.9 ,                   !- Motor In Air Stream Fraction",
+        "    Exhaust Zone;           !- Motor Loss Zone Name",
+
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool errorsFound = false;
+    HeatBalanceManager::GetZoneData(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+    DataHeatBalance::AllocateIntGains(*state);
+
+    Fans::GetFanInput(*state);
+    state->dataSize->CurZoneEqNum = 0;
+    state->dataSize->CurSysNum = 0;
+    state->dataSize->CurOASysNum = 0;
+    state->dataEnvrn->StdRhoAir = 1.2;
+
+    auto *fanExhaust = dynamic_cast<Fans::FanComponent *>(state->dataFans->fans(1));
+    assert(fanExhaust != nullptr);
+    EXPECT_ENUM_EQ(Fans::HeatLossDest::Zone, fanExhaust->heatLossDest);
+    EXPECT_EQ(0.9, fanExhaust->motorInAirFrac);
+    EXPECT_EQ(1, fanExhaust->zoneNum);
+    EXPECT_EQ(0.6, fanExhaust->totalEff);
+    EXPECT_EQ(1.0, fanExhaust->maxAirFlowRate);
+
+    fanExhaust->inletAirTemp = 20.0;
+    fanExhaust->inletAirHumRat = 0.008;
+    fanExhaust->inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(fanExhaust->inletAirTemp, fanExhaust->inletAirHumRat);
+    fanExhaust->inletAirMassFlowRate = 1.0;
+
+    fanExhaust->simulateZoneExhaust(*state);
+
+    EXPECT_EQ(fanExhaust->inletAirMassFlowRate, fanExhaust->outletAirMassFlowRate);
+    Real64 const shaftPower = fanExhaust->inletAirMassFlowRate * 100.0 / state->dataEnvrn->StdRhoAir;
+    EXPECT_NEAR(83.3333, shaftPower, 0.0001);
+    Real64 const powerLostToAir = shaftPower + (fanExhaust->totalPower - shaftPower) * fanExhaust->motorInAirFrac;
+    EXPECT_NEAR(138.8888, fanExhaust->totalPower, 0.0001);
+    EXPECT_NEAR(133.3333, fanExhaust->powerLossToAir, 0.0001);
+    EXPECT_NEAR(powerLostToAir, fanExhaust->powerLossToAir, 0.0001);
+
+    EXPECT_NEAR(5.5555, fanExhaust->powerLossToZone, 0.0001);
+    EXPECT_NEAR(20.1307, fanExhaust->outletAirTemp, 0.0001);
+    EXPECT_GT(fanExhaust->outletAirTemp, fanExhaust->inletAirTemp);
+    EXPECT_GT(fanExhaust->outletAirEnthalpy, fanExhaust->inletAirEnthalpy);
+    EXPECT_EQ(fanExhaust->outletAirHumRat, fanExhaust->inletAirHumRat);
+
+    InternalHeatGains::UpdateInternalGainValues(*state);
+    EXPECT_NEAR(5.5555, InternalHeatGains::zoneSumAllInternalConvectionGains(*state, fanExhaust->zoneNum), 0.0001);
+
+    // Check that remaining motor heat is rejected outdoors when requested.
+    fanExhaust->heatLossDest = Fans::HeatLossDest::Outside;
+    fanExhaust->simulateZoneExhaust(*state);
+    EXPECT_NEAR(0.0, fanExhaust->powerLossToZone, 0.0001);
+    InternalHeatGains::UpdateInternalGainValues(*state);
+    EXPECT_NEAR(0.0, InternalHeatGains::zoneSumAllInternalConvectionGains(*state, fanExhaust->zoneNum), 0.0001);
 }
 } // namespace EnergyPlus
