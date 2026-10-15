@@ -82,7 +82,11 @@ Real64 CoolingAirFlowSizer::size(EnergyPlusData &state, Real64 _originalValue, b
                     this->originalValue /= (1.0 - this->dataBypassFrac);  // back out bypass fraction applied in GetInput
                 }
             } else if (this->zoneEqSizing(this->curZoneEqNum).DesignSizeFromParent) {
-                this->autoSizedValue = this->zoneEqSizing(this->curZoneEqNum).AirVolFlow;
+                if (this->zoneEqSizing(this->curZoneEqNum).CoolingAirFlow) {
+                    this->autoSizedValue = this->zoneEqSizing(this->curZoneEqNum).CoolingAirVolFlow;
+                } else {
+                    this->autoSizedValue = this->zoneEqSizing(this->curZoneEqNum).AirVolFlow;
+                }
             } else {
                 switch (this->zoneEqSizing(this->curZoneEqNum).SizingMethod(HVAC::CoolingAirflowSizing)) {
                 case DataSizing::SupplyAirFlowRate:
