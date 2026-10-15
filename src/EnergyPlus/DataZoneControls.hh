@@ -156,7 +156,7 @@ namespace DataZoneControls {
             : ActualZoneNum(0), ManageDemand(false), HeatingResetLimit(0.0), CoolingResetLimit(0.0), EMSOverrideHeatingSetPointOn(false),
               EMSOverrideHeatingSetPointValue(0.0), EMSOverrideCoolingSetPointOn(false), EMSOverrideCoolingSetPointValue(0.0),
               FixedRadiativeFraction(0.0), AdaptiveComfortTempControl(false), AdaptiveComfortModelTypeIndex(0), ZoneOvercoolRange(0.0),
-              ZoneOvercoolConstRange(0.0), ZoneOvercoolControlRatio(0.0), DeltaTCutSet(0), ZoneThermostatSetPointHi(0.0),
+              ZoneOvercoolConstRange(0.0), ZoneOvercoolControlRatio(0.0), DeltaTCutSet(0.0), ZoneThermostatSetPointHi(0.0),
               ZoneThermostatSetPointLo(0.0), CoolModeLast(false), HeatModeLast(false), CoolModeLastSave(false), HeatModeLastSave(false),
               CoolOffFlag(false), HeatOffFlag(false)
 

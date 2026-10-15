@@ -15,8 +15,8 @@
 !
 ! Location:                Denver, CO
 !
-! Design Days:             DENVER_STAPLETON_CO_USA Annual Heating 99%, MaxDB=-16�C
-!                          DENVER_STAPLETON_CO_USA Annual Cooling (DB=>MWB) 1%, MaxDB=32.6�C MWB=15.5�C
+! Design Days:             DENVER_STAPLETON_CO_USA Annual Heating 99%, MaxDB=-16 C
+!                          DENVER_STAPLETON_CO_USA Annual Cooling (DB=>MWB) 1%, MaxDB=32.6 C MWB=15.5 C
 !
 ! Run Period (Weather File): Full Annual Simulation, DENVER_STAPLETON_CO_USA_WMO_724690
 !
@@ -83,10 +83,10 @@
 !  Data Source=ASHRAE 2009 Annual Design Conditions
 ! Using Design Conditions from "Climate Design Data 2009 ASHRAE Handbook"
 ! Denver Centennial CO USA Extreme Annual Wind Speeds, 1%=11.1m/s, 2.5%=9.5m/s, 5%=8.4m/s
-! Denver Centennial CO USA Extreme Annual Temperatures, Max Drybulb=-22.9�C Min Drybulb=36.1�C
+! Denver Centennial CO USA Extreme Annual Temperatures, Max Drybulb=-22.9 C Min Drybulb=36.1 C
 ! Denver Centennial CO USA Annual Heating Design Conditions Wind Speed=3m/s Wind Dir=340
 ! Coldest Month=December
-! Denver Centennial CO USA Annual Heating 99.6%, MaxDB=-18.8�C
+! Denver Centennial CO USA Annual Heating 99.6%, MaxDB=-18.8 C
 
   SizingPeriod:DesignDay,
     Denver Centennial Ann Htg 99.6% Condns DB,  !- Name
@@ -118,7 +118,7 @@
 
 ! Denver Centennial Annual Cooling Design Conditions Wind Speed=4.9m/s Wind Dir=0
 ! Hottest Month=July
-! Denver Centennial CO USA Annual Cooling (DB=>MWB) 1%, MaxDB=32�C MWB=15.5�C
+! Denver Centennial CO USA Annual Cooling (DB=>MWB) 1%, MaxDB=32 C MWB=15.5 C
 
   SizingPeriod:DesignDay,
     Denver Centennial Ann Clg 1% Condns DB=>MWB,  !- Name
@@ -554,6 +554,7 @@
     Main Zone Thermostat,    !- Name
     Main Zone,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint",
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Control;   !- Control 1 Name
 

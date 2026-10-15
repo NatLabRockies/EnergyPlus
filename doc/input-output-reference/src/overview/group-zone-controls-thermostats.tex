@@ -58,6 +58,10 @@ Schedule which defines what type of control is active during the simulation. Val
 
 Each non-zero control type which is used in this schedule must appear in the following fields which list the specific thermostat control objects to be used for this zone.
 
+\paragraph{Field: Temperature Difference Between Cutout And Setpoint}\label{field-temperature-difference-between-cutout-and-Setpoint}
+
+This optional choice field provides a temperature difference between cutout temperature and setpoint. When the temperature difference is greater than 0.0, the difference is applied to both heating and cooling by possibly revising setpoints based on control types.
+
 \paragraph{Field Set (Control Object Type, Control Name)}\label{field-set-control-object-type-control-name}
 
 Up to four pairs of Control Object Type and Control Name may be listed to specify which control objects are used for this zone. This list is not order-dependent, and the position in this list has no impact on the control type schedule. In the control type schedule, a value of 1 always means ``Single Heating Setpoint'', even if that control type is not first in this list.
@@ -77,10 +81,6 @@ This field specifies the control type to be used for this zone. Available contro
 \paragraph{Field: Control \textless{}x\textgreater{} Name}\label{field-control-x-name}
 
 The corresponding control type name. The name is used in an object with the name of the control type and specifies the schedule.
-
-\paragraph{Field: Temperature Difference Between Cutout And Setpoint}\label{field-temperature-difference-between-cutout-and-Setpoint}
-
-This optional choice field provides a temperature difference between cutout temperature and setpoint. When the temperature difference is greater than 0.0, the difference is applied to both heating and cooling by possibly revising setpoints based on control types.
 
 If MAT is defined as zone air temperature at previous time step, DeltaT represents the temperature difference between cutout and setpoint and is greater than 0.0, and PredictedLoad represents predicted load calculated in the ZoneTempPredictorCorrector, following action will be taken:
 
@@ -130,7 +130,7 @@ An example of this statement in an IDF is:
 
 \begin{lstlisting}
 ZoneControl:Thermostat, Zone 3 Thermostat, NORTH ZONE,
-  Zone Control Type Sched,
+  Zone Control Type Sched, 0.0,
   DUAL SETPOINT WITH DEADBAND, VAV Setpoints;
 \end{lstlisting}
 
@@ -140,14 +140,15 @@ An example of a global thermostat:
 ZoneList,AllControlledZones,SPACE1-1,SPACE2-1,SPACE3-1,SPACE4-1,SPACE5-1;
 ZoneControl:Thermostat,
   AllControlledZones Thermostat,  !- Name
-  AllControlledZones,         !- Zone Name
-  Zone Control Type Sched,    !- Control Type Schedule Name
+  AllControlledZones,              !- Zone Name
+  Zone Control Type Sched,         !- Control Type Schedule Name
+  ,                                !- Temperature Difference Between Cutout And Setpoint
   ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
-  CoolingSetPoint,            !- Control 1 Name
+  CoolingSetPoint,                   !- Control 1 Name
   ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
-  HeatingSetpoint,            !- Control 2 Name
+  HeatingSetpoint,                   !- Control 2 Name
   ThermostatSetpoint:DualSetpoint,  !- Control 3 Object Type
-  DualSetPoint;               !- Control 3 Name
+  DualSetPoint;                      !- Control 3 Name
 \end{lstlisting}
 
 A complete zone thermostat example showing this statement and all of the objects it must reference is:
