@@ -770,6 +770,14 @@ namespace Weather {
             }
             DisplaySimDaysProgress(state, state.dataEnvrn->CurrentOverallSimDay, state.dataEnvrn->TotalOverallSimDays);
         }
+        if (state.dataWeather->updateTSArraysFlag && state.dataGlobal->updateTSArrays) {
+            state.dataWeather->updateTSArraysFlag = false;
+            Weather::AllocateWeatherData(state);
+            for (int iDD = 1; iDD <= state.dataEnvrn->TotDesDays; ++iDD) {
+                state.dataWeather->desDayMods(iDD).allocate(state.dataGlobal->TimeStepsInHour, Constant::iHoursInDay);
+            }
+            Weather::SetupInterpolationValues(state);
+        }
 
         CloseWeatherFile(state); // will only close if opened.
         ++state.dataWeather->Envrn;
