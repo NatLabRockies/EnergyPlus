@@ -900,6 +900,16 @@ else() # windows
 endif()
 target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
 
+if(WIN32)
+  configure_file("${PROJECT_SOURCE_DIR}/scripts/ReadVarsESO.bat" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ReadVarsESO.bat" COPYONLY)
+else()
+  configure_file("${PROJECT_SOURCE_DIR}/scripts/ReadVarsESO" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ReadVarsESO" COPYONLY)
+  file(
+    CHMOD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ReadVarsESO"
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  )
+endif()
+
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 
@@ -1167,11 +1177,11 @@ if(BUILD_TESTING)
     "API.TestFunctionalPython" PROPERTIES ENVIRONMENT
                                            "PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS};ENERGYPLUS_USE_PSYCH_ERRORS=$<BOOL:${USE_PSYCH_ERRORS}>")
 
-  # Runtime tests need a folder to be created for output files, if we are building fortran, let's test that the python API properly sets the E+ install root by passing "-r"
+  # Runtime tests need a folder to be created for output files. When the Python auxiliary tools are available, test that the Python API
+  # properly sets the E+ install root by passing "-r".
   set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtime_python")
   file(MAKE_DIRECTORY ${TEST_DIR})
-  if(BUILD_FORTRAN)
-    # TODO: This should depend on a completed build of readvars
+  if(PYTHON_CLI)
     add_test(NAME "API.TestRuntimePython" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntime.py" -r -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")
   else()
     add_test(NAME "API.TestRuntimePython" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntime.py" -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")

@@ -1,4 +1,5 @@
 @echo off
+set readvars_status=0
  if Not "%~1" == "" goto :NoErr
  echo usage: %0 InputFileName (req) WeatherFileName (opt)
  echo Current Parameters:
@@ -23,7 +24,7 @@
 :                  if the extension is imf -- will run epmacro to process before
 :                  executing energyplus
 :   %output_path%  contains the path where the result files should be stored
-:   %post_proc%    contains the path to the post processing program (ReadVarsESO)
+:   %post_proc%    contains the path to the other post processing programs
 :   %weather_path% contains the path to the weather files (used with optional argument 2)
 :   %pausing%      contains Y if pause should occur between major portions of
 :                  batch file (mostly commented out)
@@ -59,10 +60,10 @@
 :       Run the Slab preprocessor program if necessary
 :   5.  Execute EnergyPlus
 :   6.  If available Copy %1.rvi (post processor commands) into Eplusout.inp
-:   7.  Execute ReadVarsESO.exe (the Post Processing Program)
+:   7.  Execute ReadVarsESO (the Post Processing Program)
 :   8.  If available Copy %1.mvi (post processor commands) into test.mvi
 :       or create appropriate input to get meter output from eplusout.mtr
-:   9.  Execute ReadVarsESO.exe (the Post Processing Program) for meter output
+:   9.  Execute ReadVarsESO (the Post Processing Program) for meter output
 :  10.  Copy Eplusout.* to %1.*
 :  11.  Clean up working directory.
 :
@@ -324,12 +325,24 @@ if %maxcol%==nolimit SET rvset=unlimited
 : readvars creates audit in append mode.  start it off
 echo %date% %time% ReadVars >readvars.audit
 
-IF EXIST eplusout.inp %post_proc%ReadVarsESO.exe eplusout.inp %rvset%
-IF NOT EXIST eplusout.inp %post_proc%ReadVarsESO.exe " " %rvset%
-IF EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe eplusmtr.inp %rvset%
-IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
-IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
-IF NOT EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe test.mvi %rvset%
+IF EXIST eplusout.inp (
+  "%program_path%energyplus.exe" auxiliary readvars eplusout.inp %rvset%
+  IF ERRORLEVEL 1 SET readvars_status=1
+)
+IF NOT EXIST eplusout.inp (
+  "%program_path%energyplus.exe" auxiliary readvars " " %rvset%
+  IF ERRORLEVEL 1 SET readvars_status=1
+)
+IF EXIST eplusmtr.inp (
+  "%program_path%energyplus.exe" auxiliary readvars eplusmtr.inp %rvset%
+  IF ERRORLEVEL 1 SET readvars_status=1
+)
+IF NOT EXIST eplusmtr.inp IF EXIST eplusout.mtr echo eplusout.mtr >test.mvi
+IF NOT EXIST eplusmtr.inp IF EXIST eplusout.mtr echo eplusmtr.csv >>test.mvi
+IF NOT EXIST eplusmtr.inp IF EXIST eplusout.mtr (
+  "%program_path%energyplus.exe" auxiliary readvars test.mvi %rvset%
+  IF ERRORLEVEL 1 SET readvars_status=1
+)
 :skipReadVars
 
 IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe
@@ -429,3 +442,4 @@ goto :eof
  
  :done
  echo ===== %0 %~1 ===== Complete =====
+ exit /b %readvars_status%

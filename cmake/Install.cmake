@@ -85,7 +85,6 @@ set(CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR};EnergyPlus;ALL;/")
 
 if(BUILD_FORTRAN)
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/ExpandObjects/;ExpandObjects;ALL;/")
-  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/ReadVars/;ReadVars;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/Transition/;Transition;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/Basement/;Basement;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/HVAC-Diagram/;HVAC-Diagram;ALL;/")
@@ -386,9 +385,11 @@ if(WIN32)
   install(FILES "${PROJECT_SOURCE_DIR}/release/RunEP.ico" DESTINATION "./")
   install(FILES "${PROJECT_SOURCE_DIR}/scripts/RunEPlus.bat" DESTINATION "./")
   install(FILES "${PROJECT_SOURCE_DIR}/scripts/RunReadESO.bat" DESTINATION "./")
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/ReadVarsESO.bat" DESTINATION "./")
   install(FILES "${PROJECT_SOURCE_DIR}/release/Runep.pif" DESTINATION "./")
   install(FILES "${PROJECT_SOURCE_DIR}/bin/CSVProc/CSVproc.exe" DESTINATION "PostProcess/")
   install(FILES "${PROJECT_SOURCE_DIR}/scripts/RunReadESO.bat" DESTINATION "PostProcess/")
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/ReadVarsESO.bat" DESTINATION "PostProcess/")
   install(FILES "${PROJECT_SOURCE_DIR}/bin/CoeffConv/CoeffCheck.exe" DESTINATION "PreProcess/CoeffConv/")
   install(FILES "${PROJECT_SOURCE_DIR}/bin/CoeffConv/CoeffCheckExample.cci" DESTINATION "PreProcess/CoeffConv/")
   install(FILES "${PROJECT_SOURCE_DIR}/bin/CoeffConv/CoeffConv.exe" DESTINATION "PreProcess/CoeffConv/")
@@ -506,6 +507,8 @@ if(APPLE)
   install(PROGRAMS "${PROJECT_BINARY_DIR}/scripts/runenergyplus" DESTINATION "./")
   install(PROGRAMS scripts/runepmacro DESTINATION "./")
   install(PROGRAMS scripts/runreadvars DESTINATION "./")
+  install(PROGRAMS scripts/ReadVarsESO DESTINATION "./")
+  install(PROGRAMS scripts/ReadVarsESO DESTINATION "PostProcess/")
 
   # You need at least one "install(..." command for it to be registered as a component
   install(CODE "MESSAGE(\"Creating symlinks.\")" COMPONENT Symlinks)
@@ -543,6 +546,8 @@ elseif(UNIX)
   install(PROGRAMS "${PROJECT_BINARY_DIR}/scripts/runenergyplus" DESTINATION "./")
   install(PROGRAMS scripts/runepmacro DESTINATION "./")
   install(PROGRAMS scripts/runreadvars DESTINATION "./")
+  install(PROGRAMS scripts/ReadVarsESO DESTINATION "./")
+  install(PROGRAMS scripts/ReadVarsESO DESTINATION "PostProcess/")
 
   # You need at least one "install(..." command for it to be registered as a component
   install(CODE "MESSAGE(\"Creating symlinks.\")" COMPONENT Symlinks)
@@ -656,6 +661,8 @@ if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
     "runenergyplus"
     "runepmacro"
     "runreadvars"
+    "ReadVarsESO"
+    "PostProcess/ReadVarsESO"
     # Copied-verbatim apps: Already signed because just copied from bin to package
     # "EPMacro"
     # "PreProcess/EP-Launch-Lite.app"
@@ -700,7 +707,7 @@ include(CPackIFW)
 
 #cpack_add_component(AuxiliaryPrograms
 #DISPLAY_NAME "Auxiliary Programs"
-#DESCRIPTION "The suite of Fortran auxiliary programs such as ReadVarsESO, ExpandObjects, etc"
+#DESCRIPTION "The suite of auxiliary programs such as ReadVarsESO, ExpandObjects, etc"
 #REQUIRED
 #)
 

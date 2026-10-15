@@ -321,6 +321,23 @@ main([)python";
             exit(0);
         });
 
+        auto *readVarsSubCommand = auxiliaryToolsSubcommand->add_subcommand("readvars", "ReadVarsESO postprocessor");
+        readVarsSubCommand->set_help_flag();
+        readVarsSubCommand->allow_extras();
+        readVarsSubCommand->footer(
+            "You can pass extra arguments after the readvars keyword; they will be forwarded to the ReadVarsESO postprocessor.");
+
+        readVarsSubCommand->callback([&state, readVarsSubCommand] {
+            int status = static_cast<int>(ReturnCodes::Failure);
+            try {
+                EnergyPlus::Python::PythonEngine engine(state);
+                status = engine.callFunctionWithStringList("readvars.process", "run", readVarsSubCommand->remaining());
+            } catch (std::runtime_error const &error) {
+                EnergyPlus::print(stderr, "ERROR: {}\n", error.what());
+            }
+            exit(status);
+        });
+
         auto *gheDesignerSubCommand = auxiliaryToolsSubcommand->add_subcommand("ghedesigner", "GHEDesigner Operation");
         gheDesignerSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to GHEDesigner")->option_text("ARG ...");
         gheDesignerSubCommand->positionals_at_end(true);
@@ -939,28 +956,31 @@ state.dataStrGlobals->inputFilePath='{:g}',
 
     int runReadVarsESO(EnergyPlusData &state)
     {
-        fs::path readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
+#ifndef PYTHON_CLI
+        DisplayString(state, "ERROR: ReadVarsESO is unavailable because this EnergyPlus build does not include Python CLI tools.");
+        return static_cast<int>(ReturnCodes::Failure);
+#else
+        fs::path const energyPlusPath = (state.dataStrGlobals->exeDirectoryPath / "energyplus").replace_extension(FileSystem::exeExtension);
 
-        if (!FileSystem::fileExists(readVarsPath)) {
-            readVarsPath = (state.dataStrGlobals->exeDirectoryPath / "PostProcess" / "ReadVarsESO").replace_extension(FileSystem::exeExtension);
-            if (!FileSystem::fileExists(readVarsPath)) {
-                // should report the error differently if the user is calling into E+ through EXE or DLL
-                if (state.dataGlobal->eplusRunningViaAPI) {
-                    DisplayString(
-                        state,
-                        "ERROR: Could not find ReadVarsESO executable.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
-                } else {
-                    DisplayString(state, std::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath)));
-                }
-                return static_cast<int>(ReturnCodes::Failure);
+        if (!FileSystem::fileExists(energyPlusPath)) {
+            // should report the error differently if the user is calling into E+ through EXE or DLL
+            if (state.dataGlobal->eplusRunningViaAPI) {
+                DisplayString(state,
+                              std::format("ERROR: Could not find EnergyPlus program at: {}. When calling through C API, make sure to call "
+                                          "setEnergyPlusRootDirectory.",
+                                          FileSystem::getAbsolutePath(energyPlusPath)));
+            } else {
+                DisplayString(state, std::format("ERROR: Could not find EnergyPlus program at: {}.", FileSystem::getAbsolutePath(energyPlusPath)));
             }
+            return static_cast<int>(ReturnCodes::Failure);
         }
 
         fs::path const RVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".rvi");
         fs::path const MVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".mvi");
 
         const bool rviFileExists = FileSystem::fileExists(RVIfile);
-        if (!rviFileExists) {
+        const bool runRvi = rviFileExists || FileSystem::fileExists(state.files.eso.filePath);
+        if (runRvi && !rviFileExists) {
             std::ofstream ofs{RVIfile};
             if (!ofs.good()) {
                 ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
@@ -971,35 +991,55 @@ state.dataStrGlobals->inputFilePath='{:g}',
         }
 
         const bool mviFileExists = FileSystem::fileExists(MVIfile);
-        if (!mviFileExists) {
+        const bool runMvi = mviFileExists || FileSystem::fileExists(state.files.mtr.filePath);
+        if (runMvi && !mviFileExists) {
             std::ofstream ofs{MVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
+                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", MVIfile));
             } else {
                 ofs << FileSystem::toString(state.files.mtr.filePath) << '\n';
                 ofs << FileSystem::toString(state.files.mtr_csv.filePath) << '\n';
             }
         }
 
-        // We quote the paths in case we have spaces
-        // "/Path/to/ReadVarEso" "/Path/to/folder with spaces/file.rvi" unlimited
-        std::string const readVarsRviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(RVIfile) + "\" unlimited";
-        std::string const readVarsMviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(MVIfile) + "\" unlimited";
+        auto runReadVars = [&state, &energyPlusPath](fs::path const &controlFile) {
+            // We quote the paths in case they contain spaces. systemCall handles the platform-specific shell invocation.
+            std::string const command =
+                "\"" + FileSystem::toString(energyPlusPath) + "\" auxiliary readvars \"" + FileSystem::toString(controlFile) + "\" unlimited";
+            int const status = FileSystem::systemCall(command);
+            if (status != static_cast<int>(ReturnCodes::Success)) {
+                DisplayString(state, std::format("ERROR: ReadVarsESO failed for '{}' with exit code {}.", FileSystem::toString(controlFile), status));
+            }
+            return status;
+        };
 
-        // systemCall will be responsible to handle to above command on Windows versus Unix
-        FileSystem::systemCall(readVarsRviCommand);
-        FileSystem::systemCall(readVarsMviCommand);
+        int rviStatus = static_cast<int>(ReturnCodes::Success);
+        if (runRvi) {
+            rviStatus = runReadVars(RVIfile);
+        }
 
-        if (!rviFileExists) {
+        int mviStatus = static_cast<int>(ReturnCodes::Success);
+        if (runMvi) {
+            mviStatus = runReadVars(MVIfile);
+        }
+
+        if (runRvi && !rviFileExists) {
             FileSystem::removeFile(RVIfile);
         }
 
-        if (!mviFileExists) {
+        if (runMvi && !mviFileExists) {
             FileSystem::removeFile(MVIfile);
         }
 
-        FileSystem::moveFile("readvars.audit", state.dataStrGlobals->outputRvauditFilePath);
+        if ((runRvi || runMvi) && FileSystem::fileExists("readvars.audit")) {
+            FileSystem::moveFile("readvars.audit", state.dataStrGlobals->outputRvauditFilePath);
+        }
+
+        if (rviStatus != static_cast<int>(ReturnCodes::Success) || mviStatus != static_cast<int>(ReturnCodes::Success)) {
+            return static_cast<int>(ReturnCodes::Failure);
+        }
         return static_cast<int>(ReturnCodes::Success);
+#endif
     }
 
 } // namespace CommandLineInterface
