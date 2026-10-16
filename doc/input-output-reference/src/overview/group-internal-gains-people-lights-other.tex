@@ -4558,6 +4558,164 @@ ElectricEquipment:ITE:AirCooled:Instance,
   Node 6;                     !- Supply Air Node Name
 \end{lstlisting}
 
+\subsection{ElectricEquipment:ITE:LiquidCooled}\label{electricequipmentiteliquidcooled}
+
+This object describes liquid-cooled data center IT equipment racks. It calculates the transient electric power consumption of the rack and the resulting split of heat generation between a liquid cooling loop and the zone air. The rack references one to four cooling coils (Coil:Cooling:ITE:ColdPlate or Coil:Cooling:ITE:UserDefined, documented separately) which carry the liquid-side heat away through a standard EnergyPlus plant loop.
+
+\subsubsection{Inputs}\label{inputs-iteliquidcooled}
+
+\paragraph{Field: Name}\label{field-name-iteliquidcooled}
+
+The name of this object.
+
+\paragraph{Field: Zone or Space Name}\label{field-zone-or-space-name-iteliquidcooled}
+
+The zone or space the IT equipment rack is located in. Unlike \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled}, ZoneList and SpaceList names are not allowed here; this field must name a single Zone or Space. Any heat not captured by the liquid loop (see Liquid Heat Capture Fraction below) is added to this zone or space's heat balance as a convective gain.
+
+\paragraph{Field: Availability Schedule Name}\label{field-availability-schedule-name-iteliquidcooled}
+
+The availability schedule for this equipment. A schedule value greater than 0 means the equipment is on. If this field is blank, the equipment is always available.
+
+\paragraph{Field: Compute Load Schedule Name}\label{field-compute-load-schedule-name-iteliquidcooled}
+
+The transient CPU loading schedule, a 0-1 fraction that is multiplied by the Design Power Input to determine the current CPU power. This field is required.
+
+\paragraph{Field: Design Power Input}\label{field-design-power-input-iteliquidcooled}
+
+The design (maximum) power consumption of a single IT equipment rack, in Watts.
+
+\paragraph{Field: Multiplier}\label{field-multiplier-iteliquidcooled}
+
+Scales the power and heat of this object to represent multiple identical racks sharing the same zone, schedules, and cooling coil connections. The default is 1.0.
+
+\paragraph{Field: Design Fan Power Input Fraction}\label{field-design-fan-power-input-fraction-iteliquidcooled}
+
+The fraction (0.0 to 1.0) of the total power input that is for auxiliary server fans contributing to air load, with the remainder attributed to CPU power. The default is 0.0.
+
+\paragraph{Field: IT Equipment Power Modifier Curve Name}\label{field-it-equipment-power-modifier-curve-name-iteliquidcooled}
+
+The name of a two-variable curve or table lookup object which modifies the total power input as a function of CPU loading ($x$) and zone air temperature ($y$). This curve (table) should equal 1.0 at design conditions. If this field is left blank, a value of 1.0 is used.
+
+\paragraph{Field: Liquid Heat Capture Fraction}\label{field-liquid-heat-capture-fraction-iteliquidcooled}
+
+The fraction (0.0 to 1.0) of the total ITE heat generation (CPU + Fan) that is removed by the liquid cooling loop at design conditions; the remaining fraction is transferred to the zone air as a convective gain. The default is 0.8.
+
+\paragraph{Field: Liquid Heat Capture Fraction Schedule Name}\label{field-liquid-heat-capture-fraction-schedule-name-iteliquidcooled}
+
+An optional schedule that multiplies the Liquid Heat Capture Fraction field, allowing the capture effectiveness to vary dynamically during the simulation. If this field is left blank, a constant multiplier of 1.0 is used (i.e.\ the Liquid Heat Capture Fraction above is used as-is).
+
+\paragraph{Field: Cooling Coil 1 Object Type}\label{field-cooling-coil-1-object-type-iteliquidcooled}
+
+The type of the first cooling component handling physical heat transfer for this rack: \textbf{Coil:Cooling:ITE:ColdPlate} or \textbf{Coil:Cooling:ITE:UserDefined}. This field is required.
+
+\paragraph{Field: Cooling Coil 1 Name}\label{field-cooling-coil-1-name-iteliquidcooled}
+
+The name of the first cooling component. A given coil (its object type and name together) may be referenced by only one ElectricEquipment:ITE:LiquidCooled object; referencing the same coil from more than one rack is an input error. This field is required.
+
+\paragraph{Field: Cooling Coil 1 Load Fraction}\label{field-cooling-coil-1-load-fraction-iteliquidcooled}
+
+A static fraction (0.0 to 1.0) of the total IT liquid load directed to this coil. If this field is used, the Load Fraction Schedule field below should be left blank. If this is the only active Cooling Coil N slot on this object and neither this field nor the schedule below is specified, this coil is assumed to receive the entire liquid load (fraction = 1.0). If more than one Cooling Coil N slot is active, one of this field or the schedule below must be specified for every active slot.
+
+\paragraph{Field: Cooling Coil 1 Load Fraction Schedule Name}\label{field-cooling-coil-1-load-fraction-schedule-name-iteliquidcooled}
+
+A schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this coil at each time step. If this field is used, the static Load Fraction field above should be left blank.
+
+\paragraph{Field: Cooling Coil 2/3/4 Object Type, Name, Load Fraction, and Load Fraction Schedule Name}\label{field-cooling-coil-2-3-4-iteliquidcooled}
+
+Three additional, optional Cooling Coil slots follow the same pattern as Cooling Coil 1 above, allowing a single rack to split its liquid load across up to four coils --- for example a hybrid rack combining a direct-to-chip cold plate with a rear-door heat exchanger modeled with Coil:Cooling:ITE:UserDefined. A coil slot that is not used should leave both its Object Type and Name fields blank.
+
+\paragraph{Field: CPU End-Use Subcategory}\label{field-cpu-end-use-subcategory-iteliquidcooled}
+
+Any text may be used here to categorize the CPU electricity end-use in the ABUPS End Uses by Subcategory table. The default is ITE-CPU.
+
+\paragraph{Field: Fan End-Use Subcategory}\label{field-fan-end-use-subcategory-iteliquidcooled}
+
+Any text may be used here to categorize the fan electricity end-use in the ABUPS End Uses by Subcategory table. The default is ITE-Fans.
+
+\subsubsection{Outputs}\label{outputs-iteliquidcooled}
+
+ElectricEquipment:ITE:LiquidCooled Outputs:
+
+\begin{itemize}
+\tightlist
+\item
+  Zone,Average,ITE CPU Electricity Rate {[}W{]}
+\item
+  Zone,Sum,ITE CPU Electricity Energy {[}J{]}
+\item
+  Zone,Average,ITE Fan Electricity Rate {[}W{]}
+\item
+  Zone,Sum,ITE Fan Electricity Energy {[}J{]}
+\item
+  Zone,Average,ITE Total Electricity Rate {[}W{]}
+\item
+  Zone,Sum,ITE Total Electricity Energy {[}J{]}
+\item
+  Zone,Average,ITE Total Heat Generation Rate {[}W{]}
+\item
+  Zone,Sum,ITE Total Heat Generation Energy {[}J{]}
+\item
+  Zone,Average,ITE Liquid Heat Capture Fraction {[]}
+\item
+  Zone,Average,ITE Liquid Heat Gain Rate {[}W{]}
+\item
+  Zone,Sum,ITE Liquid Heat Gain Energy {[}J{]}
+\item
+  Zone,Average,ITE Air Heat Gain to Zone Rate {[}W{]}
+\item
+  Zone,Sum,ITE Air Heat Gain to Zone Energy {[}J{]}
+\end{itemize}
+
+Corresponding Space and Zone level aggregations (e.g.\ ``Zone ITE Total Electricity Rate'', ``Space ITE Air Heat Gain to Zone Rate'') are automatically generated for every variable listed above, following the same convention as \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled}.
+
+\paragraph{ITE CPU Electricity Rate {[}W{]}}\label{ite-cpu-electricity-rate-liquidcooled}
+
+The power consumed specifically by the compute components of the IT equipment.
+
+\paragraph{ITE Fan Electricity Rate {[}W{]}}\label{ite-fan-electricity-rate-liquidcooled}
+
+The power consumed by the internal fans used to assist with thermal management within the equipment.
+
+\paragraph{ITE Total Electricity Rate {[}W{]}}\label{ite-total-electricity-rate-liquidcooled}
+
+The overall power consumption of the liquid-cooled IT equipment, the sum of the CPU and fan electricity rates above.
+
+\paragraph{ITE Total Heat Generation Rate {[}W{]}}\label{ite-total-heat-generation-rate-liquidcooled}
+
+The entire thermal load produced by the equipment, which is inherently equal to the total electricity rate above.
+
+\paragraph{ITE Liquid Heat Capture Fraction {[]}}\label{ite-liquid-heat-capture-fraction}
+
+The final fraction of total heat generation being routed to the liquid loop at the current time step, accounting for the Liquid Heat Capture Fraction field and its optional schedule.
+
+\paragraph{ITE Liquid Heat Gain Rate {[}W{]}}\label{ite-liquid-heat-gain-rate}
+
+The portion of ITE Total Heat Generation Rate that is captured and removed by the attached liquid cooling loop.
+
+\paragraph{ITE Air Heat Gain to Zone Rate {[}W{]}}\label{ite-air-heat-gain-to-zone-rate}
+
+The remaining portion of ITE Total Heat Generation Rate that is not captured by the liquid loop, dissipated into the surrounding zone air as a convective sensible heat gain. Once the referenced cooling coil (Coil:Cooling:ITE:ColdPlate or Coil:Cooling:ITE:UserDefined) is wired up to this calculation, this output reflects the coil's achieved split from its \emph{previous} system time step, since the coil is plant equipment simulated later in the same time step after this object's zone heat balance contribution has already been evaluated. The sensible heat actually entering the zone's air heat balance at that point comes from the coil's own registration rather than from this output directly, and the two may differ slightly, time step to time step, in the same way already documented for DX coil condenser heat rejection to a zone.
+
+An IDF example:
+
+\begin{lstlisting}
+ElectricEquipment:ITE:LiquidCooled,
+  ITE Rack 1,              !- Name
+  ZONE ONE,                !- Zone or Space Name
+  AlwaysOn,                !- Availability Schedule Name
+  ComputeLoadSched,        !- Compute Load Schedule Name
+  10000,                   !- Design Power Input {W}
+  2.0,                     !- Multiplier
+  0.1,                     !- Design Fan Power Input Fraction
+  ,                        !- IT Equipment Power Modifier Curve Name
+  0.8,                     !- Liquid Heat Capture Fraction
+  ,                        !- Liquid Heat Capture Fraction Schedule Name
+  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type
+  ColdPlate1,              !- Cooling Coil 1 Name
+  1.0,                     !- Cooling Coil 1 Load Fraction
+  ;                        !- Cooling Coil 1 Load Fraction Schedule Name
+\end{lstlisting}
+
 \subsection{ZoneBaseboard:OutdoorTemperatureControlled}\label{zonebaseboardoutdoortemperaturecontrolled}
 
 This object specifies outside temperature-controlled (OTC) baseboard heating. The capacities (high and low) are specified in W at the temperatures specified. The schedule allows both capacities to change hourly on a proportional basis. This baseboard heater does not operate if the outdoor dry-bulb is above the high temperature limit. Between the high temperature and the low temperature, the capacity is interpolated (linear) between the high and the low capacity values. Below the low temperature, the capacity is set at the low capacity value. This allows the user to add baseboard heat to a perimeter zone starting at a prescribed temperature and then slowly increases this capacity to a max value.

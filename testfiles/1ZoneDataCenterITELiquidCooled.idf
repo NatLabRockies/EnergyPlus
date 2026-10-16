@@ -1,0 +1,337 @@
+!1ZoneDataCenterITELiquidCooled.idf
+! Basic file description:  Minimal single-zone test of ElectricEquipment:ITE:LiquidCooled.
+!
+! Highlights:              Exercises the new ElectricEquipment:ITE:LiquidCooled object: a
+!                          transient Compute Load Schedule drives CPU/Fan electricity and total
+!                          heat generation, which is split between the liquid cooling loop and
+!                          the zone air using the Liquid Heat Capture Fraction. No cooling coil
+!                          objects exist yet (Coil:Cooling:ITE:ColdPlate is still under
+!                          development), so the Cooling Coil 1 fields reference a coil name that
+!                          is never instantiated; the parent object does not simulate the coil.
+!
+! Simulation Location/Run: Denver Centennial Golden CO USA WMO=724666, 1 week January run period
+!
+! Location:                Denver, CO
+!
+! Run Period (Weather File): 1 week in January
+!
+! Run Control:             No sizing, weather file run period only
+!
+! Building: Fictional 1 zone building with resistive walls, same envelope as
+!           1ZoneUncontrolled3SurfaceZone.idf.
+!
+! Floor Area:        232.25 m2
+! Number of Stories: 1
+!
+! Internal gains description:     ElectricEquipment:ITE:LiquidCooled
+!
+! Interzone Surfaces:             None
+! Internal Mass:                  None
+! People:                         None
+! Lights:                         None
+! Windows:                        0
+! Detached Shading:               None
+! Daylight:                       None
+! Natural Ventilation:            None
+! Solar Distribution:             MinimalShadowing
+!
+! HVAC:                           NA
+!
+! Zonal Equipment:                NA
+! Central Air Handling Equipment: No
+! Coils:                          None (Coil:Cooling:ITE:ColdPlate not yet implemented)
+! Pumps:                          None
+! Boilers:                        None
+! Chillers:                       None
+! Towers:                         None
+
+  Version,26.2;
+
+  Timestep,4;
+
+  Building,
+    Simple One Zone (ITE Liquid Cooled),  !- Name
+    0,                       !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.004,                   !- Temperature Convergence Tolerance Value {deltaC}
+    MinimalShadowing,        !- Solar Distribution
+    30,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  HeatBalanceAlgorithm,ConductionTransferFunction;
+
+  SurfaceConvectionAlgorithm:Inside,TARP;
+
+  SurfaceConvectionAlgorithm:Outside,DOE-2;
+
+  SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    Yes,                     !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  RunPeriod,
+    Jan Week 1,               !- Name
+    1,                        !- Begin Month
+    1,                        !- Begin Day of Month
+    ,                         !- Begin Year
+    1,                        !- End Month
+    7,                        !- End Day of Month
+    ,                         !- End Year
+    Tuesday,                  !- Day of Week for Start Day
+    Yes,                      !- Use Weather File Holidays and Special Days
+    Yes,                      !- Use Weather File Daylight Saving Period
+    No,                       !- Apply Weekend Holiday Rule
+    Yes,                      !- Use Weather File Rain Indicators
+    Yes;                      !- Use Weather File Snow Indicators
+
+  Site:Location,
+    Denver Centennial  Golden   N_CO_USA Design_Conditions,  !- Name
+    39.74,                   !- Latitude {deg}
+    -105.18,                 !- Longitude {deg}
+    -7.00,                   !- Time Zone {hr}
+    1829.00;                 !- Elevation {m}
+
+ !  WMO=724666 Time Zone=NAM: (GMT-07:00) Mountain Time (US & Canada)
+ !  Data Source=ASHRAE 2009 Annual Design Conditions
+ ! Denver Centennial  Golden   N_CO_USA Annual Heating Design Conditions Wind Speed=3m/s Wind Dir=340
+ ! Coldest Month=DEC
+ ! Denver Centennial  Golden   N_CO_USA Annual Heating 99%, MaxDB=-15.5°C
+
+  SizingPeriod:DesignDay,
+    Denver Centennial  Golden   N Ann Htg 99% Condns DB,  !- Name
+    12,                      !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    -15.5,                   !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    -15.5,                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    81198.,                  !- Barometric Pressure {Pa}
+    3,                       !- Wind Speed {m/s}
+    340,                     !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    0.00;                    !- Sky Clearness
+
+ ! Denver Centennial  Golden   N Annual Cooling Design Conditions Wind Speed=4.9m/s Wind Dir=0
+ ! Hottest Month=JUL
+ ! Denver Centennial  Golden   N_CO_USA Annual Cooling (DB=>MWB) 1%, MaxDB=32°C MWB=15.5°C
+
+  SizingPeriod:DesignDay,
+    Denver Centennial  Golden   N Ann Clg 1% Condns DB=>MWB,  !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    32,                      !- Maximum Dry-Bulb Temperature {C}
+    15.2,                    !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    15.5,                    !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    81198.,                  !- Barometric Pressure {Pa}
+    4.9,                     !- Wind Speed {m/s}
+    0,                       !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.00;                    !- Sky Clearness
+
+  Material:NoMass,
+    R13LAYER,                !- Name
+    Rough,                   !- Roughness
+    2.290965,                !- Thermal Resistance {m2-K/W}
+    0.9000000,               !- Thermal Absorptance
+    0.7500000,               !- Solar Absorptance
+    0.7500000;               !- Visible Absorptance
+
+  Material:NoMass,
+    R31LAYER,                !- Name
+    Rough,                   !- Roughness
+    5.456,                   !- Thermal Resistance {m2-K/W}
+    0.9000000,               !- Thermal Absorptance
+    0.7500000,               !- Solar Absorptance
+    0.7500000;               !- Visible Absorptance
+
+  Material,
+    C5 - 4 IN HW CONCRETE,   !- Name
+    MediumRough,             !- Roughness
+    0.1014984,               !- Thickness {m}
+    1.729577,                !- Conductivity {W/m-K}
+    2242.585,                !- Density {kg/m3}
+    836.8000,                !- Specific Heat {J/kg-K}
+    0.9000000,               !- Thermal Absorptance
+    0.6500000,               !- Solar Absorptance
+    0.6500000;               !- Visible Absorptance
+
+  Construction,
+    R13WALL,                 !- Name
+    R13LAYER;                !- Outside Layer
+
+  Construction,
+    FLOOR,                   !- Name
+    C5 - 4 IN HW CONCRETE;   !- Outside Layer
+
+  Construction,
+    ROOF31,                  !- Name
+    R31LAYER;                !- Outside Layer
+
+  Zone,
+    ZONE ONE,                !- Name
+    0,                       !- Direction of Relative North {deg}
+    0,                       !- X Origin {m}
+    0,                       !- Y Origin {m}
+    0,                       !- Z Origin {m}
+    1,                       !- Type
+    1,                       !- Multiplier
+    autocalculate,           !- Ceiling Height {m}
+    autocalculate;           !- Volume {m3}
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    World;                   !- Coordinate System
+
+  BuildingSurface:Detailed,
+    Zn001:Wall001,           !- Name
+    Wall,                    !- Surface Type
+    R13WALL,                 !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0.5000000,               !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0,0,4.572000,  !- X,Y,Z ==> Vertex 1 {m}
+    0,0,0,  !- X,Y,Z ==> Vertex 2 {m}
+    60.96000,0,0,  !- X,Y,Z ==> Vertex 3 {m}
+    60.96000,0,4.572000;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Flr001,            !- Name
+    Floor,                   !- Surface Type
+    FLOOR,                   !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Adiabatic,               !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    NoSun,                   !- Sun Exposure
+    NoWind,                  !- Wind Exposure
+    1.000000,                !- View Factor to Ground
+    4,                       !- Number of Vertices
+    15.24000,0.000000,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.000000,0.000000,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.000000,15.24000,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    15.24000,15.24000,0.0;  !- X,Y,Z ==> Vertex 4 {m}
+
+  BuildingSurface:Detailed,
+    Zn001:Roof001,           !- Name
+    Roof,                    !- Surface Type
+    ROOF31,                  !- Construction Name
+    ZONE ONE,                !- Zone Name
+    ,                        !- Space Name
+    Outdoors,                !- Outside Boundary Condition
+    ,                        !- Outside Boundary Condition Object
+    SunExposed,              !- Sun Exposure
+    WindExposed,             !- Wind Exposure
+    0,                       !- View Factor to Ground
+    4,                       !- Number of Vertices
+    0.000000,15.24000,4.572,  !- X,Y,Z ==> Vertex 1 {m}
+    0.000000,0.000000,4.572,  !- X,Y,Z ==> Vertex 2 {m}
+    15.24000,0.000000,4.572,  !- X,Y,Z ==> Vertex 3 {m}
+    15.24000,15.24000,4.572;  !- X,Y,Z ==> Vertex 4 {m}
+
+  ScheduleTypeLimits,
+    Fraction,                !- Name
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
+    CONTINUOUS;              !- Numeric Type
+
+  ScheduleTypeLimits,
+    On/Off,                  !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    DISCRETE;                !- Numeric Type
+
+  Schedule:Constant,AlwaysOn,On/Off,1.0;
+
+  Schedule:Compact,
+    ComputeLoadSched,        !- Name
+    Fraction,                !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 12:00,0.5,        !- Field 3
+    Until: 24:00,1.0;        !- Field 5
+
+  ElectricEquipment:ITE:LiquidCooled,
+    ITE Rack 1,              !- Name
+    ZONE ONE,                !- Zone or Space Name
+    AlwaysOn,                !- Availability Schedule Name
+    ComputeLoadSched,        !- Compute Load Schedule Name
+    10000,                   !- Design Power Input {W}
+    2.0,                     !- Multiplier
+    0.1,                     !- Design Fan Power Input Fraction
+    ,                        !- IT Equipment Power Modifier Curve Name
+    0.8,                     !- Liquid Heat Capture Fraction
+    ,                        !- Liquid Heat Capture Fraction Schedule Name
+    Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type
+    ColdPlate1,              !- Cooling Coil 1 Name
+    1.0,                     !- Cooling Coil 1 Load Fraction
+    ;                        !- Cooling Coil 1 Load Fraction Schedule Name
+
+  Output:Variable,*,Zone Mean Air Temperature,hourly;
+
+  Output:Variable,*,ITE CPU Electricity Rate,hourly;
+
+  Output:Variable,*,ITE Fan Electricity Rate,hourly;
+
+  Output:Variable,*,ITE Total Electricity Rate,hourly;
+
+  Output:Variable,*,ITE Total Heat Generation Rate,hourly;
+
+  Output:Variable,*,ITE Liquid Heat Capture Fraction,hourly;
+
+  Output:Variable,*,ITE Liquid Heat Gain Rate,hourly;
+
+  Output:Variable,*,ITE Air Heat Gain to Zone Rate,hourly;
+
+  Output:Variable,*,Zone ITE Total Electricity Rate,hourly;
+
+  Output:Variable,*,Zone ITE Air Heat Gain to Zone Rate,hourly;
+
+  Output:Variable,*,Space ITE Total Electricity Rate,hourly;
+
+  Output:VariableDictionary,IDF;
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
