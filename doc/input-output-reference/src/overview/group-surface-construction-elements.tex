@@ -1400,6 +1400,8 @@ If Optical Data Type = SpectralAndAngle, this is the name of a spectral and angl
 
 It should be pointed out that when Optical Data Type = SpectralAndAngle for a glass layer in a construction, the table input data are converted into polynomial curve fits with 6 coefficients, so that all outputs of optical properties for the same construction will be curve values for a given incident angle. Therefore, the values may be slightly different from input values.
 
+SpectralAndAngle can also be used when only angle-dependent, spectrally averaged properties of a glass layer are available, for example solar transmittance and reflectances at several incidence angles from an optical calculation. Give each of the three data sets two wavelengths, for example 0.3 and 2.5 microns, with the same value for both wavelengths at each angle. The spectral integration then returns these values, so the tables act as angle-dependent solar properties. Because the values do not depend on wavelength, the visible properties of the layer are equal to the solar ones.
+
 IDF examples of Spectral average and using a Spectral data set:
 
 \begin{lstlisting}
