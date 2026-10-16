@@ -666,6 +666,8 @@ Common pipe feature eliminates the need of specifying two different EnergyPlus l
   The flow at the inlet node of the half loop is equal to the flow at the outlet node of the half loop.
 \item
   The pumps can have different schedules and any loop can be shut off when the other loop is still running.
+\item
+  If the primary-side, or supply-side, inlet pump is a variable speed pump, the common pipe model accepts it. For CommonPipe, the primary flow remains governed by the pump and loop controls; for Two-Way CommonPipe, the solver can request primary flow through the pump while resolving the interface balances.
 \end{itemize}
 
 \begin{figure}[hbtp] % fig 125
@@ -709,6 +711,8 @@ A model referred to as Two-Way Common Pipe is available which provides a way to 
   The mass flow rate at the Secondary Side Outlet Node is always equal to the mass flow rate at the Secondary Side Inlet Node.
 \item
   Only one additional node, either primary-side inlet or secondary-side inlet, (along with the primary-side/supply-side outlet node) can be controlled. The system of equations that describe the loop interface will be under specified if both the Primary and Secondary Inlet nodes have to be controlled.
+\item
+  If the primary-side, or supply-side, inlet pump is a variable speed pump, the Two-Way Common Pipe solver can request primary flow through the pump as part of resolving the interface balances. The temperature control is still resolved by the common pipe flow balances using the available primary and secondary flows.
 \end{itemize}
 
 Figure~\ref{fig:schematic-of-a-two-way-common-pipe-used-in} shows a schematic of the Two-Way Common Pipe. There are two common pipe legs, shown as broken lines, allow for some recirculation at the half loop level.~ The model allows for common pipe flow in either or both directions. The model determines flow rates in the common pipes and temperatures at nodes based on the following:
