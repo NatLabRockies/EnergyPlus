@@ -54,9 +54,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/string.functions.hh>
 
-// Third Party Headers
-#include <boost/math/tools/roots.hpp>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -1319,15 +1316,14 @@ namespace ThermalComfort {
                    SET;
         };
 
-        auto ce_root_termination = [](Real64 min, Real64 max) { return abs(max - min) <= 0.01; };
-        Real64 lowerBound = 0.0;
-        Real64 upperBound = 50.0;
+        Real64 constexpr Acc = 0.01; // Accuracy of the SET match [C]
+        int constexpr MaxIte = 100;
+        Real64 constexpr lowerBound = 0.0;
+        Real64 constexpr upperBound = 50.0;
+        int SolFla = 0;
 
-        // We have yet another solver?
-        try {
-            std::pair<Real64, Real64> solverResult = boost::math::tools::bisect(ce_root_function, lowerBound, upperBound, ce_root_termination);
-            CoolingEffect = (solverResult.first + solverResult.second) / 2;
-        } catch (const std::exception &e) {
+        General::SolveRoot(state, Acc, MaxIte, SolFla, CoolingEffect, ce_root_function, lowerBound, upperBound);
+        if (SolFla < 0) {
             ShowRecurringWarningErrorAtEnd(state,
                                            "The cooling effect could not be solved for People=\"" + people.Name + "\"" +
                                                "As a result, no cooling effect will be applied to adjust the PMV and PPD results.",
