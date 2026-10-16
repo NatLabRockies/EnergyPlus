@@ -4992,7 +4992,13 @@ void CalcZoneMassBalance(EnergyPlusData &state, bool const FirstHVACIteration)
             auto &airLoopFlow = state.dataAirLoop->AirLoopFlow(airDisUnit.AirLoopNum);
             airLoopFlow.SupFlow += airDisUnit.MassFlowRateSup;
             airLoopFlow.RecircFlow += airDisUnit.MassFlowRatePlenInd;
-            airLoopFlow.LeakFlow += airDisUnit.MassFlowRateDnStrLk + airDisUnit.MassFlowRateUpStrLk + airDisUnit.massFlowRateParallelPIULk;
+            // Simple duct leakage is only recovered by the return path when the zone's return node feeds a return plenum, which adds the
+            // leak flow back into its outlet (see ZonePlenum::CalcAirZoneReturnPlenum). Without a plenum the leaked air never reaches the
+            // return node, so counting it in SysRetFlow makes MixedAir under-estimate the replacement air and the supply flow collapses.
+            Real64 const ductLeakFlow = ZonePlenum::zoneReturnFeedsPlenum(state, airDisUnit.ZoneEqNum)
+                                            ? airDisUnit.MassFlowRateDnStrLk + airDisUnit.MassFlowRateUpStrLk
+                                            : 0.0;
+            airLoopFlow.LeakFlow += ductLeakFlow + airDisUnit.massFlowRateParallelPIULk;
         }
     }
 

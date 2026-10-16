@@ -91,6 +91,8 @@ Connections between the air distribution unit, the supply air duct, and the zone
 
 The Air Distribution unit also allows the user to specify leaks in the supply air duct system. These inputs are used in the EnergyPlus Simplified Duct Leakage Model (SDLM). This model simulates a specific configuration: supply leaks to a return plenum in a commercial VAV or CV system. The VAV system must have a constant static pressure setpoint, and a constant upstream air leakage flow rate is calculated using the upstream leakage fraction and design flow rate of the VAV box. For the CV system, a proportional leakage amount is calculated using the upstream leakage fraction and the maximum available air flow rate of the air terminal box. The downstream leakages are always calculated as a fraction of the current flow rate through the air terminal. Within these limitations SDLM allows the user to easily evaluate the energy penalty due to duct leakage.
 
+The leaked air is assumed to be recovered by an \textbf{AirLoopHVAC:ReturnPlenum} connected to the zone's return air node. If an air distribution unit with leakage serves a zone whose return air does not pass through a return plenum, the program issues a warning during initialization and the leakage is still simulated: the leaked air is treated as lost from the air loop. It is not included in the system return air flow, so the outdoor air system must supply the replacement air, subject to the capacity and flow limits of the equipment. The thermal effect of the leaked air on any other space, such as an attic, is not modeled in this case.
+
 The Simplified Duct Leakage Model (SDLM) is currently supported for the following air terminals:
 
 \begin{itemize}
