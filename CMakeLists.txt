@@ -72,6 +72,11 @@ add_library(project_fp_options INTERFACE)
 
 add_library(project_warnings INTERFACE)
 
+# Treat compiler warnings as errors (-Werror, /WX). Turn off when building with a compiler or standard library
+# version that the project does not test yet, so new warnings do not stop the build.
+option(ENABLE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+mark_as_advanced(ENABLE_WARNINGS_AS_ERRORS)
+
 # Useful for checking once in a while if a third-party library is generating scary warnings, but too noisy for normal development
 option(ENABLE_WARNINGS_IN_THIRD_PARTY "Enable warnings in third-party libraries" OFF)
 mark_as_advanced(ENABLE_WARNINGS_IN_THIRD_PARTY)
