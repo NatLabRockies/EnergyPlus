@@ -372,10 +372,11 @@ TEST_F(EnergyPlusFixture, Psychrometrics_PsyCpAirFn_Test)
     Real64 Error_avg = Error_sum / 101;
 
     // check analytical vs numerical cp values stats
-    EXPECT_LT(Error_min, 0.0);
-    EXPECT_GT(Error_max, 0.0);
-    EXPECT_GT(Error_avg, 0.0);
-    EXPECT_GT(StdError, 0.0);
+    // h(T) is linear in T so the finite difference only differs from the analytical cp by round-off: check its magnitude, not its sign
+    EXPECT_NEAR(Error_min, 0.0, 1.0e-8);
+    EXPECT_NEAR(Error_max, 0.0, 1.0e-8);
+    EXPECT_NEAR(Error_avg, 0.0, 1.0e-8);
+    EXPECT_NEAR(StdError, 0.0, 1.0e-8);
 
     // EXPECT_DOUBLE_EQ(Error_min, -2.8808244678657502e-10);
     // EXPECT_DOUBLE_EQ(Error_max, 2.5875124265439808e-10);

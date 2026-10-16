@@ -7396,6 +7396,20 @@ TEST_F(SQLiteFixture, WriteVeriSumTable_TestNotPartOfTotal_DualUnits)
     }
 }
 
+namespace {
+// The "no formatting" JSON output path (RealToStr with formatReals=false) prints the shortest
+// round-trip representation of the raw double, so it is sensitive to last-bit differences (eg.
+// from -ffast-math). Compare the numeric value of each cell instead of the literal string.
+void expectNumericRowsNear(const ResultsFramework::json &row, const std::vector<std::string> &expected, Real64 tol = 1e-9)
+{
+    std::vector<std::string> rowStrs = row.get<std::vector<std::string>>();
+    ASSERT_EQ(expected.size(), rowStrs.size());
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_NEAR(std::stod(expected[i]), std::stod(rowStrs[i]), tol) << "Mismatch at column " << i;
+    }
+}
+} // namespace
+
 TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
 {
     state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
@@ -7742,17 +7756,17 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
                     std::vector<std::string> colHeaders = subTable["Cols"];
                     EXPECT_EQ(colHeaders, expectColHeaders);
                     auto &row = subTable["Rows"]["Exterior Lighting:AnotherEndUseSubCat"];
-                    EXPECT_EQ(row, expectExtLtgAnother);
+                    expectNumericRowsNear(row, expectExtLtgAnother);
                     row = subTable["Rows"]["Heating:General"];
-                    EXPECT_EQ(row, expectHeating);
+                    expectNumericRowsNear(row, expectHeating);
                 }
                 if (subTable["TableName"] == "End Uses") {
                     std::vector<std::string> colHeaders = subTable["Cols"];
                     EXPECT_EQ(colHeaders, expectColHeaders);
                     auto &row = subTable["Rows"]["Exterior Lighting"];
-                    EXPECT_EQ(row, expectExtLtg);
+                    expectNumericRowsNear(row, expectExtLtg);
                     row = subTable["Rows"]["Heating"];
-                    EXPECT_EQ(row, expectHeating);
+                    expectNumericRowsNear(row, expectHeating);
                 }
             }
         }
