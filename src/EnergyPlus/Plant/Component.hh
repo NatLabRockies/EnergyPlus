@@ -280,28 +280,26 @@ namespace DataPlant {
     struct CompData
     {
         // Members
-        std::string TypeOf;                           // The 'keyWord' identifying  component type
-        DataPlant::PlantEquipmentType Type;           // Reference the "TypeOf" parameters in DataPlant
-        std::string Name;                             // Component name
-        int CompNum;                                  // Component ID number
-        DataBranchAirLoopPlant::ControlType FlowCtrl; // flow control for splitter/mixer (ACTIVE/PASSIVE/BYPASS)
-        LoopFlowStatus FlowPriority;                  // status for overall loop flow determination
-        bool ON;                                      // TRUE = designated component or operation scheme available
-        bool Available;                               // TRUE = designated component or operation scheme available
-        std::string NodeNameIn;                       // Component inlet node name
-        std::string NodeNameOut;                      // Component outlet node name
-        int NodeNumIn;                                // Component inlet node number
-        int NodeNumOut;                               // Component outlet node number
-        Real64 MyLoad;                                // Distributed Load
-        Real64 MaxLoad;                               // Maximum load
-        Real64 MinLoad;                               // Minimum Load
-        Real64 OptLoad;                               // Optimal Load
-        Real64 SizFac;                                // Sizing Fraction
-        DataPlant::OpScheme CurOpSchemeType;          // updated pointer to
-        // Plant()%OpScheme(CurOpSchemeType)...
-        int NumOpSchemes;      // number of schemes held in the pointer array
-        int CurCompLevelOpNum; // pointer to the OpScheme array defined next
-        // PlantLoop()%LoopSide()%Branch()%Comp()%OpScheme(curOpSchemePtr)
+        std::string TypeOf;                               // The 'keyWord' identifying  component type
+        DataPlant::PlantEquipmentType Type;               // Reference the "TypeOf" parameters in DataPlant
+        std::string Name;                                 // Component name
+        int CompNum;                                      // Component ID number
+        DataBranchAirLoopPlant::ControlType FlowCtrl;     // flow control for splitter/mixer (ACTIVE/PASSIVE/BYPASS)
+        LoopFlowStatus FlowPriority;                      // status for overall loop flow determination
+        bool ON;                                          // TRUE = designated component or operation scheme available
+        bool Available;                                   // TRUE = designated component or operation scheme available
+        std::string NodeNameIn;                           // Component inlet node name
+        std::string NodeNameOut;                          // Component outlet node name
+        int NodeNumIn;                                    // Component inlet node number
+        int NodeNumOut;                                   // Component outlet node number
+        Real64 MyLoad;                                    // Distributed Load
+        Real64 MaxLoad;                                   // Maximum load
+        Real64 MinLoad;                                   // Minimum Load
+        Real64 OptLoad;                                   // Optimal Load
+        Real64 SizFac;                                    // Sizing Fraction
+        DataPlant::OpScheme CurOpSchemeType;              // updated pointer to
+        int NumOpSchemes;                                 // number of schemes held in the pointer array
+        int CurCompLevelOpNum;                            // pointer to the OpScheme array defined next
         Array1D<OpSchemePtrData> OpScheme;                // Pointers to component on lists
         Real64 EquipDemand;                               // Component load request based on inlet temp and outlet SP
         bool EMSLoadOverrideOn;                           // EMS is calling to override load dispatched to component
@@ -346,7 +344,7 @@ namespace DataPlant {
 
         static CompData &getPlantComponent(EnergyPlusData &state, PlantLocation const &plantLoc);
 
-        Real64 getDynamicMaxCapacity(EnergyPlusData &state) const;
+        std::tuple<Real64, bool> getDynamicMaxCapacity(EnergyPlusData &state) const;
     };
 } // namespace DataPlant
 } // namespace EnergyPlus
