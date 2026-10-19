@@ -143,6 +143,8 @@ namespace HybridEvapCoolingModel {
         Real64 Maximum_Outdoor_Air_Relative_Humidity;
         Real64 Minimum_Return_Air_Temperature;
         Real64 Maximum_Return_Air_Temperature;
+        bool Minimum_Return_Air_Temperature_Blank;
+        bool Maximum_Return_Air_Temperature_Blank;
         Real64 Minimum_Return_Air_Humidity_Ratio;
         Real64 Maximum_Return_Air_Humidity_Ratio;
         Real64 Minimum_Return_Air_Relative_Humidity;
@@ -161,22 +163,21 @@ namespace HybridEvapCoolingModel {
                        Array1D_string Alphas,
                        Array1D_string cAlphaFields,
                        Array1D<Real64> Numbers,
-                       Array1D_string cNumericFields,
                        Array1D<bool> lAlphaBlanks,
                        Array1D<bool> lNumericBlanks,
                        std::string cCurrentModuleObject);
         void InitializeCurve(int curveType, int CurveID);
         Real64 CalculateCurveVal(EnergyPlusData &state, Real64 Tosa, Real64 Wosa, Real64 Tra, Real64 Wra, Real64 Msa, Real64 OSAF, int curveType);
-        bool InitializeOSAFConstraints(Real64 minOSAF, Real64 maxOSAF);
-        bool InitializeMsaRatioConstraints(Real64 minMsa, Real64 maxMsa);
-        bool InitializeOutdoorAirTemperatureConstraints(Real64 min, Real64 max, bool minBlank, bool maxBlank);
-        bool InitializeOutdoorAirHumidityRatioConstraints(Real64 min, Real64 max);
-        bool InitializeOutdoorAirRelativeHumidityConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirTemperatureConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirHumidityRatioConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirRelativeHumidityConstraints(Real64 min, Real64 max);
+        void InitializeOSAFConstraints(Real64 minOSAF, Real64 maxOSAF);
+        void InitializeMsaRatioConstraints(Real64 minMsa, Real64 maxMsa);
+        void InitializeOutdoorAirTemperatureConstraints(Real64 min, Real64 max, bool minBlank, bool maxBlank);
+        void InitializeOutdoorAirHumidityRatioConstraints(Real64 min, Real64 max);
+        void InitializeOutdoorAirRelativeHumidityConstraints(Real64 min, Real64 max);
+        void InitializeReturnAirTemperatureConstraints(Real64 min, Real64 max, bool minBlank, bool maxBlank);
+        void InitializeReturnAirHumidityRatioConstraints(Real64 min, Real64 max);
+        void InitializeReturnAirRelativeHumidityConstraints(Real64 min, Real64 max);
         void GenerateSolutionSpace();
-        bool MeetsOAEnvConstraints(Real64 Tosa, Real64 Wosa, Real64 RHos);
+        bool MeetsConstraints(Real64 Tosa, Real64 Wosa, Real64 RHosa, Real64 Tra, Real64 Wra, Real64 RHra);
 
     private:
     };
@@ -400,7 +401,6 @@ namespace HybridEvapCoolingModel {
                        Array1D_string Alphas,
                        Array1D_string cAlphaFields,
                        Array1D<Real64> Numbers,
-                       Array1D_string cNumericFields,
                        Array1D<bool> lAlphaBlanks,
                        Array1D<bool> lNumericBlanks,
                        std::string cCurrentModuleObject);
