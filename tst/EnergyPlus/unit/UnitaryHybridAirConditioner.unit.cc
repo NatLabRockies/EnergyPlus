@@ -1437,6 +1437,26 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateOptionalError
         delimited_string({"   ** Severe  ** GetInputZoneHybridUnitaryAirConditioners: ZoneHVAC:HybridUnitaryHVAC = MUNTERSEPX5000 invalid data",
                           "   **   ~~~   ** Invalid-not found Design Specification Outdoor Air Object Name=\"SZ DSOA SPACE2-1\"."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
+
+    // Check for warnings when changing operating settings
+    EnergyPlus::HybridEvapCoolingModel::CStepInputs StepIns;
+    StepIns.Tosa = 150;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStep = 1;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).SetOperatingSetting(*state, StepIns);
+    state->dataGlobal->HourOfDay = 24;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).SetOperatingSetting(*state, StepIns);
+
+    std::string const warning_string =
+        delimited_string({"   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 was unable to operate for 2.0 timesteps because environment "
+                          "conditions were beyond the allowable operating range for any mode.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to meet supply air humidity ratio for 2.0 timesteps. For "
+                          "these timesteps MUNTERSEPX5000 was set to mode 0.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to meet supply air temperature constraints for 2.0 "
+                          "timesteps. For these timesteps MUNTERSEPX5000 was set to mode 0.",
+                          "   ** Warning ** In day 0.0 of simulation, MUNTERSEPX5000 failed to satisfy sensible load for 2.0 timesteps. For these "
+                          "timesteps settings were selected to provide as much sensible cooling or heating as possible, given other constraints."});
+    EXPECT_TRUE(compare_err_stream(warning_string, true));
 }
 
 TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_RuntimeFraction_Initialization)

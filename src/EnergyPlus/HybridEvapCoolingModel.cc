@@ -1244,7 +1244,7 @@ namespace HybridEvapCoolingModel {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool DidWeMeetLoad = false;
-        bool DidWeMeetHumidificaiton = false;
+        bool DidWeMeetHumidification = false;
         bool DidWePartlyMeetLoad = false;
         Real64 OptimalSetting_RunFractionTotalFuel = IMPLAUSIBLE_POWER;
         Real64 Tma;
@@ -1480,16 +1480,12 @@ namespace HybridEvapCoolingModel {
             }
 
             bool Humidification_load_met = false;
-
-            Real64 RequestedDeHumidificationLoad = StepIns.ZoneDehumidificationLoad;
-            if (DehumidificationRequested && latentRoomORZone > RequestedDeHumidificationLoad) {
+            if (DehumidificationRequested && latentRoomORZone > StepIns.ZoneDehumidificationLoad) {
                 Humidification_load_met = true;
             }
-            Real64 RequestedHumidificationLoad = StepIns.ZoneMoistureLoad;
-            if (HumidificationRequested && latentRoomORZone < RequestedHumidificationLoad) {
+            if (HumidificationRequested && latentRoomORZone < StepIns.ZoneMoistureLoad) {
                 Humidification_load_met = true;
             }
-
             if (!(HumidificationRequested || DehumidificationRequested)) {
                 Humidification_load_met = true;
             }
@@ -1528,10 +1524,10 @@ namespace HybridEvapCoolingModel {
                     OptimalSetting_RunFractionTotalFuel = RunFractionTotalFuel;
                     OptimalSetting = thisSetting;
                     DidWeMeetLoad = true;
-                    DidWeMeetHumidificaiton = true;
+                    DidWeMeetHumidification = true;
                 }
             } else {
-                if (!DidWeMeetLoad && !DidWeMeetHumidificaiton) {
+                if (!DidWeMeetLoad && !DidWeMeetHumidification) {
                     bool store_best_attempt = false;
 
                     if (Conditioning_load_met) {
@@ -1622,36 +1618,43 @@ namespace HybridEvapCoolingModel {
         // temperature constraints were not met for a given day. ideally there would be a clear flag that indicates "this is the last timestep of the
         // day, so report", but that doesn't seem to exist.
         if ((TimeElapsed > 24) && WarnOnceFlag && !state.dataGlobal->WarmupFlag) {
-            if (count_EnvironmentConditionsNotMet > 0)
-                ShowWarningError(state,
-                                 format("In day {:.1R} was unable to operate for  of simulation, {}{:.1R} timesteps because environment conditions "
-                                        "were beyond the allowable operating range for any mode.",
-                                        (Real64)state.dataGlobal->DayOfSim,
-                                        Name,
-                                        (Real64)count_EnvironmentConditionsNotMet));
-            if (count_SAHR_OC_MetOnce > 0)
-                ShowWarningError(state,
-                                 format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} time steps. For these "
-                                        "time steps For these time steps was set to mode 0{}",
-                                        (Real64)state.dataGlobal->DayOfSim,
-                                        Name,
-                                        Real64(count_SAHR_OC_MetOnce),
-                                        Name));
-            if (count_SAT_OC_MetOnce > 0)
-                ShowWarningError(state,
-                                 format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} time steps. "
-                                        "For these time steps For these time steps{} was set to mode 0",
-                                        (Real64)state.dataGlobal->DayOfSim,
-                                        Name,
-                                        Real64(count_SAT_OC_MetOnce),
-                                        Name));
+            if (count_EnvironmentConditionsNotMet > 0) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("In day {:.1R} of simulation, {} was unable to operate for {:.1R} timesteps because environment conditions "
+                                       "were beyond the allowable operating range for any mode.",
+                                       (Real64)state.dataGlobal->DayOfSim,
+                                       Name,
+                                       (Real64)count_EnvironmentConditionsNotMet));
+            }
+            if (count_SAHR_OC_MetOnce > 0) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air humidity ratio for {:.1R} timesteps. For these "
+                                       "timesteps {} was set to mode 0.",
+                                       (Real64)state.dataGlobal->DayOfSim,
+                                       Name,
+                                       Real64(count_SAHR_OC_MetOnce),
+                                       Name));
+            }
+            if (count_SAT_OC_MetOnce > 0) {
+                ShowWarningError(
+                    state,
+                    EnergyPlus::format("In day {:.1R} of simulation, {} failed to meet supply air temperature constraints for {:.1R} timesteps. "
+                                       "For these timesteps {} was set to mode 0.",
+                                       (Real64)state.dataGlobal->DayOfSim,
+                                       Name,
+                                       Real64(count_SAT_OC_MetOnce),
+                                       Name));
+            }
 
-            ShowWarningError(state,
-                             format("In day {:.1R} of simulation, {} failed to  satisfy sensible load for {:.1R} time steps. For these time steps "
-                                    "settings were selected to provide as much sensible cooling or heating as possible, given other constraints.",
-                                    (Real64)state.dataGlobal->DayOfSim,
-                                    Name,
-                                    (Real64)count_DidWeNotMeetLoad));
+            ShowWarningError(
+                state,
+                EnergyPlus::format("In day {:.1R} of simulation, {} failed to satisfy sensible load for {:.1R} timesteps. For these timesteps "
+                                   "settings were selected to provide as much sensible cooling or heating as possible, given other constraints.",
+                                   (Real64)state.dataGlobal->DayOfSim,
+                                   Name,
+                                   (Real64)count_DidWeNotMeetLoad));
 
             count_SAT_OC_MetOnce = 0;
             count_DidWeNotMeetLoad = 0;
