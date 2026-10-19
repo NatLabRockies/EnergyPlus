@@ -485,8 +485,8 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
         "Electricity,             !- First fuel type",
         "NaturalGas,              !- Second fuel type",
         "DistrictCooling,         !- Third fuel type",
-        ",                        !- Objective Function Minimizes",
-        "SZ DSOA SPACE 1,        !- Design Specification Outdoor Air Object Name",
+        "Electricity Use,         !- Objective Function Minimizes",
+        "SZ DSOA SPACE 1,         !- Design Specification Outdoor Air Object Name",
         "Mode0 Standby,           !- Mode0 Name",
         ",                        !- Mode0 Supply Air Temperature Lookup Table Name",
         ",                        !- Mode0 Supply Air Humidity Ratio Lookup Table Name",
@@ -547,8 +547,8 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
         "Electricity,             !- First fuel type",
         "NaturalGas,              !- Second fuel type",
         "DistrictCooling,         !- Third fuel type",
-        ",                        !- Objective Function Minimizes",
-        "SZ DSOA SPACE 2,        !- Design Specification Outdoor Air Object Name",
+        "Water Use,               !- Objective Function Minimizes",
+        "SZ DSOA SPACE 2,         !- Design Specification Outdoor Air Object Name",
         "Mode0 Standby,           !- Mode0 Name",
         ",                        !- Mode0 Supply Air Temperature Lookup Table Name",
         ",                        !- Mode0 Supply Air Humidity Ratio Lookup Table Name",
@@ -592,12 +592,18 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateFieldsParsing
     bool ErrorsFound = false;
     GetInputZoneHybridUnitaryAirConditioners(*state, ErrorsFound);
     unsigned long expectedOperatingModesSize = 2;
+    auto &hybridUnit1 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1);
+    auto &hybridUnit2 = state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2);
+
     // check the number of operating modes
-    EXPECT_EQ(state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).OperatingModes.size(), expectedOperatingModesSize);
-    EXPECT_EQ(state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2).OperatingModes.size(), expectedOperatingModesSize);
+    EXPECT_EQ(hybridUnit1.OperatingModes.size(), expectedOperatingModesSize);
+    EXPECT_EQ(hybridUnit2.OperatingModes.size(), expectedOperatingModesSize);
     // check if names for HybridUnitaryAC are converted to upper case
-    EXPECT_EQ("HYBRID UNIT 1", state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(1).Name);
-    EXPECT_EQ("HYBRID UNIT 2", state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(2).Name);
+    EXPECT_EQ(hybridUnit1.Name, "HYBRID UNIT 1");
+    EXPECT_EQ(hybridUnit2.Name, "HYBRID UNIT 2");
+    // check that objective function was set or defaulted correctly
+    EXPECT_EQ(hybridUnit1.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::ElectricityUse);
+    EXPECT_EQ(hybridUnit2.ObjectiveFunction, HybridEvapCoolingModel::ObjectiveFunctionType::WaterUse);
 }
 
 TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_ValidateMinimumIdfInput)

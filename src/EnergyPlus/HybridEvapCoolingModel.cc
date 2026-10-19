@@ -1504,19 +1504,33 @@ namespace HybridEvapCoolingModel {
                 thisSetting.oMode.CalculateCurveVal(state, StepIns.Tosa, Wosa, StepIns.Tra, Wra, UnscaledMsa, OSAF, WATER_USE);
 
             // Calculate partload fraction required to meet all requirements
-            Real64 PartRuntimeFraction = 0;
-            PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
-                                                               thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
-                                                               StepIns.RequestedCoolingLoad,
-                                                               StepIns.RequestedHeatingLoad,
-                                                               SensibleRoomORZone,
-                                                               StepIns.ZoneDehumidificationLoad,
-                                                               StepIns.ZoneMoistureLoad,
-                                                               latentRoomORZone); //
+            // Fraction can be above 1 meaning its not able to do it completely in a time step
+            Real64 PartRuntimeFraction = CalculatePartRuntimeFraction(MinOA_Msa,
+                                                                      thisSetting.Supply_Air_Ventilation_Volume * state.dataEnvrn->StdRhoAir,
+                                                                      StepIns.RequestedCoolingLoad,
+                                                                      StepIns.RequestedHeatingLoad,
+                                                                      SensibleRoomORZone,
+                                                                      StepIns.ZoneDehumidificationLoad,
+                                                                      StepIns.ZoneMoistureLoad,
+                                                                      latentRoomORZone);
 
-            Real64 RunFractionTotalFuel =
-                thisSetting.ElectricalPower * PartRuntimeFraction; // fraction can be above 1 meaning its not able to do it completely in a time step.
-            thisSetting.Runtime_Fraction = PartRuntimeFraction;
+            Real64 RunFractionTotalFuel;
+            switch (ObjectiveFunction) {
+            default:
+            case ObjectiveFunctionType::ElectricityUse:
+                RunFractionTotalFuel = thisSetting.ElectricalPower * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::SecondFuelUse:
+                RunFractionTotalFuel = thisSetting.SecondaryFuelConsumptionRate * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::ThirdFuelUse:
+                RunFractionTotalFuel = thisSetting.ThirdFuelConsumptionRate * PartRuntimeFraction;
+                break;
+            case ObjectiveFunctionType::WaterUse:
+                RunFractionTotalFuel = thisSetting.WaterConsumptionRate * PartRuntimeFraction;
+                break;
+            }
+            thisSetting.Runtime_Fraction = PartRuntimeFraction; //
 
             if (Conditioning_load_met && Humidification_load_met) {
                 // store best performing mode
