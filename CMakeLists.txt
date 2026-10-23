@@ -346,6 +346,19 @@ if(BUILD_FORTRAN)
   include(CMakeAddFortranSubdirectory)
   # Define a top-level target `fortran_project_options`
   include(cmake/Fortran.cmake)
+  if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    include(CheckLanguage)
+    check_language(Fortran)
+    if(CMAKE_Fortran_COMPILER)
+      enable_language(Fortran)
+      include(CheckIPOSupported)
+      check_ipo_supported(RESULT ipo_supported_fortran OUTPUT ipo_output_fortran LANGUAGES Fortran)
+      if(NOT ipo_supported_fortran)
+        message(WARNING "ENABLE_LTO: IPO/LTO is not supported by the Fortran compiler, disabling it for the Fortran tools: ${ipo_output_fortran}")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+      endif()
+    endif()
+  endif()
   cmake_add_fortran_subdirectory(
     src/ExpandObjects
     PROJECT ExpandObjects
