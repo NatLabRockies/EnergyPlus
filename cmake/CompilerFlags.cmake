@@ -175,6 +175,8 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
       target_compile_options(project_warnings INTERFACE -Wno-restrict)
     endif()
+    # With LTO, middle-end warnings are emitted again at link time, where compile options don't apply
+    target_link_options(project_warnings INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:-Wno-aggressive-loop-optimizations>)
     if(NOT ENABLE_NATIVE_OPTIMIZATION)
       target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
     endif()
