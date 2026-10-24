@@ -74,7 +74,7 @@ def test_fan_performance_night_ventilation_removes_maximum_flow_rate(prepare_and
 
     expected_idf_text = """
   FanPerformance:NightVentilation,
-    Explicit Maximum Flow,  !- Fan Name
+    Explicit Maximum Flow,   !- Fan Name
     0.7,                     !- Fan Total Efficiency
     67.0,                    !- Pressure Rise {Pa}
     0.9,                     !- Motor Efficiency
