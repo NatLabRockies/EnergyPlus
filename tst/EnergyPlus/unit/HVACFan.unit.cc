@@ -62,6 +62,7 @@
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -114,6 +115,36 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TestGetFunctions1)
     Real64 locDesignHeatGain = fanSystem->getDesignHeatGain(*state, locFanSizeVdot);
     EXPECT_NEAR(locDesignHeatGain, 200.0, 0.1);
     EXPECT_FALSE(fanSystem->speedControl == Fans::SpeedControl::Continuous);
+}
+
+// In night mode, a SystemModel fan without a night pressure override retains its design pressure and power.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressure)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 1.2;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_DOUBLE_EQ(1.2, fanSystem.outletAirMassFlowRate);
+    EXPECT_NEAR(500.0, fanSystem.totalPower, 0.0001);
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)

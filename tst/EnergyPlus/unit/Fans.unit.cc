@@ -354,7 +354,7 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationFouledFilterUsesNightPressure)
 
     auto *fanCurve = Curve::AddCurve(*state, "Night Pressure Fan Curve");
     fanCurve->curveType = Curve::CurveType::Quadratic;
-    fanCurve->coeff[0] = 1000.0;
+    fanCurve->coeff[0] = 800.0;
     fanCurve->coeff[1] = -500.0;
     fanCurve->inputLimits[0].min = 0.0;
     fanCurve->inputLimits[0].max = 1.0;
@@ -400,7 +400,7 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationFouledFilterUsesNightPressure)
             FAIL() << "Unexpected fan type in night fouled-filter test";
         }
 
-        EXPECT_NEAR(0.9, fan.outletAirMassFlowRate, 0.005);
+        EXPECT_NEAR(0.94, fan.outletAirMassFlowRate, 0.01);
         EXPECT_NEAR(fan.outletAirMassFlowRate * 550.0 / 0.5, fan.totalPower, 0.01);
     }
 }

@@ -1687,8 +1687,8 @@ void FanComponent::simulateConstant(EnergyPlusData &state)
                 state,
                 Name,
                 maxAirFlowRate,
-                _faultBasePressure,
-                (fault.pressFracSched->getCurrentVal() - 1) * _faultBasePressure,
+                deltaPress,
+                (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
                 fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
@@ -1811,8 +1811,8 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
                     state,
                     Name,
                     maxAirFlowRate,
-                    _faultBasePressure,
-                    (fault.pressFracSched->getCurrentVal() - 1) * _faultBasePressure,
+                    deltaPress,
+                    (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
                     fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
@@ -1974,8 +1974,8 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
                     state,
                     Name,
                     maxAirFlowRate,
-                    _faultBasePressure,
-                    (fault.pressFracSched->getCurrentVal() - 1) * _faultBasePressure,
+                    deltaPress,
+                    (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
                     fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
@@ -2826,6 +2826,9 @@ void FanSystem::calcSimpleSystemFan(
         if (nightVentPressureDelta > 0.0) {
             _localPressureRise[0] = nightVentPressureDelta;
             _localPressureRise[1] = nightVentPressureDelta;
+        } else {
+            _localPressureRise[0] = deltaPress;
+            _localPressureRise[1] = deltaPress;
         }
 
         _localFlowFrac = (maxAirMassFlowRate > 0.0) ? inletAirMassFlowRate / maxAirMassFlowRate : 1.0;
