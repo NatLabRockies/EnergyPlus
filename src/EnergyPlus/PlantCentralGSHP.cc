@@ -1626,7 +1626,7 @@ void WrapperSpecs::initialize(EnergyPlusData &state,
         this->GLHEVolFlowRate = 0.0;
 
         for (int ChillerHeaterNum = 1; ChillerHeaterNum <= this->ChillerHeaterNums; ++ChillerHeaterNum) {
-            auto &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
+            auto const &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
             this->CHWVolFlowRate += chillerHeater.EvapVolFlowRate;
             this->HWVolFlowRate += chillerHeater.DesignHotWaterVolFlowRate;
             this->GLHEVolFlowRate += chillerHeater.CondVolFlowRate;
@@ -3001,7 +3001,7 @@ void WrapperSpecs::CalcWrapperModel(EnergyPlusData &state, Real64 &MyLoad, int c
                 } else if (this->SimulHtgDominant) { // Heating dominant simultaneous clg/htg mode
 
                     for (int ChillerHeaterNum = 1; ChillerHeaterNum <= this->ChillerHeaterNums; ++ChillerHeaterNum) {
-                        auto &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
+                        auto const &chillerHeater = this->ChillerHeater(ChillerHeaterNum);
                         // Set temperatures and mass flow rates for the cooling side
                         CurrentMode currentMode = chillerHeater.Report.currentMode;
                         CHWInletTemp = this->Report.CHWInletTempSimul;

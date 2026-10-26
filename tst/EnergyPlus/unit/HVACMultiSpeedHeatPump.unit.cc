@@ -111,6 +111,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    Z401TempCtrl,            !- Name",
         "    401,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint1;            !- Control 3 Name",
 
@@ -123,6 +124,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    Z402TempCtrl,            !- Name",
         "    402,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint2;            !- Control 3 Name",
 
@@ -1534,6 +1536,7 @@ TEST_F(EnergyPlusFixture, HVACMSHP_UnitarySystemElectricityRateTest)
         "    Z401TempCtrl,            !- Name",
         "    401,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint1;            !- Control 3 Name",
 

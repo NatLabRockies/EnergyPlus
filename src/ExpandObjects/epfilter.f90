@@ -8973,6 +8973,7 @@ DO iZone = 1, numCompactZoneVAV
     CALL AddToObjFld('Zone or ZoneList Name', base +  vzNameOff,' ')
     !this schedule was previously created
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + vzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -9460,6 +9461,7 @@ DO iZone = 1, numCompactZoneFPVAV
     CALL AddToObjFld('Name', base + fpvzNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + fpvzNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + fpvzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -9942,6 +9944,7 @@ DO iZone = 1, numCompactZoneHCVAV
     CALL AddToObjFld('Zone or ZoneList Name', base +  hcvzNameOff,' ')
     !this schedule was previously created
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + hcvzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -13529,6 +13532,7 @@ DO iZone = 1, numCompactZoneUnit
     CALL AddToObjFld('Zone or ZoneList Name', base +  uzNameOff,' ')
     !this schedule was previously created
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + uzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -18887,6 +18891,7 @@ DO iZone = 1, numCompactZoneConstVol
     CALL AddToObjFld('Zone or ZoneList Name', base +  cvzNameOff,' ')
     !this schedule was previously created
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + cvzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -20824,6 +20829,7 @@ DO iZone = 1, numCompactZoneDualDuct
     CALL AddToObjFld('Zone or ZoneList Name', base +  ddzNameOff,' ')
     !this schedule was previously created
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + ddzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -22934,6 +22940,7 @@ DO iZone = 1, numCompactZoneVRF
     CALL AddToObjFld('Name', base + vrfzNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + vrfzNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + vrfzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -23984,6 +23991,7 @@ DO iZone = 1, numCompactFanCoil
     CALL AddToObjFld('Name', base + fczNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + fczNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + fczTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -24658,6 +24666,7 @@ DO iPurchAir = 1, numCompactPurchAir
     CALL AddToObjFld('Name', base +  pazNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base +  pazNameOff,' ')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + pazTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -24913,6 +24922,7 @@ DO iZone = 1, numCompactBaseboard
     CALL AddToObjFld('Name', base + bbzNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + bbzNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + bbzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -25222,6 +25232,7 @@ DO iZone = 1, numCompactPTAC
     CALL AddToObjFld('Name', base + ptaczNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + ptaczNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + ptaczTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -25830,6 +25841,7 @@ DO iZone = 1, numCompactPTHP
     CALL AddToObjFld('Name', base + pthpzNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + pthpzNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + pthpzTStatNameOff,' Dual SP Control',.TRUE.)
   END IF
@@ -30202,6 +30214,7 @@ DO iZone = 1, numCompactWaterAirHP
     CALL AddToObjFld('Name', base + wahpNameOff,' Thermostat')
     CALL AddToObjFld('Zone or ZoneList Name', base + wahpNameOff,'')
     CALL AddToObjStr('Control Type Schedule Name','HVACTemplate-Always 4')
+    CALL AddToObjStr('Temperature Difference Between Cutout And Setpoint','')
     CALL AddToObjStr('Control Object Type','ThermostatSetpoint:DualSetpoint')
     CALL AddToObjFld('Control Name', base + wahpTStatNameOff,' Dual SP Control',.TRUE.)
   END IF

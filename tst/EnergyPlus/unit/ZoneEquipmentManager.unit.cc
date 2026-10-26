@@ -5499,3 +5499,70 @@ TEST_F(EnergyPlusFixture, SpaceReturnMixerTest)
     EXPECT_NEAR(mixSpace2Node.MassFlowRateMaxAvail, outletNode.MassFlowRateMaxAvail * mixSpace2.fraction, 0.0001);
     EXPECT_NEAR(mixSpace3Node.MassFlowRateMaxAvail, outletNode.MassFlowRateMaxAvail * mixSpace3.fraction, 0.0001);
 }
+
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_LatentSizingPropagatesOutdoorPeakConditions)
+{
+    DataSizing::ZoneSizingData calcFinalZoneSizing;
+    Array2D<DataSizing::ZoneSizingData> calcZoneSizing(1, 1);
+    calcFinalZoneSizing.allocateMemberArrays(2);
+    calcZoneSizing(1, 1).allocateMemberArrays(2);
+
+    calcFinalZoneSizing.zoneSizingMethod = DataSizing::ZoneSizing::SensibleAndLatent;
+    auto &designDaySizing = calcZoneSizing(1, 1);
+    designDaySizing.zoneLatentSizing = true;
+    designDaySizing.DesCoolDens = 1.2;
+    designDaySizing.DesHeatDens = 1.2;
+    designDaySizing.CoolDDNum = 1;
+    designDaySizing.LatentCoolDDNum = 1;
+    designDaySizing.HeatDDNum = 1;
+    designDaySizing.LatentHeatDDNum = 1;
+
+    designDaySizing.CoolLoadSeq = {100.0, 50.0};
+    designDaySizing.CoolFlowSeq = {0.12, 0.06};
+    designDaySizing.LatentCoolLoadSeq = {50.0, 200.0};
+    designDaySizing.LatentCoolFlowSeq = {0.06, 0.24};
+    designDaySizing.CoolOutTempSeq = {30.0, 25.0};
+    designDaySizing.CoolOutHumRatSeq = {0.012, 0.018};
+    designDaySizing.CoolZoneTempSeq(1) = 24.0;
+    designDaySizing.CoolZoneTempSeq(2) = 23.0;
+    designDaySizing.CoolZoneHumRatSeq = {0.010, 0.011};
+    designDaySizing.CoolZoneRetTempSeq = {25.0, 24.0};
+
+    designDaySizing.HeatLoadSeq = {300.0, 150.0};
+    designDaySizing.HeatFlowSeq = {0.12, 0.06};
+    designDaySizing.LatentHeatLoadSeq = {100.0, 400.0};
+    designDaySizing.LatentHeatFlowSeq = {0.12, 0.48};
+    designDaySizing.HeatOutTempSeq = {-10.0, -5.0};
+    designDaySizing.HeatOutHumRatSeq = {0.002, 0.004};
+    designDaySizing.HeatZoneTempSeq(1) = 20.0;
+    designDaySizing.HeatZoneTempSeq(2) = 21.0;
+    designDaySizing.HeatZoneHumRatSeq = {0.006, 0.007};
+    designDaySizing.HeatZoneRetTempSeq = {19.0, 20.0};
+
+    DataSizing::DesDayWeathData designDayWeather;
+    designDayWeather.Temp.dimension(2);
+    designDayWeather.HumRat.dimension(2);
+    designDayWeather.Temp(1) = 30.0;
+    designDayWeather.Temp(2) = 25.0;
+    designDayWeather.HumRat(1) = 0.012;
+    designDayWeather.HumRat(2) = 0.018;
+    updateZoneSizingEndDay(designDaySizing, calcFinalZoneSizing, 2, designDayWeather, 1.2);
+
+    EXPECT_EQ(25.0, calcFinalZoneSizing.OutTempAtLatentCoolPeak);
+    EXPECT_EQ(0.018, calcFinalZoneSizing.OutHumRatAtLatentCoolPeak);
+    EXPECT_EQ(-5.0, calcFinalZoneSizing.OutTempAtLatentHeatPeak);
+    EXPECT_EQ(0.004, calcFinalZoneSizing.OutHumRatAtLatentHeatPeak);
+
+    bool anyLatentLoad = false;
+    updateZoneSizingEndZoneSizingCalc3(calcFinalZoneSizing, calcZoneSizing, anyLatentLoad, 1);
+
+    EXPECT_TRUE(anyLatentLoad);
+    EXPECT_EQ(25.0, calcFinalZoneSizing.OutTempAtCoolPeak);
+    EXPECT_EQ(0.018, calcFinalZoneSizing.OutHumRatAtCoolPeak);
+    EXPECT_EQ(-5.0, calcFinalZoneSizing.OutTempAtHeatPeak);
+    EXPECT_EQ(0.004, calcFinalZoneSizing.OutHumRatAtHeatPeak);
+    EXPECT_EQ(25.0, designDaySizing.OutTempAtCoolPeak);
+    EXPECT_EQ(0.018, designDaySizing.OutHumRatAtCoolPeak);
+    EXPECT_EQ(-5.0, designDaySizing.OutTempAtHeatPeak);
+    EXPECT_EQ(0.004, designDaySizing.OutHumRatAtHeatPeak);
+}

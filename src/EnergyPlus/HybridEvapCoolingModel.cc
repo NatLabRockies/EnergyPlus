@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -236,7 +237,7 @@ namespace HybridEvapCoolingModel {
         case W_CURVE:
             if (ValidPointer(HRsa_curve_pointer)) {
                 Y_val = CurveValue(state, HRsa_curve_pointer, Tosa, Wosa, Tra, Wra, Msa, OSAF);
-                Y_val = max(min(Y_val, 1.0), 0.0);
+                Y_val = std::clamp(Y_val, 0.0, 1.0);
             } else {
                 Y_val = Wra; // return HR
             }

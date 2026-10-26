@@ -2616,6 +2616,7 @@
     Zone 1 Control,          !- Name
     Zone 1,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2627,6 +2628,7 @@
     Zone 2 Control,          !- Name
     Zone 2,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2638,6 +2640,7 @@
     Zone 3 Control,          !- Name
     Zone 3,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2649,6 +2652,7 @@
     Zone 4 Control,          !- Name
     Zone 4,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2660,6 +2664,7 @@
     Zone 5 Control,          !- Name
     Zone 5,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2754,7 +2759,12 @@
     Zone 5 Exhaust Fan Outlet,  !- Air Outlet Node Name
     General,                 !- End-Use Subcategory
     ,                        !- Flow Fraction Schedule Name
-    Coupled;                 !- System Availability Manager Coupling Mode
+    Coupled,                 !- System Availability Manager Coupling Mode
+    ,                        !- Minimum Zone Temperature Limit Schedule Name
+    ,                        !- Balanced Exhaust Fraction Schedule Name
+    Zone,                    !- Motor Loss Location
+    0.7,                     !- Motor in Airstream Fraction
+    PLENUM-1;                !- Motor Loss Zone Name
 
   ZoneHVAC:AirDistributionUnit,
     Zone 1 ATU,              !- Name

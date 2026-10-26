@@ -2119,6 +2119,7 @@
     Zone 1 Thermostat,       !- Name
     West Zone,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type
     Heating Cooling Setpoint Sched;  !- Control 1 Name
 
@@ -2126,6 +2127,7 @@
     Zone 2 Thermostat,       !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type
     Heating Cooling Setpoint Sched;  !- Control 1 Name
 
@@ -2133,6 +2135,7 @@
     Zone 3 Thermostat,       !- Name
     NORTH ZONE,              !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type
     Heating Cooling Setpoint Sched;  !- Control 1 Name
 

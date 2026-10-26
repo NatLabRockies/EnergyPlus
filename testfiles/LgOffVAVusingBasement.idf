@@ -5126,6 +5126,7 @@
     P1T Thermostat,          !- Name
     PER-1T,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5133,6 +5134,7 @@
     P2T Thermostat,          !- Name
     PER-2T,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5140,6 +5142,7 @@
     P3T Thermostat,          !- Name
     PER-3T,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5147,6 +5150,7 @@
     P4T Thermostat,          !- Name
     PER-4T,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5154,6 +5158,7 @@
     C1T Thermostat,          !- Name
     COR-T,                   !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5161,6 +5166,7 @@
     P1F Thermostat,          !- Name
     PER-1F,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5168,6 +5174,7 @@
     P2F Thermostat,          !- Name
     PER-2F,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5175,6 +5182,7 @@
     P3F Thermostat,          !- Name
     PER-3F,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5182,6 +5190,7 @@
     P4F Thermostat,          !- Name
     PER-4F,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5189,6 +5198,7 @@
     C1F Thermostat,          !- Name
     COR-F,                   !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5196,6 +5206,7 @@
     P1I Thermostat,          !- Name
     PER-1I,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5203,6 +5214,7 @@
     P2I Thermostat,          !- Name
     PER-2I,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5210,6 +5222,7 @@
     P3I Thermostat,          !- Name
     PER-3I,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5217,6 +5230,7 @@
     P4I Thermostat,          !- Name
     PER-4I,                  !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -5224,6 +5238,7 @@
     C1I Thermostat,          !- Name
     COR-I,                   !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 

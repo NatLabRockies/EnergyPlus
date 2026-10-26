@@ -730,7 +730,6 @@ void Calc_ISO15099(EnergyPlusData &state,
         // bi...do an Unshaded run if necessary (Uvalue/Winter conditions):
         // bi...Prepare variables for UNSHADED (NO SD) run:
 
-        bool NeedUnshadedRun = false;
         int FirstSpecularLayer = 1;
         int nlayer_NOSD = nlayer;
         if (IsShadingLayer(LayerType(1))) {
@@ -745,8 +744,9 @@ void Calc_ISO15099(EnergyPlusData &state,
         }
 
         // no unshaded run for now
-        NeedUnshadedRun = false;
+        bool const NeedUnshadedRun = false;
         // bi...Set outdoor & indoor gas properties:
+        // Preserve the dormant unshaded calculation until it can be re-enabled.
         if (NeedUnshadedRun) {
             int NumOfIter_NOSD;
             state.dataThermalISO15099Calc->nmix_NOSD(1) = nmix(1);
@@ -813,7 +813,8 @@ void Calc_ISO15099(EnergyPlusData &state,
             hout_NOSD = houtt;
 
             // Simon: Removed unshaded debug output for now
-            int UnshadedDebug = 0;
+            int constexpr UnshadedDebug = 0;
+            // Preserve the disabled debug output alongside the dormant unshaded calculation.
             if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
                 print(files.DebugOutputFile, "\n");
                 print(files.DebugOutputFile, "UNSHADED RUN:\n");
@@ -987,6 +988,7 @@ void Calc_ISO15099(EnergyPlusData &state,
             ShadeHcRatioIn = ShadeHcModifiedIn / HcUnshadedIn;
 
             // bi...unshaded results:
+            // Preserve the disabled debug output alongside the dormant unshaded calculation.
             if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
                 WriteOutputArguments(files.DebugOutputFile,
                                      files.DBGD,
@@ -1349,8 +1351,8 @@ void therm1d(EnergyPlusData &state,
 
     CalculationOutcome CalcOutcome;
 
-    bool iterationsFinished; // To mark whether or not iterations are finished
-    bool saveIterationResults;
+    bool iterationsFinished;                 // To mark whether or not iterations are finished
+    bool const saveIterationResults = false; // Diagnostic iteration output is currently disabled.
     bool updateGapTemperature;
     // logical :: TurnOnNewton
 
@@ -1382,8 +1384,6 @@ void therm1d(EnergyPlusData &state,
 
     maxiter = NumOfIterations;
 
-    saveIterationResults = false;
-
     for (i = 1; i <= nlayer; ++i) {
         k = 2 * i;
         Radiation(k) = Ebb(i);
@@ -1405,6 +1405,7 @@ void therm1d(EnergyPlusData &state,
     }
 
     // first store results before iterations begin
+    // Preserve the diagnostic output path so it can be re-enabled when needed.
     if (saveIterationResults) {
         storeIterationResults(state,
                               files,
@@ -1722,6 +1723,7 @@ void therm1d(EnergyPlusData &state,
         }
 
         // and store results during iterations
+        // Preserve the diagnostic output path so it can be re-enabled when needed.
         if (saveIterationResults) {
             storeIterationResults(state,
                                   files,

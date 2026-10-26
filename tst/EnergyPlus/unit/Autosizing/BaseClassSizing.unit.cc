@@ -1293,6 +1293,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_SupplyAirTempLessThanZoneTStatTest)
         "      Zone Thermostat,         !- Name",
         "      ZONE ONE,                !- Zone or ZoneList Name",
         "      Zone Control Type Sched, !- Control Type Schedule Name",
+        "      ,                        !- Temperature Difference Between Cutout And Setpoint",
         "      ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "      Temperature Setpoints;   !- Control 1 Name",
 

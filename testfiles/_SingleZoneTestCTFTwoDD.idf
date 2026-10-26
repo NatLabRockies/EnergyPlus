@@ -2466,6 +2466,7 @@
     SouthZone-Thermostat,    !- Name
     SouthZone,               !- Zone or ZoneList Name
     SouthZone-Control Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SouthZone-Heating Setpoint with SB;  !- Control 1 Name
 

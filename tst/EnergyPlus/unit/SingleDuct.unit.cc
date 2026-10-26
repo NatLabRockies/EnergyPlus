@@ -47,6 +47,7 @@
 
 // EnergyPlus::Standalone ERV Unit Tests
 
+#include <algorithm>
 #include <fstream>
 
 // Google Test Headers
@@ -1092,6 +1093,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1099,6 +1101,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1309,9 +1312,9 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     // ); apply limit based on min stop
     MaxAirVolFractionDuringReheatDes = max(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(1).ZoneMinAirFrac);
     // apply model math
-    MaxAirVolFlowRateDuringReheatDes =
-        min(max(MaxAirVolFlowRateDuringReheatDes, MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate),
-            state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate);
+    MaxAirVolFlowRateDuringReheatDes = std::clamp(MaxAirVolFlowRateDuringReheatDes,
+                                                  MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate,
+                                                  state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate);
     // EXPECT zone floor area == 0, others as calculated above
     EXPECT_EQ(state->dataSingleDuct->sd_airterminal(1).ZoneFloorArea, 0.0);
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRateDuringReheat, MaxAirVolFlowRateDuringReheatDes, 0.0000000000001);
@@ -1325,9 +1328,9 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     MaxAirVolFractionDuringReheatDes =
         min(1.0, (state->dataSize->FinalZoneSizing(2).DesHeatVolFlow / state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate));
     MaxAirVolFractionDuringReheatDes = max(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(2).ZoneMinAirFrac);
-    MaxAirVolFlowRateDuringReheatDes =
-        min(max(MaxAirVolFlowRateDuringReheatDes, MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate),
-            state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate);
+    MaxAirVolFlowRateDuringReheatDes = std::clamp(MaxAirVolFlowRateDuringReheatDes,
+                                                  MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate,
+                                                  state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate);
 
     // EXPECT zone floor area > 0, others as calculated above
     EXPECT_GT(state->dataSingleDuct->sd_airterminal(2).ZoneFloorArea, 0.0);
@@ -2314,6 +2317,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2321,6 +2325,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 

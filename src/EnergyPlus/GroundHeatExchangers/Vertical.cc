@@ -287,7 +287,6 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
             } else {
-                std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
                 auto const &vars = j.at("vertical_well_locations");
                 // FullDesign uses a single borehole only to seed temporary response factors;
                 // the designed borefield replaces the g-functions after HVAC sizing.
@@ -296,6 +295,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                     if (!var.at("ghe_vertical_single_object_name").empty()) {
                         std::shared_ptr<GLHEVertSingle> tempBHptr =
                             GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                        std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
                         tempVectOfBHObjects.push_back(tempBHptr);
                         this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
                     }

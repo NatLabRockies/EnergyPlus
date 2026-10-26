@@ -54,10 +54,10 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Vector3.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 
 namespace EnergyPlus {
 
@@ -81,19 +81,11 @@ namespace DataVectorTypes {
 
     // Types
 
-    // Vector2/3 are integrated with Array and offer additional capabilities such as
+    // Vector2D/3 are integrated with Array and offer additional capabilities such as
     //  subscript lookup and are templates so we are using them as plug replacements
     //  for consistent API and to avoid cost of copying them
     // Note: For vectorization contexts std::array is a better choice
-    using Vector = ObjexxFCL::Vector3<Real64>;
-    using Vector_2d = ObjexxFCL::Vector2<Real64>;
-    using ObjexxFCL::cross;
-
-    struct Vector2dCount : Vector_2d
-    {
-        int count{};
-        Vector2dCount() = default;
-    };
+    using Vector = Vector3D;
 
     //    struct Vector // This is used to specify a point in 3D space
     //    {
@@ -127,10 +119,10 @@ namespace DataVectorTypes {
     //            return *this;
     //        }
     //
-    //        // Vector3 Assignment
+    //        // Vector3D Assignment
     //        inline
     //        Vector &
-    //        operator =( Vector3< Real64 > const & v )
+    //        operator =( Vector3D const & v )
     //        {
     //            x = v.x;
     //            y = v.y;
@@ -416,7 +408,7 @@ namespace DataVectorTypes {
     //        inline
     //        friend
     //        Real64
-    //        dot( Vector const & a, Vector3< Real64 > const & b )
+    //        dot( Vector const & a, Vector3D const & b )
     //        {
     //            return ( a.x * b.x ) + ( a.y * b.y ) + ( a.z * b.z );
     //        }
@@ -425,7 +417,7 @@ namespace DataVectorTypes {
     //        inline
     //        friend
     //        Real64
-    //        dot( Vector3< Real64 > const & a, Vector const & b )
+    //        dot( Vector3D const & a, Vector const & b )
     //        {
     //            return ( a.x * b.x ) + ( a.y * b.y ) + ( a.z * b.z );
     //        }
@@ -447,7 +439,7 @@ namespace DataVectorTypes {
     //        inline
     //        friend
     //        Vector
-    //        cross( Vector const & a, Vector3< Real64 > const & b )
+    //        cross( Vector const & a, Vector3D const & b )
     //        {
     //            Vector c;
     //            c.x = ( a.y * b.z ) - ( a.z * b.y );
@@ -460,7 +452,7 @@ namespace DataVectorTypes {
     //        inline
     //        friend
     //        Vector
-    //        cross( Vector3< Real64 > const & a, Vector const & b )
+    //        cross( Vector3D const & a, Vector const & b )
     //        {
     //            Vector c;
     //            c.x = ( a.y * b.z ) - ( a.z * b.y );
@@ -477,12 +469,12 @@ namespace DataVectorTypes {
     //            return Array1D< Real64 >( 3, { x, y, z } );
     //        }
     //
-    //        // Vector3 Generator
+    //        // Vector3D Generator
     //        inline
-    //        Vector3< Real64 >
+    //        Vector3D
     //        Vec3() const
     //        {
-    //            return Vector3< Real64 >( x, y, z );
+    //            return Vector3D( x, y, z );
     //        }
     //
     //        // Assign to an Array
@@ -496,10 +488,10 @@ namespace DataVectorTypes {
     //            a( 3 ) = z;
     //        }
     //
-    //        // Assign to a Vector3
+    //        // Assign to a Vector3D
     //        inline
     //        void
-    //        assign_to( Vector3< Real64 > & v ) const
+    //        assign_to( Vector3D & v ) const
     //        {
     //            v.x = x;
     //            v.y = y;
@@ -518,18 +510,6 @@ namespace DataVectorTypes {
     //        }
     //
     //    };
-
-    struct PlaneEq // This is used to specify a plane based on vectors in that plane
-    {
-        // Members
-        Real64 x{};
-        Real64 y{};
-        Real64 z{};
-        Real64 w{};
-
-        // Default Constructor
-        PlaneEq() = default;
-    };
 
     struct Face // Used to specify the face of a polyhedron
     {
@@ -552,37 +532,6 @@ namespace DataVectorTypes {
         // Default Constructor
         Polyhedron() = default;
     };
-
-    //    struct Vector_2d
-    //    {
-    //        // Members
-    //        Real64 x;
-    //        Real64 y;
-    //
-    //        // Default Constructor
-    //        Vector_2d()
-    //        {}
-    //
-    //
-    //        // Dot Product
-    //        inline
-    //        friend
-    //        Real64
-    //        dot( Vector_2d const & a, Vector_2d const & b )
-    //        {
-    //            return ( a.x * b.x ) + ( a.y * b.y );
-    //        }
-    //
-    //        // Cross Product
-    //        inline
-    //        friend
-    //        Real64
-    //        cross( Vector_2d const & a, Vector_2d const & b )
-    //        {
-    //            return ( a.x * b.y ) - ( a.y * b.x );
-    //        }
-    //
-    //    };
 
     struct dTriangle
     {

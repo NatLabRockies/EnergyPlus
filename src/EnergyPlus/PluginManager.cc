@@ -108,9 +108,7 @@ void registerUserDefinedCallback(const EnergyPlusData &state, const std::functio
 void onBeginEnvironment(const EnergyPlusData &state)
 {
     // reset vars and trends -- sensors and actuators are reset by EMS
-    for (auto &v : state.dataPluginManager->globalVariableValues) {
-        v = 0;
-    }
+    std::fill(state.dataPluginManager->globalVariableValues.begin(), state.dataPluginManager->globalVariableValues.end(), 0.0);
     // reinitialize trend variables so old data are purged
     for (auto &tr : state.dataPluginManager->trends) {
         tr.reset();

@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -488,7 +489,7 @@ void GetFanInput(EnergyPlusData &state)
             ShowWarningCustom(
                 state,
                 eoh,
-                std::format("{}={} has fracdtional values. Only 0.0 in the schedule value turns the fan off.", cAlphaFieldNames(2), cAlphaArgs(2)));
+                std::format("{}={} has fractional values. Only 0.0 in the schedule value turns the fan off.", cAlphaFieldNames(2), cAlphaArgs(2)));
         }
 
         fan->totalEff = rNumericArgs(1);
@@ -576,6 +577,19 @@ void GetFanInput(EnergyPlusData &state)
             Sched::ShowSevereBadMinMax(state, eoh, cAlphaFieldNames(9), cAlphaArgs(9), Clusive::In, 0.0, Clusive::In, 1.0);
             ErrorsFound = true;
         }
+        fan->heatLossDest = static_cast<HeatLossDest>(getEnumValue(heatLossDestNamesUC, cAlphaArgs(10)));
+        if (fan->heatLossDest == HeatLossDest::Zone) {
+            if ((fan->zoneNum = Util::FindItemInList(cAlphaArgs(11), state.dataHeatBal->Zone)) == 0) {
+                fan->heatLossDest = HeatLossDest::Outside;
+                ShowWarningItemNotFound(
+                    state, eoh, cAlphaFieldNames(11), cAlphaArgs(11), "Zone not found. Exhaust fan motor heat losses will not be added to a zone.");
+                // continue with simulation but motor losses not sent to a zone.
+            } else {
+                SetupZoneInternalGain(state, fan->zoneNum, fan->Name, DataHeatBalance::IntGainType::FanZoneExhaust, &fan->powerLossToZone);
+            }
+        }
+        fan->motorInAirFrac = rNumericArgs(4);
+
         if (ErrorsFound) {
             ShowFatalError(state, std::format("{}: Errors found in input for fan name = {}.  Program terminates.", routineName, fan->Name));
         }
@@ -1315,7 +1329,7 @@ void FanComponent::init(EnergyPlusData &state)
     auto const &outletNode = state.dataLoopNodes->Node(outletNodeNum);
 
     massFlowRateMaxAvail = min(outletNode.MassFlowRateMax, inletNode.MassFlowRateMaxAvail);
-    massFlowRateMinAvail = min(max(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail), inletNode.MassFlowRateMaxAvail);
+    massFlowRateMinAvail = std::clamp(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail, inletNode.MassFlowRateMaxAvail);
 
     // Load the node data in this section for the component simulation
     // First need to make sure that the MassFlowRate is between the max and min avail.
@@ -2138,8 +2152,10 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
 
     if (_fanIsRunning) {
         // Fan is operating
-        totalPower = max(0.0, _massFlow * _deltaPress / (_totalEff * _rhoAir)); // total fan power
-        powerLossToAir = totalPower;
+        Real64 const _shaftPower = std::fmax(0.0, _massFlow * _deltaPress / _rhoAir);
+        totalPower = _shaftPower / _totalEff; // total fan power
+        powerLossToAir = _shaftPower + (totalPower - _shaftPower) * motorInAirFrac;
+        powerLossToZone = (heatLossDest == HeatLossDest::Zone) ? totalPower - powerLossToAir : 0.0;
         outletAirEnthalpy = inletAirEnthalpy + powerLossToAir / _massFlow;
         // This fan does not change the moisture or Mass Flow across the component
         outletAirHumRat = inletAirHumRat;
@@ -2150,6 +2166,7 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
         // Fan is off and not operating no power consumed and mass flow rate.
         totalPower = 0.0;
         powerLossToAir = 0.0;
+        powerLossToZone = 0.0;
         outletAirMassFlowRate = 0.0;
         outletAirHumRat = inletAirHumRat;
         outletAirEnthalpy = inletAirEnthalpy;
@@ -2601,7 +2618,7 @@ void FanSystem::init(EnergyPlusData &state)
     }
 
     massFlowRateMaxAvail = min(outletNode.MassFlowRateMax, inletNode.MassFlowRateMaxAvail);
-    massFlowRateMinAvail = min(max(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail), inletNode.MassFlowRateMaxAvail);
+    massFlowRateMinAvail = std::clamp(outletNode.MassFlowRateMin, inletNode.MassFlowRateMinAvail, inletNode.MassFlowRateMaxAvail);
 
     // Load the node data in this section for the component simulation
     // First need to make sure that the MassFlowRate is between the max and min avail.

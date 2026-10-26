@@ -1133,6 +1133,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
         "  Core_bottom Thermostat,  !- Name",
         "  Core_bottom,             !- Zone or ZoneList Name",
         "  Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "  Core_bottom DualSPSched; !- Control 1 Name",
         " ",
@@ -5022,9 +5023,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_IncSolarMultiplier)
     state->dataEnvrn->BeamSolarRad = 0.1;
     state->dataEnvrn->GndSolarRad = 0.2;
     state->dataEnvrn->DifSolarRad = 0.3;
-    state->dataEnvrn->SOLCOS(1) = 0.84471127222777276;
-    state->dataEnvrn->SOLCOS(2) = -0.53484539135440257;
-    state->dataEnvrn->SOLCOS(3) = 0.020081681162033127;
+    state->dataEnvrn->SOLCOS.x = 0.84471127222777276;
+    state->dataEnvrn->SOLCOS.y = -0.53484539135440257;
+    state->dataEnvrn->SOLCOS.z = 0.020081681162033127;
 
     HeatBalanceManager::AllocateZoneHeatBalArrays(*state);
 
@@ -5417,9 +5418,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestInitHBDaylightingNoExtWi
     state->dataEnvrn->BeamSolarRad = 50;
     state->dataEnvrn->GndSolarRad = 50;
     state->dataEnvrn->DifSolarRad = 0;
-    state->dataEnvrn->SOLCOS(1) = 0.84471127222777276;
-    state->dataEnvrn->SOLCOS(2) = -0.53484539135440257;
-    state->dataEnvrn->SOLCOS(3) = 0.020081681162033127;
+    state->dataEnvrn->SOLCOS.x = 0.84471127222777276;
+    state->dataEnvrn->SOLCOS.y = -0.53484539135440257;
+    state->dataEnvrn->SOLCOS.z = 0.020081681162033127;
 
     for (auto &thisSurf : state->dataSurface->Surface) {
         thisSurf.SolarEnclIndex = 1;
@@ -5986,7 +5987,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestTDDSurfWinHeatGain)
     int constexpr HoursInDay(24);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
-        state->dataSurface->SurfSunCosHourly(hour) = 0.0;
+        state->dataSurface->SurfSunCosHourly(hour) = Vector3D();
     }
     //    SurfaceGeometry::GetSurfaceData(*state, ErrorsFound);
     //    EXPECT_FALSE(ErrorsFound);

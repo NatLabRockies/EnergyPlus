@@ -10,16 +10,7 @@ if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
 
-option(SAM_SKIP_TOOLS "Skips the sdktool and tcsconsole builds" OFF)
-
-option(SAM_SKIP_TESTS "Skips building tests" OFF)
-
 option(SAMAPI_EXPORT "Export of ssc binaries to the SAM_api directory; for Unix, compile ssc libraries for SAM_api" ON)
-
-#
-# If project isn't system_advisor_model and SAM_SKIP_TOOLS=1,
-#   environment vars LK_LIB and LKD_LIB can be used to specify where to find those libraries
-#
 
 if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
@@ -30,10 +21,6 @@ if (UNIX AND NOT CMAKE_C_COMPILER)
 	set(CMAKE_CXX_COMPILER g++)
 endif()
 set(CMAKE_CXX_STANDARD 11)
-
-if ( NOT APPLE)
-    set(CURL_DIR build_resources/libcurl_ssl_x64)
-endif()
 
 Project(sam_simulation_core VERSION 1.0.0)
 
@@ -137,26 +124,5 @@ endfunction()
 #
 #####################################################################################################################
 
-# turn off examples, tests and install for jsoncpp
-set(JSONCPP_WITH_EXAMPLE 0)
-set(JSONCPP_WITH_TESTS 0)
-
-# Skip install() commands for jsoncpp
-add_subdirectory(jsoncpp EXCLUDE_FROM_ALL)
-
-add_subdirectory(splinter)
 add_subdirectory(shared)
-#add_subdirectory(nlopt)
-#add_subdirectory(lpsolve)
-#add_subdirectory(solarpilot)
-#add_subdirectory(tcs)
 add_subdirectory(ssc)
-
-if (NOT SAM_SKIP_TOOLS)
-	add_subdirectory(sdktool)
-	add_subdirectory(tcsconsole)
-endif()
-
-if (NOT SAM_SKIP_TESTS)
-	add_subdirectory(test)
-endif()

@@ -84,6 +84,16 @@ namespace Fans {
 
     static constexpr std::array<std::string_view, (int)AvailManagerMode::Num> availManagerModeNamesUC = {"COUPLED", "DECOUPLED"};
 
+    enum class HeatLossDest
+    {
+        Invalid = -1,
+        Zone,
+        Outside,
+        Num
+    };
+
+    static constexpr std::array<std::string_view, (int)HeatLossDest::Num> heatLossDestNamesUC = {"ZONE", "OUTSIDE"};
+
     struct FanBase
     {
         FanBase()
@@ -154,7 +164,8 @@ namespace Fans {
         Real64 totalEnergy = 0.0; // Fan energy in [J]
                                   //    Real64 fanRuntimeFraction; // Fraction of the timestep that the fan operates
 
-        Real64 powerLossToAir = 0.0; // fan heat gain into process air [W]
+        Real64 powerLossToAir = 0.0;  // fan heat gain into process air [W]
+        Real64 powerLossToZone = 0.0; // fan heat gain into zone [W]
 
         Real64 inletAirMassFlowRate = 0.0; // MassFlow through the Fan being Simulated [kg/Sec]
         Real64 outletAirMassFlowRate = 0.0;
@@ -192,6 +203,8 @@ namespace Fans {
         Real64 EMSTotalEffValue = 0.0;            // EMS value for total efficiency of the Fan, fraction on 0..1
 
         std::string sizingPrefix;
+        HeatLossDest heatLossDest = HeatLossDest::Invalid; // enum for where motor loss go
+        int zoneNum = 0;                                   // zone index for motor heat losses as internal gains
     };
 
     enum class VFDEffType
@@ -337,14 +350,6 @@ namespace Fans {
     static constexpr std::array<std::string_view, (int)PowerSizing::Num> powerSizingNamesUC = {
         "POWERPERFLOW", "POWERPERFLOWPERPRESSURE", "TOTALEFFICIENCYANDPRESSURE"};
 
-    enum class HeatLossDest
-    {
-        Invalid = -1,
-        Zone,
-        Outside,
-        Num
-    };
-
     enum class SpeedControl : int
     {
         // TODO: enum check
@@ -425,15 +430,12 @@ namespace Fans {
         Real64 elecPowerPerFlowRate = 0.0;                    // scaling factor for PowerPerFlow method
         Real64 elecPowerPerFlowRatePerPressure = 0.0;         // scaling factor for PowerPerFlowPerPressure
         Real64 nightVentPressureDelta = 0.0;                  // fan pressure rise during night ventilation mode
-        Real64 nightVentMaxAirFlowRate = 0.0;                 // fan max air flow rate cap during night ventilation mode
-        Real64 nightVentMaxAirMassFlowRate = 0.0;             // fan max air mass flow rate cap during night ventilation mode [kg/s]
         Real64 nightVentTotalEff = 0.0;                       // fan total efficiency during night ventilation mode, 0.0 means not specified
         Real64 nightVentMotorEff = 0.0;                       // fan motor efficiency during night ventilation mode, 0.0 means not specified
         Real64 nightVentMotorInAirFrac = 0.0;                 // motor in air stream fraction during night ventilation mode
         bool nightVentMotorInAirFracSpecified = false;        // true if a night ventilation motor in air stream fraction was input
         int zoneNum = 0;                                      // zone index for motor heat losses as internal gains
         Real64 zoneRadFract = 0.0;                            // thermal radiation split for motor losses
-        HeatLossDest heatLossDest = HeatLossDest::Invalid;    // enum for where motor loss go
         Real64 qdotConvZone = 0.0;                            // fan power lost to surrounding zone by convection to air (W)
         Real64 qdotRadZone = 0.0;                             // fan power lost to surrounding zone by radiation to zone surfaces(W)
         std::vector<Real64> powerFracAtSpeed;                 // array of power fractions for speed levels

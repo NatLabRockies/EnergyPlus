@@ -1554,10 +1554,16 @@ SUBROUTINE ValidateObjectandParse(ProposedObject,CurPos,EndofFile)
       NumMiscErrorsFound=NumMiscErrorsFound+1
     ENDIF
     IF (ObjectDef(Found)%ObsPtr > 0) THEN
-      CALL ShowWarningError('IP: IDF line~'//TRIM(IPTrimSigDigits(NumLines))//  &
-                      ' Obsolete object='//TRIM(ADJUSTL(ProposedObject))//  &
-                      ', encountered.  Should be replaced with new object='//  &
-                      TRIM(ObsoleteObjectsRepNames(ObjectDef(Found)%ObsPtr)),Auditf)
+      IF (SameString(TRIM(ObsoleteObjectsRepNames(ObjectDef(Found)%ObsPtr)),'deleted')) THEN
+        CALL ShowWarningError('IP: IDF line~'//TRIM(IPTrimSigDigits(NumLines))//  &
+                        ' Obsolete object='//TRIM(ADJUSTL(ProposedObject))//  &
+                        ', encountered.  It will be removed in the future.',Auditf)
+      ELSE
+        CALL ShowWarningError('IP: IDF line~'//TRIM(IPTrimSigDigits(NumLines))//  &
+                        ' Obsolete object='//TRIM(ADJUSTL(ProposedObject))//  &
+                        ', encountered.  Should be replaced with new object='//  &
+                        TRIM(ObsoleteObjectsRepNames(ObjectDef(Found)%ObsPtr)),Auditf)
+      ENDIF
     ENDIF
   ENDIF
 
