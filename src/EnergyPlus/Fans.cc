@@ -2865,7 +2865,7 @@ void FanSystem::calcSimpleSystemFan(
                 Fans::CalFaultyFanAirFlowReduction(state, Name, maxAirFlowRate, deltaPress, (_pressFrac - 1) * deltaPress, fault.fanCurveNum);
 
             _localFaultMaxAirMassFlow = maxAirMassFlowRate - _designFlowRateDec * rhoAirStdInit;
-            _localFaultPressureRise = _pressFrac * deltaPress;
+            _localFaultPressureRise = _pressFrac * (state.dataHVACGlobal->NightVentOn ? _localPressureRise[0] : deltaPress);
         }
     }
 
