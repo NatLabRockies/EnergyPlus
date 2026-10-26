@@ -147,6 +147,43 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressur
     EXPECT_NEAR(500.0, fanSystem.totalPower, 0.0001);
 }
 
+// Verify the low-flow heat safeguard preserves fixed-speed night power instead of reapplying the normal power curve.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentLowFlowBypassesPowerCurve)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.012;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Night Vent Cubic Power Curve");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[3] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_DOUBLE_EQ(0.012, fanSystem.outletAirMassFlowRate);
+    EXPECT_NEAR(50.0, fanSystem.totalPower, 0.0001);
+}
+
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
 {
     // this unit test mimics "EnergyPlusFixture.Fans_FanSizing"

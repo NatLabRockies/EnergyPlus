@@ -3067,11 +3067,15 @@ void FanSystem::calcSimpleSystemFan(
                     Real64 _powerFracAtLowMin = 0.0;
                     Real64 _fanPowerAtLowMinimum = 0.0;
                     if (_localFlowFracForPower < _minFlowFracLimitFanHeat) {
-                        _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
+                        _powerFracAtLowMin = state.dataHVACGlobal->NightVentOn
+                                                 ? 1.0
+                                                 : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
                         _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _localFlowFracForPower * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     } else if (_locFlowRatio < _minFlowFracLimitFanHeat) {
-                        _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
+                        _powerFracAtLowMin = state.dataHVACGlobal->NightVentOn
+                                                 ? 1.0
+                                                 : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
                         _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _locFlowRatio * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     }
