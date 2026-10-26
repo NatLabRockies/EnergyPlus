@@ -57,8 +57,8 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
-#include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/Fans.hh>
+#include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 using namespace EnergyPlus;

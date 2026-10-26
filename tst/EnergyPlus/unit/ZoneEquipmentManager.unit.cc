@@ -6103,8 +6103,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     auto &zone2AvailabilityForForceOff = unitHeaterAvailability.ZoneCompAvailMgrs(2);
     zone2AvailabilityForForceOff.availStatus = Avail::Status::ForceOff;
     zone2AvailabilityForForceOff.availManagers(1).availStatus = Avail::Status::CycleOn;
-    EXPECT_FALSE(ZoneEquipmentManager::getZoneEquipmentNightVentStatus(
-        state, DataZoneEquipment::ZoneEquipType::UnitHeater, 2, true));
+    EXPECT_FALSE(ZoneEquipmentManager::getZoneEquipmentNightVentStatus(state, DataZoneEquipment::ZoneEquipType::UnitHeater, 2, true));
     zone2AvailabilityForForceOff.availStatus = Avail::Status::NoAction;
     zone2AvailabilityForForceOff.availManagers(1).availStatus = Avail::Status::NoAction;
 

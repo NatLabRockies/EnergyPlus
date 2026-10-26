@@ -1684,12 +1684,7 @@ void FanComponent::simulateConstant(EnergyPlusData &state)
             Real64 const _faultBasePressure = _deltaPress;
             // Decrease of the Fan Design Volume Flow Rate [m3/sec]
             Real64 _fanDesignFlowRateDec = CalFaultyFanAirFlowReduction(
-                state,
-                Name,
-                maxAirFlowRate,
-                deltaPress,
-                (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
-                fault.fanCurveNum);
+                state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
             _massFlow = min(_massFlow, maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir);
@@ -1808,12 +1803,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
             Real64 const _faultBasePressure = _deltaPress;
             Real64 _fanDesignFlowRateDec = // Decrease of the Fan Design Volume Flow Rate [m3/sec]
                 CalFaultyFanAirFlowReduction(
-                    state,
-                    Name,
-                    maxAirFlowRate,
-                    deltaPress,
-                    (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
-                    fault.fanCurveNum);
+                    state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
             _maxAirFlowRate = maxAirFlowRate - _fanDesignFlowRateDec;
@@ -1880,15 +1870,17 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
             Real64 _partLoadFracatLowMin;
             Real64 _minFlowFracLimitFanHeat = 0.10;
             if (_flowFracForPower < _minFlowFracLimitFanHeat) {
-                _partLoadFracatLowMin = nightVentMode ? 1.0
-                                                      : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                                            coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                _partLoadFracatLowMin = nightVentMode
+                                            ? 1.0
+                                            : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                                  coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracForPower * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             } else if (_flowFracActual < _minFlowFracLimitFanHeat) {
-                _partLoadFracatLowMin = nightVentMode ? 1.0
-                                                      : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                                            coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                _partLoadFracatLowMin = nightVentMode
+                                            ? 1.0
+                                            : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                                  coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracActual * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             }
@@ -1971,12 +1963,7 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
             Real64 const _faultBasePressure = _deltaPress;
             Real64 _fanDesignFlowRateDec = // Decrease of the Fan Design Volume Flow Rate [m3/sec]
                 CalFaultyFanAirFlowReduction(
-                    state,
-                    Name,
-                    maxAirFlowRate,
-                    deltaPress,
-                    (fault.pressFracSched->getCurrentVal() - 1) * deltaPress,
-                    fault.fanCurveNum);
+                    state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
             _maxAirMassFlowRate = maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir;
