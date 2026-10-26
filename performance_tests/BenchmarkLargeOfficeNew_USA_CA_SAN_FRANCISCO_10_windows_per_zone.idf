@@ -2098,6 +2098,7 @@
     Core_bottom Thermostat,  !- Name
     Core_bottom,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Core_bottom DualSPSched; !- Control 1 Name
 
@@ -2523,6 +2524,7 @@
     Core_mid Thermostat,     !- Name
     Core_mid,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Core_mid DualSPSched;    !- Control 1 Name
 
@@ -2948,6 +2950,7 @@
     Core_top Thermostat,     !- Name
     Core_top,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Core_top DualSPSched;    !- Control 1 Name
 
@@ -3373,6 +3376,7 @@
     Perimeter_bot_ZN_3 Thermostat,  !- Name
     Perimeter_bot_ZN_3,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_bot_ZN_3 DualSPSched;  !- Control 1 Name
 
@@ -3743,6 +3747,7 @@
     Perimeter_bot_ZN_2 Thermostat,  !- Name
     Perimeter_bot_ZN_2,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_bot_ZN_2 DualSPSched;  !- Control 1 Name
 
@@ -4113,6 +4118,7 @@
     Perimeter_bot_ZN_1 Thermostat,  !- Name
     Perimeter_bot_ZN_1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_bot_ZN_1 DualSPSched;  !- Control 1 Name
 
@@ -4483,6 +4489,7 @@
     Perimeter_bot_ZN_4 Thermostat,  !- Name
     Perimeter_bot_ZN_4,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_bot_ZN_4 DualSPSched;  !- Control 1 Name
 
@@ -4853,6 +4860,7 @@
     Perimeter_mid_ZN_3 Thermostat,  !- Name
     Perimeter_mid_ZN_3,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_mid_ZN_3 DualSPSched;  !- Control 1 Name
 
@@ -5223,6 +5231,7 @@
     Perimeter_mid_ZN_2 Thermostat,  !- Name
     Perimeter_mid_ZN_2,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_mid_ZN_2 DualSPSched;  !- Control 1 Name
 
@@ -5593,6 +5602,7 @@
     Perimeter_mid_ZN_1 Thermostat,  !- Name
     Perimeter_mid_ZN_1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_mid_ZN_1 DualSPSched;  !- Control 1 Name
 
@@ -5963,6 +5973,7 @@
     Perimeter_mid_ZN_4 Thermostat,  !- Name
     Perimeter_mid_ZN_4,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_mid_ZN_4 DualSPSched;  !- Control 1 Name
 
@@ -6333,6 +6344,7 @@
     Perimeter_top_ZN_3 Thermostat,  !- Name
     Perimeter_top_ZN_3,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_top_ZN_3 DualSPSched;  !- Control 1 Name
 
@@ -6703,6 +6715,7 @@
     Perimeter_top_ZN_2 Thermostat,  !- Name
     Perimeter_top_ZN_2,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_top_ZN_2 DualSPSched;  !- Control 1 Name
 
@@ -7073,6 +7086,7 @@
     Perimeter_top_ZN_1 Thermostat,  !- Name
     Perimeter_top_ZN_1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_top_ZN_1 DualSPSched;  !- Control 1 Name
 
@@ -7443,6 +7457,7 @@
     Perimeter_top_ZN_4 Thermostat,  !- Name
     Perimeter_top_ZN_4,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Perimeter_top_ZN_4 DualSPSched;  !- Control 1 Name
 

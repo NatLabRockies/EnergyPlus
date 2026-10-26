@@ -3410,6 +3410,7 @@
     Zone Thermostat_unit1,   !- Name
     living_unit1,            !- Zone or ZoneList Name
     zone_control_type,       !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     thermostat_living Dual SP Control;  !- Control 1 Name
 

@@ -848,6 +848,7 @@
     Gnd West Thermostat,     !- Name
     Gnd West Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -1140,6 +1141,7 @@
     Gnd Center Thermostat,   !- Name
     Gnd Center Zone,         !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -1440,6 +1442,7 @@
     Gnd East Thermostat,     !- Name
     Gnd East Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -1751,6 +1754,7 @@
     Mid West Thermostat,     !- Name
     Mid West Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -2036,6 +2040,7 @@
     Mid Center Thermostat,   !- Name
     Mid Center Zone,         !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -2336,6 +2341,7 @@
     Mid East Thermostat,     !- Name
     Mid East Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -2647,6 +2653,7 @@
     Top West Thermostat,     !- Name
     Top West Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -2932,6 +2939,7 @@
     Top Center Thermostat,   !- Name
     Top Center Zone,         !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -3232,6 +3240,7 @@
     Top East Thermostat,     !- Name
     Top East Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 

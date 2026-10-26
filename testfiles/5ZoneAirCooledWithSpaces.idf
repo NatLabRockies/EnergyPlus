@@ -2633,6 +2633,7 @@
     Zone 1 Control,          !- Name
     Zone 1,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2644,6 +2645,7 @@
     Zone 2 Control,          !- Name
     Zone 2,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2655,6 +2657,7 @@
     Zone 3 Control,          !- Name
     Zone 3,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2666,6 +2669,7 @@
     Zone 4 Control,          !- Name
     Zone 4,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2677,6 +2681,7 @@
     Zone 5 Control,          !- Name
     Zone 5,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type

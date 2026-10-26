@@ -11043,6 +11043,7 @@ TEST_F(EnergyPlusFixture, VRFFluidControl_FanSysModel_OnOffModeTest)
         "     SPACE1-1 Control,        !- Name",
         "     Zone 1,                  !- Zone or ZoneList Name",
         "     Zone Control Type Sched, !- Control Type Schedule Name",
+        "     ,                        !- Temperature Difference Between Cutout And Setpoint",
         "     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "     DualSetPoint;            !- Control 1 Name",
 
@@ -24466,6 +24467,7 @@ TEST_F(EnergyPlusFixture, VRF_MultispeedFan_Test)
         "     SPACE1-1 Control,        !- Name",
         "     Zone 1,                  !- Zone or ZoneList Name",
         "     Zone Control Type Sched, !- Control Type Schedule Name",
+        "     ,                        !- Temperature Difference Between Cutout And Setpoint",
         "     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "     DualSetPoint;            !- Control 1 Name",
 
@@ -25781,6 +25783,7 @@ TEST_F(EnergyPlusFixture, VRF_MultispeedFan_Test_HardSized)
         "     SPACE1-1 Control,        !- Name",
         "     Zone 1,                  !- Zone or ZoneList Name",
         "     Zone Control Type Sched, !- Control Type Schedule Name",
+        "     ,                        !- Temperature Difference Between Cutout And Setpoint",
         "     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "     DualSetPoint;            !- Control 1 Name",
 

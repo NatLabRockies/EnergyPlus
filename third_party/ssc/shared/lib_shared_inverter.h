@@ -3,7 +3,14 @@
 
 #include "lib_sandia.h"
 #include "lib_pvinv.h"
-#include "lib_ondinv.h"
+// NOTE: EnergyPlus: the OND inverter model (lib_ondinv) is not built: it was only reachable through OND_INVERTER, which E+ never uses,
+// and it pulled splinter and its bundled Eigen 3.2.8 into the link (an ODR clash with third_party/eigen). Kept as an opaque type.
+class ond_inverter;
+// lib_ondinv.h used to provide these (directly or through splinter/Eigen) to everything including this header, keep them so overload resolution is unchanged
+#include <cmath>
+#include <sstream>
+#include <string>
+using namespace std;
 #include <vector>
 
 /**

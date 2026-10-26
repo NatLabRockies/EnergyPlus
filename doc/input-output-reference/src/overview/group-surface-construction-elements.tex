@@ -1400,6 +1400,8 @@ If Optical Data Type = SpectralAndAngle, this is the name of a spectral and angl
 
 It should be pointed out that when Optical Data Type = SpectralAndAngle for a glass layer in a construction, the table input data are converted into polynomial curve fits with 6 coefficients, so that all outputs of optical properties for the same construction will be curve values for a given incident angle. Therefore, the values may be slightly different from input values.
 
+SpectralAndAngle can also be used when only angle-dependent, spectrally averaged properties of a glass layer are available, for example solar transmittance and reflectances at several incidence angles from an optical calculation. Give each of the three data sets two wavelengths, for example 0.3 and 2.5 microns, with the same value for both wavelengths at each angle. The spectral integration then returns these values, so the tables act as angle-dependent solar properties. Because the values do not depend on wavelength, the visible properties of the layer are equal to the solar ones.
+
 IDF examples of Spectral average and using a Spectral data set:
 
 \begin{lstlisting}
@@ -1420,19 +1422,19 @@ WindowMaterial:Glazing,
   0.9;                        !- Conductivity {W/m-K}
 
 WindowMaterial:Glazing,
-  SPECTRAL GLASS INNER PANE,  !- Material name
-  Spectral,                   !- Optical data type {SpectralAverage or Spectral}
-  TestSpectralDataSet,        !- Name of spectral data set
+  SPECTRAL GLASS INNER PANE,  !- Name
+  Spectral,                   !- Optical Data Type
+  TestSpectralDataSet,        !- Window Glass Spectral Data Set Name
   0.0099,                     !- Thickness {m}
-  ,                           !- Solar transmittance at normal incidence
-  ,                           !- Solar reflectance at normal incidence: front side
-  ,                           !- Solar reflectance at normal incidence: back side
-  ,                           !- Visible transmittance at normal incidence
-  ,                           !- Visible reflectance at normal incidence: front side
-  ,                           !- Visible reflectance at normal incidence: back side
-  0.0,                        !- IR transmittance at normal incidence
-  0.84,                       !- IR emissivity: front side
-  0.84,                       !- IR emissivity: back side
+  ,                           !- Solar Transmittance at Normal Incidence
+  ,                           !- Front Side Solar Reflectance at Normal Incidence
+  ,                           !- Back Side Solar Reflectance at Normal Incidence
+  ,                           !- Visible Transmittance at Normal Incidence
+  ,                           !- Front Side Visible Reflectance at Normal Incidence
+  ,                           !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                        !- Infrared Transmittance at Normal Incidence
+  0.84,                       !- Front Side Infrared Hemispherical Emissivity
+  0.84,                       !- Back Side Infrared Hemispherical Emissivity
   0.798;                      !- Conductivity {W/m-K}
 \end{lstlisting}
 
@@ -1440,51 +1442,51 @@ IDF example using a SpectralAndAngle data set:
 
 \begin{lstlisting}
 WindowMaterial:Glazing,
-  SPECTRAL AND ANGLE GLASS INNER PANE,  !- Material name
-  SpectralAndAngle,           !- Optical data type {SpectralAverage or Spectral}
-  ,                           !- Name of spectral data set
+  SPECTRAL AND ANGLE GLASS INNER PANE,  !- Name
+  SpectralAndAngle,           !- Optical Data Type
+  ,                           !- Window Glass Spectral Data Set Name
   0.0099,                     !- Thickness {m}
-  ,                           !- Solar transmittance at normal incidence
-  ,                           !- Solar reflectance at normal incidence: front side
-  ,                           !- Solar reflectance at normal incidence: back side
-  ,                           !- Visible transmittance at normal incidence
-  ,                           !- Visible reflectance at normal incidence: front side
-  ,                           !- Visible reflectance at normal incidence: back side
-  0.0,                        !- IR transmittance at normal incidence
-  0.84,                       !- IR emissivity: front side
-  0.84,                       !- IR emissivity: back side
+  ,                           !- Solar Transmittance at Normal Incidence
+  ,                           !- Front Side Solar Reflectance at Normal Incidence
+  ,                           !- Back Side Solar Reflectance at Normal Incidence
+  ,                           !- Visible Transmittance at Normal Incidence
+  ,                           !- Front Side Visible Reflectance at Normal Incidence
+  ,                           !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                        !- Infrared Transmittance at Normal Incidence
+  0.84,                       !- Front Side Infrared Hemispherical Emissivity
+  0.84,                       !- Back Side Infrared Hemispherical Emissivity
   0.798,                      !- Conductivity {W/m-K}
   ,                           !- Dirt Correction Factor for Solar and Visible Transmittance
   ,                           !- Solar Diffusing
   ,                           !- Young's modulus
   ,                           !- Poisson's ratio
-  TranmittanceDataSet,        !- Window Glass Spectral+Incident Angle Transmittance Data Set Table Name
-  FrontReflectanceDataSet,    !- Window Glass Spectral+Incident Angle Front Reflectance Data Set Table Name
-  BackReflectanceDataSet;     !- Window Glass Spectral+Incident Angle Back Reflectance Data Set Table Name
+  TransmittanceDataSet,       !- Window Glass Spectral and Incident Angle Transmittance Data Set Table Name
+  FrontReflectanceDataSet,    !- Window Glass Spectral and Incident Angle Front Reflectance Data Set Table Name
+  BackReflectanceDataSet;     !- Window Glass Spectral and Incident Angle Back Reflectance Data Set Table Name
 \end{lstlisting}
 
 IDF example of Spectral Data Type = BSDF
 
 \begin{lstlisting}
 WindowMaterial:Glazing,
-  Glass_5012_Layer,           !- Layer name : CLEAR_6.PPG
+  Glass_5012_Layer,           !- Name
   BSDF,                       !- Optical Data Type
-  ,                           !- Spectral Data name
-  0.005664,                   !- Thickness
-  ,                           !- Solar Transmittance
-  ,                           !- Solar Front Reflectance
-  ,                           !- Solar Back Reflectance
-  ,                           !- Visible Transmittance
-  ,                           !- Visible Front Reflectance
-  ,                           !- Visible Back reflectance
-  0.000000,                   !- IR Transmittance
-  0.840000,                   !- Front Emissivity
-  0.840000,                   !- Back Emissivity
-  1.000000,                   !- Conductivity
-  ,                           !- Dirt Correction Factor for Sol/Vis Transmittance
+  ,                           !- Window Glass Spectral Data Set Name
+  0.005664,                   !- Thickness {m}
+  ,                           !- Solar Transmittance at Normal Incidence
+  ,                           !- Front Side Solar Reflectance at Normal Incidence
+  ,                           !- Back Side Solar Reflectance at Normal Incidence
+  ,                           !- Visible Transmittance at Normal Incidence
+  ,                           !- Front Side Visible Reflectance at Normal Incidence
+  ,                           !- Back Side Visible Reflectance at Normal Incidence
+  0.000000,                   !- Infrared Transmittance at Normal Incidence
+  0.840000,                   !- Front Side Infrared Hemispherical Emissivity
+  0.840000,                   !- Back Side Infrared Hemispherical Emissivity
+  1.000000,                   !- Conductivity {W/m-K}
+  ,                           !- Dirt Correction Factor for Solar and Visible Transmittance
   ,                           !- Solar Diffusing
-  7.2e10,                     !- Young’s modulus
-  0.22;                       !- Poisson’s ratio
+  7.2e10,                     !- Young's modulus
+  0.22;                       !- Poisson's ratio
 \end{lstlisting}
 
 \subsection{WindowMaterial:Glazing:RefractionExtinctionMethod}\label{windowmaterialglazingrefractionextinctionmethod}
@@ -4375,7 +4377,7 @@ This output is the heat energy added after material layer N from the EMS heat fl
 
 \paragraph{CondFD EMS Sky Longwave Radiation Override Heat Flux}
 
-This output is the user-specified net sky longwave radiation heat flux applied to the exterior surface via the EMS actuator (Component type: ``CondFD Surface''; Control type: ``Sky Longwave Radiation Override''). Reports 0.0 when not actuated. Only valid for exterior CondFD surfaces.
+This output is the user-specified net sky longwave radiation heat flux applied to the exterior surface via the EMS actuator (Component type: ``CondFD Surface''; Control type: ``Sky Longwave Radiation Override''). Reports 0.0 when not actuated. Only valid for exterior CondFD surfaces. The actuator replaces only the sky term of this surface; windows and CTF surfaces keep the sky temperature calculated by EnergyPlus. To change the sky temperature for all exterior surfaces, use \hyperref[weatherpropertyskytemperature]{WeatherProperty:SkyTemperature}.
 
 \subsection{Construction:AirBoundary}\label{constructionairboundary}
 

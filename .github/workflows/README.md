@@ -21,6 +21,10 @@ This README is really just a place to drop current status while I figure out wha
 - release_linux.yml, release_mac.yml, release_windows.yml
   - Only work on tags
   - Build and publish the platform-specific release packages for Linux, macOS, and Windows
+- self_hosted_decent_ci.yml
+  - Runs a GCC 13.3 RelWithDebInfo build and split unit/integration tests on every direct branch push
+  - Uses one ephemeral Ubuntu 24.04 self-hosted runner and a persistent ccache when available
+  - Cancels superseded runs on the same branch; fork pull requests cannot target the self-hosted runner
 - test_code_integrity.yml
   - Runs on Linux, about 22 minutes
 - test_debug_builds.yml
