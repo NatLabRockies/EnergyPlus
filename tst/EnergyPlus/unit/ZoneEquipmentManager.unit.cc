@@ -6021,7 +6021,7 @@ public:
     }
 };
 
-// Exercise active, inactive, managerless, and unmanaged zone equipment against stale global night-vent state.
+// Exercise zone-fan night vent manager evaluation, status transitions, and isolation from stale global state.
 void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
 {
     state.init_state(state);
@@ -6043,6 +6043,8 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     }
     UnitHeater::GetUnitHeaterInput(state);
     Avail::ManageSystemAvailability(state);
+    ASSERT_TRUE(allocated(state.dataAvail->NightVentData));
+    ASSERT_EQ(state.dataAvail->NightVentData.size(), 2);
 
     // Assign the unit-heater indexes to their respective zone equipment lists.
     auto &zoneEquipList1 = state.dataZoneEquip->ZoneEquipList(1);
@@ -6050,20 +6052,18 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     zoneEquipList1.EquipIndex(1) = 1;
     zoneEquipList2.EquipIndex(1) = 2;
 
-    // Bind both components to the same NightVentilation manager number; their evaluated statuses must remain component-specific.
+    // Bind each component to its own NightVentilation manager; their evaluated statuses must remain component-specific.
     auto &unitHeaterAvailability = state.dataAvail->ZoneComp((int)DataZoneEquipment::ZoneEquipType::UnitHeater);
     ASSERT_EQ(unitHeaterAvailability.TotalNumComp, 2);
     for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
         auto &componentAvailability = unitHeaterAvailability.ZoneCompAvailMgrs(zoneNum);
-        componentAvailability.AvailManagerListName = "Zone " + std::to_string(zoneNum) + " Availability List";
         componentAvailability.ZoneNum = zoneNum;
         componentAvailability.Input = false;
         componentAvailability.NumAvailManagers = 1;
         componentAvailability.availManagers.allocate(1);
-        componentAvailability.availManagers(1).Name = "Shared Night Ventilation";
+        componentAvailability.availManagers(1).Name = "Zone " + std::to_string(zoneNum) + " Night Ventilation";
         componentAvailability.availManagers(1).type = Avail::ManagerType::NightVent;
-        componentAvailability.availManagers(1).Num = 1;
-        componentAvailability.availManagers(1).availStatus = Avail::Status::NoAction;
+        componentAvailability.availManagers(1).Num = zoneNum;
     }
 
     // Allocate the minimal zone demand and simulation-order state required by SimZoneEquipment.
@@ -6090,16 +6090,15 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     state.dataGlobal->BeginEnvrnFlag = true;
     state.dataGlobal->SysSizingCalc = true;
 
-    // Only zone 1 is night ventilating; zone 2 remains at design performance.
-    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
-        auto &componentAvailability = unitHeaterAvailability.ZoneCompAvailMgrs(zoneNum);
-        componentAvailability.availStatus = zoneNum == 1 ? Avail::Status::CycleOn : Avail::Status::NoAction;
-        int const managerNum = componentAvailability.availManagers(1).Num;
-        componentAvailability.availManagers(1).availStatus = componentAvailability.availStatus;
-        state.dataAvail->NightVentData(managerNum).availStatus = componentAvailability.availStatus;
-    }
-    EXPECT_EQ(state.dataAvail->NightVentData(1).availStatus, Avail::Status::NoAction);
+    // Evaluate each zone's actual NightVentilation manager; only zone 1 satisfies its temperature conditions.
+    state.dataEnvrn->OutDryBulbTemp = 10.0;
+    state.dataHeatBalFanSys->TempTstatAir(1) = 25.0;
+    state.dataHeatBalFanSys->TempTstatAir(2) = 20.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::CycleOn);
     EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availManagers(1).availStatus, Avail::Status::CycleOn);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(2).availStatus, Avail::Status::NoAction);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(2).availManagers(1).availStatus, Avail::Status::NoAction);
     auto &zone2AvailabilityForForceOff = unitHeaterAvailability.ZoneCompAvailMgrs(2);
     zone2AvailabilityForForceOff.availStatus = Avail::Status::ForceOff;
     zone2AvailabilityForForceOff.availManagers(1).availStatus = Avail::Status::CycleOn;
@@ -6137,6 +6136,18 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
     EXPECT_NEAR(zone1InletNode.MassFlowRate, designMassFlow, 0.0001);
     EXPECT_NEAR(zone2InletNode.MassFlowRate, designMassFlow, 0.0001);
+
+    // A temperature change clears the manager status and restores the fan's design performance.
+    state.dataHeatBalFanSys->TempTstatAir(1) = 19.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::NoAction);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availManagers(1).availStatus, Avail::Status::NoAction);
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_NEAR(fan1.totalPower, designPower, 0.0001);
+
+    state.dataHeatBalFanSys->TempTstatAir(1) = 25.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::CycleOn);
 
     // A stale true global flag must not grant night performance to the inactive zone.
     state.dataHVACGlobal->NightVentOn = true;
