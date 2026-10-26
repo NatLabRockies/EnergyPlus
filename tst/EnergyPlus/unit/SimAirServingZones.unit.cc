@@ -2477,7 +2477,7 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
     EXPECT_EQ(0, state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate);
 }
 
-// Verify air-loop simulation clears the transient global night-ventilation flag on exit.
+// Verify air loop simulation clears the transient global night ventilation flag on exit.
 TEST_F(EnergyPlusFixture, SimAirServingZones_ClearsNightVentFlagOnExit)
 {
     // SimAirLoops must not leak the last air loop's night-ventilation state into later simulations.

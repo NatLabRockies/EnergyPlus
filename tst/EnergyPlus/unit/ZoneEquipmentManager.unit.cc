@@ -6195,7 +6195,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneOnOffFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:OnOff"))));
-    // Check zone-manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
     runZoneFanNightVentTest(*state);
 }
 
@@ -6203,7 +6203,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneOnOffFanUsesComponentNightVen
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:VariableVolume"))));
-    // Check zone-manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
     runZoneFanNightVentTest(*state);
 }
 
@@ -6211,6 +6211,6 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponen
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneConstantVolumeFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:ConstantVolume"))));
-    // Check zone-manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
     runZoneFanNightVentTest(*state);
 }
