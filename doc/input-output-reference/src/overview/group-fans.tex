@@ -816,15 +816,13 @@ This object specifies alternate performance parameters for a fan when night vent
 
 For zone equipment other than air distribution units, night-ventilation mode is determined by that component's own AvailabilityManager:NightVentilation status. An air distribution unit follows the status of its connected air loop. A coupled \hyperref[fanzoneexhaust]{Fan:ZoneExhaust} follows an air loop serving its zone; a decoupled exhaust fan does not enter night-ventilation mode.
 
-For \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, alternate performance is used only when the fan is coupled to an air loop that is in night-ventilation mode. Decoupled zone exhaust fans do not enter night-ventilation mode.
-
 The fan uses these alternate performance parameters during night ventilation and is assumed to run at a fixed speed. The inputs are the fan name, fan total efficiency, pressure rise, motor efficiency, and motor in airstream fraction.
 
 \subsubsection{Inputs}\label{inputs-4-013}
 
 \paragraph{Field: Fan Name}\label{field-fan-name-001}
 
-This is the name of a fan defined elsewhere in the input file. The night vent performance parameters will be applied to the named fan when a system manager (such as \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}) has set the air system flow rate.
+This is the name of a fan defined elsewhere in the input file. The night vent performance parameters are applied when the named fan is operating in night-ventilation mode.
 
 \paragraph{Field: Fan Total Efficiency}\label{field-fan-total-efficiency-4}
 
