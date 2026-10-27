@@ -473,7 +473,7 @@ void resetActuator(EnergyPlusState state, int handle)
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
         *theActuator.Actuated = false;
-        ++thisState->dataPluginManager->actuatorWriteCount;
+        thisState->dataRuntimeLang->anyActuatorWritten = true;
     } else {
         if (thisState->dataGlobal->errorCallback) {
             std::cout << "ERROR: Actuator handle out of range in resetActuator, returning but caller should take note and likely abort." << std::endl;
@@ -502,7 +502,7 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
             // allow small tolerance while passing between languages and types
         }
         *theActuator.Actuated = true;
-        ++thisState->dataPluginManager->actuatorWriteCount;
+        thisState->dataRuntimeLang->anyActuatorWritten = true;
     } else {
         if (thisState->dataGlobal->errorCallback) {
             std::cout << "ERROR: Actuator handle out of range in setActuatorValue, returning but caller should take note and likely abort."

@@ -272,7 +272,7 @@ namespace EMSManager {
 
         InitEMS(state, iCalledFrom);
 
-        auto const actuatorWritesBefore = state.dataPluginManager->actuatorWriteCount;
+        state.dataRuntimeLang->anyActuatorWritten = false;
 
         // also call plugins and callbacks here for convenience
         if (iCalledFrom != EMSCallFrom::UserDefinedComponentModel) { // don't run user-defined component plugins this way
@@ -374,9 +374,9 @@ namespace EMSManager {
 
         ReportEMS(state);
 
-        // At this calling point, anyProgramRan forces additional air-loop iterations. Read-only callbacks and Erl programs still execute and
-        // report normally, but they must not perturb convergence merely by being registered.
-        if (iCalledFrom == EMSCallFrom::HVACIterationLoop && state.dataPluginManager->actuatorWriteCount == actuatorWritesBefore) {
+        // At this calling point, anyProgramRan requests additional air loop iterations. Callbacks and Erl programs that wrote no actuator
+        // still execute and report normally, but they do not request those iterations.
+        if (iCalledFrom == EMSCallFrom::HVACIterationLoop && !state.dataRuntimeLang->anyActuatorWritten) {
             anyProgramRan = false;
         }
     }

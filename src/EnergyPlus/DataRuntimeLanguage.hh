@@ -786,6 +786,10 @@ struct RuntimeLanguageData : BaseGlobalStruct
     bool OutputEMSInternalVarsFull = false;   // how much to write out to EDD file, if true dump full combinatorial internal list
     bool OutputEMSInternalVarsSmall = false;  // how much to write out to EDD file, if true dump internal list without key names
 
+    // Set when an Erl program or Data Exchange API call writes or resets an actuator during ManageEMS. It only decides whether
+    // ManageEMS requests additional HVAC iterations at InsideHVACSystemIterationLoop.
+    bool anyActuatorWritten = false;
+
     Array2D_bool EMSConstructActuatorChecked;
     Array2D_bool EMSConstructActuatorIsOkay;
 
@@ -852,6 +856,7 @@ struct RuntimeLanguageData : BaseGlobalStruct
         this->OutputEMSActuatorAvailSmall = false;
         this->OutputEMSInternalVarsFull = false;
         this->OutputEMSInternalVarsSmall = false;
+        this->anyActuatorWritten = false;
         this->EMSConstructActuatorChecked.deallocate();
         this->EMSConstructActuatorIsOkay.deallocate();
         this->ErlVariable.deallocate();
