@@ -25812,8 +25812,9 @@ ZoneVentilation:WindandStackOpenArea,
        \note  "Cw" in the wind-driven equation and the maximum value is 1.0.
        \note When the input is Autocalculate, the program calculates Cw based on an angle between
        \note wind direction and effective angle
-       \note Cw = 0.55 at angle = 0, and Cw = 0.3 at angle=180
-       \note Linear interpolation is used to calculate Cw based on the above two values.
+       \note Cw = 0.55 at angle = 0 and Cw = 0.3 at angle = 45, with the same linear slope
+       \note continued to Cw = 0.05 at angle = 90. Cw = 0 for angles greater than 90
+       \note (wind from the other side of the opening).
        \units dimensionless
        \autocalculatable
        \type real
