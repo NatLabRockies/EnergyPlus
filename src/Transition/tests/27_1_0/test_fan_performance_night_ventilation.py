@@ -93,7 +93,7 @@ def test_fan_performance_night_ventilation_removes_maximum_flow_rate(prepare_and
         version_ori=(26, 2, 0),
         version_new=(27, 1, 0),
         expected_audit_text=(
-          'For FanPerformance:NightVentilation="Explicit Maximum Flow", Maximum Flow Rate was removed; '
-          'input value "Autosize" was discarded.'
+            'For FanPerformance:NightVentilation="Explicit Maximum Flow", Maximum Flow Rate was removed; '
+            'input value "Autosize" was discarded.'
         ),
     )
