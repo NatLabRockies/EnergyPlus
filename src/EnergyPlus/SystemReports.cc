@@ -3240,9 +3240,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         DEHUMIDIFIER_DESICCANT_SYSTEM,
         DUCT,
         EVAPORATIVECOOLER_DIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_WETCOIL,
         FAN_COMPONENTMODEL,
         FAN_SYSTEMMODEL,
@@ -3335,9 +3335,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         {"DEHUMIDIFIER:DESICCANT:SYSTEM", DEHUMIDIFIER_DESICCANT_SYSTEM},
         {"DUCT", DUCT},
         {"EVAPORATIVECOOLER:DIRECT:CELDEKPAD", EVAPORATIVECOOLER_DIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:CELDEKPAD", EVAPORATIVECOOLER_INDIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:WETCOIL", EVAPORATIVECOOLER_INDIRECT_WETCOIL},
         {"FAN:COMPONENTMODEL", FAN_COMPONENTMODEL},
         {"FAN:SYSTEMMODEL", FAN_SYSTEMMODEL},
@@ -3554,8 +3554,8 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case EVAPORATIVECOOLER_DIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_WETCOIL:
-    case EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL:
-    case EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL:
+    case EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS:
+    case EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS:
         if (CompLoadFlag) {
             thisSysLoadRepVars.EvapCLNG += std::abs(CompLoad);
         }
@@ -4805,11 +4805,10 @@ void reportAirLoopToplogy(EnergyPlusData &state)
         for (int BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
             auto &pasBranch = pas.Branch(BranchNum);
             if (pas.Splitter.Exists) {
-                for (int outNum : pas.Splitter.BranchNumOut) {
-                    if (outNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Splitter.BranchNumOut.begin(), pas.Splitter.BranchNumOut.end(), [BranchNum](int outNum) {
+                        return outNum == BranchNum;
+                    })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
                 }
             }
             for (int CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
@@ -4839,11 +4838,8 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                 }
             }
             if (pas.Mixer.Exists) {
-                for (int inNum : pas.Mixer.BranchNumIn) {
-                    if (inNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Mixer.BranchNumIn.begin(), pas.Mixer.BranchNumIn.end(), [BranchNum](int inNum) { return inNum == BranchNum; })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
                 }
             }
         }

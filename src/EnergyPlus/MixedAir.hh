@@ -107,8 +107,8 @@ namespace MixedAir {
         EvaporativeCoolerDirectCeldekPad,
         EvaporativeCoolerIndirectCeldekPad,
         EvaporativeCoolerIndirectWetCoil,
-        EvaporativeCoolerIndirectResearchSpecial,
-        EvaporativeCoolerDirectResearchSpecial,
+        EvaporativeCoolerIndirectUserEffectiveness,
+        EvaporativeCoolerDirectUserEffectiveness,
         ZoneHVACTerminalUnitVariableRefrigerantFlow,
         Num
     };
@@ -143,8 +143,8 @@ namespace MixedAir {
         "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
         "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD",
         "EVAPORATIVECOOLER:INDIRECT:WETCOIL",
-        "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL",
-        "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL",
+        "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS",
+        "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS",
         "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW",
     };
 

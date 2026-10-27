@@ -1718,13 +1718,12 @@ namespace WaterManager {
             }
         }
         // report eco roof
-        for (auto const &c : state.dataConstruction->Construct) {
-            if (c.TypeIsEcoRoof) {
-                for (int i = 0; i < 12; i++) {
-                    OutputReportPredefined::PreDefTableEntry(
-                        state, state.dataOutRptPredefined->pdchMonthlyTotalIrrDep, Months[i], state.dataEcoRoofMgr->MonthlyIrrigation[i]);
-                }
-                break;
+        if (std::any_of(state.dataConstruction->Construct.begin(), state.dataConstruction->Construct.end(), [](auto const &construction) {
+                return construction.TypeIsEcoRoof;
+            })) {
+            for (int i = 0; i < 12; i++) {
+                OutputReportPredefined::PreDefTableEntry(
+                    state, state.dataOutRptPredefined->pdchMonthlyTotalIrrDep, Months[i], state.dataEcoRoofMgr->MonthlyIrrigation[i]);
             }
         }
     }

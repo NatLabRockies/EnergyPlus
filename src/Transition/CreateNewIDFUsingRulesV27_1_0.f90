@@ -383,11 +383,51 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with A, insert the rules here
 
+              CASE('AIRLOOPHVAC:OUTDOORAIRSYSTEM:EQUIPMENTLIST')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+                  DO i = 2, CurArgs, 2
+                    IF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Direct:UserEffectiveness'
+                      nodiff=.false.
+                    ELSEIF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Indirect:UserEffectiveness'
+                      nodiff=.false.
+                    ENDIF
+                  END DO
+
+              ! If your original object starts with B, insert the rules here
+
+              CASE('BRANCH')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+                  DO i = 3, CurArgs, 4
+                    IF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Direct:UserEffectiveness'
+                      nodiff=.false.
+                    ELSEIF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Indirect:UserEffectiveness'
+                      nodiff=.false.
+                    ENDIF
+                  END DO
+
               ! If your original object starts with C, insert the rules here
 
               ! If your original object starts with D, insert the rules here
 
               ! If your original object starts with E, insert the rules here
+
+              CASE('EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL')
+                  ObjectName = 'EvaporativeCooler:Direct:UserEffectiveness'
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+
+              CASE('EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL')
+                  ObjectName = 'EvaporativeCooler:Indirect:UserEffectiveness'
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:CurArgs)=InArgs(1:CurArgs)
 
               ! If your original object starts with F, insert the rules here
 
@@ -420,6 +460,32 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               ! If your original object starts with W, insert the rules here
 
               ! If your original object starts with Z, insert the rules here
+
+              CASE('ZONECONTROL:THERMOSTAT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:3)=InArgs(1:3)
+                  IF (CurArgs .EQ. 12) THEN
+                    OutArgs(4)=InArgs(CurArgs)
+                    OutArgs(5:CurArgs)=InArgs(4:CurArgs - 1)
+                  ELSE
+                    OutArgs(4)=' '
+                    OutArgs(5:CurArgs + 1)=InArgs(4:CurArgs)
+                    CurArgs = CurArgs + 1
+                  ENDIF
+                  nodiff=.false.
+
+              CASE('ZONEHVAC:EVAPORATIVECOOLERUNIT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+                  DO i = 14, MIN(CurArgs, 16), 2
+                    IF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Direct:UserEffectiveness'
+                      nodiff=.false.
+                    ELSEIF (MakeUPPERCase(OutArgs(i)) == 'EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL') THEN
+                      OutArgs(i)='EvaporativeCooler:Indirect:UserEffectiveness'
+                      nodiff=.false.
+                    ENDIF
+                  END DO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                   Changes for report variables, meters, tables -- update names                                   !

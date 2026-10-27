@@ -1014,6 +1014,7 @@ TEST_F(EnergyPlusFixture, UnitHeater_HWHeatingCoilUAAutoSizingTest)
         "    Zone 2 Thermostat,       !- Name",
         "    EAST ZONE,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -1848,6 +1849,7 @@ TEST_F(EnergyPlusFixture, UnitHeater_SecondPriorityZoneEquipment)
         "    Main Zone Thermostat,    !- Name",
         "    Main Zone,               !- Zone or ZoneList Name",
         "    ZONE CONTROL TYPE SCHED, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 

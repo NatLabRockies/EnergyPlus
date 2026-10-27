@@ -1175,9 +1175,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
 
         thisEquipConfig.ReturnNode.allocate(NumNodes);
         thisEquipConfig.returnNodeSpaceMixerIndex.allocate(NumNodes);
-        for (int &mixIndex : thisEquipConfig.returnNodeSpaceMixerIndex) {
-            mixIndex = -1;
-        }
+        std::fill(thisEquipConfig.returnNodeSpaceMixerIndex.begin(), thisEquipConfig.returnNodeSpaceMixerIndex.end(), -1);
         thisEquipConfig.ReturnNodeAirLoopNum.allocate(NumNodes);
         thisEquipConfig.ReturnNodeRetPathNum.allocate(NumNodes);
         thisEquipConfig.ReturnNodeRetPathCompNum.allocate(NumNodes);
@@ -1370,14 +1368,10 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
                                                    Node::CompFluidStream::Primary,
                                                    objectIsParent);
     // Check zone exhaust nodes
-    bool found = false;
     auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneNum);
-    for (int exhNodeNum : thisZoneEquipConfig.ExhaustNode) {
-        if (thisZeqMixer.outletNodeNum == exhNodeNum) {
-            found = true;
-            break;
-        }
-    }
+    bool found = std::any_of(thisZoneEquipConfig.ExhaustNode.begin(),
+                             thisZoneEquipConfig.ExhaustNode.end(),
+                             [outletNodeNum = thisZeqMixer.outletNodeNum](int exhNodeNum) { return outletNodeNum == exhNodeNum; });
     if (!found) {
         ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
         ShowContinueError(state,
@@ -1418,14 +1412,10 @@ void processZoneEquipMixerInput(EnergyPlusData &state,
                                                               Node::CompFluidStream::Primary,
                                                               objectIsParent);
                 // Check space exhaust nodes
-                found = false;
                 auto &thisSpaceEquipConfig = state.dataZoneEquip->spaceEquipConfig(thisZeqSpace.spaceIndex);
-                for (int exhNodeNum : thisSpaceEquipConfig.ExhaustNode) {
-                    if (thisZeqSpace.spaceNodeNum == exhNodeNum) {
-                        found = true;
-                        break;
-                    }
-                }
+                found = std::any_of(thisSpaceEquipConfig.ExhaustNode.begin(),
+                                    thisSpaceEquipConfig.ExhaustNode.end(),
+                                    [spaceNodeNum = thisZeqSpace.spaceNodeNum](int exhNodeNum) { return spaceNodeNum == exhNodeNum; });
                 if (!found) {
                     ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZeqMixer.Name));
                     ShowContinueError(state,
@@ -1510,14 +1500,10 @@ void processZoneReturnMixerInput(EnergyPlusData &state,
                                       Node::CompFluidStream::Primary,
                                       objectIsParent);
                 // Check space return nodes
-                found = false;
                 auto &thisSpaceEquipConfig = state.dataZoneEquip->spaceEquipConfig(thisZeqSpace.spaceIndex);
-                for (int retNodeNum : thisSpaceEquipConfig.ReturnNode) {
-                    if (thisZeqSpace.spaceNodeNum == retNodeNum) {
-                        found = true;
-                        break;
-                    }
-                }
+                found = std::any_of(thisSpaceEquipConfig.ReturnNode.begin(),
+                                    thisSpaceEquipConfig.ReturnNode.end(),
+                                    [spaceNodeNum = thisZeqSpace.spaceNodeNum](int retNodeNum) { return spaceNodeNum == retNodeNum; });
                 if (!found) {
                     ShowSevereError(state, std::format("{}{}={}", RoutineName, zeqMixerModuleObject, thisZretMixer.Name));
                     ShowContinueError(state,

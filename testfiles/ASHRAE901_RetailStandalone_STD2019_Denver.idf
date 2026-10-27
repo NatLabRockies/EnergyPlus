@@ -3833,6 +3833,7 @@
     Back_Space Thermostat,   !- Name
     Back_Space,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Back_Space DualSPSched;  !- Control 1 Name
 
@@ -3840,6 +3841,7 @@
     Core_Retail Thermostat,  !- Name
     Core_Retail,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Core_Retail DualSPSched; !- Control 1 Name
 
@@ -3847,6 +3849,7 @@
     Point_Of_Sale Thermostat,!- Name
     Point_Of_Sale,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Point_Of_Sale DualSPSched;  !- Control 1 Name
 
@@ -3854,6 +3857,7 @@
     Front_Retail Thermostat, !- Name
     Front_Retail,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Front_Retail DualSPSched;!- Control 1 Name
 
@@ -3861,6 +3865,7 @@
     Front_Entry Thermostat,  !- Name
     Front_Entry,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Front_Entry DualSPSched; !- Control 1 Name
 

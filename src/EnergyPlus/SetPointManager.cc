@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -4407,12 +4408,8 @@ int GetSetPointManagerIndexByNode(EnergyPlusData &state, int const NodeNum, HVAC
             if (NodeNum == spm->refNodeNum) {
                 return iSPM;
             }
-        } else {
-            for (int ctrlNodeNum : spm->ctrlNodeNums) {
-                if (NodeNum == ctrlNodeNum) {
-                    return iSPM;
-                }
-            }
+        } else if (std::any_of(spm->ctrlNodeNums.begin(), spm->ctrlNodeNums.end(), [NodeNum](int ctrlNodeNum) { return NodeNum == ctrlNodeNum; })) {
+            return iSPM;
         }
     }
 
@@ -4439,18 +4436,10 @@ bool IsNodeOnSetPtManager(EnergyPlusData &state, int const NodeNum, HVAC::CtrlVa
         state.dataSetPointManager->GetInputFlag = false;
     }
 
-    for (auto const *spm : state.dataSetPointManager->spms) {
-        if (spm->ctrlVar != ctrlVar) {
-            continue;
-        }
-        for (int ctrlNodeNum : spm->ctrlNodeNums) {
-            if (NodeNum == ctrlNodeNum) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return std::any_of(state.dataSetPointManager->spms.begin(), state.dataSetPointManager->spms.end(), [NodeNum, ctrlVar](auto const *spm) {
+        return spm->ctrlVar == ctrlVar &&
+               std::any_of(spm->ctrlNodeNums.begin(), spm->ctrlNodeNums.end(), [NodeNum](int ctrlNodeNum) { return NodeNum == ctrlNodeNum; });
+    });
 } // IsNodeOnSetPointManager()
 
 bool NodeHasSPMCtrlVarType(EnergyPlusData &state, int const NodeNum, HVAC::CtrlVarType const ctrlVar)
@@ -4471,18 +4460,10 @@ bool NodeHasSPMCtrlVarType(EnergyPlusData &state, int const NodeNum, HVAC::CtrlV
         state.dataSetPointManager->GetInputFlag = false;
     }
 
-    for (auto const *spm : state.dataSetPointManager->spms) {
-        if (spm->ctrlVar != ctrlVar) {
-            continue;
-        }
-        for (int ctrlNodeNum : spm->ctrlNodeNums) {
-            if (NodeNum == ctrlNodeNum) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return std::any_of(state.dataSetPointManager->spms.begin(), state.dataSetPointManager->spms.end(), [NodeNum, ctrlVar](auto const *spm) {
+        return spm->ctrlVar == ctrlVar &&
+               std::any_of(spm->ctrlNodeNums.begin(), spm->ctrlNodeNums.end(), [NodeNum](int ctrlNodeNum) { return NodeNum == ctrlNodeNum; });
+    });
 } // NodeHasSPMCtrlVarType()
 
 void ResetHumidityRatioCtrlVarType(EnergyPlusData &state, int const NodeNum)

@@ -2638,6 +2638,7 @@
     Bakery Thermostat,       !- Name
     Bakery,                  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Bakery DualSPSched;      !- Control 1 Name
 
@@ -2645,6 +2646,7 @@
     Deli Thermostat,         !- Name
     Deli,                    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Deli DualSPSched;        !- Control 1 Name
 
@@ -2652,6 +2654,7 @@
     DryStorage Thermostat,   !- Name
     DryStorage,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DryStorage DualSPSched;  !- Control 1 Name
 
@@ -2659,6 +2662,7 @@
     Office Thermostat,       !- Name
     Office,                  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office DualSPSched;      !- Control 1 Name
 
@@ -2666,6 +2670,7 @@
     Produce Thermostat,      !- Name
     Produce,                 !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Produce DualSPSched;     !- Control 1 Name
 
@@ -2673,6 +2678,7 @@
     Sales Thermostat,        !- Name
     Sales,                   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Sales DualSPSched;       !- Control 1 Name
 

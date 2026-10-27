@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -704,7 +705,7 @@ void SimOAComponent(EnergyPlusData &state,
         }
     } break;
     case SimAirServingZones::CompType::EvapCooler: { // EvaporativeCooler:Direct:CelDekPad, EvaporativeCooler:Indirect:CelDekPad
-        // EvaporativeCooler:Indirect:WetCoil, EvaporativeCooler:Indirect:ResearchSpecial
+        // EvaporativeCooler:Indirect:WetCoil, EvaporativeCooler:Indirect:UserEffectiveness
         if (Sim) {
             EvaporativeCoolers::SimEvapCooler(state, CompName, CompIndex);
         }
@@ -1036,7 +1037,7 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
                     if (OASys.ComponentType(CompNum) == "COILSYSTEM:COOLING:WATER" && CompNum < OASys.NumComponents) {
                         if (OASys.compPointer[CompNum] != nullptr) {
                             // compPointer[CompNum] already points at the correct UnitarySys object (matched by name in UnitarySys::factory())
-                            if (auto *unitarySysPtr = dynamic_cast<UnitarySystems::UnitarySys *>(OASys.compPointer[CompNum])) {
+                            if (auto const *unitarySysPtr = dynamic_cast<UnitarySystems::UnitarySys *>(OASys.compPointer[CompNum])) {
                                 companionCoilAirInletNodeNum = unitarySysPtr->m_HRcoolCoilAirInNode;
                             }
                         }
@@ -1138,7 +1139,7 @@ void GetOutsideAirSysInputs(EnergyPlusData &state)
                 } else if (thisComp == "DEHUMIDIFIER:DESICCANT:SYSTEM") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::Desiccant;
                 } else if (thisComp == "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD" || thisComp == "EVAPORATIVECOOLER:INDIRECT:WETCOIL" ||
-                           thisComp == "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL" || thisComp == "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL") {
+                           thisComp == "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS" || thisComp == "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::EvapCooler;
                 } else if (thisComp == "HUMIDIFIER:STEAM:GAS") {
                     OASys.ComponentTypeEnum(CompNum) = SimAirServingZones::CompType::Humidifier;
@@ -3453,7 +3454,7 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
     Real64 MinOASchedVal = 1.0; // value of the minimum outside air schedule
     if (this->minOASched != nullptr) {
         MinOASchedVal = this->minOASched->getCurrentVal();
-        MinOASchedVal = min(max(MinOASchedVal, 0.0), 1.0);
+        MinOASchedVal = std::clamp(MinOASchedVal, 0.0, 1.0);
         OutAirMinFrac *= MinOASchedVal;
         this->OALimitingFactor = OALimitFactor::Limits;
     }
@@ -3514,7 +3515,7 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
         this->OALimitingFactor = OALimitFactor::DCV;
     }
 
-    OutAirMinFrac = min(max(OutAirMinFrac, 0.0), 1.0);
+    OutAirMinFrac = std::clamp(OutAirMinFrac, 0.0, 1.0);
 
     // At this point, OutAirMinFrac is still based on AirLoopFlow.DesSupply
     if (AirLoopNum > 0) {
@@ -3570,7 +3571,7 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
     // Apply Minimum Fraction of Outdoor Air Schedule
     if (this->minOAflowSched != nullptr) {
         Real64 MinOAflowfracVal = this->minOAflowSched->getCurrentVal();
-        MinOAflowfracVal = min(max(MinOAflowfracVal, 0.0), 1.0);
+        MinOAflowfracVal = std::clamp(MinOAflowfracVal, 0.0, 1.0);
         OutAirMinFrac = max(MinOAflowfracVal, OutAirMinFrac);
         Real64 minOAFracMassFlowRate = this->MixMassFlow * MinOAflowfracVal;
         if (minOAFracMassFlowRate > this->OAMassFlow) {
@@ -3583,7 +3584,7 @@ void OAControllerProps::CalcOAController(EnergyPlusData &state, int const AirLoo
     Real64 currentMaxOAMassFlowRate = this->MaxOAMassFlowRate;
     if (this->maxOAflowSched != nullptr) {
         Real64 MaxOAflowfracVal = this->maxOAflowSched->getCurrentVal();
-        MaxOAflowfracVal = min(max(MaxOAflowfracVal, 0.0), 1.0);
+        MaxOAflowfracVal = std::clamp(MaxOAflowfracVal, 0.0, 1.0);
         currentMaxOAMassFlowRate = min(this->MaxOAMassFlowRate, this->MixMassFlow * MaxOAflowfracVal);
         OutAirMinFrac = min(MaxOAflowfracVal, OutAirMinFrac);
         if (currentMaxOAMassFlowRate < this->OAMassFlow) {
@@ -4317,7 +4318,7 @@ void OAControllerProps::CalcOAEconomizer(EnergyPlusData &state,
             MaximumOAFracBySetPoint = OutAirSignal;
         }
     }
-    OutAirSignal = min(max(OutAirSignal, OutAirMinFrac), 1.0);
+    OutAirSignal = std::clamp(OutAirSignal, OutAirMinFrac, 1.0);
 
     // If no economizer, set to minimum and disable economizer and high humidity control
     if (this->Econo == EconoOp::NoEconomizer) {
@@ -4460,8 +4461,10 @@ void OAControllerProps::CalcOAEconomizer(EnergyPlusData &state,
                 // 1 - check min OA flow result
                 if (this->FixedMin) {
                     state.dataLoopNodes->Node(this->OANode).MassFlowRate =
-                        min(max(this->ExhMassFlow, OutAirMinFrac * state.dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply),
-                            state.dataLoopNodes->Node(this->MixNode).MassFlowRate);
+                        std::clamp(this->ExhMassFlow,
+                                   std::min(OutAirMinFrac * state.dataAirLoop->AirLoopFlow(AirLoopNum).DesSupply,
+                                            state.dataLoopNodes->Node(this->MixNode).MassFlowRate),
+                                   state.dataLoopNodes->Node(this->MixNode).MassFlowRate);
                     state.dataLoopNodes->Node(this->RelNode).MassFlowRate =
                         max(state.dataLoopNodes->Node(this->OANode).MassFlowRate - this->ExhMassFlow, 0.0);
                     // save actual OA flow frac for use as min value for RegulaFalsi call
@@ -4550,7 +4553,7 @@ void OAControllerProps::CalcOAEconomizer(EnergyPlusData &state,
     }
 
     if (this->CoolCoilFreezeCheck) {
-        MaximumOAFracBySetPoint = min(max(MaximumOAFracBySetPoint, 0.0), 1.0);
+        MaximumOAFracBySetPoint = std::clamp(MaximumOAFracBySetPoint, 0.0, 1.0);
         this->MaxOAFracBySetPoint = MaximumOAFracBySetPoint;
 
         // This should not be messing with OutAirMinFrac, freeze protection should only limit economizer operation
@@ -4895,6 +4898,8 @@ void OAMixerProps::UpdateOAMixer(EnergyPlusData &state) const
     state.dataLoopNodes->Node(mixNode).Enthalpy = this->MixEnthalpy;
     state.dataLoopNodes->Node(mixNode).Press = this->MixPressure;
     state.dataLoopNodes->Node(mixNode).MassFlowRateMaxAvail = this->MixMassFlowRate;
+    state.dataLoopNodes->Node(mixNode).MassFlowRateMinAvail =
+        min(state.dataLoopNodes->Node(mixNode).MassFlowRateMinAvail, state.dataLoopNodes->Node(mixNode).MassFlowRateMaxAvail);
     // Move the relief air data to the relief air node
     state.dataLoopNodes->Node(relNode).MassFlowRate = this->RelMassFlowRate;
     state.dataLoopNodes->Node(relNode).Temp = this->RelTemp;
@@ -4902,6 +4907,8 @@ void OAMixerProps::UpdateOAMixer(EnergyPlusData &state) const
     state.dataLoopNodes->Node(relNode).Enthalpy = this->RelEnthalpy;
     state.dataLoopNodes->Node(relNode).Press = this->RelPressure;
     state.dataLoopNodes->Node(relNode).MassFlowRateMaxAvail = this->RelMassFlowRate;
+    state.dataLoopNodes->Node(relNode).MassFlowRateMinAvail =
+        min(state.dataLoopNodes->Node(relNode).MassFlowRateMinAvail, state.dataLoopNodes->Node(relNode).MassFlowRateMaxAvail);
 
     if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
         state.dataLoopNodes->Node(relNode).CO2 = state.dataLoopNodes->Node(retNode).CO2;
@@ -5676,8 +5683,8 @@ void GetOACompNodeNumbers(EnergyPlusData &state, int OASysNum, bool &errorsFound
         case MixedAir::ValidEquipListType::EvaporativeCoolerDirectCeldekPad:
         case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectCeldekPad:
         case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectWetCoil:
-        case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectResearchSpecial:
-        case MixedAir::ValidEquipListType::EvaporativeCoolerDirectResearchSpecial:
+        case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectUserEffectiveness:
+        case MixedAir::ValidEquipListType::EvaporativeCoolerDirectUserEffectiveness:
             thisOutsideAirSys.InletNodeNum(CompNum) = EvaporativeCoolers::GetInletNodeNum(state, CompName, InletNodeErrFlag);
             thisOutsideAirSys.OutletNodeNum(CompNum) = EvaporativeCoolers::GetOutletNodeNum(state, CompName, OutletNodeErrFlag);
             break;

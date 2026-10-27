@@ -5697,7 +5697,7 @@ namespace PlantPipingSystemsManager {
         this->Cur.CurAirTemp = state.dataEnvrn->OutDryBulbTemp;
         this->Cur.CurWindSpeed = state.dataEnvrn->WindSpeed;
         this->Cur.CurRelativeHumidity = state.dataEnvrn->OutRelHum;
-        this->Cur.CurIncidentSolar = state.dataEnvrn->BeamSolarRad * max(state.dataEnvrn->SOLCOS(3), 0.0);
+        this->Cur.CurIncidentSolar = state.dataEnvrn->BeamSolarRad * max(state.dataEnvrn->SOLCOS.z, 0.0);
 
         //'now update cell properties
         auto &cells = this->Cells;

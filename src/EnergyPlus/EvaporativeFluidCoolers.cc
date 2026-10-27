@@ -1753,10 +1753,8 @@ namespace EvaporativeFluidCoolers {
                     }
                 }
             } else {
-                if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                    ShowSevereError(state, std::format("Autosizing error for evaporative fluid cooler object = {}", this->Name));
-                    ShowFatalError(state, "Autosizing of evaporative fluid cooler UA requires a loop Sizing:Plant object.");
-                }
+                ShowSevereError(state, std::format("Autosizing error for evaporative fluid cooler object = {}", this->Name));
+                ShowFatalError(state, "Autosizing of evaporative fluid cooler UA requires a loop Sizing:Plant object.");
             }
         }
 

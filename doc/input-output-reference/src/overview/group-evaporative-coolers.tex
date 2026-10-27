@@ -130,13 +130,13 @@ This is the water consumed by the evaporative cooler that could not actually be 
 
 This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
-\subsection{EvaporativeCooler:Direct:ResearchSpecial}\label{evaporativecoolerdirectresearchspecial}
+\subsection{EvaporativeCooler:Direct:UserEffectiveness}\label{evaporativecoolerdirectusereffectiveness}
 
-This cooler is similar in principal to the \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}. The model differs in that it gives the user a simple way of specify the cooler effectiveness. Using the ResearchSpecial input object also allows the cooler to control the amount of cooling based on node setpoints (controlled by SetpointManagers). This avoid problems from over cooling when conditions are such that loads are low and cooling power is high.
+This cooler is similar in principal to the \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}. The model differs in that it gives the user a simple way of specify the cooler effectiveness. Using the UserEffectiveness input object also allows the cooler to control the amount of cooling based on node setpoints (controlled by SetpointManagers). This avoid problems from over cooling when conditions are such that loads are low and cooling power is high.
 
 The model allows to vary the effectiveness depending on the primary air flow rates. The design effectiveness is modified by multiplying with Effectiveness Flow Fraction Modifier Curve value. The flow fraction is the ratio of the current primary airflow rate to the design flow rate. The recirculating and spray water pump power is assumed to vary with the primary air flow. The design pump power is modified using user specified pump modifier curve value. The normalized pump power modifier curve is a function of primary air flow fraction as a independent variable.
 
-Also the direct evaporative cooler operating range can be controlled depending on the entering air dry bulb and wet bulb temperatures. The operating range controlled based on minimum and maximum inlet node air temperature limits. The evaporative cooler can be turned on or off depending user specified minimum and maximum temperature limits. If the inlet node entering air temperature is lower or higher than the minimum and maximum limits, respectively, then the direct research special evaporative cooler is turned off. If these two input fields are left blank then, no user specified operating temperature control is applied. Operating range control feature is primarily intended for application in data centers.
+Also the direct evaporative cooler operating range can be controlled depending on the entering air dry bulb and wet bulb temperatures. The operating range controlled based on minimum and maximum inlet node air temperature limits. The evaporative cooler can be turned on or off depending user specified minimum and maximum temperature limits. If the inlet node entering air temperature is lower or higher than the minimum and maximum limits, respectively, then the direct user effectiveness evaporative cooler is turned off. If these two input fields are left blank then, no user specified operating temperature control is applied. Operating range control feature is primarily intended for application in data centers.
 
 \subsubsection{Inputs}\label{inputs-1-014}
 
@@ -156,21 +156,21 @@ This numeric field specifies the effectiveness at design flow rate that is appli
 
 This alpha field is the name of a curve that modifies the effectiveness design value specified the previous field by multiplying the value by the result of this curve. The modifying curve is a function of flow fraction, which is the ratio of the current primary air flow rates divided by the design primary air flow rates. If this input field is left blank, the effectiveness is assumed to be constant. Any curve or table with one independent variable can be used. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and \hyperref[tablelookup]{Table:Lookup}.
 
-\paragraph{Field: Primary Design Air Flow Rate}\label{field-primary-design-air-flow-rate}
+\paragraph{Field: Primary Air Design Flow Rate}\label{field-primary-design-air-flow-rate}
 
 This numeric field is the primary air design air flow rate in \si{\volumeFlowRate}. This input field is autosizable. If the evaporative cooler is on the main air loop branch, the design flow rate is the same as branch design flow rate. If the evaporative cooler is in the outdoor air system the design flow rate will be the maximum of the outdoor air design flow rate and one-half of the primary air flow rate on the main air loop branch.
 
 \paragraph{Field: Recirculating Water Pump Design Power}
 
-This numeric field is the recirculating and spray pump electric power at the Primary Design Air Flow Rate in \si{\watt}.
+This numeric field is the recirculating and spray pump electric power at the Primary Air Design Flow Rate in \si{\watt}.
 This is the nominal water recirculating and spray pump power of evaporative cooler at primary air design flow rates and cooler design effectiveness.
-This input field is autosizable, see \hyperref[field-water-pump-power-sizing-factor]{Water Pump Power Sizing Factor}.
+This input field is autosizable, see \hyperref[field-design-water-pump-power-per-unit-flow-rate]{Design Water Pump Power Per Unit Flow Rate}.
 
-\paragraph{Field: Water Pump Power Sizing Factor}\label{field-water-pump-power-sizing-factor}
+\paragraph{Field: Design Water Pump Power Per Unit Flow Rate}\label{field-design-water-pump-power-per-unit-flow-rate}
 
-This numeric field value is recirculating water pump sizing factor in \si{\wattperVolumeFlowRate}.
-This field is used when the previous field is set to autosize. The pump design electric power is scaled with the Primary Design Air Flow Rate. This input field is autosizable.
-Average Pump Power sizing factor was estimated from pump power and primary air design flow rates inputs from energyplus example files and
+This numeric field value is recirculating water pump sizing ratio in \si{\wattperVolumeFlowRate}.
+This field is used when the previous field is set to autosize. The pump design electric power is scaled with the Primary Air Design Flow Rate.
+Average water pump power per unit primary design air flow rate was estimated from pump power and primary air design flow rate inputs from energyplus example files and
 is about \SI{90.0}{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Primary Air Design Flow Rate). The factor ranges from 55.0 to \SI{150.0}{\wattperVolumeFlowRate}.
 
 \paragraph{Field: Water Pump Power Modifier Curve Name}\label{field-water-pump-power-modifier-curve-name}
@@ -201,7 +201,7 @@ This numeric field is optional and can be used to model additional water consume
 
 This numeric field is optional and can be used to model additional water consumed by the cooler from blowdown. Blowdown is water that is intentionally drained from the cooler's sump to offset the build up of solids in the water that would otherwise occur because of evaporation. The value entered here is dimensionless. It can be characterized as the ratio of solids in the blowdown water to solids in the make up water. Typical values are 3 to 5. The default is 3.0.
 
-\paragraph{Field: Evaporative Cooler Operation Minimum Drybulb Temperature}\label{field-evaporative-cooler-operation-minimum-drybulb-temperature}
+\paragraph{Field: Evaporative Operation Minimum Drybulb Temperature}\label{field-evaporative-cooler-operation-minimum-drybulb-temperature}
 
 This numeric field defines the evaporative cooler inlet node drybulb temperature minimum limit in degrees Celsius. The evaporative cooler will be turned off when the evaporator cooler air inlet node dry-bulb temperature falls below this value. The typical minimum value is \SI{16}{\celsius}. Users are allowed to specify their own limits. If this field is left blank, then there is no drybulb temperature lower limit for evaporative cooler operation.
 
@@ -216,14 +216,14 @@ This numeric field defines the evaporative cooler air inlet node drybulb tempera
 An example IDF entry is
 
 \begin{lstlisting}
-EvaporativeCooler:Direct:ResearchSpecial,
+EvaporativeCooler:Direct:UserEffectiveness,
   Direct Evap Cooler,         !- Name
   ALWAYS_ON,                  !- Availability Schedule Name
   0.7,                        !- Cooler Design Effectiveness
   ,                           !- Effectiveness Flow Ratio Modifier Curve Name
   autosize,                   !- Primary Air Design Flow Rate {m3/s}
-  30.0,                       !- Recirculating Water Pump Design Power
-  ,                           !- Water Pump Power Sizing Factor
+  30.0,                       !- Recirculating Water Pump Design Power {W}
+  ,                           !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
   ,                           !- Water Pump Power Modifier Curve Name
   OAIndRDD Evap Cooler-OADirect Evap CoolerNode,  !- Air Inlet Node Name
   OADirect Evap Cooler-OAMixing BoxNode,  !- Air Outlet Node Name
@@ -589,11 +589,11 @@ This is the water consumed by the evaporative cooler that could not actually be 
 
 This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
-\subsection{EvaporativeCooler:Indirect:ResearchSpecial}\label{evaporativecoolerindirectresearchspecial}
+\subsection{EvaporativeCooler:Indirect:UserEffectiveness}\label{evaporativecoolerindirectusereffectiveness}
 
-This cooler is similar in principal to the \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad} and \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil} (see Figure~\ref{fig:secondary-air-process-indirect-dry-coil-evap}, Figure~\ref{fig:evaporative-cooler-indirect-wet-coil}, and Figure~\ref{fig:secondary-air-process-indirect-wet-coil-evap}). The model differs in that it gives the user more flexibility to specify the source of secondary air. The cooler effectiveness with respect to wetbulb depression is allowed to go beyond 1.0. Using the ResearchSpecial object also allows the cooler to control the amount of cooling based on node setpoints (controlled by SetpointManagers). This avoid problems from over cooling when conditions are such that loads are low and cooling power is high. Fan power is assumed to vary linearly when the cooler is operating at less than full capacity (includes air system cycling, if any).
+This cooler is similar in principal to the \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad} and \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil} (see Figure~\ref{fig:secondary-air-process-indirect-dry-coil-evap}, Figure~\ref{fig:evaporative-cooler-indirect-wet-coil}, and Figure~\ref{fig:secondary-air-process-indirect-wet-coil-evap}). The model differs in that it gives the user more flexibility to specify the source of secondary air. The cooler effectiveness with respect to wetbulb depression is allowed to go beyond 1.0. Using the UserEffectiveness object also allows the cooler to control the amount of cooling based on node setpoints (controlled by SetpointManagers). This avoid problems from over cooling when conditions are such that loads are low and cooling power is high. Fan power is assumed to vary linearly when the cooler is operating at less than full capacity (includes air system cycling, if any).
 
-The indirect evaporative cooler research special calculation procedure allows accounting for dry and wet effectiveness value variation with flow fraction. Two effectiveness modifier curves are included as optional user inputs for this purpose. Effectiveness modifier curves operate on the design dry and wet effectiveness values. The flow fraction is calculated as a ratio of the sum of current primary and secondary air flow rates to the sum of the design flow rates. These effectiveness modifier curves are required for proper operation of secondary air flow modulation in dry and wet operating modes when advanced control is desired using the following three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Operation Maximum Limit Outdoor Drybulb Temperature}. The model also accounts for fan and recirculation water pump power variation with secondary air flow rates using pump power modifying curve. The fan power is calculated by multiplying the design fan power using fan power modify curve value evaluated at current secondary air flow fraction. Similarly, recirculating pump power is calculated by multiplying the design pump power by pump power modifier curve value evaluated at current secondary air flow fraction. If the secondary air fan and recirculating pump power modifier curves are not specified, then fan and pump power are assumed to vary linearly with flow fraction, and if the air system cycles, the air loop cycling ratio (a.k.a. air system part-load ratio).
+The indirect evaporative cooler user effectiveness calculation procedure allows accounting for dry and wet effectiveness value variation with flow fraction. Two effectiveness modifier curves are included as optional user inputs for this purpose. Effectiveness modifier curves operate on the design dry and wet effectiveness values. The flow fraction is calculated as a ratio of the sum of current primary and secondary air flow rates to the sum of the design flow rates. These effectiveness modifier curves are required for proper operation of secondary air flow modulation in dry and wet operating modes when advanced control is desired using the following three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Dry Operation Maximum Limit Outdoor Drybulb Temperature}. The model also accounts for fan and recirculation water pump power variation with secondary air flow rates using pump power modifying curve. The fan power is calculated by multiplying the design fan power using fan power modify curve value evaluated at current secondary air flow fraction. Similarly, recirculating pump power is calculated by multiplying the design pump power by pump power modifier curve value evaluated at current secondary air flow fraction. If the secondary air fan and recirculating pump power modifier curves are not specified, then fan and pump power are assumed to vary linearly with flow fraction, and if the air system cycles, the air loop cycling ratio (a.k.a. air system part-load ratio).
 
 \subsubsection{Inputs}\label{inputs-4-011}
 
@@ -609,29 +609,29 @@ The alpha field is the name of a schedule that defines when the evaporative cool
 
 This numeric field specifies the design effectiveness that is applied to the wetbulb depression to determine the conditions leaving the cooler. This effectiveness is a complicated function of the efficiency with which heat and mass are transferred on the secondary side and the efficiency of heat exchange between the secondary and primary flows. The model assumes that the effectiveness is a function of flow fraction. The flow fraction is the ratio of the sum of primary air and secondary air current flow rates and the sum of the primary air and secondary air design flow rates.
 
-\paragraph{Field: Wet Bulb Effectiveness Flow Ratio Modifier Curve Name}\label{field-wet-bulb-effectiveness-flow-ratio-modifier-curve-name}
+\paragraph{Field: Wetbulb Effectiveness Flow Ratio Modifier Curve Name}\label{field-wet-bulb-effectiveness-flow-ratio-modifier-curve-name}
 
-This alpha field is the name of a curve that modifies the wet bulb effectiveness design value specified in the previous field by multiplying that value by the result of this curve. The modifying curve is a function of flow fraction, which is the ratio of the sum of the primary and secondary flow rates divided by the sum of the design flow rates. If this input field is left blank, the effectiveness is assumed to be constant. The wet bulb effectiveness modifier curve is required for proper operation of secondary air flow modulation in wet cooling operating mode, and is used with the three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Operation Maximum Limit Outdoor Drybulb Temperature}. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
+This alpha field is the name of a curve that modifies the wet bulb effectiveness design value specified in the previous field by multiplying that value by the result of this curve. The modifying curve is a function of flow fraction, which is the ratio of the sum of the primary and secondary flow rates divided by the sum of the design flow rates. If this input field is left blank, the effectiveness is assumed to be constant. The wet bulb effectiveness modifier curve is required for proper operation of secondary air flow modulation in wet cooling operating mode, and is used with the three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Dry Operation Maximum Limit Outdoor Drybulb Temperature}. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
 
 \paragraph{Field: Cooler Drybulb Design Effectiveness}\label{field-cooler-drybulb-design-effectiveness}
 
 This numeric field is the dry bulb design effectiveness of the evaporative cooler. This is the nominal design dry bulb effectiveness with respect to the dry bulb temperature difference, i.e., dry operation at design air flow rates, and no water evaporation or spraying on the secondary side.
 
-\paragraph{Field Drybulb Effectiveness Flow Ratio Modifier Curve Name}\label{field-drybulb-effectiveness-flow-ratio-modifier-curve-name}
+\paragraph{Field: Drybulb Effectiveness Flow Ratio Modifier Curve Name}\label{field-drybulb-effectiveness-flow-ratio-modifier-curve-name}
 
-This alpha field is the name of a curve that modifies the drybulb effectiveness in the previous field (eff\_db\_design) by multiplying the design effectiveness value by the result of this curve. The curve is evaluated using the flow fraction as the independent variable. The flow fraction is the ratio of sum of the primary and secondary flow rates divided by the sum of the design flow rates. If this input field is left blank, the effectiveness is assumed to be constant. The dry bulb effectiveness modifier curve is required for proper operation of secondary air flow modulation in dry cooling operating mode, and is used with the three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Operation Maximum Limit Outdoor Drybulb Temperature}. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
+This alpha field is the name of a curve that modifies the drybulb effectiveness in the previous field (eff\_db\_design) by multiplying the design effectiveness value by the result of this curve. The curve is evaluated using the flow fraction as the independent variable. The flow fraction is the ratio of sum of the primary and secondary flow rates divided by the sum of the design flow rates. If this input field is left blank, the effectiveness is assumed to be constant. The dry bulb effectiveness modifier curve is required for proper operation of secondary air flow modulation in dry cooling operating mode, and is used with the three input fields \textit{Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}, \textit{Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}, and \textit{Dry Operation Maximum Limit Outdoor Drybulb Temperature}. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
 
 \paragraph{Field: Recirculating Water Pump Design Power}\label{field-recirculating-water-pump-design-power}
 
-This numeric field is the recirculating pump electric power at Secondary Design Air Flow Rate in W. This is the nominal design pump power water recirculation and spray for evaporation at design secondary air flow rates and cooler design effectiveness. This input field is autosizable.
+This numeric field is the recirculating pump electric power at Secondary Air Design Flow Rate in W. This is the nominal design pump power water recirculation and spray for evaporation at design secondary air flow rates and cooler design effectiveness. This input field is autosizable.
 
-\paragraph{Field: Water Pump Power Sizing Factor}\label{field-water-pump-power-sizing-factor-1}
+\paragraph{Field: Design Water Pump Power Per Unit Flow Rate}\label{field-design-water-pump-power-per-unit-flow-rate-1}
 
-This numeric field value is recirculating water pump sizing factor in \si{\wattperVolumeFlowRate}. This field is used when the previous field is set to autosize. The pump design electric power is scaled with Secondary Design Air Flow Rate. Average Pump Power sizing factor was estimated from pump power and secondary air design flow rates inputs from energyplus example files and is about 90.0 \si{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Secondary Air Design Flow Rate). The factor ranges from 55.0 to 150.0 \si{\wattperVolumeFlowRate}.
+This numeric field value is recirculating water pump sizing ratio in \si{\wattperVolumeFlowRate}. This field is used when the previous field is set to autosize. The pump design electric power is scaled with Secondary Air Design Flow Rate. Average water pump power per unit secondary air design flow rate was estimated from pump power and secondary air design flow rate inputs from energyplus example files and is about 90.0 \si{\wattperVolumeFlowRate} ( = 90.0 \textasciitilde{} Pump Power / Secondary Air Design Flow Rate). The factor ranges from 55.0 to 150.0 \si{\wattperVolumeFlowRate}.
 
 \paragraph{Field: Water Pump Power Modifier Curve Name}\label{field-water-pump-power-modifier-curve-name-1}
 
-This alpha field is the name of a dimensionless normalized pump power modifying curve. This curve modifies the pump electric power in the previous field by multiplying the design power by the result of this curve. The normalized curve is a function of the secondary side flow fraction as the independent variable. The curve shall yield a value of 1.0 at a flow fraction of 1.0. The flow fraction is the secondary air flow rate during operation divided by Secondary Design Air Flow Rate. If this input field is left blank, the pump power is assumed to vary linearly with the load. If pump power does not vary linearly with load this curve should be used. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
+This alpha field is the name of a dimensionless normalized pump power modifying curve. This curve modifies the pump electric power in the previous field by multiplying the design power by the result of this curve. The normalized curve is a function of the secondary side flow fraction as the independent variable. The curve shall yield a value of 1.0 at a flow fraction of 1.0. The flow fraction is the secondary air flow rate during operation divided by Secondary Air Design Flow Rate. If this input field is left blank, the pump power is assumed to vary linearly with the load. If pump power does not vary linearly with load this curve should be used. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
 
 \paragraph{Field: Secondary Air Design Flow Rate}\label{field-secondary-air-design-flow-rate}
 
@@ -639,19 +639,19 @@ This numeric field is used to specify the secondary air fan flow rate and is spe
 
 \paragraph{Field: Secondary Air Flow Scaling Factor}\label{field-secondary-air-flow-scaling-factor}
 
-This numeric field is used to scale the secondary air design flow rate and is dimensionless. This field is used when the previous field is set to autosize. The Primary Design Air Flow Rate is scaled using this factor to calculate the secondary design air flow rate.
+This numeric field is used to scale the secondary air design flow rate and is dimensionless. This field is used when the previous field is set to autosize. The Primary Air Design Flow Rate is scaled using this factor to calculate the secondary design air flow rate.
 
 \paragraph{Field: Secondary Air Fan Design Power}\label{field-secondary-air-fan-design-power}
 
-This numeric field is the fan electric power at the Secondary Design Air Flow Rate. This is the nominal design electric power at full speed of the secondary air fan. This input field is autosizable.
+This numeric field is the fan electric power at the Secondary Air Design Flow Rate. This is the nominal design electric power at full speed of the secondary air fan. This input field is autosizable.
 
 \paragraph{Field: Secondary Air Fan Sizing Specific Power}\label{field-secondary-air-fan-sizing-specific-power}
 
-This numeric field is the secondary air fan sizing specific power in W/(m3/s). This field is used when the previous field is set to autosize. The fan power is scaled using the Secondary Design Air Flow Rate.
+This numeric field is the secondary air fan sizing specific power in W/(m3/s). This field is used when the previous field is set to autosize. The fan power is scaled using the Secondary Air Design Flow Rate.
 
 \paragraph{Field: Secondary Air Fan Power Modifier Curve Name}\label{field-secondary-air-fan-power-modifier-curve-name}
 
-This alpha field is the name of a dimensionless normalized curve. The normalized curve modifies the design secondary air fan power in the previous field by multiplying that value by the result of this curve. The normalized curve is a function of the secondary side flow fraction as the independent variable. The curve shall yield a value of 1.0 at a flow fraction of 1.0. The flow fraction is the secondary air flow rate divided by Secondary Design Air Flow Rate. If this input field is left blank, the fan power will vary linearly with load (includes air system cycling, if any). If fan power does not vary linearly with load this curve should be used. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
+This alpha field is the name of a dimensionless normalized curve. The normalized curve modifies the design secondary air fan power in the previous field by multiplying that value by the result of this curve. The normalized curve is a function of the secondary side flow fraction as the independent variable. The curve shall yield a value of 1.0 at a flow fraction of 1.0. The flow fraction is the secondary air flow rate divided by Secondary Air Design Flow Rate. If this input field is left blank, the fan power will vary linearly with load (includes air system cycling, if any). If fan power does not vary linearly with load this curve should be used. Any curve or table with one independent variable can be used: \hyperref[curvelinear]{Curve:Linear}, \hyperref[curvequadratic]{Curve:Quadratic}, \hyperref[curvecubic]{Curve:Cubic}, \hyperref[curvequartic]{Curve:Quartic}, \hyperref[curveexponent]{Curve:Exponent}, \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal}, \hyperref[curvesigmoid]{Curve:Sigmoid}, Curve:RectuangularHyperbola1, \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2}, \hyperref[curveexponentialdecay]{Curve:ExponentialDecay}, \hyperref[curvedoubleexponentialdecay]{Curve:DoubleExponentialDecay}, and one-dimensional \hyperref[tablelookup]{Table:Lookup}.
 
 \paragraph{Field: Primary Air Inlet Node Name}\label{field-primary-air-inlet-node-name-2}
 
@@ -661,7 +661,7 @@ This alpha field is the name of the air inlet node for the primary air flow path
 
 This alpha field is the name of the air outlet node for the primary air flow path through the cooler.
 
-\paragraph{Field:Primary Design Air Flow Rate}\label{fieldprimary-design-air-flow-rate-1}
+\paragraph{Field: Primary Air Design Flow Rate}\label{fieldprimary-design-air-flow-rate-1}
 
 This numeric field is the primary air design air flow rate in m3/s. This input field is autosizable. If the evaporative cooler is on the main air loop branch, the design flow rate is the same as branch design flow rate. If the evaporative cooler is in the outdoor air system primary design flow rate will be the maximum of the the outdoor air design flow rate and one-half of the primary air flow rate on the main air loop branch.
 
@@ -697,37 +697,39 @@ This numeric field is optional and can be used to model additional water consume
 
 This numeric field is optional and can be used to model additional water consumed by the cooler from blowdown. Blowdown is water that is intentionally drained from the cooler s sump to offset the build up of solids in the water that would otherwise occur because of evaporation. The value entered here is dimensionless. It can be characterized as the ratio of solids in the blowdown water to solids in the make up water. Typical values are 3 to 5. The default is 3.0.
 
-\paragraph{Field: Evaporative Operation Minimum Limit Drybulb Temperature}\label{field-evaporative-operation-minimum-limit-drybulb-temperature}
+\paragraph{Field: Evaporative Operation Minimum Limit Secondary Air Drybulb Temperature}\label{field-evaporative-operation-minimum-limit-drybulb-temperature}
 
 This numeric field defines the secondary air inlet node drybulb temperature limits in degree Celsius. When the secondary side entering air dry bulb temperature drops below this limit, then the evaporative cooler operation mode changes to dry heat exchanger. Users specify their own limits. If this field is left blank, then there is no drybulb temperature lower limit for evaporative cooler operation. If operating range control is desired then this input field and the next two input fields should be specified or all the three should be left blank or left out. If no minimum drybulb temperature limit is required while there are maximum drybulb and wetbulb temperature limits then specify very low temperature limit value (e.g., -99.0 C).
 
-\paragraph{Field: Evaporative Operation Maximum Limit Wetbulb Temperature}\label{field-evaporative-operation-maximum-limit-wetbulb-temperature-1}
+\paragraph{Field: Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature}\label{field-evaporative-operation-maximum-limit-wetbulb-temperature-1}
 
 This numeric field defines the secondary air inlet node wetbulb temperature limits in degree Celsius. When the secondary side entering air wet bulb temperature exceeds this limit, then the evaporative cooler is turns off and does not attempt to do any cooling. If this field is left blank, then there is no wetbulb temperature maximum limit for evaporative cooler wet operation mode. If no upper wetbulb temperature limits is desired while there are minimum drybulb and maximum drybulb upper temperature limits then then specify very high maximum wetbulb temperature limit value (e.g.~99.0 C).
 
-\paragraph{Field: Evaporative Operation Maximum Limit Drybulb Temperature}\label{field-evaporative-operation-maximum-limit-drybulb-temperature-1}
+\paragraph{Field: Dry Operation Maximum Limit Outdoor Drybulb Temperature}\label{field-evaporative-operation-maximum-limit-drybulb-temperature-1}
 
 This numeric field defines the secondary air inlet node drybulb temperature limits in degree Celsius. When the secondary side entering air drybulb temperature exceeds this limit, the evaporative cooler will not run in dry operation mode or may be turned off depending on its wetbulb temperature. If this field is left blank, then there is no drybulb temperature maximum limit for evaporative cooler dry operation mode. If no drybulb temperature limit is desired while there are minimum drybulb and maximum wetbulb temperature limits then specify very high maximum drybulb temperature limit value (e.g.~99.0 C).
 
 An IDF example is shown below:
 
 \begin{lstlisting}
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
   DataC_IndirectEvapCooler,   !- Name
   ALWAYS_ON,                  !- Availability Schedule Name
   0.75,                       !- Cooler Wetbulb Design Effectiveness
   ,                           !- Wetbulb Effectiveness Flow Ratio Modifier Curve Name
   ,                           !- Cooler Drybulb Design Effectiveness
   ,                           !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
-  autosize,                   !- Recirculating Water Pump Power
-  autosize,                   !- Secondary Air Design Flow Rate
-  1.0,                        !- Secondary Air Flow Scaling Factor
-  autosize,                   !- Secondary Air Fan Design Power
-  800.0,                      !- Secondary Air Fan Sizing Specific Power W
+  autosize,                   !- Recirculating Water Pump Design Power {W}
+  ,                           !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
+  ,                           !- Water Pump Power Modifier Curve Name
+  autosize,                   !- Secondary Air Design Flow Rate {m3/s}
+  1.0,                        !- Secondary Air Flow Scaling Factor {dimensionless}
+  autosize,                   !- Secondary Air Fan Design Power {W}
+  800.0,                      !- Secondary Air Fan Sizing Specific Power {W/(m3/s)}
   ,                           !- Secondary Air Fan Power Modifier Curve Name
   Return Air Node,            !- Primary Air Inlet Node Name
   IndEC Outlet Node,          !- Primary Air Outlet Node Name
-  autosize,                   !- Primary Design Air Flow Rate
+  autosize,                   !- Primary Air Design Flow Rate {m3/s}
   0.9,                        !- Dewpoint Effectiveness Factor
   IndEC OA Air Inlet Node,    !- Secondary Air Inlet Node Name
   IndEC OA Air Outlet Node,   !- Secondary Air Outlet Node Name
@@ -740,7 +742,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
 
 \subsubsection{Outputs}\label{outputs-4-004}
 
-The output variables that are available for the EvaporativeCooler:Indirect:ResearchSpecial object are shown below:
+The output variables that are available for the EvaporativeCooler:Indirect:UserEffectiveness object are shown below:
 
 \begin{itemize}
 \item
@@ -773,11 +775,11 @@ This output variable provides the operating modes or status of the indirect evap
 
 \paragraph{Evaporative Cooler Part Load Ratio {[]}}\label{evaporative-cooler-part-load-ratio}
 
-This output variable provides the part load fraction of the indirect cooler. The ResearchSpecial cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
+This output variable provides the part load fraction of the indirect cooler. The UserEffectiveness cooler model is able to modulate to meet a temperature set point to avoid over cooling. This output variable is the fraction formed by the ratio of the capacity needed over the maximum cooling capacity available. A value of 1.0 corresponds to full capacity cooling.
 
 \paragraph{Evaporative Cooler Dewpoint Bound Status {[]}}\label{evaporative-cooler-dewpoint-bound-status}
 
-This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The ResearchSpecial model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
+This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The UserEffectiveness model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
 
 \paragraph{Evaporative Cooler Electricity Rate {[}W{]}}\label{evaporative-cooler-electric-power-w-1}
 

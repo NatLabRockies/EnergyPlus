@@ -1281,6 +1281,7 @@
     Zone 1 Thermostat,       !- Name
     NORTH ZONE,              !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Temperature Setpoints;   !- Control 1 Name
 
@@ -1288,6 +1289,7 @@
     Zone 2 Thermostat,       !- Name
     WEST ZONE,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Temperature Setpoints;   !- Control 1 Name
 
@@ -1295,6 +1297,7 @@
     Zone 3 Thermostat,       !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Temperature Setpoints;   !- Control 1 Name
 
@@ -2121,6 +2124,8 @@
   Output:Variable,*,Heating Coil Heating Rate,timestep;
 
   Output:Variable,*,Heating Coil Heating Energy,timestep;
+
+  Output:Variable,*,Heating Coil Runtime Fraction,timestep;
 
   Output:Variable,Outside Air Inlet Node,System Node Mass Flow Rate,timestep;
 

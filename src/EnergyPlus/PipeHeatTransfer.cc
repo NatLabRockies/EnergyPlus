@@ -1390,7 +1390,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
 
                         // total absorbed solar - no ground solar
                         QSolAbsorbed =
-                            TopSolarAbs * (max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad);
+                            TopSolarAbs * (max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad);
 
                         // If sun is not exposed, then turn off both solar and thermal radiation
                         if (!this->SolarExposed) {
