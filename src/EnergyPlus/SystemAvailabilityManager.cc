@@ -266,6 +266,9 @@ namespace Avail {
                     previousAvailStatus = zcam.availStatus;
                     // initialize the availability to "take no action"
                     zcam.availStatus = Status::NoAction;
+                    for (auto &manager : zcam.availManagers) {
+                        manager.availStatus = Status::NoAction;
+                    }
                     for (ZoneCompAvailMgrNum = 1; ZoneCompAvailMgrNum <= zcam.NumAvailManagers; ++ZoneCompAvailMgrNum) {
                         // loop over the avail managers in ZoneHVAC:* components
                         availStatus = SimSysAvailManager(state,
@@ -277,6 +280,7 @@ namespace Avail {
                                                          zcam.ZoneNum,
                                                          ZoneEquipType,
                                                          CompNum);
+                        zcam.availManagers(ZoneCompAvailMgrNum).availStatus = availStatus;
                         if (availStatus == Status::ForceOff) {
                             zcam.availStatus = Status::ForceOff;
                             break; // Fans forced off takes precedence

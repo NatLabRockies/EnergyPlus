@@ -76,6 +76,7 @@
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
+#include <EnergyPlus/SystemAvailabilityManager.hh>
 #include <EnergyPlus/ThermalChimney.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
@@ -89,6 +90,66 @@ using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::HeatBalanceAirManager;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::HVACManager;
+
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesComponentResults)
+{
+    state->init_state(*state);
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataAvail->ZoneComp.allocate(NumValidSysAvailZoneComponents);
+    auto &zoneComponents = state->dataAvail->ZoneComp((int)ZoneEquipType::UnitHeater);
+    zoneComponents.ZoneCompAvailMgrs.allocate(2);
+    for (auto &component : zoneComponents.ZoneCompAvailMgrs) {
+        component.NumAvailManagers = 1;
+        component.availStatus = Avail::Status::CycleOn;
+        component.availManagers.allocate(1);
+        component.availManagers(1).type = Avail::ManagerType::NightVent;
+        component.availManagers(1).Num = 1;
+    }
+    auto &firstComponent = zoneComponents.ZoneCompAvailMgrs(1);
+    auto &secondComponent = zoneComponents.ZoneCompAvailMgrs(2);
+    firstComponent.availManagers(1).availStatus = Avail::Status::CycleOn;
+    secondComponent.availManagers(1).availStatus = Avail::Status::NoAction;
+
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 2, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 0, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, false));
+
+    firstComponent.availStatus = Avail::Status::ForceOff;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    firstComponent.availStatus = Avail::Status::CycleOn;
+    firstComponent.availManagers(1).availStatus = Avail::Status::NoAction;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
+}
+
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesTerminalAirLoop)
+{
+    state->dataDefineEquipment->AirDistUnit.allocate(1);
+    auto &airDistributionUnit = state->dataDefineEquipment->AirDistUnit(1);
+    airDistributionUnit.AirLoopNum = 1;
+    airDistributionUnit.OutletNodeNum = 10;
+    state->dataAirLoop->AirLoopControlInfo.allocate(2);
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = false;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = true;
+
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+    airDistributionUnit.AirLoopNum = 2;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+
+    airDistributionUnit.AirLoopNum = 0;
+    state->dataSize->CurZoneEqNum = 1;
+    state->dataZoneEquip->ZoneEquipConfig.allocate(1);
+    auto &zoneConfig = state->dataZoneEquip->ZoneEquipConfig(1);
+    zoneConfig.NumInletNodes = 1;
+    zoneConfig.InletNode.allocate(1);
+    zoneConfig.InletNode(1) = airDistributionUnit.OutletNodeNum;
+    zoneConfig.InletNodeAirLoopNum.allocate(1);
+    zoneConfig.InletNodeAirLoopNum(1) = 2;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+    zoneConfig.InletNodeAirLoopNum(1) = 1;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+}
 
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_CalcZoneMassBalanceTest)
 {
