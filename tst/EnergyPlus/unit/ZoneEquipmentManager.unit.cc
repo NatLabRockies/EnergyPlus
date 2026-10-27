@@ -5970,7 +5970,7 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
         idfObjects.emplace_back("  " + fan + ",                !- Supply Air Fan Name");
         bool const usePartialFlow = zoneNum == 1;
         idfObjects.emplace_back(usePartialFlow ? "  0.3,                      !- Maximum Supply Air Flow Rate {m3/s}"
-                               : "  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
+                                               : "  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
         idfObjects.emplace_back("  Coil:Heating:Electric,    !- Heating Coil Object Type");
         idfObjects.emplace_back("  " + zone + " Coil,              !- Heating Coil Name");
         idfObjects.emplace_back("  Always On,                !- Supply Air Fan Operating Mode Schedule Name");

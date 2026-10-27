@@ -1871,13 +1871,13 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
             Real64 _partLoadFracatLowMin;
             Real64 _minFlowFracLimitFanHeat = 0.10;
             if (_flowFracForPower < _minFlowFracLimitFanHeat) {
-                    _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                    coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                        coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracForPower * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             } else if (_flowFracActual < _minFlowFracLimitFanHeat) {
-                    _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                    coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                        coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracActual * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             }

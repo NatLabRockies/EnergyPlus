@@ -3578,8 +3578,7 @@ bool getZoneEquipmentNightVentStatus(EnergyPlusData &state,
         if (zoneCompNum > 0 && zoneCompNum <= state.dataDefineEquipment->AirDistUnit.isize()) {
             auto const &airDistUnit = state.dataDefineEquipment->AirDistUnit(zoneCompNum);
             int airLoopNum = airDistUnit.AirLoopNum;
-            if (airLoopNum == 0 && state.dataSize->CurZoneEqNum > 0 &&
-                state.dataSize->CurZoneEqNum <= state.dataZoneEquip->ZoneEquipConfig.isize()) {
+            if (airLoopNum == 0 && state.dataSize->CurZoneEqNum > 0 && state.dataSize->CurZoneEqNum <= state.dataZoneEquip->ZoneEquipConfig.isize()) {
                 auto const &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(state.dataSize->CurZoneEqNum);
                 for (int inletNodeNum = 1; inletNodeNum <= zoneEquipConfig.NumInletNodes; ++inletNodeNum) {
                     if (zoneEquipConfig.InletNode(inletNodeNum) == airDistUnit.OutletNodeNum) {
@@ -3794,8 +3793,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
                     ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment(state);
                     state.dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag = false;
                 }
-                zoneEquipList.EquipIndex(EquipPtr) =
-                    Util::FindItemInList(zoneEquipList.EquipName(EquipPtr), state.dataDefineEquipment->AirDistUnit);
+                zoneEquipList.EquipIndex(EquipPtr) = Util::FindItemInList(zoneEquipList.EquipName(EquipPtr), state.dataDefineEquipment->AirDistUnit);
             }
 
             const int ZoneCompNum = zoneEquipList.EquipIndex(EquipPtr);
