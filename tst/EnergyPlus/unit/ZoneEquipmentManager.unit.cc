@@ -5873,6 +5873,16 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
         "  20;                       !- Hourly Value",
     };
 
+    if (fanType == "Fan:SystemModel") {
+        idfObjects.emplace_back("Curve:Quadratic,");
+        idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Name");
+        idfObjects.emplace_back("  0.0,                      !- Coefficient1 Constant");
+        idfObjects.emplace_back("  1.0,                      !- Coefficient2 x");
+        idfObjects.emplace_back("  0.0,                      !- Coefficient3 x**2");
+        idfObjects.emplace_back("  0.0,                      !- Minimum Value of x");
+        idfObjects.emplace_back("  1.0;                      !- Maximum Value of x");
+    }
+
     auto appendFan = [&idfObjects, fanType](int zoneNum) {
         std::string const zone = "Zone " + std::to_string(zoneNum);
         std::string const fan = zone + " Fan";
@@ -5880,48 +5890,76 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
         std::string const outletNode = zone + " Fan Outlet";
 
         // Keep each fan object in field order while varying only model-specific inputs.
-        idfObjects.emplace_back(std::string(fanType) + ",");
-        idfObjects.emplace_back("  " + fan + ",                !- Name");
-        idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
-        idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
-        idfObjects.emplace_back("  300,                      !- Pressure Rise {Pa}");
-        idfObjects.emplace_back("  1.0,                      !- Maximum Flow Rate {m3/s}");
-
-        if (fanType == "Fan:OnOff") {
-            idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
-            idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+        if (fanType == "Fan:SystemModel") {
+            idfObjects.emplace_back("Fan:SystemModel,");
+            idfObjects.emplace_back("  " + fan + ",                !- Name");
+            idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
             idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
             idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
-            idfObjects.emplace_back("  ,                         !- Fan Power Ratio Function of Speed Ratio Curve Name");
-            idfObjects.emplace_back("  ,                         !- Fan Efficiency Ratio Function of Speed Ratio Curve Name");
-            idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
-        } else if (fanType == "Fan:ConstantVolume") {
+            idfObjects.emplace_back("  1.0,                      !- Design Maximum Air Flow Rate {m3/s}");
+            idfObjects.emplace_back("  Continuous,               !- Speed Control Method");
+            idfObjects.emplace_back("  0.0,                      !- Electric Power Minimum Flow Rate Fraction");
+            idfObjects.emplace_back("  300.0,                    !- Design Pressure Rise {Pa}");
             idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
-            idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
-            idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
-            idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
-            idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
+            idfObjects.emplace_back("  1.0,                      !- Motor In Air Stream Fraction");
+            idfObjects.emplace_back("  Autosize,                 !- Design Electric Power Consumption");
+            idfObjects.emplace_back("  TotalEfficiencyAndPressure, !- Design Power Sizing Method");
+            idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate");
+            idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate Per Unit Pressure");
+            idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Electric Power Function of Flow Fraction Curve Name");
+            idfObjects.emplace_back("  100.0,                    !- Night Ventilation Mode Pressure Rise {Pa}");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Flow Fraction");
+            idfObjects.emplace_back("  ,                         !- Motor Loss Zone Name");
+            idfObjects.emplace_back("  0.0,                      !- Motor Loss Radiative Fraction");
+            idfObjects.emplace_back("  General,                  !- End-Use Subcategory");
+            idfObjects.emplace_back("  1;                        !- Number of Speeds");
         } else {
-            idfObjects.emplace_back("  FixedFlowRate,           !- Fan Power Minimum Flow Rate Input Method");
-            idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Flow Fraction");
-            idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Air Flow Rate {m3/s}");
-            idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
-            idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
-            idfObjects.emplace_back("  0.040759894,              !- Fan Power Coefficient 1");
-            idfObjects.emplace_back("  0.08804497,               !- Fan Power Coefficient 2");
-            idfObjects.emplace_back("  -0.07292612,              !- Fan Power Coefficient 3");
-            idfObjects.emplace_back("  0.943739823,              !- Fan Power Coefficient 4");
-            idfObjects.emplace_back("  0.0,                      !- Fan Power Coefficient 5");
-            idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
-            idfObjects.emplace_back("  " + outletNode + ";        !- Air Outlet Node Name");
+            idfObjects.emplace_back(std::string(fanType) + ",");
+            idfObjects.emplace_back("  " + fan + ",                !- Name");
+            idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
+            idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  300,                      !- Pressure Rise {Pa}");
+            idfObjects.emplace_back("  1.0,                      !- Maximum Flow Rate {m3/s}");
+
+            if (fanType == "Fan:OnOff") {
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
+                idfObjects.emplace_back("  ,                         !- Fan Power Ratio Function of Speed Ratio Curve Name");
+                idfObjects.emplace_back("  ,                         !- Fan Efficiency Ratio Function of Speed Ratio Curve Name");
+                idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
+            } else if (fanType == "Fan:ConstantVolume") {
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
+                idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
+            } else {
+                idfObjects.emplace_back("  FixedFlowRate,           !- Fan Power Minimum Flow Rate Input Method");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Flow Fraction");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Air Flow Rate {m3/s}");
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  0.040759894,              !- Fan Power Coefficient 1");
+                idfObjects.emplace_back("  0.08804497,               !- Fan Power Coefficient 2");
+                idfObjects.emplace_back("  -0.07292612,              !- Fan Power Coefficient 3");
+                idfObjects.emplace_back("  0.943739823,              !- Fan Power Coefficient 4");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Coefficient 5");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ";        !- Air Outlet Node Name");
+            }
         }
 
-        idfObjects.emplace_back("FanPerformance:NightVentilation,");
-        idfObjects.emplace_back("  " + fan + ",                !- Fan Name");
-        idfObjects.emplace_back("  0.5,                      !- Fan Total Efficiency");
-        idfObjects.emplace_back("  100,                      !- Pressure Rise {Pa}");
-        idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
-        idfObjects.emplace_back("  1.0;                      !- Motor in Airstream Fraction");
+        if (fanType != "Fan:SystemModel") {
+            idfObjects.emplace_back("FanPerformance:NightVentilation,");
+            idfObjects.emplace_back("  " + fan + ",                !- Fan Name");
+            idfObjects.emplace_back("  0.5,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  100,                      !- Pressure Rise {Pa}");
+            idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+            idfObjects.emplace_back("  1.0;                      !- Motor in Airstream Fraction");
+        }
 
         idfObjects.emplace_back("ZoneHVAC:UnitHeater,");
         idfObjects.emplace_back("  " + zone + " Unit Heater,       !- Name");
@@ -5930,7 +5968,9 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
         idfObjects.emplace_back("  " + zone + " Inlet,             !- Air Outlet Node Name");
         idfObjects.emplace_back("  " + std::string(fanType) + ",          !- Supply Air Fan Object Type");
         idfObjects.emplace_back("  " + fan + ",                !- Supply Air Fan Name");
-        idfObjects.emplace_back("  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
+        bool const usePartialFlow = zoneNum == 1 && (fanType == "Fan:SystemModel" || fanType == "Fan:VariableVolume");
+        idfObjects.emplace_back(usePartialFlow ? "  0.3,                      !- Maximum Supply Air Flow Rate {m3/s}"
+                               : "  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
         idfObjects.emplace_back("  Coil:Heating:Electric,    !- Heating Coil Object Type");
         idfObjects.emplace_back("  " + zone + " Coil,              !- Heating Coil Name");
         idfObjects.emplace_back("  Always On,                !- Supply Air Fan Operating Mode Schedule Name");
@@ -6053,6 +6093,10 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
 
     Fans::GetFanInput(state);
     for (auto *fan : state.dataFans->fans) {
+        if (fan->type == HVAC::FanType::SystemModel) {
+            fan->rhoAirStdInit = state.dataEnvrn->StdRhoAir;
+            fan->maxAirMassFlowRate = fan->maxAirFlowRate * fan->rhoAirStdInit;
+        }
         fan->sizingFlag = false;
     }
     UnitHeater::GetUnitHeaterInput(state);
@@ -6126,30 +6170,45 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     ASSERT_GT(fan2Num, 0);
     auto &fan1 = *state.dataFans->fans(fan1Num);
     auto &fan2 = *state.dataFans->fans(fan2Num);
-    auto const *fan2Component = dynamic_cast<Fans::FanComponent const *>(&fan2);
-    ASSERT_NE(fan2Component, nullptr);
     auto &zone1InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(1).InletNode(1));
     auto &zone2InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(2).InletNode(1));
-    Real64 constexpr designMassFlow = 1.0 * 1.2;
+    Real64 const zone1MassFlow = (fan1.type == HVAC::FanType::VAV || fan1.type == HVAC::FanType::SystemModel) ? 0.3 * 1.2 : 1.0 * 1.2;
+    Real64 constexpr zone2MassFlow = 1.0 * 1.2;
     Real64 designPowerFrac = 1.0;
     if (fan2.type == HVAC::FanType::VAV) {
+        auto const *fan2Component = dynamic_cast<Fans::FanComponent const *>(&fan2);
+        ASSERT_NE(fan2Component, nullptr);
         Real64 constexpr designFlowFrac = 1.0;
         designPowerFrac = fan2Component->coeffs[0] + fan2Component->coeffs[1] * designFlowFrac + fan2Component->coeffs[2] * pow_2(designFlowFrac) +
                           fan2Component->coeffs[3] * pow_3(designFlowFrac) + fan2Component->coeffs[4] * pow_4(designFlowFrac);
     }
-    Real64 const designPower = designPowerFrac * designMassFlow * 300.0 / (0.6 * 1.2);
-    Real64 constexpr nightVentPower = designMassFlow * 100.0 / (0.5 * 1.2);
+    Real64 const designPower = designPowerFrac * zone2MassFlow * 300.0 / (0.6 * 1.2);
+    Real64 zone1NormalPower = designPower;
+    if (fan1.type == HVAC::FanType::VAV) {
+        auto const *fan1Component = dynamic_cast<Fans::FanComponent const *>(&fan1);
+        ASSERT_NE(fan1Component, nullptr);
+        Real64 const fan1DesignMassFlow = fan1.maxAirFlowRate * state.dataEnvrn->StdRhoAir;
+        Real64 const flowFraction = zone1MassFlow / fan1DesignMassFlow;
+        Real64 const powerFraction = fan1Component->coeffs[0] + fan1Component->coeffs[1] * flowFraction +
+                                     fan1Component->coeffs[2] * pow_2(flowFraction) + fan1Component->coeffs[3] * pow_3(flowFraction) +
+                                     fan1Component->coeffs[4] * pow_4(flowFraction);
+        zone1NormalPower = powerFraction * fan1DesignMassFlow * 300.0 / (0.6 * 1.2);
+    } else if (fan1.type == HVAC::FanType::SystemModel) {
+        zone1NormalPower = zone1MassFlow * 300.0 / (0.6 * 1.2);
+    }
+    Real64 const nightFanEff = (fan1.type == HVAC::FanType::SystemModel) ? 0.6 : 0.5;
+    Real64 const nightVentPower = zone1MassFlow * 100.0 / (nightFanEff * 1.2);
     bool simAir = false;
 
-    // An active zone component uses night performance despite a false global flag; flow stays at the requested design rate.
+    // An active zone component uses night performance despite a false global flag; requested airflow is preserved.
     state.dataHVACGlobal->NightVentOn = false;
     SimZoneEquipment(state, true, simAir);
-    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
     EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
-    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
-    EXPECT_NEAR(zone1InletNode.MassFlowRate, designMassFlow, 0.0001);
-    EXPECT_NEAR(zone2InletNode.MassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
 
     // A temperature change clears the manager status and restores the fan's design performance.
     state.dataHeatBalFanSys->TempTstatAir(1) = 19.0;
@@ -6157,7 +6216,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::NoAction);
     EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availManagers(1).availStatus, Avail::Status::NoAction);
     SimZoneEquipment(state, true, simAir);
-    EXPECT_NEAR(fan1.totalPower, designPower, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, zone1NormalPower, 0.0001);
 
     state.dataHeatBalFanSys->TempTstatAir(1) = 25.0;
     Avail::ManageSystemAvailability(state);
@@ -6166,12 +6225,12 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     // A stale true global flag must not grant night performance to the inactive zone.
     state.dataHVACGlobal->NightVentOn = true;
     SimZoneEquipment(state, true, simAir);
-    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
     EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
-    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
-    EXPECT_NEAR(zone1InletNode.MassFlowRate, designMassFlow, 0.0001);
-    EXPECT_NEAR(zone2InletNode.MassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
     EXPECT_TRUE(state.dataHVACGlobal->NightVentOn);
 
     // Removing zone 2's manager must not let it inherit stale global night-vent state.
@@ -6181,12 +6240,12 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     zone2Availability.availManagers.deallocate();
     state.dataHVACGlobal->NightVentOn = true;
     SimZoneEquipment(state, true, simAir);
-    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
     EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
-    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
     EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
-    EXPECT_NEAR(zone1InletNode.MassFlowRate, designMassFlow, 0.0001);
-    EXPECT_NEAR(zone2InletNode.MassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
     EXPECT_TRUE(state.dataHVACGlobal->NightVentOn);
 
     // Unmanaged zone equipment must also ignore stale global night-ventilation state.
@@ -6223,7 +6282,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneOnOffFanUsesComponentNightVen
     runZoneFanNightVentTest(*state);
 }
 
-// Verify a UnitHeater VAV fan follows its own night manager rather than stale global night mode.
+// Verify a UnitHeater VAV fan follows its own night manager, ignores stale global state, and scales power with its 30% flow.
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:VariableVolume"))));
@@ -6235,6 +6294,14 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponen
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneConstantVolumeFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:ConstantVolume"))));
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    runZoneFanNightVentTest(*state);
+}
+
+// Verify a UnitHeater SystemModel fan follows its own night manager, ignores stale global state, and scales power with its 30% flow.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneSystemModelFanUsesComponentNightVentilation)
+{
+    ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:SystemModel"))));
     // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
     runZoneFanNightVentTest(*state);
 }

@@ -406,7 +406,7 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationFouledFilterUsesNightPressure)
     }
 }
 
-// Verify VAV night power scales with actual flow, including below the normal low-flow heat-safeguard threshold.
+// Verify VAV night power follows actual flow below the normal low-flow heat-safeguard threshold.
 TEST_F(EnergyPlusFixture, Fans_VAVNightVentilationPowerScalesWithLowFlow)
 {
     state->init_state(*state);

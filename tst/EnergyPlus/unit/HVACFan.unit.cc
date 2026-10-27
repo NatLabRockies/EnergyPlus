@@ -201,7 +201,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentFouledFilterUsesNightPressure)
     EXPECT_NEAR(206.8, fanSystem.powerLossToAir, 0.01);
 }
 
-// Verify continuous SystemModel night power remains proportional to actual flow at very low flow.
+// Verify continuous SystemModel night power follows actual flow below the normal low-flow heat-safeguard threshold.
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
 {
     state->init_state(*state);
