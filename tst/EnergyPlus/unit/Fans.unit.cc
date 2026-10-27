@@ -252,7 +252,7 @@ TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
 // Verify alternate night performance across ConstantVolume, VAV, OnOff, and ZoneExhaust fan models.
 TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
 {
-    // Alternate night performance changes fan pressure, efficiency, and heat without limiting requested airflow.
+    // Alternate night performance changes pressure and efficiency while night power follows requested airflow.
     state->init_state(*state);
     state->dataEnvrn->StdRhoAir = 1.0;
     state->dataHVACGlobal->NightVentOn = true;
@@ -283,12 +283,13 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
         return fan;
     };
 
-    // Constant-volume flow remains at its 1.0 kg/s request while night power uses the alternate settings.
+    // Constant-volume operation uses its 0.3 kg/s request with alternate night pressure and efficiency.
     auto constantFan = configureFan(HVAC::FanType::Constant);
+    constantFan->inletAirMassFlowRate = 0.3;
     constantFan->simulateConstant(*state);
-    EXPECT_DOUBLE_EQ(1.0, constantFan->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(200.0, constantFan->totalPower);
-    EXPECT_DOUBLE_EQ(140.0, constantFan->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.3, constantFan->outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(60.0, constantFan->totalPower);
+    EXPECT_DOUBLE_EQ(42.0, constantFan->powerLossToAir);
 
     auto variableFan = configureFan(HVAC::FanType::VAV);
     variableFan->coeffs = {0.25, 0.0, 0.0, 0.0, 0.0};
@@ -324,18 +325,20 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
 
     // Night ventilation is fixed-speed, so the parent speed ratio and curves must not modify night power.
     state->dataHVACGlobal->NightVentOn = true;
+    onOffFan->inletAirMassFlowRate = 0.3;
     onOffFan->simulateOnOff(*state, 0.5);
-    EXPECT_DOUBLE_EQ(1.0, onOffFan->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(200.0, onOffFan->totalPower);
-    EXPECT_DOUBLE_EQ(140.0, onOffFan->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.3, onOffFan->outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(60.0, onOffFan->totalPower);
+    EXPECT_DOUBLE_EQ(42.0, onOffFan->powerLossToAir);
 
     auto exhaustFan = configureFan(HVAC::FanType::Exhaust);
     exhaustFan->availManagerMode = Fans::AvailManagerMode::Coupled;
+    exhaustFan->inletAirMassFlowRate = 0.3;
     exhaustFan->simulateZoneExhaust(*state);
     // Zone exhaust fan heat uses air power; its night motor efficiency does not alter the heat calculation.
-    EXPECT_DOUBLE_EQ(1.0, exhaustFan->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(200.0, exhaustFan->totalPower);
-    EXPECT_DOUBLE_EQ(125.0, exhaustFan->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.3, exhaustFan->outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(60.0, exhaustFan->totalPower);
+    EXPECT_DOUBLE_EQ(37.5, exhaustFan->powerLossToAir);
 }
 
 // Verify fouled-filter pressure scaling uses the selected night pressure when night mode is active.

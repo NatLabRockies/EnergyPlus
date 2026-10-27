@@ -5968,7 +5968,7 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
         idfObjects.emplace_back("  " + zone + " Inlet,             !- Air Outlet Node Name");
         idfObjects.emplace_back("  " + std::string(fanType) + ",          !- Supply Air Fan Object Type");
         idfObjects.emplace_back("  " + fan + ",                !- Supply Air Fan Name");
-        bool const usePartialFlow = zoneNum == 1 && (fanType == "Fan:SystemModel" || fanType == "Fan:VariableVolume");
+        bool const usePartialFlow = zoneNum == 1;
         idfObjects.emplace_back(usePartialFlow ? "  0.3,                      !- Maximum Supply Air Flow Rate {m3/s}"
                                : "  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
         idfObjects.emplace_back("  Coil:Heating:Electric,    !- Heating Coil Object Type");
@@ -6172,7 +6172,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     auto &fan2 = *state.dataFans->fans(fan2Num);
     auto &zone1InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(1).InletNode(1));
     auto &zone2InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(2).InletNode(1));
-    Real64 const zone1MassFlow = (fan1.type == HVAC::FanType::VAV || fan1.type == HVAC::FanType::SystemModel) ? 0.3 * 1.2 : 1.0 * 1.2;
+    Real64 constexpr zone1MassFlow = 0.3 * 1.2;
     Real64 constexpr zone2MassFlow = 1.0 * 1.2;
     Real64 designPowerFrac = 1.0;
     if (fan2.type == HVAC::FanType::VAV) {
@@ -6193,7 +6193,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
                                      fan1Component->coeffs[2] * pow_2(flowFraction) + fan1Component->coeffs[3] * pow_3(flowFraction) +
                                      fan1Component->coeffs[4] * pow_4(flowFraction);
         zone1NormalPower = powerFraction * fan1DesignMassFlow * 300.0 / (0.6 * 1.2);
-    } else if (fan1.type == HVAC::FanType::SystemModel) {
+    } else {
         zone1NormalPower = zone1MassFlow * 300.0 / (0.6 * 1.2);
     }
     Real64 const nightFanEff = (fan1.type == HVAC::FanType::SystemModel) ? 0.6 : 0.5;
@@ -6274,7 +6274,7 @@ void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
     zoneEquipList2ForCapture.compPointer[equipPtr] = savedComponent2;
 }
 
-// Verify a UnitHeater OnOff fan follows its own night manager rather than stale global night mode.
+// Verify a UnitHeater OnOff fan follows its own night manager, ignores stale global state, and scales night power at 30% flow.
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneOnOffFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:OnOff"))));
@@ -6290,7 +6290,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponen
     runZoneFanNightVentTest(*state);
 }
 
-// Verify a UnitHeater ConstantVolume fan follows its own night manager rather than stale global night mode.
+// Verify a UnitHeater ConstantVolume fan follows its own night manager, ignores stale global state, and scales night power at 30% flow.
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneConstantVolumeFanUsesComponentNightVentilation)
 {
     ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:ConstantVolume"))));
