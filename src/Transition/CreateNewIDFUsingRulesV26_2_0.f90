@@ -416,22 +416,19 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               CASE('FAN:SYSTEMMODEL')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                   nodiff=.false.
-                  IF (CurArgs <= 17) THEN
-                    ! record does not reach the old Night Ventilation Mode Flow Fraction field, nothing to do
+                  IF (CurArgs <= 16) THEN
                     OutArgs(1:CurArgs)=InArgs(1:CurArgs)
-                  ELSEIF (CurArgs == 18) THEN
-                    ! old field 18, Night Ventilation Mode Flow Fraction, is dropped; nothing follows it
-                    OutArgs(1:17)=InArgs(1:17)
-                    CurArgs = 17
                   ELSE
-                    OutArgs(1:17)=InArgs(1:17)
-                    OutArgs(18) = ''  ! new Night Ventilation Mode Maximum Air Flow Rate field (blank)
-                    OutArgs(19) = ''  ! new Night Ventilation Mode Fan Total Efficiency field (blank)
-                    OutArgs(20) = ''  ! new Night Ventilation Mode Motor Efficiency field (blank)
-                    OutArgs(21) = ''  ! new Night Ventilation Mode Motor In Air Stream Fraction field (blank)
-                    ! old field 18, Night Ventilation Mode Flow Fraction, is dropped; shift remaining fields
-                    OutArgs(22:CurArgs+3)=InArgs(19:CurArgs)
-                    CurArgs = CurArgs + 3
+                    OutArgs(1:16)=InArgs(1:16)
+                    OutArgs(17) = ''
+                    OutArgs(18) = InArgs(17)
+                    IF (CurArgs <= 18) THEN
+                      CurArgs = 18
+                    ELSE
+                      OutArgs(19:20) = ''
+                      OutArgs(21:CurArgs+2)=InArgs(19:CurArgs)
+                      CurArgs = CurArgs + 2
+                    ENDIF
                   ENDIF
 
               ! If your original object starts with G, insert the rules here

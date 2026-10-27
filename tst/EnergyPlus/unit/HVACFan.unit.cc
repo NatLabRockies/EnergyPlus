@@ -60,6 +60,7 @@
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/Fans.hh>
+#include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -162,61 +163,6 @@ TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
     state->dataSize->DataNonZoneNonAirloopValue = 0.0;
 }
 
-TEST_F(EnergyPlusFixture, VariableVolumeFan_NightVentilationPerformance)
-{
-    state->init_state(*state);
-    state->dataEnvrn->StdRhoAir = 1.0;
-
-    auto *fan = new Fans::FanComponent;
-    fan->Name = "Test Fan";
-    fan->type = HVAC::FanType::VAV;
-    fan->deltaPress = 300.0;
-    fan->totalEff = 0.7;
-    fan->motorEff = 0.8;
-    fan->motorInAirFrac = 1.0;
-    fan->coeffs[1] = 1.0;
-    fan->availSched = Sched::GetScheduleAlwaysOn(*state);
-    fan->maxAirFlowRate = 1.0;
-    fan->minAirMassFlowRate = 0.0;
-    fan->maxAirMassFlowRate = 1.0;
-    fan->inletAirMassFlowRate = 1.0;
-    fan->rhoAirStdInit = state->dataEnvrn->StdRhoAir;
-    fan->nightVentPerfNum = 1;
-
-    state->dataFans->NumNightVentPerf = 1;
-    state->dataFans->NightVentPerf.allocate(1);
-    auto &nightVentPerf = state->dataFans->NightVentPerf(1);
-    nightVentPerf.FanName = fan->Name;
-    nightVentPerf.FanEff = 0.5;
-    nightVentPerf.DeltaPress = 100.0;
-    nightVentPerf.MaxAirFlowRate = 0.75;
-    nightVentPerf.MaxAirMassFlowRate = 0.75;
-    nightVentPerf.MotEff = 0.6;
-    nightVentPerf.MotInAirFrac = 0.25;
-
-    state->dataFans->fans.push_back(fan);
-    state->dataFans->fanMap.insert_or_assign(fan->Name, state->dataFans->fans.size());
-
-    state->dataHVACGlobal->TurnFansOn = true;
-    state->dataHVACGlobal->NightVentOn = false;
-
-    Real64 const designElecPower = fan->maxAirFlowRate * fan->deltaPress / fan->totalEff;
-
-    fan->simulateVAV(*state);
-
-    EXPECT_DOUBLE_EQ(300.0 / 0.7, designElecPower); // normal design power: 1.0 kg/s * 300 Pa / 0.7 total efficiency
-    EXPECT_DOUBLE_EQ(1.0, fan->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s design maximum
-    EXPECT_DOUBLE_EQ(designElecPower, fan->totalPower); // normal power equals design power at full flow
-    EXPECT_DOUBLE_EQ(designElecPower, fan->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
-
-    state->dataHVACGlobal->NightVentOn = true;
-    fan->simulateVAV(*state);
-
-    EXPECT_DOUBLE_EQ(0.75, fan->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
-    EXPECT_DOUBLE_EQ(150.0, fan->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
-    EXPECT_DOUBLE_EQ(105.0, fan->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
-}
-
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
 {
     std::string const idf_objects = delimited_string({
@@ -238,9 +184,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
         "    ,                            !- Fan Total Efficiency",
         "    simple cubic,                !- Electric Power Function of Flow Fraction Curve Name",
-        "    100.0,                       !- Night Ventilation Mode Pressure Rise",
-        "    0.75,                        !- Night Ventilation Mode Maximum Air Flow Rate",
         "    0.5,                         !- Night Ventilation Mode Fan Total Efficiency",
+        "    100.0,                       !- Night Ventilation Mode Pressure Rise",
         "    0.6,                         !- Night Ventilation Mode Motor Efficiency",
         "    0.25;                        !- Night Ventilation Mode Motor In Air Stream Fraction",
 
@@ -273,23 +218,175 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
 
     auto &inletNode = state->dataLoopNodes->Node(fanSystem->inletNodeNum);
     auto &outletNode = state->dataLoopNodes->Node(fanSystem->outletNodeNum);
-    inletNode.MassFlowRate = 1.0;
     inletNode.MassFlowRateMaxAvail = 1.0;
     outletNode.MassFlowRateMax = 1.0;
     outletNode.MassFlowRateMaxAvail = 1.0;
-    fanSystem->simulate(*state, false, _, _);
+    EXPECT_DOUBLE_EQ(0.5, fanSystem->nightVentTotalEff);
+    EXPECT_DOUBLE_EQ(100.0, fanSystem->nightVentPressureDelta);
+    EXPECT_DOUBLE_EQ(0.6, fanSystem->nightVentMotorEff);
+    EXPECT_DOUBLE_EQ(0.25, fanSystem->nightVentMotorInAirFrac);
+    EXPECT_TRUE(fanSystem->nightVentMotorInAirFracSpecified);
 
-    EXPECT_DOUBLE_EQ(300.0 / 0.7, fanSystem->designElecPower); // normal design power: 1.0 kg/s * 300 Pa / default 0.7 total efficiency
-    EXPECT_DOUBLE_EQ(1.0, fanSystem->outletAirMassFlowRate); // normal mode uses the 1.0 kg/s design maximum
-    EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->totalPower); // normal power equals design power at full flow
-    EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->powerLossToAir); // 0.8 * design power + (design power - 0.8 * design power) * 1.0
+    for (auto const speedControl : {Fans::SpeedControl::Continuous, Fans::SpeedControl::Discrete}) {
+        fanSystem->speedControl = speedControl;
+        state->dataHVACGlobal->NightVentOn = false;
+        inletNode.MassFlowRate = 1.0;
+        fanSystem->simulate(*state, false, _, _);
 
+        EXPECT_DOUBLE_EQ(300.0 / 0.7, fanSystem->designElecPower);
+        EXPECT_DOUBLE_EQ(1.0, fanSystem->outletAirMassFlowRate);
+        EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->totalPower);
+        EXPECT_DOUBLE_EQ(fanSystem->designElecPower, fanSystem->powerLossToAir);
+
+        state->dataHVACGlobal->NightVentOn = true;
+        inletNode.MassFlowRate = 0.75;
+        fanSystem->simulate(*state, false, _, _);
+
+        EXPECT_DOUBLE_EQ(0.75, fanSystem->outletAirMassFlowRate);
+        EXPECT_DOUBLE_EQ(150.0, fanSystem->totalPower);
+        EXPECT_DOUBLE_EQ(105.0, fanSystem->powerLossToAir);
+
+        fanSystem->nightVentMotorInAirFrac = 0.0;
+        fanSystem->simulate(*state, false, _, _);
+        EXPECT_DOUBLE_EQ(150.0, fanSystem->totalPower);
+        EXPECT_DOUBLE_EQ(90.0, fanSystem->powerLossToAir);
+        fanSystem->nightVentMotorInAirFrac = 0.25;
+
+        inletNode.MassFlowRate = 1.0;
+        fanSystem->simulate(*state, false, _, _);
+        EXPECT_DOUBLE_EQ(1.0, fanSystem->outletAirMassFlowRate);
+        EXPECT_DOUBLE_EQ(200.0, fanSystem->totalPower);
+    }
+
+    fanSystem->numSpeeds = 2;
+    fanSystem->flowFracAtSpeed = {0.5, 1.0};
+    fanSystem->massFlowAtSpeed = {0.5, 1.0};
+    fanSystem->totalEffAtSpeed = {0.9, 0.7};
+    fanSystem->runtimeFracAtSpeed.resize(2, 0.0);
+    for (Real64 const massFlowRate : {0.25, 0.75}) {
+        inletNode.MassFlowRate = massFlowRate;
+        fanSystem->simulate(*state, false, _, _);
+        EXPECT_DOUBLE_EQ(massFlowRate, fanSystem->outletAirMassFlowRate);
+        EXPECT_DOUBLE_EQ(massFlowRate * 100.0 / 0.5, fanSystem->totalPower);
+        EXPECT_NEAR(0.7 * fanSystem->totalPower, fanSystem->powerLossToAir, 0.0001);
+    }
+}
+
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressure)
+{
+    state->init_state(*state);
     state->dataHVACGlobal->NightVentOn = true;
-    fanSystem->simulate(*state, false, _, _);
+    state->dataHVACGlobal->TurnFansOn = true;
 
-    EXPECT_DOUBLE_EQ(0.75, fanSystem->outletAirMassFlowRate); // night flow is capped at min(1.0 kg/s inlet, 0.75 kg/s night maximum)
-    EXPECT_DOUBLE_EQ(150.0, fanSystem->totalPower); // night power: 0.75 kg/s * 100 Pa / 0.5 night efficiency
-    EXPECT_DOUBLE_EQ(105.0, fanSystem->powerLossToAir); // 0.6 * 150 W + (150 W - 0.6 * 150 W) * 0.25
+    Fans::FanSystem fanSystem;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.36;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.numSpeeds = 1;
+    fanSystem.runtimeFracAtSpeed.resize(1, 0.0);
+
+    for (auto const speedControl : {Fans::SpeedControl::Continuous, Fans::SpeedControl::Discrete}) {
+        fanSystem.speedControl = speedControl;
+        fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+        EXPECT_DOUBLE_EQ(0.36, fanSystem.outletAirMassFlowRate);
+        EXPECT_NEAR(150.0, fanSystem.totalPower, 0.0001);
+        EXPECT_NEAR(150.0, fanSystem.powerLossToAir, 0.0001);
+    }
+}
+
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentFouledFilterUsesNightPressure)
+{
+    state->init_state(*state);
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataGlobal->DoWeathSim = true;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.0;
+    fanSystem.inletAirMassFlowRate = 1.0;
+    fanSystem.rhoAirStdInit = 1.0;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.nightVentPressureDelta = 100.0;
+    fanSystem.totalEff = 0.5;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.faultyFilterFlag = true;
+    fanSystem.faultyFilterIndex = 1;
+
+    auto *fanCurve = Curve::AddCurve(*state, "Night Pressure Fan Curve");
+    fanCurve->curveType = Curve::CurveType::Quadratic;
+    fanCurve->coeff[0] = 800.0;
+    fanCurve->coeff[1] = -500.0;
+    fanCurve->inputLimits[0].min = 0.0;
+    fanCurve->inputLimits[0].max = 1.0;
+
+    Sched::ScheduleConstant faultAvailableSchedule;
+    faultAvailableSchedule.currentVal = 1.0;
+    Sched::ScheduleConstant pressureFractionSchedule;
+    pressureFractionSchedule.currentVal = 1.1;
+    state->dataFaultsMgr->NumFaultyAirFilter = 1;
+    state->dataFaultsMgr->FaultsFouledAirFilters.allocate(1);
+    auto &fault = state->dataFaultsMgr->FaultsFouledAirFilters(1);
+    fault.availSched = &faultAvailableSchedule;
+    fault.pressFracSched = &pressureFractionSchedule;
+    fault.fanCurveNum = fanCurve->Num;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_NEAR(0.94, fanSystem.outletAirMassFlowRate, 0.01);
+    EXPECT_NEAR(206.8, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(206.8, fanSystem.powerLossToAir, 0.01);
+}
+
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
+{
+    state->init_state(*state);
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.012;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 20000.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Night Vent Cubic Power Curve");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[3] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    for (Real64 const minPowerFlowFrac : {0.0, 0.2}) {
+        fanSystem.minPowerFlowFrac = minPowerFlowFrac;
+        fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+        EXPECT_DOUBLE_EQ(0.012, fanSystem.outletAirMassFlowRate);
+        EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
+    }
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
@@ -315,9 +412,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
         "    ,                            !- Fan Total Efficiency",
         "    ,                            !- Electric Power Function of Flow Fraction Curve Name",
-        "    ,                            !- Night Ventilation Mode Pressure Rise",
-        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
         "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
         "    ,                            !- Night Ventilation Mode Motor Efficiency",
         "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
         "    ,                            !- Motor Loss Zone Name",
@@ -382,9 +478,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc2)
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
         "    ,                            !- Fan Total Efficiency",
         "    simple cubic,                !- Electric Power Function of Flow Fraction Curve Name",
-        "    ,                            !- Night Ventilation Mode Pressure Rise",
-        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
         "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
         "    ,                            !- Night Ventilation Mode Motor Efficiency",
         "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
         "    ,                            !- Motor Loss Zone Name",
@@ -462,9 +557,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc3)
         "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
         "    ,                            !- Fan Total Efficiency",
         "    ,                            !- Electric Power Function of Flow Fraction Curve Name",
-        "    ,                            !- Night Ventilation Mode Pressure Rise",
-        "    ,                            !- Night Ventilation Mode Maximum Air Flow Rate",
         "    ,                            !- Night Ventilation Mode Fan Total Efficiency",
+        "    ,                            !- Night Ventilation Mode Pressure Rise",
         "    ,                            !- Night Ventilation Mode Motor Efficiency",
         "    ,                            !- Night Ventilation Mode Motor In Air Stream Fraction",
         "    ,                            !- Motor Loss Zone Name",

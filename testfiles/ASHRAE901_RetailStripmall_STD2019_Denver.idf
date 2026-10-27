@@ -6221,9 +6221,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.58175,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                     !- Night Ventilation Mode Maximum Air Flow Rate
     ,                     !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                     !- Night Ventilation Mode Motor Efficiency
     ,                     !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6252,9 +6251,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6281,9 +6279,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6310,9 +6307,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6339,9 +6335,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6368,9 +6363,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.58175,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6399,9 +6393,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6428,9 +6421,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6457,9 +6449,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
@@ -6486,9 +6477,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.56225,                 !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
-    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     ,                        !- Night Ventilation Mode Fan Total Efficiency
+    622.5,                   !- Night Ventilation Mode Pressure Rise {Pa}
     ,                        !- Night Ventilation Mode Motor Efficiency
     ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name

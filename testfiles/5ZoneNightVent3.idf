@@ -3598,9 +3598,8 @@
     ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
     0.7,                     !- Fan Total Efficiency
     VAV Fan Curve,           !- Electric Power Function of Flow Fraction Curve Name
-    67.0,                    !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Maximum Air Flow Rate
     0.7,                     !- Night Ventilation Mode Fan Total Efficiency
+    67.0,                    !- Night Ventilation Mode Pressure Rise {Pa}
     0.9,                     !- Night Ventilation Mode Motor Efficiency
     1.0,                     !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name

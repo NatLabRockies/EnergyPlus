@@ -964,16 +964,15 @@ void GetFanInput(EnergyPlusData &state)
             }
         }
 
-        fan->nightVentPressureDelta = rNumericArgs(10);
-            fan->nightVentMaxAirFlowRate = rNumericArgs(11);
+        if (!lNumericFieldBlanks(10)) {
+            fan->nightVentTotalEff = rNumericArgs(10);
+        }
+        fan->nightVentPressureDelta = rNumericArgs(11);
         if (!lNumericFieldBlanks(12)) {
-            fan->nightVentTotalEff = rNumericArgs(12);
+            fan->nightVentMotorEff = rNumericArgs(12);
         }
         if (!lNumericFieldBlanks(13)) {
-            fan->nightVentMotorEff = rNumericArgs(13);
-        }
-        if (!lNumericFieldBlanks(14)) {
-            fan->nightVentMotorInAirFrac = rNumericArgs(14);
+            fan->nightVentMotorInAirFrac = rNumericArgs(13);
             fan->nightVentMotorInAirFracSpecified = true;
         }
 
@@ -987,15 +986,15 @@ void GetFanInput(EnergyPlusData &state)
             fan->heatLossDest = HeatLossDest::Zone;
         }
 
-        fan->zoneRadFract = rNumericArgs(15);
+        fan->zoneRadFract = rNumericArgs(14);
         if (!lAlphaFieldBlanks(9)) {
             fan->endUseSubcategoryName = cAlphaArgs(9);
         } else {
             fan->endUseSubcategoryName = "General";
         }
 
-        if (!lNumericFieldBlanks(16)) {
-            fan->numSpeeds = rNumericArgs(16);
+        if (!lNumericFieldBlanks(15)) {
+            fan->numSpeeds = rNumericArgs(15);
         } else {
             fan->numSpeeds = 1;
         }
@@ -1006,11 +1005,11 @@ void GetFanInput(EnergyPlusData &state)
             fan->flowFracAtSpeed.resize(fan->numSpeeds, 0.0);
             fan->powerFracAtSpeed.resize(fan->numSpeeds, 0.0);
             fan->powerFracInputAtSpeed.resize(fan->numSpeeds, false);
-            if (fan->numSpeeds == ((NumNums - 16) / 2) || fan->numSpeeds == ((NumNums + 1 - 16) / 2)) {
+            if (fan->numSpeeds == ((NumNums - 15) / 2) || fan->numSpeeds == ((NumNums + 1 - 15) / 2)) {
                 for (int loopSet = 0; loopSet < fan->numSpeeds; ++loopSet) {
-                    fan->flowFracAtSpeed[loopSet] = rNumericArgs(16 + loopSet * 2 + 1);
-                    if (!lNumericFieldBlanks(16 + loopSet * 2 + 2)) {
-                        fan->powerFracAtSpeed[loopSet] = rNumericArgs(16 + loopSet * 2 + 2);
+                    fan->flowFracAtSpeed[loopSet] = rNumericArgs(15 + loopSet * 2 + 1);
+                    if (!lNumericFieldBlanks(15 + loopSet * 2 + 2)) {
+                        fan->powerFracAtSpeed[loopSet] = rNumericArgs(15 + loopSet * 2 + 2);
                         fan->powerFracInputAtSpeed[loopSet] = true;
                     } else {
                         fan->powerFracInputAtSpeed[loopSet] = false;
@@ -2682,11 +2681,6 @@ void FanSystem::set_size(EnergyPlusData &state)
     rhoAirStdInit = state.dataEnvrn->StdRhoAir;
     maxAirMassFlowRate = maxAirFlowRate * rhoAirStdInit;
 
-    if (nightVentMaxAirFlowRate == DataSizing::AutoSize) {
-        nightVentMaxAirFlowRate = maxAirFlowRate;
-    }
-    nightVentMaxAirMassFlowRate = nightVentMaxAirFlowRate * rhoAirStdInit;
-
     // calculate total fan system efficiency at design, else set to 1 to avoid div by zero
     totalEff = (designElecPower > 0.0) ? maxAirFlowRate * deltaPress / designElecPower : 1.0;
 
@@ -2826,17 +2820,21 @@ void FanSystem::calcSimpleSystemFan(
     Real64 _localMotorEff = (state.dataHVACGlobal->NightVentOn && nightVentMotorEff > 0.0) ? nightVentMotorEff : motorEff;
     Real64 _localMotorInAirFrac =
         (state.dataHVACGlobal->NightVentOn && nightVentMotorInAirFracSpecified) ? nightVentMotorInAirFrac : motorInAirFrac;
-    // cap flow to the night ventilation maximum air flow rate, which defaults to the design maximum air flow rate
-    Real64 _localMaxAirMassFlowRate = state.dataHVACGlobal->NightVentOn ? nightVentMaxAirMassFlowRate : maxAirMassFlowRate;
-
+    auto const efficiencyAtSpeed = [&](int const speedIndex) {
+        return ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) || EMSTotalEffOverrideOn) ? _localFanTotalEff
+                                                                                                         : totalEffAtSpeed[speedIndex];
+    };
     if (state.dataHVACGlobal->NightVentOn) {
         // assume if non-zero inputs for night data then this fan is to be used with that data
         if (nightVentPressureDelta > 0.0) {
             _localPressureRise[0] = nightVentPressureDelta;
             _localPressureRise[1] = nightVentPressureDelta;
+        } else {
+            _localPressureRise[0] = deltaPress;
+            _localPressureRise[1] = deltaPress;
         }
 
-        _localFlowFrac = (_localMaxAirMassFlowRate > 0.0) ? inletAirMassFlowRate / _localMaxAirMassFlowRate : 1.0;
+        _localFlowFrac = (maxAirMassFlowRate > 0.0) ? inletAirMassFlowRate / maxAirMassFlowRate : 1.0;
 
         _localAirMassFlow[0] = inletAirMassFlowRate;
 
@@ -2883,7 +2881,7 @@ void FanSystem::calcSimpleSystemFan(
                 Fans::CalFaultyFanAirFlowReduction(state, Name, maxAirFlowRate, deltaPress, (_pressFrac - 1) * deltaPress, fault.fanCurveNum);
 
             _localFaultMaxAirMassFlow = maxAirMassFlowRate - _designFlowRateDec * rhoAirStdInit;
-            _localFaultPressureRise = _pressFrac * deltaPress;
+            _localFaultPressureRise = _pressFrac * (state.dataHVACGlobal->NightVentOn ? _localPressureRise[0] : deltaPress);
         }
     }
 
@@ -2893,22 +2891,22 @@ void FanSystem::calcSimpleSystemFan(
             _localPressureRise[mode] = EMSPressureValue;
         }
         if (EMSTotalEffOverrideOn) {
-            _localTotalEff = EMSTotalEffValue;
+            _localFanTotalEff = EMSTotalEffValue;
         }
         if (EMSMaxMassFlowOverrideOn) {
             _localAirMassFlow[mode] = EMSAirMassFlowValue;
         }
 
-        _localAirMassFlow[mode] = min(_localAirMassFlow[mode], _localMaxAirMassFlowRate);
+        _localAirMassFlow[mode] = min(_localAirMassFlow[mode], maxAirMassFlowRate);
         if (_faultActive) {
             _localAirMassFlow[mode] = min(_localAirMassFlow[mode], _localFaultMaxAirMassFlow);
             _localPressureRise[mode] = _localFaultPressureRise;
         }
-        _localFlowFrac = (_localMaxAirMassFlowRate > 0.0) ? _localAirMassFlow[0] / _localMaxAirMassFlowRate : 0.0;
+        _localFlowFrac = (maxAirMassFlowRate > 0.0) ? _localAirMassFlow[0] / maxAirMassFlowRate : 0.0;
         _localFlowFrac = min(1.0, _localFlowFrac);
 
-        if (_localMaxAirMassFlowRate > 0.0 && _localRuntimeFrac[mode] > 0.0) {
-            _localFlowRatio[mode] = _localAirMassFlow[mode] / (_localMaxAirMassFlowRate * _localRuntimeFrac[mode]);
+        if (maxAirMassFlowRate > 0.0 && _localRuntimeFrac[mode] > 0.0) {
+            _localFlowRatio[mode] = _localAirMassFlow[mode] / (maxAirMassFlowRate * _localRuntimeFrac[mode]);
         }
         _localFlowRatio[mode] = min(1.0, _localFlowRatio[mode]);
     }
@@ -2989,13 +2987,13 @@ void FanSystem::calcSimpleSystemFan(
                         if (_lowSideSpeed != -1 && _hiSideSpeed != -1) {
                             totalPower += max(0.0,
                                               _locLowSpeedRuntimeFrac * massFlowAtSpeed[_lowSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_lowSideSpeed] * rhoAirStdInit) +
+                                                      (efficiencyAtSpeed(_lowSideSpeed) * rhoAirStdInit) +
                                                   _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                      (efficiencyAtSpeed(_hiSideSpeed) * rhoAirStdInit));
                         } else if (_lowSideSpeed == -1 && _hiSideSpeed == 0) {
                             totalPower += max(0.0,
                                               _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                  (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                  (efficiencyAtSpeed(_hiSideSpeed) * rhoAirStdInit));
                         }
                     }
                 } else {
@@ -3042,13 +3040,13 @@ void FanSystem::calcSimpleSystemFan(
                         if (_lowSideSpeed != -1 && _hiSideSpeed != -1) {
                             totalPower += max(0.0,
                                               _locLowSpeedRuntimeFrac * massFlowAtSpeed[_lowSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_lowSideSpeed] * rhoAirStdInit) +
+                                                      (efficiencyAtSpeed(_lowSideSpeed) * rhoAirStdInit) +
                                                   _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                      (efficiencyAtSpeed(_hiSideSpeed) * rhoAirStdInit));
                         } else if (_lowSideSpeed == -1 && _hiSideSpeed == 0) {
                             totalPower += max(0.0,
                                               _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                  (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                  (efficiencyAtSpeed(_hiSideSpeed) * rhoAirStdInit));
                         }
                     }
                 }
@@ -3068,10 +3066,11 @@ void FanSystem::calcSimpleSystemFan(
                 }
 
                 Real64 _localFlowFracForPower = max(minPowerFlowFrac, _locFlowRatio);
-                Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn) ? 1.0 : // not sure why, but legacy fan had this for night ventilation
-                                             Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
+                Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn)
+                                             ? _locFlowRatio
+                                             : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
                 Real64 _localFanPower =
-                    max(0.0, _locRuntimeFrac * _localPowerFrac * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
+                    max(0.0, _locRuntimeFrac * _localPowerFrac * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
                 Real64 _shaftPower = _localMotorEff * _localFanPower;
                 Real64 _localPowerLossToAir = _shaftPower + (_localFanPower - _shaftPower) * _localMotorInAirFrac;
                 outletAirEnthalpy = inletAirEnthalpy + _localPowerLossToAir / _localAirMassFlow[mode]; // this will get revised later
@@ -3080,17 +3079,17 @@ void FanSystem::calcSimpleSystemFan(
                 // When fan air flow is less than 10%, the fan power curve is linearized between the 10% to 0% to
                 //  avoid the unrealistic high temperature rise across the fan.
                 Real64 _deltaTAcrossFan = outletAirTemp - inletAirTemp;
-                if (_deltaTAcrossFan > 20.0) {
+                if (_deltaTAcrossFan > 20.0 && !state.dataHVACGlobal->NightVentOn) {
                     Real64 _minFlowFracLimitFanHeat = 0.10;
                     Real64 _powerFracAtLowMin = 0.0;
                     Real64 _fanPowerAtLowMinimum = 0.0;
                     if (_localFlowFracForPower < _minFlowFracLimitFanHeat) {
                         _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
-                        _fanPowerAtLowMinimum = _powerFracAtLowMin * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
+                        _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _localFlowFracForPower * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     } else if (_locFlowRatio < _minFlowFracLimitFanHeat) {
                         _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
-                        _fanPowerAtLowMinimum = _powerFracAtLowMin * _localMaxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
+                        _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _locFlowRatio * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     }
                 }
