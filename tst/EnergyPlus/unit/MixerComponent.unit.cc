@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/MixerComponent.hh>
+#include <EnergyPlus/Psychrometrics.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::MixerComponent;
@@ -84,16 +85,16 @@ TEST_F(EnergyPlusFixture, GetZoneMixerIndex)
     EXPECT_TRUE(errFlag);
 }
 
-TEST_F(EnergyPlusFixture, MixerRetainsOutletConditionsAtZeroFlow)
-{
-    int mixerNum = 1;
-    constexpr int numInletNodes = 2;
-    constexpr int outletNodeNum = numInletNodes + 1;
+namespace {
 
-    state->dataMixerComponent->MixerCond.allocate(1);
-    auto &mixer = state->dataMixerComponent->MixerCond(mixerNum);
+// Two-inlet mixer whose inlet conditions are read from nodes 1 and 2 by InitAirMixer; node 3 is the outlet
+void setupTwoInletMixer(EnergyPlusData &state)
+{
+    constexpr int numInletNodes = 2;
+    state.dataMixerComponent->MixerCond.allocate(1);
+    auto &mixer = state.dataMixerComponent->MixerCond(1);
     mixer.NumInletNodes = numInletNodes;
-    mixer.OutletNode = outletNodeNum;
+    mixer.OutletNode = numInletNodes + 1;
     mixer.InletNode.allocate(numInletNodes);
     mixer.InletMassFlowRate.allocate(numInletNodes);
     mixer.InletMassFlowRateMaxAvail.allocate(numInletNodes);
@@ -102,61 +103,89 @@ TEST_F(EnergyPlusFixture, MixerRetainsOutletConditionsAtZeroFlow)
     mixer.InletHumRat.allocate(numInletNodes);
     mixer.InletEnthalpy.allocate(numInletNodes);
     mixer.InletPressure.allocate(numInletNodes);
+    mixer.InletNode(1) = 1;
+    mixer.InletNode(2) = 2;
 
-    state->dataLoopNodes->Node.allocate(outletNodeNum);
-    state->dataContaminantBalance->Contaminant.CO2Simulation = true;
-    state->dataContaminantBalance->Contaminant.GenericContamSimulation = true;
+    state.dataLoopNodes->Node.allocate(numInletNodes + 1);
+    state.dataContaminantBalance->Contaminant.CO2Simulation = true;
+    state.dataContaminantBalance->Contaminant.GenericContamSimulation = true;
+}
 
-    for (int inletNum = 1; inletNum <= numInletNodes; ++inletNum) {
-        mixer.InletNode(inletNum) = inletNum;
-        mixer.InletMassFlowRate(inletNum) = inletNum;
-        mixer.InletMassFlowRateMaxAvail(inletNum) = inletNum;
-        mixer.InletMassFlowRateMinAvail(inletNum) = 0.0;
-    }
+void setInletNode(EnergyPlusData &state, int nodeNum, Real64 massFlowRate, Real64 temp, Real64 humRat, Real64 press, Real64 co2, Real64 genContam)
+{
+    auto &node = state.dataLoopNodes->Node(nodeNum);
+    node.MassFlowRate = massFlowRate;
+    node.MassFlowRateMaxAvail = massFlowRate;
+    node.MassFlowRateMinAvail = 0.0;
+    node.Temp = temp;
+    node.HumRat = humRat;
+    node.Enthalpy = Psychrometrics::PsyHFnTdbW(temp, humRat);
+    node.Press = press;
+    node.CO2 = co2;
+    node.GenContam = genContam;
+}
 
-    mixer.InletTemp(1) = 20.0;
-    mixer.InletTemp(2) = 30.0;
-    mixer.InletHumRat(1) = 0.005;
-    mixer.InletHumRat(2) = 0.010;
-    mixer.InletPressure(1) = 99000.0;
-    mixer.InletPressure(2) = 101000.0;
-    mixer.InletEnthalpy(1) = 33000.0;
-    mixer.InletEnthalpy(2) = 50000.0;
-    state->dataLoopNodes->Node(1).CO2 = 450.0;
-    state->dataLoopNodes->Node(2).CO2 = 800.0;
-    state->dataLoopNodes->Node(1).GenContam = 2.0;
-    state->dataLoopNodes->Node(2).GenContam = 4.0;
+void simMixer(EnergyPlusData &state)
+{
+    int mixerNum = 1;
+    InitAirMixer(state, mixerNum);
+    CalcAirMixer(state, mixerNum);
+    UpdateAirMixer(state, mixerNum);
+}
 
-    CalcAirMixer(*state, mixerNum);
-    UpdateAirMixer(*state, mixerNum);
+} // namespace
 
-    auto &outletNode = state->dataLoopNodes->Node(outletNodeNum);
-    Real64 const outletTemp = outletNode.Temp;
-    Real64 const outletHumRat = outletNode.HumRat;
-    Real64 const outletPressure = outletNode.Press;
-    Real64 const outletEnthalpy = outletNode.Enthalpy;
-    Real64 const outletCO2 = outletNode.CO2;
-    Real64 const outletGenericContaminant = outletNode.GenContam;
+TEST_F(EnergyPlusFixture, MixerAveragesInletsAtZeroFlow)
+{
+    setupTwoInletMixer(*state);
+    setInletNode(*state, 1, 0.0, 20.0, 0.005, 99000.0, 450.0, 2.0);
+    setInletNode(*state, 2, 0.0, 30.0, 0.010, 101000.0, 800.0, 4.0);
 
-    mixer.InletMassFlowRate = 0.0;
-    mixer.InletMassFlowRateMaxAvail = 0.0;
-    mixer.InletTemp = 5.0;
-    mixer.InletHumRat = 0.001;
-    mixer.InletPressure = 95000.0;
-    mixer.InletEnthalpy = 10000.0;
-    state->dataLoopNodes->Node(1).CO2 = 100.0;
-    state->dataLoopNodes->Node(2).CO2 = 200.0;
-    state->dataLoopNodes->Node(1).GenContam = 0.5;
-    state->dataLoopNodes->Node(2).GenContam = 1.0;
+    simMixer(*state);
 
-    CalcAirMixer(*state, mixerNum);
-    UpdateAirMixer(*state, mixerNum);
-
+    auto const &outletNode = state->dataLoopNodes->Node(3);
+    Real64 const expectedEnthalpy = (state->dataLoopNodes->Node(1).Enthalpy + state->dataLoopNodes->Node(2).Enthalpy) / 2.0;
     EXPECT_DOUBLE_EQ(0.0, outletNode.MassFlowRate);
-    EXPECT_DOUBLE_EQ(outletTemp, outletNode.Temp);
-    EXPECT_DOUBLE_EQ(outletHumRat, outletNode.HumRat);
-    EXPECT_DOUBLE_EQ(outletPressure, outletNode.Press);
-    EXPECT_DOUBLE_EQ(outletEnthalpy, outletNode.Enthalpy);
-    EXPECT_DOUBLE_EQ(outletCO2, outletNode.CO2);
-    EXPECT_DOUBLE_EQ(outletGenericContaminant, outletNode.GenContam);
+    EXPECT_DOUBLE_EQ(25.0, outletNode.Temp);
+    EXPECT_DOUBLE_EQ(0.0075, outletNode.HumRat);
+    EXPECT_DOUBLE_EQ(100000.0, outletNode.Press);
+    EXPECT_DOUBLE_EQ(expectedEnthalpy, outletNode.Enthalpy);
+    EXPECT_DOUBLE_EQ(625.0, outletNode.CO2);
+    EXPECT_DOUBLE_EQ(3.0, outletNode.GenContam);
+
+    // Reversing the inlet order gives the same outlet state
+    auto &mixer = state->dataMixerComponent->MixerCond(1);
+    mixer.InletNode(1) = 2;
+    mixer.InletNode(2) = 1;
+    simMixer(*state);
+
+    EXPECT_DOUBLE_EQ(25.0, outletNode.Temp);
+    EXPECT_DOUBLE_EQ(0.0075, outletNode.HumRat);
+    EXPECT_DOUBLE_EQ(100000.0, outletNode.Press);
+    EXPECT_DOUBLE_EQ(expectedEnthalpy, outletNode.Enthalpy);
+    EXPECT_DOUBLE_EQ(625.0, outletNode.CO2);
+    EXPECT_DOUBLE_EQ(3.0, outletNode.GenContam);
+}
+
+TEST_F(EnergyPlusFixture, MixerUsesCurrentInletsAtZeroFlowAfterFlow)
+{
+    setupTwoInletMixer(*state);
+    setInletNode(*state, 1, 1.0, 20.0, 0.005, 99000.0, 450.0, 2.0);
+    setInletNode(*state, 2, 2.0, 30.0, 0.010, 101000.0, 800.0, 4.0);
+    simMixer(*state);
+
+    // When flow stops, the outlet follows the current inlet conditions instead of holding the previous outlet state
+    setInletNode(*state, 1, 0.0, 10.0, 0.002, 98000.0, 100.0, 0.5);
+    setInletNode(*state, 2, 0.0, 14.0, 0.004, 100000.0, 200.0, 1.0);
+    simMixer(*state);
+
+    auto const &outletNode = state->dataLoopNodes->Node(3);
+    Real64 const expectedEnthalpy = (state->dataLoopNodes->Node(1).Enthalpy + state->dataLoopNodes->Node(2).Enthalpy) / 2.0;
+    EXPECT_DOUBLE_EQ(0.0, outletNode.MassFlowRate);
+    EXPECT_DOUBLE_EQ(12.0, outletNode.Temp);
+    EXPECT_DOUBLE_EQ(0.003, outletNode.HumRat);
+    EXPECT_DOUBLE_EQ(99000.0, outletNode.Press);
+    EXPECT_DOUBLE_EQ(expectedEnthalpy, outletNode.Enthalpy);
+    EXPECT_DOUBLE_EQ(150.0, outletNode.CO2);
+    EXPECT_DOUBLE_EQ(0.75, outletNode.GenContam);
 }
