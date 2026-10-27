@@ -816,7 +816,7 @@ This object specifies alternate performance parameters for a fan when night vent
 
 For zone equipment other than air distribution units, night-ventilation mode is determined by that component's own AvailabilityManager:NightVentilation status. An air distribution unit follows the status of its connected air loop. A coupled \hyperref[fanzoneexhaust]{Fan:ZoneExhaust} follows an air loop serving its zone; a decoupled exhaust fan does not enter night-ventilation mode.
 
-The fan uses these alternate performance parameters during night ventilation and is assumed to run at a fixed speed. The inputs are the fan name, fan total efficiency, pressure rise, motor efficiency, and motor in airstream fraction.
+The fan uses these alternate performance parameters during night ventilation and is assumed to run at a fixed speed. This does not fix airflow or power at design values; power is calculated from actual operating airflow using the entered pressure rise and fan total efficiency. The inputs are the fan name, fan total efficiency, pressure rise, motor efficiency, and motor in airstream fraction.
 
 \subsubsection{Inputs}\label{inputs-4-013}
 
