@@ -2365,6 +2365,7 @@
     SPACE1-1 Thermal Zone Thermostat,  !- Name
     SPACE1-1 Thermal Zone,   !- Zone or ZoneList Name
     SPACE1-1 Thermal Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     {6b5ec96d-bccd-45b7-8936-6ef68acc6b2f};  !- Control 1 Name
 
@@ -2372,6 +2373,7 @@
     SPACE2-1 Thermal Zone Thermostat,  !- Name
     SPACE2-1 Thermal Zone,   !- Zone or ZoneList Name
     SPACE2-1 Thermal Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     {d799f115-af73-4624-998c-9e81dbbb2327};  !- Control 1 Name
 
@@ -2379,6 +2381,7 @@
     SPACE3-1 Thermal Zone Thermostat,  !- Name
     SPACE3-1 Thermal Zone,   !- Zone or ZoneList Name
     SPACE3-1 Thermal Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     {bea2f2b9-2b98-445e-ba0d-cc8c90f00bc1};  !- Control 1 Name
 
@@ -2386,6 +2389,7 @@
     SPACE4-1 Thermal Zone Thermostat,  !- Name
     SPACE4-1 Thermal Zone,   !- Zone or ZoneList Name
     SPACE4-1 Thermal Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     {ef646519-79bc-4440-b55a-26d91f0715a9};  !- Control 1 Name
 
@@ -2393,6 +2397,7 @@
     SPACE5-1 Thermal Zone Thermostat,  !- Name
     SPACE5-1 Thermal Zone,   !- Zone or ZoneList Name
     SPACE5-1 Thermal Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     {dca11545-a240-4366-b6d7-503339d1cdfa};  !- Control 1 Name
 

@@ -461,6 +461,19 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with Z, insert the rules here
 
+              CASE('ZONECONTROL:THERMOSTAT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:3)=InArgs(1:3)
+                  IF (CurArgs .EQ. 12) THEN
+                    OutArgs(4)=InArgs(CurArgs)
+                    OutArgs(5:CurArgs)=InArgs(4:CurArgs - 1)
+                  ELSE
+                    OutArgs(4)=' '
+                    OutArgs(5:CurArgs + 1)=InArgs(4:CurArgs)
+                    CurArgs = CurArgs + 1
+                  ENDIF
+                  nodiff=.false.
+
               CASE('ZONEHVAC:EVAPORATIVECOOLERUNIT')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                   OutArgs(1:CurArgs)=InArgs(1:CurArgs)

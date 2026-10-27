@@ -18528,6 +18528,7 @@
     Basement Thermostat,     !- Name
     Basement,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Basement DualSPSched;    !- Control 1 Name
 
@@ -18535,6 +18536,7 @@
     Corridor_Flr_1 Thermostat,  !- Name
     Corridor_Flr_1,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18542,6 +18544,7 @@
     Corridor_Flr_2 Thermostat,  !- Name
     Corridor_Flr_2,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18549,6 +18552,7 @@
     Corridor_Flr_5 Thermostat,  !- Name
     Corridor_Flr_5,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18556,6 +18560,7 @@
     Corridor_NW_Flr_3 Thermostat,  !- Name
     Corridor_NW_Flr_3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_NW_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18563,6 +18568,7 @@
     Corridor_NW_Flr_4 Thermostat,  !- Name
     Corridor_NW_Flr_4,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_NW_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18570,6 +18576,7 @@
     Corridor_SE_Flr_3 Thermostat,  !- Name
     Corridor_SE_Flr_3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_SE_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18577,6 +18584,7 @@
     Corridor_SE_Flr_4 Thermostat,  !- Name
     Corridor_SE_Flr_4,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_SE_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18584,6 +18592,7 @@
     Dining_Flr_5 Thermostat, !- Name
     Dining_Flr_5,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dining_Flr_5 DualSPSched;!- Control 1 Name
 
@@ -18591,6 +18600,7 @@
     ER_Exam1_Mult4_Flr_1 Thermostat,  !- Name
     ER_Exam1_Mult4_Flr_1,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_Exam1_Mult4_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18598,6 +18608,7 @@
     ER_Exam3_Mult4_Flr_1 Thermostat,  !- Name
     ER_Exam3_Mult4_Flr_1,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_Exam3_Mult4_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18605,6 +18616,7 @@
     ER_NurseStn_Lobby_Flr_1 Thermostat,  !- Name
     ER_NurseStn_Lobby_Flr_1, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_NurseStn_Lobby_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18612,6 +18624,7 @@
     ER_Trauma1_Flr_1 Thermostat,  !- Name
     ER_Trauma1_Flr_1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_Trauma1_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18619,6 +18632,7 @@
     ER_Trauma2_Flr_1 Thermostat,  !- Name
     ER_Trauma2_Flr_1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_Trauma2_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18626,6 +18640,7 @@
     ER_Triage_Mult4_Flr_1 Thermostat,  !- Name
     ER_Triage_Mult4_Flr_1,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ER_Triage_Mult4_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18633,6 +18648,7 @@
     ICU_Flr_2 Thermostat,    !- Name
     ICU_Flr_2,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ICU_Flr_2 DualSPSched;   !- Control 1 Name
 
@@ -18640,6 +18656,7 @@
     ICU_NurseStn_Lobby_Flr_2 Thermostat,  !- Name
     ICU_NurseStn_Lobby_Flr_2,!- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ICU_NurseStn_Lobby_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18647,6 +18664,7 @@
     IC_PatRoom1_Mult5_Flr_2 Thermostat,  !- Name
     IC_PatRoom1_Mult5_Flr_2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     IC_PatRoom1_Mult5_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18654,6 +18672,7 @@
     IC_PatRoom2_Flr_2 Thermostat,  !- Name
     IC_PatRoom2_Flr_2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     IC_PatRoom2_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18661,6 +18680,7 @@
     IC_PatRoom3_Mult6_Flr_2 Thermostat,  !- Name
     IC_PatRoom3_Mult6_Flr_2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     IC_PatRoom3_Mult6_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18668,6 +18688,7 @@
     Kitchen_Flr_5 Thermostat,!- Name
     Kitchen_Flr_5,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Kitchen_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18675,6 +18696,7 @@
     Lab_Flr_3 Thermostat,    !- Name
     Lab_Flr_3,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Lab_Flr_3 DualSPSched;   !- Control 1 Name
 
@@ -18682,6 +18704,7 @@
     Lab_Flr_4 Thermostat,    !- Name
     Lab_Flr_4,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Lab_Flr_4 DualSPSched;   !- Control 1 Name
 
@@ -18689,6 +18712,7 @@
     Lobby_Records_Flr_1 Thermostat,  !- Name
     Lobby_Records_Flr_1,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Lobby_Records_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18696,6 +18720,7 @@
     NurseStn_Lobby_Flr_3 Thermostat,  !- Name
     NurseStn_Lobby_Flr_3,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     NurseStn_Lobby_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18703,6 +18728,7 @@
     NurseStn_Lobby_Flr_4 Thermostat,  !- Name
     NurseStn_Lobby_Flr_4,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     NurseStn_Lobby_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18710,6 +18736,7 @@
     NurseStn_Lobby_Flr_5 Thermostat,  !- Name
     NurseStn_Lobby_Flr_5,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     NurseStn_Lobby_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18717,6 +18744,7 @@
     OR1_Flr_2 Thermostat,    !- Name
     OR1_Flr_2,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     OR1_Flr_2 DualSPSched;   !- Control 1 Name
 
@@ -18724,6 +18752,7 @@
     OR2_Mult5_Flr_2 Thermostat,  !- Name
     OR2_Mult5_Flr_2,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     OR2_Mult5_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18731,6 +18760,7 @@
     OR3_Flr_2 Thermostat,    !- Name
     OR3_Flr_2,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     OR3_Flr_2 DualSPSched;   !- Control 1 Name
 
@@ -18738,6 +18768,7 @@
     OR4_Flr_2 Thermostat,    !- Name
     OR4_Flr_2,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     OR4_Flr_2 DualSPSched;   !- Control 1 Name
 
@@ -18745,6 +18776,7 @@
     OR_NurseStn_Lobby_Flr_2 Thermostat,  !- Name
     OR_NurseStn_Lobby_Flr_2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     OR_NurseStn_Lobby_Flr_2 DualSPSched;  !- Control 1 Name
 
@@ -18752,6 +18784,7 @@
     Office1_Flr_5 Thermostat,!- Name
     Office1_Flr_5,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office1_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18759,6 +18792,7 @@
     Office1_Mult4_Flr_1 Thermostat,  !- Name
     Office1_Mult4_Flr_1,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office1_Mult4_Flr_1 DualSPSched;  !- Control 1 Name
 
@@ -18766,6 +18800,7 @@
     Office2_Mult5_Flr_5 Thermostat,  !- Name
     Office2_Mult5_Flr_5,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office2_Mult5_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18773,6 +18808,7 @@
     Office3_Flr_5 Thermostat,!- Name
     Office3_Flr_5,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office3_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18780,6 +18816,7 @@
     Office4_Mult6_Flr_5 Thermostat,  !- Name
     Office4_Mult6_Flr_5,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office4_Mult6_Flr_5 DualSPSched;  !- Control 1 Name
 
@@ -18787,6 +18824,7 @@
     PatRoom1_Mult10_Flr_3 Thermostat,  !- Name
     PatRoom1_Mult10_Flr_3,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom1_Mult10_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18794,6 +18832,7 @@
     PatRoom1_Mult10_Flr_4 Thermostat,  !- Name
     PatRoom1_Mult10_Flr_4,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom1_Mult10_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18801,6 +18840,7 @@
     PatRoom2_Flr_3 Thermostat,  !- Name
     PatRoom2_Flr_3,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom2_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18808,6 +18848,7 @@
     PatRoom2_Flr_4 Thermostat,  !- Name
     PatRoom2_Flr_4,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom2_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18815,6 +18856,7 @@
     PatRoom3_Mult10_Flr_3 Thermostat,  !- Name
     PatRoom3_Mult10_Flr_3,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom3_Mult10_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18822,6 +18864,7 @@
     PatRoom3_Mult10_Flr_4 Thermostat,  !- Name
     PatRoom3_Mult10_Flr_4,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom3_Mult10_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18829,6 +18872,7 @@
     PatRoom4_Flr_3 Thermostat,  !- Name
     PatRoom4_Flr_3,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom4_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18836,6 +18880,7 @@
     PatRoom4_Flr_4 Thermostat,  !- Name
     PatRoom4_Flr_4,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom4_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18843,6 +18888,7 @@
     PatRoom5_Mult10_Flr_3 Thermostat,  !- Name
     PatRoom5_Mult10_Flr_3,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom5_Mult10_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18850,6 +18896,7 @@
     PatRoom5_Mult10_Flr_4 Thermostat,  !- Name
     PatRoom5_Mult10_Flr_4,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom5_Mult10_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18857,6 +18904,7 @@
     PatRoom6_Flr_3 Thermostat,  !- Name
     PatRoom6_Flr_3,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom6_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18864,6 +18912,7 @@
     PatRoom6_Flr_4 Thermostat,  !- Name
     PatRoom6_Flr_4,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom6_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18871,6 +18920,7 @@
     PatRoom7_Mult10_Flr_3 Thermostat,  !- Name
     PatRoom7_Mult10_Flr_3,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom7_Mult10_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18878,6 +18928,7 @@
     PatRoom7_Mult10_Flr_4 Thermostat,  !- Name
     PatRoom7_Mult10_Flr_4,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom7_Mult10_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18885,6 +18936,7 @@
     PatRoom8_Flr_3 Thermostat,  !- Name
     PatRoom8_Flr_3,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom8_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18892,6 +18944,7 @@
     PatRoom8_Flr_4 Thermostat,  !- Name
     PatRoom8_Flr_4,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PatRoom8_Flr_4 DualSPSched;  !- Control 1 Name
 
@@ -18899,6 +18952,7 @@
     PhysTherapy_Flr_3 Thermostat,  !- Name
     PhysTherapy_Flr_3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PhysTherapy_Flr_3 DualSPSched;  !- Control 1 Name
 
@@ -18906,6 +18960,7 @@
     Radiology_Flr_4 Thermostat,  !- Name
     Radiology_Flr_4,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Radiology_Flr_4 DualSPSched;  !- Control 1 Name
 
