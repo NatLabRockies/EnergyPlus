@@ -1846,7 +1846,8 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
                             coeffs[4] * pow_4(_flowFracForPower);
         }
 
-        totalPower = max(0.0, _partLoadFrac * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir)); // total fan power (PH 7/13/03)
+        Real64 const _fanPowerMassFlow = nightVentMode ? _massFlow : _maxAirMassFlowRate;
+        totalPower = max(0.0, _partLoadFrac * _fanPowerMassFlow * _deltaPress / (_totalEff * _rhoAir)); // total fan power (PH 7/13/03)
 
         Real64 _shaftPower = _motorEff * totalPower; // power delivered to shaft
         powerLossToAir = _shaftPower + (totalPower - _shaftPower) * _motorInAirFrac;
@@ -1864,23 +1865,19 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
         //  A potential way to improve is to check the temperature rise across the fan first,
         //  if it is too high (say > 20C) then applies the code.
         Real64 _deltaTAcrossFan = outletAirTemp - inletAirTemp;
-        if (_deltaTAcrossFan > 20.0) {
+        if (_deltaTAcrossFan > 20.0 && !nightVentMode) {
             // added to address the fan heat issue during low air flow conditions
             Real64 _fanPoweratLowMinimum; // Fan Power at Low Minimum Airflow [W]
             Real64 _partLoadFracatLowMin;
             Real64 _minFlowFracLimitFanHeat = 0.10;
             if (_flowFracForPower < _minFlowFracLimitFanHeat) {
-                _partLoadFracatLowMin = nightVentMode
-                                            ? 1.0
-                                            : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                                  coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                    _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                    coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracForPower * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             } else if (_flowFracActual < _minFlowFracLimitFanHeat) {
-                _partLoadFracatLowMin = nightVentMode
-                                            ? 1.0
-                                            : coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
-                                                  coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
+                    _partLoadFracatLowMin = coeffs[0] + coeffs[1] * _minFlowFracLimitFanHeat + coeffs[2] * pow_2(_minFlowFracLimitFanHeat) +
+                                    coeffs[3] * pow_3(_minFlowFracLimitFanHeat) + coeffs[4] * pow_4(_minFlowFracLimitFanHeat);
                 _fanPoweratLowMinimum = _partLoadFracatLowMin * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir);
                 totalPower = max(0.0, _flowFracActual * _fanPoweratLowMinimum / _minFlowFracLimitFanHeat);
             }
@@ -3050,8 +3047,9 @@ void FanSystem::calcSimpleSystemFan(
                 }
 
                 Real64 _localFlowFracForPower = max(minPowerFlowFrac, _locFlowRatio);
-                Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn) ? 1.0 : // not sure why, but legacy fan had this for night ventilation
-                                             Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
+                Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn)
+                                             ? _locFlowRatio
+                                             : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _localFlowFracForPower);
                 Real64 _localFanPower =
                     max(0.0, _locRuntimeFrac * _localPowerFrac * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit));
                 Real64 _shaftPower = motorEff * _localFanPower;
@@ -3062,20 +3060,16 @@ void FanSystem::calcSimpleSystemFan(
                 // When fan air flow is less than 10%, the fan power curve is linearized between the 10% to 0% to
                 //  avoid the unrealistic high temperature rise across the fan.
                 Real64 _deltaTAcrossFan = outletAirTemp - inletAirTemp;
-                if (_deltaTAcrossFan > 20.0) {
+                if (_deltaTAcrossFan > 20.0 && !state.dataHVACGlobal->NightVentOn) {
                     Real64 _minFlowFracLimitFanHeat = 0.10;
                     Real64 _powerFracAtLowMin = 0.0;
                     Real64 _fanPowerAtLowMinimum = 0.0;
                     if (_localFlowFracForPower < _minFlowFracLimitFanHeat) {
-                        _powerFracAtLowMin = state.dataHVACGlobal->NightVentOn
-                                                 ? 1.0
-                                                 : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
+                        _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
                         _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _localFlowFracForPower * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     } else if (_locFlowRatio < _minFlowFracLimitFanHeat) {
-                        _powerFracAtLowMin = state.dataHVACGlobal->NightVentOn
-                                                 ? 1.0
-                                                 : Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
+                        _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
                         _fanPowerAtLowMinimum = _powerFracAtLowMin * maxAirMassFlowRate * _localPressureRise[mode] / (_localTotalEff * rhoAirStdInit);
                         _localFanPower = max(0.0, _locFlowRatio * _fanPowerAtLowMinimum / _minFlowFracLimitFanHeat);
                     }

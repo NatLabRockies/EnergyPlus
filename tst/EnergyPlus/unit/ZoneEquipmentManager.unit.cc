@@ -5597,6 +5597,20 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ADUUsesConnectedLoopNightVentilat
 
     // A disconnected ADU cannot inherit night mode from either loop.
     state->dataDefineEquipment->AirDistUnit(1).AirLoopNum = 0;
+    state->dataDefineEquipment->AirDistUnit(1).OutletNodeNum = 1001;
+    state->dataZoneEquip->ZoneEquipConfig.allocate(1);
+    auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(1);
+    zoneEquipConfig.NumInletNodes = 1;
+    zoneEquipConfig.InletNode.allocate(1);
+    zoneEquipConfig.InletNodeAirLoopNum.allocate(1);
+    zoneEquipConfig.InletNode(1) = 1001;
+    zoneEquipConfig.InletNodeAirLoopNum(1) = 1;
+    state->dataSize->CurZoneEqNum = 1;
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = true;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
+
+    // On the first simulation call, the ADU's cached air loop may not be populated yet.
+    zoneEquipConfig.InletNodeAirLoopNum(1) = 0;
     EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
 }
 

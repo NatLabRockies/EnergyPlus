@@ -292,11 +292,12 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
 
     auto variableFan = configureFan(HVAC::FanType::VAV);
     variableFan->coeffs = {0.25, 0.0, 0.0, 0.0, 0.0};
+    variableFan->inletAirMassFlowRate = 0.3;
     // Night ventilation assumes fixed speed, so it must bypass the normal VAV part-load power curve.
     variableFan->simulateVAV(*state);
-    EXPECT_DOUBLE_EQ(1.0, variableFan->outletAirMassFlowRate);
-    EXPECT_DOUBLE_EQ(200.0, variableFan->totalPower);
-    EXPECT_DOUBLE_EQ(140.0, variableFan->powerLossToAir);
+    EXPECT_DOUBLE_EQ(0.3, variableFan->outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(60.0, variableFan->totalPower);
+    EXPECT_DOUBLE_EQ(42.0, variableFan->powerLossToAir);
 
     auto onOffFan = configureFan(HVAC::FanType::OnOff);
     auto *powerRatioCurve = Curve::AddCurve(*state, "Night Vent Power Ratio");
@@ -405,8 +406,8 @@ TEST_F(EnergyPlusFixture, Fans_NightVentilationFouledFilterUsesNightPressure)
     }
 }
 
-// Verify the VAV low-flow heat fallback preserves fixed-speed night power instead of using normal part-load coefficients.
-TEST_F(EnergyPlusFixture, Fans_VAVNightVentilationLowFlowFallbackUsesFixedSpeedPower)
+// Verify VAV night power scales with actual flow, including below the normal low-flow heat-safeguard threshold.
+TEST_F(EnergyPlusFixture, Fans_VAVNightVentilationPowerScalesWithLowFlow)
 {
     state->init_state(*state);
     state->dataEnvrn->StdRhoAir = 1.0;
@@ -415,7 +416,7 @@ TEST_F(EnergyPlusFixture, Fans_VAVNightVentilationLowFlowFallbackUsesFixedSpeedP
     state->dataHVACGlobal->TurnFansOff = false;
     state->dataFans->NightVentPerf.allocate(1);
     auto &nightVentPerf = state->dataFans->NightVentPerf(1);
-    nightVentPerf.DeltaPress = 100.0;
+    nightVentPerf.DeltaPress = 20000.0;
     nightVentPerf.FanEff = 0.5;
     nightVentPerf.MotEff = 1.0;
     nightVentPerf.MotInAirFrac = 1.0;
@@ -442,5 +443,5 @@ TEST_F(EnergyPlusFixture, Fans_VAVNightVentilationLowFlowFallbackUsesFixedSpeedP
     fan.simulateVAV(*state);
 
     EXPECT_DOUBLE_EQ(0.005, fan.outletAirMassFlowRate);
-    EXPECT_NEAR(10.0, fan.totalPower, 0.0001);
+    EXPECT_NEAR(200.0, fan.totalPower, 0.0001);
 }

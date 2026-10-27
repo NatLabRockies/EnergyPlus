@@ -118,7 +118,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TestGetFunctions1)
     EXPECT_FALSE(fanSystem->speedControl == Fans::SpeedControl::Continuous);
 }
 
-// In night mode, a SystemModel fan without a night pressure override retains its design pressure and power.
+// In night mode, a SystemModel fan without a night pressure override uses design pressure and scales power with actual flow.
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressure)
 {
     state->init_state(*state);
@@ -132,7 +132,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressur
     fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
     fanSystem.maxAirFlowRate = 1.0;
     fanSystem.maxAirMassFlowRate = 1.2;
-    fanSystem.inletAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.36;
     fanSystem.rhoAirStdInit = 1.2;
     fanSystem.deltaPress = 300.0;
     fanSystem.totalEff = 0.6;
@@ -144,8 +144,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressur
 
     fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
 
-    EXPECT_DOUBLE_EQ(1.2, fanSystem.outletAirMassFlowRate);
-    EXPECT_NEAR(500.0, fanSystem.totalPower, 0.0001);
+    EXPECT_DOUBLE_EQ(0.36, fanSystem.outletAirMassFlowRate);
+    EXPECT_NEAR(150.0, fanSystem.totalPower, 0.0001);
 }
 
 // Verify fouled-filter operation preserves night pressure while validating its curve against rated pressure.
@@ -197,12 +197,12 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentFouledFilterUsesNightPressure)
     fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
 
     EXPECT_NEAR(0.94, fanSystem.outletAirMassFlowRate, 0.01);
-    EXPECT_DOUBLE_EQ(220.0, fanSystem.totalPower);
-    EXPECT_DOUBLE_EQ(220.0, fanSystem.powerLossToAir);
+    EXPECT_NEAR(206.8, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(206.8, fanSystem.powerLossToAir, 0.01);
 }
 
-// Verify the low-flow heat safeguard preserves fixed-speed night power instead of reapplying the normal power curve.
-TEST_F(EnergyPlusFixture, SystemFanObj_NightVentLowFlowBypassesPowerCurve)
+// Verify continuous SystemModel night power remains proportional to actual flow at very low flow.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
 {
     state->init_state(*state);
     state->dataEnvrn->StdRhoAir = 1.2;
@@ -217,7 +217,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentLowFlowBypassesPowerCurve)
     fanSystem.maxAirMassFlowRate = 1.2;
     fanSystem.inletAirMassFlowRate = 0.012;
     fanSystem.rhoAirStdInit = 1.2;
-    fanSystem.deltaPress = 300.0;
+    fanSystem.deltaPress = 20000.0;
     fanSystem.totalEff = 0.6;
     fanSystem.motorEff = 0.9;
     fanSystem.motorInAirFrac = 1.0;
@@ -235,7 +235,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentLowFlowBypassesPowerCurve)
     fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
 
     EXPECT_DOUBLE_EQ(0.012, fanSystem.outletAirMassFlowRate);
-    EXPECT_NEAR(50.0, fanSystem.totalPower, 0.0001);
+    EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
