@@ -433,6 +433,10 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
                 CASE('FANPERFORMANCE:NIGHTVENTILATION')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  IF (TRIM(InArgs(4)) /= Blank) THEN
+                    CALL ShowWarningError('For FanPerformance:NightVentilation="'//TRIM(InArgs(1))// &
+                        '", Maximum Flow Rate was removed; input value "'//TRIM(InArgs(4))//'" was discarded.',Auditf)
+                  ENDIF
                   OutArgs(1:3)=InArgs(1:3)
                   OutArgs(4:CurArgs - 1)=InArgs(5:CurArgs)
                   CurArgs = CurArgs - 1

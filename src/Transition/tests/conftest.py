@@ -124,6 +124,7 @@ def prepare_and_run_transition(transitionclidir: Path, tmp_path: Path):
         expected_idf_text: str,
         version_ori: tuple[int, int, int],
         version_new: tuple[int, int, int],
+        expected_audit_text: str = "",
     ):
         v_ori = "-".join(map(str, version_ori))
         v_new = "-".join(map(str, version_new))
@@ -134,6 +135,9 @@ def prepare_and_run_transition(transitionclidir: Path, tmp_path: Path):
         idf_file_path.write_text(add_required_objects(idf_text=ori_idf_text, version=version_ori))
         subprocess.check_call([cli_path, idf_file_path], cwd=transitionclidir)
         new_text = (tmp_path / "in.idfnew").read_text()
+        if expected_audit_text:
+            audit_text = (transitionclidir / "Transition.audit").read_text()
+            assert expected_audit_text in audit_text
         assert "Version,{};\n".format(".".join(map(str, version_new[:2]))) in new_text
 
         expected_idf_text = add_required_objects(idf_text=expected_idf_text, version=version_new)
