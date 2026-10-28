@@ -1066,6 +1066,9 @@ TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_test)
     state->dataHeatBal->Zone(zn).spaceIndexes.emplace_back(1);
     state->dataHeatBal->space.allocate(zn);
     state->dataHeatBal->space(1).solarEnclosureNum = 1;
+    dl->enclDaylight(zn).NumOfDayltgExtWins = 9;
+    dl->enclDaylight(zn).DayltgExtWinSurfNums.allocate(dl->enclDaylight(zn).NumOfDayltgExtWins);
+    dl->enclDaylight(zn).DayltgExtWinSurfNums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     CreateShadeDeploymentOrder(*state, zn);
 
@@ -1149,16 +1152,7 @@ TEST_F(EnergyPlusFixture, MapShadeDeploymentOrderToLoopNumber_Test)
     state->dataHeatBal->space(zn).solarEnclosureNum = 1;
     state->dataViewFactor->EnclSolInfo.allocate(state->dataGlobal->NumOfZones);
 
-    CreateShadeDeploymentOrder(*state, zn);
-
-    EXPECT_EQ(dl->daylightControl(zn).ShadeDeployOrderExtWins.size(), 6ul);
-    EXPECT_EQ(dl->maxShadeDeployOrderExtWins, 6);
-
-    dl->daylightControl(zn).TotalDaylRefPoints = 1;
-    state->dataViewFactor->EnclSolInfo(zn).TotalEnclosureDaylRefPoints = 1;
-
     dl->enclDaylight(zn).NumOfDayltgExtWins = 9;
-    dl->daylightControl(zn).MapShdOrdToLoopNum.allocate(dl->enclDaylight(zn).NumOfDayltgExtWins);
     dl->enclDaylight(zn).DayltgExtWinSurfNums.allocate(dl->enclDaylight(zn).NumOfDayltgExtWins);
     dl->enclDaylight(zn).DayltgExtWinSurfNums(1) = 1;
     dl->enclDaylight(zn).DayltgExtWinSurfNums(2) = 2;
@@ -1169,6 +1163,16 @@ TEST_F(EnergyPlusFixture, MapShadeDeploymentOrderToLoopNumber_Test)
     dl->enclDaylight(zn).DayltgExtWinSurfNums(7) = 7;
     dl->enclDaylight(zn).DayltgExtWinSurfNums(8) = 8;
     dl->enclDaylight(zn).DayltgExtWinSurfNums(9) = 9;
+
+    CreateShadeDeploymentOrder(*state, zn);
+
+    EXPECT_EQ(dl->daylightControl(zn).ShadeDeployOrderExtWins.size(), 6ul);
+    EXPECT_EQ(dl->maxShadeDeployOrderExtWins, 6);
+
+    dl->daylightControl(zn).TotalDaylRefPoints = 1;
+    state->dataViewFactor->EnclSolInfo(zn).TotalEnclosureDaylRefPoints = 1;
+
+    dl->daylightControl(zn).MapShdOrdToLoopNum.allocate(dl->enclDaylight(zn).NumOfDayltgExtWins);
 
     MapShadeDeploymentOrderToLoopNumber(*state, zn);
 
@@ -1181,6 +1185,132 @@ TEST_F(EnergyPlusFixture, MapShadeDeploymentOrderToLoopNumber_Test)
     EXPECT_EQ(dl->daylightControl(zn).MapShdOrdToLoopNum(7), 5);
     EXPECT_EQ(dl->daylightControl(zn).MapShdOrdToLoopNum(8), 6);
     EXPECT_EQ(dl->daylightControl(zn).MapShdOrdToLoopNum(9), 7);
+}
+
+TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_DuplicateAndOtherEnclosureWindows)
+{
+    // Two WindowShadingControls on zone 1 both list the windows of zone 1 (surfaces 1-6) and zone 2 (surfaces 7-12).
+    // Only the six exterior windows of enclosure 1 should be deployed, each once, so MapShdOrdToLoopNum (sized to
+    // NumOfDayltgExtWins) is never written past its end.
+    state->init_state(*state);
+    auto &dl = state->dataDayltg;
+    int constexpr numZones = 2;
+    int constexpr numSurfs = 12;
+
+    state->dataSurface->Surface.allocate(numSurfs);
+    for (int surfNum = 1; surfNum <= numSurfs; ++surfNum) {
+        state->dataSurface->Surface(surfNum).Name = std::format("WIN_{}", surfNum);
+    }
+
+    state->dataSurface->TotWinShadingControl = 2;
+    state->dataSurface->WindowShadingControl.allocate(state->dataSurface->TotWinShadingControl);
+    for (int iShadeCtrl = 1; iShadeCtrl <= state->dataSurface->TotWinShadingControl; ++iShadeCtrl) {
+        auto &winShadeControl = state->dataSurface->WindowShadingControl(iShadeCtrl);
+        winShadeControl.Name = std::format("WSC{}", iShadeCtrl);
+        winShadeControl.ZoneIndex = 1;
+        winShadeControl.SequenceNumber = 1;
+        winShadeControl.multiSurfaceControl = MultiSurfaceControl::Sequential;
+        winShadeControl.FenestrationCount = numSurfs;
+        winShadeControl.FenestrationIndex.allocate(numSurfs);
+        for (int i = 1; i <= numSurfs; ++i) {
+            winShadeControl.FenestrationIndex(i) = i;
+        }
+    }
+
+    state->dataGlobal->NumOfZones = numZones;
+    state->dataGlobal->numSpaces = numZones;
+    state->dataHeatBal->Zone.allocate(numZones);
+    state->dataHeatBal->space.allocate(numZones);
+    state->dataViewFactor->EnclSolInfo.allocate(numZones);
+    for (int zn = 1; zn <= numZones; ++zn) {
+        state->dataHeatBal->Zone(zn).spaceIndexes.emplace_back(zn);
+        state->dataHeatBal->space(zn).solarEnclosureNum = zn;
+        state->dataViewFactor->EnclSolInfo(zn).Name = std::format("ENCL{}", zn);
+    }
+
+    dl->daylightControl.allocate(1);
+    dl->enclDaylight.allocate(numZones);
+    dl->enclDaylight(1).daylightControlIndexes.emplace_back(1);
+    dl->enclDaylight(1).NumOfDayltgExtWins = 6;
+    dl->enclDaylight(1).DayltgExtWinSurfNums.allocate(dl->enclDaylight(1).NumOfDayltgExtWins);
+    dl->enclDaylight(1).DayltgExtWinSurfNums = {1, 2, 3, 4, 5, 6};
+
+    dl->maxShadeDeployOrderExtWins = 0;
+    CreateShadeDeploymentOrder(*state, 1);
+
+    auto const &deployOrder = dl->daylightControl(1).ShadeDeployOrderExtWins;
+    ASSERT_EQ(deployOrder.size(), 6ul);
+    for (int i = 1; i <= 6; ++i) {
+        EXPECT_EQ(deployOrder[i - 1], std::vector<int>{i});
+    }
+    EXPECT_EQ(dl->maxShadeDeployOrderExtWins, 6);
+
+    EXPECT_TRUE(compare_err_stream_substring("WindowShadingControl=\"WSC1\" references fenestration surfaces that are not exterior windows of "
+                                             "daylighting enclosure ENCL1",
+                                             false));
+    EXPECT_TRUE(compare_err_stream_substring("WindowShadingControl=\"WSC2\" references fenestration surfaces that are already referenced", false));
+    EXPECT_TRUE(compare_err_stream_substring("-  WIN_7", true));
+
+    dl->daylightControl(1).TotalDaylRefPoints = 1;
+    state->dataViewFactor->EnclSolInfo(1).TotalEnclosureDaylRefPoints = 1;
+    dl->daylightControl(1).MapShdOrdToLoopNum.dimension(dl->enclDaylight(1).NumOfDayltgExtWins, 0);
+
+    MapShadeDeploymentOrderToLoopNumber(*state, 1);
+
+    for (int i = 1; i <= 6; ++i) {
+        EXPECT_EQ(dl->daylightControl(1).MapShdOrdToLoopNum(i), i);
+    }
+}
+
+TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_MaxAcrossEnclosures)
+{
+    // maxShadeDeployOrderExtWins sizes per-group arrays used for every daylighting control, so it must be the max over
+    // all enclosures, not just the last one processed.
+    state->init_state(*state);
+    auto &dl = state->dataDayltg;
+    int constexpr numZones = 2;
+
+    state->dataSurface->TotWinShadingControl = 2;
+    state->dataSurface->WindowShadingControl.allocate(state->dataSurface->TotWinShadingControl);
+    std::array<std::vector<int>, numZones> const zoneWins = {std::vector<int>{1, 2, 3, 4, 5}, std::vector<int>{6, 7}};
+    for (int zn = 1; zn <= numZones; ++zn) {
+        auto &winShadeControl = state->dataSurface->WindowShadingControl(zn);
+        winShadeControl.Name = std::format("WSC{}", zn);
+        winShadeControl.ZoneIndex = zn;
+        winShadeControl.SequenceNumber = 1;
+        winShadeControl.multiSurfaceControl = MultiSurfaceControl::Sequential;
+        winShadeControl.FenestrationCount = (int)zoneWins[zn - 1].size();
+        winShadeControl.FenestrationIndex.allocate(winShadeControl.FenestrationCount);
+        for (int i = 1; i <= winShadeControl.FenestrationCount; ++i) {
+            winShadeControl.FenestrationIndex(i) = zoneWins[zn - 1][i - 1];
+        }
+    }
+
+    state->dataGlobal->NumOfZones = numZones;
+    state->dataGlobal->numSpaces = numZones;
+    state->dataHeatBal->Zone.allocate(numZones);
+    state->dataHeatBal->space.allocate(numZones);
+    dl->daylightControl.allocate(numZones);
+    dl->enclDaylight.allocate(numZones);
+    for (int zn = 1; zn <= numZones; ++zn) {
+        state->dataHeatBal->Zone(zn).spaceIndexes.emplace_back(zn);
+        state->dataHeatBal->space(zn).solarEnclosureNum = zn;
+        dl->enclDaylight(zn).daylightControlIndexes.emplace_back(zn);
+        dl->enclDaylight(zn).NumOfDayltgExtWins = (int)zoneWins[zn - 1].size();
+        dl->enclDaylight(zn).DayltgExtWinSurfNums.allocate(dl->enclDaylight(zn).NumOfDayltgExtWins);
+        for (int i = 1; i <= dl->enclDaylight(zn).NumOfDayltgExtWins; ++i) {
+            dl->enclDaylight(zn).DayltgExtWinSurfNums(i) = zoneWins[zn - 1][i - 1];
+        }
+    }
+
+    dl->maxShadeDeployOrderExtWins = 0;
+    CreateShadeDeploymentOrder(*state, 1);
+    CreateShadeDeploymentOrder(*state, 2);
+
+    EXPECT_EQ(dl->daylightControl(1).ShadeDeployOrderExtWins.size(), 5ul);
+    EXPECT_EQ(dl->daylightControl(2).ShadeDeployOrderExtWins.size(), 2ul);
+    EXPECT_EQ(dl->maxShadeDeployOrderExtWins, 5);
+    EXPECT_EQ(dl->maxDayltgExtWins, 5);
 }
 
 TEST_F(EnergyPlusFixture, DaylightingManager_DayltgInteriorIllum_LuminanceShading_Test)
