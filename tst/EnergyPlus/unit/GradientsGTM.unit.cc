@@ -190,3 +190,25 @@ TEST_F(GradientsGTMTest, HybridAtTransitionDepth)
     EXPECT_NEAR(gtm->getGroundTempAtTimeInMonths(*state, 15.0, 1),
                 gtm->testSegmentTemp(15.0), 1e-6);
 }
+TEST_F(GradientsGTMTest, ParseReferenceTemperature)
+{
+    nlohmann::json j;
+    j["transition_depth"] = 15.0;
+    j["blend_width"] = 5.0;
+    j["reference_temperature"] = 18.5; // The new field we are testing
+    j["number_of_segments"] = 1;
+    j["segments"] = nlohmann::json::array({
+        {{"upper_depth", 15.0}, {"lower_depth", 100.0}, {"gradient", 0.057}}
+    });
+
+    auto testgtm = std::make_unique<GradientsGTM>();
+    testgtm->parseGradientSegments(*state, j);
+    testgtm->setBoreholeDepth(*state, 100.0);
+
+    // Verify the temperature at 50m depth.
+    // With ref_temp = 18.5 and gradient = 0.057 starting at 15m:
+    // Temp = 18.5 + 0.057 * (50 - 15) = 18.5 + 1.995 = 20.495
+    Real64 tempAt50m = testgtm->getGroundTempAtTimeInMonths(*state, 50.0, 1); 
+    
+    EXPECT_NEAR(tempAt50m, 20.495, 0.001);
+}
