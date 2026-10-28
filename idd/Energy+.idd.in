@@ -78515,11 +78515,21 @@ HeatPump:AirToWater,
         \object-list BivariateFunctions
         \note EIRFT - Fuel Energy Input Ratio Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
-   A59; \field Cooling Energy Input Ratio Function of PLR Curve Name in Booster Mode
+   A59, \field Cooling Energy Input Ratio Function of PLR Curve Name in Booster Mode
         \type object-list
         \object-list UnivariateFunctions
         \note EIRFPLR - Fuel Energy Input Ratio Function of Part Load Ratio(PLR) Curve Name,
         \note which is a cubic curve or a lookup table.
+   A60; \field Flow Mode
+        \note Select operating mode for fluid flow through the heat pump, applied to both the hot water
+        \note and chilled water sides. "ConstantFlow" requests the rated water flow rate whenever the
+        \note heat pump operates. "LeavingSetpointModulated" varies the water flow rate to meet the
+        \note leaving water temperature setpoint, capped at the rated water flow rate. Use
+        \note "LeavingSetpointModulated" with a variable speed pump.
+        \type choice
+        \key ConstantFlow
+        \key LeavingSetpointModulated
+        \default ConstantFlow
 
 HeatPump:WaterToWater:EquationFit:Heating,
         \memo simple water-water hp curve-fit model

@@ -6604,6 +6604,18 @@ capacity and use 0.95 times the max-speed rated COP for the rated capacity at bo
 \paragraph{Cooling Energy Input Ratio Function of PLR Curve Name in Booster
 Mode} This field is the cooling energy input ratio function of part load ratio
 (PLR) curve name in booster mode.
+\paragraph{Field: Flow Mode} This field selects how the water flow rate through
+the heat pump is controlled. It applies to both the hot water and the chilled
+water sides. The choices are \emph{ConstantFlow} and
+\emph{LeavingSetpointModulated}. With \emph{ConstantFlow}, the heat pump requests
+the rated water flow rate whenever it operates. With
+\emph{LeavingSetpointModulated}, the heat pump varies the water flow rate to just
+meet the leaving water temperature setpoint, using the loop setpoint (the high
+setpoint for cooling and the low setpoint for heating on a dual setpoint loop).
+The flow rate is capped at the rated water flow rate, and, if the heat pump's
+branch has a variable speed pump, it is not reduced below that pump's minimum
+flow rate. Use \emph{LeavingSetpointModulated} together with a variable speed
+pump. The default is \emph{ConstantFlow}.
 
 \subsubsection{Outputs}\label{outputs-heatpump-air-to-water}
 \begin{itemize}
