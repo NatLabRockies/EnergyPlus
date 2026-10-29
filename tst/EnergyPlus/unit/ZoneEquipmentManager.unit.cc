@@ -5968,8 +5968,10 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
             idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate Per Unit Pressure");
             idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
             idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Electric Power Function of Flow Fraction Curve Name");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Fan Total Efficiency");
             idfObjects.emplace_back("  100.0,                    !- Night Ventilation Mode Pressure Rise {Pa}");
-            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Flow Fraction");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Motor Efficiency");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Motor In Air Stream Fraction");
             idfObjects.emplace_back("  ,                         !- Motor Loss Zone Name");
             idfObjects.emplace_back("  0.0,                      !- Motor Loss Radiative Fraction");
             idfObjects.emplace_back("  General,                  !- End-Use Subcategory");
