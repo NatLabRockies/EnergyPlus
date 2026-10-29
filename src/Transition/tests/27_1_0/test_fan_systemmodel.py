@@ -57,7 +57,7 @@ import pytest
 
 
 @pytest.mark.parametrize("old_field_count", [16, 17, 18])
-def test_fan_systemmodel_no_trailing_fields(run_transition_test, old_field_count):
+def test_fan_systemmodel_no_trailing_fields(prepare_and_run_transition, old_field_count):
     """Preserve a final pressure-rise value after inserting the night efficiency field."""
     idf_text = """
   Fan:SystemModel,
@@ -113,10 +113,15 @@ def test_fan_systemmodel_no_trailing_fields(run_transition_test, old_field_count
       idf_text = idf_text.replace("250.0;", "250.0,")
       idf_text += "    0.3333;                  !- Night Ventilation Mode Flow Fraction\n"
 
-    run_transition_test(idf_text, expected_idf_text)
+    prepare_and_run_transition(
+      ori_idf_text=idf_text,
+      expected_idf_text=expected_idf_text,
+      version_ori=(26, 2, 0),
+      version_new=(27, 1, 0),
+    )
 
 
-def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(run_transition_test):
+def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(prepare_and_run_transition):
     """Fan:SystemModel with the (now removed) Night Ventilation Mode Flow Fraction populated
     and trailing fields present: preserve pressure and shift trailing fields by two."""
     idf_text = """
@@ -171,10 +176,15 @@ def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(run_transition_t
     Fan Energy;              !- End-Use Subcategory
 """
 
-    run_transition_test(idf_text, expected_idf_text)
+    prepare_and_run_transition(
+      ori_idf_text=idf_text,
+      expected_idf_text=expected_idf_text,
+      version_ori=(26, 2, 0),
+      version_new=(27, 1, 0),
+    )
 
 
-def test_fan_systemmodel_with_multispeed_fields(run_transition_test):
+def test_fan_systemmodel_with_multispeed_fields(prepare_and_run_transition):
     """Fan:SystemModel with Number of Speeds and speed field sets present: all fields after
     the removed flow fraction shift down by two positions."""
     idf_text = """
@@ -239,4 +249,9 @@ def test_fan_systemmodel_with_multispeed_fields(run_transition_test):
     1.0;                     !- Speed 2 Electric Power Fraction
 """
 
-    run_transition_test(idf_text, expected_idf_text)
+    prepare_and_run_transition(
+      ori_idf_text=idf_text,
+      expected_idf_text=expected_idf_text,
+      version_ori=(26, 2, 0),
+      version_new=(27, 1, 0),
+    )
