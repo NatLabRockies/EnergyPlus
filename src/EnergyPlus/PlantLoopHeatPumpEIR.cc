@@ -2835,14 +2835,14 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
     this->oneTimeInitFlagAWHP = false;
 }
 
-// TODO: sizeLoadSide() is not virtual, and the only production call site (EIRPlantLoopHeatPump::onInitLoopEquip,
-// via `this->sizeLoadSide(state);`) is compiled in the base class's own scope, so it always statically resolves to
-// EIRPlantLoopHeatPump::sizeLoadSide. This override is therefore unreachable dead code today; the
-// referenceCapacityOneUnit recompute below never runs. Pre-existing issue, unrelated to the Wshadow-field cleanup.
 void HeatPumpAirToWater::sizeLoadSide(EnergyPlusData &state)
 {
     EIRPlantLoopHeatPump::sizeLoadSide(state);
     this->referenceCapacityOneUnit = this->referenceCapacity / this->heatPumpMultiplier;
+    if (this->referenceCapacityWasAutoSized) {
+        // only the highest speed (or booster mode) capacity can be autosized, keep it in sync with the sized value
+        this->ratedCapacity[this->numSpeeds - 1] = this->referenceCapacityOneUnit;
+    }
 }
 
 bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
@@ -4577,8 +4577,9 @@ void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 cu
         auto capacityModifierFuncTemp = Curve::CurveValue(state, curveIndex, this->loadSideOutletTemp, this->sourceSideInletTemp);
         auto availableCapacityOneUnit = this->referenceCapacityOneUnit * capacityModifierFuncTemp;
 
+        auto companionCurveIndex = companionCoil.capFuncTempCurveIndices[companionCoil.numSpeeds - 1];
         auto companionCapacityModifierFuncTemp =
-            Curve::CurveValue(state, curveIndex, companionCoil.loadSideOutletTemp, companionCoil.sourceSideInletTemp);
+            Curve::CurveValue(state, companionCurveIndex, companionCoil.loadSideOutletTemp, companionCoil.sourceSideInletTemp);
         auto companionAvailableCapacityOneUnit = companionCoil.referenceCapacityOneUnit * companionCapacityModifierFuncTemp;
         if (this->OperationModeEMSOverrideOn) {
             if (this->OperationModeEMSOverrideValue > 0) {
