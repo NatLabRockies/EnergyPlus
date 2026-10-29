@@ -460,6 +460,7 @@ add_simulation_test(IDF_FILE PlantApplicationsGuide_Example2_hwTank.idf EPW_FILE
 add_simulation_test(IDF_FILE PlantApplicationsGuide_Example3.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantComponentTemperatureSource.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantHorizontalGroundHX.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
+add_simulation_test(IDF_FILE PlantLiquidITECooling.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE PlantLoadProfile.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantLoadProfileCoolingReturnReset.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantLoadProfileCoolingReturnResetLookup.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
