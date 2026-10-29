@@ -9790,37 +9790,83 @@ void CreateShadeDeploymentOrder(EnergyPlusData &state, int const enclNum)
     }
     // sort the WindowShadingControl objects based on sequence number
     sort(shadeControlSequence.begin(), shadeControlSequence.end());
-    // now make the deployment list of lists.
-    // each sublist is a group of surfaces that should be deployed together
-    // often the sublist is just a single item.
-    dl->maxShadeDeployOrderExtWins = 0;
-    for (int controlNum : dl->enclDaylight(enclNum).daylightControlIndexes) {
-        auto &thisDaylightCtrl = dl->daylightControl(controlNum);
-        for (auto sequence : shadeControlSequence) { // This is an iterator (THIS_AUTO_OK)
-            int curShadeControlNum = sequence.second;
-            auto const &winShadeControl = s_surf->WindowShadingControl(curShadeControlNum);
-            if (winShadeControl.multiSurfaceControl == MultiSurfaceControl::Group) {
-                // add a group of surfaces since they should be deployed as a group
-                std::vector<int> group;
-                for (int i = 1; i <= winShadeControl.FenestrationCount; i++) {
-                    group.push_back(winShadeControl.FenestrationIndex(i));
-                }
-                thisDaylightCtrl.ShadeDeployOrderExtWins.push_back(group);
-            } else {
-                // add each individual surface as a separate list so they are deployed individually
-                for (int i = 1; i <= winShadeControl.FenestrationCount; i++) {
-                    std::vector<int> singleMemberVector;
-                    singleMemberVector.push_back(winShadeControl.FenestrationIndex(i));
-                    thisDaylightCtrl.ShadeDeployOrderExtWins.push_back(singleMemberVector);
-                }
-            }
-        }
-        dl->maxShadeDeployOrderExtWins = max(dl->maxShadeDeployOrderExtWins, (int)thisDaylightCtrl.ShadeDeployOrderExtWins.size());
-    }
 
     dl->maxDayltgExtWins = 0;
     for (auto const &enclDayl : dl->enclDaylight) {
         dl->maxDayltgExtWins = max(dl->maxDayltgExtWins, enclDayl.NumOfDayltgExtWins);
+    }
+
+    auto const &thisEnclDaylight = dl->enclDaylight(enclNum);
+    if (thisEnclDaylight.daylightControlIndexes.empty()) {
+        return;
+    }
+
+    // now make the deployment list of lists.
+    // each sublist is a group of surfaces that should be deployed together
+    // often the sublist is just a single item.
+    // Only exterior windows seen by this enclosure (DayltgExtWinSurfNums) are included, and each only once, so that
+    // the total number of windows in the list never exceeds NumOfDayltgExtWins (the size of MapShdOrdToLoopNum).
+    std::vector<std::vector<int>> shadeDeployOrderExtWins;
+    std::vector<int> addedWins;
+    for (auto const &sequence : shadeControlSequence) {
+        auto const &winShadeControl = s_surf->WindowShadingControl(sequence.second);
+        std::vector<int> group;
+        std::vector<int> skippedNotInEncl;
+        std::vector<int> skippedDuplicate;
+        for (int i = 1; i <= winShadeControl.FenestrationCount; i++) {
+            int const surfNum = winShadeControl.FenestrationIndex(i);
+            if (std::find(thisEnclDaylight.DayltgExtWinSurfNums.begin(), thisEnclDaylight.DayltgExtWinSurfNums.end(), surfNum) ==
+                thisEnclDaylight.DayltgExtWinSurfNums.end()) {
+                skippedNotInEncl.push_back(surfNum);
+                continue;
+            }
+            if (std::find(addedWins.begin(), addedWins.end(), surfNum) != addedWins.end()) {
+                skippedDuplicate.push_back(surfNum);
+                continue;
+            }
+            addedWins.push_back(surfNum);
+            if (winShadeControl.multiSurfaceControl == MultiSurfaceControl::Group) {
+                // add a group of surfaces since they should be deployed as a group
+                group.push_back(surfNum);
+            } else {
+                // add each individual surface as a separate list so they are deployed individually
+                shadeDeployOrderExtWins.push_back({surfNum});
+            }
+        }
+        if (!group.empty()) {
+            shadeDeployOrderExtWins.push_back(group);
+        }
+
+        if (!skippedNotInEncl.empty()) {
+            ShowWarningError(state,
+                             std::format("CreateShadeDeploymentOrder: WindowShadingControl=\"{}\" references fenestration surfaces that are not "
+                                         "exterior windows of daylighting enclosure {}.",
+                                         winShadeControl.Name,
+                                         state.dataViewFactor->EnclSolInfo(enclNum).Name));
+            ShowContinueError(state, "Check the Zone Name in the WindowShadingControl. These surfaces are ignored for daylighting shade deployment:");
+            for (int surfNum : skippedNotInEncl) {
+                ShowContinueError(state, std::format("  -  {}", s_surf->Surface(surfNum).Name));
+            }
+        }
+        if (!skippedDuplicate.empty()) {
+            ShowWarningError(state,
+                             std::format("CreateShadeDeploymentOrder: WindowShadingControl=\"{}\" references fenestration surfaces that are already "
+                                         "referenced by another WindowShadingControl in daylighting enclosure {}.",
+                                         winShadeControl.Name,
+                                         state.dataViewFactor->EnclSolInfo(enclNum).Name));
+            ShowContinueError(state, "Only the first reference is used for daylighting shade deployment:");
+            for (int surfNum : skippedDuplicate) {
+                ShowContinueError(state, std::format("  -  {}", s_surf->Surface(surfNum).Name));
+            }
+        }
+    }
+
+    // dl->maxShadeDeployOrderExtWins is reset by the caller and accumulates the max across enclosures
+    for (int controlNum : thisEnclDaylight.daylightControlIndexes) {
+        auto &thisDaylightCtrl = dl->daylightControl(controlNum);
+        thisDaylightCtrl.ShadeDeployOrderExtWins.insert(
+            thisDaylightCtrl.ShadeDeployOrderExtWins.end(), shadeDeployOrderExtWins.begin(), shadeDeployOrderExtWins.end());
+        dl->maxShadeDeployOrderExtWins = max(dl->maxShadeDeployOrderExtWins, (int)thisDaylightCtrl.ShadeDeployOrderExtWins.size());
     }
 
 } // CreateShadeDeploymentOrder()
@@ -9831,7 +9877,6 @@ void MapShadeDeploymentOrderToLoopNumber(EnergyPlusData &state, int const enclNu
     // Allow a way to map back to the original "loop" index that is used in many other places in the
     // ZoneDayLight data structure when traversing the list in the order of the window shaded deployment
     auto &dl = state.dataDayltg;
-    auto &s_surf = state.dataSurface;
 
     auto const &thisEnclDaylight = dl->enclDaylight(enclNum);
     auto const &thisEnclSol = state.dataViewFactor->EnclSolInfo(enclNum);
@@ -9847,21 +9892,11 @@ void MapShadeDeploymentOrderToLoopNumber(EnergyPlusData &state, int const enclNu
         }
 
         int count = 0;
-        bool showOnce = true;
         for (auto const &listOfExtWin : thisDaylightCtrl.ShadeDeployOrderExtWins) {
             for (int IWinShdOrd : listOfExtWin) {
                 ++count;
-                if (count > thisEnclDaylight.NumOfDayltgExtWins) {
-                    if (showOnce) {
-                        ShowWarningError(
-                            state,
-                            std::format("MapShadeDeploymentOrderToLoopNumber: too many controlled shaded windows in enclosure {}", thisEnclSol.Name));
-                        ShowContinueError(state,
-                                          "Check the Zone Name in the WindowShadingControl that references the following fenestration surfaces:");
-                        showOnce = false;
-                    }
-                    ShowContinueError(state, std::format("  -  {}", s_surf->Surface(IWinShdOrd).Name));
-                }
+                // CreateShadeDeploymentOrder only adds each of the enclosure's exterior windows once
+                assert(count <= thisEnclDaylight.NumOfDayltgExtWins);
                 for (int loop = 1; loop <= thisEnclDaylight.NumOfDayltgExtWins; ++loop) {
                     int IWinLoop = thisEnclDaylight.DayltgExtWinSurfNums(loop);
                     if (IWinShdOrd == IWinLoop) {
