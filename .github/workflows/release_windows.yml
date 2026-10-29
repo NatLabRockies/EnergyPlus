@@ -7,7 +7,12 @@ on:
   workflow_dispatch:
 
 env:
-  MINGW_GFORTRAN: "/c/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
+  # Pin a MSVCRT-based MinGW: UCRT makes the Fortran tools (e.g. ReadVarsESO) ~3x slower, see #11876
+  # Root cause is libgfortran's per-statement setlocale(LC_NUMERIC) dance, which is slow and a use-after-free with UCRT
+  # Switch back to UCRT once https://gcc.gnu.org/bugzilla/show_bug.cgi?id=128183 is fixed in a release: patched UCRT is faster than stock MSVCRT
+  MINGW_ARCHIVE_URL: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev2.7z"
+  MINGW_ARCHIVE_SHA256: "9b8f39d04521c078d6a7f88ae4f9f052eb574f303f4134c7b614074d34e21363"
+  MINGW_GFORTRAN: "/c/mingw-msvcrt/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILD_TYPE: Release
 
@@ -83,6 +88,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.python-arch }}
+
+    - name: Install MinGW gfortran (MSVCRT)
+      shell: bash
+      run: |
+        set -euxo pipefail
+        curl -fsSL -o mingw.7z "$MINGW_ARCHIVE_URL"
+        echo "$MINGW_ARCHIVE_SHA256  mingw.7z" | sha256sum -c -
+        7z x -y -oC:/mingw-msvcrt mingw.7z > /dev/null
+        rm mingw.7z
+        "$MINGW_GFORTRAN" --version
 
     - name: Setup QtIFW 4.x
       uses: jmarrec/setup-qtifw@v1

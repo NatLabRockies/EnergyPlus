@@ -102,11 +102,18 @@ This field is the name of a performance curve or table that describes how electr
 
 This optional numeric field is the fan total efficiency used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank the normal fan total efficiency determined from design flow, pressure, and electric power is used instead.
 
+These night performance fields replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object, which is not needed with this fan.
+
 \paragraph{Field: Night Ventilation Mode Pressure Rise}\label{field-nite-vent-pressure-fansysmodel}
 
-This optional numeric field is the total system pressure rise experienced by the fan when operating in night ventilation mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}, in Pascals. A positive value overrides the Design Pressure Rise during night ventilation; if this field is blank or zero, the design pressure rise is used. This field allows the fan to be modeled with the different system pressure that can occur when outdoor air is used to precool a building with dampers fully open. These night performance fields replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object, which is not needed with this fan.
+This optional numeric field is the total system pressure rise experienced by the fan when operating in night ventilation mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}, in Pascals.
+A positive value overrides the Design Pressure Rise during night ventilation; if this field is blank or zero, the design pressure rise is used.
+This field allows the fan to be modeled with the different system pressure that can occur when outdoor air is used to precool a building with dampers fully open.
 
-During night ventilation, a continuously controlled fan calculates electric power from the actual air flow rate multiplied by the active pressure rise and divided by the active total efficiency, without applying the normal power curve or its minimum flow fraction. The night performance fields do not set or reduce the requested flow rate. On an air loop, the night venting flow fraction is applied by the availability manager; zone equipment retains its parent component's flow control. Night mode follows the serving air loop for terminal fans and the component's own availability managers for other zone equipment.
+During night ventilation, a continuously controlled fan calculates electric power from the actual air flow rate multiplied by the active pressure rise and divided by the active total efficiency, without applying the normal power curve or its minimum flow fraction.
+The night performance fields do not set or reduce the requested flow rate.
+On an air loop, the night venting flow fraction is applied by the availability manager; zone equipment retains its parent component's flow control.
+Night mode follows the serving air loop for terminal fans and the component's own availability managers for other zone equipment.
 
 \paragraph{Field: Night Ventilation Mode Motor Efficiency}\label{field-nite-vent-motor-eff-fansysmodel}
 
@@ -826,18 +833,17 @@ Fan:OnOff,
 
 \subsection{FanPerformance:NightVentilation}\label{fanperformancenightventilation}
 
-This object is used for specifying an alternate set of performance parameters for a fan (i.e., the performance of the fan during night venting may be very different than during normal operation).
-These alternate parameters are used when a system manager (such as \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}) sets a specified flow rate for a central forced air system.
-At this time, it can be used with \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, and \hyperref[fanonoff]{Fan:OnOff} fans, but not with \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fancomponentmodel]{Fan:ComponentModel} fans.
-\hyperref[fansystemmodel]{Fan:SystemModel} fans have replaced \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} (i.e., provides built-in night ventilation settings so \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} is not applicable/needed for that fan type).
+This object specifies alternate performance parameters for a fan when night ventilation is active. It can be used with \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, and \hyperref[fanonoff]{Fan:OnOff} fans, but not with \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fancomponentmodel]{Fan:ComponentModel} fans. Fan:SystemModel has separate night-ventilation inputs, but its Night Ventilation Mode Flow Fraction field currently has no effect.
 
-The fan model checks whether a fixed flow rate has been set; if it has the fan model will use these alternate performance parameters. Note that it is assumed that the fan will run at a fixed speed in the alternate mode. The inputs needed by this object are the fan name, fan total efficiency, pressure rise, flow rate, motor efficiency, and motor in airstream fraction.
+For zone equipment other than air distribution units, night-ventilation mode is determined by that component's own AvailabilityManager:NightVentilation status. An air distribution unit follows the status of its connected air loop. A coupled \hyperref[fanzoneexhaust]{Fan:ZoneExhaust} follows an air loop serving its zone; a decoupled exhaust fan does not enter night-ventilation mode.
+
+The fan uses these alternate performance parameters during night ventilation and is assumed to run at a fixed speed. This does not fix airflow or power at design values; power is calculated from actual operating airflow using the entered pressure rise and fan total efficiency. The inputs are the fan name, fan total efficiency, pressure rise, motor efficiency, and motor in airstream fraction.
 
 \subsubsection{Inputs}\label{inputs-4-013}
 
 \paragraph{Field: Fan Name}\label{field-fan-name-001}
 
-This is the name of a fan defined elsewhere in the input file. The night vent performance parameters will be applied to the named fan when a system manager (such as \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}) has set the air system flow rate.
+This is the name of a fan defined elsewhere in the input file. The night vent performance parameters are applied when the named fan is operating in night-ventilation mode.
 
 \paragraph{Field: Fan Total Efficiency}\label{field-fan-total-efficiency-4}
 
@@ -847,13 +853,9 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 The pressure rise in Pascals at full flow and standard (sea level) conditions (\SI{20}{\celsius} and 101325 Pa). This is a required field with no default.
 
-\paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-4}
-
-The design volumetric flow rate of the fan (m\(^{3}\)/sec) at standard conditions. This input is not currently used by the night ventilation manager. The flow rate during night ventilation is specified using the \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} ``Night Venting Flow Fraction'' field. This fraction is multiplied by the fan object's design flow rate.
-
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-3}
 
-The shaft power divided by the electrical power consumed. Must be between 0 and 1. This is a required field with no default.
+The shaft power divided by the electrical power consumed. Must be between 0 and 1. This is a required field with no default. This input is not used by \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, which calculates electrical power from the air power and Fan Total Efficiency.
 
 \paragraph{Field: Motor in Airstream Fraction}\label{field-motor-in-airstream-fraction-3}
 
@@ -885,7 +887,6 @@ FanPerformance:NightVentilation,
   Supply Fan 1,               !- Fan Name
   0.7,                        !- Fan Total Efficiency
   67.0,                       !- Pressure Rise {Pa}
-  autosize,                   !- Maximum Flow Rate {m3/s}
   0.9,                        !- Motor Efficiency
   1.0;                        !- Motor in Airstream Fraction
 \end{lstlisting}

@@ -64,6 +64,7 @@
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -116,6 +117,126 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TestGetFunctions1)
     Real64 locDesignHeatGain = fanSystem->getDesignHeatGain(*state, locFanSizeVdot);
     EXPECT_NEAR(locDesignHeatGain, 200.0, 0.1);
     EXPECT_FALSE(fanSystem->speedControl == Fans::SpeedControl::Continuous);
+}
+
+// In night mode, a SystemModel fan without a night pressure override uses design pressure and scales power with actual flow.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressure)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.36;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_DOUBLE_EQ(0.36, fanSystem.outletAirMassFlowRate);
+    EXPECT_NEAR(150.0, fanSystem.totalPower, 0.0001);
+}
+
+// Verify fouled-filter operation preserves night pressure while validating its curve against rated pressure.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentFouledFilterUsesNightPressure)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+    state->dataGlobal->DoWeathSim = true;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.0;
+    fanSystem.inletAirMassFlowRate = 1.0;
+    fanSystem.rhoAirStdInit = 1.0;
+    fanSystem.deltaPress = 300.0;
+    fanSystem.nightVentPressureDelta = 100.0;
+    fanSystem.totalEff = 0.5;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.faultyFilterFlag = true;
+    fanSystem.faultyFilterIndex = 1;
+
+    auto *fanCurve = Curve::AddCurve(*state, "Night Pressure Fan Curve");
+    fanCurve->curveType = Curve::CurveType::Quadratic;
+    fanCurve->coeff[0] = 800.0;
+    fanCurve->coeff[1] = -500.0;
+    fanCurve->inputLimits[0].min = 0.0;
+    fanCurve->inputLimits[0].max = 1.0;
+
+    Sched::ScheduleConstant faultAvailableSchedule;
+    faultAvailableSchedule.currentVal = 1.0;
+    Sched::ScheduleConstant pressureFractionSchedule;
+    pressureFractionSchedule.currentVal = 1.1;
+    state->dataFaultsMgr->NumFaultyAirFilter = 1;
+    state->dataFaultsMgr->FaultsFouledAirFilters.allocate(1);
+    auto &fault = state->dataFaultsMgr->FaultsFouledAirFilters(1);
+    fault.availSched = &faultAvailableSchedule;
+    fault.pressFracSched = &pressureFractionSchedule;
+    fault.fanCurveNum = fanCurve->Num;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_NEAR(0.94, fanSystem.outletAirMassFlowRate, 0.01);
+    EXPECT_NEAR(206.8, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(206.8, fanSystem.powerLossToAir, 0.01);
+}
+
+// Verify continuous SystemModel night power follows actual flow below the normal low-flow heat-safeguard threshold.
+TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.012;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 20000.0;
+    fanSystem.totalEff = 0.6;
+    fanSystem.motorEff = 0.9;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Night Vent Cubic Power Curve");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[3] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    fanSystem.calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+
+    EXPECT_DOUBLE_EQ(0.012, fanSystem.outletAirMassFlowRate);
+    EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)

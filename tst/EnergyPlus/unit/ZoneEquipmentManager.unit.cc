@@ -62,6 +62,7 @@
 #include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
+#include <EnergyPlus/DataHVACSystems.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -69,6 +70,7 @@
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/EarthTube.hh>
+#include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/HVACManager.hh>
 #include <EnergyPlus/HeatBalanceAirManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
@@ -78,6 +80,7 @@
 #include <EnergyPlus/SimAirServingZones.hh>
 #include <EnergyPlus/SystemAvailabilityManager.hh>
 #include <EnergyPlus/ThermalChimney.hh>
+#include <EnergyPlus/UnitHeater.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
@@ -5626,4 +5629,739 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_LatentSizingPropagatesOutdoorPeak
     EXPECT_EQ(0.018, designDaySizing.OutHumRatAtCoolPeak);
     EXPECT_EQ(-5.0, designDaySizing.OutTempAtHeatPeak);
     EXPECT_EQ(0.004, designDaySizing.OutHumRatAtHeatPeak);
+}
+
+// Verify an ADU follows only its connected air loop's night state, including reversed and disconnected cases.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ADUUsesConnectedLoopNightVentilation)
+{
+    state->init_state(*state);
+    state->dataDefineEquipment->AirDistUnit.allocate(2);
+    state->dataAirLoop->AirLoopControlInfo.resize(2);
+    state->dataDefineEquipment->AirDistUnit(1).AirLoopNum = 1;
+    state->dataDefineEquipment->AirDistUnit(1).ZoneNum = 1;
+    state->dataDefineEquipment->AirDistUnit(2).AirLoopNum = 2;
+    state->dataDefineEquipment->AirDistUnit(2).ZoneNum = 1;
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = true;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = false;
+    state->dataHVACGlobal->NightVentOn = true;
+
+    // Two ADUs serve the same zone from different loops; each follows only its own loop's night-vent status.
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 2, false));
+
+    // Reversing the loop states must reverse the result for the two ADUs.
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = false;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = true;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 2, false));
+
+    // A disconnected ADU cannot inherit night mode from either loop.
+    state->dataDefineEquipment->AirDistUnit(1).AirLoopNum = 0;
+    state->dataDefineEquipment->AirDistUnit(1).OutletNodeNum = 1001;
+    state->dataZoneEquip->ZoneEquipConfig.allocate(1);
+    auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(1);
+    zoneEquipConfig.NumInletNodes = 1;
+    zoneEquipConfig.InletNode.allocate(1);
+    zoneEquipConfig.InletNodeAirLoopNum.allocate(1);
+    zoneEquipConfig.InletNode(1) = 1001;
+    zoneEquipConfig.InletNodeAirLoopNum(1) = 1;
+    state->dataSize->CurZoneEqNum = 1;
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = true;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
+
+    // On the first simulation call, the ADU's cached air loop may not be populated yet.
+    zoneEquipConfig.InletNodeAirLoopNum(1) = 0;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, DataZoneEquipment::ZoneEquipType::AirDistributionUnit, 1, false));
+}
+
+// Verify coupled ZoneExhaust fans follow their serving loop, decoupled fans ignore it, and global state is restored.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServingAirLoop)
+{
+    // Each zone has its own exhaust fan and serving air loop; only zone 1's loop is initially night ventilating.
+    // Since NightVentOn is global, SimZoneEquipment must derive it from the serving loop for each coupled fan.
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone 1;                   !- Name",
+        "Zone,",
+        "  Zone 2;                   !- Name",
+
+        "ZoneHVAC:EquipmentConnections,",
+        "  Zone 1,                   !- Zone Name",
+        "  Zone 1 Equipment,         !- Zone Conditioning Equipment List Name",
+        "  Zone 1 In Node,           !- Zone Air Inlet Node or NodeList Name",
+        "  Zone 1 Fan Inlet Node,    !- Zone Air Exhaust Node or NodeList Name",
+        "  Zone 1 Node,              !- Zone Air Node Name",
+        "  Zone 1 Ret Node;          !- Zone Return Air Node Name",
+
+        "ZoneHVAC:EquipmentConnections,",
+        "  Zone 2,                   !- Zone Name",
+        "  Zone 2 Equipment,         !- Zone Conditioning Equipment List Name",
+        "  Zone 2 In Node,           !- Zone Air Inlet Node or NodeList Name",
+        "  Zone 2 Fan Inlet Node,    !- Zone Air Exhaust Node or NodeList Name",
+        "  Zone 2 Node,              !- Zone Air Node Name",
+        "  Zone 2 Ret Node;          !- Zone Return Air Node Name",
+
+        "ZoneHVAC:EquipmentList,",
+        "  Zone 1 Equipment,         !- Name",
+        "  SequentialLoad,           !- Load Distribution Scheme",
+        "  Fan:ZoneExhaust,          !- Zone Equipment 1 Object Type",
+        "  Zone 1 Exhaust Fan,       !- Zone Equipment 1 Name",
+        "  1,                        !- Zone Equipment 1 Cooling Sequence",
+        "  1,                        !- Zone Equipment 1 Heating or No - Load Sequence",
+        "  ,                         !- Zone Equipment 1 Sequential Cooling Fraction",
+        "  ;                         !- Zone Equipment 1 Sequential Heating or No-Load Fraction",
+
+        "ZoneHVAC:EquipmentList,",
+        "  Zone 2 Equipment,         !- Name",
+        "  SequentialLoad,           !- Load Distribution Scheme",
+        "  Fan:ZoneExhaust,          !- Zone Equipment 1 Object Type",
+        "  Zone 2 Exhaust Fan,       !- Zone Equipment 1 Name",
+        "  1,                        !- Zone Equipment 1 Cooling Sequence",
+        "  1,                        !- Zone Equipment 1 Heating or No - Load Sequence",
+        "  ,                         !- Zone Equipment 1 Sequential Cooling Fraction",
+        "  ;                         !- Zone Equipment 1 Sequential Heating or No-Load Fraction",
+
+        "Fan:ZoneExhaust,",
+        "  Zone 1 Exhaust Fan,       !- Name",
+        "  ,                         !- Availability Schedule Name",
+        "  0.6,                      !- Fan Total Efficiency",
+        "  300.0,                    !- Pressure Rise {Pa}",
+        "  1.0,                      !- Maximum Flow Rate {m3/s}",
+        "  Zone 1 Fan Inlet Node,    !- Air Inlet Node Name",
+        "  Zone 1 Fan Outlet Node,   !- Air Outlet Node Name",
+        "  Zone Exhaust Fans;        !- End - Use Subcategory",
+
+        "Fan:ZoneExhaust,",
+        "  Zone 2 Exhaust Fan,       !- Name",
+        "  ,                         !- Availability Schedule Name",
+        "  0.6,                      !- Fan Total Efficiency",
+        "  300.0,                    !- Pressure Rise {Pa}",
+        "  1.0,                      !- Maximum Flow Rate {m3/s}",
+        "  Zone 2 Fan Inlet Node,    !- Air Inlet Node Name",
+        "  Zone 2 Fan Outlet Node,   !- Air Outlet Node Name",
+        "  Zone Exhaust Fans,        !- End - Use Subcategory",
+        "  ,                         !- Flow Fraction Schedule Name",
+        "  Decoupled;                !- System Availability Manager Coupling Mode",
+
+        "FanPerformance:NightVentilation,",
+        "  Zone 1 Exhaust Fan,       !- Fan Name",
+        "  0.5,                      !- Fan Total Efficiency",
+        "  100.0,                    !- Pressure Rise {Pa}",
+        "  0.9,                      !- Motor Efficiency",
+        "  1.0;                      !- Motor in Airstream Fraction",
+
+        "FanPerformance:NightVentilation,",
+        "  Zone 2 Exhaust Fan,       !- Fan Name",
+        "  0.5,                      !- Fan Total Efficiency",
+        "  100.0,                    !- Pressure Rise {Pa}",
+        "  0.9,                      !- Motor Efficiency",
+        "  1.0;                      !- Motor in Airstream Fraction",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataEnvrn->OutBaroPress = 100000.0;
+
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+    AllocateHeatBalArrays(*state);
+    GetZoneEquipmentData(*state);
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+    GetSimpleAirModelInputs(*state, errorsFound);
+
+    // Both fans have hard-sized maximum flow rates, so skip sizing, which requires a full sizing fixture.
+    Fans::GetFanInput(*state);
+    for (auto *fan : state->dataFans->fans) {
+        fan->sizingFlag = false;
+    }
+    int const fan1Num = Fans::GetFanIndex(*state, "ZONE 1 EXHAUST FAN");
+    int const fan2Num = Fans::GetFanIndex(*state, "ZONE 2 EXHAUST FAN");
+    ASSERT_GT(fan1Num, 0);
+    ASSERT_GT(fan2Num, 0);
+    auto &fan1 = *state->dataFans->fans(fan1Num);
+    auto &fan2 = *state->dataFans->fans(fan2Num);
+    auto *fan2Component = dynamic_cast<Fans::FanComponent *>(state->dataFans->fans(fan2Num));
+    ASSERT_NE(fan2Component, nullptr);
+    EXPECT_EQ(fan2Component->availManagerMode, Fans::AvailManagerMode::Decoupled);
+    // Keep both fans coupled initially to isolate serving-loop state from decoupled behavior.
+    fan2Component->availManagerMode = Fans::AvailManagerMode::Coupled;
+
+    // Allocate the minimum zone equipment manager state needed by SimZoneEquipment.
+    int const numZones = state->dataGlobal->NumOfZones;
+    ASSERT_EQ(numZones, 2);
+    state->dataSize->ZoneEqSizing.allocate(numZones);
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(numZones);
+    state->dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(numZones);
+    for (int zoneNum = 1; zoneNum <= numZones; ++zoneNum) {
+        auto &energy = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(zoneNum);
+        energy.NumZoneEquipment = 1;
+        energy.SequencedOutputRequired.allocate(1);
+        energy.SequencedOutputRequiredToHeatingSP.allocate(1);
+        energy.SequencedOutputRequiredToCoolingSP.allocate(1);
+        auto &moisture = state->dataZoneEnergyDemand->ZoneSysMoistureDemand(zoneNum);
+        moisture.NumZoneEquipment = 1;
+        moisture.SequencedOutputRequired.allocate(1);
+        moisture.SequencedOutputRequiredToHumidSP.allocate(1);
+        moisture.SequencedOutputRequiredToDehumidSP.allocate(1);
+    }
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback.dimension(numZones, false);
+    state->dataZoneEnergyDemand->DeadBandOrSetback.dimension(numZones, false);
+    state->dataHeatBalFanSys->TempControlType.dimension(numZones, HVAC::SetptType::Uncontrolled);
+    state->dataHeatBal->RefrigCaseCredit.allocate(numZones);
+    state->dataZoneEquipmentManager->PrioritySimOrder.allocate(1);
+    state->dataGlobal->BeginEnvrnFlag = true;
+
+    // Zone 1 is served by night-ventilating air loop 1; zone 2 is served by non-ventilating air loop 2.
+    state->dataAirLoop->AirLoopControlInfo.allocate(2);
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = true;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = false;
+    state->dataZoneEquip->ZoneEquipConfig(1).InletNodeAirLoopNum(1) = 1;
+    state->dataZoneEquip->ZoneEquipConfig(2).InletNodeAirLoopNum(1) = 2;
+
+    for (int nodeNum = 1; nodeNum <= state->dataLoopNodes->NumOfNodes; ++nodeNum) {
+        auto &node = state->dataLoopNodes->Node(nodeNum);
+        node.Temp = 20.0;
+        node.HumRat = 0.004;
+        node.Enthalpy = Psychrometrics::PsyHFnTdbW(node.Temp, node.HumRat);
+    }
+
+    // Night performance changes pressure and efficiency; with no night flow cap, both fans retain requested design flow.
+    Real64 constexpr designMassFlow = 1.0 * 1.2;
+    Real64 constexpr designPower = designMassFlow * 300.0 / (0.6 * 1.2);
+    Real64 constexpr nightVentPower = designMassFlow * 100.0 / (0.5 * 1.2);
+    bool simAir = false;
+
+    // A false global flag must not hide night mode from zone 1's serving loop.
+    state->dataHVACGlobal->NightVentOn = false;
+    SimZoneEquipment(*state, true, simAir);
+    // Zone 1 uses alternate night power; zone 2 retains design performance.
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    // Per-zone overrides must not leak back to the caller's global flag.
+    EXPECT_FALSE(state->dataHVACGlobal->NightVentOn);
+
+    // A stale true global flag must not make zone 2 use night settings when its loop is not ventilating.
+    state->dataHVACGlobal->NightVentOn = true;
+    SimZoneEquipment(*state, true, simAir);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    // Restore the caller's flag after simulating both fans.
+    EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
+
+    // A decoupled fan ignores the night-ventilation state of its serving loop.
+    fan2Component->availManagerMode = Fans::AvailManagerMode::Decoupled;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = true;
+    SimZoneEquipment(*state, true, simAir);
+    // Both loops now ventilate, but only the coupled zone 1 fan uses alternate performance.
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, designMassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    // The caller's global flag remains unchanged after the per-zone overrides.
+    EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
+}
+
+// This fixture covers fan models embedded in ZoneHVAC:UnitHeater under a component NightVentilation manager.
+// Fan:ZoneExhaust follows separate serving-air-loop coupling behavior and is covered by
+// ZoneEquipmentManager_ZoneExhaustFanNightVentUsesServingAirLoop.
+// Verify each zone fan uses its component's NightVentilation status and does not inherit a stale global flag.
+std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
+{
+    std::vector<std::string> idfObjects = {
+        "Zone,",
+        "  Zone 1;                   !- Name",
+        "Zone,",
+        "  Zone 2;                   !- Name",
+
+        "ZoneHVAC:EquipmentConnections,",
+        "  Zone 1,                   !- Zone Name",
+        "  Zone 1 Equipment,         !- Zone Conditioning Equipment List Name",
+        "  Zone 1 Inlet,             !- Zone Air Inlet Node or NodeList Name",
+        "  Zone 1 Exhaust,           !- Zone Air Exhaust Node or NodeList Name",
+        "  Zone 1 Node,              !- Zone Air Node Name",
+        "  Zone 1 Return;            !- Zone Return Air Node Name",
+
+        "ZoneHVAC:EquipmentConnections,",
+        "  Zone 2,                   !- Zone Name",
+        "  Zone 2 Equipment,         !- Zone Conditioning Equipment List Name",
+        "  Zone 2 Inlet,             !- Zone Air Inlet Node or NodeList Name",
+        "  Zone 2 Exhaust,           !- Zone Air Exhaust Node or NodeList Name",
+        "  Zone 2 Node,              !- Zone Air Node Name",
+        "  Zone 2 Return;            !- Zone Air Return Node Name",
+
+        "ZoneHVAC:EquipmentList,",
+        "  Zone 1 Equipment,         !- Name",
+        "  SequentialLoad,           !- Load Distribution Scheme",
+        "  ZoneHVAC:UnitHeater,      !- Zone Equipment 1 Object Type",
+        "  Zone 1 Unit Heater,       !- Zone Equipment 1 Name",
+        "  1,                        !- Zone Equipment 1 Cooling Sequence",
+        "  1;                        !- Zone Equipment 1 Heating or No-Load Sequence",
+
+        "ZoneHVAC:EquipmentList,",
+        "  Zone 2 Equipment,         !- Name",
+        "  SequentialLoad,           !- Load Distribution Scheme",
+        "  ZoneHVAC:UnitHeater,      !- Zone Equipment 1 Object Type",
+        "  Zone 2 Unit Heater,       !- Zone Equipment 1 Name",
+        "  1,                        !- Zone Equipment 1 Cooling Sequence",
+        "  1;                        !- Zone Equipment 1 Heating or No-Load Sequence",
+
+        "ScheduleTypeLimits,",
+        "  Fraction,                !- Name",
+        "  0,                        !- Lower Limit Value",
+        "  1,                        !- Upper Limit Value",
+        "  Continuous;               !- Numeric Type",
+
+        "Schedule:Constant,",
+        "  Always On,                !- Name",
+        "  Fraction,                 !- Schedule Type Limits Name",
+        "  1;                        !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always Off,               !- Name",
+        "  Fraction,                 !- Schedule Type Limits Name",
+        "  0;                        !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Ventilation Temperature,  !- Name",
+        "  Any Number,               !- Schedule Type Limits Name",
+        "  20;                       !- Hourly Value",
+    };
+
+    if (fanType == "Fan:SystemModel") {
+        idfObjects.emplace_back("Curve:Quadratic,");
+        idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Name");
+        idfObjects.emplace_back("  0.0,                      !- Coefficient1 Constant");
+        idfObjects.emplace_back("  1.0,                      !- Coefficient2 x");
+        idfObjects.emplace_back("  0.0,                      !- Coefficient3 x**2");
+        idfObjects.emplace_back("  0.0,                      !- Minimum Value of x");
+        idfObjects.emplace_back("  1.0;                      !- Maximum Value of x");
+    }
+
+    auto appendFan = [&idfObjects, fanType](int zoneNum) {
+        std::string const zone = "Zone " + std::to_string(zoneNum);
+        std::string const fan = zone + " Fan";
+        std::string const inletNode = zone + " Exhaust";
+        std::string const outletNode = zone + " Fan Outlet";
+
+        // Keep each fan object in field order while varying only model-specific inputs.
+        if (fanType == "Fan:SystemModel") {
+            idfObjects.emplace_back("Fan:SystemModel,");
+            idfObjects.emplace_back("  " + fan + ",                !- Name");
+            idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
+            idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+            idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
+            idfObjects.emplace_back("  1.0,                      !- Design Maximum Air Flow Rate {m3/s}");
+            idfObjects.emplace_back("  Continuous,               !- Speed Control Method");
+            idfObjects.emplace_back("  0.0,                      !- Electric Power Minimum Flow Rate Fraction");
+            idfObjects.emplace_back("  300.0,                    !- Design Pressure Rise {Pa}");
+            idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+            idfObjects.emplace_back("  1.0,                      !- Motor In Air Stream Fraction");
+            idfObjects.emplace_back("  Autosize,                 !- Design Electric Power Consumption");
+            idfObjects.emplace_back("  TotalEfficiencyAndPressure, !- Design Power Sizing Method");
+            idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate");
+            idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate Per Unit Pressure");
+            idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Electric Power Function of Flow Fraction Curve Name");
+            idfObjects.emplace_back("  100.0,                    !- Night Ventilation Mode Pressure Rise {Pa}");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Flow Fraction");
+            idfObjects.emplace_back("  ,                         !- Motor Loss Zone Name");
+            idfObjects.emplace_back("  0.0,                      !- Motor Loss Radiative Fraction");
+            idfObjects.emplace_back("  General,                  !- End-Use Subcategory");
+            idfObjects.emplace_back("  1;                        !- Number of Speeds");
+        } else {
+            idfObjects.emplace_back(std::string(fanType) + ",");
+            idfObjects.emplace_back("  " + fan + ",                !- Name");
+            idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
+            idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  300,                      !- Pressure Rise {Pa}");
+            idfObjects.emplace_back("  1.0,                      !- Maximum Flow Rate {m3/s}");
+
+            if (fanType == "Fan:OnOff") {
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
+                idfObjects.emplace_back("  ,                         !- Fan Power Ratio Function of Speed Ratio Curve Name");
+                idfObjects.emplace_back("  ,                         !- Fan Efficiency Ratio Function of Speed Ratio Curve Name");
+                idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
+            } else if (fanType == "Fan:ConstantVolume") {
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ",        !- Air Outlet Node Name");
+                idfObjects.emplace_back("  General;                  !- End-Use Subcategory");
+            } else {
+                idfObjects.emplace_back("  FixedFlowRate,           !- Fan Power Minimum Flow Rate Input Method");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Flow Fraction");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Minimum Air Flow Rate {m3/s}");
+                idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+                idfObjects.emplace_back("  1.0,                      !- Motor In Airstream Fraction");
+                idfObjects.emplace_back("  0.040759894,              !- Fan Power Coefficient 1");
+                idfObjects.emplace_back("  0.08804497,               !- Fan Power Coefficient 2");
+                idfObjects.emplace_back("  -0.07292612,              !- Fan Power Coefficient 3");
+                idfObjects.emplace_back("  0.943739823,              !- Fan Power Coefficient 4");
+                idfObjects.emplace_back("  0.0,                      !- Fan Power Coefficient 5");
+                idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+                idfObjects.emplace_back("  " + outletNode + ";        !- Air Outlet Node Name");
+            }
+        }
+
+        if (fanType != "Fan:SystemModel") {
+            idfObjects.emplace_back("FanPerformance:NightVentilation,");
+            idfObjects.emplace_back("  " + fan + ",                !- Fan Name");
+            idfObjects.emplace_back("  0.5,                      !- Fan Total Efficiency");
+            idfObjects.emplace_back("  100,                      !- Pressure Rise {Pa}");
+            idfObjects.emplace_back("  0.9,                      !- Motor Efficiency");
+            idfObjects.emplace_back("  1.0;                      !- Motor in Airstream Fraction");
+        }
+
+        idfObjects.emplace_back("ZoneHVAC:UnitHeater,");
+        idfObjects.emplace_back("  " + zone + " Unit Heater,       !- Name");
+        idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
+        idfObjects.emplace_back("  " + inletNode + ",           !- Air Inlet Node Name");
+        idfObjects.emplace_back("  " + zone + " Inlet,             !- Air Outlet Node Name");
+        idfObjects.emplace_back("  " + std::string(fanType) + ",          !- Supply Air Fan Object Type");
+        idfObjects.emplace_back("  " + fan + ",                !- Supply Air Fan Name");
+        bool const usePartialFlow = zoneNum == 1;
+        idfObjects.emplace_back(usePartialFlow ? "  0.3,                      !- Maximum Supply Air Flow Rate {m3/s}"
+                                               : "  1.0,                      !- Maximum Supply Air Flow Rate {m3/s}");
+        idfObjects.emplace_back("  Coil:Heating:Electric,    !- Heating Coil Object Type");
+        idfObjects.emplace_back("  " + zone + " Coil,              !- Heating Coil Name");
+        idfObjects.emplace_back("  Always On,                !- Supply Air Fan Operating Mode Schedule Name");
+        idfObjects.emplace_back("  Yes,                      !- Supply Air Fan Operation During No Heating");
+        idfObjects.emplace_back("  ,                         !- Maximum Hot Water or Steam Flow Rate {m3/s}");
+        idfObjects.emplace_back("  0,                        !- Minimum Hot Water or Steam Flow Rate {m3/s}");
+        idfObjects.emplace_back("  0.001,                    !- Heating Convergence Tolerance");
+        idfObjects.emplace_back("  " + zone + " Availability List; !- Availability Manager List Name");
+
+        idfObjects.emplace_back("Coil:Heating:Electric,");
+        idfObjects.emplace_back("  " + zone + " Coil,              !- Name");
+        idfObjects.emplace_back("  Always On,                !- Availability Schedule Name");
+        idfObjects.emplace_back("  1.0,                      !- Efficiency");
+        idfObjects.emplace_back("  1000,                     !- Nominal Capacity {W}");
+        idfObjects.emplace_back("  " + outletNode + ",        !- Air Inlet Node Name");
+        idfObjects.emplace_back("  " + zone + " Inlet;             !- Air Outlet Node Name");
+
+        idfObjects.emplace_back("AvailabilityManagerAssignmentList,");
+        idfObjects.emplace_back("  " + zone + " Availability List, !- Name");
+        idfObjects.emplace_back("  AvailabilityManager:NightVentilation, !- Availability Manager 1 Object Type");
+        idfObjects.emplace_back("  " + zone + " Night Ventilation; !- Availability Manager 1 Name");
+
+        idfObjects.emplace_back("AvailabilityManager:NightVentilation,");
+        idfObjects.emplace_back("  " + zone + " Night Ventilation, !- Name");
+        idfObjects.emplace_back("  Always On,                !- Applicability Schedule Name");
+        idfObjects.emplace_back("  Always Off,               !- Fan Schedule Name");
+        idfObjects.emplace_back("  Ventilation Temperature,  !- Ventilation Temperature Schedule Name");
+        idfObjects.emplace_back("  2.0,                      !- Ventilation Temperature Difference {deltaC}");
+        idfObjects.emplace_back("  15.0,                     !- Ventilation Temperature Low Limit {C}");
+        idfObjects.emplace_back("  0.4,                      !- Night Venting Flow Fraction");
+        idfObjects.emplace_back("  " + zone + ";                   !- Control Zone Name");
+    };
+
+    appendFan(1);
+    appendFan(2);
+    return idfObjects;
+}
+
+// Capture the flag seen by unmanaged equipment to ensure it does not inherit stale global night mode.
+class NightVentFlagCaptureSystem : public HVACSystemData
+{
+public:
+    int simulateCount = 0;
+    bool nightVentOnDuringSimulation = true;
+
+    void simulate(EnergyPlus::EnergyPlusData &state,
+                  std::string_view,
+                  bool const,
+                  int,
+                  int &,
+                  bool &,
+                  bool &,
+                  int const,
+                  Real64 const,
+                  bool const,
+                  Real64 &sysOutputProvided,
+                  Real64 &latOutputProvided) override
+    {
+        ++simulateCount;
+        nightVentOnDuringSimulation = state.dataHVACGlobal->NightVentOn;
+        sysOutputProvided = 0.0;
+        latOutputProvided = 0.0;
+    }
+
+    void sizeSystem(EnergyPlus::EnergyPlusData &, bool const, int const) override
+    {
+    }
+
+    int getAirInNode(EnergyPlus::EnergyPlusData &, std::string_view, int const, bool &) override
+    {
+        return 0;
+    }
+
+    int getAirOutNode(EnergyPlus::EnergyPlusData &, std::string_view, int const, bool &) override
+    {
+        return 0;
+    }
+
+    int getAirOutletNode() override
+    {
+        return 0;
+    }
+
+    int getMixerOANode() override
+    {
+        return 0;
+    }
+
+    int getMixerMixNode() override
+    {
+        return 0;
+    }
+
+    int getMixerRetNode() override
+    {
+        return 0;
+    }
+
+    int getEquipIndex() override
+    {
+        return 0;
+    }
+};
+
+// Exercise zone-fan night vent manager evaluation, status transitions, and isolation from stale global state.
+void runZoneFanNightVentTest(EnergyPlus::EnergyPlusData &state)
+{
+    state.init_state(state);
+    state.dataEnvrn->StdRhoAir = 1.2;
+    state.dataEnvrn->OutBaroPress = 101325.0;
+
+    bool errorsFound = false;
+    GetZoneData(state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+    AllocateHeatBalArrays(state);
+    GetZoneEquipmentData(state);
+    state.dataZoneEquip->ZoneEquipInputsFilled = true;
+    GetSimpleAirModelInputs(state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    Fans::GetFanInput(state);
+    for (auto *fan : state.dataFans->fans) {
+        if (fan->type == HVAC::FanType::SystemModel) {
+            fan->rhoAirStdInit = state.dataEnvrn->StdRhoAir;
+            fan->maxAirMassFlowRate = fan->maxAirFlowRate * fan->rhoAirStdInit;
+        }
+        fan->sizingFlag = false;
+    }
+    UnitHeater::GetUnitHeaterInput(state);
+    Avail::ManageSystemAvailability(state);
+    ASSERT_TRUE(allocated(state.dataAvail->NightVentData));
+    ASSERT_EQ(state.dataAvail->NightVentData.size(), 2);
+
+    // Assign the unit-heater indexes to their respective zone equipment lists.
+    auto &zoneEquipList1 = state.dataZoneEquip->ZoneEquipList(1);
+    auto &zoneEquipList2 = state.dataZoneEquip->ZoneEquipList(2);
+    zoneEquipList1.EquipIndex(1) = 1;
+    zoneEquipList2.EquipIndex(1) = 2;
+
+    // Bind each component to its own NightVentilation manager; their evaluated statuses must remain component-specific.
+    auto &unitHeaterAvailability = state.dataAvail->ZoneComp((int)DataZoneEquipment::ZoneEquipType::UnitHeater);
+    ASSERT_EQ(unitHeaterAvailability.TotalNumComp, 2);
+    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
+        auto &componentAvailability = unitHeaterAvailability.ZoneCompAvailMgrs(zoneNum);
+        componentAvailability.ZoneNum = zoneNum;
+        componentAvailability.Input = false;
+        componentAvailability.NumAvailManagers = 1;
+        componentAvailability.availManagers.allocate(1);
+        componentAvailability.availManagers(1).Name = "Zone " + std::to_string(zoneNum) + " Night Ventilation";
+        componentAvailability.availManagers(1).type = Avail::ManagerType::NightVent;
+        componentAvailability.availManagers(1).Num = zoneNum;
+    }
+
+    // Allocate the minimal zone demand and simulation-order state required by SimZoneEquipment.
+    state.dataSize->ZoneEqSizing.allocate(2);
+    state.dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(2);
+    state.dataZoneEnergyDemand->ZoneSysMoistureDemand.allocate(2);
+    for (int zoneNum = 1; zoneNum <= 2; ++zoneNum) {
+        auto &energy = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(zoneNum);
+        energy.NumZoneEquipment = 1;
+        energy.SequencedOutputRequired.allocate(1);
+        energy.SequencedOutputRequiredToHeatingSP.allocate(1);
+        energy.SequencedOutputRequiredToCoolingSP.allocate(1);
+        auto &moisture = state.dataZoneEnergyDemand->ZoneSysMoistureDemand(zoneNum);
+        moisture.NumZoneEquipment = 1;
+        moisture.SequencedOutputRequired.allocate(1);
+        moisture.SequencedOutputRequiredToHumidSP.allocate(1);
+        moisture.SequencedOutputRequiredToDehumidSP.allocate(1);
+    }
+    state.dataZoneEnergyDemand->CurDeadBandOrSetback.dimension(2, false);
+    state.dataZoneEnergyDemand->DeadBandOrSetback.dimension(2, false);
+    state.dataHeatBalFanSys->TempControlType.dimension(2, HVAC::SetptType::Uncontrolled);
+    state.dataHeatBal->RefrigCaseCredit.allocate(2);
+    state.dataZoneEquipmentManager->PrioritySimOrder.allocate(1);
+    state.dataGlobal->BeginEnvrnFlag = true;
+    state.dataGlobal->SysSizingCalc = true;
+
+    // Evaluate each zone's actual NightVentilation manager; only zone 1 satisfies its temperature conditions.
+    state.dataEnvrn->OutDryBulbTemp = 10.0;
+    state.dataHeatBalFanSys->TempTstatAir(1) = 25.0;
+    state.dataHeatBalFanSys->TempTstatAir(2) = 20.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::CycleOn);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availManagers(1).availStatus, Avail::Status::CycleOn);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(2).availStatus, Avail::Status::NoAction);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(2).availManagers(1).availStatus, Avail::Status::NoAction);
+    auto &zone2AvailabilityForForceOff = unitHeaterAvailability.ZoneCompAvailMgrs(2);
+    zone2AvailabilityForForceOff.availStatus = Avail::Status::ForceOff;
+    zone2AvailabilityForForceOff.availManagers(1).availStatus = Avail::Status::CycleOn;
+    EXPECT_FALSE(ZoneEquipmentManager::getZoneEquipmentNightVentStatus(state, DataZoneEquipment::ZoneEquipType::UnitHeater, 2, true));
+    zone2AvailabilityForForceOff.availStatus = Avail::Status::NoAction;
+    zone2AvailabilityForForceOff.availManagers(1).availStatus = Avail::Status::NoAction;
+
+    int const fan1Num = Fans::GetFanIndex(state, "ZONE 1 FAN");
+    int const fan2Num = Fans::GetFanIndex(state, "ZONE 2 FAN");
+    ASSERT_GT(fan1Num, 0);
+    ASSERT_GT(fan2Num, 0);
+    auto &fan1 = *state.dataFans->fans(fan1Num);
+    auto &fan2 = *state.dataFans->fans(fan2Num);
+    auto &zone1InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(1).InletNode(1));
+    auto &zone2InletNode = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(2).InletNode(1));
+    Real64 constexpr zone1MassFlow = 0.3 * 1.2;
+    Real64 constexpr zone2MassFlow = 1.0 * 1.2;
+    Real64 designPowerFrac = 1.0;
+    if (fan2.type == HVAC::FanType::VAV) {
+        auto const *fan2Component = dynamic_cast<Fans::FanComponent const *>(&fan2);
+        ASSERT_NE(fan2Component, nullptr);
+        Real64 constexpr designFlowFrac = 1.0;
+        designPowerFrac = fan2Component->coeffs[0] + fan2Component->coeffs[1] * designFlowFrac + fan2Component->coeffs[2] * pow_2(designFlowFrac) +
+                          fan2Component->coeffs[3] * pow_3(designFlowFrac) + fan2Component->coeffs[4] * pow_4(designFlowFrac);
+    }
+    Real64 const designPower = designPowerFrac * zone2MassFlow * 300.0 / (0.6 * 1.2);
+    Real64 zone1NormalPower = designPower;
+    if (fan1.type == HVAC::FanType::VAV) {
+        auto const *fan1Component = dynamic_cast<Fans::FanComponent const *>(&fan1);
+        ASSERT_NE(fan1Component, nullptr);
+        Real64 const fan1DesignMassFlow = fan1.maxAirFlowRate * state.dataEnvrn->StdRhoAir;
+        Real64 const flowFraction = zone1MassFlow / fan1DesignMassFlow;
+        Real64 const powerFraction = fan1Component->coeffs[0] + fan1Component->coeffs[1] * flowFraction +
+                                     fan1Component->coeffs[2] * pow_2(flowFraction) + fan1Component->coeffs[3] * pow_3(flowFraction) +
+                                     fan1Component->coeffs[4] * pow_4(flowFraction);
+        zone1NormalPower = powerFraction * fan1DesignMassFlow * 300.0 / (0.6 * 1.2);
+    } else {
+        zone1NormalPower = zone1MassFlow * 300.0 / (0.6 * 1.2);
+    }
+    Real64 const nightFanEff = (fan1.type == HVAC::FanType::SystemModel) ? 0.6 : 0.5;
+    Real64 const nightVentPower = zone1MassFlow * 100.0 / (nightFanEff * 1.2);
+    bool simAir = false;
+
+    // An active zone component uses night performance despite a false global flag; requested airflow is preserved.
+    state.dataHVACGlobal->NightVentOn = false;
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
+
+    // A temperature change clears the manager status and restores the fan's design performance.
+    state.dataHeatBalFanSys->TempTstatAir(1) = 19.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::NoAction);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availManagers(1).availStatus, Avail::Status::NoAction);
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_NEAR(fan1.totalPower, zone1NormalPower, 0.0001);
+
+    state.dataHeatBalFanSys->TempTstatAir(1) = 25.0;
+    Avail::ManageSystemAvailability(state);
+    EXPECT_EQ(unitHeaterAvailability.ZoneCompAvailMgrs(1).availStatus, Avail::Status::CycleOn);
+
+    // A stale true global flag must not grant night performance to the inactive zone.
+    state.dataHVACGlobal->NightVentOn = true;
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
+    EXPECT_TRUE(state.dataHVACGlobal->NightVentOn);
+
+    // Removing zone 2's manager must not let it inherit stale global night-vent state.
+    auto &zone2Availability = unitHeaterAvailability.ZoneCompAvailMgrs(2);
+    zone2Availability.AvailManagerListName.clear();
+    zone2Availability.NumAvailManagers = 0;
+    zone2Availability.availManagers.deallocate();
+    state.dataHVACGlobal->NightVentOn = true;
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_NEAR(fan1.outletAirMassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(fan1.totalPower, nightVentPower, 0.0001);
+    EXPECT_NEAR(fan2.outletAirMassFlowRate, zone2MassFlow, 0.0001);
+    EXPECT_NEAR(fan2.totalPower, designPower, 0.0001);
+    EXPECT_NEAR(zone1InletNode.MassFlowRate, zone1MassFlow, 0.0001);
+    EXPECT_NEAR(zone2InletNode.MassFlowRate, zone2MassFlow, 0.0001);
+    EXPECT_TRUE(state.dataHVACGlobal->NightVentOn);
+
+    // Unmanaged zone equipment must also ignore stale global night-ventilation state.
+    auto &zoneEquipList1ForCapture = state.dataZoneEquip->ZoneEquipList(1);
+    auto &zoneEquipList2ForCapture = state.dataZoneEquip->ZoneEquipList(2);
+    auto const savedZoneEquipType1 = zoneEquipList1ForCapture.EquipType(1);
+    auto const savedZoneEquipType2 = zoneEquipList2ForCapture.EquipType(1);
+    constexpr int equipPtr = 1;
+    auto *savedComponent1 = zoneEquipList1ForCapture.compPointer[equipPtr];
+    auto *savedComponent2 = zoneEquipList2ForCapture.compPointer[equipPtr];
+    NightVentFlagCaptureSystem captureSystem;
+    zoneEquipList1ForCapture.compPointer[equipPtr] = &captureSystem;
+    zoneEquipList2ForCapture.compPointer[equipPtr] = &captureSystem;
+    zoneEquipList1ForCapture.EquipType(1) = DataZoneEquipment::ZoneEquipType::UnitarySystem;
+    zoneEquipList2ForCapture.EquipType(1) = DataZoneEquipment::ZoneEquipType::UnitarySystem;
+
+    state.dataHVACGlobal->NightVentOn = true;
+    SimZoneEquipment(state, true, simAir);
+    EXPECT_EQ(captureSystem.simulateCount, 2);
+    EXPECT_FALSE(captureSystem.nightVentOnDuringSimulation);
+    EXPECT_TRUE(state.dataHVACGlobal->NightVentOn);
+
+    zoneEquipList1ForCapture.EquipType(1) = savedZoneEquipType1;
+    zoneEquipList2ForCapture.EquipType(1) = savedZoneEquipType2;
+    zoneEquipList1ForCapture.compPointer[equipPtr] = savedComponent1;
+    zoneEquipList2ForCapture.compPointer[equipPtr] = savedComponent2;
+}
+
+// Verify a UnitHeater OnOff fan follows its own night manager, ignores stale global state, and scales night power at 30% flow.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneOnOffFanUsesComponentNightVentilation)
+{
+    ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:OnOff"))));
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    runZoneFanNightVentTest(*state);
+}
+
+// Verify a UnitHeater VAV fan follows its own night manager, ignores stale global state, and scales power with its 30% flow.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneVariableVolumeFanUsesComponentNightVentilation)
+{
+    ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:VariableVolume"))));
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    runZoneFanNightVentTest(*state);
+}
+
+// Verify a UnitHeater ConstantVolume fan follows its own night manager, ignores stale global state, and scales night power at 30% flow.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneConstantVolumeFanUsesComponentNightVentilation)
+{
+    ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:ConstantVolume"))));
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    runZoneFanNightVentTest(*state);
+}
+
+// Verify a UnitHeater SystemModel fan follows its own night manager, ignores stale global state, and scales power with its 30% flow.
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_ZoneSystemModelFanUsesComponentNightVentilation)
+{
+    ASSERT_TRUE(process_idf(delimited_string(zoneFanNightVentInputs("Fan:SystemModel"))));
+    // Check zone manager behavior and ensure unmanaged zone equipment ignores stale global state.
+    runZoneFanNightVentTest(*state);
 }

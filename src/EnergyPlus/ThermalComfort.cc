@@ -54,9 +54,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/string.functions.hh>
 
-// Third Party Headers
-#include <boost/math/tools/roots.hpp>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -888,6 +885,7 @@ namespace ThermalComfort {
     Real64 CalcStandardEffectiveTemp(
         EnergyPlusData &state, Real64 AirTemp, Real64 RadTemp, Real64 RelHum, Real64 AirVel, Real64 ActMet, Real64 CloUnit, Real64 WorkEff)
     {
+        auto &s_tc = state.dataThermalComforts;
 
         // Thermal const
         constexpr Real64 CloFac(0.25);                  // Clothing factor determined experimentally (var KCLO)
@@ -914,9 +912,9 @@ namespace ThermalComfort {
         }
 
         // (var VaporPressure)
-        state.dataThermalComforts->VapPress = RelHum * CalcSatVapPressFromTempTorr(AirTemp);
+        s_tc->VapPress = RelHum * CalcSatVapPressFromTempTorr(AirTemp);
         Real64 ActLevel = ActLevelConv * ActMet;
-        state.dataThermalComforts->IntHeatProd = ActLevel - WorkEff;
+        s_tc->IntHeatProd = ActLevel - WorkEff;
 
         // Step 1: CALCULATE VARIABLESS THAT REMAIN CONSTANT FOR AN HOUR
         Real64 PInAtmospheres = state.dataEnvrn->OutBaroPress / 101325;
@@ -926,8 +924,8 @@ namespace ThermalComfort {
         Real64 EvapEff;                           // evaporative efficiency
 
         // APPROXIMATE THE FOLLOWING VALUES TO START
-        state.dataThermalComforts->SkinTemp = SkinTempSet;
-        state.dataThermalComforts->CoreTemp = CoreTempSet;
+        s_tc->SkinTemp = SkinTempSet;
+        s_tc->CoreTemp = CoreTempSet;
         Real64 SkinBloodFlow = SkinBloodFlowSet;
         Real64 SkinMassRat = SkinMassRatSet;
 
@@ -935,21 +933,20 @@ namespace ThermalComfort {
         // CloInsul is efficiency of mass transfer for CloUnit.
         if (CloUnit <= 0) {
             EvapEff = 0.38 * std::pow(AirVel, -0.29); // (var WCRIT)
-            state.dataThermalComforts->CloInsul = 1.0;
+            s_tc->CloInsul = 1.0;
         } else {
             EvapEff = 0.59 * std::pow(AirVel, -0.08); // (var ICL)
-            state.dataThermalComforts->CloInsul = 0.45;
+            s_tc->CloInsul = 0.45;
         }
 
         Real64 CorrectedHC = 3.0 * std::pow(PInAtmospheres, 0.53);              // corrected convective heat transfer coefficient
         Real64 ForcedHC = 8.600001 * std::pow((AirVel * PInAtmospheres), 0.53); // forced convective heat transfer coefficient, W/(m2 °C) (CHCV)
-        state.dataThermalComforts->Hc = std::max(CorrectedHC, ForcedHC);        // (CHC)
-        state.dataThermalComforts->Hr = 4.7;                                    // (CHR)
-        state.dataThermalComforts->EvapHeatLoss = 0.1 * ActMet;
-        Real64 RAir = 1.0 / (TotCloFac * (state.dataThermalComforts->Hc + state.dataThermalComforts->Hr)); // resistance of air layer to dry heat (RA)
-        state.dataThermalComforts->OpTemp = (state.dataThermalComforts->Hr * RadTemp + state.dataThermalComforts->Hc * AirTemp) /
-                                            (state.dataThermalComforts->Hc + state.dataThermalComforts->Hr); // operative temperature (TOP)
-        Real64 ActLevelStart = ActLevel; // ActLevel gets increased by shivering in the following
+        s_tc->Hc = std::max(CorrectedHC, ForcedHC);                             // (CHC)
+        s_tc->Hr = 4.7;                                                         // (CHR)
+        s_tc->EvapHeatLoss = 0.1 * ActMet;
+        Real64 RAir = 1.0 / (TotCloFac * (s_tc->Hc + s_tc->Hr));                          // resistance of air layer to dry heat (RA)
+        s_tc->OpTemp = (s_tc->Hr * RadTemp + s_tc->Hc * AirTemp) / (s_tc->Hc + s_tc->Hr); // operative temperature (TOP)
+        Real64 ActLevelStart = ActLevel;                                                  // ActLevel gets increased by shivering in the following
         Real64 AvgBodyTempSet = SkinMassRatSet * SkinTempSet + (1.0 - SkinMassRatSet) * CoreTempSet; // (var TempBodyNeutral)
 
         // Step 2: BEGIN MINUTE BY MINUTE CALCULATIONS FOR ONE HOUR SIMULATION OF TEMPERATURE REGULATION.
@@ -958,59 +955,51 @@ namespace ThermalComfort {
         // start level, not perpetually increased
         for (int IterMin = 1; IterMin <= 60; ++IterMin) {
             // Dry heat balance: solve for CloSurfTemp and Hr, GUESS CloSurfTemp TO START
-            state.dataThermalComforts->CloSurfTemp =
-                (RAir * state.dataThermalComforts->SkinTemp + RClo * state.dataThermalComforts->OpTemp) / (RAir + RClo);
+            s_tc->CloSurfTemp = (RAir * s_tc->SkinTemp + RClo * s_tc->OpTemp) / (RAir + RClo);
             bool converged = false;
             while (!converged) {
-                state.dataThermalComforts->Hr =
-                    4.0 * StefanBoltz * std::pow((state.dataThermalComforts->CloSurfTemp + RadTemp) / 2.0 + 273.15, 3) * 0.72;
-                RAir = 1.0 / (TotCloFac * (state.dataThermalComforts->Hc + state.dataThermalComforts->Hr));
-                state.dataThermalComforts->OpTemp = (state.dataThermalComforts->Hr * RadTemp + state.dataThermalComforts->Hc * AirTemp) /
-                                                    (state.dataThermalComforts->Hc + state.dataThermalComforts->Hr);
-                Real64 CloSurfTempNew = (RAir * state.dataThermalComforts->SkinTemp + RClo * state.dataThermalComforts->OpTemp) / (RAir + RClo);
-                if (std::abs(CloSurfTempNew - state.dataThermalComforts->CloSurfTemp) <= 0.01) {
+                s_tc->Hr = 4.0 * StefanBoltz * std::pow((s_tc->CloSurfTemp + RadTemp) / 2.0 + 273.15, 3) * 0.72;
+                RAir = 1.0 / (TotCloFac * (s_tc->Hc + s_tc->Hr));
+                s_tc->OpTemp = (s_tc->Hr * RadTemp + s_tc->Hc * AirTemp) / (s_tc->Hc + s_tc->Hr);
+                Real64 CloSurfTempNew = (RAir * s_tc->SkinTemp + RClo * s_tc->OpTemp) / (RAir + RClo);
+                if (std::abs(CloSurfTempNew - s_tc->CloSurfTemp) <= 0.01) {
                     converged = true;
                 }
-                state.dataThermalComforts->CloSurfTemp = CloSurfTempNew;
+                s_tc->CloSurfTemp = CloSurfTempNew;
             }
 
             // CALCULATE THE COMBINED HEAT TRANSFER COEFF. (H)
-            state.dataThermalComforts->H = state.dataThermalComforts->Hr + state.dataThermalComforts->Hc;
+            s_tc->H = s_tc->Hr + s_tc->Hc;
             // Heat flow from Clothing surface to environment
-            state.dataThermalComforts->DryHeatLoss = (state.dataThermalComforts->SkinTemp - state.dataThermalComforts->OpTemp) / (RAir + RClo);
+            s_tc->DryHeatLoss = (s_tc->SkinTemp - s_tc->OpTemp) / (RAir + RClo);
 
             // dry and latent respiratory heat losses
-            state.dataThermalComforts->LatRespHeatLoss =
-                0.0023 * ActLevel * (44.0 - state.dataThermalComforts->VapPress); // latent heat loss due to respiration
-            state.dataThermalComforts->DryRespHeatLoss = 0.0014 * ActLevel * (34.0 - AirTemp);
+            s_tc->LatRespHeatLoss = 0.0023 * ActLevel * (44.0 - s_tc->VapPress); // latent heat loss due to respiration
+            s_tc->DryRespHeatLoss = 0.0014 * ActLevel * (34.0 - AirTemp);
 
-            state.dataThermalComforts->RespHeatLoss = state.dataThermalComforts->LatRespHeatLoss + state.dataThermalComforts->DryRespHeatLoss;
+            s_tc->RespHeatLoss = s_tc->LatRespHeatLoss + s_tc->DryRespHeatLoss;
 
             // Heat flows to skin and core: 5.28 is skin conductance in the absence of skin blood flow
-            state.dataThermalComforts->HeatFlow =
-                (state.dataThermalComforts->CoreTemp - state.dataThermalComforts->SkinTemp) * (5.28 + 1.163 * SkinBloodFlow);
+            s_tc->HeatFlow = (s_tc->CoreTemp - s_tc->SkinTemp) * (5.28 + 1.163 * SkinBloodFlow);
 
-            Real64 CoreHeatStorage = ActLevel - state.dataThermalComforts->HeatFlow - state.dataThermalComforts->RespHeatLoss -
-                                     WorkEff; // rate of energy storage in the core
-            Real64 SkinHeatStorage = state.dataThermalComforts->HeatFlow - state.dataThermalComforts->DryHeatLoss -
-                                     state.dataThermalComforts->EvapHeatLoss; // rate of energy storage in the skin
+            Real64 CoreHeatStorage = ActLevel - s_tc->HeatFlow - s_tc->RespHeatLoss - WorkEff; // rate of energy storage in the core
+            Real64 SkinHeatStorage = s_tc->HeatFlow - s_tc->DryHeatLoss - s_tc->EvapHeatLoss;  // rate of energy storage in the skin
 
             // Thermal capacities
-            state.dataThermalComforts->CoreThermCap = 0.97 * (1 - SkinMassRat) * BodyWeight;
-            state.dataThermalComforts->SkinThermCap = 0.97 * SkinMassRat * BodyWeight;
+            s_tc->CoreThermCap = 0.97 * (1 - SkinMassRat) * BodyWeight;
+            s_tc->SkinThermCap = 0.97 * SkinMassRat * BodyWeight;
 
             // Temperature changes in 1 minute
-            state.dataThermalComforts->CoreTempChange = (CoreHeatStorage * BodySurfAreaPierce / (state.dataThermalComforts->CoreThermCap * 60.0));
-            state.dataThermalComforts->SkinTempChange = (SkinHeatStorage * BodySurfAreaPierce) / (state.dataThermalComforts->SkinThermCap * 60.0);
+            s_tc->CoreTempChange = (CoreHeatStorage * BodySurfAreaPierce / (s_tc->CoreThermCap * 60.0));
+            s_tc->SkinTempChange = (SkinHeatStorage * BodySurfAreaPierce) / (s_tc->SkinThermCap * 60.0);
 
-            state.dataThermalComforts->CoreTemp += state.dataThermalComforts->CoreTempChange;
-            state.dataThermalComforts->SkinTemp += state.dataThermalComforts->SkinTempChange;
-            state.dataThermalComforts->AvgBodyTemp =
-                SkinMassRat * state.dataThermalComforts->SkinTemp + (1.0 - SkinMassRat) * state.dataThermalComforts->CoreTemp;
+            s_tc->CoreTemp += s_tc->CoreTempChange;
+            s_tc->SkinTemp += s_tc->SkinTempChange;
+            s_tc->AvgBodyTemp = SkinMassRat * s_tc->SkinTemp + (1.0 - SkinMassRat) * s_tc->CoreTemp;
 
-            Real64 SkinThermSigWarm;                                               // vasodilation signal (WARMS)
-            Real64 SkinThermSigCold;                                               // vasoconstriction signal
-            Real64 SkinSignal = state.dataThermalComforts->SkinTemp - SkinTempSet; // thermoregulatory control signal from the skin
+            Real64 SkinThermSigWarm;                          // vasodilation signal (WARMS)
+            Real64 SkinThermSigCold;                          // vasoconstriction signal
+            Real64 SkinSignal = s_tc->SkinTemp - SkinTempSet; // thermoregulatory control signal from the skin
             if (SkinSignal > 0) {
                 SkinThermSigWarm = SkinSignal;
                 SkinThermSigCold = 0.0;
@@ -1019,9 +1008,9 @@ namespace ThermalComfort {
                 SkinThermSigWarm = 0.0;
             }
 
-            Real64 CoreThermSigWarm;                                               // vasodialtion signal (WARMC)
-            Real64 CoreThermSigCold;                                               // vasoconstriction signal
-            Real64 CoreSignal = state.dataThermalComforts->CoreTemp - CoreTempSet; // thermoregulatory control signal from the skin, °C
+            Real64 CoreThermSigWarm;                          // vasodialtion signal (WARMC)
+            Real64 CoreThermSigCold;                          // vasoconstriction signal
+            Real64 CoreSignal = s_tc->CoreTemp - CoreTempSet; // thermoregulatory control signal from the skin, °C
             if (CoreSignal > 0) {
                 CoreThermSigWarm = CoreSignal;
                 CoreThermSigCold = 0.0;
@@ -1031,7 +1020,7 @@ namespace ThermalComfort {
             }
 
             Real64 BodyThermSigWarm; // WARMB
-            Real64 BodySignal = state.dataThermalComforts->AvgBodyTemp - AvgBodyTempSet;
+            Real64 BodySignal = s_tc->AvgBodyTemp - AvgBodyTempSet;
 
             if (BodySignal > 0) {
                 BodyThermSigWarm = BodySignal;
@@ -1039,9 +1028,9 @@ namespace ThermalComfort {
                 BodyThermSigWarm = 0.0;
             }
 
-            state.dataThermalComforts->VasodilationFac = DriCoeffVasodilation * CoreThermSigWarm;
-            state.dataThermalComforts->VasoconstrictFac = DriCoeffVasoconstriction * SkinThermSigCold;
-            SkinBloodFlow = (SkinBloodFlowSet + state.dataThermalComforts->VasodilationFac) / (1.0 + state.dataThermalComforts->VasoconstrictFac);
+            s_tc->VasodilationFac = DriCoeffVasodilation * CoreThermSigWarm;
+            s_tc->VasoconstrictFac = DriCoeffVasoconstriction * SkinThermSigCold;
+            SkinBloodFlow = (SkinBloodFlowSet + s_tc->VasodilationFac) / (1.0 + s_tc->VasoconstrictFac);
             // SkinBloodFlow is never below 0.5 liter/(m2.hr) nor above 90 liter/(m2.hr)
             if (SkinBloodFlow < MinSkinBloodFlow) {
                 SkinBloodFlow = MinSkinBloodFlow;
@@ -1055,86 +1044,78 @@ namespace ThermalComfort {
             if (RegSweat > RegSweatMax) {
                 RegSweat = RegSweatMax;
             }
-            state.dataThermalComforts->EvapHeatLossRegSweat = 0.68 * RegSweat; // heat lost by vaporization sweat
+            s_tc->EvapHeatLossRegSweat = 0.68 * RegSweat; // heat lost by vaporization sweat
 
             // adjustment of metabolic heat due to shivering (Stolwijk, Hardy)
-            state.dataThermalComforts->ShivResponse = 19.4 * SkinThermSigCold * CoreThermSigCold;
-            ActLevel = ActLevelStart + state.dataThermalComforts->ShivResponse;
+            s_tc->ShivResponse = 19.4 * SkinThermSigCold * CoreThermSigCold;
+            ActLevel = ActLevelStart + s_tc->ShivResponse;
 
             // Evaluation of heat transfer by evaporation at skin surface
-            Real64 AirEvapHeatResist = 1.0 / (LewisRatio * TotCloFac * state.dataThermalComforts->Hc); // evaporative resistance air layer
-            Real64 CloEvapHeatResist = RClo / (LewisRatio * state.dataThermalComforts->CloInsul);
+            Real64 AirEvapHeatResist = 1.0 / (LewisRatio * TotCloFac * s_tc->Hc); // evaporative resistance air layer
+            Real64 CloEvapHeatResist = RClo / (LewisRatio * s_tc->CloInsul);
             Real64 TotEvapHeatResist = AirEvapHeatResist + CloEvapHeatResist;
-            state.dataThermalComforts->SatSkinVapPress = CalcSatVapPressFromTempTorr(state.dataThermalComforts->SkinTemp); // PSSK
-            state.dataThermalComforts->EvapHeatLossMax =
-                (state.dataThermalComforts->SatSkinVapPress - state.dataThermalComforts->VapPress) / TotEvapHeatResist; // TotEvapHeatResist;
-            state.dataThermalComforts->SkinWetSweat =
-                state.dataThermalComforts->EvapHeatLossRegSweat /
-                state.dataThermalComforts->EvapHeatLossMax; // ratio heat loss sweating to max heat loss sweating
+            s_tc->SatSkinVapPress = CalcSatVapPressFromTempTorr(s_tc->SkinTemp);                  // PSSK
+            s_tc->EvapHeatLossMax = (s_tc->SatSkinVapPress - s_tc->VapPress) / TotEvapHeatResist; // TotEvapHeatResist;
+            s_tc->SkinWetSweat = s_tc->EvapHeatLossRegSweat / s_tc->EvapHeatLossMax; // ratio heat loss sweating to max heat loss sweating
 
-            state.dataThermalComforts->SkinWetDiff =
-                (1.0 - state.dataThermalComforts->SkinWetSweat) * 0.06; // 0.06 if SkinWetDiff for nonsweating skin --- Kerslake
-            state.dataThermalComforts->EvapHeatLossDiff = state.dataThermalComforts->SkinWetDiff * state.dataThermalComforts->EvapHeatLossMax;
-            state.dataThermalComforts->EvapHeatLoss = state.dataThermalComforts->EvapHeatLossRegSweat + state.dataThermalComforts->EvapHeatLossDiff;
-            state.dataThermalComforts->SkinWetTot = state.dataThermalComforts->EvapHeatLoss / state.dataThermalComforts->EvapHeatLossMax;
+            s_tc->SkinWetDiff = (1.0 - s_tc->SkinWetSweat) * 0.06; // 0.06 if SkinWetDiff for nonsweating skin --- Kerslake
+            s_tc->EvapHeatLossDiff = s_tc->SkinWetDiff * s_tc->EvapHeatLossMax;
+            s_tc->EvapHeatLoss = s_tc->EvapHeatLossRegSweat + s_tc->EvapHeatLossDiff;
+            s_tc->SkinWetTot = s_tc->EvapHeatLoss / s_tc->EvapHeatLossMax;
 
             // Beginning of dripping (Sweat not evaporated on skin surface)
-            if (state.dataThermalComforts->SkinWetTot >= EvapEff) {
-                state.dataThermalComforts->SkinWetTot = EvapEff;
-                state.dataThermalComforts->SkinWetSweat = EvapEff / 0.94;
-                state.dataThermalComforts->EvapHeatLossRegSweat =
-                    state.dataThermalComforts->SkinWetSweat * state.dataThermalComforts->EvapHeatLossMax;
-                state.dataThermalComforts->SkinWetDiff = (1.0 - state.dataThermalComforts->SkinWetSweat) * 0.06;
-                state.dataThermalComforts->EvapHeatLossDiff = state.dataThermalComforts->SkinWetDiff * state.dataThermalComforts->EvapHeatLossMax;
-                state.dataThermalComforts->EvapHeatLoss =
-                    state.dataThermalComforts->EvapHeatLossRegSweat + state.dataThermalComforts->EvapHeatLossDiff;
+            if (s_tc->SkinWetTot >= EvapEff) {
+                s_tc->SkinWetTot = EvapEff;
+                // Invert SkinWetTot = SkinWetSweat + SkinWetDiff = SkinWetSweat + (1 - SkinWetSweat) * 0.06 = 0.06 + 0.94 * SkinWetSweat, so
+                // that EvapHeatLoss below equals SkinWetTot * EvapHeatLossMax (Gagge et al. 1986: prsw=(eveff-.06)/.94)
+                s_tc->SkinWetSweat = (s_tc->SkinWetTot - 0.06) / 0.94;
+                s_tc->EvapHeatLossRegSweat = s_tc->SkinWetSweat * s_tc->EvapHeatLossMax;
+                s_tc->SkinWetDiff = (1.0 - s_tc->SkinWetSweat) * 0.06;
+                s_tc->EvapHeatLossDiff = s_tc->SkinWetDiff * s_tc->EvapHeatLossMax;
+                s_tc->EvapHeatLoss = s_tc->EvapHeatLossRegSweat + s_tc->EvapHeatLossDiff;
             }
 
             // When EvapHeatLossMax<0. condensation on skin occurs.
-            if (state.dataThermalComforts->EvapHeatLossMax < 0.0) {
-                state.dataThermalComforts->SkinWetDiff = 0.0;
-                state.dataThermalComforts->EvapHeatLossDiff = 0.0;
-                state.dataThermalComforts->EvapHeatLoss = 0.0;
-                state.dataThermalComforts->SkinWetTot = EvapEff;
-                state.dataThermalComforts->SkinWetSweat = EvapEff;
-                state.dataThermalComforts->EvapHeatLossRegSweat = 0.0;
+            if (s_tc->EvapHeatLossMax < 0.0) {
+                s_tc->SkinWetDiff = 0.0;
+                s_tc->EvapHeatLossDiff = 0.0;
+                s_tc->EvapHeatLoss = 0.0;
+                s_tc->SkinWetTot = EvapEff;
+                s_tc->SkinWetSweat = EvapEff;
+                s_tc->EvapHeatLossRegSweat = 0.0;
             }
             // Vapor pressure at skin (as measured by dewpoint sensors)
-            state.dataThermalComforts->SkinVapPress = state.dataThermalComforts->SkinWetTot * state.dataThermalComforts->SatSkinVapPress +
-                                                      (1.0 - state.dataThermalComforts->SkinWetTot) * state.dataThermalComforts->VapPress;
+            s_tc->SkinVapPress = s_tc->SkinWetTot * s_tc->SatSkinVapPress + (1.0 - s_tc->SkinWetTot) * s_tc->VapPress;
         } // END OF MINUTE BY MINUTE TEMPERATURE REGULATION LOOP
 
         // EvapHeatLossMax is readjusted for EvapEff
-        state.dataThermalComforts->EvapHeatLossMax *= EvapEff;
+        s_tc->EvapHeatLossMax *= EvapEff;
 
         // Step 3: Heat transfer indices in real environment. Computation of comfort indices.
         // Inputs to this SECTION are the physiological data from the simulation of temperature regulation loop.
-        Real64 EffectSkinHeatLoss = state.dataThermalComforts->DryHeatLoss + state.dataThermalComforts->EvapHeatLoss;
+        Real64 EffectSkinHeatLoss = s_tc->DryHeatLoss + s_tc->EvapHeatLoss;
         // ET*(standardization humidity/REAL(r64) CloUnit, StdAtm and Hc)
-        state.dataThermalComforts->CloBodyRat = 1.0 + CloFac * CloUnit;
-        Real64 EffectCloUnit =
-            CloUnit - (state.dataThermalComforts->CloBodyRat - 1.0) / (0.155 * state.dataThermalComforts->CloBodyRat * state.dataThermalComforts->H);
-        Real64 EffectCloThermEff = 1.0 / (1.0 + 0.155 * state.dataThermalComforts->Hc * EffectCloUnit);
-        state.dataThermalComforts->CloPermeatEff =
-            1.0 / (1.0 + (0.155 / state.dataThermalComforts->CloInsul) * state.dataThermalComforts->Hc * EffectCloUnit);
+        s_tc->CloBodyRat = 1.0 + CloFac * CloUnit;
+        Real64 EffectCloUnit = CloUnit - (s_tc->CloBodyRat - 1.0) / (0.155 * s_tc->CloBodyRat * s_tc->H);
+        Real64 EffectCloThermEff = 1.0 / (1.0 + 0.155 * s_tc->Hc * EffectCloUnit);
+        s_tc->CloPermeatEff = 1.0 / (1.0 + (0.155 / s_tc->CloInsul) * s_tc->Hc * EffectCloUnit);
         // Get a low approximation for ET* and solve balance equation by iteration
-        Real64 ET = state.dataThermalComforts->SkinTemp - EffectSkinHeatLoss / (state.dataThermalComforts->H * EffectCloThermEff);
+        Real64 ET = s_tc->SkinTemp - EffectSkinHeatLoss / (s_tc->H * EffectCloThermEff);
         Real64 EnergyBalErrET;
         while (true) {
             Real64 StdVapPressET = CalcSatVapPressFromTempTorr(ET); // THE STANDARD VAPOR PRESSURE AT THE EFFECTIVE TEMP : StdVapPressET
-            EnergyBalErrET = EffectSkinHeatLoss - state.dataThermalComforts->H * EffectCloThermEff * (state.dataThermalComforts->SkinTemp - ET) -
-                             state.dataThermalComforts->SkinWetTot * LewisRatio * state.dataThermalComforts->Hc *
-                                 state.dataThermalComforts->CloPermeatEff * (state.dataThermalComforts->SatSkinVapPress - StdVapPressET / 2.0);
+            EnergyBalErrET = EffectSkinHeatLoss - s_tc->H * EffectCloThermEff * (s_tc->SkinTemp - ET) -
+                             s_tc->SkinWetTot * LewisRatio * s_tc->Hc * s_tc->CloPermeatEff * (s_tc->SatSkinVapPress - StdVapPressET / 2.0);
             if (EnergyBalErrET >= 0.0) {
                 break;
             }
             ET += 0.1;
         }
-        state.dataThermalComforts->EffTemp = ET;
+        s_tc->EffTemp = ET;
 
         // Standard effective temperature SET* standardized humidity.  Hc, CloUnit, StdAtm normalized for given ActLel AirVel
         // Standard environment
-        Real64 StdHr = state.dataThermalComforts->Hr;
+        Real64 StdHr = s_tc->Hr;
         Real64 StdHc; // standard conv. heat tr. coeff. (level walking/still air)
         if (ActMet <= 0.85) {
             StdHc = 3.0; // minimum value of Hc at sea leAirVel = 3.0 (AirVel = .137 m/s)
@@ -1150,8 +1131,7 @@ namespace ThermalComfort {
         Real64 StdRClo = 0.155 * StdCloUnit;                                                   // RCLS
         Real64 StdCloBodyRat = 1.0 + CloFac * StdCloUnit;                                      // FACLS
         Real64 StdEffectCloThermEff = 1.0 / (1.0 + 0.155 * StdCloBodyRat * StdH * StdCloUnit); // FCLS
-        Real64 StdCloInsul = state.dataThermalComforts->CloInsul * StdHc / StdH * (1 - StdEffectCloThermEff) /
-                             (StdHc / StdH - state.dataThermalComforts->CloInsul * StdEffectCloThermEff);
+        Real64 StdCloInsul = s_tc->CloInsul * StdHc / StdH * (1 - StdEffectCloThermEff) / (StdHc / StdH - s_tc->CloInsul * StdEffectCloThermEff);
         Real64 StdREvap = 1.0 / (LewisRatio * StdCloBodyRat * StdHc);
         Real64 StdREvapClo = StdRClo / (LewisRatio * StdCloInsul);
         Real64 StdHEvap = 1.0 / (StdREvap + StdREvapClo);
@@ -1159,28 +1139,26 @@ namespace ThermalComfort {
         Real64 StdHDry = 1.0 / (StdRAir + StdRClo);
 
         // Get a low approximation for SET* and solve balance equ. by iteration
-        Real64 StdEffectSkinHeatLoss = state.dataThermalComforts->DryHeatLoss + state.dataThermalComforts->EvapHeatLoss;
-        Real64 OldSET = round((state.dataThermalComforts->SkinTemp - StdEffectSkinHeatLoss / StdHDry) * 100) / 100;
+        Real64 StdEffectSkinHeatLoss = s_tc->DryHeatLoss + s_tc->EvapHeatLoss;
+        Real64 OldSET = round((s_tc->SkinTemp - StdEffectSkinHeatLoss / StdHDry) * 100) / 100;
         Real64 delta = 0.0001;
         Real64 err = 100.0;
         while (std::abs(err) > 0.01) {
             Real64 StdVapPressSET_1 = CalcSatVapPressFromTempTorr(OldSET); // StdVapPressSET *= VapPressConv;
-            Real64 EnergyBalErrSET_1 =
-                StdEffectSkinHeatLoss - StdHDry * (state.dataThermalComforts->SkinTemp - OldSET) -
-                state.dataThermalComforts->SkinWetTot * StdHEvap * (state.dataThermalComforts->SatSkinVapPress - StdVapPressSET_1 / 2.0);
+            Real64 EnergyBalErrSET_1 = StdEffectSkinHeatLoss - StdHDry * (s_tc->SkinTemp - OldSET) -
+                                       s_tc->SkinWetTot * StdHEvap * (s_tc->SatSkinVapPress - StdVapPressSET_1 / 2.0);
             Real64 StdVapPressSET_2 = CalcSatVapPressFromTempTorr(OldSET + delta);
-            Real64 EnergyBalErrSET_2 =
-                StdEffectSkinHeatLoss - StdHDry * (state.dataThermalComforts->SkinTemp - (OldSET + delta)) -
-                state.dataThermalComforts->SkinWetTot * StdHEvap * (state.dataThermalComforts->SatSkinVapPress - StdVapPressSET_2 / 2.0);
+            Real64 EnergyBalErrSET_2 = StdEffectSkinHeatLoss - StdHDry * (s_tc->SkinTemp - (OldSET + delta)) -
+                                       s_tc->SkinWetTot * StdHEvap * (s_tc->SatSkinVapPress - StdVapPressSET_2 / 2.0);
             Real64 NewSET = OldSET - delta * EnergyBalErrSET_1 / (EnergyBalErrSET_2 - EnergyBalErrSET_1);
             err = NewSET - OldSET;
             OldSET = NewSET;
         }
         Real64 SET = OldSET;
         // PMV*(PMVET in prgm) uses ET instead of OpTemp
-        state.dataThermalComforts->DryHeatLossET = StdH * StdEffectCloThermEff * (state.dataThermalComforts->SkinTemp - ET);
+        s_tc->DryHeatLossET = StdH * StdEffectCloThermEff * (s_tc->SkinTemp - ET);
         // SPMV*(PMVSET in prgm) uses SET instead of OpTemp
-        state.dataThermalComforts->DryHeatLossSET = StdH * StdEffectCloThermEff * (state.dataThermalComforts->SkinTemp - SET);
+        s_tc->DryHeatLossSET = StdH * StdEffectCloThermEff * (s_tc->SkinTemp - SET);
         return SET;
     }
 
@@ -1319,15 +1297,14 @@ namespace ThermalComfort {
                    SET;
         };
 
-        auto ce_root_termination = [](Real64 min, Real64 max) { return abs(max - min) <= 0.01; };
-        Real64 lowerBound = 0.0;
-        Real64 upperBound = 50.0;
+        Real64 constexpr tempAccuracy = 0.001; // Accuracy of the SET match [deltaC]
+        int constexpr MaxIte = 100;
+        Real64 constexpr lowerBound = 0.0;
+        Real64 constexpr upperBound = 50.0;
+        int SolFla = 0;
 
-        // We have yet another solver?
-        try {
-            std::pair<Real64, Real64> solverResult = boost::math::tools::bisect(ce_root_function, lowerBound, upperBound, ce_root_termination);
-            CoolingEffect = (solverResult.first + solverResult.second) / 2;
-        } catch (const std::exception &e) {
+        General::SolveRoot(state, tempAccuracy, MaxIte, SolFla, CoolingEffect, ce_root_function, lowerBound, upperBound);
+        if (SolFla < 0) {
             ShowRecurringWarningErrorAtEnd(state,
                                            "The cooling effect could not be solved for People=\"" + people.Name + "\"" +
                                                "As a result, no cooling effect will be applied to adjust the PMV and PPD results.",

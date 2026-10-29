@@ -694,10 +694,8 @@ void GetFanInput(EnergyPlusData &state)
             e.FanName.clear();
             e.FanEff = 0.0;
             e.DeltaPress = 0.0;
-            e.MaxAirFlowRate = 0.0;
             e.MotEff = 0.0;
             e.MotInAirFrac = 0.0;
-            e.MaxAirMassFlowRate = 0.0;
         }
 
         // input the night ventilation performance objects
@@ -723,9 +721,8 @@ void GetFanInput(EnergyPlusData &state)
             nvp.FanName = cAlphaArgs(1);
             nvp.FanEff = rNumericArgs(1);
             nvp.DeltaPress = rNumericArgs(2);
-            nvp.MaxAirFlowRate = rNumericArgs(3);
-            nvp.MotEff = rNumericArgs(4);
-            nvp.MotInAirFrac = rNumericArgs(5);
+            nvp.MotEff = rNumericArgs(3);
+            nvp.MotInAirFrac = rNumericArgs(4);
 
             auto found = df->fanMap.find(nvp.FanName);
             if (found == df->fanMap.end()) {
@@ -1294,10 +1291,6 @@ void FanComponent::init(EnergyPlusData &state)
             minAirFlowRate = fixedMin;
             minAirMassFlowRate = minAirFlowRate * rhoAirStdInit;
         }
-        if (nightVentPerfNum > 0) {
-            df->NightVentPerf(nightVentPerfNum).MaxAirMassFlowRate = df->NightVentPerf(nightVentPerfNum).MaxAirFlowRate * rhoAirStdInit;
-        }
-
         // Init the Node Control variables
         state.dataLoopNodes->Node(outletNodeNum).MassFlowRateMax = maxAirMassFlowRate;
         // According to the IO Ref guide:
@@ -1634,12 +1627,6 @@ void FanComponent::set_size(EnergyPlusData &state)
             state.dataAirLoopHVACDOAS->airloopDOAS[airLoopNum - state.dataHVACGlobal->NumPrimaryAirSys - 1].Name);
     }
 
-    if (nightVentPerfNum > 0) {
-        if (state.dataFans->NightVentPerf(nightVentPerfNum).MaxAirFlowRate == DataSizing::AutoSize) {
-            state.dataFans->NightVentPerf(nightVentPerfNum).MaxAirFlowRate = maxAirFlowRate;
-        }
-    }
-
     // Now that sizing is done, do check if the design point of fan is covered in the fault Fan Curve
     if (faultyFilterFlag) {
         auto &fault = state.dataFaultsMgr->FaultsFouledAirFilters(faultyFilterIndex);
@@ -1704,13 +1691,14 @@ void FanComponent::simulateConstant(EnergyPlusData &state)
         auto &fault = state.dataFaultsMgr->FaultsFouledAirFilters(faultyFilterIndex);
         // Check fault availability schedules
         if (fault.availSched->getCurrentVal() > 0.0) {
+            Real64 const _faultBasePressure = _deltaPress;
             // Decrease of the Fan Design Volume Flow Rate [m3/sec]
             Real64 _fanDesignFlowRateDec = CalFaultyFanAirFlowReduction(
                 state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
             _massFlow = min(_massFlow, maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir);
-            _deltaPress = fault.pressFracSched->getCurrentVal() * deltaPress;
+            _deltaPress = fault.pressFracSched->getCurrentVal() * _faultBasePressure;
         }
     }
 
@@ -1783,6 +1771,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
     Real64 _motorInAirFrac;
     Real64 _motorEff;
     Real64 _partLoadFrac;
+    bool const nightVentMode = state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0;
 
     // Simple Variable Volume Fan - default values from DOE-2
     // Type of Fan          Coeff1       Coeff2       Coeff3        Coeff4      Coeff5
@@ -1790,13 +1779,13 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
     // DISCHARGE DAMPERS    0.37073425   0.97250253   -0.34240761   0.000       0.000
     // VARIABLE SPEED MOTOR 0.0015302446 0.0052080574  1.1086242   -0.11635563  0.000
 
-    if (state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0) {
+    if (nightVentMode) {
         auto const &nightVentPerf = state.dataFans->NightVentPerf(nightVentPerfNum);
         _deltaPress = nightVentPerf.DeltaPress;
         _totalEff = nightVentPerf.FanEff;
         _motorEff = nightVentPerf.MotEff;
         _motorInAirFrac = nightVentPerf.MotInAirFrac;
-        _maxAirMassFlowRate = nightVentPerf.MaxAirMassFlowRate;
+        _maxAirMassFlowRate = maxAirMassFlowRate;
     } else {
         if (present(_pressureRise)) {
             _deltaPress = _pressureRise;
@@ -1821,6 +1810,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
         auto &fault = state.dataFaultsMgr->FaultsFouledAirFilters(faultyFilterIndex);
         // Check fault availability schedules
         if (fault.availSched->getCurrentVal() > 0.0) {
+            Real64 const _faultBasePressure = _deltaPress;
             Real64 _fanDesignFlowRateDec = // Decrease of the Fan Design Volume Flow Rate [m3/sec]
                 CalFaultyFanAirFlowReduction(
                     state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
@@ -1828,7 +1818,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
             // Update MassFlow & DeltaPress of the fan
             _maxAirFlowRate = maxAirFlowRate - _fanDesignFlowRateDec;
             _maxAirMassFlowRate = maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir;
-            _deltaPress = fault.pressFracSched->getCurrentVal() * deltaPress;
+            _deltaPress = fault.pressFracSched->getCurrentVal() * _faultBasePressure;
         }
     }
 
@@ -1859,14 +1849,15 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
         // Calculate the part Load Fraction             (PH 7/13/03)
 
         Real64 _flowFracForPower = max(_minFlowFrac, min(_flowFracActual, 1.0)); // limit flow fraction to allowed range
-        if (state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0) {
+        if (nightVentMode) {
             _partLoadFrac = 1.0;
         } else {
             _partLoadFrac = coeffs[0] + coeffs[1] * _flowFracForPower + coeffs[2] * pow_2(_flowFracForPower) + coeffs[3] * pow_3(_flowFracForPower) +
                             coeffs[4] * pow_4(_flowFracForPower);
         }
 
-        totalPower = max(0.0, _partLoadFrac * _maxAirMassFlowRate * _deltaPress / (_totalEff * _rhoAir)); // total fan power (PH 7/13/03)
+        Real64 const _fanPowerMassFlow = nightVentMode ? _massFlow : _maxAirMassFlowRate;
+        totalPower = max(0.0, _partLoadFrac * _fanPowerMassFlow * _deltaPress / (_totalEff * _rhoAir)); // total fan power (PH 7/13/03)
 
         Real64 _shaftPower = _motorEff * totalPower; // power delivered to shaft
         powerLossToAir = _shaftPower + (totalPower - _shaftPower) * _motorInAirFrac;
@@ -1884,7 +1875,7 @@ void FanComponent::simulateVAV(EnergyPlusData &state, ObjexxFCL::Optional<Real64
         //  A potential way to improve is to check the temperature rise across the fan first,
         //  if it is too high (say > 20C) then applies the code.
         Real64 _deltaTAcrossFan = outletAirTemp - inletAirTemp;
-        if (_deltaTAcrossFan > 20.0) {
+        if (_deltaTAcrossFan > 20.0 && !nightVentMode) {
             // added to address the fan heat issue during low air flow conditions
             Real64 _fanPoweratLowMinimum; // Fan Power at Low Minimum Airflow [W]
             Real64 _partLoadFracatLowMin;
@@ -1954,7 +1945,18 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
     Real64 _maxAirMassFlowRate = maxAirMassFlowRate;
     Real64 _deltaPress = deltaPress; // [N/m2]
     Real64 _totalEff = totalEff;
+    Real64 _motorEff = motorEff;
+    Real64 _motorInAirFrac = motorInAirFrac;
     Real64 _rhoAir = rhoAirStdInit;
+
+    bool const nightVentMode = state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0;
+    if (nightVentMode) {
+        auto const &nightVentPerf = state.dataFans->NightVentPerf(nightVentPerfNum);
+        _deltaPress = nightVentPerf.DeltaPress;
+        _totalEff = nightVentPerf.FanEff;
+        _motorEff = nightVentPerf.MotEff;
+        _motorInAirFrac = nightVentPerf.MotInAirFrac;
+    }
 
     // Faulty fan operations
     // Update MassFlow & DeltaPress if there are fouling air filters corresponding to the fan
@@ -1965,13 +1967,14 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
 
         // Check fault availability schedules
         if (fault.availSched->getCurrentVal() > 0.0) {
+            Real64 const _faultBasePressure = _deltaPress;
             Real64 _fanDesignFlowRateDec = // Decrease of the Fan Design Volume Flow Rate [m3/sec]
                 CalFaultyFanAirFlowReduction(
                     state, Name, maxAirFlowRate, deltaPress, (fault.pressFracSched->getCurrentVal() - 1) * deltaPress, fault.fanCurveNum);
 
             // Update MassFlow & DeltaPress of the fan
             _maxAirMassFlowRate = maxAirMassFlowRate - _fanDesignFlowRateDec * _rhoAir;
-            _deltaPress = fault.pressFracSched->getCurrentVal() * deltaPress;
+            _deltaPress = fault.pressFracSched->getCurrentVal() * _faultBasePressure;
         }
     }
 
@@ -2020,7 +2023,7 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
             totalPower = max(0.0, _maxAirMassFlowRate * runtimeFrac * _deltaPress / (_totalEff * _rhoAir));
 
             //    Do not modify fan power calculation unless fan power vs speed ratio curve is used.
-            if (powerRatioAtSpeedRatioCurveNum > 0) {
+            if (powerRatioAtSpeedRatioCurveNum > 0 && !nightVentMode) {
 
                 //      adjust RTF to be in line with speed ratio (i.e., MaxAirMassFlowRate is not MAX when SpeedRatio /= 1)
                 //      PLR = Mdot/MAXFlow => Mdot/(MAXFlow * SpeedRatio), RTF = PLR/PLF => PLR/SpeedRatio/PLF = RTF / SpeedRatio
@@ -2068,8 +2071,8 @@ void FanComponent::simulateOnOff(EnergyPlusData &state, ObjexxFCL::Optional<Real
         // OnOffFanPartLoadFraction is passed via DataHVACGlobals from the cooling or heating coil that is
         //   requesting the fan to operate in cycling fan/cycling coil mode
         state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0; // reset to 1 in case other on/off fan is called without a part load curve
-        Real64 _shaftPower = motorEff * totalPower;           // power delivered to shaft
-        powerLossToAir = _shaftPower + (totalPower - _shaftPower) * motorInAirFrac;
+        Real64 _shaftPower = _motorEff * totalPower;          // power delivered to shaft
+        powerLossToAir = _shaftPower + (totalPower - _shaftPower) * _motorInAirFrac;
         outletAirEnthalpy = inletAirEnthalpy + powerLossToAir / _massFlow;
         // This fan does not change the moisture or Mass Flow across the component
         outletAirHumRat = inletAirHumRat;
@@ -2113,19 +2116,27 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
     bool _fanIsRunning = false; // There seems to be a missing else case below unless false is assumed
 
     Real64 _deltaPress = deltaPress; // [N/m2]
-    if (EMSPressureOverrideOn) {
-        _deltaPress = EMSPressureValue;
-    }
-
     Real64 _totalEff = totalEff;
-    if (EMSTotalEffOverrideOn) {
-        _totalEff = EMSTotalEffValue;
+    Real64 _motorInAirFrac = motorInAirFrac;
+
+    if (state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0) {
+        auto const &nightVentPerf = state.dataFans->NightVentPerf(nightVentPerfNum);
+        _deltaPress = nightVentPerf.DeltaPress;
+        _totalEff = nightVentPerf.FanEff;
+        _motorInAirFrac = nightVentPerf.MotInAirFrac;
     }
 
     // For a Constant Volume Simple Fan the Max Flow Rate is the Flow Rate for the fan
     Real64 _Tin = inletAirTemp;
     Real64 _rhoAir = rhoAirStdInit;
     Real64 _massFlow = inletAirMassFlowRate;
+
+    if (EMSPressureOverrideOn) {
+        _deltaPress = EMSPressureValue;
+    }
+    if (EMSTotalEffOverrideOn) {
+        _totalEff = EMSTotalEffValue;
+    }
 
     //  When the AvailManagerMode == ExhaustFanCoupledToAvailManagers then the
     //  Exhaust Fan is  interlocked with air loop availability via global TurnFansOn and TurnFansOff variables.
@@ -2153,7 +2164,8 @@ void FanComponent::simulateZoneExhaust(EnergyPlusData &state)
         // Fan is operating
         Real64 const _shaftPower = std::fmax(0.0, _massFlow * _deltaPress / _rhoAir);
         totalPower = _shaftPower / _totalEff; // total fan power
-        powerLossToAir = _shaftPower + (totalPower - _shaftPower) * motorInAirFrac;
+        // Zone exhaust fan heat uses the air power; night-vent motor efficiency does not affect this calculation.
+        powerLossToAir = _shaftPower + (totalPower - _shaftPower) * _motorInAirFrac;
         powerLossToZone = (heatLossDest == HeatLossDest::Zone) ? totalPower - powerLossToAir : 0.0;
         outletAirEnthalpy = inletAirEnthalpy + powerLossToAir / _massFlow;
         // This fan does not change the moisture or Mass Flow across the component
@@ -2205,24 +2217,12 @@ void FanComponent::simulateComponentModel(EnergyPlusData &state)
     // Calculate air temperature rise due to fan (and belt+motor if in airstream) power entering air-handler airflow
     // Calculate output node conditions
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 _maxAirMassFlowRate; // Fan Max mass airflow [kg/s]
-    Real64 _motorInAirFrac;     // Fraction of fan power input to airstream
-
     // Local variables
     Real64 _dimFlow;               // Fan dimensionless airflow [-]
     Real64 _beltPLEff;             // Belt normalized (part-load) efficiency [-]
     Real64 _motorPLEff;            // Motor normalized (part-load) efficiency [-]
     Real64 _vfdSpeedRatio(0.0);    // Ratio of motor speed to motor max speed [-]
     Real64 _vfdOutPowerRatio(0.0); // Ratio of VFD output power to max VFD output power [-]
-
-    if (state.dataHVACGlobal->NightVentOn && nightVentPerfNum > 0) {
-        _motorInAirFrac = state.dataFans->NightVentPerf(nightVentPerfNum).MotInAirFrac;
-        _maxAirMassFlowRate = state.dataFans->NightVentPerf(nightVentPerfNum).MaxAirMassFlowRate;
-    } else {
-        _motorInAirFrac = motorInAirFrac;
-        _maxAirMassFlowRate = maxAirMassFlowRate;
-    }
 
     // Get air density at standard conditions and get mass airflow through fan
     // From WeatherManager:

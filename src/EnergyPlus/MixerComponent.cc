@@ -458,8 +458,8 @@ void CalcAirMixer(EnergyPlusData &state, int &MixerNum)
                                         const int numRetNodes = state.dataZoneEquip->ZoneEquipConfig(airDistUnitZoneNum).NumReturnNodes;
                                         for (int retZoneAirNodeNum = 1; retZoneAirNodeNum <= numRetNodes; ++retZoneAirNodeNum) {
                                             if (const int retZoneAirNode =
-                                                    state.dataZoneEquip->ZoneEquipConfig(airDistUnitZoneNum).ReturnNodeAirLoopNum(retZoneAirNodeNum);
-                                                retZoneAirNode == InletNodeNum) {
+                                                    state.dataZoneEquip->ZoneEquipConfig(airDistUnitZoneNum).ReturnNode(retZoneAirNodeNum);
+                                                retZoneAirNode == mixer.InletNode(InletNodeNum)) {
                                                 // Third: increment to get the mixer leakage
                                                 massFlowRateParallelPIULk += airDistUnit.massFlowRateParallelPIULk;
                                                 massFlowRateHumRatParallelPIULk += airDistUnit.massFlowRateParallelPIULk *
