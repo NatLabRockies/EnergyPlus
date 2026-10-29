@@ -650,6 +650,46 @@ void HeatPumpAirToWater::calcLoadSideHeatTransfer(EnergyPlusData &state, Real64 
     this->loadSideOutletTemp = this->calcLoadOutletTemp(this->loadSideInletTemp, this->loadSideHeatTransfer / loadMCp);
 }
 
+void HeatPumpAirToWater::setOperatingFlowRatesASHP(EnergyPlusData &state, bool FirstHVACIteration, Real64 const currentLoad)
+{
+    // the base class handles the off, out of range and no load cases, and requests the rated flow otherwise
+    EIRPlantLoopHeatPump::setOperatingFlowRatesASHP(state, FirstHVACIteration, currentLoad);
+    if (!this->running || FirstHVACIteration || this->flowMode != DataPlant::FlowMode::LeavingSetpointModulated) {
+        return;
+    }
+
+    // modulate the load side flow so that the leaving water temperature meets the setpoint
+    bool const isCooling = this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    auto const &setPointNode = state.dataLoopNodes->Node(this->setPointNodeNum);
+    Real64 leavingSetpoint = setPointNode.TempSetPoint;
+    if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
+        leavingSetpoint = isCooling ? setPointNode.TempSetPointHi : setPointNode.TempSetPointLo;
+    }
+    Real64 const deltaTemp = isCooling ? this->loadSideInletTemp - leavingSetpoint : leavingSetpoint - this->loadSideInletTemp;
+
+    if (deltaTemp > 0.0 && std::abs(currentLoad) > 0.0) {
+        Real64 const CpLoad =
+            this->loadSidePlantLoc.loop->glycol->getSpecificHeat(state, this->loadSideInletTemp, "HeatPumpAirToWater::setOperatingFlowRatesASHP()");
+        this->loadSideMassFlowRate = min(this->loadSideDesignMassFlowRate, std::abs(currentLoad) / (CpLoad * deltaTemp));
+        if (this->loadVSBranchPump) {
+            this->loadSideMassFlowRate = std::max(this->loadSideMassFlowRate, this->loadVSPumpMinLimitMassFlow);
+        }
+    } else {
+        this->loadSideMassFlowRate = 0.0;
+    }
+    PlantUtilities::SetComponentFlowRate(
+        state, this->loadSideMassFlowRate, this->loadSideNodes.inlet, this->loadSideNodes.outlet, this->loadSidePlantLoc);
+
+    // if there's no flow, turn the heat pump off
+    if (this->loadSideMassFlowRate <= 0.0) {
+        this->loadSideMassFlowRate = 0.0;
+        this->sourceSideMassFlowRate = 0.0;
+        this->running = false;
+        PlantUtilities::SetComponentFlowRate(
+            state, this->loadSideMassFlowRate, this->loadSideNodes.inlet, this->loadSideNodes.outlet, this->loadSidePlantLoc);
+    }
+}
+
 void HeatPumpAirToWater::calcPowerUsage(EnergyPlusData &state, Real64 availableCapacityBeforeMultiplier)
 {
     // check to see how many heat pumps are needed
@@ -1132,7 +1172,9 @@ void EIRPlantLoopHeatPump::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused
             }
         }
 
-        if (this->flowMode == DataPlant::FlowMode::VariableSpeedPump) {
+        bool const isAWHP = this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling ||
+                            this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+        if (this->flowMode == DataPlant::FlowMode::VariableSpeedPump || (isAWHP && this->flowMode == DataPlant::FlowMode::LeavingSetpointModulated)) {
             this->loadVSPumpMinLimitMassFlow =
                 PlantUtilities::MinFlowIfBranchHasVSPump(state, this->loadSidePlantLoc, this->loadVSBranchPump, this->loadVSLoopPump, true);
             if (this->waterSource) {
@@ -3887,6 +3929,9 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                         fields, schemaProps, "maximum_ambient_temperature_for_crankcase_heater_operation");
                 }
                 thisAWHP.minimumPLR = state.dataInputProcessing->inputProcessor->getRealFieldValue(fields, schemaProps, "minimum_part_load_ratio");
+                thisAWHP.flowMode = static_cast<DataPlant::FlowMode>(
+                    getEnumValue(DataPlant::FlowModeNamesUC,
+                                 Util::makeUPPER(state.dataInputProcessing->inputProcessor->getAlphaFieldValue(fields, schemaProps, "flow_mode"))));
 
                 // read heating/cooling specific fields
                 thisAWHP.EIRHPType = classToInput.thisType;

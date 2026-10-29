@@ -532,6 +532,7 @@ namespace EIRPlantLoopHeatPumps {
         CompressorControlType controlType = CompressorControlType::FixedSpeed;
 
         void doPhysics(EnergyPlusData &state, Real64 currentLoad) override;
+        void setOperatingFlowRatesASHP(EnergyPlusData &state, bool FirstHVACIteration, Real64 const currentLoad) override;
         void oneTimeInit(EnergyPlusData &state) override;
         void calcLoadSideHeatTransfer(EnergyPlusData &state, Real64 availableCapacity, Real64 currentLoad);
         void calcPowerUsage(EnergyPlusData &state, Real64 availableCapacityBeforeMultiplier);

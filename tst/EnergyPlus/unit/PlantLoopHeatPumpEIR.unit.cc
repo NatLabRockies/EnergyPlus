@@ -591,6 +591,9 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
     // for now we know the order is maintained, so get each heat pump object
     HeatPumpAirToWater *thisAWHPHeating = &state->dataHeatPumpAirToWater->heatPumps[1];
     HeatPumpAirToWater *thisAWHPCooling = &state->dataHeatPumpAirToWater->heatPumps[0];
+    // flow mode is not specified, so it defaults to constant flow
+    EXPECT_ENUM_EQ(DataPlant::FlowMode::Constant, thisAWHPHeating->flowMode);
+    EXPECT_ENUM_EQ(DataPlant::FlowMode::Constant, thisAWHPCooling->flowMode);
 
     // do a bit of extra wiring up to the plant
     PLHPPlantLoadSideCompHeating.Name = thisAWHPHeating->name;
@@ -684,6 +687,230 @@ TEST_F(EnergyPlusFixture, HeatingSimulate_AirSource_AWHP)
         // expect it to miss setpoint and be at max capacity
         EXPECT_NEAR(45.0, thisAWHPHeating->loadSideOutletTemp, 0.001);
         EXPECT_NEAR(30.0, thisAWHPHeating->sourceSideOutletTemp, 0.001);
+    }
+}
+
+TEST_F(EnergyPlusFixture, LeavingSetpointModulatedFlow_AWHP)
+{
+    std::string const idf_objects = delimited_string({"HeatPump:AirToWater,",
+                                                      "test_AWHP, !- Name",
+                                                      ", !- Availability Schedule Name Heating",
+                                                      ", !- Availability Schedule Name Cooling",
+                                                      "Load , !- Operating Mode Control Method",
+                                                      "SingleMode, !- Operating Mode Control Option for Multiple Unit",
+                                                      ", !- Operating Mode Control Schedule Name",
+                                                      ",    !- Minimum Part Load Ratio",
+                                                      "20 , !-  Rated Inlet Air Temperature in Heating Mode",
+                                                      "1.0, !-  Rated Air Flow Rate in Heating Mode",
+                                                      "50 , !-  Rated Leaving Water Temperature in Heating Mode",
+                                                      "0.0001, !-  Rated Water Flow Rate in Heating Mode",
+                                                      ", !-  Minimum Outdoor Air Temperature in Heating Mode",
+                                                      ", !-  Maximum Outdoor Air Temperature in Heating Mode",
+                                                      ",    !- Minimum Leaving Water Temperature Curve Name in Heating Mode",
+                                                      ",    !- Maximum Leaving Water Temperature Curve Name in Heating Mode",
+                                                      "1.0, !-  Sizing Factor for Heating",
+                                                      "25, !-  Rated Inlet Air Temperature in Cooling Mode",
+                                                      "0.002, !-  Rated Air Flow Rate in Cooling Mode",
+                                                      "22 , !-  Rated Leaving Water Temperature in Cooling Mode",
+                                                      "0.005, !-  Rated Water Flow Rate in Cooling Mode",
+                                                      ", !-  Minimum Outdoor Air Temperature in Cooling Mode",
+                                                      ", !-  Maximum Outdoor Air Temperature in Cooling Mode",
+                                                      ",    !- Minimum Leaving Water Temperature Curve Name in Cooling Mode",
+                                                      ",    !- Maximum Leaving Water Temperature Curve Name in Cooling Mode",
+                                                      "0.9, !-  Sizing Factor for Cooling",
+                                                      "Outdoor Air Inlet Node , !-  Air Inlet Node Name",
+                                                      "Outdoor Air Outlet Node, !-  Air Outlet Node Name",
+                                                      "Heating Coil Load Loop Intermediate Node, !-  Hot Water Inlet Node Name",
+                                                      "Heating Coil Load Loop Supply Outlet Node, !-  Hot Water Outlet Node Name",
+                                                      "Cooling Coil Load Loop Intermediate Node , !-  Chilled Water Inlet Node Name",
+                                                      "Cooling Coil Load Loop Supply Outlet Node , !-  Chilled Water Outlet Node Name",
+                                                      ", !- Maximum Outdoor Dry Bulb Temperature For Defrost Operation",
+                                                      ", !-  Heat Pump Defrost Control",
+                                                      ", !-  Defrost Time Period Fraction",
+                                                      ", !-  Resistive Defrost Heater Capacity",
+                                                      ", !-  Defrost Energy Input Ratio Function of Temperature Curve Name",
+                                                      "1 , !- Compressor Multiplier",
+                                                      "FixedSpeed , !- Control Type",
+                                                      ", !- Crankcase Heater Capacity",
+                                                      ", !- Crankcase Heater Capacity Function of Temperature Curve Name",
+                                                      ", !- Maximum Ambient Temperature for Crankcase Heater Operation",
+                                                      "1 , !- Number of Speeds for Heating",
+                                                      "1000, !-  Rated Heating Capacity at Speed 1",
+                                                      "3.14, !-  Rated COP for Heating at Speed 1",
+                                                      "dummyCurve, !-  Normalized Heating Capacity Function of Temperature Curve Name at Speed 1",
+                                                      "dummyCurve, !-  Heating Energy Input Ratio Function of Temperature Curve Name at Speed 1",
+                                                      "dummyCurve, !-  Heating Energy Input Ratio Function of PLR Curve Name at Speed 1",
+                                                      ", !-  Rated Heating Capacity at Speed 2",
+                                                      ", !-  Rated COP for Heating at Speed 2",
+                                                      ", !-  Normalized Heating Capacity Function of Temperature Curve Name at Speed 2",
+                                                      ", !-  Heating Energy Input Ratio Function of Temperature Curve Name at Speed 2",
+                                                      ", !-  Heating Energy Input Ratio Function of PLR Curve Name at Speed 2",
+                                                      ", !-  Rated Heating Capacity at Speed 3",
+                                                      ", !-  Rated COP for Heating at Speed 3",
+                                                      ", !-  Normalized Heating Capacity Function of Temperature Curve Name at Speed 3",
+                                                      ", !-  Heating Energy Input Ratio Function of Temperature Curve Name at Speed 3",
+                                                      ", !-  Heating Energy Input Ratio Function of PLR Curve Name at Speed 3",
+                                                      ", !-  Rated Heating Capacity at Speed 4",
+                                                      ", !-  Rated COP for Heating at Speed 4",
+                                                      ", !-  Normalized Heating Capacity Function of Temperature Curve Name at Speed 4",
+                                                      ", !-  Heating Energy Input Ratio Function of Temperature Curve Name at Speed 4",
+                                                      ", !-  Heating Energy Input Ratio Function of PLR Curve Name at Speed 4",
+                                                      ", !-  Rated Heating Capacity at Speed 5",
+                                                      ", !-  Rated COP for Heating at Speed 5",
+                                                      ", !-  Normalized Heating Capacity Function of Temperature Curve Name at Speed 5",
+                                                      ", !-  Heating Energy Input Ratio Function of Temperature Curve Name at Speed 5",
+                                                      ", !-  Heating Energy Input Ratio Function of PLR Curve Name at Speed 5",
+                                                      ", !-  Booster Mode On Heating",
+                                                      ", !-  Rated Heating Capacity in Booster Mode",
+                                                      ", !-  Rated Heating COP in Booster Mode",
+                                                      ", !-  Normalized Heating Capacity Function of Temperature Curve Name in Booster Mode",
+                                                      ", !-  Heating Energy Input Ratio Function of Temperature Curve Name in Booster Mode",
+                                                      ", !-  Heating Energy Input Ratio Function of PLR Curve Name in Booster Mode",
+                                                      "1, !-  Number of Speeds for Cooling",
+                                                      "20000, !-  Rated Cooling Capacity at Speed 1",
+                                                      "3, !-  Rated COP for Cooling at Speed 1",
+                                                      "dummyCurve, !-  Normalized Cooling Capacity Function of Temperature Curve Name at Speed 1",
+                                                      "dummyCurve, !-  Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 1",
+                                                      "dummyCurve, !-  Cooling Energy Input Ratio Function of PLR Curve Name at Speed 1",
+                                                      ", !-  Rated Cooling Capacity at Speed 2",
+                                                      ", !-  Rated COP for Cooling at Speed 2",
+                                                      ", !-  Normalized Cooling Capacity Function of Temperature Curve Name at Speed 2",
+                                                      ", !-  Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 2",
+                                                      ", !-  Cooling Energy Input Ratio Function of PLR Curve Name at Speed 2",
+                                                      ", !-  Rated Cooling Capacity at Speed 3",
+                                                      ", !-  Rated COP for Cooling at Speed 3",
+                                                      ", !-  Normalized Cooling Capacity Function of Temperature Curve Name at Speed 3",
+                                                      ", !-  Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 3",
+                                                      ", !-  Cooling Energy Input Ratio Function of PLR Curve Name at Speed 3",
+                                                      ", !-  Rated Cooling Capacity at Speed 4",
+                                                      ", !-  Rated COP for Cooling at Speed 4",
+                                                      ", !-  Normalized Cooling Capacity Function of Temperature Curve Name at Speed 4",
+                                                      ", !-  Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 4",
+                                                      ", !-  Cooling Energy Input Ratio Function of PLR Curve Name at Speed 4",
+                                                      ", !-  Rated Cooling Capacity at Speed 5",
+                                                      ", !-  Rated COP for Cooling at Speed 5",
+                                                      ", !-  Normalized Cooling Capacity Function of Temperature Curve Name at Speed 5",
+                                                      ", !-  Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 5",
+                                                      ", !-  Cooling Energy Input Ratio Function of PLR Curve Name at Speed 5",
+                                                      ", !-  Booster Mode On Cooling",
+                                                      ", !-  Rated Cooling Capacity in Booster Mode",
+                                                      ", !-  Rated Cooling COP in Booster Mode",
+                                                      ", !-  Normalized Cooling Capacity Function of Temperature Curve Name in Booster Mode",
+                                                      ", !-  Cooling Energy Input Ratio Function of Temperature Curve Name in Booster Mode",
+                                                      ", !-  Cooling Energy Input Ratio Function of PLR Curve Name in Booster Mode",
+                                                      "LeavingSetpointModulated; !-  Flow Mode",
+
+                                                      "Curve:Linear,",
+                                                      "  dummyCurve,",
+                                                      "  0.95,",
+                                                      "  0,",
+                                                      "  1,",
+                                                      "  1;"});
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    // heating side on a single setpoint loop, cooling side on a dual setpoint loop
+    state->dataPlnt->TotNumLoops = 2;
+    state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);
+
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    state->dataPlnt->PlantLoop(1).LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).TotalBranches = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).TotalComponents = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+    auto &PLHPPlantLoadSideCompHeating = state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
+    PLHPPlantLoadSideCompHeating.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+    PLHPPlantLoadSideCompHeating.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
+
+    state->dataPlnt->PlantLoop(2).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(2).glycol = Fluid::GetWater(*state);
+    state->dataPlnt->PlantLoop(2).LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
+    state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).TotalBranches = 1;
+    state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).TotalComponents = 1;
+    state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+    auto &PLHPPlantLoadSideCompCooling = state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1);
+    PLHPPlantLoadSideCompCooling.Type = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    PLHPPlantLoadSideCompCooling.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
+    PlantLocation myHeatingLocation = PlantLocation(1, DataPlant::LoopSideLocation::Supply, 1, 1);
+    PlantLocation myCoolingLocation = PlantLocation(2, DataPlant::LoopSideLocation::Supply, 1, 1);
+
+    DataPlant::PlantEquipmentType equipType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating;
+    HeatPumpAirToWater::factory(*state, equipType, "TEST_AWHP");
+    ASSERT_EQ(2u, state->dataHeatPumpAirToWater->heatPumps.size());
+    HeatPumpAirToWater *thisAWHPHeating = &state->dataHeatPumpAirToWater->heatPumps[1];
+    HeatPumpAirToWater *thisAWHPCooling = &state->dataHeatPumpAirToWater->heatPumps[0];
+    EXPECT_ENUM_EQ(DataPlant::FlowMode::LeavingSetpointModulated, thisAWHPHeating->flowMode);
+    EXPECT_ENUM_EQ(DataPlant::FlowMode::LeavingSetpointModulated, thisAWHPCooling->flowMode);
+
+    PLHPPlantLoadSideCompHeating.Name = thisAWHPHeating->name;
+    PLHPPlantLoadSideCompHeating.NodeNumIn = thisAWHPHeating->loadSideNodes.inlet;
+    PLHPPlantLoadSideCompCooling.Name = thisAWHPCooling->name;
+    PLHPPlantLoadSideCompCooling.NodeNumIn = thisAWHPCooling->loadSideNodes.inlet;
+
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
+    thisAWHPHeating->onInitLoopEquip(*state, myHeatingLocation);
+    thisAWHPCooling->onInitLoopEquip(*state, myCoolingLocation);
+    thisAWHPHeating->setPointNodeNum = thisAWHPHeating->loadSideNodes.outlet;
+    thisAWHPCooling->setPointNodeNum = thisAWHPCooling->loadSideNodes.outlet;
+
+    Real64 const heatingDesignMassFlowRate = thisAWHPHeating->loadSideDesignMassFlowRate;
+    Real64 const coolingDesignMassFlowRate = thisAWHPCooling->loadSideDesignMassFlowRate;
+    bool runFlag = true;
+    state->dataLoopNodes->Node(thisAWHPHeating->sourceSideNodes.inlet).Temp = 30;
+
+    // heating, first HVAC iteration: request the rated flow
+    {
+        Real64 curLoad = 400;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = 45;
+        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = 40;
+        thisAWHPHeating->simulate(*state, myHeatingLocation, true, curLoad, runFlag);
+        EXPECT_NEAR(heatingDesignMassFlowRate, thisAWHPHeating->loadSideMassFlowRate, 1e-6);
+    }
+
+    // heating, part load: flow is reduced to just meet the leaving setpoint
+    {
+        Real64 curLoad = 400;
+        Real64 constexpr loadInletTemp = 40;
+        Real64 constexpr specifiedLoadSetpoint = 45;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = specifiedLoadSetpoint;
+        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = loadInletTemp;
+        thisAWHPHeating->simulate(*state, myHeatingLocation, false, curLoad, runFlag);
+        Real64 const cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, loadInletTemp, "UnitTest");
+        Real64 const expectedMassFlowRate = curLoad / (cp * (specifiedLoadSetpoint - loadInletTemp));
+        EXPECT_LT(expectedMassFlowRate, heatingDesignMassFlowRate);
+        EXPECT_NEAR(expectedMassFlowRate, thisAWHPHeating->loadSideMassFlowRate, 1e-6);
+        EXPECT_NEAR(curLoad, thisAWHPHeating->loadSideHeatTransfer, 0.001);
+        EXPECT_NEAR(specifiedLoadSetpoint, thisAWHPHeating->loadSideOutletTemp, 0.001);
+    }
+
+    // heating, small temperature rise: flow is capped at the rated flow
+    {
+        Real64 curLoad = 900;
+        state->dataLoopNodes->Node(thisAWHPHeating->setPointNodeNum).TempSetPoint = 45;
+        state->dataLoopNodes->Node(thisAWHPHeating->loadSideNodes.inlet).Temp = 44.5;
+        thisAWHPHeating->simulate(*state, myHeatingLocation, false, curLoad, runFlag);
+        EXPECT_NEAR(heatingDesignMassFlowRate, thisAWHPHeating->loadSideMassFlowRate, 1e-6);
+    }
+
+    // cooling on a dual setpoint loop: modulate to the high setpoint
+    {
+        Real64 curLoad = -2000;
+        Real64 constexpr loadInletTemp = 14;
+        Real64 constexpr specifiedLoadSetpointHi = 12;
+        state->dataLoopNodes->Node(thisAWHPCooling->setPointNodeNum).TempSetPointHi = specifiedLoadSetpointHi;
+        state->dataLoopNodes->Node(thisAWHPCooling->setPointNodeNum).TempSetPointLo = 5;
+        state->dataLoopNodes->Node(thisAWHPCooling->loadSideNodes.inlet).Temp = loadInletTemp;
+        state->dataLoopNodes->Node(thisAWHPCooling->sourceSideNodes.inlet).Temp = 30;
+        thisAWHPCooling->simulate(*state, myCoolingLocation, false, curLoad, runFlag);
+        Real64 const cp = state->dataPlnt->PlantLoop(2).glycol->getSpecificHeat(*state, loadInletTemp, "UnitTest");
+        Real64 const expectedMassFlowRate = std::abs(curLoad) / (cp * (loadInletTemp - specifiedLoadSetpointHi));
+        EXPECT_LT(expectedMassFlowRate, coolingDesignMassFlowRate);
+        EXPECT_NEAR(expectedMassFlowRate, thisAWHPCooling->loadSideMassFlowRate, 1e-6);
+        EXPECT_NEAR(specifiedLoadSetpointHi, thisAWHPCooling->loadSideOutletTemp, 0.001);
     }
 }
 
