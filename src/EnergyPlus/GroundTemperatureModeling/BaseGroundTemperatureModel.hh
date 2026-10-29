@@ -70,6 +70,7 @@ namespace GroundTemp {
         SiteDeep,
         SiteFCFactorMethod,
         Xing,
+        GradientSegments,
         Num
     };
 
@@ -79,7 +80,8 @@ namespace GroundTemp {
                                                                                     "SITE:GROUNDTEMPERATURE:SHALLOW",
                                                                                     "SITE:GROUNDTEMPERATURE:DEEP",
                                                                                     "SITE:GROUNDTEMPERATURE:FCFACTORMETHOD",
-                                                                                    "SITE:GROUNDTEMPERATURE:UNDISTURBED:XING"};
+                                                                                    "SITE:GROUNDTEMPERATURE:UNDISTURBED:XING",
+                                                                                    "SITE:GROUNDTEMPERATURE:UNDISTURBED:GRADIENTSEGMENTS"};
 
     constexpr std::array<std::string_view, (int)ModelType::Num> modelTypeNames = {"Site:GroundTemperature:Undisturbed:KusudaAchenbach",
                                                                                   "Site:GroundTemperature:Undisturbed:FiniteDifference",
@@ -87,7 +89,8 @@ namespace GroundTemp {
                                                                                   "Site:GroundTemperature:Shallow",
                                                                                   "Site:GroundTemperature:Deep",
                                                                                   "Site:GroundTemperature:FCfactorMethod",
-                                                                                  "Site:GroundTemperature:Undisturbed:Xing"};
+                                                                                  "Site:GroundTemperature:Undisturbed:Xing",
+                                                                                  "Site:GroundTemperature:Undisturbed:GradientSegments"};
 
     // Base class
     class BaseGroundTempsModel

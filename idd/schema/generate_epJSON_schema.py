@@ -68,7 +68,7 @@ def generate_epJSON_schema(source_dir_path: str):
     data = idd_parser.Data()
     idd_path = path.join(source_dir_path, "Energy+.idd")
     if path.exists(idd_path):
-        with open(idd_path, "r") as f:
+        with open(idd_path, "r", encoding="utf-8") as f:
             data.file = f.read()
     else:
         # this script is also used in the sphinx documentation, which doesn't do a CMake configuration run
@@ -77,7 +77,7 @@ def generate_epJSON_schema(source_dir_path: str):
         # generated idd file.
         idd_in_path = path.join(source_dir_path, "Energy+.idd.in")
         if path.exists(idd_in_path):
-            with open(idd_in_path, "r") as f:
+            with open(idd_in_path, "r", encoding="utf-8") as f:
                 data.file = f.read()
         else:
             print(f"Could not find E+ IDD, looked for both: {idd_path} and {idd_in_path}.  Aborting")
@@ -92,7 +92,7 @@ def generate_epJSON_schema(source_dir_path: str):
     modify_schema.change_89_release_issues(data.schema)
     modify_schema.add_explicit_extensible_bounds(data.schema)
 
-    with open(path.join(source_dir_path, "Energy+.schema.epJSON"), "w") as f2:
+    with open(path.join(source_dir_path, "Energy+.schema.epJSON"), "w", encoding="utf-8") as f2:
         f2.write(json.dumps(data.schema, indent=4))
 
 

@@ -839,6 +839,7 @@ if (NOT (TARGET_ARCH MATCHES "arm64"))
   add_simulation_test(IDF_FILE AbsorptionChiller_Macro.imf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ENERGYPLUS_FLAGS -m)
 endif ()
 
+ADD_SIMULATION_TEST(IDF_FILE GroundTemperatureGradientSegments.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 if (BUILD_FORTRAN)
     # ExpandObjects dependent files
     add_simulation_test(

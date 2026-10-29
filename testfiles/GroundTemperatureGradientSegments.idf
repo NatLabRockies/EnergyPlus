@@ -1,0 +1,26 @@
+!-Generator IDFEditor 1.55
+!-Option SortedOrder
+
+!-NOTE: All comments with '!-' are ignored by the IDFEditor and are generated automatically.
+!-      Use '!' comments if they need to be retained when using the IDFEditor.
+
+
+!-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
+
+Version,
+    26.2;                    !- Version Identifier
+
+!-   ===========  ALL OBJECTS IN CLASS: SITE:GROUNDTEMPERATURE:UNDISTURBED:================
+
+Site:GroundTemperature:Undisturbed:GradientSegments,
+    Melbourne Gradient Ground Temps,  !- Name
+    2,                                !- Number of Segments
+    15.0,                             !- Transition Depth {m}
+    5.0,                              !- Blend Width {m}
+    15.0,                              !- Reference Temperature {C}
+    15.0,                             !- Upper Depth 1 {m}
+    50,                             !- Lower Depth 1 {m}
+    0.057,                            !- Gradient 1 {K/m}
+    50,                             !- Upper Depth 2 {m}
+    400,                             !- Lower Depth 2 {m}
+    0.040;                            !- Gradient 2 {K/m}
