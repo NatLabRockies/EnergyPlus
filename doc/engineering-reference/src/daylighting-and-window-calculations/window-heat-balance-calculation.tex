@@ -665,6 +665,16 @@ Assuming that the inside and outside frame profile is rectangular introduces an 
 
 The divider inside and outside surface temperatures are determined by a heat balance calculation that is analogous to the frame heat balance calculation described above.
 
+\subsubsection{Long-Wave Exchange of Frame and Divider with the Zone}\label{long-wave-exchange-of-frame-and-divider-with-the-zone}
+
+Frames and dividers are not surfaces of the zone's radiant enclosure (see ``Internal Long-Wave Radiation Exchange''), but their inside faces exchange long-wave radiation with the zone at the interior IR irradiance incident on the window, \emph{E\(_{i}\)}. Per unit frame face area, the frame receives from the zone
+
+\begin{equation}
+{q_{IR,zone}} = {\varepsilon_2}\left( {1 + \frac{1}{2}{\eta_2}} \right)\left( {{E_i} - \sigma \theta_2^4} \right)
+\end{equation}
+
+where \emph{\(\varepsilon_2\)} is the frame emissivity; the divider term is analogous. The total, \emph{q\(_{IR,zone}\)A\(_{f}\)} plus the divider term, is subtracted from the net long-wave radiation received by the opaque surfaces of the enclosure, in proportion to each surface's Script F exchange factor with the window (its share of \emph{E\(_{i}\)}), so that the interior long-wave exchange conserves energy. The frame and divider heat gain outputs remain the convective heat gain to the zone air.
+
 \subsection{Beam Solar Reflection from Window Reveal Surfaces}\label{beam-solar-reflection-from-window-reveal-surfaces}
 
 This section describes how beam solar radiation that is reflected from window reveal surfaces is calculated. Reflection from outside reveal surfaces---which are associated with the setback of the glazing from the outside surface of the window's parent wall---increases the solar gain through the glazing. Reflection from inside reveal surfaces---which are associated with the setback of the glazing from the inside surface of the window's parent wall---decreases the solar gain to the zone because some of this radiation is reflected back out of the window.
