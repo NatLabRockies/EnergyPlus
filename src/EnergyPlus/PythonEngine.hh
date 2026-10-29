@@ -74,6 +74,7 @@ namespace Python {
         static std::string getBasicPreamble();
         static std::string getTclPreppedPreamble(std::vector<std::string> const &python_fwd_args);
         void exec(std::string_view sv);
+        int callFunctionWithStringList(std::string_view moduleName, std::string_view functionName, std::vector<std::string> const &arguments);
 
         bool eplusRunningViaPythonAPI = false;
 

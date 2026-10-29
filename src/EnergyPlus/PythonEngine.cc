@@ -115,6 +115,70 @@ namespace Python {
         Py_DECREF(v);
     }
 
+    int
+    PythonEngine::callFunctionWithStringList(std::string_view moduleName, std::string_view functionName, std::vector<std::string> const &arguments)
+    {
+        std::string const moduleNameString{moduleName};
+        PyObject *module = PyImport_ImportModule(moduleNameString.c_str());
+        if (module == nullptr) {
+            PyErr_Print();
+            throw std::runtime_error(std::format("Unable to import Python module '{}'", moduleName));
+        }
+
+        std::string const functionNameString{functionName};
+        PyObject *function = PyObject_GetAttrString(module, functionNameString.c_str());
+        if (function == nullptr || PyCallable_Check(function) == 0) {
+            if (PyErr_Occurred()) {
+                PyErr_Print();
+            }
+            Py_XDECREF(function);
+            Py_DECREF(module);
+            throw std::runtime_error(std::format("Python attribute '{}.{}' is not callable", moduleName, functionName));
+        }
+
+        PyObject *pythonArguments = PyList_New(static_cast<Py_ssize_t>(arguments.size()));
+        if (pythonArguments == nullptr) {
+            PyErr_Print();
+            Py_DECREF(function);
+            Py_DECREF(module);
+            throw std::runtime_error("Unable to create Python argument list");
+        }
+
+        for (std::size_t i = 0; i < arguments.size(); ++i) {
+            auto const &argument = arguments[i];
+            PyObject *pythonArgument = PyUnicode_DecodeFSDefaultAndSize(argument.data(), static_cast<Py_ssize_t>(argument.size()));
+            if (pythonArgument == nullptr) {
+                PyErr_Print();
+                Py_DECREF(pythonArguments);
+                Py_DECREF(function);
+                Py_DECREF(module);
+                throw std::runtime_error("Unable to convert a command-line argument to a Python string");
+            }
+            PyList_SET_ITEM(pythonArguments, static_cast<Py_ssize_t>(i), pythonArgument); // PyList_SET_ITEM steals the reference
+        }
+
+        PyObject *result = PyObject_CallFunctionObjArgs(function, pythonArguments, nullptr);
+        Py_DECREF(pythonArguments);
+        Py_DECREF(function);
+        Py_DECREF(module);
+        if (result == nullptr) {
+            PyErr_Print();
+            throw std::runtime_error(std::format("Error calling Python function '{}.{}'", moduleName, functionName));
+        }
+        if (PyLong_Check(result) == 0) {
+            Py_DECREF(result);
+            throw std::runtime_error(std::format("Python function '{}.{}' did not return an integer", moduleName, functionName));
+        }
+
+        long const status = PyLong_AsLong(result);
+        Py_DECREF(result);
+        if (status == -1 && PyErr_Occurred()) {
+            PyErr_Print();
+            throw std::runtime_error(std::format("Python function '{}.{}' returned an invalid status", moduleName, functionName));
+        }
+        return static_cast<int>(status);
+    }
+
     PythonEngine::~PythonEngine()
     {
         if (!this->eplusRunningViaPythonAPI) {
@@ -189,6 +253,11 @@ sys.argv.append("energyplus")
 
     void PythonEngine::exec(std::string_view)
     {
+    }
+
+    int PythonEngine::callFunctionWithStringList(std::string_view, std::string_view, std::vector<std::string> const &)
+    {
+        return 1;
     }
 
 #endif // LINK_WITH_PYTHON
