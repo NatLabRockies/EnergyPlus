@@ -4313,10 +4313,10 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_basic)
     // 11 fields defaulted    , 4 Autosized  , 2 Autocalculated
 
     EXPECT_EQ(5, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
-    EXPECT_EQ(37, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
+    EXPECT_EQ(38, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
     EXPECT_EQ(6, state->dataOutput->iTotalAutoSizableFields);      // Total number of autosizeable fields
     EXPECT_EQ(3, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
-    EXPECT_EQ(11, state->dataOutput->iNumberOfDefaultedFields);    // Number of defaulted fields in IDF
+    EXPECT_EQ(12, state->dataOutput->iNumberOfDefaultedFields);    // Number of defaulted fields in IDF
     EXPECT_EQ(4, state->dataOutput->iNumberOfAutoSizedFields);     // Number of autosized fields in IDF
     EXPECT_EQ(2, state->dataOutput->iNumberOfAutoCalcedFields);    // Number of autocalculated fields
 }
@@ -4390,10 +4390,10 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
     // 2  fields defaulted    , 0 Autosized  , 0 Autocalculated
 
     EXPECT_EQ(5, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
-    EXPECT_EQ(16, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
+    EXPECT_EQ(17, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
     EXPECT_EQ(0, state->dataOutput->iTotalAutoSizableFields);      // Total number of autosizeable fields
     EXPECT_EQ(2, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
-    EXPECT_EQ(2, state->dataOutput->iNumberOfDefaultedFields);     // Number of defaulted fields in IDF
+    EXPECT_EQ(3, state->dataOutput->iNumberOfDefaultedFields);     // Number of defaulted fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoSizedFields);     // Number of autosized fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoCalcedFields);    // Number of autocalculated fields
 }
