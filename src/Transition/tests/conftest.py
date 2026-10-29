@@ -133,10 +133,13 @@ def prepare_and_run_transition(transitionclidir: Path, tmp_path: Path):
             raise FileNotFoundError(f"Transition binary not found: {cli_path}")
         idf_file_path = tmp_path / "in.idf"
         idf_file_path.write_text(add_required_objects(idf_text=ori_idf_text, version=version_ori))
+        # The audit is written to the transition directory; remove any stale copy so it reflects this run only
+        audit_file_path = transitionclidir / "Transition.audit"
+        audit_file_path.unlink(missing_ok=True)
         subprocess.check_call([cli_path, idf_file_path], cwd=transitionclidir)
         new_text = (tmp_path / "in.idfnew").read_text()
+        audit_text = audit_file_path.read_text() if audit_file_path.is_file() else ""
         if expected_audit_text:
-            audit_text = (transitionclidir / "Transition.audit").read_text()
             assert expected_audit_text in audit_text
         assert "Version,{};\n".format(".".join(map(str, version_new[:2]))) in new_text
 
@@ -154,5 +157,6 @@ def prepare_and_run_transition(transitionclidir: Path, tmp_path: Path):
             assert False, diff_str
         else:
             assert expected_idf_text in new_text
+        return audit_text
 
     return _run

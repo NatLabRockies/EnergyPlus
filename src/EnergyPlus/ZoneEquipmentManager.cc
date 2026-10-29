@@ -3789,11 +3789,7 @@ void SimZoneEquipment(EnergyPlusData &state, bool const FirstHVACIteration, bool
             auto &zoneEquipList = state.dataZoneEquip->ZoneEquipList(state.dataSize->CurZoneEqNum);
 
             if (zoneEquipType == ZoneEquipType::AirDistributionUnit && zoneEquipList.EquipIndex(EquipPtr) == 0) {
-                if (state.dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag) {
-                    ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment(state);
-                    state.dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag = false;
-                }
-                zoneEquipList.EquipIndex(EquipPtr) = Util::FindItemInList(zoneEquipList.EquipName(EquipPtr), state.dataDefineEquipment->AirDistUnit);
+                zoneEquipList.EquipIndex(EquipPtr) = ZoneAirLoopEquipmentManager::getAirDistUnitIndex(state, zoneEquipList.EquipName(EquipPtr));
             }
 
             const int ZoneCompNum = zoneEquipList.EquipIndex(EquipPtr);

@@ -87,7 +87,7 @@ def test_fan_performance_night_ventilation_removes_maximum_flow_rate(prepare_and
     0.8;                     !- Motor Efficiency
 """
 
-    prepare_and_run_transition(
+    audit_text = prepare_and_run_transition(
         ori_idf_text=idf_text,
         expected_idf_text=expected_idf_text,
         version_ori=(26, 2, 0),
@@ -97,3 +97,5 @@ def test_fan_performance_night_ventilation_removes_maximum_flow_rate(prepare_and
             'input value "Autosize" was discarded.'
         ),
     )
+    # A blank Maximum Flow Rate has no value to discard, so it should not be reported
+    assert "Blank Maximum Flow" not in audit_text
