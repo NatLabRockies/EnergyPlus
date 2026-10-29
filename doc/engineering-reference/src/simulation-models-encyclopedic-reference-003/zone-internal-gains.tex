@@ -373,6 +373,128 @@ where $T_{\textrm{return}}$ is the weighted return air temperature from all ITE 
 
 Another modified assumption for this case is, in zones with ITE objects, to make sure the zone heat balance converge, unlike the original thermostat setpoint control logic, the well-mixed zone temperature is not controlled. The actual controlled object is the supply air temperature. So when using this method, the user input of zone cooling setpoint is ignored and the unmet hour for cooling does not apply.
 
+\subsection{Heat Gain from Liquid-Cooled IT Equipment}\label{heat-gain-from-liquid-cooled-it-equipment}
+
+The input object ElectricEquipment:ITE:LiquidCooled describes liquid-cooled data center IT equipment racks. It calculates the transient electric power consumption of the rack and splits the resulting heat generation between a liquid cooling loop and the zone air. The rack references one or more cooling coils (Coil:Cooling:ITE:ColdPlate or Coil:Cooling:ITE:UserDefined) which carry the liquid-side heat away through a plant loop; those coil objects are documented separately. The calculations for the rack itself are described below.
+
+\subsubsection{Variable Definitions---User Inputs:}\label{variable-definitions-user-inputs-liquidcooled}
+
+\begin{itemize}
+\tightlist
+\item
+  P$_\textrm{Design}$ is the design power input when fully loaded (W)
+\item
+  Mult is the multiplier used to scale power and heat to represent multiple identical racks
+\item
+  PFanFrac$_\textrm{Design}$ is the design fan power input fraction of total power input
+\item
+  LHCF$_\textrm{Design}$ is the design (nominal) liquid heat capture fraction
+\item
+  LF$_{i,\textrm{Design}}$ is the static Load Fraction of Cooling Coil $i$ ($i=1\ldots4$), each a fraction (0.0 to 1.0) of the total liquid load directed to that coil
+\end{itemize}
+
+\subsubsection{Variable Definitions---Simulation Inputs:}\label{variable-definitions-simulation-inputs-liquidcooled}
+
+\begin{itemize}
+\tightlist
+\item
+  SchAvail is the current value of the Availability Schedule (equipment is on if SchAvail \textgreater{} 0)
+\item
+  SchComputeLoad is the current value of the Compute Load Schedule, a 0-1 CPU loading fraction
+\item
+  T$_\textrm{Zone}$ is the zone air temperature at current conditions ($^\circ$C)
+\item
+  PfLoadTZone is the IT Equipment Power Modifier Curve, a function of SchComputeLoad ($x$) and T$_\textrm{Zone}$ ($y$)
+\item
+  SchLHCF is the current value of the Liquid Heat Capture Fraction Schedule (defaults to 1.0 if not specified)
+\item
+  SchLF$_i$ is the current value of Cooling Coil $i$'s Load Fraction Schedule, if provided, in place of LF$_{i,\textrm{Design}}$
+\end{itemize}
+
+\subsubsection{Variable Definitions---Outputs:}\label{variable-definitions-outputs-liquidcooled}
+
+\begin{itemize}
+\tightlist
+\item
+  P$_\textrm{CPU}$ is the CPU power input (W)
+\item
+  P$_\textrm{Fan}$ is the fan power input (W)
+\item
+  P$_\textrm{Total}$ is the total electric power input (W)
+\item
+  Q$_\textrm{Total}$ is the total heat generation rate (W)
+\item
+  LHCF is the effective liquid heat capture fraction at current conditions
+\item
+  Q$_\textrm{Liquid}$ is the liquid heat gain rate, the portion of Q$_\textrm{Total}$ removed by the liquid cooling loop (W)
+\item
+  Q$_\textrm{Air}$ is the air heat gain to zone rate, the remaining portion of Q$_\textrm{Total}$ dissipated as a convective gain to the zone air (W)
+\end{itemize}
+
+\subsubsection{Calculations}\label{calculations-liquidcooled}
+
+The total electric power input is calculated from the design power input, the rack multiplier, the current CPU loading, and the power modifier curve (if provided; a value of 1.0 is used otherwise), clamped to be non-negative. It is zero whenever the equipment is unavailable (SchAvail $\leq$ 0).
+
+\begin{equation}
+P_{\textrm{Total}} = \textrm{max}\left(P_{\textrm{Design}} \cdot \textrm{Mult} \cdot \textrm{SchComputeLoad} \cdot \textrm{PfLoadTZone}(\textrm{SchComputeLoad}, T_{\textrm{Zone}}),\ 0\right)
+\end{equation}
+
+The total power is split into fan and CPU portions:
+
+\begin{equation}
+P_{\textrm{Fan}} = P_{\textrm{Total}} \cdot \textrm{PFanFrac}_{\textrm{Design}}
+\end{equation}
+
+\begin{equation}
+P_{\textrm{CPU}} = P_{\textrm{Total}} - P_{\textrm{Fan}}
+\end{equation}
+
+All electricity consumed by the rack is ultimately converted to heat:
+
+\begin{equation}
+Q_{\textrm{Total}} = P_{\textrm{Total}}
+\end{equation}
+
+The effective liquid heat capture fraction is the design value modified by its optional schedule, clamped to {[}0,1{]}:
+
+\begin{equation}
+\textrm{LHCF} = \textrm{clamp}\left(\textrm{LHCF}_{\textrm{Design}} \cdot \textrm{SchLHCF},\ 0,\ 1\right)
+\end{equation}
+
+The target total liquid heat load is then split across each active Cooling Coil $i$ slot by that coil's Load Fraction (the schedule value SchLF$_i$ is used in place of LF$_{i,\textrm{Design}}$ whenever a schedule is provided; if exactly one coil slot is active and neither a static Load Fraction nor a schedule is specified for it, that coil is assumed to receive the entire liquid load):
+
+\begin{equation}
+Q_{\textrm{Liquid,Target}} = Q_{\textrm{Total}} \cdot \textrm{LHCF}
+\end{equation}
+
+\begin{equation}
+Q_{\textrm{Liquid,Target},i} = Q_{\textrm{Liquid,Target}} \cdot \textrm{LF}_i
+\end{equation}
+
+As currently implemented, each coil's achieved liquid heat removal is assumed equal to its target, with no physical capacity limit applied, because the referenced cooling coil object is not yet wired up to this calculation (see note below):
+
+\begin{equation}
+Q_{\textrm{Liquid,Achieved},i} = Q_{\textrm{Liquid,Target},i}
+\end{equation}
+
+The rack's total liquid heat gain and air heat gain are then:
+
+\begin{equation}
+Q_{\textrm{Liquid}} = \sum_i Q_{\textrm{Liquid,Achieved},i}
+\end{equation}
+
+\begin{equation}
+Q_{\textrm{Air}} = Q_{\textrm{Total}} - Q_{\textrm{Liquid}}
+\end{equation}
+
+Q$_{\textrm{Air}}$ is added to the zone air heat balance as a convective internal gain, registered by this object itself.
+
+\paragraph{Coupling to Coil:Cooling:ITE:ColdPlate and Coil:Cooling:ITE:UserDefined}\label{coupling-to-coil-cooling-ite-coldplate-and-userdefined}
+
+Coil:Cooling:ITE:ColdPlate and Coil:Cooling:ITE:UserDefined are developed under separate, parallel efforts and are not yet wired up to the calculation above. Once that integration lands, each coil's achieved liquid heat removal, Q$_{\textrm{Liquid,Achieved},i}$, will instead be queried from the referenced coil object itself, which caps it at that coil's own physical capacity; any shortfall will continue to flow into Q$_{\textrm{Air}}$ as shown above. At that point, the convective zone gain for Q$_{\textrm{Air}}$ will also be registered by the coil itself, against its own specified zone, rather than by this object. Because the coil is plant equipment simulated later in the same system time step --- after the zone's internal gains, including this object, have already been evaluated for that time step --- the coil's achieved value will reflect its \emph{previous} time step result rather than a value computed in direct response to this time step's target. This introduces a one system time step lag between the Liquid Heat Gain and Air Heat Gain to Zone outputs reported by this object and the heat actually appearing in the zone's air heat balance, the same lag pattern already used for other plant-to-zone couplings such as DX coil condenser heat rejection.
+
+The referenced cooling coil is plant equipment, simulated later in the same system time step after the zone's internal gains (including this object) have already been evaluated for that time step. Consequently, Q$_{\textrm{Liquid,Achieved},i}$ reflects the coil's \emph{previous} time step result rather than a value computed in direct response to this time step's Q$_{\textrm{Liquid,Target},i}$; the coil itself registers any uncaptured heat as a convective gain to its own specified zone, with the same one system time step lag described above for ElectricEquipment:ITE:AirCooled's related equipment. This is the same lag pattern already used for other plant-to-zone couplings such as DX coil condenser heat rejection.
+
 \subsection{Heat Gain from Baseboard Heat}\label{heat-gain-from-baseboard-heat}
 
 The input object ZoneBaseboard:OutdoorTemperatureControlled provides a model for an outdoor temperature controlled baseboard heater that adds energy to the zone according a control profile as shown in the following figure.~ At TA = T2, the baseboard heat gain is Q2.~ For TA \textgreater{} T2, there is no heat gain.~ For TA \textless{} T1, a maximum amount of energy, Q1, is added to the zone.~ There is proportional control between those two temperatures:

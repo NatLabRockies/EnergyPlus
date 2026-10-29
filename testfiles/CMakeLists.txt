@@ -17,6 +17,7 @@ add_simulation_test(IDF_FILE VSHeatPumpWaterToAirWithRHControl.idf EPW_FILE USA_
 add_simulation_test(IDF_FILE 1ZoneDataCenterCRAC_wPumpedDXCoolingCoil.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE 1ZoneDataCenterCRAC_wApproachTemp.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE 1ZoneDataCenterCRAC_wApproachTemp_ClassH1.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
+add_simulation_test(IDF_FILE 1ZoneDataCenterITELiquidCooled.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE 2ZoneDataCenterHVAC_wEconomizer.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 2ZoneDataCenterHVAC_wEconomizer_ClassA1A2.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 1ZoneEvapCooler.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
