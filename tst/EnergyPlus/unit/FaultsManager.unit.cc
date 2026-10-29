@@ -455,7 +455,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_FaultChillerSWTSensor_CalFaultChillerSWT
     FaultyChillerSWTOffset = 0;
     FaultChiller.CalFaultChillerSWT(FlagVariableFlow, FaultyChillerSWTOffset, Cp, EvapInletTemp, EvapOutletTemp_1, EvapMassFlowRate_1, QEvaporator_1);
     EXPECT_EQ(1, EvapOutletTemp_1 / EvapOutletTemp);
-    EXPECT_EQ(1, QEvaporator_1 / QEvaporator);
+    EXPECT_DOUBLE_EQ(1, QEvaporator_1 / QEvaporator);
 
     // 2) offset is 2C
     Real64 EvapOutletTemp_2 = EvapOutletTemp;     // Chiller evaporator outlet water temperature

@@ -5526,7 +5526,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         }
     }
     // verify results
-    EXPECT_EQ(RegCoilCapacity, state->dataWaterCoils->WaterCoil(CoilIndex).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(RegCoilCapacity, state->dataWaterCoils->WaterCoil(CoilIndex).DesWaterHeatingCoilRate);
 }
 
 TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
