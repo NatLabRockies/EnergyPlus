@@ -59,6 +59,7 @@
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/WaterUse.hh>
@@ -1738,4 +1739,63 @@ TEST_F(EnergyPlusFixture, WaterUse_calcH2ODensity_Test)
     functionResult = calcH2ODensity(*state);
     EXPECT_NEAR(functionResult, expectedResult, allowedTolerance);
     EXPECT_FALSE(state->dataWaterUse->calcRhoH2O);
+}
+
+// Verifies that WaterUse:Connections reports the hot-water flow actually delivered by a locked plant loop,
+// while cold-water makeup preserves the requested total fixture flow.
+TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantLimitsFlow)
+{
+    state->init_state(*state);
+
+    state->dataLoopNodes->Node.allocate(2);
+    state->dataLoopNodes->Node(1).MassFlowRateMax = 1.0;
+
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &demandSide = state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand);
+    demandSide.TotalBranches = 1;
+    demandSide.Branch.allocate(1);
+    demandSide.Branch(1).TotalComponents = 1;
+    demandSide.Branch(1).Comp.allocate(1);
+    demandSide.Branch(1).Comp(1).CurOpSchemeType = DataPlant::OpScheme::Demand;
+    demandSide.FlowLock = DataPlant::FlowLock::Locked;
+
+    state->dataWaterUse->numWaterEquipment = 1;
+    state->dataWaterUse->WaterEquipment.allocate(1);
+    auto &waterEquipment = state->dataWaterUse->WaterEquipment(1);
+    waterEquipment.Connections = 1;
+    waterEquipment.PeakVolFlowRate = 1.0e-4;
+    waterEquipment.targetTempSched = Sched::AddScheduleConstant(*state, "TARGET TEMP", 40.0);
+    waterEquipment.allowHotControl = true;
+    waterEquipment.setupMyOutputVars = false;
+
+    state->dataWaterUse->numWaterConnections = 1;
+    state->dataWaterUse->WaterConnections.allocate(1);
+    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
+    waterConnections.InletNode = 1;
+    waterConnections.OutletNode = 2;
+    waterConnections.NumWaterEquipment = 1;
+    waterConnections.myWaterEquipArr.allocate(1);
+    waterConnections.myWaterEquipArr(1) = 1;
+    waterConnections.ColdTemp = 10.0;
+    waterConnections.HotTemp = 55.0;
+    waterConnections.plantLoc = PlantLocation(1, DataPlant::LoopSideLocation::Demand, 1, 1);
+    PlantUtilities::SetPlantLocationLinks(*state, waterConnections.plantLoc);
+
+    Real64 const totalMassFlowRate = 1.0e-4 * calcH2ODensity(*state);
+    Real64 const requestedHotMassFlowRate = totalMassFlowRate * (40.0 - 10.0) / (55.0 - 10.0);
+
+    // Locked plant flow delivers only half of the requested hot water
+    Real64 const deliveredHotMassFlowRate = 0.5 * requestedHotMassFlowRate;
+    state->dataLoopNodes->Node(1).MassFlowRate = deliveredHotMassFlowRate;
+
+    waterConnections.CalcConnectionsFlowRates(*state, false);
+
+    EXPECT_NEAR(waterEquipment.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterEquipment.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterEquipment.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
+
+    EXPECT_NEAR(waterConnections.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
 }

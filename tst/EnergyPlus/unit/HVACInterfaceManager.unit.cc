@@ -57,8 +57,10 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
+#include <EnergyPlus/DataConvergParams.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/HVACInterfaceManager.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -191,5 +193,62 @@ TEST_F(EnergyPlusFixture, UpdateHVACInterface_Test)
     EXPECT_TRUE(OutOfToleranceFlag);
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACCO2NotConverged[2]);
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACGenContamNotConverged[2]);
+}
+
+// Verifies that supply-demand flow mismatches trigger resimulation for DHW-sized and near-zero flows,
+// while the same 0.0007 kg/s mismatch is accepted on a large loop.
+TEST_F(EnergyPlusFixture, UpdatePlantLoopInterface_SmallLoopFlowChangeResimulatesDemandSide)
+{
+    state->init_state(*state);
+    state->dataHVACGlobal->TimeStepSys = 1;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
+
+    int constexpr supplyInletNode = 1;
+    int constexpr supplyOutletNode = 2;
+    int constexpr demandInletNode = 3;
+    int constexpr demandOutletNode = 4;
+
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &loop = state->dataPlnt->PlantLoop(1);
+    loop.Mass = 3.0;
+    loop.glycol = Fluid::GetWater(*state);
+    loop.LoopSide(DataPlant::LoopSideLocation::Supply).NodeNumIn = supplyInletNode;
+    loop.LoopSide(DataPlant::LoopSideLocation::Supply).NodeNumOut = supplyOutletNode;
+    loop.LoopSide(DataPlant::LoopSideLocation::Demand).NodeNumIn = demandInletNode;
+    loop.LoopSide(DataPlant::LoopSideLocation::Demand).NodeNumOut = demandOutletNode;
+    state->dataConvergeParams->PlantConvergence.allocate(1);
+
+    state->dataLoopNodes->Node.allocate(4);
+    for (auto &node : state->dataLoopNodes->Node) {
+        node.Temp = 52.0;
+    }
+
+    PlantLocation const supplySide(1, DataPlant::LoopSideLocation::Supply, 1, 1);
+
+    // DHW-sized flows: the supply side now carries 0.0025 kg/s but the demand side last ran at 0.0018 kg/s
+    state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate = 0.0025;
+    state->dataLoopNodes->Node(demandInletNode).MassFlowRate = 0.0018;
+    bool resimDemandSide = false;
+    HVACInterfaceManager::UpdatePlantLoopInterface(
+        *state, supplySide, supplyOutletNode, demandInletNode, resimDemandSide, DataPlant::CommonPipeType::No);
+    EXPECT_TRUE(resimDemandSide);
+    EXPECT_NEAR(state->dataLoopNodes->Node(demandInletNode).MassFlowRate, 0.0025, 1.0e-10);
+
+    // A flow below 1e-7 kg/s still uses the relative tolerance rather than an absolute floor
+    state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate = 1.02e-8;
+    state->dataLoopNodes->Node(demandInletNode).MassFlowRate = 1.0e-8;
+    resimDemandSide = false;
+    HVACInterfaceManager::UpdatePlantLoopInterface(
+        *state, supplySide, supplyOutletNode, demandInletNode, resimDemandSide, DataPlant::CommonPipeType::No);
+    EXPECT_TRUE(resimDemandSide);
+
+    // The same absolute difference on a large loop is still considered converged
+    state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate = 10.0007;
+    state->dataLoopNodes->Node(demandInletNode).MassFlowRate = 10.0;
+    resimDemandSide = false;
+    HVACInterfaceManager::UpdatePlantLoopInterface(
+        *state, supplySide, supplyOutletNode, demandInletNode, resimDemandSide, DataPlant::CommonPipeType::No);
+    EXPECT_FALSE(resimDemandSide);
 }
 } // namespace EnergyPlus

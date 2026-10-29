@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 
 // ObjexxFCL Headers
@@ -556,9 +557,13 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
             }
         } else {
             rshift1(flow_supply_to_demand_tol);
-            flow_supply_to_demand_tol[0] = std::abs(state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate -
-                                                    state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate);
-            if (flow_supply_to_demand_tol[0] > DataConvergParams::PlantFlowRateToler) {
+            Real64 const supplyOutletMdot = state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate;
+            Real64 const demandInletMdot = state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate;
+            flow_supply_to_demand_tol[0] = std::abs(supplyOutletMdot - demandInletMdot);
+            // relative tolerance so small loops (e.g., DHW) still resimulate the demand side
+            Real64 const flowToler = std::min(DataConvergParams::PlantFlowRateToler,
+                                              DataConvergParams::PlantFlowRateRelToler * std::max(supplyOutletMdot, demandInletMdot));
+            if (flow_supply_to_demand_tol[0] > flowToler) {
                 convergence.PlantMassFlowNotConverged = true;
             }
         }

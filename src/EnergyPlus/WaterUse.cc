@@ -1373,6 +1373,7 @@ namespace WaterUse {
 
                         Real64 AvailableFraction = DesiredHotWaterMassFlow / this->HotMassFlowRate;
 
+                        this->HotMassFlowRate = DesiredHotWaterMassFlow; // SetComponentFlowRate returned the flow the plant actually delivered
                         this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
 
                         // Proportionally reduce hot water and increase cold water for all WATER USE EQUIPMENT
