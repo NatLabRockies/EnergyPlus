@@ -47,6 +47,11 @@
 
 // EnergyPlus::ThermalComfort Unit Tests
 
+// C++ Headers
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -1102,6 +1107,31 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcThermalComfortASH55)
     CalcThermalComfortAnkleDraftASH(*state);
     // TODO: This is being calculated about 0.2 degrees different on x86* and ARM, so I loosened up the tolerance, but why??
     EXPECT_NEAR(state->dataThermalComforts->ThermalComfortData(1).AnkleDraftPPDASH55, 25.0, 0.25);
+}
+
+TEST_F(EnergyPlusFixture, ThermalComfort_CalcStandardEffectiveTemp_ContinuousAtCriticalWettedness)
+{
+    // When the skin wettedness reaches EvapEff, SkinWetSweat must invert SkinWetTot = 0.06 + 0.94 * SkinWetSweat, i.e.
+    // (SkinWetTot - 0.06) / 0.94 as in Gagge et al. (1986). SET should then change smoothly and monotonically with temperature.
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    Real64 constexpr RelHum = 0.7;
+    Real64 constexpr AirVel = 0.1;
+    Real64 constexpr ActMet = 1.1;
+    Real64 constexpr CloUnit = 0.5;
+    Real64 constexpr WorkEff = 0.0;
+
+    Real64 maxStep = 0.0;
+    Real64 minStep = std::numeric_limits<Real64>::max();
+    Real64 previous = CalcStandardEffectiveTemp(*state, 32.5, 32.5, RelHum, AirVel, ActMet, CloUnit, WorkEff);
+    for (int i = 1; i <= 1500; ++i) {
+        Real64 const temp = 32.5 + i * 0.001;
+        Real64 const current = CalcStandardEffectiveTemp(*state, temp, temp, RelHum, AirVel, ActMet, CloUnit, WorkEff);
+        maxStep = std::max(maxStep, std::abs(current - previous));
+        minStep = std::min(minStep, current - previous);
+        previous = current;
+    }
+    EXPECT_LT(maxStep, 0.01);
+    EXPECT_GT(minStep, 0.0); // monotonic, so the cooling effect has a single root
 }
 
 TEST_F(EnergyPlusFixture, ThermalComfort_CalcThermalComfortFanger_Correct_TimeStep)

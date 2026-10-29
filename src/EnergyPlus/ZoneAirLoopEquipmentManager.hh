@@ -73,6 +73,8 @@ namespace ZoneAirLoopEquipmentManager {
 
     void GetZoneAirLoopEquipment(EnergyPlusData &state);
 
+    int getAirDistUnitIndex(EnergyPlusData &state, std::string const &ZoneAirLoopEquipName);
+
     void InitZoneAirLoopEquipment(EnergyPlusData &state, int AirDistUnitNum, int ControlledZoneNum);
 
     void InitZoneAirLoopEquipmentTimeStep(EnergyPlusData &state, int AirDistUnitNum);

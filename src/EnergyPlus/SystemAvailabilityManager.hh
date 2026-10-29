@@ -399,6 +399,7 @@ namespace Avail {
         std::string Name;
         ManagerType type;
         int Num;
+        Status availStatus = Status::NoAction;
     };
 
     struct List // LOL

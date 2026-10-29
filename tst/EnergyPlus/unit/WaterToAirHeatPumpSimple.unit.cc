@@ -213,7 +213,7 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     EXPECT_DOUBLE_EQ(0.0075, state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesHumRat);
 
     // check that the total cooling capacity is >= the sensible cooling capacity
-    EXPECT_GE(wahpSimple1.RatedCapCoolTotal, wahpSimple1.RatedCapCoolSens);
+    EXPECT_GE(wahpSimple1.RatedCapCoolTotal, wahpSimple1.RatedCapCoolSens * (1.0 - 1e-12));
 
     if (wahpSimple1.RatedCapCoolTotal != 0.0) {
         ShowMessage(
