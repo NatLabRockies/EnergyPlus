@@ -269,6 +269,7 @@ add_simulation_test(IDF_FILE DisplacementVent_1ZoneOffice.idf EPW_FILE USA_CA_Sa
 add_simulation_test(IDF_FILE DisplacementVent_Nat_AirflowNetwork.idf EPW_FILE USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw)
 add_simulation_test(IDF_FILE DisplacementVent_Nat_AirflowNetwork_AdaptiveComfort.idf EPW_FILE USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw)
 add_simulation_test(IDF_FILE DisplacementVent_VAV.idf EPW_FILE USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw)
+add_simulation_test(IDF_FILE VAVDuctLeakage_NoReturnPlenum.idf EPW_FILE USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw)
 add_simulation_test(IDF_FILE DualDuctConstVolDamper.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE DualDuctConstVolGasHC.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE DualDuctVarVolDamper.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
