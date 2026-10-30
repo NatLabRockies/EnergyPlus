@@ -329,7 +329,7 @@ This field (even if blank) overrides the Cold Water Supply Temperature Schedule 
 
 \paragraph{Field: Drain Water Heat Exchanger Type}\label{field-drain-water-heat-exchanger-type}
 
-The heat exchanger type to be used for drainwater heat recovery. None indicates no heat recovery is to be simulated. Ideal sets a heat exchanger effectiveness of 1.0. Effectiveness is calculated dynamically for CounterFlow and CrossFlow options.
+The heat exchanger type to be used for drainwater heat recovery. None indicates no heat recovery is to be simulated. Ideal sets a heat exchanger effectiveness of 1.0. Effectiveness is calculated dynamically for CounterFlow and CrossFlow options. For every type, the effectiveness is 0 and no heat is recovered when either side of the heat exchanger has no flow.
 
 One popular type of drainwater heat exchanger is the Gravity-Film Heat Exchanger (GFX). The GFX is most closely approximated with the CounterFlow option, but keep in mind that the UA varies more with flow rate for the GFX than for most traditional heat exchangers.
 
@@ -486,11 +486,11 @@ The temperature of the water leaving the heat exchanger. If no heat exchanger, t
 
 \paragraph{Water Use Connections Heat Recovery Water Temperature {[}C{]}}\label{water-use-connections-heat-recovery-water-temperature-c}
 
-The temperature of the water leaving the heat exchanger. If no heat exchanger, the waste water temperature equals the drain water temperature, in units of degrees Celsius (C).
+The temperature of the make-up water leaving the recovery side of the heat exchanger. If no heat is recovered, the heat recovery water temperature equals the cold water supply temperature, in units of degrees Celsius (C).
 
 \paragraph{Water Use Connections Heat Recovery Effectiveness {[]}}\label{water-use-connections-heat-recovery-effectiveness}
 
-The effectiveness value of the heat exchanger. The units are dimensionless.
+The effectiveness value of the heat exchanger. The effectiveness is 0 when either side of the heat exchanger has no flow, for example with the Plant configuration and no hot water flow. The units are dimensionless.
 
 \paragraph{Water Use Connections Heat Recovery Rate {[}W{]}}\label{water-use-connections-heat-recovery-rate-w}
 

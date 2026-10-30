@@ -478,6 +478,8 @@ The heat capacity rates on both sides of the heat exchanger are calculated and t
 
 where \({R_c}\) is the heat capacity ratio.
 
+If either side of the heat exchanger has no flow (\({C_{min}} = 0\)), no heat is recovered.~ The effectiveness and the heat recovery rate are set to 0, \({T_{recovery}} = {T_{makeup}}\), and \({T_{waste}} = {T_{drain}}\).~ Otherwise, the calculation continues as follows.
+
 The effectiveness \(\varepsilon\) is then calculated for the given type of heat exchanger.~ For the ``ideal'' heat exchanger, \(\varepsilon = 1\).
 
 For the ``counterflow'' and ``crossflow'' heat exchangers, the effectiveness is calculated using the effectiveness-NTU method, where:
@@ -489,12 +491,14 @@ NTU = \frac{{UA}}{{{C_{min}}}}
 For the ``counterflow'' heat exchanger:
 
 \begin{equation}
-\varepsilon = \frac{{NTU}}{{1 + NTU}},~if~{R_c}~=~1
+\varepsilon = \frac{{NTU}}{{1 + NTU}},~if~\left| {1 - {R_c}} \right|~<~{10^{ - 6}}
 \end{equation}
 
 \begin{equation}
-\varepsilon = \frac{{1 - EXP\left( { - NTU\left( {1 - {R_c}} \right)} \right)}}{{1 - {R_c}EXP\left( { - NTU\left( {1 - {R_c}} \right)} \right)}},~if~{R_c}~<~1
+\varepsilon = \frac{{1 - EXP\left( { - NTU\left( {1 - {R_c}} \right)} \right)}}{{1 - {R_c}EXP\left( { - NTU\left( {1 - {R_c}} \right)} \right)}},~otherwise
 \end{equation}
+
+The balanced-flow limit is used near \({R_c} = 1\) because round-off in the flow rates makes the general formula cancel badly there.
 
 For the ``crossflow'' heat exchanger:
 
