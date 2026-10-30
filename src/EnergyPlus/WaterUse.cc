@@ -1456,11 +1456,13 @@ namespace WaterUse {
             this->WasteTemp = this->DrainTemp;
 
         } else if (this->TotalMassFlowRate == 0.0) {
+            this->RecoveryMassFlowRate = 0.0;
             this->Effectiveness = 0.0;
             this->RecoveryRate = 0.0;
             this->RecoveryTemp = this->ColdSupplyTemp;
             this->ReturnTemp = this->ColdSupplyTemp;
             this->WasteTemp = this->DrainTemp;
+            this->TempError = 0.0;
 
         } else { // WaterConnections(WaterConnNum)%TotalMassFlowRate > 0.0
 
@@ -1482,32 +1484,43 @@ namespace WaterUse {
             Real64 DrainCapacityRate = Psychrometrics::CPHW(Constant::InitConvTemp) * this->DrainMassFlowRate;
             Real64 MinCapacityRate = min(DrainCapacityRate, HXCapacityRate);
 
-            switch (this->HeatRecoveryHX) {
-            case HeatRecovHX::Ideal: {
-                this->Effectiveness = 1.0;
-            } break;
-            case HeatRecovHX::CounterFlow: { // Unmixed
-                Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                Real64 NTU = this->HXUA / MinCapacityRate;
-                if (CapacityRatio == 1.0) {
-                    this->Effectiveness = NTU / (1.0 + NTU);
-                } else {
-                    Real64 ExpVal = std::exp(-NTU * (1.0 - CapacityRatio));
-                    this->Effectiveness = (1.0 - ExpVal) / (1.0 - CapacityRatio * ExpVal);
+            if (MinCapacityRate <= 0.0) {
+                // No flow on one side of the heat exchanger (e.g., no hot water flow with Plant destination), so nothing can be recovered
+                this->Effectiveness = 0.0;
+                this->RecoveryRate = 0.0;
+                this->RecoveryTemp = this->ColdSupplyTemp;
+                this->WasteTemp = this->DrainTemp;
+            } else {
+                switch (this->HeatRecoveryHX) {
+                case HeatRecovHX::Ideal: {
+                    this->Effectiveness = 1.0;
+                } break;
+                case HeatRecovHX::CounterFlow: { // Unmixed
+                    Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
+                    Real64 NTU = this->HXUA / MinCapacityRate;
+                    // Use the balanced-flow limit near CapacityRatio = 1, where round-off in the flows makes the general formula cancel badly
+                    if (std::abs(1.0 - CapacityRatio) < 1.0e-6) {
+                        this->Effectiveness = NTU / (1.0 + NTU);
+                    } else {
+                        Real64 ExpVal = std::exp(-NTU * (1.0 - CapacityRatio));
+                        this->Effectiveness = (1.0 - ExpVal) / (1.0 - CapacityRatio * ExpVal);
+                    }
+                } break;
+                case HeatRecovHX::CrossFlow: { // Unmixed
+                    Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
+                    Real64 NTU = this->HXUA / MinCapacityRate;
+                    this->Effectiveness =
+                        1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
+                } break;
+                default:
+                    break;
                 }
-            } break;
-            case HeatRecovHX::CrossFlow: { // Unmixed
-                Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                Real64 NTU = this->HXUA / MinCapacityRate;
-                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
-            } break;
-            default:
-                break;
-            }
 
-            this->RecoveryRate = this->Effectiveness * MinCapacityRate * (this->DrainTemp - this->ColdSupplyTemp);
-            this->RecoveryTemp = this->ColdSupplyTemp + this->RecoveryRate / (Psychrometrics::CPHW(Constant::InitConvTemp) * this->TotalMassFlowRate);
-            this->WasteTemp = this->DrainTemp - this->RecoveryRate / (Psychrometrics::CPHW(Constant::InitConvTemp) * this->TotalMassFlowRate);
+                this->RecoveryRate = this->Effectiveness * MinCapacityRate * (this->DrainTemp - this->ColdSupplyTemp);
+                // Only the water passing through each side of the heat exchanger changes temperature
+                this->RecoveryTemp = this->ColdSupplyTemp + this->RecoveryRate / HXCapacityRate;
+                this->WasteTemp = this->DrainTemp - this->RecoveryRate / DrainCapacityRate;
+            }
 
             if (this->RecoveryTankNum > 0) {
                 state.dataWaterData->WaterStorage(this->RecoveryTankNum).VdotAvailSupply(this->TankSupplyID) = this->DrainVolFlowRate;

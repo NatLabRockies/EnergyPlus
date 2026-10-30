@@ -1915,3 +1915,157 @@ TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantDeliversMoreThanRe
     EXPECT_NEAR(waterEquipment2.MixedTemp, lockedLoopHotTemp, 1.0e-8);
     expectConsistentWaterConnectionFlows(*state);
 }
+
+// With drain water heat recovery to the plant, no hot water flow leaves the heat exchanger with zero capacity on the recovery side;
+// the CrossFlow effectiveness used to divide by that zero capacity ratio and turn the recovery results into NaN
+TEST_F(EnergyPlusFixture, WaterUse_ConnectionsCrossFlowHeatRecoveryWithNoHotFlow)
+{
+    setupLockedLoopWaterConnection(*state, {40.0});
+    auto &waterEquipment = state->dataWaterUse->WaterEquipment(1);
+    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
+    waterConnections.HeatRecovery = true;
+    waterConnections.HeatRecoveryHX = HeatRecovHX::CrossFlow;
+    waterConnections.HeatRecoveryConfig = HeatRecovConfig::Plant;
+    waterConnections.HXUA = 1500.0;
+
+    Real64 const totalMassFlowRate = lockedLoopPeakVolFlowRate * calcH2ODensity(*state);
+
+    // The locked loop delivers no hot water
+    state->dataLoopNodes->Node(1).MassFlowRate = 0.0;
+
+    Real64 curLoad = 0.0;
+    waterConnections.simulate(*state, waterConnections.plantLoc, false, curLoad, true);
+
+    EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.HotMassFlowRate, 0.0, 1.0e-10);
+    EXPECT_NEAR(waterConnections.ColdMassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterEquipment.MixedTemp, lockedLoopColdTemp, 1.0e-8);
+    expectConsistentWaterConnectionFlows(*state);
+
+    EXPECT_NEAR(waterConnections.RecoveryMassFlowRate, 0.0, 1.0e-10);
+    EXPECT_EQ(waterConnections.Effectiveness, 0.0);
+    EXPECT_EQ(waterConnections.RecoveryRate, 0.0);
+    EXPECT_EQ(waterConnections.RecoveryEnergy, 0.0);
+    EXPECT_NEAR(waterConnections.RecoveryTemp, lockedLoopColdTemp, 1.0e-10);
+    EXPECT_NEAR(waterConnections.ReturnTemp, lockedLoopColdTemp, 1.0e-10);
+    EXPECT_NEAR(waterConnections.WasteTemp, waterConnections.DrainTemp, 1.0e-10);
+    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, lockedLoopColdTemp, 1.0e-10);
+}
+
+// With PlantAndEquipment destination and no latent load, the recovery and drain flows are equal, but round-off in the summed flows can leave
+// the capacity ratio one ulp from 1.0; the general CounterFlow formula then cancels to a wrong effectiveness, which made the heat recovery
+// temperature iteration oscillate without converging
+TEST_F(EnergyPlusFixture, WaterUse_ConnectionsCounterFlowHeatRecoveryBalancedFlows)
+{
+    state->init_state(*state);
+    state->dataWaterUse->WaterConnections.allocate(1);
+    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
+    waterConnections.HeatRecovery = true;
+    waterConnections.HeatRecoveryHX = HeatRecovHX::CounterFlow;
+    waterConnections.HeatRecoveryConfig = HeatRecovConfig::PlantAndEquip;
+    waterConnections.HXUA = 250.0;
+    waterConnections.ColdSupplyTemp = 18.8;
+    waterConnections.DrainTemp = 31.8;
+
+    Real64 constexpr totalMassFlowRate = 0.05;
+    waterConnections.TotalMassFlowRate = totalMassFlowRate;
+    waterConnections.HotMassFlowRate = 0.02;
+    waterConnections.ColdMassFlowRate = totalMassFlowRate - waterConnections.HotMassFlowRate;
+
+    Real64 const NTU = waterConnections.HXUA / (Psychrometrics::CPHW(Constant::InitConvTemp) * totalMassFlowRate);
+    Real64 const balancedEffectiveness = NTU / (1.0 + NTU);
+
+    for (Real64 const drainMassFlowRate : {std::nextafter(totalMassFlowRate, 1.0), std::nextafter(totalMassFlowRate, 0.0)}) {
+        waterConnections.DrainMassFlowRate = drainMassFlowRate;
+        waterConnections.ColdTemp = waterConnections.ColdSupplyTemp;
+
+        waterConnections.CalcConnectionsHeatRecovery(*state);
+
+        EXPECT_NEAR(waterConnections.Effectiveness, balancedEffectiveness, 1.0e-9);
+        EXPECT_NEAR(waterConnections.RecoveryTemp,
+                    waterConnections.ColdSupplyTemp + balancedEffectiveness * (waterConnections.DrainTemp - waterConnections.ColdSupplyTemp),
+                    1.0e-8);
+    }
+}
+
+// When the fixtures stop drawing water, the heat recovery results must reset instead of reporting the last nonzero recovery flow
+TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHeatRecoveryResetsAtZeroFlow)
+{
+    setupLockedLoopWaterConnection(*state, {40.0});
+    auto &waterEquipment = state->dataWaterUse->WaterEquipment(1);
+    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
+    waterConnections.HeatRecovery = true;
+    waterConnections.HeatRecoveryHX = HeatRecovHX::CounterFlow;
+    waterConnections.HeatRecoveryConfig = HeatRecovConfig::Plant;
+    waterConnections.HXUA = 250.0;
+
+    // The plant delivers the requested hot water, so heat is recovered into it
+    Real64 const totalMassFlowRate = lockedLoopPeakVolFlowRate * calcH2ODensity(*state);
+    Real64 const requestedHotMassFlowRate = totalMassFlowRate * (40.0 - 10.0) / (55.0 - 10.0);
+    state->dataLoopNodes->Node(1).MassFlowRate = requestedHotMassFlowRate;
+
+    Real64 curLoad = 0.0;
+    waterConnections.simulate(*state, waterConnections.plantLoc, false, curLoad, true);
+
+    EXPECT_NEAR(waterConnections.RecoveryMassFlowRate, requestedHotMassFlowRate, 1.0e-10);
+    EXPECT_GT(waterConnections.Effectiveness, 0.0);
+
+    // The fixtures stop drawing water right after a timestep whose heat recovery temperature did not converge
+    waterEquipment.PeakVolFlowRate = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRate = 0.0;
+    waterConnections.TempError = 1.0;
+    state->dataGlobal->WarmupFlag = false;
+
+    waterConnections.simulate(*state, waterConnections.plantLoc, false, curLoad, true);
+
+    EXPECT_EQ(waterConnections.TotalMassFlowRate, 0.0);
+    EXPECT_EQ(waterConnections.RecoveryMassFlowRate, 0.0);
+    EXPECT_EQ(waterConnections.Effectiveness, 0.0);
+    EXPECT_EQ(waterConnections.RecoveryRate, 0.0);
+    EXPECT_NEAR(waterConnections.ReturnTemp, lockedLoopColdTemp, 1.0e-10);
+    // With no flow there is nothing to iterate on, so the stale error must not trigger a non-convergence warning
+    EXPECT_EQ(waterConnections.TempError, 0.0);
+    EXPECT_EQ(waterConnections.MaxIterationsErrorIndex, 0);
+}
+
+// The recovered heat raises only the stream that passes through the heat exchanger (hot makeup for Plant, cold supply for Equipment, both
+// for PlantAndEquipment) and lowers only the drain water, so each outlet temperature must carry the full recovery rate on its own flow
+TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHeatRecoveryEnergyBalance)
+{
+    state->init_state(*state);
+    state->dataWaterUse->WaterConnections.allocate(1);
+    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
+    waterConnections.HeatRecovery = true;
+    waterConnections.HeatRecoveryHX = HeatRecovHX::CounterFlow;
+    waterConnections.HXUA = 250.0;
+    waterConnections.ColdSupplyTemp = 10.0;
+    waterConnections.DrainTemp = 32.0;
+    waterConnections.TotalMassFlowRate = 0.05;
+    waterConnections.HotMassFlowRate = 0.02;
+    waterConnections.ColdMassFlowRate = 0.03;
+    waterConnections.DrainMassFlowRate = 0.048; // some water evaporated to the zone
+
+    Real64 const cp = Psychrometrics::CPHW(Constant::InitConvTemp);
+
+    for (auto const [config, recoveryMassFlowRate] :
+         {std::pair{HeatRecovConfig::Plant, 0.02}, std::pair{HeatRecovConfig::Equipment, 0.03}, std::pair{HeatRecovConfig::PlantAndEquip, 0.05}}) {
+        waterConnections.HeatRecoveryConfig = config;
+        waterConnections.ColdTemp = waterConnections.ColdSupplyTemp;
+
+        waterConnections.CalcConnectionsHeatRecovery(*state);
+
+        EXPECT_NEAR(waterConnections.RecoveryMassFlowRate, recoveryMassFlowRate, 1.0e-12);
+        EXPECT_GT(waterConnections.RecoveryRate, 0.0);
+        EXPECT_NEAR(
+            recoveryMassFlowRate * cp * (waterConnections.RecoveryTemp - waterConnections.ColdSupplyTemp), waterConnections.RecoveryRate, 1.0e-8);
+        EXPECT_NEAR(waterConnections.DrainMassFlowRate * cp * (waterConnections.DrainTemp - waterConnections.WasteTemp),
+                    waterConnections.RecoveryRate,
+                    1.0e-8);
+        EXPECT_LE(waterConnections.RecoveryTemp, waterConnections.DrainTemp);
+        if (config == HeatRecovConfig::Equipment) {
+            EXPECT_NEAR(waterConnections.ReturnTemp, waterConnections.ColdSupplyTemp, 1.0e-12);
+        } else {
+            EXPECT_NEAR(waterConnections.ReturnTemp, waterConnections.RecoveryTemp, 1.0e-12);
+        }
+    }
+}
