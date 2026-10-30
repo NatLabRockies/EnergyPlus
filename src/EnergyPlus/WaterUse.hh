@@ -213,7 +213,7 @@ namespace WaterUse {
 
         void InitConnections(EnergyPlusData &state);
 
-        void CalcConnectionsFlowRates(EnergyPlusData &state, bool FirstHVACIteration);
+        void CalcConnectionsFlowRates(EnergyPlusData &state);
 
         void CalcConnectionsDrainTemp(EnergyPlusData &state);
 
@@ -232,7 +232,7 @@ namespace WaterUse {
         void FillPredefinedTable(EnergyPlusData &state);
     };
 
-    void SimulateWaterUse(EnergyPlusData &state, bool FirstHVACIteration);
+    void SimulateWaterUse(EnergyPlusData &state);
 
     void GetWaterUseInput(EnergyPlusData &state);
 

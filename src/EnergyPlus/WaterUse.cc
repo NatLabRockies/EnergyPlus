@@ -85,7 +85,7 @@ namespace WaterUse {
     //       DATE WRITTEN   August 2006
     //       MODIFIED       Brent Griffith, plant upgrade
 
-    void SimulateWaterUse(EnergyPlusData &state, bool FirstHVACIteration)
+    void SimulateWaterUse(EnergyPlusData &state)
     {
 
         // SUBROUTINE INFORMATION:
@@ -155,7 +155,7 @@ namespace WaterUse {
             while (true) {
                 ++NumIteration;
 
-                waterConnection.CalcConnectionsFlowRates(state, FirstHVACIteration);
+                waterConnection.CalcConnectionsFlowRates(state);
                 waterConnection.CalcConnectionsDrainTemp(state);
                 waterConnection.CalcConnectionsHeatRecovery(state);
 
@@ -205,7 +205,7 @@ namespace WaterUse {
 
     void WaterConnectionsType::simulate(EnergyPlusData &state,
                                         [[maybe_unused]] const PlantLocation &calledFromLocation,
-                                        bool FirstHVACIteration,
+                                        [[maybe_unused]] bool FirstHVACIteration,
                                         [[maybe_unused]] Real64 &CurLoad,
                                         [[maybe_unused]] bool RunFlag)
     {
@@ -251,7 +251,7 @@ namespace WaterUse {
         while (true) {
             ++NumIteration;
 
-            this->CalcConnectionsFlowRates(state, FirstHVACIteration);
+            this->CalcConnectionsFlowRates(state);
             this->CalcConnectionsDrainTemp(state);
             this->CalcConnectionsHeatRecovery(state);
 
@@ -1335,7 +1335,7 @@ namespace WaterUse {
         }
     }
 
-    void WaterConnectionsType::CalcConnectionsFlowRates(EnergyPlusData &state, bool FirstHVACIteration)
+    void WaterConnectionsType::CalcConnectionsFlowRates(EnergyPlusData &state)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1361,37 +1361,40 @@ namespace WaterUse {
 
         if (!this->StandAlone) { // Interact with the plant loop
             if (this->InletNode > 0) {
-                if (FirstHVACIteration) {
-                    // Request the mass flow rate from the demand side manager
-                    PlantUtilities::SetComponentFlowRate(state, this->HotMassFlowRate, this->InletNode, this->OutletNode, this->plantLoc);
+                // Request the mass flow rate from the demand side manager
+                Real64 const DesiredHotWaterMassFlow = this->HotMassFlowRate;
+                Real64 DeliveredHotWaterMassFlow = DesiredHotWaterMassFlow;
+                PlantUtilities::SetComponentFlowRate(state, DeliveredHotWaterMassFlow, this->InletNode, this->OutletNode, this->plantLoc);
+                // A locked loop, a SeriesActive branch, or MinAvail can deliver more than was requested, but the fixtures cannot use more hot
+                // water than their total draw
+                DeliveredHotWaterMassFlow = min(DeliveredHotWaterMassFlow, this->TotalMassFlowRate);
 
-                } else {
-                    Real64 DesiredHotWaterMassFlow = this->HotMassFlowRate;
-                    PlantUtilities::SetComponentFlowRate(state, DesiredHotWaterMassFlow, this->InletNode, this->OutletNode, this->plantLoc);
-                    // readjust if more than actual available mass flow rate determined by the demand side manager
-                    if ((this->HotMassFlowRate != DesiredHotWaterMassFlow) && (this->HotMassFlowRate > 0.0)) { // plant didn't give what was asked for
+                if (DeliveredHotWaterMassFlow != DesiredHotWaterMassFlow) { // plant didn't give what was asked for
+                    this->HotMassFlowRate = DeliveredHotWaterMassFlow;
+                    this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
 
-                        Real64 AvailableFraction = DesiredHotWaterMassFlow / this->HotMassFlowRate;
+                    // Shift hot and cold water proportionally for all WATER USE EQUIPMENT so their sums match the connection
+                    for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
+                        auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
 
-                        this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
+                        if (DeliveredHotWaterMassFlow < DesiredHotWaterMassFlow) {
+                            // Reduce each equipment's hot water by the available fraction
+                            thisWEq.HotMassFlowRate *= DeliveredHotWaterMassFlow / DesiredHotWaterMassFlow;
+                        } else {
+                            // Replace each equipment's cold water with the surplus hot water; Desired < Delivered <= Total here
+                            thisWEq.HotMassFlowRate += thisWEq.ColdMassFlowRate * (DeliveredHotWaterMassFlow - DesiredHotWaterMassFlow) /
+                                                       (this->TotalMassFlowRate - DesiredHotWaterMassFlow);
+                        }
+                        thisWEq.ColdMassFlowRate = thisWEq.TotalMassFlowRate - thisWEq.HotMassFlowRate;
 
-                        // Proportionally reduce hot water and increase cold water for all WATER USE EQUIPMENT
-                        for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
-                            auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
-
-                            // Recalculate flow rates for water equipment within connection
-                            thisWEq.HotMassFlowRate *= AvailableFraction;
-                            thisWEq.ColdMassFlowRate = thisWEq.TotalMassFlowRate - thisWEq.HotMassFlowRate;
-
-                            // Recalculate mixed water temperature
-                            if (thisWEq.TotalMassFlowRate > 0.0) {
-                                thisWEq.MixedTemp = (thisWEq.ColdMassFlowRate * thisWEq.ColdTemp + thisWEq.HotMassFlowRate * thisWEq.HotTemp) /
-                                                    thisWEq.TotalMassFlowRate;
-                            } else {
-                                thisWEq.MixedTemp = thisWEq.TargetTemp;
-                            }
-                        } // Loop
-                    }
+                        // Recalculate mixed water temperature
+                        if (thisWEq.TotalMassFlowRate > 0.0) {
+                            thisWEq.MixedTemp =
+                                (thisWEq.ColdMassFlowRate * thisWEq.ColdTemp + thisWEq.HotMassFlowRate * thisWEq.HotTemp) / thisWEq.TotalMassFlowRate;
+                        } else {
+                            thisWEq.MixedTemp = thisWEq.TargetTemp;
+                        }
+                    } // Loop
                 }
             }
         }
