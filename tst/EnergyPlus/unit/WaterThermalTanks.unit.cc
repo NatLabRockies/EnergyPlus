@@ -2878,7 +2878,7 @@ TEST_F(EnergyPlusFixture, DesuperheaterTimeAdvanceCheck)
     EXPECT_EQ(state->dataLoopNodes->Node(Desuperheater.WaterInletNode).Temp, 50);
     EXPECT_EQ(Tank.SavedTankTemp, 50);
     // No loss no source, Tank temperature supposed to be 50
-    EXPECT_EQ(Tank.TankTemp, 50);
+    EXPECT_DOUBLE_EQ(Tank.TankTemp, 50);
 
     // Assumed next iteration with FirstHVAC condition not changed
     state->dataHeatBal->HeatReclaimDXCoil(DXNum).AvailCapacity = 500;

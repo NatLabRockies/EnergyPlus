@@ -1453,6 +1453,7 @@
     ZN_1_FLR_1_SEC_1 Thermostat,  !- Name
     ZN_1_FLR_1_SEC_1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZN_1_FLR_1_SEC_1 DualSPSched;  !- Control 1 Name
 
@@ -1947,6 +1948,7 @@
     ZN_1_FLR_1_SEC_2 Thermostat,  !- Name
     ZN_1_FLR_1_SEC_2,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZN_1_FLR_1_SEC_2 DualSPSched;  !- Control 1 Name
 
@@ -2422,6 +2424,7 @@
     ZN_1_FLR_1_SEC_3 Thermostat,  !- Name
     ZN_1_FLR_1_SEC_3,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZN_1_FLR_1_SEC_3 DualSPSched;  !- Control 1 Name
 
@@ -2916,6 +2919,7 @@
     ZN_1_FLR_1_SEC_4 Thermostat,  !- Name
     ZN_1_FLR_1_SEC_4,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZN_1_FLR_1_SEC_4 DualSPSched;  !- Control 1 Name
 
@@ -3496,6 +3500,7 @@
     ZN_1_FLR_1_SEC_5 Thermostat,  !- Name
     ZN_1_FLR_1_SEC_5,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZN_1_FLR_1_SEC_5 DualSPSched;  !- Control 1 Name
 

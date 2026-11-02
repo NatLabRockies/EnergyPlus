@@ -3153,6 +3153,7 @@
     Thermostat_SouthZone_1stFloor,  !- Name
     SouthZone_1stFloor,      !- Zone or ZoneList Name
     Zone Control Schedule,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -3160,6 +3161,7 @@
     Thermostat_NorthZone_1stFloor,  !- Name
     NorthZone_1stFloor,      !- Zone or ZoneList Name
     Zone Control Schedule,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -3167,6 +3169,7 @@
     Thermostat_SouthZone_2ndFloor,  !- Name
     SouthZone_2ndFloor,      !- Zone or ZoneList Name
     Zone Control Schedule,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -3174,6 +3177,7 @@
     Thermostat_NorthZone_2ndFloor,  !- Name
     NorthZone_2ndFloor,      !- Zone or ZoneList Name
     Zone Control Schedule,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 

@@ -16,16 +16,16 @@
 ! HVAC:         Zone Evaporative Coolers, Electric Baseboards
 !
 ! Evap Units:   Zone       Description
-!               LGstore1   Component VS Fan, blow through, zone load VS fan, autosize, 1)Indirect CelDekPad 2)Direct ResearchSpecial
+!               LGstore1   Component VS Fan, blow through, zone load VS fan, autosize, 1)Indirect CelDekPad 2)Direct UserEffectiveness
 !               LGstore2   On/Off Fan,   Blow through, thermostat on/off, hardsize, Direct CelDekPad,
 !               SMstore1   Constant Fan, draw through, zone load on/off,  hardsize, Direct CelDekPad,
 !               SMstore2   Constant Fan, draw through, zone load on/off,  autosize, Direct CelDekPad,
 !               SMStore3   Variable Fan, draw through, zone load VS fan,  autosize, Direct CelDekPad,
-!               SMStore4   Variable Fan, blow through, zone load VS fan,  autosize, Direct ResearchSpecial
-!               SMStore5   Variable Fan, blow through, zone load VS fan,  autosize, Indirect ResearchSpecial
+!               SMStore4   Variable Fan, blow through, zone load VS fan,  autosize, Direct UserEffectiveness
+!               SMStore5   Variable Fan, blow through, zone load VS fan,  autosize, Indirect UserEffectiveness
 !               SMstore6   Constant Fan, draw through, thermostat on/off, hardsize, Indirect WetCoil
 !               SMstore7   Constant Fan, draw through, thermostat on/off, hardsize, 1)Indirect WetCoil 2)Direct CelDekPad
-!               SMstore8   Variable Fan, blow through, zone load VS fan,  autosize, 1)Indirect ResearchSpecial 2)Direct ResearchSpecial
+!               SMstore8   Variable Fan, blow through, zone load VS fan,  autosize, 1)Indirect UserEffectiveness 2)Direct UserEffectiveness
 !
 ! Int. gains:   W/m2 (W/ft2)            lights          elec plug     gas plug
 !               High LPD (2 stores):    23.99 (2.23)    4.3 (0.4)     0
@@ -3941,6 +3941,7 @@
     LGstore1 Thermostat,     !- Name
     LGstore1,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     LGstore1 DualSPSched;    !- Control 1 Name
 
@@ -3948,6 +3949,7 @@
     LGstore2 Thermostat,     !- Name
     LGstore2,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     LGstore2 DualSPSched;    !- Control 1 Name
 
@@ -3955,6 +3957,7 @@
     SMstore1 Thermostat,     !- Name
     SMstore1,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore1 DualSPSched;    !- Control 1 Name
 
@@ -3962,6 +3965,7 @@
     SMstore2 Thermostat,     !- Name
     SMstore2,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore2 DualSPSched;    !- Control 1 Name
 
@@ -3969,6 +3973,7 @@
     SMstore3 Thermostat,     !- Name
     SMstore3,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore3 DualSPSched;    !- Control 1 Name
 
@@ -3976,6 +3981,7 @@
     SMstore4 Thermostat,     !- Name
     SMstore4,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore4 DualSPSched;    !- Control 1 Name
 
@@ -3983,6 +3989,7 @@
     SMstore5 Thermostat,     !- Name
     SMstore5,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore5 DualSPSched;    !- Control 1 Name
 
@@ -3990,6 +3997,7 @@
     SMstore6 Thermostat,     !- Name
     SMstore6,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore6 DualSPSched;    !- Control 1 Name
 
@@ -3997,6 +4005,7 @@
     SMstore7 Thermostat,     !- Name
     SMstore7,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore7 DualSPSched;    !- Control 1 Name
 
@@ -4004,6 +4013,7 @@
     SMstore8 Thermostat,     !- Name
     SMstore8,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore8 DualSPSched;    !- Control 1 Name
 
@@ -4155,7 +4165,7 @@
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
     EvaporativeCooler:Indirect:CelDekPad,  !- First Evaporative Cooler Object Type
     LGstore1 Indirect Evaporative Cooler,  !- First Evaporative Cooler Object Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Second Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Second Evaporative Cooler Object Type
     LGstore1 Direct Evaporative Cooler;  !- Second Evaporative Cooler Name
 
   OutdoorAir:Node,
@@ -4358,14 +4368,14 @@
   OutdoorAir:Node,
     LGstore1 Evap Cooler OA node;  !- Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     LGstore1 Direct Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     55.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     LGstore1 Indirect Outlet Node,  !- Air Inlet Node Name
     LGstore1 Inlet Node,     !- Air Outlet Node Name
@@ -4568,7 +4578,7 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Direct:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore4 Evaporative Cooler,  !- First Evaporative Cooler Object Name
     ,                        !- Second Evaporative Cooler Object Type
     ;                        !- Second Evaporative Cooler Name
@@ -4595,14 +4605,14 @@
     SMstore4 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore4 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     SMstore4 Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     55.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     SMstore4 Fan outlet,     !- Air Inlet Node Name
     SMstore4 Inlet Node,     !- Air Outlet Node Name
@@ -4625,7 +4635,7 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore5 Evaporative Cooler,  !- First Evaporative Cooler Object Name
     ,                        !- Second Evaporative Cooler Object Type
     ;                        !- Second Evaporative Cooler Name
@@ -4652,7 +4662,7 @@
     SMstore5 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore5 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     SMstore5 Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4660,7 +4670,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     55.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.0,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4808,9 +4818,9 @@
     ZoneCoolingLoadVariableSpeedFan,  !- Cooler Unit Control Method
     1.1,                     !- Throttling Range Temperature Difference {deltaC}
     100.0,                   !- Cooling Load Control Threshold Heat Transfer Rate {W}
-    EvaporativeCooler:Indirect:ResearchSpecial,  !- First Evaporative Cooler Object Type
+    EvaporativeCooler:Indirect:UserEffectiveness,  !- First Evaporative Cooler Object Type
     SMstore8 Indirect Evaporative Cooler,  !- First Evaporative Cooler Object Name
-    EvaporativeCooler:Direct:ResearchSpecial,  !- Second Evaporative Cooler Object Type
+    EvaporativeCooler:Direct:UserEffectiveness,  !- Second Evaporative Cooler Object Type
     SMstore8 Direct Evaporative Cooler;  !- Second Evaporative Cooler Name
 
   OutdoorAir:Node,
@@ -4835,7 +4845,7 @@
     SMstore8 Cooler Unit OA Inlet,  !- Air Inlet Node Name
     SMstore8 Fan outlet;     !- Air Outlet Node Name
 
-  EvaporativeCooler:Indirect:ResearchSpecial,
+  EvaporativeCooler:Indirect:UserEffectiveness,
     SMstore8 Indirect Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7500,                  !- Cooler Wetbulb Design Effectiveness
@@ -4843,7 +4853,7 @@
     ,                        !- Cooler Drybulb Design Effectiveness
     ,                        !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
     55.0000,                 !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     1.0,                     !- Secondary Air Design Flow Rate {m3/s}
     1.0,                     !- Secondary Air Flow Scaling Factor {dimensionless}
@@ -4865,14 +4875,14 @@
   OutdoorAir:Node,
     SMstore8 Evap Cooler OA node;  !- Name
 
-  EvaporativeCooler:Direct:ResearchSpecial,
+  EvaporativeCooler:Direct:UserEffectiveness,
     SMstore8 Direct Evaporative Cooler,  !- Name
     ALWAYS_ON,               !- Availability Schedule Name
     0.7,                     !- Cooler Design Effectiveness
     ,                        !- Effectiveness Flow Ratio Modifier Curve Name
     autosize,                !- Primary Air Design Flow Rate {m3/s}
     55.0,                    !- Recirculating Water Pump Design Power {W}
-    ,                        !- Water Pump Power Sizing Factor {W/(m3/s)}
+    ,                        !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}
     ,                        !- Water Pump Power Modifier Curve Name
     SMstore8 Indirect Outlet Node,  !- Air Inlet Node Name
     SMstore8 Inlet Node,     !- Air Outlet Node Name

@@ -297,6 +297,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
         "  Core_top Thermostat,     !- Name",
         "  Core_top,                !- Zone or ZoneList Name",
         "  Single Heating Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "  Core_top HeatSPSched;    !- Control 1 Name",
         " ",
@@ -371,6 +372,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
         "  Core_middle Thermostat,  !- Name",
         "  Core_middle,             !- Zone or ZoneList Name",
         "  Single Cooling Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "  Core_middle CoolSPSched; !- Control 1 Name",
         " ",
@@ -411,6 +413,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
         "  Core_basement Thermostat,  !- Name",
         "  Core_basement,             !- Zone or ZoneList Name",
         "  Single Cooling Heating Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                          !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type",
         "  Core_basement CoolHeatSPSched; !- Control 1 Name",
         " ",
@@ -444,6 +447,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ReportingTest)
         "  Core_bottom Thermostat,  !- Name",
         "  Core_bottom,             !- Zone or ZoneList Name",
         "  Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "  Core_bottom DualSPSched; !- Control 1 Name",
         " ",
@@ -729,6 +733,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_AdaptiveThermostat)
         "  Core_top Thermostat,                   !- Name",
         "  Core_top,                              !- Zone or ZoneList Name",
         "  Single Cooling Control Type Sched,     !- Control Type Schedule Name",
+        "  ,                                      !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleCooling,      !- Control 1 Object Type",
         "  Core_top CoolSPSched;                  !- Control 1 Name",
         " ",
@@ -743,6 +748,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_AdaptiveThermostat)
         "  Core_middle Thermostat,                !- Name",
         "  Core_middle,                           !- Zone or ZoneList Name",
         "  Single Cooling Control Type Sched,     !- Control Type Schedule Name",
+        "  ,                                      !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleCooling,      !- Control 1 Object Type",
         "  Core_middle CoolSPSched;               !- Control 1 Name",
         " ",
@@ -757,6 +763,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_AdaptiveThermostat)
         "  Core_basement Thermostat,                   !- Name",
         "  Core_basement,                              !- Zone or ZoneList Name",
         "  Single Cooling Heating Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                                           !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type",
         "  Core_basement CoolHeatSPSched;              !- Control 1 Name",
         " ",
@@ -771,6 +778,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_AdaptiveThermostat)
         "  Core_bottom Thermostat,                !- Name",
         "  Core_bottom,                           !- Zone or ZoneList Name",
         "  Dual Zone Control Type Sched,          !- Control Type Schedule Name",
+        "  ,                                      !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,       !- Control 1 Object Type",
         "  Core_bottom DualSPSched;               !- Control 1 Name",
         " ",
@@ -1117,6 +1125,26 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_calcZoneOrSpaceSums_SurfCon
     EXPECT_NEAR(7328.768356, thisZoneHB.SumSysMCpT, 0.0001);
 }
 
+TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ThirdOrderComponentLoadStorageTest)
+{
+    state->init_state(*state);
+
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBalFanSys->SumConvHTRadSys.allocate(1);
+    state->dataHeatBalFanSys->SumConvPool.allocate(1);
+
+    ZoneTempPredictorCorrector::ZoneHeatBalanceData zoneHB;
+    zoneHB.AirPowerCap = 100.0;
+    zoneHB.MAT = 23.0;
+    zoneHB.ZTM = {20.0, 19.0, 18.0, 0.0};
+
+    state->dataHeatBal->ZoneAirSolutionAlgo = DataHeatBalance::SolutionAlgo::ThirdOrder;
+    DataHeatBalance::AirReportVars airReport;
+    CalcZoneComponentLoadSums(*state, 1, &zoneHB, airReport);
+
+    EXPECT_NEAR(1400.0 / 3.0, airReport.CzdTdt, 1.0e-10);
+}
+
 TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_EMSOverrideSetpointTest)
 {
     // AUTHOR: L. Gu, FSEC
@@ -1182,6 +1210,7 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_WrongControlTypeSchedule)
         "  Zone1 Thermostat,                       !- Name",
         "  Zone1,                                  !- Zone or ZoneList Name",
         "  Single HEATING Control Type Sched,      !- Control Type Schedule Name",
+        "  ,                                       !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleCooling,       !- Control 1 Object Type",
         "  Thermostat Setpoint Single Cooling;     !- Control 1 Name",
 
@@ -2087,6 +2116,7 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_Test)
         " TheZone Thermostat,",
         " TheZone,",
         " ZONE CONTROL TYPE SCHED,"
+        " ,",
         " ThermostatSetpoint:SingleHeating,",
         " SingleHeatingSetpoints,",
         " ThermostatSetpoint:SingleCooling,",
@@ -2100,6 +2130,7 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_Test)
         " AnotherZone Thermostat,",
         " AnotherZone,",
         " ZONE CONTROL TYPE SCHED,",
+        " ,",
         " ThermostatSetpoint:SingleHeating,",
         " ThisIsInvalid;" // This is an error because this ThermostatSetpoint:SingleHeating object does NOT exist (cause of defect)
         " ",
@@ -2134,6 +2165,57 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_Test)
     EXPECT_TRUE(compare_err_stream_substring("ZoneControl:Thermostat = ANOTHERZONE THERMOSTAT, control name = THISISINVALID was not found in "
                                              "ThermostatSetpoint object type = ThermostatSetpoint:SingleHeating.",
                                              true));
+}
+
+TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_CutoutDifferentialIgnoredForSingleHeatingOrCooling)
+{
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Control Type,",
+        "  0,",
+        "  4,",
+        "  Discrete;",
+        "",
+        "Schedule:Constant,",
+        "  Zone Control Type Schedule,",
+        "  Control Type,",
+        "  3;",
+        "",
+        "Schedule:Constant,",
+        "  Setpoint Schedule,",
+        "  ,",
+        "  22.0;",
+        "",
+        "ThermostatSetpoint:SingleHeatingOrCooling,",
+        "  Combined Setpoint,",
+        "  Setpoint Schedule;",
+        "",
+        "ZoneControl:Thermostat,",
+        "  Zone Thermostat,",
+        "  Zone,",
+        "  Zone Control Type Schedule,",
+        "  1.0,",
+        "  ThermostatSetpoint:SingleHeatingOrCooling,",
+        "  Combined Setpoint;",
+        "",
+        "Zone,",
+        "  Zone,",
+        "  0, 0, 0, 0,",
+        "  1,",
+        "  1;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    GetZoneAirSetPoints(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(
+        "Temperature Difference Between Cutout And Setpoint will not be applied to ThermostatSetpoint:SingleHeatingOrCooling.", true));
 }
 
 TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_ITEApproachTempWarning)
@@ -2179,6 +2261,7 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_ITEApproachTempWarning)
         " East Zone Thermostat,",
         " East Zone,",
         " ZONE CONTROL TYPE SCHED,",
+        " ,",
         " ThermostatSetpoint:DualSetpoint,",
         " DualSetpoints;",
         " ",
@@ -2250,6 +2333,7 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_ITEApproachTempNoWarningForInactiv
         "  East Zone Thermostat,   !- Name",
         "  East Zone,              !- Zone or ZoneList or Space or SpaceList Name",
         "  Zone Control Type Sched,!- Control Type Schedule Name",
+        "  ,                       !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:SingleHeating, !- Control 1 Object Type",
         "  Heating Only Setpoint,  !- Control 1 Name",
         "  ThermostatSetpoint:DualSetpoint, !- Control 2 Object Type",

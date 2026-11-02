@@ -1601,6 +1601,7 @@
     Dining Thermostat,       !- Name
     Dining,                  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dining DualSPSched;      !- Control 1 Name
 
@@ -1608,6 +1609,7 @@
     Kitchen Thermostat,      !- Name
     Kitchen,                 !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Kitchen DualSPSched;     !- Control 1 Name
 

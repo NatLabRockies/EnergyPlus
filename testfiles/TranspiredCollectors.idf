@@ -3450,6 +3450,7 @@
     ZN1 Thermostat,          !- Name
     ZN1_S_Space_1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 
@@ -3770,6 +3771,7 @@
     ZN2 Thermostat,          !- Name
     ZN2_E_Space_1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 
@@ -4090,6 +4092,7 @@
     ZN3 Thermostat,          !- Name
     ZN3_N_Space_1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 
@@ -4410,6 +4413,7 @@
     ZN4 Thermostat,          !- Name
     ZN4_W_Space_1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 
@@ -4730,6 +4734,7 @@
     ZN5 Thermostat,          !- Name
     ZN5_Core_Space_1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 
@@ -5067,6 +5072,7 @@
     ZN11 Thermostat,         !- Name
     ZN11_Shop_1,             !- Zone or ZoneList Name
     Shop Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Shop Heating Setpoints Constant,  !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -5281,6 +5287,7 @@
     ZN12 Thermostat,         !- Name
     ZN12_Shop_1,             !- Zone or ZoneList Name
     Shop Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Shop Heating Setpoints Constant,  !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -5482,6 +5489,7 @@
     ZN13 Thermostat,         !- Name
     ZN13_Shop_1,             !- Zone or ZoneList Name
     Shop Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Shop Heating Setpoints Constant,  !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -5695,6 +5703,7 @@
     ZN14 Thermostat,         !- Name
     ZN14_Shop_1,             !- Zone or ZoneList Name
     Shop Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Shop Heating Setpoints Constant,  !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type

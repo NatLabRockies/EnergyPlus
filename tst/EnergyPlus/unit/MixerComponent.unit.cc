@@ -53,7 +53,11 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataDefineEquip.hh>
+#include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/MixerComponent.hh>
+#include <EnergyPlus/PoweredInductionUnits.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::MixerComponent;
@@ -80,4 +84,73 @@ TEST_F(EnergyPlusFixture, GetZoneMixerIndex)
     GetZoneMixerIndex(*state, "SPACE3-3 ATU Mixer", MixerIndex, errFlag, CurrentModuleObject);
     EXPECT_EQ(0, MixerIndex);
     EXPECT_TRUE(errFlag);
+}
+
+TEST_F(EnergyPlusFixture, MixerParallelPIULeakageMatchesReturnNode)
+{
+    // Return path mixer with inlet nodes 11 and 12. Zone 1 returns to node 12 on air loop 3; zone 2 returns to node 20,
+    // which is not connected to the mixer, on air loop 1. Leakage must only come from the PIU serving zone 1.
+    int mixerNum = 1;
+    constexpr int numInletNodes = 2;
+    constexpr int outletNodeNum = 13;
+
+    state->dataLoopNodes->Node.allocate(20);
+    state->dataMixerComponent->MixerCond.allocate(1);
+    auto &mixer = state->dataMixerComponent->MixerCond(mixerNum);
+    mixer.MixerName = "RETURN MIXER";
+    mixer.NumInletNodes = numInletNodes;
+    mixer.OutletNode = outletNodeNum;
+    mixer.InletNode.allocate(numInletNodes);
+    mixer.InletNode(1) = 11;
+    mixer.InletNode(2) = 12;
+    mixer.InletMassFlowRate.dimension(numInletNodes, 0.5);
+    mixer.InletMassFlowRateMaxAvail.dimension(numInletNodes, 0.5);
+    mixer.InletMassFlowRateMinAvail.dimension(numInletNodes, 0.0);
+    mixer.InletTemp.dimension(numInletNodes, 22.0);
+    mixer.InletHumRat.dimension(numInletNodes, 0.008);
+    mixer.InletEnthalpy.dimension(numInletNodes, 42500.0);
+    mixer.InletPressure.dimension(numInletNodes, 101325.0);
+
+    state->dataZoneEquip->ReturnAirPath.allocate(1);
+    auto &returnAirPath = state->dataZoneEquip->ReturnAirPath(1);
+    returnAirPath.NumOfComponents = 1;
+    returnAirPath.ComponentName.allocate(1);
+    returnAirPath.ComponentName(1) = mixer.MixerName;
+    returnAirPath.ComponentTypeEnum.allocate(1);
+    returnAirPath.ComponentTypeEnum(1) = DataZoneEquipment::AirLoopHVACZone::Mixer;
+
+    state->dataZoneEquip->ZoneEquipConfig.allocate(2);
+    auto setupZone = [&](int zoneNum, int returnNode, int airLoopNum) {
+        auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(zoneNum);
+        zoneEquipConfig.NumReturnNodes = 1;
+        zoneEquipConfig.ReturnNode.allocate(1);
+        zoneEquipConfig.ReturnNode(1) = returnNode;
+        zoneEquipConfig.ReturnNodeAirLoopNum.allocate(1);
+        zoneEquipConfig.ReturnNodeAirLoopNum(1) = airLoopNum;
+    };
+    setupZone(1, 12, 3);
+    setupZone(2, 20, 1);
+
+    // leak air conditions match the return air so only the flow rate is affected
+    constexpr int leakZoneNum = 2;
+    auto &leakNode = state->dataLoopNodes->Node(leakZoneNum);
+    leakNode.HumRat = 0.008;
+    leakNode.Press = 101325.0;
+    leakNode.Enthalpy = 42500.0;
+
+    state->dataPowerInductionUnits->NumParallelPIUs = 2;
+    state->dataDefineEquipment->AirDistUnit.allocate(2);
+    for (int aduNum = 1; aduNum <= 2; ++aduNum) {
+        auto &adu = state->dataDefineEquipment->AirDistUnit(aduNum);
+        adu.ZoneNum = aduNum;
+        adu.piuLkZoneNum = leakZoneNum;
+    }
+    state->dataDefineEquipment->AirDistUnit(1).massFlowRateParallelPIULk = 0.1;
+    state->dataDefineEquipment->AirDistUnit(2).massFlowRateParallelPIULk = 0.2;
+
+    CalcAirMixer(*state, mixerNum);
+
+    EXPECT_DOUBLE_EQ(1.1, mixer.OutletMassFlowRate);
+    EXPECT_DOUBLE_EQ(0.008, mixer.OutletHumRat);
+    EXPECT_DOUBLE_EQ(42500.0, mixer.OutletEnthalpy);
 }

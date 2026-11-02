@@ -1163,6 +1163,7 @@
     Bottom-Thermostat,       !- Name
     Bottom,                  !- Zone or ZoneList Name
     Bottom-Control Sched,    !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Bottom-Heating Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -1174,6 +1175,7 @@
     SecondLevel-Thermostat,  !- Name
     SecondLevel,             !- Zone or ZoneList Name
     SecondLevel-Control Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     SecondLevel-Cooling Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -1185,6 +1187,7 @@
     ThirdLevel-Thermostat,   !- Name
     ThirdLevel,              !- Zone or ZoneList Name
     ThirdLevel-Control Sched,!- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     ThirdLevel-Cooling Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
