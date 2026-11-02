@@ -1344,6 +1344,8 @@ namespace WaterUse {
 
         // PURPOSE OF THIS SUBROUTINE:
         // Calculate summed values for WATER USE CONNECTIONS (to prepare to request flow from plant, and for reporting).
+        // When connected to a plant loop, request the hot water flow and rescale the connection and equipment flows to the hot water the
+        // plant delivers.
 
         this->ColdMassFlowRate = 0.0;
         this->HotMassFlowRate = 0.0;
@@ -1373,18 +1375,19 @@ namespace WaterUse {
                     this->HotMassFlowRate = DeliveredHotWaterMassFlow;
                     this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
 
-                    // Shift hot and cold water proportionally for all WATER USE EQUIPMENT so their sums match the connection
+                    // Shift hot and cold water proportionally for all WATER USE EQUIPMENT so their sums match the connection.
+                    // A shortfall reduces each equipment's hot water by the available fraction; a surplus replaces the same fraction of each
+                    // equipment's cold water (Desired < Delivered <= Total there, so the denominator is positive).
+                    bool const plantLimited = DeliveredHotWaterMassFlow < DesiredHotWaterMassFlow;
+                    Real64 const hotFraction = plantLimited ? DeliveredHotWaterMassFlow / DesiredHotWaterMassFlow : 1.0;
+                    Real64 const coldToHotFraction =
+                        plantLimited ? 0.0
+                                     : (DeliveredHotWaterMassFlow - DesiredHotWaterMassFlow) / (this->TotalMassFlowRate - DesiredHotWaterMassFlow);
+
                     for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
                         auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
 
-                        if (DeliveredHotWaterMassFlow < DesiredHotWaterMassFlow) {
-                            // Reduce each equipment's hot water by the available fraction
-                            thisWEq.HotMassFlowRate *= DeliveredHotWaterMassFlow / DesiredHotWaterMassFlow;
-                        } else {
-                            // Replace each equipment's cold water with the surplus hot water; Desired < Delivered <= Total here
-                            thisWEq.HotMassFlowRate += thisWEq.ColdMassFlowRate * (DeliveredHotWaterMassFlow - DesiredHotWaterMassFlow) /
-                                                       (this->TotalMassFlowRate - DesiredHotWaterMassFlow);
-                        }
+                        thisWEq.HotMassFlowRate = thisWEq.HotMassFlowRate * hotFraction + thisWEq.ColdMassFlowRate * coldToHotFraction;
                         thisWEq.ColdMassFlowRate = thisWEq.TotalMassFlowRate - thisWEq.HotMassFlowRate;
 
                         // Recalculate mixed water temperature
@@ -1491,13 +1494,14 @@ namespace WaterUse {
                 this->RecoveryTemp = this->ColdSupplyTemp;
                 this->WasteTemp = this->DrainTemp;
             } else {
+                Real64 const CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
+                Real64 const NTU = this->HXUA / MinCapacityRate;
+
                 switch (this->HeatRecoveryHX) {
                 case HeatRecovHX::Ideal: {
                     this->Effectiveness = 1.0;
                 } break;
                 case HeatRecovHX::CounterFlow: { // Unmixed
-                    Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                    Real64 NTU = this->HXUA / MinCapacityRate;
                     // Use the balanced-flow limit near CapacityRatio = 1, where round-off in the flows makes the general formula cancel badly
                     if (std::abs(1.0 - CapacityRatio) < 1.0e-6) {
                         this->Effectiveness = NTU / (1.0 + NTU);
@@ -1507,8 +1511,6 @@ namespace WaterUse {
                     }
                 } break;
                 case HeatRecovHX::CrossFlow: { // Unmixed
-                    Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                    Real64 NTU = this->HXUA / MinCapacityRate;
                     this->Effectiveness =
                         1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
                 } break;

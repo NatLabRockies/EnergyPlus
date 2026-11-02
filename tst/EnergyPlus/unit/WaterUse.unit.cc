@@ -1821,8 +1821,9 @@ void expectConsistentWaterConnectionFlows(EnergyPlusData &state)
 
 } // namespace
 
-// Verifies that WaterUse:Connections reports the hot-water flow actually delivered by a locked plant loop,
-// while cold-water makeup preserves the requested total fixture flow.
+// Verifies that WaterUse:Connections reports the hot-water flow actually delivered by a locked plant loop, while cold-water makeup preserves
+// the requested total fixture flow. The first HVAC iteration used to keep the delivered hot flow without adding cold makeup or rescaling the
+// equipment flows, and later iterations rescaled the equipment flows without storing the delivered flow on the connection.
 TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantLimitsFlow)
 {
     setupLockedLoopWaterConnection(*state, {40.0});
@@ -1836,43 +1837,24 @@ TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantLimitsFlow)
     Real64 const deliveredHotMassFlowRate = 0.5 * requestedHotMassFlowRate;
     state->dataLoopNodes->Node(1).MassFlowRate = deliveredHotMassFlowRate;
 
-    waterConnections.CalcConnectionsFlowRates(*state);
+    for (bool const firstHVACIteration : {true, false}) {
+        SCOPED_TRACE(std::format("FirstHVACIteration = {}", firstHVACIteration));
+        Real64 curLoad = 0.0;
+        waterConnections.simulate(*state, waterConnections.plantLoc, firstHVACIteration, curLoad, true);
 
-    EXPECT_NEAR(waterEquipment.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterEquipment.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterEquipment.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterConnections.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterConnections.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterEquipment.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterEquipment.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
+        EXPECT_NEAR(waterEquipment.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
+        EXPECT_LT(waterEquipment.MixedTemp, 40.0);
+        expectConsistentWaterConnectionFlows(*state);
 
-    EXPECT_NEAR(waterConnections.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterConnections.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
-}
-
-// The same plant-limited case on the first HVAC iteration, which used to keep the delivered hot flow without adding cold makeup
-// or rescaling the equipment flows
-TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantLimitsFlowFirstHVACIteration)
-{
-    setupLockedLoopWaterConnection(*state, {40.0});
-    auto &waterEquipment = state->dataWaterUse->WaterEquipment(1);
-    auto &waterConnections = state->dataWaterUse->WaterConnections(1);
-
-    Real64 const totalMassFlowRate = lockedLoopPeakVolFlowRate * calcH2ODensity(*state);
-    Real64 const requestedHotMassFlowRate = totalMassFlowRate * (40.0 - 10.0) / (55.0 - 10.0);
-    Real64 const deliveredHotMassFlowRate = 0.5 * requestedHotMassFlowRate;
-    state->dataLoopNodes->Node(1).MassFlowRate = deliveredHotMassFlowRate;
-
-    Real64 curLoad = 0.0;
-    waterConnections.simulate(*state, waterConnections.plantLoc, true, curLoad, true);
-
-    EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterConnections.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterConnections.ColdMassFlowRate, totalMassFlowRate - deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_NEAR(waterEquipment.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
-    EXPECT_LT(waterEquipment.MixedTemp, 40.0);
-    expectConsistentWaterConnectionFlows(*state);
-
-    // Reported volume flows follow the rescaled mass flows
-    EXPECT_NEAR(waterConnections.HotVolFlowRate, deliveredHotMassFlowRate / calcH2ODensity(*state), 1.0e-12);
-    EXPECT_NEAR(waterEquipment.HotVolFlowRate, deliveredHotMassFlowRate / calcH2ODensity(*state), 1.0e-12);
+        // Reported volume flows follow the rescaled mass flows
+        EXPECT_NEAR(waterConnections.HotVolFlowRate, deliveredHotMassFlowRate / calcH2ODensity(*state), 1.0e-12);
+        EXPECT_NEAR(waterEquipment.HotVolFlowRate, deliveredHotMassFlowRate / calcH2ODensity(*state), 1.0e-12);
+    }
 }
 
 // A locked loop can deliver more hot water than was requested; the surplus replaces cold water at each equipment, and anything beyond
