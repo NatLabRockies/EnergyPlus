@@ -45,7 +45,7 @@
 ! Chillers:                       None
 ! Towers:                         None
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,4;
 
@@ -308,9 +308,9 @@
 
   Output:Variable,*,Zone Mean Air Temperature,hourly;
 
-  Output:Variable,*,ITE CPU Electricity Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled CPU Electricity Rate,hourly;
 
-  Output:Variable,*,ITE Fan Electricity Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled Fan Electricity Rate,hourly;
 
   Output:Variable,*,ITE Total Electricity Rate,hourly;
 

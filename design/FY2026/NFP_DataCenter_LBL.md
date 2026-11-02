@@ -156,8 +156,8 @@ ElectricEquipment:ITE:LiquidCooled,
        \required-field
        \type object-list
        \object-list ScheduleNames
-       \note Defines the transient CPU loading schedule.
-       \note This 0-1 factor multiplied by the design power input is the current CPU power.
+       \note Defines the transient compute loading schedule.
+       \note This 0-1 factor is applied to the Design Power Input as part of the total rack power calculation.
   N1 , \field Design Power Input
        \required-field
        \type real
@@ -277,10 +277,10 @@ The following additional fields, outside the ElectricEquipment:ITE:LiquidCooled 
 
 The outputs for `ElectricEquipment:ITE:LiquidCooled` are as follows
 ```
-   Zone,Average,ITE CPU Electricity Rate [W]
-   Zone,Sum,ITE CPU Electricity Energy [J]
-   Zone,Average,ITE Fan Electricity Rate [W]
-   Zone,Sum,ITE Fan Electricity Energy [J]
+   Zone,Average,ITE Liquid Cooled CPU Electricity Rate [W]
+   Zone,Sum,ITE Liquid Cooled CPU Electricity Energy [J]
+   Zone,Average,ITE Liquid Cooled Fan Electricity Rate [W]
+   Zone,Sum,ITE Liquid Cooled Fan Electricity Energy [J]
    Zone,Average,ITE Total Electricity Rate [W]
    Zone,Sum,ITE Total Electricity Energy [J]
    Zone,Average,ITE Total Heat Generation Rate [W]
@@ -294,7 +294,7 @@ The outputs for `ElectricEquipment:ITE:LiquidCooled` are as follows
 
 The ITE CPU electricity rate and energy outputs represent the power and energy consumed specifically by the compute components of the IT equipment. The ITE fan electricity rate and energy outputs represent the power and energy consumed by the internal fans used to assist with thermal management within the equipment. The ITE total electricity rate and energy outputs represent the overall power and energy consumption of the liquid-cooled IT equipment, which is the sum of the CPU and fan electricity usage.
 
-The ITE total heat generation rate and energy outputs represent the entire thermal load produced by the equipment, which is inherently equal to the total electricity consumed. The ITE liquid heat capture fraction reports the final fraction of heat being routed to the liquid loop at the current timestep, accounting for the design input field and any modifying schedules. The ITE liquid heat gain rate and energy outputs report the amount of this total heat generation that is captured and removed directly by the attached liquid cooling loop. The ITE air heat gain to zone rate and energy outputs represent the remaining thermal fraction that is not captured by the liquid loop and is instead dissipated into the surrounding zone air as a sensible heat gain. In addition to these core object-level outputs, EnergyPlus will automatically generate corresponding Space and Zone level aggregations for every variable listed above.
+The ITE total heat generation rate and energy outputs represent the entire thermal load produced by the equipment, which is inherently equal to the total electricity consumed. The ITE liquid heat capture fraction reports the achieved liquid heat gain divided by total heat generation at the current timestep (or zero when no heat is generated), so it accounts for the design input, modifying schedules, and coil load fractions. The ITE liquid heat gain rate and energy outputs report the amount of this total heat generation that is captured and removed directly by the attached liquid cooling loop. The ITE air heat gain to zone rate and energy outputs represent the remaining thermal fraction that is not captured by the liquid loop and is instead dissipated into the surrounding zone air as a sensible heat gain. In addition to these core object-level outputs, EnergyPlus will automatically generate corresponding Space and Zone level aggregations for every variable listed above. The Space and Zone liquid heat capture fractions are calculated from their aggregate liquid heat gain and total heat generation rates, so racks are weighted by their current heat generation.
 
 The CPU and Fan End-Use Subcategory fields (see Input Description) let the CPU and Fan electricity outputs above roll up separately in the ABUPS End Uses by Subcategory table, so downstream PUE- and ITUE-adjacent analysis can distinguish IT compute load from auxiliary fan load rather than relying on manual post-processing.
 

@@ -24660,9 +24660,10 @@ ElectricEquipment:ITE:LiquidCooled,
   A1 , \field Name
        \required-field
        \type alpha
-       \reference ITEAndITEListNames
   A2 , \field Zone or Space Name
        \note ZoneList and SpaceList names are not allowed.
+       \note If a Zone with more than one Space is named, the Design Power Input is apportioned to each
+       \note Space by floor area.
        \required-field
        \type object-list
        \object-list ZoneNames
@@ -24678,8 +24679,9 @@ ElectricEquipment:ITE:LiquidCooled,
        \required-field
        \type object-list
        \object-list ScheduleNames
-       \note Defines the transient CPU loading schedule.
-       \note This 0-1 factor multiplied by the design power input is the current CPU power.
+       \note Defines the transient compute loading schedule.
+       \note This 0-1 factor is applied to the Design Power Input as part of the total rack power calculation.
+       \note Schedule values must be between 0.0 and 1.0.
   N1 , \field Design Power Input
        \required-field
        \type real
@@ -24739,11 +24741,16 @@ ElectricEquipment:ITE:LiquidCooled,
        \note schedule below is specified, this coil is assumed to receive the entire liquid load (fraction =
        \note 1.0). If more than one Cooling Coil N slot is active, one of this field or the schedule below
        \note must be specified for every active slot.
+       \note The static Load Fractions of all active slots must not sum to more than 1.0 (an input error);
+       \note any remainder below 1.0 is added to the zone air as a convective gain.
   A9 , \field Cooling Coil 1 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
        \note Schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this coil.
        \note If this field is used, the static Load Fraction field above should be left blank.
+       \note If the Load Fractions of all active slots sum to more than 1.0 at a time step, they are
+       \note normalized to sum to 1.0. A recurring warning is issued when the excess is greater than
+       \note the numerical tolerance.
   A10, \field Cooling Coil 2 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
