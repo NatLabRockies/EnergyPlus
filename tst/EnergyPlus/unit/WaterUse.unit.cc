@@ -2057,7 +2057,7 @@ TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHeatRecoveryEnergyBalance)
 
     Real64 const cp = Psychrometrics::CPHW(Constant::InitConvTemp);
 
-    for (auto const [config, recoveryMassFlowRate] :
+    for (auto const &[config, recoveryMassFlowRate] :
          {std::pair{HeatRecovConfig::Plant, 0.02}, std::pair{HeatRecovConfig::Equipment, 0.03}, std::pair{HeatRecovConfig::PlantAndEquip, 0.05}}) {
         waterConnections.HeatRecoveryConfig = config;
         waterConnections.ColdTemp = waterConnections.ColdSupplyTemp;
