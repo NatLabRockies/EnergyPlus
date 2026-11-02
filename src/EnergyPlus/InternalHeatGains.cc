@@ -8744,7 +8744,7 @@ namespace InternalHeatGains {
             }
 
             // CPU and Fan electricity energy go on the meters
-            for (auto const [i, endUseSubcategory] :
+            for (auto const &[i, endUseSubcategory] :
                  {std::pair<int, std::string const *>{(int)LiquidITERptVars::CPU, &thisITELC.EndUseSubcategoryCPU},
                   std::pair<int, std::string const *>{(int)LiquidITERptVars::Fan, &thisITELC.EndUseSubcategoryFan}}) {
                 SetupOutputVariable(state,
