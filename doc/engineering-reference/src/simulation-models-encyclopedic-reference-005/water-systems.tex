@@ -357,10 +357,10 @@ First calls on each piece of equipment to simulate itself with the given supply 
 {\dot M_{cold}} = \mathop \sum \limits_i {\dot m_{cold,i}}
 \end{equation}
 
-If plant-coupled, \({\dot M_{hot}}\) is compared to the maximum flow rate available in the plant loop (after the first HVAC iteration).~ If \({\dot M_{hot}}\) ~\textgreater{} \({\dot M_{hot,max}}\), the actual flow rate is reset to equal the maximum: \({\dot M_{hot}}\) = \({\dot M_{hot,max}}\).~ New hot and cold flow rates, \({\dot m'_{hot,i}}\) and \({\dot m'_{cold,i}}\), at the equipment level are then recalculated, decreasing the hot flow rate and increasing the cold flow rate in order to still meet the target flow rate.
+If plant-coupled, the requested \({\dot M_{hot}}\) is passed to the plant loop on every HVAC iteration and compared with the flow that the plant delivers.~ If the plant delivers less than requested, the actual hot water flow is reset to the delivered flow.~ New hot and cold flow rates, \({\dot m'_{hot,i}}\) and \({\dot m'_{cold,i}}\), at the equipment level are then recalculated, decreasing the hot flow rate and increasing the cold flow rate in order to still meet the target flow rate.
 
 \begin{equation}
-\alpha  = \frac{{{{\dot M}_{hot,max}}}}{{{{\dot M}_{hot}}}}
+\alpha  = \frac{{\dot M}_{hot,delivered}}{{\dot M}_{hot,requested}}
 \end{equation}
 
 \begin{equation}
@@ -372,6 +372,8 @@ If plant-coupled, \({\dot M_{hot}}\) is compared to the maximum flow rate availa
 \end{equation}
 
 A new mixed water temperature is also recalculated at the equipment level.
+
+If the plant delivers more hot water than requested, the surplus replaces the same fraction of each equipment's cold water, up to the total fixture flow.~ Any plant flow above the total fixture flow bypasses the equipment at the hot water inlet temperature.~ The bypass and the fixture return water are mixed at the plant outlet so that the outlet temperature preserves the plant-side energy balance.
 
 Although water storage tanks can also have a maximum flow rate on the cold side, the cold flow rate is not limited in this implementation.
 
@@ -391,25 +393,31 @@ In the case of no drainwater heat recovery, the subsystem wastewater temperature
 
 \subsubsection{Update Connections Nodes}\label{update-connections-nodes}
 
-Finally, if plant-coupled, the return water temperature, \({T_{return}}\), is passed on to the plant outlet node.~ \({T_{return}}\) is taken from the cold water supply schedule or the water mains.~ The return flow rate is equal to the hot water supply flow rate in order to preserve a closed plant loop: \({\dot M_{return}}\) = \({\dot M_{hot}}\).
-
-For ``connected'' water equipment, the heating rate and energy that is required to supply the hot water for individual water equipment is calculated by the following equations.
+Finally, if plant-coupled, the actual plant flow and plant return water temperature, \({T_{plant,return}}\), are passed to the plant outlet node.~ The fixture return temperature, \({T_{return}}\), includes any plant-side drainwater heat recovery.~ If the actual plant flow exceeds the fixture hot water flow, the bypass flow at \({T_{hot}}\) is mixed with the fixture return flow to determine \({T_{plant,return}}\).
 
 \begin{equation}
-Q = {\dot m_{hot}}{c_p}\left( {{T_{hot}} - {T_{return}}} \right)
+{T_{plant,return}} = \frac{{{{\dot M}_{hot}}{T_{return}} + \left( {{{\dot M}_{plant}} - {{\dot M}_{hot}}} \right){T_{hot}}}}{{{{\dot M}_{plant}}}},~if~{\dot M_{plant}} > {\dot M_{hot}}
+\end{equation}
+
+Otherwise, \({T_{plant,return}} = {T_{return}}\).~ The return flow rate equals the actual plant inlet flow in order to preserve a closed plant loop: \({\dot M_{return}}\) = \({\dot M_{plant}}\).
+
+For each ``connected'' water equipment object, the heating rate and energy required to supply its hot water are calculated by the following equations.
+
+\begin{equation}
+Q_i = {\dot m_{hot,i}}{c_p}\left( {{T_{hot}} - {T_{return}}} \right)
 \end{equation}
 
 \begin{equation}
-\Delta E = Q\Delta t
+\Delta E_i = Q_i\Delta t
 \end{equation}
 
 where:
 
-\(Q\) is the heating rate
+\(Q_i\) is the equipment heating rate
 
 \({c_p}\) is the specific heat of water
 
-\(\Delta E\) is the heating energy
+\(\Delta E_i\) is the equipment heating energy
 
 \(\Delta t\) is the time interval.
 

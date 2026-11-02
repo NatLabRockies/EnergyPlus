@@ -1880,22 +1880,50 @@ TEST_F(EnergyPlusFixture, WaterUse_ConnectionsHotFlowWhenPlantDeliversMoreThanRe
 
     EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
     EXPECT_NEAR(waterConnections.HotMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.PlantMassFlowRate, deliveredHotMassFlowRate, 1.0e-10);
     EXPECT_NEAR(waterEquipment1.HotMassFlowRate, requestedHotMassFlowRate + 0.5 * (equipMassFlowRate - requestedHotMassFlowRate), 1.0e-10);
     EXPECT_NEAR(waterEquipment2.HotMassFlowRate, 0.5 * equipMassFlowRate, 1.0e-10);
     EXPECT_GT(waterEquipment1.MixedTemp, 40.0);
     expectConsistentWaterConnectionFlows(*state);
 
     // Deliver three times the total fixture draw: everything is served hot and no cold water is used
-    state->dataLoopNodes->Node(1).MassFlowRate = 3.0 * totalMassFlowRate;
+    Real64 const plantMassFlowRate = 3.0 * totalMassFlowRate;
+    state->dataLoopNodes->Node(1).MassFlowRate = plantMassFlowRate;
 
     waterConnections.simulate(*state, waterConnections.plantLoc, false, curLoad, true);
 
     EXPECT_NEAR(waterConnections.TotalMassFlowRate, totalMassFlowRate, 1.0e-10);
     EXPECT_NEAR(waterConnections.HotMassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.PlantMassFlowRate, plantMassFlowRate, 1.0e-10);
     EXPECT_NEAR(waterConnections.ColdMassFlowRate, 0.0, 1.0e-10);
     EXPECT_NEAR(waterEquipment1.MixedTemp, lockedLoopHotTemp, 1.0e-8);
     EXPECT_NEAR(waterEquipment2.MixedTemp, lockedLoopHotTemp, 1.0e-8);
     expectConsistentWaterConnectionFlows(*state);
+
+    // The unused plant flow bypasses the fixtures at the inlet temperature, so the plant outlet and reported load conserve energy
+    Real64 const expectedPlantReturnTemp =
+        (totalMassFlowRate * lockedLoopColdTemp + (plantMassFlowRate - totalMassFlowRate) * lockedLoopHotTemp) / plantMassFlowRate;
+    EXPECT_NEAR(waterConnections.ReturnTemp, lockedLoopColdTemp, 1.0e-10);
+    EXPECT_NEAR(waterConnections.PlantReturnTemp, expectedPlantReturnTemp, 1.0e-8);
+    EXPECT_NEAR(state->dataLoopNodes->Node(2).MassFlowRate, plantMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, expectedPlantReturnTemp, 1.0e-8);
+    EXPECT_NEAR(waterConnections.Power, waterEquipment1.Power + waterEquipment2.Power, 1.0e-8);
+
+    // With no fixture draw, all locked plant flow bypasses at the inlet temperature and creates no plant load
+    waterEquipment1.PeakVolFlowRate = 0.0;
+    waterEquipment2.PeakVolFlowRate = 0.0;
+    state->dataLoopNodes->Node(1).MassFlowRate = totalMassFlowRate;
+
+    waterConnections.simulate(*state, waterConnections.plantLoc, false, curLoad, true);
+
+    EXPECT_EQ(waterConnections.TotalMassFlowRate, 0.0);
+    EXPECT_EQ(waterConnections.HotMassFlowRate, 0.0);
+    EXPECT_NEAR(waterConnections.PlantMassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(waterConnections.ReturnTemp, lockedLoopColdTemp, 1.0e-8);
+    EXPECT_NEAR(waterConnections.PlantReturnTemp, lockedLoopHotTemp, 1.0e-8);
+    EXPECT_NEAR(state->dataLoopNodes->Node(2).MassFlowRate, totalMassFlowRate, 1.0e-10);
+    EXPECT_NEAR(state->dataLoopNodes->Node(2).Temp, lockedLoopHotTemp, 1.0e-8);
+    EXPECT_NEAR(waterConnections.Power, 0.0, 1.0e-8);
 }
 
 // With drain water heat recovery to the plant, no hot water flow leaves the heat exchanger with zero capacity on the recovery side;

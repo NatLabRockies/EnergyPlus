@@ -172,6 +172,7 @@ namespace WaterUse {
         Real64 TankMassFlowRate = 0.0;  // Mass flow rate (kg/s)
         Real64 ColdMassFlowRate = 0.0;  // Mass flow rate (kg/s)  cold = mains + tank
         Real64 HotMassFlowRate = 0.0;   // Mass flow rate (kg/s)
+        Real64 PlantMassFlowRate = 0.0; // Actual mass flow rate through the plant branch (kg/s)
         Real64 TotalMassFlowRate = 0.0; // Mass flow rate (kg/s) total = cold + hot
         Real64 DrainMassFlowRate = 0.0;
         Real64 RecoveryMassFlowRate = 0.0;
@@ -190,6 +191,7 @@ namespace WaterUse {
         Real64 DrainTemp = 0.0;
         Real64 RecoveryTemp = 0.0;
         Real64 ReturnTemp = 0.0;
+        Real64 PlantReturnTemp = 0.0; // Plant outlet temperature after mixing in any bypass flow (C)
         Real64 WasteTemp = 0.0;
         Real64 TempError = 0.0;
         Real64 ColdVolume = 0.0;  // Water consumption (m3)

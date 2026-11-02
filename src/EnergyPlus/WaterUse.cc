@@ -1349,6 +1349,7 @@ namespace WaterUse {
 
         this->ColdMassFlowRate = 0.0;
         this->HotMassFlowRate = 0.0;
+        this->PlantMassFlowRate = 0.0;
 
         for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
             auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
@@ -1367,6 +1368,7 @@ namespace WaterUse {
                 Real64 const DesiredHotWaterMassFlow = this->HotMassFlowRate;
                 Real64 DeliveredHotWaterMassFlow = DesiredHotWaterMassFlow;
                 PlantUtilities::SetComponentFlowRate(state, DeliveredHotWaterMassFlow, this->InletNode, this->OutletNode, this->plantLoc);
+                this->PlantMassFlowRate = DeliveredHotWaterMassFlow;
                 // A locked loop, a SeriesActive branch, or MinAvail can deliver more than was requested, but the fixtures cannot use more hot
                 // water than their total draw
                 DeliveredHotWaterMassFlow = min(DeliveredHotWaterMassFlow, this->TotalMassFlowRate);
@@ -1562,12 +1564,21 @@ namespace WaterUse {
         // PURPOSE OF THIS SUBROUTINE:
         // Updates the node variables with local variables.
 
+        // A locked loop, a SeriesActive branch, or MinAvail can force more plant flow through this component than the fixtures use. The
+        // surplus bypasses the fixtures and returns at the inlet temperature, so mix it with the fixture makeup before setting the plant outlet.
+        if (this->PlantMassFlowRate > this->HotMassFlowRate) {
+            Real64 const bypassMassFlowRate = this->PlantMassFlowRate - this->HotMassFlowRate;
+            this->PlantReturnTemp = (this->HotMassFlowRate * this->ReturnTemp + bypassMassFlowRate * this->HotTemp) / this->PlantMassFlowRate;
+        } else {
+            this->PlantReturnTemp = this->ReturnTemp;
+        }
+
         if (this->InletNode > 0 && this->OutletNode > 0) {
             // Pass all variables from inlet to outlet node
             PlantUtilities::SafeCopyPlantNode(state, this->InletNode, this->OutletNode, this->plantLoc.loopNum);
 
             // Set outlet node variables that are possibly changed
-            state.dataLoopNodes->Node(this->OutletNode).Temp = this->ReturnTemp;
+            state.dataLoopNodes->Node(this->OutletNode).Temp = this->PlantReturnTemp;
             // should add enthalpy update to return?
         }
     }
