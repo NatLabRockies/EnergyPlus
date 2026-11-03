@@ -1200,6 +1200,7 @@ TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_DuplicateAndOtherEnclosureW
     state->dataSurface->Surface.allocate(numSurfs);
     for (int surfNum = 1; surfNum <= numSurfs; ++surfNum) {
         state->dataSurface->Surface(surfNum).Name = std::format("WIN_{}", surfNum);
+        state->dataSurface->Surface(surfNum).Zone = surfNum <= 6 ? 1 : 2;
     }
 
     state->dataSurface->TotWinShadingControl = 2;
@@ -1223,6 +1224,7 @@ TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_DuplicateAndOtherEnclosureW
     state->dataHeatBal->space.allocate(numZones);
     state->dataViewFactor->EnclSolInfo.allocate(numZones);
     for (int zn = 1; zn <= numZones; ++zn) {
+        state->dataHeatBal->Zone(zn).Name = std::format("ZONE{}", zn);
         state->dataHeatBal->Zone(zn).spaceIndexes.emplace_back(zn);
         state->dataHeatBal->space(zn).solarEnclosureNum = zn;
         state->dataViewFactor->EnclSolInfo(zn).Name = std::format("ENCL{}", zn);
@@ -1245,10 +1247,10 @@ TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_DuplicateAndOtherEnclosureW
     }
     EXPECT_EQ(dl->maxShadeDeployOrderExtWins, 6);
 
-    EXPECT_TRUE(compare_err_stream_substring("WindowShadingControl=\"WSC1\" references fenestration surfaces that are not exterior windows of "
-                                             "daylighting enclosure ENCL1",
+    EXPECT_TRUE(compare_err_stream_substring("WindowShadingControl=\"WSC1\" references fenestration surfaces that are neither in Zone=\"ZONE1\" "
+                                             "nor in an adjacent zone connected by an interior window",
                                              false));
-    EXPECT_TRUE(compare_err_stream_substring("WindowShadingControl=\"WSC2\" references fenestration surfaces that are already referenced", false));
+    EXPECT_FALSE(compare_err_stream_substring("references fenestration surfaces that are already referenced", false, false));
     EXPECT_TRUE(compare_err_stream_substring("-  WIN_7", true));
 
     dl->daylightControl(1).TotalDaylRefPoints = 1;
@@ -1260,6 +1262,121 @@ TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_DuplicateAndOtherEnclosureW
     for (int i = 1; i <= 6; ++i) {
         EXPECT_EQ(dl->daylightControl(1).MapShdOrdToLoopNum(i), i);
     }
+}
+
+TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_MultipleSpacesInSameZone)
+{
+    // WindowShadingControl is zone-level and can validly reference windows in multiple spaces, and multiple scheduled
+    // controls may reference the same windows. Skip other-enclosure windows and duplicates without warning.
+    state->init_state(*state);
+    auto &dl = state->dataDayltg;
+    int constexpr numSpaces = 2;
+
+    state->dataSurface->Surface.allocate(numSpaces);
+    for (int surfNum = 1; surfNum <= numSpaces; ++surfNum) {
+        state->dataSurface->Surface(surfNum).Name = std::format("WIN_{}", surfNum);
+        state->dataSurface->Surface(surfNum).Zone = 1;
+    }
+
+    state->dataSurface->TotWinShadingControl = 2;
+    state->dataSurface->WindowShadingControl.allocate(state->dataSurface->TotWinShadingControl);
+    for (int iShadeCtrl = 1; iShadeCtrl <= state->dataSurface->TotWinShadingControl; ++iShadeCtrl) {
+        auto &winShadeControl = state->dataSurface->WindowShadingControl(iShadeCtrl);
+        winShadeControl.Name = std::format("WSC{}", iShadeCtrl);
+        winShadeControl.ZoneIndex = 1;
+        winShadeControl.SequenceNumber = 1;
+        winShadeControl.multiSurfaceControl = MultiSurfaceControl::Sequential;
+        winShadeControl.FenestrationCount = numSpaces;
+        winShadeControl.FenestrationIndex.allocate(numSpaces);
+        winShadeControl.FenestrationIndex = {1, 2};
+    }
+
+    state->dataGlobal->NumOfZones = 1;
+    state->dataGlobal->numSpaces = numSpaces;
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBal->Zone(1).Name = "ZONE1";
+    state->dataHeatBal->space.allocate(numSpaces);
+    state->dataViewFactor->EnclSolInfo.allocate(numSpaces);
+    dl->daylightControl.allocate(numSpaces);
+    dl->enclDaylight.allocate(numSpaces);
+    for (int spaceNum = 1; spaceNum <= numSpaces; ++spaceNum) {
+        state->dataHeatBal->Zone(1).spaceIndexes.emplace_back(spaceNum);
+        state->dataHeatBal->space(spaceNum).solarEnclosureNum = spaceNum;
+        dl->enclDaylight(spaceNum).daylightControlIndexes.emplace_back(spaceNum);
+        dl->enclDaylight(spaceNum).NumOfDayltgExtWins = 1;
+        dl->enclDaylight(spaceNum).DayltgExtWinSurfNums.allocate(1);
+        dl->enclDaylight(spaceNum).DayltgExtWinSurfNums(1) = spaceNum;
+    }
+
+    dl->maxShadeDeployOrderExtWins = 0;
+    CreateShadeDeploymentOrder(*state, 1);
+    CreateShadeDeploymentOrder(*state, 2);
+
+    EXPECT_EQ(dl->daylightControl(1).ShadeDeployOrderExtWins, std::vector<std::vector<int>>{{1}});
+    EXPECT_EQ(dl->daylightControl(2).ShadeDeployOrderExtWins, std::vector<std::vector<int>>{{2}});
+    EXPECT_FALSE(compare_err_stream_substring("CreateShadeDeploymentOrder:", true, false));
+}
+
+TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_AdjacentZoneWindow)
+{
+    // WindowShadingControl also permits a window in an adjacent zone connected by an interior window. Even when that
+    // exterior window is not used by this daylighting enclosure, skipping it should not produce a zone-mismatch warning.
+    state->init_state(*state);
+    auto &dl = state->dataDayltg;
+    int constexpr numZones = 2;
+    int constexpr numSurfs = 4;
+
+    state->dataSurface->Surface.allocate(numSurfs);
+    state->dataSurface->Surface(1).Name = "ADJACENT_EXT_WINDOW";
+    state->dataSurface->Surface(1).Zone = 2;
+    state->dataSurface->Surface(2).Name = "ZONE1_INTERIOR_WINDOW";
+    state->dataSurface->Surface(2).Zone = 1;
+    state->dataSurface->Surface(2).Class = SurfaceClass::Window;
+    state->dataSurface->Surface(2).ExtBoundCond = 3;
+    state->dataSurface->Surface(3).Name = "ZONE2_INTERIOR_WINDOW";
+    state->dataSurface->Surface(3).Zone = 2;
+    state->dataSurface->Surface(3).Class = SurfaceClass::Window;
+    state->dataSurface->Surface(3).ExtBoundCond = 2;
+    state->dataSurface->Surface(4).Name = "ZONE1_EXT_WINDOW";
+    state->dataSurface->Surface(4).Zone = 1;
+
+    state->dataSurface->TotWinShadingControl = 1;
+    state->dataSurface->WindowShadingControl.allocate(1);
+    auto &winShadeControl = state->dataSurface->WindowShadingControl(1);
+    winShadeControl.Name = "WSC1";
+    winShadeControl.ZoneIndex = 1;
+    winShadeControl.SequenceNumber = 1;
+    winShadeControl.multiSurfaceControl = MultiSurfaceControl::Sequential;
+    winShadeControl.FenestrationCount = 1;
+    winShadeControl.FenestrationIndex.allocate(1);
+    winShadeControl.FenestrationIndex(1) = 1;
+
+    state->dataGlobal->NumOfZones = numZones;
+    state->dataGlobal->numSpaces = numZones;
+    state->dataHeatBal->Zone.allocate(numZones);
+    state->dataHeatBal->space.allocate(numZones);
+    for (int zn = 1; zn <= numZones; ++zn) {
+        state->dataHeatBal->Zone(zn).Name = std::format("ZONE{}", zn);
+        state->dataHeatBal->Zone(zn).spaceIndexes.emplace_back(zn);
+        state->dataHeatBal->space(zn).solarEnclosureNum = zn;
+    }
+    state->dataHeatBal->space(1).surfaces.push_back(2);
+    state->dataHeatBal->space(1).surfaces.push_back(4);
+    state->dataHeatBal->space(2).surfaces.push_back(1);
+    state->dataHeatBal->space(2).surfaces.push_back(3);
+
+    dl->daylightControl.allocate(1);
+    dl->enclDaylight.allocate(numZones);
+    dl->enclDaylight(1).daylightControlIndexes.emplace_back(1);
+    dl->enclDaylight(1).NumOfDayltgExtWins = 1;
+    dl->enclDaylight(1).DayltgExtWinSurfNums.allocate(1);
+    dl->enclDaylight(1).DayltgExtWinSurfNums(1) = 4;
+
+    dl->maxShadeDeployOrderExtWins = 0;
+    CreateShadeDeploymentOrder(*state, 1);
+
+    EXPECT_TRUE(dl->daylightControl(1).ShadeDeployOrderExtWins.empty());
+    EXPECT_FALSE(compare_err_stream_substring("CreateShadeDeploymentOrder:", true, false));
 }
 
 TEST_F(EnergyPlusFixture, CreateShadeDeploymentOrder_MaxAcrossEnclosures)

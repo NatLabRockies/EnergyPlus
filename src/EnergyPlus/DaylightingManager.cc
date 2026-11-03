@@ -9808,20 +9808,40 @@ void CreateShadeDeploymentOrder(EnergyPlusData &state, int const enclNum)
     // the total number of windows in the list never exceeds NumOfDayltgExtWins (the size of MapShdOrdToLoopNum).
     std::vector<std::vector<int>> shadeDeployOrderExtWins;
     std::vector<int> addedWins;
+
+    auto surfaceIsInControlZoneOrAdjacent = [&state, &s_surf](int const surfNum, int const controlZoneNum) {
+        auto const &surf = s_surf->Surface(surfNum);
+        if (surf.Zone == controlZoneNum) {
+            return true;
+        }
+
+        // WindowShadingControl permits exterior windows in an adjacent zone when the two zones are connected by an interior window.
+        for (int const spaceNum : state.dataHeatBal->Zone(controlZoneNum).spaceIndexes) {
+            for (int const zoneSurfNum : state.dataHeatBal->space(spaceNum).surfaces) {
+                auto const &zoneSurf = s_surf->Surface(zoneSurfNum);
+                if (zoneSurf.Class == SurfaceClass::Window && zoneSurf.ExtBoundCond >= 1 &&
+                    s_surf->Surface(zoneSurf.ExtBoundCond).Zone == surf.Zone) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
     for (auto const &sequence : shadeControlSequence) {
         auto const &winShadeControl = s_surf->WindowShadingControl(sequence.second);
         std::vector<int> group;
-        std::vector<int> skippedNotInEncl;
-        std::vector<int> skippedDuplicate;
+        std::vector<int> skippedInvalidZone;
         for (int i = 1; i <= winShadeControl.FenestrationCount; i++) {
             int const surfNum = winShadeControl.FenestrationIndex(i);
             if (std::find(thisEnclDaylight.DayltgExtWinSurfNums.begin(), thisEnclDaylight.DayltgExtWinSurfNums.end(), surfNum) ==
                 thisEnclDaylight.DayltgExtWinSurfNums.end()) {
-                skippedNotInEncl.push_back(surfNum);
+                if (!surfaceIsInControlZoneOrAdjacent(surfNum, winShadeControl.ZoneIndex)) {
+                    skippedInvalidZone.push_back(surfNum);
+                }
                 continue;
             }
             if (std::find(addedWins.begin(), addedWins.end(), surfNum) != addedWins.end()) {
-                skippedDuplicate.push_back(surfNum);
                 continue;
             }
             addedWins.push_back(surfNum);
@@ -9837,25 +9857,14 @@ void CreateShadeDeploymentOrder(EnergyPlusData &state, int const enclNum)
             shadeDeployOrderExtWins.push_back(group);
         }
 
-        if (!skippedNotInEncl.empty()) {
+        if (!skippedInvalidZone.empty()) {
             ShowWarningError(state,
-                             std::format("CreateShadeDeploymentOrder: WindowShadingControl=\"{}\" references fenestration surfaces that are not "
-                                         "exterior windows of daylighting enclosure {}.",
+                             std::format("CreateShadeDeploymentOrder: WindowShadingControl=\"{}\" references fenestration surfaces that are neither "
+                                         "in Zone=\"{}\" nor in an adjacent zone connected by an interior window.",
                                          winShadeControl.Name,
-                                         state.dataViewFactor->EnclSolInfo(enclNum).Name));
-            ShowContinueError(state, "Check the Zone Name in the WindowShadingControl. These surfaces are ignored for daylighting shade deployment:");
-            for (int surfNum : skippedNotInEncl) {
-                ShowContinueError(state, std::format("  -  {}", s_surf->Surface(surfNum).Name));
-            }
-        }
-        if (!skippedDuplicate.empty()) {
-            ShowWarningError(state,
-                             std::format("CreateShadeDeploymentOrder: WindowShadingControl=\"{}\" references fenestration surfaces that are already "
-                                         "referenced by another WindowShadingControl in daylighting enclosure {}.",
-                                         winShadeControl.Name,
-                                         state.dataViewFactor->EnclSolInfo(enclNum).Name));
-            ShowContinueError(state, "Only the first reference is used for daylighting shade deployment:");
-            for (int surfNum : skippedDuplicate) {
+                                         state.dataHeatBal->Zone(winShadeControl.ZoneIndex).Name));
+            ShowContinueError(state, "These surfaces are ignored for daylighting shade deployment:");
+            for (int surfNum : skippedInvalidZone) {
                 ShowContinueError(state, std::format("  -  {}", s_surf->Surface(surfNum).Name));
             }
         }
