@@ -1374,7 +1374,7 @@ namespace WaterUse {
                 DeliveredHotWaterMassFlow = min(DeliveredHotWaterMassFlow, this->TotalMassFlowRate);
 
                 if (DeliveredHotWaterMassFlow != DesiredHotWaterMassFlow) { // plant didn't give what was asked for
-                    this->HotMassFlowRate = DeliveredHotWaterMassFlow; // SetComponentFlowRate returned the flow the plant actually delivered
+                    this->HotMassFlowRate = DeliveredHotWaterMassFlow;      // SetComponentFlowRate returned the flow the plant actually delivered
                     this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
 
                     // Shift hot and cold water proportionally for all WATER USE EQUIPMENT so their sums match the connection.
