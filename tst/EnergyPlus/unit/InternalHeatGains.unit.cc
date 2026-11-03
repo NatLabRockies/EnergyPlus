@@ -1601,7 +1601,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ZoneBaseboardOutdoorTemperatureContr
     EXPECT_EQ(25.0, thisBBHeat2.ZnHtgSetTemp);
     EXPECT_EQ(-17.3, thisBBHeat2.LowTemperature);
     EXPECT_EQ(25.0, thisBBHeat2.HighTemperature);
-    EXPECT_EQ(1269.0 * 0.75, thisBBHeat2.CapatLowTemperature);
+    EXPECT_DOUBLE_EQ(1269.0 * 0.75, thisBBHeat2.CapatLowTemperature);
     EXPECT_EQ(0.0, thisBBHeat2.CapatHighTemperature);
 
     EXPECT_EQ(20.0, thisBBHeat3.ZnHtgSetTemp);

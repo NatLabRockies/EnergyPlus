@@ -2843,10 +2843,13 @@ namespace PlantPipingSystemsManager {
             if (this->BasementZone.Width > 0) {
                 // Create partitions at basement walls and horizontal insulation edges
                 CellWidth = this->VertInsThickness;
+                // The insulation layer and the basement wall interface partitions are adjacent: derive both from their shared edge so it
+                // is computed only once, otherwise round-off can make them overlap
+                Real64 const SideXInsulationWallEdge = this->PerimeterOffset - InterfaceCellWidth;
                 // Side X direction - Insulation layer
-                SideXLocation = this->PerimeterOffset - InterfaceCellWidth - CellWidth / 2.0;
+                SideXLocation = SideXInsulationWallEdge - CellWidth / 2.0;
                 // Side X direction - Basement Wall Interface
-                SideXWallLocation = this->PerimeterOffset - InterfaceCellWidth / 2.0;
+                SideXWallLocation = SideXInsulationWallEdge + InterfaceCellWidth / 2.0;
                 if (this->HorizIns == HorizInsulation::Perimeter) {
                     // Insulation Edge in X direction
                     SideXInsulationLocation = this->PerimeterOffset + this->HorizInsWidth + InterfaceCellWidth / 2.0;
@@ -2878,10 +2881,13 @@ namespace PlantPipingSystemsManager {
             // Zone coupled basement model
             if (this->BasementZone.Depth > 0) {
                 CellWidth = this->HorizInsThickness;
+                // The floor insulation layer and the basement floor interface partitions are adjacent: derive both from their shared edge so
+                // it is computed only once, otherwise round-off can make them overlap
+                Real64 const UnderFloorFloorEdge = this->Extents.yMax - this->BasementZone.Depth - InterfaceCellWidth;
                 // Distance of basement floor interface from domain bottom
-                FloorLocation = this->Extents.yMax - this->BasementZone.Depth - InterfaceCellWidth / 2.0;
+                FloorLocation = UnderFloorFloorEdge + InterfaceCellWidth / 2.0;
                 // Distance of basement floor insulation layer from domain bottom
-                UnderFloorLocation = this->Extents.yMax - this->BasementZone.Depth - InterfaceCellWidth - CellWidth / 2.0;
+                UnderFloorLocation = UnderFloorFloorEdge - CellWidth / 2.0;
                 if (this->VertInsPresentFlag) {
                     YInsulationLocation = this->Extents.yMax - this->VertInsDepth - InterfaceCellWidth / 2.0;
                 } else {
@@ -2905,10 +2911,13 @@ namespace PlantPipingSystemsManager {
             if (this->BasementZone.Width > 0) {
                 // Create partitions at basement walls and horizontal insulation edges
                 CellWidth = this->VertInsThickness;
+                // The insulation layer and the basement wall interface partitions are adjacent: derive both from their shared edge so it
+                // is computed only once, otherwise round-off can make them overlap
+                Real64 const SideZInsulationWallEdge = this->PerimeterOffset - InterfaceCellWidth;
                 // Side Z direction - Insulation layer
-                SideZLocation = this->PerimeterOffset - InterfaceCellWidth - CellWidth / 2.0;
+                SideZLocation = SideZInsulationWallEdge - CellWidth / 2.0;
                 // Side Z direction - Basement Wall Interface
-                SideZWallLocation = this->PerimeterOffset - InterfaceCellWidth / 2.0;
+                SideZWallLocation = SideZInsulationWallEdge + InterfaceCellWidth / 2.0;
                 if (this->HorizIns == HorizInsulation::Perimeter) {
                     // Insulation Edge Z direction
                     SideZInsulationLocation = this->PerimeterOffset + this->HorizInsWidth + InterfaceCellWidth / 2.0;
