@@ -1351,6 +1351,72 @@ TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP)
                    HeatPumpAirToWater::OperatingModeControlOptionMultipleUnit::SingleMode);
 }
 
+TEST_F(EnergyPlusFixture, processInputForEIRPLHP_AWHP_BoosterRejectsAutosizedRegularSpeed)
+{
+    nlohmann::json const epJSON = nlohmann::json::parse(R"(
+    {
+        "HeatPump:AirToWater": {
+            "test_awhp": {
+                "air_inlet_node_name": "Outdoor Air Inlet Node",
+                "air_outlet_node_name": "Outdoor Air Outlet Node",
+                "hot_water_inlet_node_name": "Hot Water Inlet Node",
+                "hot_water_outlet_node_name": "Hot Water Outlet Node",
+                "number_of_speeds_for_heating": 2,
+                "rated_heating_capacity_at_speed_1": 500.0,
+                "rated_cop_for_heating_at_speed_1": 3.0,
+                "normalized_heating_capacity_function_of_temperature_curve_name_at_speed_1": "CapCurve",
+                "heating_energy_input_ratio_function_of_temperature_curve_name_at_speed_1": "CapCurve",
+                "heating_energy_input_ratio_function_of_plr_curve_name_at_speed_1": "PLRCurve",
+                "rated_heating_capacity_at_speed_2": "Autosize",
+                "rated_cop_for_heating_at_speed_2": 3.0,
+                "normalized_heating_capacity_function_of_temperature_curve_name_at_speed_2": "CapCurve",
+                "heating_energy_input_ratio_function_of_temperature_curve_name_at_speed_2": "CapCurve",
+                "heating_energy_input_ratio_function_of_plr_curve_name_at_speed_2": "PLRCurve",
+                "booster_mode_on_heating": "Yes",
+                "rated_heating_capacity_in_booster_mode": 2000.0,
+                "rated_heating_cop_in_booster_mode": 3.0,
+                "normalized_heating_capacity_function_of_temperature_curve_name_in_booster_mode": "CapCurve",
+                "heating_energy_input_ratio_function_of_temperature_curve_name_in_booster_mode": "CapCurve",
+                "heating_energy_input_ratio_function_of_plr_curve_name_in_booster_mode": "PLRCurve",
+                "number_of_speeds_for_cooling": 0
+            }
+        },
+        "Curve:Biquadratic": {
+            "CapCurve": {
+                "coefficient1_constant": 1.0,
+                "coefficient2_x": 0.0,
+                "coefficient3_x_2": 0.0,
+                "coefficient4_y": 0.0,
+                "coefficient5_y_2": 0.0,
+                "coefficient6_x_y": 0.0,
+                "minimum_value_of_x": -100.0,
+                "maximum_value_of_x": 100.0,
+                "minimum_value_of_y": -100.0,
+                "maximum_value_of_y": 100.0
+            }
+        },
+        "Curve:Linear": {
+            "PLRCurve": {
+                "coefficient1_constant": 1.0,
+                "coefficient2_x": 0.0,
+                "minimum_value_of_x": 0.0,
+                "maximum_value_of_x": 1.0
+            }
+        }
+    }
+    )");
+
+    ASSERT_TRUE(process_json(epJSON));
+    state->init_state(*state);
+
+    HeatPumpAirToWater::processInputForEIRPLHP(*state);
+
+    EXPECT_TRUE(state->dataHeatPumpAirToWater->heatPumps.empty());
+    EXPECT_TRUE(compare_err_stream(delimited_string({
+        "   ** Severe  ** cannot autosize capacity below maximum speed (name=TEST_AWHP, field=rated_heating_capacity_at_speed_2)",
+    })));
+}
+
 TEST_F(EnergyPlusFixture, calcLoadSideHeatTransfer_AWHP)
 {
     auto thisAWHP = HeatPumpAirToWater();

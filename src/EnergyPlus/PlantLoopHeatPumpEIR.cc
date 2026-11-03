@@ -2840,7 +2840,7 @@ void HeatPumpAirToWater::sizeLoadSide(EnergyPlusData &state)
     EIRPlantLoopHeatPump::sizeLoadSide(state);
     this->referenceCapacityOneUnit = this->referenceCapacity / this->heatPumpMultiplier;
     if (this->referenceCapacityWasAutoSized) {
-        // only the highest speed (or booster mode) capacity can be autosized, keep it in sync with the sized value
+        // only the highest speed can be autosized, keep it in sync with the sized value
         this->ratedCapacity[this->numSpeeds - 1] = this->referenceCapacityOneUnit;
     }
 }
@@ -4148,7 +4148,7 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                     std::string const capFtName = Util::makeUPPER(fields.at(capFtFieldName).get<std::string>());
                     thisAWHP.ratedCapacity[i] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
                         fields, schemaProps, std::format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1));
-                    if (i != thisAWHP.numSpeeds - 1 && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
+                    if ((i != thisAWHP.numSpeeds - 1 || thisAWHP.boosterOn) && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
                         ShowSevereError(state,
                                         std::format("cannot autosize capacity below maximum speed (name={}, field={})",
                                                     thisAWHP.name,
