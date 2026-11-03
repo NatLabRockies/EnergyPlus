@@ -1197,6 +1197,7 @@ namespace FanCoilUnits {
 
         bool ErrorsFound = false;             // TRUE if errors found during sizing
         bool IsAutoSize = false;              // Indicator to autosize for reporting
+        bool maxAirFlowIsAutosized = false;   // Indicator that user autosized fan coil air flow
         Real64 MaxAirVolFlowDes = 0.0;        // Autosized max air flow for reporting
         Real64 MaxAirVolFlowUser = 0.0;       // Hardsized max air flow for reporting
         Real64 OutAirVolFlowDes = 0.0;        // Autosized outdoor air flow for reporting
@@ -1382,6 +1383,7 @@ namespace FanCoilUnits {
                 TempSize = fanCoil.MaxAirVolFlow;
                 PrintFlag = true;
                 if (fanCoil.MaxAirVolFlow == DataSizing::AutoSize) {
+                    maxAirFlowIsAutosized = true;
                     IsAutoSize = true;
                     SystemAirFlowSizer sizerSystemAirFlow;
                     // sizerSystemAirFlow.setHVACSizingIndexData(fanCoil.HVACSizingIndex);
@@ -1920,12 +1922,15 @@ namespace FanCoilUnits {
             zoneEqSizing.DesHeatingLoad = fanCoil.DesHeatingLoad;
             if (state.dataSize->ZoneSizingRunDone) {
                 // the fan coil has a single input for Maximum Supply Air Flow Rate
-                // it is odd to use two airflows if autosizing and a single air flow when not autosizing
+                // it is odd to use two coil airflows if autosizing and a single air flow for both coils when not autosizing
                 // however, this method does minimize water coil sizes instead of upsizing one of the coils to meet the maximum air flow rate
-                zoneEqSizing.CoolingAirFlow = true;
-                zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
-                zoneEqSizing.HeatingAirFlow = true;
-                zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+                // if user specified autosized air flow rate then size water coil using zone sizing design cooling/heating air flow rates
+                if (maxAirFlowIsAutosized) {
+                    zoneEqSizing.CoolingAirFlow = true;
+                    zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
+                    zoneEqSizing.HeatingAirFlow = true;
+                    zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+                }
             }
             // when DesignSizeFromParent is set, sizing will use AirVolFlow in CoolingAirFlowSizing and HeatingAirFlowSizing
             // if CoolingAirFlow and HeatingAirFlow are also set (as above), then sizing will use the CoolingAirVolFlow and HeatingAirVolFlow values
