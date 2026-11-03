@@ -116,14 +116,8 @@ void setupMixer(EnergyPlus::EnergyPlusData &state, int const numInletNodes)
     state.dataContaminantBalance->Contaminant.GenericContamSimulation = true;
 }
 
-void setInletNode(EnergyPlus::EnergyPlusData &state,
-                  int nodeNum,
-                  Real64 massFlowRate,
-                  Real64 temp,
-                  Real64 humRat,
-                  Real64 press,
-                  Real64 co2,
-                  Real64 genContam)
+void setInletNode(
+    EnergyPlus::EnergyPlusData &state, int nodeNum, Real64 massFlowRate, Real64 temp, Real64 humRat, Real64 press, Real64 co2, Real64 genContam)
 {
     auto &node = state.dataLoopNodes->Node(nodeNum);
     node.MassFlowRate = massFlowRate;
