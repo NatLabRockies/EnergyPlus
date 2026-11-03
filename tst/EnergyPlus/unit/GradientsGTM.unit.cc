@@ -41,6 +41,7 @@ protected:
 
     std::unique_ptr<GradientsGTM> gtm;
 };
+
 // ---------------------------------------------------------------------------
 // 1. Parser: single segment
 // ---------------------------------------------------------------------------
@@ -190,6 +191,10 @@ TEST_F(GradientsGTMTest, HybridAtTransitionDepth)
     EXPECT_NEAR(gtm->getGroundTempAtTimeInMonths(*state, 15.0, 1),
                 gtm->testSegmentTemp(15.0), 1e-6);
 }
+
+// ---------------------------------------------------------------------------
+// 8. ParseReferenceTemperature (New test)
+// ---------------------------------------------------------------------------
 TEST_F(GradientsGTMTest, ParseReferenceTemperature)
 {
     nlohmann::json j;
@@ -201,14 +206,15 @@ TEST_F(GradientsGTMTest, ParseReferenceTemperature)
         {{"upper_depth", 15.0}, {"lower_depth", 100.0}, {"gradient", 0.057}}
     });
 
-    auto testgtm = std::make_unique<GradientsGTM>();
-    testgtm->parseGradientSegments(*state, j);
-    testgtm->setBoreholeDepth(*state, 100.0);
+    // Renamed to testGtm to avoid hiding the class member 'gtm'
+    auto testGtm = std::make_unique<GradientsGTM>();
+    testGtm->parseGradientSegments(*state, j);
+    testGtm->setBoreholeDepth(*state, 100.0);
 
     // Verify the temperature at 50m depth.
     // With ref_temp = 18.5 and gradient = 0.057 starting at 15m:
     // Temp = 18.5 + 0.057 * (50 - 15) = 18.5 + 1.995 = 20.495
-    Real64 tempAt50m = testgtm->getGroundTempAtTimeInMonths(*state, 50.0, 1); 
+    Real64 tempAt50m = testGtm->getGroundTempAtTimeInMonths(*state, 50.0, 1); 
     
     EXPECT_NEAR(tempAt50m, 20.495, 0.001);
 }
