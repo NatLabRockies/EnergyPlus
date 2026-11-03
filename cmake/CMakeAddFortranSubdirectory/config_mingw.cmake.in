@@ -12,4 +12,7 @@ execute_process(
   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=@CMAKE_OSX_DEPLOYMENT_TARGET@
   --no-warn-unused-cli
   ${CMAKE_COMMAND_LINE}
-  "@source_dir@")
+  # after CMAKE_COMMAND_LINE so the build type always matches the parent
+  "-DCMAKE_BUILD_TYPE:STRING=${CONFIG}"
+  "@source_dir@"
+  COMMAND_ERROR_IS_FATAL ANY)

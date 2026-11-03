@@ -25812,8 +25812,9 @@ ZoneVentilation:WindandStackOpenArea,
        \note  "Cw" in the wind-driven equation and the maximum value is 1.0.
        \note When the input is Autocalculate, the program calculates Cw based on an angle between
        \note wind direction and effective angle
-       \note Cw = 0.55 at angle = 0, and Cw = 0.3 at angle=180
-       \note Linear interpolation is used to calculate Cw based on the above two values.
+       \note Cw = 0.55 at angle = 0 and Cw = 0.3 at angle = 45, with the same linear slope
+       \note continued to Cw = 0.05 at angle = 90. Cw = 0 for angles greater than 90
+       \note (wind from the other side of the opening).
        \units dimensionless
        \autocalculatable
        \type real
@@ -53072,16 +53073,12 @@ FanPerformance:NightVentilation,
        \units Pa
        \ip-units inH2O
        \required-field
-  N3 , \field Maximum Flow Rate
-       \units m3/s
-       \minimum 0.0
-       \autosizable
-  N4 , \field Motor Efficiency
+  N3 , \field Motor Efficiency
        \type real
        \required-field
        \minimum> 0
        \maximum 1.0
-  N5 ; \field Motor in Airstream Fraction
+  N4 ; \field Motor in Airstream Fraction
        \type real
        \default 1.0
        \minimum 0.0
@@ -89005,6 +89002,8 @@ AvailabilityManager:NightVentilation,
        \default 1.
        \note the fraction (could be > 1) of the design system Flow Rate at which
        \note night ventilation will be done
+       \note This fraction is applied to primary air loop flow requests. For zone equipment,
+       \note the availability manager controls availability but does not scale component flow.
   A5 ; \field Control Zone Name
        \type object-list
        \object-list ZoneNames

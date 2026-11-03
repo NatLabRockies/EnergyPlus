@@ -150,11 +150,10 @@ TEST_F(EnergyPlusFixture, extendedHI_Qv)
 
 TEST_F(EnergyPlusFixture, extendedHI_Zs)
 {
-    Real64 tol = 1e-8;
     std::vector<Real64> Rs_values = {0.0387, 0.5, 1, 1.2};
     std::vector<Real64> result = {52.1, 18750000.0, 600000000.0, 1492991999.9999998};
     for (size_t i = 0; i < Rs_values.size(); ++i) {
-        EXPECT_NEAR(ExtendedHI::Zs(Rs_values[i]), result[i], tol);
+        EXPECT_DOUBLE_EQ(ExtendedHI::Zs(Rs_values[i]), result[i]);
     }
 }
 
