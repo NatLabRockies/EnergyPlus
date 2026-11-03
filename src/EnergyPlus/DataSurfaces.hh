@@ -64,7 +64,6 @@
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataVectorTypes.hh>
-#include <EnergyPlus/DataWindowEquivalentLayer.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Geometry/Plane.hh>
 #include <EnergyPlus/Geometry/Vector2D.hh>
@@ -502,15 +501,9 @@ namespace DataSurfaces {
         using Edges = std::vector<Edge>;
         using EdgesXY = std::vector<EdgeXY>;
 
-    public: // Creation
-            // Constructor
-        Surface2DSlab(Real64 const yl, Real64 const yu) : xl(0.0), xu(0.0), yl(yl), yu(yu)
-        {
-        }
-
     public:              // Data
-        Real64 xl, xu;   // Lower and upper x coordinates of slab bounding box
-        Real64 yl, yu;   // Lower and upper y coordinates of slab
+        Real64 xl = 0.0; // Lower x coordinate of slab bounding box
+        Real64 xu = 0.0; // Upper x coordinate of slab bounding box
         Edges edges;     // Left-to-right ordered edges crossing the slab
         EdgesXY edgesXY; // Edge x/y inverse slopes
 
@@ -1048,11 +1041,9 @@ namespace DataSurfaces {
         Real64 DividerConductance;         // Effective conductance of divider (no air films) {W/m2-K}
         Real64 DivEdgeToCenterGlCondRatio; // Ratio of divider edge of glass conductance (without air films) to
         // center of glass conductance (without air films)
-        Real64 DividerSolAbsorp;                                   // Solar absorptance of divider corrected for self-shading
-        Real64 DividerVisAbsorp;                                   // Visible absorptance of divider corrected for self-shading
-        Real64 DividerEmis;                                        // Thermal emissivity of divider
-        DataWindowEquivalentLayer::Orientation MullionOrientation; // Horizontal or Vertical; used only for windows with two glazing systems
-        //  divided by a mullion; obtained from Window5 data file.
+        Real64 DividerSolAbsorp;            // Solar absorptance of divider corrected for self-shading
+        Real64 DividerVisAbsorp;            // Visible absorptance of divider corrected for self-shading
+        Real64 DividerEmis;                 // Thermal emissivity of divider
         NfrcProductOptions NfrcProductType; // NFRC Product Type for Assembly Calculations
         Real64 OutsideRevealSolAbs;         // Solar absorptance of outside reveal
         Real64 InsideSillDepth;             // Inside sill depth (m)
@@ -1066,8 +1057,8 @@ namespace DataSurfaces {
               FrEdgeToCenterGlCondRatio(1.0), FrameSolAbsorp(0.0), FrameVisAbsorp(0.0), FrameEmis(0.9), DividerType(FrameDividerType::DividedLite),
               DividerWidth(0.0), HorDividers(0), VertDividers(0), DividerProjectionOut(0.0), DividerProjectionIn(0.0), DividerEdgeWidth(0.06355),
               DividerConductance(0.0), DivEdgeToCenterGlCondRatio(1.0), DividerSolAbsorp(0.0), DividerVisAbsorp(0.0), DividerEmis(0.9),
-              MullionOrientation(DataWindowEquivalentLayer::Orientation::Invalid), NfrcProductType(NfrcProductOptions::CurtainWall),
-              OutsideRevealSolAbs(0.0), InsideSillDepth(0.0), InsideReveal(0.0), InsideSillSolAbs(0.0), InsideRevealSolAbs(0.0)
+              NfrcProductType(NfrcProductOptions::CurtainWall), OutsideRevealSolAbs(0.0), InsideSillDepth(0.0), InsideReveal(0.0),
+              InsideSillSolAbs(0.0), InsideRevealSolAbs(0.0)
         {
         }
     };
@@ -1261,7 +1252,6 @@ namespace DataSurfaces {
     struct ShadingVertexData
     {
         // Members
-        int NVert = 0;
         Array1D<Real64> XV;
         Array1D<Real64> YV;
         Array1D<Real64> ZV;
@@ -1285,7 +1275,6 @@ namespace DataSurfaces {
     {
         // Members
         std::string Name;
-        int SurfaceIdx = 0;               // surface index
         Real64 Scaler = 1.0;              // the constant multiplier constant from user input
         Sched::Schedule *sched = nullptr; // multiplier schedule
     };
@@ -1296,11 +1285,10 @@ namespace DataSurfaces {
         std::string Name;
         int SurfPtr;                       // surface pointer
         int ConstrPtr;                     // construction pointer
-        int NumOfSched;                    // number of scheduled layers
         Array1D<Sched::Schedule *> scheds; // pointer to schedules for each layer in construction
 
         // Default Constructor
-        FenestrationSolarAbsorbed() : SurfPtr(0), ConstrPtr(0), NumOfSched(0)
+        FenestrationSolarAbsorbed() : SurfPtr(0), ConstrPtr(0)
         {
         }
     };
@@ -1364,16 +1352,15 @@ namespace DataSurfaces {
     {
         // Members
         std::string Name;
-        std::string ZoneOrZoneListName;   // zone or zone list name
-        int ZoneOrZoneListPtr;            // pointer to a zone list
-        int NumOfZones;                   // number of zones in a zone list
-        int Construction;                 // pointer to construction object
-        Real64 GrossArea;                 // internal surface area, [m2]
-        bool ZoneListActive;              // flag to a list
-        std::string spaceOrSpaceListName; // Space or Space list name
-        int spaceOrSpaceListPtr;          // pointer to a Space list
-        int numOfSpaces;                  // number of Spaces in a Space list
-        bool spaceListActive;             // flag to a list
+        std::string ZoneOrZoneListName; // zone or zone list name
+        int ZoneOrZoneListPtr;          // pointer to a zone list
+        int NumOfZones;                 // number of zones in a zone list
+        int Construction;               // pointer to construction object
+        Real64 GrossArea;               // internal surface area, [m2]
+        bool ZoneListActive;            // flag to a list
+        int spaceOrSpaceListPtr;        // pointer to a Space list
+        int numOfSpaces;                // number of Spaces in a Space list
+        bool spaceListActive;           // flag to a list
 
         // Default Constructor
         IntMassObject()
@@ -1486,7 +1473,6 @@ struct SurfacesData : BaseGlobalStruct
     int AttachedShadingCount = 0;    // Total number of Shades attached to Zones
     int ShadingSurfaceFirst = 0;     // Start index of shading surfaces (Building External Shades, Fixed External Shades and Shades attached to Zone)
     int ShadingSurfaceLast = -1;     // End index of shading surfaces (Building External Shades, Fixed External Shades and Shades attached to Zone)
-    bool AspectTransform = false;    // Set to true when GeometryTransform object is used
     bool CalcSolRefl = false;        // Set to true when Solar Reflection Calculations object is used
     bool CCW = false;                // True if vertices will be entered in CounterClockWise Order
     bool WorldCoordSystem = false;   // True if vertices will be "World Coordinates". False means relative coordinates

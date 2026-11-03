@@ -4502,7 +4502,6 @@ namespace UnitarySystems {
                     }
                     HeatingCoilInletNode = thisHeatCoil.AirInNode;
                     HeatingCoilOutletNode = thisHeatCoil.AirOutNode;
-                    thisHeatCoil.HeatSizeRatio = this->m_HeatingSizingRatio;
                 }
             }
 

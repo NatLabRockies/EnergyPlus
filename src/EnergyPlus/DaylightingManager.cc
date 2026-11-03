@@ -10075,11 +10075,9 @@ void CheckForGeometricTransform(EnergyPlusData &state, bool &doTransform, Real64
             ShowWarningError(state, std::format("{}: invalid {}=\"{}...ignored.", CurrentModuleObject, s_ipsc->cAlphaFieldNames(1), cAlphas(1)));
         }
         doTransform = true;
-        s_surf->AspectTransform = true;
     }
     if (s_surf->WorldCoordSystem) {
         doTransform = false;
-        s_surf->AspectTransform = false;
     }
 }
 

@@ -3582,7 +3582,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                                  _,
                                                  state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCooling);
 
-                            state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFIUPtr = VRFTUNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
 
@@ -3862,7 +3861,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                                  _,
                                                  1.0); // DefrostCapacity=1.0
 
-                            state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFIUPtr = VRFTUNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
 

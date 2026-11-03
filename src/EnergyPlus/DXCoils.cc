@@ -16229,9 +16229,9 @@ void SetDXCoolingCoilData(
     ObjexxFCL::Optional<Real64> DefrostFraction,
     ObjexxFCL::Optional<Real64> DefrostCapacity,
     ObjexxFCL::Optional<Real64> MaxOATDefrost,
-    ObjexxFCL::Optional_bool CoolingCoilPresent,
-    ObjexxFCL::Optional_bool HeatingCoilPresent,
-    ObjexxFCL::Optional<Real64> HeatSizeRatio,
+    ObjexxFCL::Optional_bool,
+    ObjexxFCL::Optional_bool,
+    ObjexxFCL::Optional<Real64>,
     ObjexxFCL::Optional<Real64> TotCap,
     ObjexxFCL::Optional_int SupplyFanIndex,
     ObjexxFCL::Optional_string SupplyFanName,
@@ -16323,18 +16323,6 @@ void SetDXCoolingCoilData(
 
     if (present(MaxOATDefrost)) {
         thisDXCoil.MaxOATDefrost = MaxOATDefrost;
-    }
-
-    if (present(CoolingCoilPresent)) {
-        thisDXCoil.CoolingCoilPresent = CoolingCoilPresent;
-    }
-
-    if (present(HeatingCoilPresent)) {
-        thisDXCoil.HeatingCoilPresent = HeatingCoilPresent;
-    }
-
-    if (present(HeatSizeRatio)) {
-        thisDXCoil.HeatSizeRatio = HeatSizeRatio;
     }
 
     if (present(TotCap)) {
