@@ -25812,8 +25812,9 @@ ZoneVentilation:WindandStackOpenArea,
        \note  "Cw" in the wind-driven equation and the maximum value is 1.0.
        \note When the input is Autocalculate, the program calculates Cw based on an angle between
        \note wind direction and effective angle
-       \note Cw = 0.55 at angle = 0, and Cw = 0.3 at angle=180
-       \note Linear interpolation is used to calculate Cw based on the above two values.
+       \note Cw = 0.55 at angle = 0 and Cw = 0.3 at angle = 45, with the same linear slope
+       \note continued to Cw = 0.05 at angle = 90. Cw = 0 for angles greater than 90
+       \note (wind from the other side of the opening).
        \units dimensionless
        \autocalculatable
        \type real
@@ -36837,6 +36838,13 @@ ZoneControl:Thermostat,
        \required-field
        \type object-list
        \object-list ScheduleNames
+  N1 , \field Temperature Difference Between Cutout And Setpoint
+       \note This optional choice field provides a temperature difference between cut-out temperature and
+       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
+       \units deltaC
+       \type real
+       \minimum 0.0
+       \default 0.0
   A4 , \field Control 1 Object Type
        \required-field
        \type choice
@@ -36878,18 +36886,11 @@ ZoneControl:Thermostat,
        \key ThermostatSetpoint:SingleCooling
        \key ThermostatSetpoint:SingleHeatingOrCooling
        \key ThermostatSetpoint:DualSetpoint
-  A11, \field Control 4 Name
+  A11; \field Control 4 Name
        \note Control names are names of individual control objects (e.g. ThermostatSetpoint:SingleHeating)
        \note Schedule values in these objects list actual setpoint temperatures for the control types
        \type object-list
        \object-list ControlTypeNames
-  N1 ; \field Temperature Difference Between Cutout And Setpoint
-       \note This optional choice field provides a temperature difference between cut-out temperature and
-       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
-       \units deltaC
-       \type real
-       \minimum 0.0
-       \default 0.0
 
 ZoneControl:Thermostat:OperativeTemperature,
        \memo This object can be used with the ZoneList option on a thermostat or with one
@@ -39010,10 +39011,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \required-field
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A12, \field First Evaporative Cooler Object Name
         \required-field
         \type object-list
@@ -39023,10 +39024,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \note second cooler must be immediately downstream of first cooler, if present
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A14, \field Second Evaporative Cooler Name
         \note optional, used for direct/indirect configurations
         \type object-list
@@ -53072,16 +53073,12 @@ FanPerformance:NightVentilation,
        \units Pa
        \ip-units inH2O
        \required-field
-  N3 , \field Maximum Flow Rate
-       \units m3/s
-       \minimum 0.0
-       \autosizable
-  N4 , \field Motor Efficiency
+  N3 , \field Motor Efficiency
        \type real
        \required-field
        \minimum> 0
        \maximum 1.0
-  N5 ; \field Motor in Airstream Fraction
+  N4 ; \field Motor in Airstream Fraction
        \type real
        \default 1.0
        \minimum 0.0
@@ -64031,7 +64028,7 @@ EvaporativeCooler:Indirect:WetCoil,
        \type node
        \note Enter the name of an outdoor air node
 
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
        \memo Indirect evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or wetted coil), recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
@@ -64089,7 +64086,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note rates and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)
@@ -64215,7 +64212,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note limits then specify very high maximum drybulb temperature limit value (e.g. 99.0 C).
 
 
-EvaporativeCooler:Direct:ResearchSpecial,
+EvaporativeCooler:Direct:UserEffectiveness,
        \memo Direct evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or similar media), and recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
@@ -64259,7 +64256,7 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \note and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)
@@ -89005,6 +89002,8 @@ AvailabilityManager:NightVentilation,
        \default 1.
        \note the fraction (could be > 1) of the design system Flow Rate at which
        \note night ventilation will be done
+       \note This fraction is applied to primary air loop flow requests. For zone equipment,
+       \note the availability manager controls availability but does not scale component flow.
   A5 ; \field Control Zone Name
        \type object-list
        \object-list ZoneNames

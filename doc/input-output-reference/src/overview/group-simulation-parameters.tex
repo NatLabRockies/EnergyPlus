@@ -664,7 +664,7 @@ Allowable choices are:
 
 \textbf{DisplayAdvancedReportVariables} -- use this to be able to use certain advanced output variables where the name may be misleading and you need to understand the concepts or reasons for use. If you put in this field, then you will be able to report on these features. They are noted in the descriptions of objects or output variables.
 
-\textbf{DisplayZoneAirHeatBalanceOffBalance} -- this is a developer diagnostic which you can turn on, if you desire.
+\textbf{DisplayZoneAirHeatBalanceOffBalance} -- this is a developer diagnostic which you can turn on, if you desire. It calculates the Zone and Space Air Heat Balance Deviation Rate output variables (which also need the DisplayAdvancedReportVariables key) and issues a warning when the imbalance of a zone air heat balance is larger than 20\% of the root sum of squares of its terms.
 
 \textbf{DoNotMirrorDetachedShading} -- use this to turn off the automatic mirroring of detached shading surfaces. These surfaces are automatically mirrored so that the user does not need to worry about facing direction of the surface and the shading surface will shade the building as appropriate.
 

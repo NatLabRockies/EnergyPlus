@@ -194,7 +194,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeIndEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).TotalComponents = 1;
 
     std::string const idf_objects = delimited_string({
-        "	EvaporativeCooler:Indirect:ResearchSpecial,",
+        "	EvaporativeCooler:Indirect:UserEffectiveness,",
         "	IndRDD Evap Cooler,  !- Name",
         "	,			         !- Availability Schedule Name",
         "	0.750,				 !- Cooler Wetbulb Design Effectiveness",
@@ -202,7 +202,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeIndEvapCoolerTest)
         "	,					 !- Cooler Drybulb Design Effectiveness",
         "	,					 !- Drybulb Effectiveness Flow Ratio Modifier Curve Name",
         "	30.0,				 !- Recirculating Water Pump Design Power { W }",
-        "	,					 !- Water Pump Power Sizing Factor",
+        "	,					 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	autosize,			 !- Secondary Air Design Flow Rate { m3 / s }",
         "	1.2,				 !- Secondary Air Flow Sizing Factor",
@@ -287,14 +287,14 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).TotalComponents = 1;
 
     std::string const idf_objects = delimited_string({
-        "	EvaporativeCooler:Direct:ResearchSpecial,",
+        "	EvaporativeCooler:Direct:UserEffectiveness,",
         "	DirectEvapCooler,    !- Name",
         "	,			         !- Availability Schedule Name",
         "	0.7,				 !- Cooler Design Effectiveness",
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	autosize,			 !- Primary Air Design Flow Rate",
         "	autosize,			 !- Recirculating Water Pump Power Consumption { W }",
-        "	55.0,				 !- Water Pump Power Sizing Factor",
+        "	55.0,				 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
@@ -314,7 +314,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).Comp(1).Name = EvapCond(EvapCoolNum).Name;
     state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow = 0.50;
     PrimaryAirDesignFlow = state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow;
-    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // Test Direct Evaporative Cooler Primary Air Design Flow Rate sizing
     SizeEvapCooler(*state, 1);
@@ -498,8 +498,8 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_SizeEvapCooler)
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.0;
     state->dataSize->FinalSysSizing(1).DesOutAirVolFlow = 0.4;
 
-    // set up the structure to size the flow rates for an RDDSpecial
-    thisEvapCooler.evapCoolerType = EvapCoolerType::IndirectRDDSpecial;
+    // set up the structure to size the flow rates for an IndirectUserEffectiveness
+    thisEvapCooler.evapCoolerType = EvapCoolerType::IndirectUserEffectiveness;
     thisEvapCooler.DesVolFlowRate = DataSizing::AutoSize;
     thisEvapCooler.PadArea = 0.0;
     thisEvapCooler.PadDepth = 0.0;
@@ -582,7 +582,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).TotalComponents = 1;
 
     std::string const idf_objects = delimited_string({
-        "	EvaporativeCooler:Indirect:ResearchSpecial,",
+        "	EvaporativeCooler:Indirect:UserEffectiveness,",
         "	IndRDD Evap Cooler,  !- Name",
         "	,			         !- Availability Schedule Name",
         "	0.750,				 !- Cooler Wetbulb Design Effectiveness",
@@ -590,7 +590,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
         "	,					 !- Cooler Drybulb Design Effectiveness",
         "	,					 !- Drybulb Effectiveness Flow Ratio Modifier Curve Name",
         "	,   				 !- Recirculating Water Pump Design Power { W }",
-        "	,					 !- Water Pump Power Sizing Factor",
+        "	,					 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	,        			 !- Secondary Air Design Flow Rate { m3 / s }",
         "	1.2,				 !- Secondary Air Flow Sizing Factor",
@@ -640,7 +640,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
     EXPECT_EQ(SecondaryAirDesignFlow, EvapCond(EvapCoolNum).IndirectVolFlowRate);
     // Test Secondary Fan Power and reciculating water pump power
     SecondaryFanPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).FanSizingSpecificPower;
-    RecirculatingWaterPumpPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirculatingWaterPumpPower = SecondaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // SizeEvapCooler(*state,  EvapCoolNum );
     EXPECT_EQ(SecondaryFanPower, EvapCond(EvapCoolNum).IndirectFanPower);
@@ -678,14 +678,14 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).TotalComponents = 1;
 
     std::string const idf_objects = delimited_string({
-        "	EvaporativeCooler:Direct:ResearchSpecial,",
+        "	EvaporativeCooler:Direct:UserEffectiveness,",
         "	DirectEvapCooler,    !- Name",
         "	,			         !- Availability Schedule Name",
         "	0.7,				 !- Cooler Design Effectiveness",
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	,          			 !- Primary Air Design Flow Rate",
         "	,               	 !- Recirculating Water Pump Power Consumption { W }",
-        "	55.0,				 !- Water Pump Power Sizing Factor",
+        "	55.0,				 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
@@ -709,7 +709,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).Comp(1).Name = EvapCond(EvapCoolNum).Name;
     state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow = 0.50;
     PrimaryAirDesignFlow = state->dataSize->FinalSysSizing(state->dataSize->CurSysNum).DesMainVolFlow;
-    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpSizingFactor;
+    RecirWaterPumpDesignPower = PrimaryAirDesignFlow * EvapCond(EvapCoolNum).RecircPumpPowerPerUnitFlowRate;
 
     // Test Direct Evaporative Cooler Primary Air Design Flow Rate sizing
     SizeEvapCooler(*state, 1);
@@ -721,7 +721,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
     state->dataSize->FinalSysSizing.deallocate();
 }
 
-TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
+TEST_F(EnergyPlusFixture, DirectEvapCoolerUserEffectivenessCalcTest)
 {
     state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
@@ -741,7 +741,7 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
     curve->inputLimits[0].max = 1.0;
 
     // set up the flow rates for a direct RDDSpecial
-    thisEvapCooler.evapCoolerType = EvapCoolerType::DirectResearchSpecial;
+    thisEvapCooler.evapCoolerType = EvapCoolerType::DirectUserEffectiveness;
     thisEvapCooler.Name = "MyDirectEvapCoolerRS";
     thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(*state);
     thisEvapCooler.PumpPowerModifierCurve = curve;
@@ -759,14 +759,14 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
     thisEvapCooler.PartLoadFract = 1.0;
 
     // check water pump power at full primary air flow
-    EvaporativeCoolers::CalcDirectResearchSpecialEvapCooler(*state, EvapCoolNum);
+    EvaporativeCoolers::CalcDirectUserEffectivenessEvapCooler(*state, EvapCoolNum);
     EXPECT_DOUBLE_EQ(200.0, thisEvapCooler.RecircPumpPower);
     EXPECT_DOUBLE_EQ(200.0, thisEvapCooler.EvapCoolerPower);
 
     // reduce primary air flow rate by half
     thisEvapCooler.InletMassFlowRate = 0.5;
     // check water pump power at half primary air flow
-    EvaporativeCoolers::CalcDirectResearchSpecialEvapCooler(*state, EvapCoolNum);
+    EvaporativeCoolers::CalcDirectUserEffectivenessEvapCooler(*state, EvapCoolNum);
     EXPECT_DOUBLE_EQ(200.0, thisEvapCooler.RecircPumpPower);
     EXPECT_DOUBLE_EQ(100.0, thisEvapCooler.EvapCoolerPower);
 }
@@ -802,7 +802,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
     thisEvapCooler.DesiredOutletTemp = 21.0;
 
     // determine operating mode
-    OperatingMode Result_WetFullOperatingMode = EvaporativeCoolers::IndirectResearchSpecialEvapCoolerOperatingMode(
+    OperatingMode Result_WetFullOperatingMode = EvaporativeCoolers::IndirectUserEffectivenessEvapCoolerOperatingMode(
         *state, EvapCoolNum, thisEvapCooler.SecInletTemp, thisEvapCooler.SecInletWetBulbTemp, TdbOutSysWetMin, TdbOutSysDryMin);
     // check operating mode
     EXPECT_ENUM_EQ(Result_WetFullOperatingMode, EvaporativeCoolers::OperatingMode::WetFull);
@@ -838,14 +838,14 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerAutosizeWithoutSysSizingRunDone)
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).Branch(1).TotalComponents = 1;
 
     std::string const idf_objects = delimited_string({
-        "	EvaporativeCooler:Direct:ResearchSpecial,",
+        "	EvaporativeCooler:Direct:UserEffectiveness,",
         "	DirectEvapCooler,    !- Name",
         "	,			         !- Availability Schedule Name",
         "	0.7,				 !- Cooler Design Effectiveness",
         "	,					 !- Effectiveness Flow Ratio Modifier Curve Name",
         "	,          			 !- Primary Air Design Flow Rate",
         "	440,               	 !- Recirculating Water Pump Power Consumption { W }",
-        "	1.0,     			 !- Water Pump Power Sizing Factor",
+        "	1.0,     			 !- Design Water Pump Power Per Unit Flow Rate",
         "	,					 !- Water Pump Power Modifier Curve Name",
         "	Fan Outlet Node,     !- Air Inlet Node Name",
         "	Zone Inlet Node,	 !- Air Outlet Node Name",
@@ -873,12 +873,12 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerAutosizeWithoutSysSizingRunDone)
 
     std::string const error_string = delimited_string({
         std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
-        "   ** Severe  ** For autosizing of EvaporativeCooler:Direct:ResearchSpecial DIRECTEVAPCOOLER, a system sizing run must be done.",
+        "   ** Severe  ** For autosizing of EvaporativeCooler:Direct:UserEffectiveness DIRECTEVAPCOOLER, a system sizing run must be done.",
         "   **   ~~~   ** The \"SimulationControl\" object did not have the field \"Do System Sizing Calculation\" set to Yes.",
         "   **  Fatal  ** Program terminates due to previously shown condition(s).",
         "   ...Summary of Errors that led to program termination:",
         "   ..... Reference severe error count=1",
-        "   ..... Last severe error=For autosizing of EvaporativeCooler:Direct:ResearchSpecial DIRECTEVAPCOOLER, a system sizing run must be done.",
+        "   ..... Last severe error=For autosizing of EvaporativeCooler:Direct:UserEffectiveness DIRECTEVAPCOOLER, a system sizing run must be done.",
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));

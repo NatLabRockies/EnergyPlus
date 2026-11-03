@@ -2335,6 +2335,7 @@
     ZONE 1 @ 200 601 0 T CONTROLS,  !- Name
     ZONE 1 @ 200 601 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 1 @ 200 601 0 T SETPOINTS;  !- Control 1 Name
 
@@ -2412,6 +2413,7 @@
     ZONE 2 @ 200 200 0 T CONTROLS,  !- Name
     ZONE 2 @ 200 200 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 2 @ 200 200 0 T SETPOINTS;  !- Control 1 Name
 
@@ -2489,6 +2491,7 @@
     ZONE 3 @ 200 610 0 T CONTROLS,  !- Name
     ZONE 3 @ 200 610 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 3 @ 200 610 0 T SETPOINTS;  !- Control 1 Name
 
@@ -2566,6 +2569,7 @@
     ZONE 4 @ 200 600 0 T CONTROLS,  !- Name
     ZONE 4 @ 200 600 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 4 @ 200 600 0 T SETPOINTS;  !- Control 1 Name
 
@@ -2643,6 +2647,7 @@
     ZONE 5 @ 200 601 1 T CONTROLS,  !- Name
     ZONE 5 @ 200 601 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 5 @ 200 601 1 T SETPOINTS;  !- Control 1 Name
 
@@ -2720,6 +2725,7 @@
     ZONE 6 @ 200 200 1 T CONTROLS,  !- Name
     ZONE 6 @ 200 200 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 6 @ 200 200 1 T SETPOINTS;  !- Control 1 Name
 
@@ -2797,6 +2803,7 @@
     ZONE 7 @ 200 610 1 T CONTROLS,  !- Name
     ZONE 7 @ 200 610 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 7 @ 200 610 1 T SETPOINTS;  !- Control 1 Name
 
@@ -2874,6 +2881,7 @@
     ZONE 8 @ 200 200 1 T CONTROLS,  !- Name
     ZONE 8 @ 200 200 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 8 @ 200 200 1 T SETPOINTS;  !- Control 1 Name
 
@@ -2951,6 +2959,7 @@
     ZONE 9 @ 200 600 1 T CONTROLS,  !- Name
     ZONE 9 @ 200 600 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 9 @ 200 600 1 T SETPOINTS;  !- Control 1 Name
 

@@ -534,6 +534,7 @@
     ZONE ONE Thermostat,     !- Name
     ZONE ONE,                !- Zone or ZoneList Name
     ALWAYS 4,                !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office Thermostat Dual SP Control;  !- Control 1 Name
 

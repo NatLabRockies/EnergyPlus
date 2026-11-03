@@ -4741,6 +4741,7 @@
     Zone1 Office Thermostat, !- Name
     Zone1 Office,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -4748,6 +4749,7 @@
     Zone2 Fine Storage Thermostat,  !- Name
     Zone2 Fine Storage,      !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Fine Storage Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -4755,6 +4757,7 @@
     Zone 3 Thermostat,       !- Name
     Zone3 Bulk Storage,      !- Zone or ZoneList Name
     ZoneControlSchedule,     !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint with SB;!- Control 1 Name
 
