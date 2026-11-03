@@ -515,6 +515,12 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
     // update the temperatures and flow rates
     auto &flow_demand_to_supply_tol(convergence.PlantFlowDemandToSupplyTolValue);
     auto &flow_supply_to_demand_tol(convergence.PlantFlowSupplyToDemandTolValue);
+    auto const isPlantFlowOutOfTolerance = [](Real64 const firstMassFlow, Real64 const secondMassFlow, Real64 &flowDifference) {
+        flowDifference = std::abs(firstMassFlow - secondMassFlow);
+        Real64 const maxMassFlow = std::max(std::abs(firstMassFlow), std::abs(secondMassFlow));
+        Real64 const flowTolerance = std::min(DataConvergParams::PlantFlowRateToler, DataConvergParams::PlantFlowRateRelToler * maxMassFlow);
+        return flowDifference > flowTolerance;
+    };
     Real64 MixedOutletTemp;
     Real64 TankOutletTemp;
     if (CommonPipeType == DataPlant::CommonPipeType::Single || CommonPipeType == DataPlant::CommonPipeType::TwoWay) {
@@ -524,14 +530,14 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
         TankOutletTemp = MixedOutletTemp;
         if (ThisLoopSideNum == DataPlant::LoopSideLocation::Demand) {
             rshift1(flow_demand_to_supply_tol);
-            flow_demand_to_supply_tol[0] = std::abs(OldOtherLoopSideInletMdot - state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate);
-            if (flow_demand_to_supply_tol[0] > DataConvergParams::PlantFlowRateToler) {
+            if (isPlantFlowOutOfTolerance(
+                    OldOtherLoopSideInletMdot, state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate, flow_demand_to_supply_tol[0])) {
                 convergence.PlantMassFlowNotConverged = true;
             }
         } else {
             rshift1(flow_supply_to_demand_tol);
-            flow_supply_to_demand_tol[0] = std::abs(OldOtherLoopSideInletMdot - state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate);
-            if (flow_supply_to_demand_tol[0] > DataConvergParams::PlantFlowRateToler) {
+            if (isPlantFlowOutOfTolerance(
+                    OldOtherLoopSideInletMdot, state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate, flow_supply_to_demand_tol[0])) {
                 convergence.PlantMassFlowNotConverged = true;
             }
         }
@@ -550,20 +556,16 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
         // Set the flow tolerance array
         if (ThisLoopSideNum == DataPlant::LoopSideLocation::Demand) {
             rshift1(flow_demand_to_supply_tol);
-            flow_demand_to_supply_tol[0] = std::abs(state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate -
-                                                    state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate);
-            if (flow_demand_to_supply_tol[0] > DataConvergParams::PlantFlowRateToler) {
+            if (isPlantFlowOutOfTolerance(state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate,
+                                          state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate,
+                                          flow_demand_to_supply_tol[0])) {
                 convergence.PlantMassFlowNotConverged = true;
             }
         } else {
             rshift1(flow_supply_to_demand_tol);
             Real64 const supplyOutletMdot = state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate;
             Real64 const demandInletMdot = state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate;
-            flow_supply_to_demand_tol[0] = std::abs(supplyOutletMdot - demandInletMdot);
-            // relative tolerance so small loops (e.g., DHW) still resimulate the demand side
-            Real64 const flowToler = std::min(DataConvergParams::PlantFlowRateToler,
-                                              DataConvergParams::PlantFlowRateRelToler * std::max(supplyOutletMdot, demandInletMdot));
-            if (flow_supply_to_demand_tol[0] > flowToler) {
+            if (isPlantFlowOutOfTolerance(supplyOutletMdot, demandInletMdot, flow_supply_to_demand_tol[0])) {
                 convergence.PlantMassFlowNotConverged = true;
             }
         }

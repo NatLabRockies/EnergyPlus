@@ -195,9 +195,9 @@ TEST_F(EnergyPlusFixture, UpdateHVACInterface_Test)
     EXPECT_TRUE(state->dataConvergeParams->AirLoopConvergence(1).HVACGenContamNotConverged[2]);
 }
 
-// Verifies that supply-demand flow mismatches trigger resimulation for DHW-sized and near-zero flows,
+// Verifies that flow mismatches in either direction trigger resimulation for DHW-sized and near-zero flows,
 // while the same 0.0007 kg/s mismatch is accepted on a large loop.
-TEST_F(EnergyPlusFixture, UpdatePlantLoopInterface_SmallLoopFlowChangeResimulatesDemandSide)
+TEST_F(EnergyPlusFixture, UpdatePlantLoopInterface_SmallLoopFlowChangesResimulateOtherSide)
 {
     state->init_state(*state);
     state->dataHVACGlobal->TimeStepSys = 1;
@@ -225,6 +225,7 @@ TEST_F(EnergyPlusFixture, UpdatePlantLoopInterface_SmallLoopFlowChangeResimulate
     }
 
     PlantLocation const supplySide(1, DataPlant::LoopSideLocation::Supply, 1, 1);
+    PlantLocation const demandSide(1, DataPlant::LoopSideLocation::Demand, 1, 1);
 
     // DHW-sized flows: the supply side now carries 0.0025 kg/s but the demand side last ran at 0.0018 kg/s
     state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate = 0.0025;
@@ -234,6 +235,16 @@ TEST_F(EnergyPlusFixture, UpdatePlantLoopInterface_SmallLoopFlowChangeResimulate
         *state, supplySide, supplyOutletNode, demandInletNode, resimDemandSide, DataPlant::CommonPipeType::No);
     EXPECT_TRUE(resimDemandSide);
     EXPECT_NEAR(state->dataLoopNodes->Node(demandInletNode).MassFlowRate, 0.0025, 1.0e-10);
+
+    // The same DHW-sized mismatch from demand to supply also triggers resimulation
+    state->dataLoopNodes->Node(demandOutletNode).MassFlowRate = 0.0025;
+    state->dataLoopNodes->Node(supplyInletNode).MassFlowRate = 0.0018;
+    bool resimSupplySide = false;
+    HVACInterfaceManager::UpdatePlantLoopInterface(
+        *state, demandSide, demandOutletNode, supplyInletNode, resimSupplySide, DataPlant::CommonPipeType::No);
+    EXPECT_TRUE(resimSupplySide);
+    EXPECT_TRUE(state->dataConvergeParams->PlantConvergence(1).PlantMassFlowNotConverged);
+    EXPECT_NEAR(state->dataLoopNodes->Node(supplyInletNode).MassFlowRate, 0.0025, 1.0e-10);
 
     // A flow below 1e-7 kg/s still uses the relative tolerance rather than an absolute floor
     state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate = 1.02e-8;
