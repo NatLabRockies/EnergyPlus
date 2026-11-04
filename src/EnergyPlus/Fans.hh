@@ -432,7 +432,6 @@ namespace Fans {
         Real64 nightVentMotorEff = 0.0;                       // fan motor efficiency during night ventilation mode, 0.0 means not specified
         Real64 nightVentMotorInAirFrac = 0.0;                 // motor in air stream fraction during night ventilation mode
         bool nightVentMotorInAirFracSpecified = false;        // true if a night ventilation motor in air stream fraction was input
-        int zoneNum = 0;                                      // zone index for motor heat losses as internal gains
         Real64 zoneRadFract = 0.0;                            // thermal radiation split for motor losses
         Real64 qdotConvZone = 0.0;                            // fan power lost to surrounding zone by convection to air (W)
         Real64 qdotRadZone = 0.0;                             // fan power lost to surrounding zone by radiation to zone surfaces(W)

@@ -103,21 +103,21 @@ def test_fan_systemmodel_no_trailing_fields(prepare_and_run_transition, old_fiel
 """
 
     if old_field_count == 16:
-      idf_text = idf_text.replace(
-        "    ,                        !- Electric Power Function of Flow Fraction Curve Name\n"
-        "    250.0;                   !- Night Ventilation Mode Pressure Rise {Pa}",
-        "    ;                        !- Electric Power Function of Flow Fraction Curve Name",
-      )
-      expected_idf_text = idf_text
+        idf_text = idf_text.replace(
+            "    ,                        !- Electric Power Function of Flow Fraction Curve Name\n"
+            "    250.0;                   !- Night Ventilation Mode Pressure Rise {Pa}",
+            "    ;                        !- Electric Power Function of Flow Fraction Curve Name",
+        )
+        expected_idf_text = idf_text
     elif old_field_count == 18:
-      idf_text = idf_text.replace("250.0;", "250.0,")
-      idf_text += "    0.3333;                  !- Night Ventilation Mode Flow Fraction\n"
+        idf_text = idf_text.replace("250.0;", "250.0,")
+        idf_text += "    0.3333;                  !- Night Ventilation Mode Flow Fraction\n"
 
     prepare_and_run_transition(
-      ori_idf_text=idf_text,
-      expected_idf_text=expected_idf_text,
-      version_ori=(26, 2, 0),
-      version_new=(27, 1, 0),
+        ori_idf_text=idf_text,
+        expected_idf_text=expected_idf_text,
+        version_ori=(26, 2, 0),
+        version_new=(27, 1, 0),
     )
 
 
@@ -177,10 +177,10 @@ def test_fan_systemmodel_with_flow_fraction_and_trailing_fields(prepare_and_run_
 """
 
     prepare_and_run_transition(
-      ori_idf_text=idf_text,
-      expected_idf_text=expected_idf_text,
-      version_ori=(26, 2, 0),
-      version_new=(27, 1, 0),
+        ori_idf_text=idf_text,
+        expected_idf_text=expected_idf_text,
+        version_ori=(26, 2, 0),
+        version_new=(27, 1, 0),
     )
 
 
@@ -250,8 +250,8 @@ def test_fan_systemmodel_with_multispeed_fields(prepare_and_run_transition):
 """
 
     prepare_and_run_transition(
-      ori_idf_text=idf_text,
-      expected_idf_text=expected_idf_text,
-      version_ori=(26, 2, 0),
-      version_new=(27, 1, 0),
+        ori_idf_text=idf_text,
+        expected_idf_text=expected_idf_text,
+        version_ori=(26, 2, 0),
+        version_new=(27, 1, 0),
     )
