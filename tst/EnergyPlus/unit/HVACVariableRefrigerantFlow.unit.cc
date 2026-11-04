@@ -4083,7 +4083,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
     ASSERT_TRUE(state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower > 0.0); // defrost power should be greater than 0
     DefrostWatts = state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF * (state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity / 1.01667) *
                    state->dataHVACVarRefFlow->VRF(VRFCond).DefrostFraction;
-    ASSERT_EQ(DefrostWatts, state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower); // defrost power calculation check
+    ASSERT_DOUBLE_EQ(DefrostWatts, state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower); // defrost power calculation check
     // check crankcase heater operation
     EXPECT_EQ(1.0, state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondRTF);
     // OAT is low enough to allow CCH operation
@@ -7226,8 +7226,9 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest)
     Real64 HRInitialEIRFrac = state->dataHVACVarRefFlow->VRF(VRFCond).HRInitialHeatEIRFrac;
     Real64 HREIRAdjustment = HRInitialEIRFrac + (HREIRFTConst - HRInitialEIRFrac) * state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier;
 
-    EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
-              state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR * HREIRAdjustment);
+    EXPECT_DOUBLE_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
+                     state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR *
+                         HREIRAdjustment);
 
     // last operating mode was cooling should give same answer since TU heating request > TU cooling request * ( 1 + 1/COP)
     state->dataHVACVarRefFlow->CoolingLoad(VRFCond) = true;
@@ -7250,8 +7251,9 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest)
     EXPECT_TRUE(state->dataHVACVarRefFlow->VRF(VRFCond).ModeChange);
     EXPECT_FALSE(state->dataHVACVarRefFlow->VRF(VRFCond).HRModeChange);
     EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecCoolingPower, 0.0);
-    EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
-              state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR * HREIRAdjustment);
+    EXPECT_DOUBLE_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
+                     state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR *
+                         HREIRAdjustment);
     EXPECT_NEAR(HREIRAdjustment, 1.06321, 0.00001);
 
     // simulate again and see that power has exponential changed from previous time step
@@ -7266,8 +7268,9 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest)
     HREIRAdjustment = HRInitialEIRFrac + (HREIRFTConst - HRInitialEIRFrac) * state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier;
 
     EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier, 0.86466, 0.00001); // will exponentially rise towards 1.0
-    EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
-              state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR * HREIRAdjustment);
+    EXPECT_DOUBLE_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
+                     state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR *
+                         HREIRAdjustment);
     EXPECT_NEAR(HREIRAdjustment, 1.08646, 0.00001); // will exponentially rise towards VRF( VRFCond ).HREIRFTHeatConst = 1.1
 
     // simulate again and see that power has exponential changed from previous time step
@@ -7275,8 +7278,9 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest)
     CalcVRFCondenser(*state, VRFCond);
     HREIRAdjustment = HRInitialEIRFrac + (HREIRFTConst - HRInitialEIRFrac) * state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier;
     EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier, 0.95021, 0.00001); // will exponentially rise towards 1.0
-    EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
-              state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR * HREIRAdjustment);
+    EXPECT_DOUBLE_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
+                     state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR *
+                         HREIRAdjustment);
     EXPECT_NEAR(HREIRAdjustment, 1.09502, 0.00001); // will exponentially rise towards VRF( VRFCond ).HREIRFTHeatConst = 1.1
 
     // simulate again and see that power has exponential changed from previous time step
@@ -7284,8 +7288,9 @@ TEST_F(EnergyPlusFixture, VRFTest_CondenserCalcTest)
     CalcVRFCondenser(*state, VRFCond);
     HREIRAdjustment = HRInitialEIRFrac + (HREIRFTConst - HRInitialEIRFrac) * state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier;
     EXPECT_NEAR(state->dataHVACVarRefFlow->VRF(VRFCond).SUMultiplier, 0.98168, 0.00001); // will exponentially rise towards 1.0
-    EXPECT_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
-              state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR * HREIRAdjustment);
+    EXPECT_DOUBLE_EQ(state->dataHVACVarRefFlow->VRF(VRFCond).ElecHeatingPower,
+                     state->dataHVACVarRefFlow->VRF(VRFCond).RatedHeatingPower * state->dataHVACVarRefFlow->VRF(VRFCond).VRFCondPLR *
+                         HREIRAdjustment);
     EXPECT_NEAR(HREIRAdjustment, 1.09817, 0.00001); // will exponentially rise towards VRF( VRFCond ).HREIRFTHeatConst = 1.1
 
     // simulate again and see that power has exponential changed from previous time step
