@@ -27953,7 +27953,7 @@ TEST_F(EnergyPlusFixture, VRFTest_HeatRecoveryTemperatureLimits)
         "    <Select zone>,           !- Zone Name for Master Thermostat Location",
         "    LoadPriority,            !- Master Thermostat Priority Control Type",
         "    ,                        !- Thermostat Priority Schedule Name",
-        "    VRF Outdoor Unit Zone List 3,  !- Zone Terminal Unit List Name",
+        "    VRF Outdoor Unit Zone List 4,  !- Zone Terminal Unit List Name",
         "    Yes,                      !- Heat Pump Waste Heat Recovery",
         "    50,                      !- Equivalent Piping Length used for Piping Correction Factor in Cooling Mode {m}",
         "    15,                      !- Vertical Height used for Piping Correction Factor {m}",
@@ -28000,16 +28000,19 @@ TEST_F(EnergyPlusFixture, VRFTest_HeatRecoveryTemperatureLimits)
         "    0;                       !- Heat Recovery Heating Energy Time Constant {hr}",
 
         "  ZoneTerminalUnitList,",
-        "    VRF Outdoor Unit Zone List 2,  !- Zone Terminal Unit List Name",
-        "    Level1:Office3 VRF Indoor Unit;  !- Zone Terminal Unit Name 1",
+        "    VRF Outdoor Unit Zone List 1,  !- Zone Terminal Unit List Name",
+        "    Level1:Office1 VRF Indoor Unit;  !- Zone Terminal Unit Name 1",
 
         "  ZoneTerminalUnitList,",
-        "    VRF Outdoor Unit Zone List 1,  !- Zone Terminal Unit List Name",
-        "    Level1:Office1 VRF Indoor Unit,  !- Zone Terminal Unit Name 1",
+        "    VRF Outdoor Unit Zone List 2,  !- Zone Terminal Unit List Name",
         "    Level1:Office2 VRF Indoor Unit;  !- Zone Terminal Unit Name 1",
 
         "  ZoneTerminalUnitList,",
         "    VRF Outdoor Unit Zone List 3,  !- Zone Terminal Unit List Name",
+        "    Level1:Office3 VRF Indoor Unit;  !- Zone Terminal Unit Name 1",
+
+        "  ZoneTerminalUnitList,",
+        "    VRF Outdoor Unit Zone List 4,  !- Zone Terminal Unit List Name",
         "    Level1:Office4 VRF Indoor Unit;  !- Zone Terminal Unit Name 1",
 
         "  OutdoorAir:Mixer,",
