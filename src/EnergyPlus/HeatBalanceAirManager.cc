@@ -4549,7 +4549,6 @@ void InitSimpleMixingConvectiveHeatGains(EnergyPlusData &state)
     // This subroutine sets up the mixing and cross mixing flows
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    // sum of zone mixing flows for a zone
 
     // Select type of airflow calculation
     if (state.dataHeatBal->AirFlowFlag) { // Simplified airflow calculation
@@ -4567,7 +4566,7 @@ void InitSimpleMixingConvectiveHeatGains(EnergyPlusData &state)
         if (state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {
             for (auto &massConservZone : state.dataHeatBal->MassConservation) {
                 Real64 ZoneMixingFlowSum = 0.0;
-                int NumOfMixingObjects = massConservZone.NumReceivingZonesMixingObject;
+                const int NumOfMixingObjects = massConservZone.NumReceivingZonesMixingObject;
                 for (int Loop = 1; Loop <= NumOfMixingObjects; ++Loop) {
                     ZoneMixingFlowSum += state.dataHeatBal->Mixing(Loop).DesignLevel;
                     massConservZone.ZoneMixingReceivingFr(Loop) = 0.0;
