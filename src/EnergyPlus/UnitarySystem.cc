@@ -8116,6 +8116,8 @@ namespace UnitarySystems {
                                          this->DesignMaxOutletTemp);
 
         // will not be running supplemental heater on this CALL (simulate with supplemental heater off)
+        // Clear the previous supplemental fraction so it cannot raise airflow during the primary-coil capacity trials.
+        this->m_SuppHeatPartLoadFrac = 0.0;
         Real64 FullSensibleOutput = 0.0;
         // using furnace module logic
         // first check to see if cycling fan with economizer can meet the load
@@ -8142,8 +8144,11 @@ namespace UnitarySystems {
             this->controlUnitarySystemOutput(
                 state, AirLoopNum, FirstHVACIteration, OnOffAirFlowRatio, ZoneLoad, FullSensibleOutput, HXUnitOn, CompressorOn);
         }
+        // Zero flow with the DX coil off must not clear the heating demand before supplemental heat can start the cycling fan.
         if (state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate < HVAC::SmallMassFlow && this->m_sysType != SysType::PackagedAC &&
-            this->m_sysType != SysType::PackagedHP && this->m_sysType != SysType::PackagedWSHP) {
+            this->m_sysType != SysType::PackagedHP && this->m_sysType != SysType::PackagedWSHP &&
+            !(this->m_SuppCoilExists && state.dataUnitarySystems->HeatingLoad && this->m_FanOpMode == HVAC::FanOp::Cycling &&
+              this->m_DXHeatingCoil)) {
             state.dataUnitarySystems->CoolingLoad = false;
             state.dataUnitarySystems->HeatingLoad = false;
             state.dataUnitarySystems->MoistureLoad = 0.0;
@@ -8179,7 +8184,10 @@ namespace UnitarySystems {
 
         if (this->m_SuppCoilExists &&
             (state.dataUnitarySystems->HeatingLoad || state.dataUnitarySystems->CoolingLoad || state.dataUnitarySystems->MoistureLoad < 0.0)) {
-            if ((FullSensibleOutput < (state.dataUnitarySystems->QToHeatSetPt - HVAC::SmallLoad)) && !FirstHVACIteration) {
+            // Apply the supplemental coil's outdoor limit before its fraction can request fan airflow; retain dehumidification reheat.
+            if ((FullSensibleOutput < (state.dataUnitarySystems->QToHeatSetPt - HVAC::SmallLoad)) && !FirstHVACIteration &&
+                (state.dataEnvrn->OutDryBulbTemp <= this->m_MaxOATSuppHeat ||
+                 (state.dataUnitarySystems->MoistureLoad < 0.0 && this->m_CoolingPartLoadFrac > 0.0))) {
                 SupHeaterLoad = max(0.0, state.dataUnitarySystems->QToHeatSetPt - FullSensibleOutput);
                 this->m_SupHeaterLoad = 0.0;
                 // what does this line even do? I know we want the supplemental heater on only if there is a dehum load,
@@ -11525,6 +11533,34 @@ namespace UnitarySystems {
             localFanPartLoadRatio = this->m_EconoPartLoadRatio;
         }
         int SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum, this->m_EconoSpeedNum);
+        // Extend load-controlled cycling airflow for supplemental heat without changing continuous-fan or ASHRAE-model control.
+        if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && this->m_SuppCoilExists &&
+            !this->m_SimASHRAEModel) {
+            if (state.dataUnitarySystems->HeatingLoad && state.dataUnitarySystems->MoistureLoad >= 0.0 && this->m_DXHeatingCoil) {
+                // Use the condenser-node temperature when valid, matching the heating-coil simulation's outdoor-temperature selection.
+                Real64 outdoorDryBulb = state.dataEnvrn->OutDryBulbTemp;
+                if (this->m_CondenserNodeNum > 0 &&
+                    state.dataLoopNodes->Node(this->m_CondenserNodeNum).Press != state.dataLoopNodes->DefaultNodeValues.Press) {
+                    outdoorDryBulb = state.dataLoopNodes->Node(this->m_CondenserNodeNum).Temp;
+                }
+                // An unavailable DX coil can retain a full-load request even though its actual runtime is zero.
+                if ((this->m_heatingCoilAvailSched != nullptr && this->m_heatingCoilAvailSched->getCurrentVal() <= 0.0) ||
+                    outdoorDryBulb < this->m_MinOATCompressorHeating ||
+                    (this->m_heatCoilType == HVAC::CoilType::HeatingDXMultiSpeed && outdoorDryBulb == this->m_MinOATCompressorHeating)) {
+                    localFanPartLoadRatio = this->m_EconoPartLoadRatio;
+                    // Use full heating airflow only during the on cycle, with zero off-cycle flow; ignore the retained DX speed.
+                    SpeedNum = 1;
+                    state.dataUnitarySystems->CompOnMassFlow = this->MaxHeatAirMassFlow;
+                    state.dataUnitarySystems->CompOnFlowRatio = this->m_HeatingFanSpeedRatio;
+                    state.dataUnitarySystems->CompOffMassFlow = 0.0;
+                    state.dataUnitarySystems->CompOffFlowRatio = 0.0;
+                    state.dataUnitarySystems->m_massFlow1 = state.dataUnitarySystems->CompOnMassFlow;
+                    state.dataUnitarySystems->m_massFlow2 = 0.0;
+                }
+            }
+            // This maximum uses requested part-load fractions, not actual coil RTFs; existing downstream DX cycling corrections remain.
+            localFanPartLoadRatio = max(localFanPartLoadRatio, this->m_SuppHeatPartLoadFrac);
+        }
         int InletNode = this->AirInNode;
 
         if (SpeedNum > 1) {
@@ -16234,6 +16270,11 @@ namespace UnitarySystems {
                 if (state.dataUnitarySystems->CompOnMassFlow > 0.0) {
                     this->FanPartLoadRatio =
                         (this->m_SpeedNum > 1 && !this->m_SingleMode) ? 1.0 : AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
+                    // With zero off-cycle flow, report the airflow-derived cycling fraction instead of forcing one for a retained DX speed.
+                    if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling &&
+                        this->m_SuppCoilExists && !this->m_SimASHRAEModel && state.dataUnitarySystems->CompOffMassFlow == 0.0) {
+                        this->FanPartLoadRatio = AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
+                    }
                 }
             }
 
