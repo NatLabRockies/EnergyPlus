@@ -2818,8 +2818,7 @@ void FanSystem::calcSimpleSystemFan(
     // use alternate night ventilation performance if provided, otherwise fall back to normal performance
     Real64 _localFanTotalEff = (state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) ? nightVentTotalEff : totalEff;
     Real64 _localMotorEff = (state.dataHVACGlobal->NightVentOn && nightVentMotorEff > 0.0) ? nightVentMotorEff : motorEff;
-    Real64 _localMotorInAirFrac =
-        (state.dataHVACGlobal->NightVentOn && nightVentMotorInAirFracSpecified) ? nightVentMotorInAirFrac : motorInAirFrac;
+    Real64 _localMotorInAirFrac = (state.dataHVACGlobal->NightVentOn && nightVentMotorInAirFracSpecified) ? nightVentMotorInAirFrac : motorInAirFrac;
     auto const efficiencyAtSpeed = [&](int const speedIndex) {
         return ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) || EMSTotalEffOverrideOn) ? _localFanTotalEff
                                                                                                          : totalEffAtSpeed[speedIndex];
