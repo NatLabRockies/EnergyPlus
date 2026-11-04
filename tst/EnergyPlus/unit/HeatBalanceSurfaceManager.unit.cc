@@ -4982,7 +4982,6 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_IncSolarMultiplier)
     state->dataSurface->Surface(SurfNum).BaseSurf = SurfNum;
     state->dataSurface->SurfIncSolMultiplier.allocate(totSurf);
     state->dataSurface->SurfIncSolMultiplier(SurfNum).Name = "testing window surface";
-    state->dataSurface->SurfIncSolMultiplier(SurfNum).SurfaceIdx = SurfNum;
     state->dataSurface->SurfIncSolMultiplier(SurfNum).sched = nullptr;
 
     state->dataSurface->Surface(SurfNum).Area = 100.0;

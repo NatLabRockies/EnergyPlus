@@ -251,8 +251,6 @@ void ZoneSizingData::zeroMemberData()
     this->CoolLatentLoadNoDOAS = 0.0;           // current zone dehumidification load without DOAS (HVAC time step)
     this->ZoneHeatLatentMassFlow = 0.0;         // current mass flow rate required to meet humidification load [kg/s]
     this->ZoneCoolLatentMassFlow = 0.0;         // current mass flow rate required to meet dehumidification load [kg/s]
-    this->ZoneHeatLatentVolFlow = 0.0;          // current volume flow rate required to meet humidification load [m3/s]
-    this->ZoneCoolLatentVolFlow = 0.0;          // current volume flow rate required to meet dehumidification load [m3/s]
     this->DesHeatLoadNoDOAS = 0.0;              // zone design heating load without DOAS [W]
     this->DesCoolLoadNoDOAS = 0.0;              // zone design cooling load without DOAS [W]
     this->DesLatentHeatLoad = 0.0;              // current zone humidification load (HVAC time step)
@@ -272,9 +270,7 @@ void ZoneSizingData::zeroMemberData()
     this->TimeStepNumAtLatentHeatNoDOASMax = 0; // time step number (in day) at latent heating peak without DOAS
     this->TimeStepNumAtLatentCoolNoDOASMax = 0; // time step number (in day) at latent cooling peak without DOAS
     this->OutTempAtLatentCoolPeak = 0.0;        // outdoor temperature at max latent cooling [C]
-    this->OutHumRatAtLatentCoolPeak = 0.0;      // outdoor humrat at max latent cooling [C]
     this->OutTempAtLatentHeatPeak = 0.0;        // outdoor temperature at max latent heating [C]
-    this->OutHumRatAtLatentHeatPeak = 0.0;      // outdoor humrat at max latent heating [C]
     this->ZoneRetTempAtLatentCoolPeak = 0.0;    // zone return temp at max cooling [C]
     this->ZoneRetTempAtLatentHeatPeak = 0.0;    // zone return temp at max heating [C]
 }
@@ -432,8 +428,6 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     state.dataSize->DataEMSOverrideON = false;
     state.dataSize->DataScalableSizingON = false;
     state.dataSize->DataScalableCapSizingON = false;
-    state.dataSize->DataSysScalableFlowSizingON = false;
-    state.dataSize->DataSysScalableCapSizingON = false;
     state.dataSize->DataDesAccountForFanHeat = true;
     state.dataSize->DataDXCoolsLowSpeedsAutozize = false;
 
@@ -502,7 +496,6 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
         ZoneEqSizing.DesHeatingLoad = 0.0;
         ZoneEqSizing.CoolingAirVolFlow = 0.0;
         ZoneEqSizing.HeatingAirVolFlow = 0.0;
-        ZoneEqSizing.SystemAirVolFlow = 0.0;
         ZoneEqSizing.DesignSizeFromParent = false;
     }
 
