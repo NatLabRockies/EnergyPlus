@@ -1097,8 +1097,6 @@ namespace SimulationManager {
                                 state.dataEnvrn->IgnoreDiffuseRadiation = true;
                             } else if (Util::SameString(diagnosticName, "DeveloperFlag")) { // TODO: Not a valid key choice
                                 state.dataSysVars->DeveloperFlag = true;
-                            } else if (Util::SameString(diagnosticName, "TimingFlag")) { // TODO: Not a valid key choice
-                                state.dataSysVars->TimingFlag = true;
                             } else if (Util::SameString(diagnosticName, "ReportDetailedWarmupConvergence")) {
                                 state.dataSysVars->ReportDetailedWarmupConvergence = true;
                             } else if (Util::SameString(diagnosticName, "ReportDuringHVACSizingSimulation")) {

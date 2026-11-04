@@ -30,7 +30,7 @@ jobs:
         run: >
           cmake -S . -B build
           -G "Unix Makefiles"
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Debug
           -DBUILD_TESTING=ON
           -DBUILD_PACKAGE=OFF
           -DDOCUMENTATION_BUILD=DoNotBuild

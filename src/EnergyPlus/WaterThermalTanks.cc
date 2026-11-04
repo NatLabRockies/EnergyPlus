@@ -859,7 +859,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
         if (Util::SameString(heatSourceObjType, "Refrigeration:CompressorRack")) {
             DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::CompressorRackRefrigeratedCase;
             for (int RackNum = 1; RackNum <= state.dataRefrigCase->NumRefrigeratedRacks; ++RackNum) {
-                if (!Util::SameString(state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum).Name, cAlphaArgs(10))) {
+                auto const &heatReclaim = state.dataHeatBal->HeatReclaimRefrigeratedRack(RackNum);
+                if (!Util::SameString(heatReclaim.Name, cAlphaArgs(10)) || !Util::SameString(heatReclaim.SourceType, heatSourceObjType)) {
                     continue;
                 }
                 DesupHtr.ReclaimHeatingSourceIndexNum = RackNum;
@@ -891,7 +892,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                    (Util::SameString(heatSourceObjType, "Refrigeration:Condenser:WaterCooled"))) {
             DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::CondenserRefrigeration;
             for (int CondNum = 1; CondNum <= state.dataRefrigCase->NumRefrigCondensers; ++CondNum) {
-                if (!Util::SameString(state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum).Name, cAlphaArgs(10))) {
+                auto const &heatReclaim = state.dataHeatBal->HeatReclaimRefrigCondenser(CondNum);
+                if (!Util::SameString(heatReclaim.Name, cAlphaArgs(10)) || !Util::SameString(heatReclaim.SourceType, heatSourceObjType)) {
                     continue;
                 }
                 DesupHtr.ReclaimHeatingSourceIndexNum = CondNum;
@@ -931,7 +933,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                 DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::DXMultiSpeed;
             }
             DXCoils::GetDXCoilIndex(state, DesupHtr.HeatingSourceName, DesupHtr.ReclaimHeatingSourceIndexNum, errFlag, cCurrentModuleObject);
-            if (allocated(state.dataHeatBal->HeatReclaimDXCoil)) {
+            if (DesupHtr.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimDXCoil) &&
+                Util::SameString(state.dataHeatBal->HeatReclaimDXCoil(DesupHtr.ReclaimHeatingSourceIndexNum).SourceType, heatSourceObjType)) {
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state.dataHeatBal->HeatReclaimDXCoil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
@@ -949,6 +952,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                                     DesupHtr.HeatingSourceName));
                     ErrorsFound = true;
                 }
+            } else if (DesupHtr.ReclaimHeatingSourceIndexNum > 0) {
+                DesupHtr.ReclaimHeatingSourceIndexNum = 0;
             }
         } else if (Util::SameString(heatSourceObjType, "Coil:Cooling:DX:VariableSpeed") ||
                    Util::SameString(heatSourceObjType, "Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit")) {
@@ -959,7 +964,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                 DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::AirWaterHeatPumpVSEQ;
             }
             DesupHtr.ReclaimHeatingSourceIndexNum = VariableSpeedCoils::GetCoilIndexVariableSpeed(state, heatSourceObjType, cAlphaArgs(10), errFlag);
-            if (allocated(state.dataHeatBal->HeatReclaimVS_Coil)) {
+            if (DesupHtr.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimVS_Coil) &&
+                Util::SameString(state.dataHeatBal->HeatReclaimVS_Coil(DesupHtr.ReclaimHeatingSourceIndexNum).SourceType, heatSourceObjType)) {
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim = state.dataHeatBal->HeatReclaimVS_Coil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
                     HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat.allocate(state.dataWaterThermalTanks->numWaterHeaterDesuperheater);
@@ -977,11 +983,15 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                                     DesupHtr.HeatingSourceName));
                     ErrorsFound = true;
                 }
+            } else if (DesupHtr.ReclaimHeatingSourceIndexNum > 0) {
+                DesupHtr.ReclaimHeatingSourceIndexNum = 0;
             }
         } else if (Util::SameString(heatSourceObjType, "Coil:Cooling:WaterToAirHeatPump:EquationFit")) {
             DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::AirWaterHeatPumpEQ;
             DesupHtr.ReclaimHeatingSourceIndexNum = WaterToAirHeatPumpSimple::GetCoilIndex(state, heatSourceObjType, cAlphaArgs(10), errFlag);
-            if (allocated(state.dataHeatBal->HeatReclaimSimple_WAHPCoil)) {
+            if (DesupHtr.ReclaimHeatingSourceIndexNum > 0 && allocated(state.dataHeatBal->HeatReclaimSimple_WAHPCoil) &&
+                Util::SameString(state.dataHeatBal->HeatReclaimSimple_WAHPCoil(DesupHtr.ReclaimHeatingSourceIndexNum).SourceType,
+                                 heatSourceObjType)) {
                 DataHeatBalance::HeatReclaimDataBase &HeatReclaim =
                     state.dataHeatBal->HeatReclaimSimple_WAHPCoil(DesupHtr.ReclaimHeatingSourceIndexNum);
                 if (!allocated(HeatReclaim.WaterHeatingDesuperheaterReclaimedHeat)) {
@@ -1000,6 +1010,8 @@ bool getDesuperHtrInput(EnergyPlusData &state)
                                     DesupHtr.HeatingSourceName));
                     ErrorsFound = true;
                 }
+            } else if (DesupHtr.ReclaimHeatingSourceIndexNum > 0) {
+                DesupHtr.ReclaimHeatingSourceIndexNum = 0;
             }
         } else if (Util::SameString(heatSourceObjType, "Coil:Cooling:DX")) {
             DesupHtr.ReclaimHeatingSource = ReclaimHeatObjectType::CoilCoolingDX;
@@ -1625,10 +1637,9 @@ bool getHPWaterHeaterInput(EnergyPlusData &state)
             VariableSpeedCoils::setVarSpeedHPWHFanIndex(state, HPWH.DXCoilNum, HPWH.FanNum);
         } else {
             // LOL
-            DXCoils::SetDXCoolingCoilData(state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.FanName);
-            DXCoils::SetDXCoolingCoilData(state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.FanNum);
-            DXCoils::SetDXCoolingCoilData(
-                state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.fanType);
+            DXCoils::SetDXCoolingCoilData(state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.FanName);
+            DXCoils::SetDXCoolingCoilData(state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.FanNum);
+            DXCoils::SetDXCoolingCoilData(state, HPWH.DXCoilNum, errFlag, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, HPWH.fanType);
         }
 
         if (errFlag) {

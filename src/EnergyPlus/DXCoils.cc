@@ -6105,7 +6105,6 @@ void GetDXCoils(EnergyPlusData &state)
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Sum,
                                 thisDXCoil.Name); //, &
-            //                           ResourceTypeKey='ENERGYTRANSFER',EndUseKey='HEATING',GroupKey='Plant')
             SetupOutputVariable(state,
                                 "Cooling Coil Water Heating Electricity Rate",
                                 Constant::Units::W,
@@ -16230,9 +16229,6 @@ void SetDXCoolingCoilData(
     ObjexxFCL::Optional<Real64> DefrostFraction,
     ObjexxFCL::Optional<Real64> DefrostCapacity,
     ObjexxFCL::Optional<Real64> MaxOATDefrost,
-    ObjexxFCL::Optional_bool CoolingCoilPresent,
-    ObjexxFCL::Optional_bool HeatingCoilPresent,
-    ObjexxFCL::Optional<Real64> HeatSizeRatio,
     ObjexxFCL::Optional<Real64> TotCap,
     ObjexxFCL::Optional_int SupplyFanIndex,
     ObjexxFCL::Optional_string SupplyFanName,
@@ -16324,18 +16320,6 @@ void SetDXCoolingCoilData(
 
     if (present(MaxOATDefrost)) {
         thisDXCoil.MaxOATDefrost = MaxOATDefrost;
-    }
-
-    if (present(CoolingCoilPresent)) {
-        thisDXCoil.CoolingCoilPresent = CoolingCoilPresent;
-    }
-
-    if (present(HeatingCoilPresent)) {
-        thisDXCoil.HeatingCoilPresent = HeatingCoilPresent;
-    }
-
-    if (present(HeatSizeRatio)) {
-        thisDXCoil.HeatSizeRatio = HeatSizeRatio;
     }
 
     if (present(TotCap)) {
