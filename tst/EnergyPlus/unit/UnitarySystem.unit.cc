@@ -8330,83 +8330,83 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
 // without changing continuous-fan operation. This tests airflow requests, not coil PLF or actual fan RTF.
 TEST_F(EnergyPlusFixture, UnitarySystemModel_SupplementalHeatingCyclingFanAirFlow)
 {
-  state->init_state(*state);
-  state->dataLoopNodes->Node.allocate(1);
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(1);
 
-  UnitarySys thisSys;
-  thisSys.AirInNode = 1;
-  thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
-  thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
-  thisSys.m_SuppCoilExists = true;
-  thisSys.m_DXHeatingCoil = true;
-  thisSys.MaxHeatAirMassFlow = 1.0;
-  thisSys.m_HeatingFanSpeedRatio = 1.0;
-  thisSys.m_MinOATCompressorHeating = -5.0;
-  thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
-  thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
-  state->dataEnvrn->OutDryBulbTemp = 10.0;
-  state->dataUnitarySystems->HeatingLoad = true;
-  state->dataUnitarySystems->CompOnMassFlow = 1.0;
-  state->dataUnitarySystems->CompOnFlowRatio = 1.0;
-  state->dataUnitarySystems->CompOffMassFlow = 0.0;
-  state->dataUnitarySystems->CompOffFlowRatio = 0.0;
-  Real64 OnOffAirFlowRatio = 0.0;
+    UnitarySys thisSys;
+    thisSys.AirInNode = 1;
+    thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+    thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+    thisSys.m_SuppCoilExists = true;
+    thisSys.m_DXHeatingCoil = true;
+    thisSys.MaxHeatAirMassFlow = 1.0;
+    thisSys.m_HeatingFanSpeedRatio = 1.0;
+    thisSys.m_MinOATCompressorHeating = -5.0;
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    state->dataUnitarySystems->HeatingLoad = true;
+    state->dataUnitarySystems->CompOnMassFlow = 1.0;
+    state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+    state->dataUnitarySystems->CompOffMassFlow = 0.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+    Real64 OnOffAirFlowRatio = 0.0;
 
-  // Exercise airflow inputs directly; this does not simulate actual coil RTFs or DX cycling-loss corrections.
-  // Supplemental-only operation cycles at its fraction; a full primary-coil request keeps the fan on continuously.
-  thisSys.m_SuppHeatPartLoadFrac = 0.25;
-  thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
-  EXPECT_DOUBLE_EQ(4.0, OnOffAirFlowRatio);
+    // Exercise airflow inputs directly; this does not simulate actual coil RTFs or DX cycling-loss corrections.
+    // Supplemental-only operation cycles at its fraction; a full primary-coil request keeps the fan on continuously.
+    thisSys.m_SuppHeatPartLoadFrac = 0.25;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+    EXPECT_DOUBLE_EQ(4.0, OnOffAirFlowRatio);
 
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction1);
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction1);
 
-  thisSys.m_SuppHeatPartLoadFrac = 0.0;
-  thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+    thisSys.m_SuppHeatPartLoadFrac = 0.0;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
 
-  // A scheduled-off DX coil must not drive the fan, even when its requested part-load ratio remains one.
-  thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOff(*state);
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+    // A scheduled-off DX coil must not drive the fan, even when its requested part-load ratio remains one.
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOff(*state);
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
 
-  thisSys.m_SuppHeatPartLoadFrac = 0.25;
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+    thisSys.m_SuppHeatPartLoadFrac = 0.25;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
 
-  thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
-  // Compressor temperature lockout likewise leaves supplemental heat in control of cycling airflow.
-  state->dataEnvrn->OutDryBulbTemp = -10.0;
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    // Compressor temperature lockout likewise leaves supplemental heat in control of cycling airflow.
+    state->dataEnvrn->OutDryBulbTemp = -10.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
 
-  // A retained high DX speed must not force continuous flow while the compressor is locked out.
-  thisSys.m_HeatingSpeedNum = 3;
-  thisSys.m_MultiOrVarSpeedHeatCoil = true;
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+    // A retained high DX speed must not force continuous flow while the compressor is locked out.
+    thisSys.m_HeatingSpeedNum = 3;
+    thisSys.m_MultiOrVarSpeedHeatCoil = true;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
 
-  thisSys.m_SuppHeatPartLoadFrac = 0.0;
-  thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+    thisSys.m_SuppHeatPartLoadFrac = 0.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
 
-  // Continuous-fan mode retains its configured off-cycle airflow, independently of either coil's heating request.
-  thisSys.m_HeatingSpeedNum = 0;
-  thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
-  state->dataUnitarySystems->CompOffMassFlow = 1.0;
-  state->dataUnitarySystems->CompOffFlowRatio = 1.0;
-  thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
-  EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
-  EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction2);
+    // Continuous-fan mode retains its configured off-cycle airflow, independently of either coil's heating request.
+    thisSys.m_HeatingSpeedNum = 0;
+    thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
+    state->dataUnitarySystems->CompOffMassFlow = 1.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 1.0;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction2);
 }
 
 // Verify DX-only, supplemental-only, and combined heating fan PLF corrections with shared component inputs.

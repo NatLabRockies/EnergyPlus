@@ -16319,8 +16319,8 @@ namespace UnitarySystems {
                     this->FanPartLoadRatio =
                         (this->m_SpeedNum > 1 && !this->m_SingleMode) ? 1.0 : AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
                     // With zero off-cycle flow, report the airflow-derived cycling fraction instead of forcing one for a retained DX speed.
-                    if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling &&
-                        this->m_SuppCoilExists && !this->m_SimASHRAEModel && state.dataUnitarySystems->CompOffMassFlow == 0.0) {
+                    if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && this->m_SuppCoilExists &&
+                        !this->m_SimASHRAEModel && state.dataUnitarySystems->CompOffMassFlow == 0.0) {
                         this->FanPartLoadRatio = AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
                     }
                 }
