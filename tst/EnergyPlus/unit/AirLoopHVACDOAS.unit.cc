@@ -2554,6 +2554,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -2561,6 +2562,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_1 Thermostat,  !- Name",
         "    Perimeter_ZN_1,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_1 DualSPSched;  !- Control 1 Name",
 
@@ -2568,6 +2570,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_2 Thermostat,  !- Name",
         "    Perimeter_ZN_2,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_2 DualSPSched;  !- Control 1 Name",
 
@@ -2575,6 +2578,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_3 Thermostat,  !- Name",
         "    Perimeter_ZN_3,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_3 DualSPSched;  !- Control 1 Name",
 
@@ -2582,6 +2586,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_4 Thermostat,  !- Name",
         "    Perimeter_ZN_4,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_4 DualSPSched;  !- Control 1 Name",
 
@@ -4392,12 +4397,9 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompOutletNodeIndex)
 
     AirLoopHVACDOAS::AirLoopDOAS::getAirLoopDOASInput(*state);
 
-    int const InletNodeNum1 = Util::FindItemInList(
-        "OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const OutletNodeNum1 = Util::FindItemInList(
-        "OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const OutletNodeNum2 = Util::FindItemInList(
-        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const InletNodeNum1 = Util::FindItemInList("OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum1 = Util::FindItemInList("OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum2 = Util::FindItemInList("AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
 
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(2), "HUMIDIFIER:STEAM:ELECTRIC");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(1), InletNodeNum1);
@@ -6964,6 +6966,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -6971,6 +6974,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_1 Thermostat,  !- Name",
         "    Perimeter_ZN_1,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_1 DualSPSched;  !- Control 1 Name",
 
@@ -6978,6 +6982,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_2 Thermostat,  !- Name",
         "    Perimeter_ZN_2,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_2 DualSPSched;  !- Control 1 Name",
 
@@ -6985,6 +6990,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_3 Thermostat,  !- Name",
         "    Perimeter_ZN_3,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_3 DualSPSched;  !- Control 1 Name",
 
@@ -6992,6 +6998,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_4 Thermostat,  !- Name",
         "    Perimeter_ZN_4,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_4 DualSPSched;  !- Control 1 Name",
 
@@ -8873,14 +8880,10 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompFanNoDrawAndBlow)
 
     AirLoopHVACDOAS::AirLoopDOAS::getAirLoopDOASInput(*state);
 
-    int const InletNodeNum1 = Util::FindItemInList(
-        "OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const OutletNodeNum1 = Util::FindItemInList(
-        "DOAS_COOLC_OUTLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const OutletNodeNum2 = Util::FindItemInList(
-        "OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const OutletNodeNum3 = Util::FindItemInList(
-        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const InletNodeNum1 = Util::FindItemInList("OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum1 = Util::FindItemInList("DOAS_COOLC_OUTLET", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum2 = Util::FindItemInList("OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum3 = Util::FindItemInList("AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
 
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(1), "COILSYSTEM:COOLING:DX");
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(1), InletNodeNum1);
@@ -9513,6 +9516,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -11082,6 +11086,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -11727,12 +11732,9 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
 
     // Issue 10204 Get AirLoopHVAC:Splitter inlet node number using NodeInputManager::GetOnlySingleNode
 
-    int const SplitterInletNodeNum = Util::FindItemInList(
-        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const ZoneADUOutletNodeNum = Util::FindItemInList(
-        "PSZ-AC:1_OAINLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
-    int const ZoneADUReliefNodeNum = Util::FindItemInList(
-        "PSZ-AC:1_OARELIEF NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const SplitterInletNodeNum = Util::FindItemInList("AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const ZoneADUOutletNodeNum = Util::FindItemInList("PSZ-AC:1_OAINLET NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
+    int const ZoneADUReliefNodeNum = Util::FindItemInList("PSZ-AC:1_OARELIEF NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes);
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->InletNodeNum, SplitterInletNodeNum);
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->OutletNodeNum[0], ZoneADUOutletNodeNum);
     EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopMixer->InletNodeNum[0], ZoneADUReliefNodeNum);

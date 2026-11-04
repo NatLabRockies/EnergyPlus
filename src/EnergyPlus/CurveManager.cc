@@ -138,9 +138,7 @@ namespace Curve {
 
         for (auto *c : state.dataCurveManager->curves) {
             c->output = Node::SensedNodeFlagValue;
-            for (auto &i : c->inputs) { // Not a good pattern
-                i = Node::SensedNodeFlagValue;
-            }
+            std::fill(c->inputs.begin(), c->inputs.end(), Node::SensedNodeFlagValue);
         }
     }
 
@@ -149,7 +147,7 @@ namespace Curve {
         commonEnvironInit(state);
         this->inputs[0] = V1;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
 
         Real64 Val = 0.0;
 
@@ -239,8 +237,8 @@ namespace Curve {
         this->inputs[0] = V1;
         this->inputs[1] = V2;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
-        V2 = max(min(V2, this->inputLimits[1].max), this->inputLimits[1].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
+        V2 = std::clamp(V2, this->inputLimits[1].min, this->inputLimits[1].max);
 
         Real64 Val = 0.0;
 
@@ -300,9 +298,9 @@ namespace Curve {
         this->inputs[1] = V2;
         this->inputs[2] = V3;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
-        V2 = max(min(V2, this->inputLimits[1].max), this->inputLimits[1].min);
-        V3 = max(min(V3, this->inputLimits[2].max), this->inputLimits[2].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
+        V2 = std::clamp(V2, this->inputLimits[1].min, this->inputLimits[1].max);
+        V3 = std::clamp(V3, this->inputLimits[2].min, this->inputLimits[2].max);
 
         Real64 Val = 0.0;
 
@@ -355,10 +353,10 @@ namespace Curve {
         this->inputs[2] = V3;
         this->inputs[3] = V4;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
-        V2 = max(min(V2, this->inputLimits[1].max), this->inputLimits[1].min);
-        V3 = max(min(V3, this->inputLimits[2].max), this->inputLimits[2].min);
-        V4 = max(min(V4, this->inputLimits[3].max), this->inputLimits[3].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
+        V2 = std::clamp(V2, this->inputLimits[1].min, this->inputLimits[1].max);
+        V3 = std::clamp(V3, this->inputLimits[2].min, this->inputLimits[2].max);
+        V4 = std::clamp(V4, this->inputLimits[3].min, this->inputLimits[3].max);
 
         Real64 Val = 0.0;
 
@@ -399,11 +397,11 @@ namespace Curve {
         this->inputs[3] = V4;
         this->inputs[4] = V5;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
-        V2 = max(min(V2, this->inputLimits[1].max), this->inputLimits[1].min);
-        V3 = max(min(V3, this->inputLimits[2].max), this->inputLimits[2].min);
-        V4 = max(min(V4, this->inputLimits[3].max), this->inputLimits[3].min);
-        V5 = max(min(V5, this->inputLimits[4].max), this->inputLimits[4].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
+        V2 = std::clamp(V2, this->inputLimits[1].min, this->inputLimits[1].max);
+        V3 = std::clamp(V3, this->inputLimits[2].min, this->inputLimits[2].max);
+        V4 = std::clamp(V4, this->inputLimits[3].min, this->inputLimits[3].max);
+        V5 = std::clamp(V5, this->inputLimits[4].min, this->inputLimits[4].max);
 
         Real64 Val = 0.0;
 
@@ -445,12 +443,12 @@ namespace Curve {
         this->inputs[4] = V5;
         this->inputs[5] = V6;
 
-        V1 = max(min(V1, this->inputLimits[0].max), this->inputLimits[0].min);
-        V2 = max(min(V2, this->inputLimits[1].max), this->inputLimits[1].min);
-        V3 = max(min(V3, this->inputLimits[2].max), this->inputLimits[2].min);
-        V4 = max(min(V4, this->inputLimits[3].max), this->inputLimits[3].min);
-        V5 = max(min(V5, this->inputLimits[4].max), this->inputLimits[4].min);
-        V6 = max(min(V6, this->inputLimits[5].max), this->inputLimits[5].min);
+        V1 = std::clamp(V1, this->inputLimits[0].min, this->inputLimits[0].max);
+        V2 = std::clamp(V2, this->inputLimits[1].min, this->inputLimits[1].max);
+        V3 = std::clamp(V3, this->inputLimits[2].min, this->inputLimits[2].max);
+        V4 = std::clamp(V4, this->inputLimits[3].min, this->inputLimits[3].max);
+        V5 = std::clamp(V5, this->inputLimits[4].min, this->inputLimits[4].max);
+        V6 = std::clamp(V6, this->inputLimits[5].min, this->inputLimits[5].max);
 
         // tables are the only 6-D curves, for now at least
         Real64 Val = BtwxtTableInterpolation(state, V1, V2, V3, V4, V5, V6);

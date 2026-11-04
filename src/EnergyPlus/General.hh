@@ -49,10 +49,7 @@
 #define General_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array1A.hh>
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/Array2A.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -166,12 +163,7 @@ namespace General {
                  int &Cnvg        // Convergence flag  Cnvg = 0:  Not converged
     );
 
-    int FindNumberInList(int WhichNumber, Array1A_int ListOfItems, int NumItems);
-
-    template <typename A> inline int FindNumberInList(int const WhichNumber, MArray1<A, int> const &ListOfItems, int const NumItems)
-    {
-        return FindNumberInList(WhichNumber, Array1D_int(ListOfItems), NumItems);
-    }
+    int FindNumberInList(int WhichNumber, Array1D_int const &ListOfItems);
 
     template <typename Container,
               class = typename std::enable_if<

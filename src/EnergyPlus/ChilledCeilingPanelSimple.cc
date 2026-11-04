@@ -291,10 +291,10 @@ void GetCoolingPanelInput(EnergyPlusData &state)
 
         // Get schedule
         thisCP.Schedule = s_ipsc->cAlphaArgs(2);
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
+        if (thisCP.Schedule.empty()) {
             thisCP.availSched = Sched::GetScheduleAlwaysOn(state);
-        } else if ((thisCP.availSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+        } else if ((thisCP.availSched = Sched::GetSchedule(state, thisCP.Schedule)) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), thisCP.Schedule);
             ErrorsFound = true;
         }
 

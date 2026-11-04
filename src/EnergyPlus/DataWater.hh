@@ -155,19 +155,12 @@ namespace DataWater {
         Real64 MaxInFlowRate;  // limit on rate of inlet [m3/s]
         Real64 MaxOutFlowRate; // limit on rate of outlet [m3/s]
         TankThermalMode ThermalMode;
-        Real64 InitialTankTemp;                      // initial tank temperature [C]
-        Sched::Schedule *tempSched = nullptr;        // temp schedule
-        AmbientTempType AmbientTempIndicator;        // Indicator for ambient tank losses (SCHEDULE, ZONE, EXTERIOR)
-        Sched::Schedule *ambientTempSched = nullptr; // Ambient temp schedule
-        int ZoneID;                                  // index "pointer" to zone where tank is
-        Real64 UValue;                               // U-value for tank [W/m2-k]
-        Real64 SurfArea;                             // surface are of tank on Zone side... [m2]
-        int InternalMassID;                          // index "pointer" to internal mass object for thermal coupling
-        std::string SurfMaterialName;                // surface properties
+        Sched::Schedule *tempSched = nullptr; // temp schedule
+        AmbientTempType AmbientTempIndicator; // Indicator for ambient tank losses (SCHEDULE, ZONE, EXTERIOR)
+        int ZoneID;                           // index "pointer" to zone where tank is
         // calculated data and from elsewhere
         Real64 ThisTimeStepVolume;
         Real64 LastTimeStepVolume;
-        Real64 LastTimeStepTemp; // previous temperature of tank water
         int NumWaterSupplies;
         Array1D<Real64> VdotAvailSupply; // Each supply component has its own term
         Array1D<Real64> TwaterSupply;    // Each supply component has its own term
@@ -185,25 +178,18 @@ namespace DataWater {
         // report variables
         Real64 NetVdot;
         Real64 Twater;
-        Real64 TouterSkin;
         Real64 TwaterOverflow;
         Real64 MainsDrawVdot;
         Real64 MainsDrawVol;
-        Real64 SkinLossPower;   // heat loss to surrounding zone [W]
-        Real64 SkinLossEnergy;  // heat loss to surround zone [J]
-        Real64 SkinLossConvect; // convective heat loss to zone [W]
-        Real64 SkinLossRadiat;  // radiative heat loss to zone [W}
 
         // Default Constructor
         StorageTankDataStruct()
             : MaxCapacity(0.0), OverflowMode(Overflow::Invalid), OverflowTankID(0), OverflowTankSupplyARRID(0), ValveOnCapacity(0.0),
               ValveOffCapacity(0.0), LastTimeStepFilling(false), ControlSupply(ControlSupplyType::Invalid), GroundWellID(0), SupplyTankID(0),
               SupplyTankDemandARRID(0), BackupMainsCapacity(0.0), InitialVolume(0.0), MaxInFlowRate(0.0), MaxOutFlowRate(0.0),
-              ThermalMode(TankThermalMode::Invalid), InitialTankTemp(20.0), AmbientTempIndicator(AmbientTempType::Invalid), ZoneID(0), UValue(0.0),
-              SurfArea(0.0), InternalMassID(0), ThisTimeStepVolume(0.0), LastTimeStepVolume(0.0), LastTimeStepTemp(0.0), NumWaterSupplies(0),
-              NumWaterDemands(0), VdotFromTank(0.0), VdotToTank(0.0), VdotOverflow(0.0), VolOverflow(0.0), NetVdot(0.0), Twater(0.0), TouterSkin(0.0),
-              TwaterOverflow(0.0), MainsDrawVdot(0.0), MainsDrawVol(0.0), SkinLossPower(0.0), SkinLossEnergy(0.0), SkinLossConvect(0.0),
-              SkinLossRadiat(0.0)
+              ThermalMode(TankThermalMode::Invalid), AmbientTempIndicator(AmbientTempType::Invalid), ZoneID(0), ThisTimeStepVolume(0.0),
+              LastTimeStepVolume(0.0), NumWaterSupplies(0), NumWaterDemands(0), VdotFromTank(0.0), VdotToTank(0.0), VdotOverflow(0.0),
+              VolOverflow(0.0), NetVdot(0.0), Twater(0.0), TwaterOverflow(0.0), MainsDrawVdot(0.0), MainsDrawVol(0.0)
         {
         }
     };
@@ -244,18 +230,11 @@ namespace DataWater {
         // user input data
         std::string Name; // name of this
         std::string StorageTankName;
-        int StorageTankID;          // index "pointer" to water storage tank
-        int StorageTankSupplyARRID; // index "pointer" to storage supply arrays
-        Real64 PumpDepth;           // depth of pump  [m]
-        Real64 PumpNomVolFlowRate;  // nominal flow rate of pump [m3/s]
-        Real64 PumpNomHead;         // design nominal capacity of pump
-        Real64 PumpNomPowerUse;     // design nominal power of pump at nom capacity
-        Real64 PumpEfficiency;
-        Real64 WellRecoveryRate;               // rate at which groundwater can enter well [m3/s]
-        Real64 NomWellStorageVol;              // water storage in well at average water table depth [m3]
+        int StorageTankID;                     // index "pointer" to water storage tank
+        int StorageTankSupplyARRID;            // index "pointer" to storage supply arrays
+        Real64 PumpNomVolFlowRate;             // nominal flow rate of pump [m3/s]
+        Real64 PumpNomPowerUse;                // design nominal power of pump at nom capacity
         GroundWaterTable GroundwaterTableMode; // method of determining water table depth
-        Real64 WaterTableDepth;
-        Sched::Schedule *waterTableDepthSched = nullptr;
         // calculated and from elsewhere
         Real64 VdotRequest;   // rate of flow over timestep requested by tank
         Real64 VdotDelivered; // rate of flow provided [m3/s]
@@ -265,9 +244,9 @@ namespace DataWater {
 
         // Default Constructor
         GroundwaterWellDataStruct()
-            : StorageTankID(0), StorageTankSupplyARRID(0), PumpDepth(0.0), PumpNomVolFlowRate(0.0), PumpNomHead(0.0), PumpNomPowerUse(0.0),
-              PumpEfficiency(0.0), WellRecoveryRate(0.0), NomWellStorageVol(0.0), GroundwaterTableMode(GroundWaterTable::Invalid),
-              WaterTableDepth(0.0), VdotRequest(0.0), VdotDelivered(0.0), VolDelivered(0.0), PumpPower(0.0), PumpEnergy(0.0)
+            : StorageTankID(0), StorageTankSupplyARRID(0), PumpNomVolFlowRate(0.0), PumpNomPowerUse(0.0),
+              GroundwaterTableMode(GroundWaterTable::Invalid), VdotRequest(0.0), VdotDelivered(0.0), VolDelivered(0.0), PumpPower(0.0),
+              PumpEnergy(0.0)
         {
         }
     };
@@ -326,8 +305,6 @@ struct DataWaterData : BaseGlobalStruct
     int NumSiteRainFall = 0;
     bool AnyWaterSystemsInModel = false;    // control flag set true if any water systems
     bool WaterSystemGetInputCalled = false; // set true once input data gotten.
-    bool AnyIrrigationInModel = false;      // control flag set true if irrigation input for ecoroof DJS PSU Dec 2006
-    int PrecipOverwrittenByRainFlag = 0;    // recurring warning index when the rain flag is on but the liquidprecipitation = 0
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -350,8 +327,6 @@ struct DataWaterData : BaseGlobalStruct
         NumSiteRainFall = 0;
         AnyWaterSystemsInModel = false;
         WaterSystemGetInputCalled = false;
-        AnyIrrigationInModel = false;
-        PrecipOverwrittenByRainFlag = 0;
     }
 };
 

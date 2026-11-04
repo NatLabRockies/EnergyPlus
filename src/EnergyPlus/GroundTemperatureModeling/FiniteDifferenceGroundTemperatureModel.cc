@@ -200,7 +200,6 @@ namespace GroundTemp {
         state.dataWeather->RunPeriodInput.redimension(state.dataWeather->TotRunPers);
         state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::ReadAllWeatherData;
         state.dataWeather->RPReadAllWeatherData = true;
-        state.dataGlobal->WeathSimReq = true;
         // RunPeriod is initialized to be one year of simulation
         // RunPeriodInput(TotRunPers).monWeekDay = 0; // Why do this?
 
@@ -281,7 +280,7 @@ namespace GroundTemp {
                     airDensity_num += state.dataEnvrn->OutAirDensity;
                     relHum_num += state.dataEnvrn->OutRelHumValue;
                     windSpeed_num += state.dataEnvrn->WindSpeed;
-                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
+                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
 
                     state.dataGlobal->BeginHourFlag = false;
                     state.dataGlobal->BeginDayFlag = false;

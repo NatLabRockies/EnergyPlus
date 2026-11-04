@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 #include <utility>
 
@@ -509,7 +510,7 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
             Real64 SHRFlowModFrac = max(Curve::CurveValue(state, indexSHRFFF, AirFF), 0.0);
 
             SHR = this->grossRatedSHR * SHRTempModFrac * SHRFlowModFrac;
-            SHR = max(min(SHR, 1.0), 0.0);
+            SHR = std::clamp(SHR, 0.0, 1.0);
             break;
         } // Calculate apparatus dew point conditions using TotCap and CBF
         Real64 hADP = inletNode.Enthalpy - hDelta / (1.0 - CBF);

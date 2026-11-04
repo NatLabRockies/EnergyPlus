@@ -84,7 +84,6 @@ namespace ChillerAbsorption {
         Real64 EvapOutletTemp = 0.0;  // reporting: evaporator outlet temperature
         Real64 Evapmdot = 0.0;        // reporting: evaporator mass flow rate
         Real64 Condmdot = 0.0;        // reporting: condenser mass flow rate
-        Real64 Genmdot = 0.0;         // reporting: generator mass flow rate when connected to plant
         Real64 SteamMdot = 0.0;       // reporting: steam mass flow rate
         Real64 ActualCOP = 0.0;       // reporting: coefficient of performance = QEvap/QGenerator
     };
@@ -128,8 +127,6 @@ namespace ChillerAbsorption {
         bool GeneratorVolFlowRateWasAutoSized = false;              // true if hot water flow was autosize on input
         Real64 GeneratorSubcool = 0.0;                              // amount of subcooling in steam generator
         Fluid::RefrigProps *steam = nullptr;                        // STEAM fluid properties
-        Real64 GeneratorDeltaTemp = -99999.0;                       // C - generator fluid temperature difference (water only)
-        bool GeneratorDeltaTempWasAutoSized = true;                 // true if generator delta T was autosize on input
         PlantLocation CWPlantLoc;                                   // chilled water plant loop index number
         PlantLocation CDPlantLoc;                                   // condenser water plant loop index number
         PlantLocation GenPlantLoc;                                  // generator water plant loop index number

@@ -21,7 +21,6 @@
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
-#include <iosfwd>
 #include <type_traits>
 #include <utility>
 
@@ -353,14 +352,6 @@ public: // Predicate
 		return ( contains( i ) && contains( j ) );
 	}
 
-	// Contains Another IndexRange?
-	bool
-	contains( IndexRange const & I ) const;
-
-	// Intersects Another IndexRange?
-	bool
-	intersects( IndexRange const & I ) const;
-
 public: // Inspector
 
 	// Lower Index
@@ -479,14 +470,6 @@ public: // Modifier
 		assert( legal() );
 		return *this;
 	}
-
-	// Expand to Contain Another IndexRange
-	IndexRange &
-	contain( IndexRange const & I );
-
-	// Intersect with Another IndexRange
-	IndexRange &
-	intersect( IndexRange const & I );
 
 	// Clear
 	IndexRange &
@@ -609,14 +592,6 @@ swap( IndexRange & a, IndexRange & b )
 {
 	a.swap( b );
 }
-
-// Stream >> IndexRange
-std::istream &
-operator >>( std::istream & stream, IndexRange & I );
-
-// Stream << IndexRange
-std::ostream &
-operator <<( std::ostream & stream, IndexRange const & I );
 
 } // ObjexxFCL
 

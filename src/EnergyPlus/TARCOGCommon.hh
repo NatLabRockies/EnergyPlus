@@ -49,7 +49,7 @@
 #define TARCOGCommon_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -88,7 +88,7 @@ namespace TARCOGCommon {
     );
 
     void matrixQBalance(int nlayer,
-                        Array2<Real64> &a,
+                        Array2D<Real64> &a,
                         Array1D<Real64> &b,
                         Array1D<Real64> const &thick,
                         Array1D<Real64> const &hcgas,
@@ -106,11 +106,11 @@ namespace TARCOGCommon {
                         Array1D<Real64> const &emis,
                         Real64 edgeGlCorrFac);
 
-    void EquationsSolver(EnergyPlusData &state, Array2<Real64> &a, Array1D<Real64> &b, int n, int &nperr, std::string &ErrorMessage);
+    void EquationsSolver(EnergyPlusData &state, Array2D<Real64> &a, Array1D<Real64> &b, int n, int &nperr, std::string &ErrorMessage);
 
-    void ludcmp(EnergyPlusData &state, Array2<Real64> &a, int n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage);
+    void ludcmp(EnergyPlusData &state, Array2D<Real64> &a, int n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage);
 
-    void lubksb(Array2A<Real64> a, int n, const Array1D_int &indx, Array1D<Real64> &b);
+    void lubksb(Array2D<Real64> const &a, int n, const Array1D_int &indx, Array1D<Real64> &b);
 
     Real64 pos(Real64 x);
 

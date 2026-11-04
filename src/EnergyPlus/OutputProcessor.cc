@@ -330,14 +330,9 @@ namespace OutputProcessor {
 
             // A match. Make sure doesn't duplicate
             reqVar->Used = true;
-            bool Dup = false;
-            // op->ReportList is allocated to a large value, so we can't use a std::find_if on it (why not?)
-            for (int iReqVar2 : reqVarList) {
-                if (op->reqVars[iReqVar2]->freq == reqVar->freq && op->reqVars[iReqVar2]->sched == reqVar->sched) {
-                    Dup = true;
-                    break;
-                }
-            }
+            bool Dup = std::any_of(reqVarList.begin(), reqVarList.end(), [&op, reqVar](int iReqVar2) {
+                return op->reqVars[iReqVar2]->freq == reqVar->freq && op->reqVars[iReqVar2]->sched == reqVar->sched;
+            });
 
             if (!Dup) {
                 reqVarList.push_back(iReqVar);
@@ -4673,10 +4668,8 @@ bool ReportingThisVariable(EnergyPlusData const &state, std::string const &RepVa
 
     std::string name = Util::makeUPPER(RepVarName);
 
-    for (const auto &reqVar : op->reqVars) {
-        if (reqVar->name == name) {
-            return true;
-        }
+    if (std::any_of(op->reqVars.begin(), op->reqVars.end(), [&name](auto const &reqVar) { return reqVar->name == name; })) {
+        return true;
     }
 
     if (auto found = op->meterMap.find(name); found != op->meterMap.end()) {

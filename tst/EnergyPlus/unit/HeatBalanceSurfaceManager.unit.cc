@@ -1133,6 +1133,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
         "  Core_bottom Thermostat,  !- Name",
         "  Core_bottom,             !- Zone or ZoneList Name",
         "  Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "  Core_bottom DualSPSched; !- Control 1 Name",
         " ",
@@ -2507,8 +2508,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySrdSurfLWR)
     // Test if sky and grd view factor and temperature correctly overwritten
     EXPECT_DOUBLE_EQ((Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(20.0 + Constant::Kelvin) - pow_4(15.0 + Constant::Kelvin)) / (20.0 - 15.0)),
                      state->dataHeatBalSurf->SurfHSkyExt(1));
-    EXPECT_DOUBLE_EQ((Constant::StefanBoltzmann * 0.9 * 0.1 * (pow_4(20.0 + Constant::Kelvin) - pow_4(22.0 + Constant::Kelvin)) / (20.0 - 22.0)),
-                     state->dataHeatBalSurf->SurfHGrdExt(1));
+    EXPECT_NEAR((Constant::StefanBoltzmann * 0.9 * 0.1 * (pow_4(20.0 + Constant::Kelvin) - pow_4(22.0 + Constant::Kelvin)) / (20.0 - 22.0)),
+                state->dataHeatBalSurf->SurfHGrdExt(1),
+                1e-12);
 
     // Test if LWR from surrounding surfaces correctly calculated
     EXPECT_DOUBLE_EQ(Constant::StefanBoltzmann * 0.9 * 0.6 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)),
@@ -4980,7 +4982,6 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_IncSolarMultiplier)
     state->dataSurface->Surface(SurfNum).BaseSurf = SurfNum;
     state->dataSurface->SurfIncSolMultiplier.allocate(totSurf);
     state->dataSurface->SurfIncSolMultiplier(SurfNum).Name = "testing window surface";
-    state->dataSurface->SurfIncSolMultiplier(SurfNum).SurfaceIdx = SurfNum;
     state->dataSurface->SurfIncSolMultiplier(SurfNum).sched = nullptr;
 
     state->dataSurface->Surface(SurfNum).Area = 100.0;
@@ -5022,9 +5023,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_IncSolarMultiplier)
     state->dataEnvrn->BeamSolarRad = 0.1;
     state->dataEnvrn->GndSolarRad = 0.2;
     state->dataEnvrn->DifSolarRad = 0.3;
-    state->dataEnvrn->SOLCOS(1) = 0.84471127222777276;
-    state->dataEnvrn->SOLCOS(2) = -0.53484539135440257;
-    state->dataEnvrn->SOLCOS(3) = 0.020081681162033127;
+    state->dataEnvrn->SOLCOS.x = 0.84471127222777276;
+    state->dataEnvrn->SOLCOS.y = -0.53484539135440257;
+    state->dataEnvrn->SOLCOS.z = 0.020081681162033127;
 
     HeatBalanceManager::AllocateZoneHeatBalArrays(*state);
 
@@ -5417,9 +5418,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestInitHBDaylightingNoExtWi
     state->dataEnvrn->BeamSolarRad = 50;
     state->dataEnvrn->GndSolarRad = 50;
     state->dataEnvrn->DifSolarRad = 0;
-    state->dataEnvrn->SOLCOS(1) = 0.84471127222777276;
-    state->dataEnvrn->SOLCOS(2) = -0.53484539135440257;
-    state->dataEnvrn->SOLCOS(3) = 0.020081681162033127;
+    state->dataEnvrn->SOLCOS.x = 0.84471127222777276;
+    state->dataEnvrn->SOLCOS.y = -0.53484539135440257;
+    state->dataEnvrn->SOLCOS.z = 0.020081681162033127;
 
     for (auto &thisSurf : state->dataSurface->Surface) {
         thisSurf.SolarEnclIndex = 1;
@@ -5986,7 +5987,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestTDDSurfWinHeatGain)
     int constexpr HoursInDay(24);
     state->dataSurface->SurfSunCosHourly.allocate(HoursInDay);
     for (int hour = 1; hour <= HoursInDay; hour++) {
-        state->dataSurface->SurfSunCosHourly(hour) = 0.0;
+        state->dataSurface->SurfSunCosHourly(hour) = Vector3D();
     }
     //    SurfaceGeometry::GetSurfaceData(*state, ErrorsFound);
     //    EXPECT_FALSE(ErrorsFound);
@@ -7260,9 +7261,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     result_LWRExchangeCoeff_surf2 = Constant::StefanBoltzmann * 0.9 * 0.2 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf3 = Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     // test LWR exchange coefficients b/n exterior wall and ground surfaces
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1));
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2));
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3));
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1), 1e-12);
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2), 1e-12);
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3), 1e-12);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestGroundSurfsAverageTemp)

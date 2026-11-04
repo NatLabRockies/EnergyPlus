@@ -46,13 +46,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <format>
+#include <limits>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
-#include <ObjexxFCL/numeric.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
@@ -761,7 +762,7 @@ void GetInputEconomicsTariff(EnergyPlusData &state, bool &ErrorsFound) // true i
         if (len(s_ipsc->cAlphaArgs(9)) > 0) {
             tariff.minMonthChgVal = Util::ProcessNumber(s_ipsc->cAlphaArgs(9), isNotNumeric);
         } else {
-            tariff.minMonthChgVal = -HUGE_(-1.0); // set to a very negative value
+            tariff.minMonthChgVal = std::numeric_limits<Real64>::lowest(); // set to a very negative value
         }
         tariff.minMonthChgPt =
             AssignVariablePt(state, s_ipsc->cAlphaArgs(9), isNotNumeric, varIsArgument, varNotYetDefined, ObjType::Invalid, 0, iInObj);
@@ -1019,14 +1020,13 @@ void GetInputEconomicsChargeBlock(EnergyPlusData &state, bool &ErrorsFound) // t
     int NumNums;   // Number of elements in the numeric array
     int IOStat;    // IO Status when calling get input subroutine
     bool isNotNumeric;
-    int alphaOffset;        // offset used in blocks for alpha array
-    Real64 hugeNumber(0.0); // Autodesk Value not used but suppresses warning about HUGE_() call
+    int alphaOffset; // offset used in blocks for alpha array
 
     auto &s_econ = state.dataEconTariff;
     auto &s_ipsc = state.dataIPShortCut;
     s_ipsc->cCurrentModuleObject = "UtilityCost:Charge:Block";
 
-    hugeNumber = HUGE_(hugeNumber);
+    Real64 const hugeNumber = std::numeric_limits<Real64>::max();
     s_econ->numChargeBlock = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
     s_econ->chargeBlock.allocate(s_econ->numChargeBlock);
     for (int iInObj = 1; iInObj <= s_econ->numChargeBlock; ++iInObj) {
@@ -2682,7 +2682,7 @@ void ComputeTariff(EnergyPlusData &state)
         return;
     }
 
-    Real64 hugeValue = HUGE_(Real64());
+    Real64 hugeValue = std::numeric_limits<Real64>::max();
     //  Clear the isEvaluated flags for all economics variables.
     for (int nVar = 1; nVar <= s_econ->numEconVar; ++nVar) {
         s_econ->econVar(nVar).isEvaluated = false;
@@ -2728,7 +2728,7 @@ void ComputeTariff(EnergyPlusData &state)
                     a = 0.0;
                     for (int kStack = 1, kStack_end = s_econ->topOfStack; kStack <= kStack_end; ++kStack) { // popStack modifies topOfStack
                         popStack(state, b, bPt);
-                        a += b;
+                        std::transform(a.begin(), a.end(), b.begin(), a.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
                     }
                     pushStack(state, a, noVar);
                 } break;
@@ -2736,13 +2736,15 @@ void ComputeTariff(EnergyPlusData &state)
                 case Op::MULTIPLY: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, a * b, noVar);
+                    std::transform(a.begin(), a.end(), b.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::SUBTRACT: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, b - a, noVar);
+                    std::transform(b.begin(), b.end(), a.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs - rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::DIVIDE: {
@@ -3028,7 +3030,8 @@ void ComputeTariff(EnergyPlusData &state)
                 case Op::ADD: {
                     popStack(state, b, bPt);
                     popStack(state, a, aPt);
-                    pushStack(state, a + b, noVar);
+                    std::transform(a.begin(), a.end(), b.begin(), c.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
+                    pushStack(state, c, noVar);
                 } break;
 
                 case Op::NOOP: {
@@ -3050,7 +3053,7 @@ void ComputeTariff(EnergyPlusData &state)
     LEEDtariffReporting(state);
 }
 
-void pushStack(EnergyPlusData &state, Array1A<Real64> const monthlyArray, int const variablePointer)
+void pushStack(EnergyPlusData &state, Array1D<Real64> const &monthlyArray, int const variablePointer)
 {
     //    AUTHOR         Jason Glazer of GARD Analytics, Inc.
     //    DATE WRITTEN   July 2004
@@ -3061,8 +3064,6 @@ void pushStack(EnergyPlusData &state, Array1A<Real64> const monthlyArray, int co
     //    first out basis. The stack consists of both a pointer
     //    to the variable and the twelve monthly values.
     //    This routine puts an item on the top of the stack.
-
-    monthlyArray.dim(NumMonths);
 
     Array1D<Real64> curMonthlyArray(NumMonths);
     int constexpr sizeIncrement(50);
@@ -3137,7 +3138,7 @@ void pushStack(EnergyPlusData &state, Array1A<Real64> const monthlyArray, int co
     stack(s_econ->topOfStack).values = curMonthlyArray;
 }
 
-void popStack(EnergyPlusData &state, Array1A<Real64> monthlyArray, int &variablePointer)
+void popStack(EnergyPlusData &state, Array1D<Real64> &monthlyArray, int &variablePointer)
 {
     //    AUTHOR         Jason Glazer of GARD Analytics, Inc.
     //    DATE WRITTEN   July 2004
@@ -3149,8 +3150,6 @@ void popStack(EnergyPlusData &state, Array1A<Real64> monthlyArray, int &variable
     //    to the variable and the twelve monthly values.
     //    This routine returns the item on the top of the stack
     //    and removes it from the stack.
-
-    monthlyArray.dim(NumMonths);
 
     auto &s_econ = state.dataEconTariff;
     auto const &stack = s_econ->stack;
@@ -3218,7 +3217,8 @@ void evaluateChargeSimple(EnergyPlusData &state, int const usingVariable)
     }
 
     // finally perform calculations
-    resultChg = sourceVals * costPer * seasonMask;
+    std::transform(sourceVals.begin(), sourceVals.end(), costPer.begin(), resultChg.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
+    std::transform(resultChg.begin(), resultChg.end(), seasonMask.begin(), resultChg.begin(), [](Real64 lhs, Real64 rhs) { return lhs * rhs; });
     // store the cost in the name of the variable
     s_econ->econVar(usingVariable).values = resultChg;
     // set the flag that it has been evaluated so it won't be evaluated multiple times
@@ -3423,7 +3423,7 @@ void evaluateRatchet(EnergyPlusData &state, int const usingVariable)
     if (isMonthly) {
         adjSeasonal = adjustmentVals;
     } else {
-        Real64 maximumVal = -HUGE_(Real64());
+        Real64 maximumVal = std::numeric_limits<Real64>::lowest();
         for (int iMonth = 1; iMonth <= NumMonths; ++iMonth) {
             if (seasonFromMask(iMonth) == 1) {
                 if (adjustmentVals(iMonth) > maximumVal) {
@@ -3612,9 +3612,12 @@ void addMonthlyCharge(EnergyPlusData &state, int const usingVariable)
         ShowContinueError(state, std::format("       And: {}", s_econ->tariff(tariff.cats[(int)Cat::ServiceCharges]).tariffName));
     }
     if (tariff.monthChgPt != 0) {
-        s_econ->econVar(usingVariable).values += s_econ->econVar(tariff.monthChgPt).values;
+        auto &values = s_econ->econVar(usingVariable).values;
+        auto const &monthChgValues = s_econ->econVar(tariff.monthChgPt).values;
+        std::transform(values.begin(), values.end(), monthChgValues.begin(), values.begin(), [](Real64 lhs, Real64 rhs) { return lhs + rhs; });
     } else {
-        s_econ->econVar(usingVariable).values += tariff.monthChgVal;
+        auto &values = s_econ->econVar(usingVariable).values;
+        std::transform(values.begin(), values.end(), values.begin(), [&tariff](Real64 v) { return v + tariff.monthChgVal; });
     }
     // zero out months with no energy consumption
     // curTotalEnergy = tariff.nativeTotalEnergy
@@ -3664,9 +3667,7 @@ void setNativeVariables(EnergyPlusData &state)
     auto &s_econ = state.dataEconTariff;
 
     Array1D<Real64> monthVal(NumMonths);
-    Real64 bigNumber(0.0); // Autodesk Value not used but suppresses warning about HUGE_() call
-
-    bigNumber = HUGE_(bigNumber);
+    Real64 const bigNumber = std::numeric_limits<Real64>::max();
     for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {
         auto &tariff = s_econ->tariff(iTariff);
         // nativeTotalEnergy
@@ -4514,13 +4515,12 @@ void getMaxAndSum(EnergyPlusData const &state, int const varPointer, Real64 &sum
 
     //    Get the annual maximum and sum for the econVariable.
 
-    Real64 maximumVal(0.0); // Autodesk Value not used but suppresses warning about HUGE_() call
+    Real64 maximumVal = std::numeric_limits<Real64>::lowest();
 
     auto const &s_econ = state.dataEconTariff;
     auto const &econVar = s_econ->econVar(varPointer);
 
     Real64 sumVal = 0.0;
-    maximumVal = -HUGE_(maximumVal);
     for (int jMonth = 1; jMonth <= 12; ++jMonth) { // note not all months get printed out if more than 12 are used.- need to fix this later
         Real64 curVal = econVar.values(jMonth);
         sumVal += curVal;
@@ -4856,17 +4856,14 @@ void selectTariff(EnergyPlusData &state)
     MinTariffIndex.deallocate();
 }
 
-void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts)
+void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1D<Real64> &outMonthlyCosts)
 {
     //       AUTHOR         Jason Glazer
     //       DATE WRITTEN   May 2010
 
     //  Return the total annual cost for a given resource number.
 
-    // Argument array dimensioning
     auto const &s_econ = state.dataEconTariff;
-
-    outMonthlyCosts.dim(12);
 
     outMonthlyCosts = 0.0;
     for (int iTariff = 1; iTariff <= s_econ->numTariff; ++iTariff) {

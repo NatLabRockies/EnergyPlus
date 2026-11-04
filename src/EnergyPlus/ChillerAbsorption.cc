@@ -1327,19 +1327,6 @@ void BLASTAbsorberSpecs::sizeChiller(EnergyPlusData &state)
         PlantUtilities::RegisterPlantCompDesignFlow(state, this->GeneratorInletNodeNum, tmpGeneratorVolFlowRate);
     }
 
-    if (this->GeneratorDeltaTempWasAutoSized) {
-        if (PltSizHeatingNum > 0 && this->GenHeatSourceType == Node::FluidType::Water) {
-            this->GeneratorDeltaTemp = max(0.5, state.dataSize->PlantSizData(PltSizHeatingNum).DeltaT);
-        } else if (this->GenHeatSourceType == Node::FluidType::Water) {
-            if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                Real64 Cp = this->GenPlantLoc.loop->glycol->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);
-                Real64 rho = this->GenPlantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
-
-                this->GeneratorDeltaTemp = (SteamInputRatNom * this->NomCap) / (Cp * rho * this->GeneratorVolFlowRate);
-            }
-        }
-    }
-
     if (ErrorsFound) {
         ShowFatalError(state, "Preceding sizing errors cause program termination");
     }
@@ -1772,7 +1759,6 @@ void BLASTAbsorberSpecs::updateRecords(EnergyPlusData &state, Real64 MyLoad, boo
         this->Report.EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
         this->Report.Evapmdot = 0.0;
         this->Report.Condmdot = 0.0;
-        this->Report.Genmdot = 0.0;
         this->Report.ActualCOP = 0.0;
 
         if (this->GeneratorInletNodeNum > 0) {
@@ -1800,7 +1786,6 @@ void BLASTAbsorberSpecs::updateRecords(EnergyPlusData &state, Real64 MyLoad, boo
         this->Report.EvapOutletTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
         this->Report.Evapmdot = this->EvapMassFlowRate;
         this->Report.Condmdot = this->CondMassFlowRate;
-        this->Report.Genmdot = this->SteamMassFlowRate;
         if (this->QGenerator != 0.0) {
             this->Report.ActualCOP = this->QEvaporator / this->QGenerator;
         } else {

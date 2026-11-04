@@ -812,7 +812,6 @@ TEST_F(EnergyPlusFixture, SZRHOAFractionImpact)
     SetPointManager::InitSetPointManagers(*state);
 
     state->dataAirLoop->AirLoopFlow(1).OAFrac = 1.0;
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.8;
 
     state->dataLoopNodes->Node(zoneInletNode).MassFlowRate = 1.0; // set zone inlet mass flow
     state->dataLoopNodes->Node(zoneInletNode).HumRat = 0.0008;
@@ -854,7 +853,6 @@ TEST_F(EnergyPlusFixture, SZRHOAFractionImpact)
     EXPECT_NEAR(state->dataLoopNodes->Node(7).TempSetPoint, 18.0251495, 0.001);
 
     state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.8;
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.8;
 
     SetPointManager::SimSetPointManagers(*state);
     SetPointManager::UpdateSetPointManagers(*state);
@@ -863,7 +861,6 @@ TEST_F(EnergyPlusFixture, SZRHOAFractionImpact)
 
     // warmer day outside
     state->dataAirLoop->AirLoopFlow(1).OAFrac = 1.0;
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.8;
 
     state->dataLoopNodes->Node(3).HumRat = 0.0006; // OA intake
     state->dataLoopNodes->Node(3).Temp = 26.0;
@@ -878,7 +875,6 @@ TEST_F(EnergyPlusFixture, SZRHOAFractionImpact)
     EXPECT_NEAR(state->dataLoopNodes->Node(7).TempSetPoint, 27.0, 0.001);
 
     state->dataAirLoop->AirLoopFlow(1).OAFrac = 0.8;
-    state->dataAirLoop->AirLoopFlow(1).OAMinFrac = 0.8;
 
     SetPointManager::SimSetPointManagers(*state);
     SetPointManager::UpdateSetPointManagers(*state);
@@ -1027,6 +1023,7 @@ TEST_F(EnergyPlusFixture, ColdestSetPointMgrInSingleDuct)
         "    SPACE1-1 Control,        !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",

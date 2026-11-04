@@ -596,7 +596,7 @@ Blowdown is water drained from the sump to counter the build up of solids in the
 
 \subsubsection{Indirect Evaporative Cooler Sizing}\label{indirect-evaporative-cooler-sizing-000}
 
-The model for the object called EvaporativeCooler:Indirect:ResearchSpecial has a field for the secondary fan flow rate that can be autosized.
+The model for the object called EvaporativeCooler:Indirect:UserEffectiveness has a field for the secondary fan flow rate that can be autosized.
 
 \paragraph{Secondary Air DesignFan Flow Rate}\label{secondary-air-designfan-flow-rate}
 
@@ -624,7 +624,7 @@ P_{sec,fan,design} = \dot{V}_{sec,design}\cdot\text{FanPowerScalingFactor}
 
 \paragraph{Recirculating Water Design Pump Power}\label{recirculating-water-design-pump-power}
 
-The Recirculating Water Design Pump Power is sized from secondary air design flow rate and user input for recirculating and spraying Water Pump Power Sizing Factor in units of W/(m3/s) or W-s/m3 and is given by:
+The Recirculating Water Design Pump Power is sized from secondary air design flow rate and the user input for Design Water Pump Power Per Unit Flow Rate in units of W/(m3/s) or W-s/m3 and is given by:
 
 \begin{equation}
 P_{pump,design} = \dot{V}_{sec,design}\cdot\text{PumpPowerScalingFactor}
@@ -640,7 +640,7 @@ where:
 
 \(\text{FanPowerScalingFactor}\) is the user specified secondary air fan sizing specific power in units of W/(m\(^{3}\)/s) for design fan power calculation
 
-\(\text{PumpPowerScalingFactor}\) is the user specified recirculating and spraying water pump power sizing factor in units of W/(m\(^{3}\)/s) for design pump power calculation.
+\(\text{PumpPowerScalingFactor}\) is the user-specified design water pump power per unit flow rate in units of W/(m\(^{3}\)/s) for design pump power calculation.
 
 \subsection{Direct Evaporative Cooler Special Research Model}\label{direct-evaporative-cooler-special-research-model}
 

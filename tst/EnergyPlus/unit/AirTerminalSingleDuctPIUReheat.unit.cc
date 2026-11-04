@@ -1057,6 +1057,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctSeriesPIU_SimTest)
         "    Thermal Zone 1 Thermostat,  !- Name",
         "    Thermal Zone 1,          !- Zone or ZoneList Name",
         "    Thermal Zone 1 Thermostat Schedule,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Thermal Zone 1 Thermostat;  !- Control 1 Name",
 

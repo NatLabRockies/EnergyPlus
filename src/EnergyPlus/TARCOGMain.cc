@@ -378,11 +378,11 @@ void TARCOG90(EnergyPlusData &state,
               Real64 const heightt,                       // Window height
               Real64 const width,                         // Window width
               const Array1D<Real64> &presure,             // Vector of gas pressures in gaps [N/m2]
-              Array2A_int const iprop,                    // Matrix of gas codes - see mgas definition
-              Array2A<Real64> const frct,                 // Matrix of mass percentages in gap mixtures
-              Array2A<Real64> const xgcon,                // Matrix of constants for gas conductivity calc
-              Array2A<Real64> const xgvis,                // Matrix of constants for gas dynamic viscosity calc
-              Array2A<Real64> const xgcp,                 // Matrix of constants for gas specific heat calc at constant pressure
+              Array2D_int const &iprop,                   // Matrix of gas codes - see mgas definition
+              Array2D<Real64> const &frct,                // Matrix of mass percentages in gap mixtures
+              Array2D<Real64> const &xgcon,               // Matrix of constants for gas conductivity calc
+              Array2D<Real64> const &xgvis,               // Matrix of constants for gas dynamic viscosity calc
+              Array2D<Real64> const &xgcp,                // Matrix of constants for gas specific heat calc at constant pressure
               const Array1D<Real64> &xwght,               // Vector of Molecular weights for gasses
               const Array1D<Real64> &gama,                // Vector of specific heat ration for low pressure calc
               const Array1D_int &nmix,                    // Vector of number of gasses in gas mixture of each gap
@@ -475,11 +475,6 @@ void TARCOG90(EnergyPlusData &state,
     EP_SIZE_CHECK(emis, maxlay2);
     EP_SIZE_CHECK(asol, maxlay);
     EP_SIZE_CHECK(presure, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(nmix, maxlay1);

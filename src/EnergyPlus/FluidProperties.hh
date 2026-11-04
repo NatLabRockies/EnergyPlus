@@ -406,7 +406,7 @@ namespace Fluid {
                                    int NumOfConcs,                     // number of concentrations (dimension of raw data)
                                    int NumOfTemps,                     // number of temperatures (dimension of raw data)
                                    const Array1D<Real64> &RawConcData, // concentrations for raw data
-                                   Array2S<Real64> RawPropData,        // raw property data (temperature,concentration)
+                                   Array2D<Real64> const &RawPropData, // raw property data (temperature,concentration)
                                    Real64 Concentration,               // concentration of actual fluid mix
                                    Array1D<Real64> &InterpData         // interpolated output data at proper concentration
     );

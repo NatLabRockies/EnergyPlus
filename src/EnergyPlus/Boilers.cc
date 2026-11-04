@@ -506,8 +506,7 @@ void BoilerSpecs::oneTimeInit(EnergyPlusData &state)
 {
     // Locate the boilers on the plant loops for later usage
     bool errFlag = false;
-    PlantUtilities::ScanPlantLoopsForObject(
-        state, this->Name, DataPlant::PlantEquipmentType::Boiler_Simple, this->plantLoc, errFlag, _, this->TempUpLimitBoilerOut, _, _, _);
+    PlantUtilities::ScanPlantLoopsForObject(state, this->Name, this->Type, this->plantLoc, errFlag, _, this->TempUpLimitBoilerOut, _, _, _);
     if (errFlag) {
         ShowFatalError(state, "InitBoiler: Program terminated due to previous condition(s).");
     }
