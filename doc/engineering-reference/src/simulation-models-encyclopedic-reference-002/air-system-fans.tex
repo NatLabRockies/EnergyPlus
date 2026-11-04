@@ -132,7 +132,7 @@ For the \emph{Fan:SystemModel} using discrete speed control, with the number of 
 {\dot Q_{tot,elec}} = {RTF_{On}} \cdot \left( \frac{\dot m_{design,max}\cdot \Delta P}{{\varepsilon_{tot}}\cdot {\rho_{air}}}\right)
 \end{equation}
 
-The mass flow inside the parentheses is the on-cycle design mass flow, not the timestep-average mass flow. If a parent system supplies a coil part-load fraction correction, the fan adjusts the cycling fraction by that correction, limited to a runtime fraction of 1. Fan:OnOff uses an analogous correction. For AirLoopHVAC:UnitarySystem, see \hyperref[unitary-system-cycling-airflow]{Cycling airflow, part-load ratio, and runtime fraction} for the distinction between requested airflow and actual fan runtime, including the current limitation for supplemental fuel-coil cycling losses.
+The mass flow inside the parentheses is the on-cycle design mass flow, not the timestep-average mass flow. If a parent system supplies a coil part-load fraction correction, the fan adjusts the cycling fraction by that correction, limited to a runtime fraction of 1. Fan:OnOff uses an analogous correction. For AirLoopHVAC:UnitarySystem, see \hyperref[unitary-system-cycling-airflow]{Cycling airflow, part-load ratio, and runtime fraction} for the distinction between requested airflow and actual fan runtime, including coordination of primary and supplemental fuel-coil cycling losses.
 
 Similarly, for two-speed and multi-speed fans, the current flow fraction will be used to find the run time fraction for each of the adjacent speed levels *x* and *x+1* that bracket the flow fraction such that
 

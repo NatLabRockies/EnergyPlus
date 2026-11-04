@@ -92,7 +92,13 @@ For single-speed DX operation, the coil supplies a part-load fraction correction
 
 Here \(PLF_{fan}\) is the correction available when the fan is simulated, not a maximum of coil runtime fractions. With no correction, \(PLF_{fan}=1\). The airflow fraction and the fan runtime fraction can therefore differ. Multi-speed fan power instead combines power at the operating speeds with their respective runtime fractions; continuous speed control uses the fan power-versus-flow curve.
 
-\textbf{Current supplemental-coil limitation:} The supplemental heating coil is simulated after the fan, for both blow-through and draw-through placement. A supplemental Coil:Heating:Fuel can calculate \(RTF_{supplemental}=PLR_{supplemental}/PLF_{supplemental}\), but its part-load fraction correction is not applied to the fan in the same simulation pass. Consequently, fan cycling is not generally calculated as \(\max(RTF_{DX},RTF_{supplemental})\). When no fuel-coil part-load fraction curve is specified, its runtime fraction equals its part-load ratio and this distinction disappears during supplemental-only operation.
+The supplemental heating coil is simulated after the fan, for both blow-through and draw-through placement: draw-through refers to the primary coils, not the supplemental heater. For load based cycling operation with zero off-cycle airflow, a supplemental Coil:Heating:Fuel with a part-load fraction curve supplies its calculated runtime fraction to an additional component pass. Fan:OnOff and discrete-speed Fan:SystemModel use one effective fan correction that accommodates the primary and supplemental runtime requirements without applying either coil's PLF twice. For single-speed operation:
+
+\begin{equation}
+RTF_{fan} = \min\left(1,\max\left(f_{fan,request},RTF_{primary},RTF_{supplemental}\right)\right)
+\end{equation}
+
+The requested airflow fraction remains a lower bound on fan runtime and is not changed by this correction. During supplemental-only operation without an outlet-temperature restriction, this gives \(RTF_{fan}=RTF_{supplemental}\); an operating primary coil at full load keeps fan runtime at 1. Components are re-simulated as needed to reconcile fan heat with the supplemental outlet-temperature limit. The shared fan PLF correction is reset before returning so it cannot affect a later system calculation. Continuous fan operation and continuous speed fan power control do not use this supplemental runtime correction. When no fuel-coil part-load fraction curve is specified, its runtime fraction equals its part-load ratio.
 
 System node airflow is a timestep-average quantity. With zero off-cycle flow, the reported air temperature describes the flowing air, not a time average that includes stagnant air during fan-off periods. For a supplemental fuel coil, the outlet temperature is obtained from the delivered heating rate and the average air mass flow:
 
