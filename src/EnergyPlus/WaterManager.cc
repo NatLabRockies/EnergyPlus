@@ -369,8 +369,7 @@ namespace WaterManager {
                             if (lAlphaFieldBlanks(9)) {
                                 ShowSevereEmptyField(state, eoh, cAlphaFieldNames(9));
                                 ErrorsFound = true;
-                            } else if ((state.dataWaterData->WaterStorage(Item).ambientTempSched = Sched::GetSchedule(state, cAlphaArgs(9))) ==
-                                       nullptr) {
+                            } else if (Sched::GetSchedule(state, cAlphaArgs(9)) == nullptr) {
                                 ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(9), cAlphaArgs(9));
                                 ErrorsFound = true;
                             }
@@ -383,10 +382,6 @@ namespace WaterManager {
                             ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                             ErrorsFound = true;
                         }
-                        state.dataWaterData->WaterStorage(Item).SurfArea = rNumericArgs(8);
-                        state.dataWaterData->WaterStorage(Item).UValue = rNumericArgs(9);
-                        state.dataWaterData->WaterStorage(Item).SurfMaterialName = cAlphaArgs(11);
-                        // todo verify material collect and store useful data from it.
                     }
                 }
             } // num water storage tanks > 0
@@ -549,13 +544,8 @@ namespace WaterManager {
                         state.dataWaterData->WaterStorage(state.dataWaterData->GroundwaterWell(Item).StorageTankID).GroundWellID = Item;
                     }
 
-                    state.dataWaterData->GroundwaterWell(Item).PumpDepth = rNumericArgs(1);
                     state.dataWaterData->GroundwaterWell(Item).PumpNomVolFlowRate = rNumericArgs(2);
-                    state.dataWaterData->GroundwaterWell(Item).PumpNomHead = rNumericArgs(3);
                     state.dataWaterData->GroundwaterWell(Item).PumpNomPowerUse = rNumericArgs(4);
-                    state.dataWaterData->GroundwaterWell(Item).PumpEfficiency = rNumericArgs(5);
-                    state.dataWaterData->GroundwaterWell(Item).WellRecoveryRate = rNumericArgs(6);
-                    state.dataWaterData->GroundwaterWell(Item).NomWellStorageVol = rNumericArgs(7);
 
                     if (lAlphaFieldBlanks(3)) {
                         // This is not an error
@@ -565,15 +555,12 @@ namespace WaterManager {
                         ErrorsFound = true;
                     }
 
-                    //  N8, \field water table depth
-                    state.dataWaterData->GroundwaterWell(Item).WaterTableDepth = rNumericArgs(8);
                     // A4; \field water table depth schedule
                     if (state.dataWaterData->GroundwaterWell(Item).GroundwaterTableMode == GroundWaterTable::Scheduled) {
                         if (lAlphaFieldBlanks(4)) {
                             ShowSevereEmptyField(state, eoh, cAlphaFieldNames(4));
                             ErrorsFound = true;
-                        } else if ((state.dataWaterData->GroundwaterWell(Item).waterTableDepthSched = Sched::GetSchedule(state, cAlphaArgs(4))) ==
-                                   nullptr) {
+                        } else if (Sched::GetSchedule(state, cAlphaArgs(4)) == nullptr) {
                             ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(4), cAlphaArgs(4));
                             ErrorsFound = true;
                         }
@@ -704,7 +691,6 @@ namespace WaterManager {
             }
 
             if (NumIrrigation == 1) {
-                state.dataWaterData->AnyIrrigationInModel = true;
                 state.dataInputProcessing->inputProcessor->getObjectItem(
                     state, cCurrentModuleObject, 1, cAlphaArgs, NumAlphas, rNumericArgs, NumNumbers, IOStatus);
 
@@ -1194,7 +1180,6 @@ namespace WaterManager {
         switch (state.dataWaterData->WaterStorage(TankNum).ThermalMode) {
         case TankThermalMode::Scheduled: {
             state.dataWaterData->WaterStorage(TankNum).Twater = state.dataWaterData->WaterStorage(TankNum).tempSched->getCurrentVal();
-            state.dataWaterData->WaterStorage(TankNum).TouterSkin = state.dataWaterData->WaterStorage(TankNum).Twater;
         } break;
         case TankThermalMode::ZoneCoupled: {
             ShowFatalError(state, "WaterUse:Storage (Water Storage Tank) zone thermal model incomplete");
@@ -1638,7 +1623,6 @@ namespace WaterManager {
             for (TankNum = 1; TankNum <= state.dataWaterData->NumWaterStorageTanks; ++TankNum) {
                 state.dataWaterData->WaterStorage(TankNum).LastTimeStepVolume = state.dataWaterData->WaterStorage(TankNum).InitialVolume;
                 state.dataWaterData->WaterStorage(TankNum).ThisTimeStepVolume = state.dataWaterData->WaterStorage(TankNum).InitialVolume;
-                state.dataWaterData->WaterStorage(TankNum).LastTimeStepTemp = state.dataWaterData->WaterStorage(TankNum).InitialTankTemp;
             }
             state.dataWaterManager->MyWarmupFlag = false;
         }

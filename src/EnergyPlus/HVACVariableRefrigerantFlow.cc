@@ -3497,11 +3497,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
             errFlag = false;
             OANodeNums = GetOAMixerNodeNumbers(state, thisVrfTU.OAMixerName, errFlag);
 
-            //       OANodeNums(1) = OAMixer(OAMixerNum)%InletNode
-            //       OANodeNums(2) = OAMixer(OAMixerNum)%RelNode
-            //       OANodeNums(3) = OAMixer(OAMixerNum)%RetNode
-            //       OANodeNums(4) = OAMixer(OAMixerNum)%MixNode
-
             if (errFlag) {
                 ShowContinueError(state, "Occurs in " + cCurrentModuleObject + " = " + thisVrfTU.Name);
                 ErrorsFound = true;
@@ -3582,7 +3577,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                                  _,
                                                  state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).MaxOATCooling);
 
-                            state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFIUPtr = VRFTUNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.CoolCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
 
@@ -3862,7 +3856,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                                  _,
                                                  1.0); // DefrostCapacity=1.0
 
-                            state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFIUPtr = VRFTUNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).VRFOUPtr = thisVrfTU.VRFSysNum;
                             state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).SupplyFanIndex = thisVrfTU.FanIndex;
 
@@ -3873,52 +3866,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                 state.dataDXCoils->DXCoil(thisVrfTU.HeatCoilIndex).RatedAirVolFlowRate(1) = AutoSize;
                             }
 
-                            // Terminal unit heating to cooling sizing ratio has precedence over VRF system sizing ratio
-                            if (thisVrfTU.HeatingCapacitySizeRatio > 1.0) {
-                                SetDXCoolingCoilData(state,
-                                                     thisVrfTU.HeatCoilIndex,
-                                                     ErrorsFound,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     thisVrfTU.HeatingCapacitySizeRatio);
-                            } else if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio > 1.0) {
-                                SetDXCoolingCoilData(state,
-                                                     thisVrfTU.HeatCoilIndex,
-                                                     ErrorsFound,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     _,
-                                                     state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio);
-                            }
                         } else {
                             ShowSevereError(state, cCurrentModuleObject + " \"" + thisVrfTU.Name + "\"");
                             ShowContinueError(
@@ -4084,52 +4031,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                                              _,
                                              _,
                                              1.0); // DefrostCapacity=1.0
-                        // Terminal unit heating to cooling sizing ratio has precedence over VRF system sizing ratio
-                        if (thisVrfTU.HeatingCapacitySizeRatio > 1.0) {
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 thisVrfTU.HeatingCapacitySizeRatio);
-                        } else if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio > 1.0) {
-                            SetDXCoolingCoilData(state,
-                                                 thisVrfTU.HeatCoilIndex,
-                                                 ErrorsFound,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 _,
-                                                 state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).HeatingCapacitySizeRatio);
-                        }
                         // Check VRF DX heating coil heating capacity as a function of temperature performance curve. Only report here for
                         // biquadratic curve type.
                         if (thisVrfTU.VRFSysNum > 0 && thisVrfTU.HeatCoilIndex > 0 &&
@@ -4472,10 +4373,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                           cAlphaArgs(12),
                           state.dataLoopNodes->NodeID(CCoilInletNodeNum),
                           state.dataLoopNodes->NodeID(CCoilOutletNodeNum));
-            //     set heating coil present flag
-            SetDXCoolingCoilData(
-                state, thisVrfTU.CoolCoilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, thisVrfTU.HeatingCoilPresent);
-
             //   check that curve types are present in VRF Condenser if cooling coil is present in terminal unit (can be blank)
             //   all curves are checked for correct type if a curve name is entered in the VRF condenser object. Check that the
             //   curve is present if the corresponding coil is entered in the terminal unit.
@@ -4509,10 +4406,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                           cAlphaArgs(14),
                           state.dataLoopNodes->NodeID(HCoilInletNodeNum),
                           state.dataLoopNodes->NodeID(HCoilOutletNodeNum));
-            //     set cooling coil present flag
-            SetDXCoolingCoilData(
-                state, thisVrfTU.HeatCoilIndex, ErrorsFound, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, thisVrfTU.CoolingCoilPresent);
-
             if (thisVrfTU.VRFSysNum > 0) {
 
                 if (state.dataHVACVarRefFlow->VRF(thisVrfTU.VRFSysNum).VRFAlgorithmType != AlgorithmType::FluidTCtrl) {
@@ -7483,7 +7376,6 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
         select_EqSizing = &state.dataSize->UnitarySysEqSizing(state.dataSize->CurSysNum);
     } else if (state.dataSize->CurZoneEqNum > 0) {
         select_EqSizing = &ZoneEqSizing(state.dataSize->CurZoneEqNum);
-        state.dataSize->ZoneEqUnitarySys = true;
     } else {
         assert(false);
     }

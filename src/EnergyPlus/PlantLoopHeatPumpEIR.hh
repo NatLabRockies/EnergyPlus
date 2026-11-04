@@ -289,7 +289,7 @@ namespace EIRPlantLoopHeatPumps {
 
         virtual void report(EnergyPlusData &state);
 
-        void sizeLoadSide(EnergyPlusData &state);
+        virtual void sizeLoadSide(EnergyPlusData &state);
 
         void sizeSrcSideWSHP(EnergyPlusData &state);
 
@@ -548,7 +548,7 @@ namespace EIRPlantLoopHeatPumps {
                                        int const inletNodeNum = 0,
                                        int const outletNodeNum = 0);
         static void processInputForEIRPLHP(EnergyPlusData &state);
-        void sizeLoadSide(EnergyPlusData &state);
+        void sizeLoadSide(EnergyPlusData &state) override;
     }; // HeatPumpAirToWater
 } // namespace EIRPlantLoopHeatPumps
 

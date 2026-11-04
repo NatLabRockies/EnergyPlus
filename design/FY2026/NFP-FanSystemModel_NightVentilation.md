@@ -71,7 +71,7 @@ In `Fan:SystemModel`, `Night Ventilation Mode Flow Fraction` is removed and repl
        \maximum 1.0
 ```
 
-`Fan:SystemModel`'s `\min-fields` becomes 16 to include the two net additional numeric fields before `Number of Speeds`.
+`Fan:SystemModel` retains `\min-fields 14` because the new night ventilation fields are optional and occur after the minimum required fields.
 
 ### Fans.cc / Fans.hh ###
 
@@ -104,7 +104,7 @@ The `V26.2 -> V27.1` `FAN:SYSTEMMODEL` rule inserts a blank `Night Ventilation M
 ## Testing/Validation/Data Sources ##
 
 - New/updated unit tests exercise `GetFanInput` field parsing and `calcSimpleSystemFan`'s alternate efficiency and motor-fraction behavior for both `Discrete` and `Continuous` speed control.
-- Transition pytest coverage (`src/Transition/tests/26_2_0/test_fan_systemmodel.py`) covers records ending before, at, and after the removed field, including one with `Number of Speeds`/speed field sets present.
+- Transition pytest coverage (`src/Transition/tests/27_1_0/test_fan_systemmodel.py`) covers records ending before, at, and after the removed field, including one with `Number of Speeds`/speed field sets present.
 - All `testfiles/*.idf` and embedded `tst/EnergyPlus/unit/*.unit.cc` `Fan:SystemModel` objects were mechanically updated to insert the new blank field(s) so existing regression tests continue to parse and run unchanged (all new fields left blank preserves prior behavior).
 - `testfiles/5ZoneNightVent3.idf` additionally exercises the alternate total efficiency/motor efficiency/motor-in-airstream-fraction fields (populated to match its companion `5ZoneNightVent4.idf`'s `FanPerformance:NightVentilation` values) to keep the two demonstration files equivalent.
 
