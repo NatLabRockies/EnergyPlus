@@ -3727,6 +3727,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_BasicCalc)
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -3805,6 +3807,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_GetITEColdPlateDesignLoadPerPlate)
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -3821,6 +3825,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_GetITEColdPlateDesignLoadPerPlate)
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  CaptureFracMultSched,    !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate2,              !- Cooling Coil 1 Name",
         "  ,                        !- Cooling Coil 1 Load Fraction",
@@ -3891,6 +3897,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_AvailabilityOff)
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -3955,6 +3963,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_CaptureFractionSched
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  CaptureFracMultSched,    !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -4015,6 +4025,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_PowerModifierCurve)
         "  PowerModCurve,           !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -4091,6 +4103,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ZoneRollupMultipleIn
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.8,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -4107,6 +4121,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ZoneRollupMultipleIn
         "  ,                        !- IT Equipment Power Modifier Curve Name",
         "  0.5,                     !- Liquid Heat Capture Fraction",
         "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate2,              !- Cooling Coil 1 Name",
         "  1.0,                     !- Cooling Coil 1 Load Fraction",
@@ -4138,6 +4154,126 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ZoneRollupMultipleIn
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::TotalElectric], 15000.0, tol);
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 10500.0, tol);
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::AirHeatGain], 4500.0, tol);
+}
+
+namespace {
+// Common objects and fixed fields for the ElectricEquipment:ITE:LiquidCooled coil list tests below
+std::string iteLiquidCooledInput(std::string const &cpuEndUse, std::string const &fanEndUse, std::string const &coilFields)
+{
+    return " Zone,ZONE ONE,0,0,0,0,1,1,autocalculate,autocalculate;\n"
+           " Schedule:Constant,AlwaysOn,,1.0;\n"
+           " Schedule:Constant,ComputeLoadSched,,1.0;\n"
+           " Schedule:Constant,LoadFracSched,,0.1;\n"
+           " ElectricEquipment:ITE:LiquidCooled,\n"
+           "  ITE Rack 1,              !- Name\n"
+           "  ZONE ONE,                !- Zone or Space Name\n"
+           "  AlwaysOn,                !- Availability Schedule Name\n"
+           "  ComputeLoadSched,        !- Compute Load Schedule Name\n"
+           "  10000,                   !- Design Power Input {W}\n"
+           "  1.0,                     !- Multiplier\n"
+           "  0.0,                     !- Design Fan Power Input Fraction\n"
+           "  ,                        !- IT Equipment Power Modifier Curve Name\n"
+           "  0.8,                     !- Liquid Heat Capture Fraction\n"
+           "  ,                        !- Liquid Heat Capture Fraction Schedule Name\n"
+           "  " +
+           cpuEndUse + ",       !- CPU End-Use Subcategory\n  " + fanEndUse + coilFields + "\n";
+}
+
+void setUpITELiquidCooledTest(EnergyPlus::EnergyPlusData &state)
+{
+    bool ErrorsFound(false);
+    state.dataGlobal->TimeStepsInHour = 1;
+    state.dataGlobal->MinutesInTimeStep = 60;
+    state.init_state(state);
+    HeatBalanceManager::GetZoneData(state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    state.dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state.dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
+}
+} // namespace
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ExtensibleCoilList)
+{
+    using namespace DataHeatBalance;
+
+    // More coils than the original four, with a blank entry that must be ignored and a last coil that omits
+    // its trailing schedule field.
+    ASSERT_TRUE(process_idf(iteLiquidCooledInput("CPU-Cat",
+                                                 "Fan-Cat",
+                                                 ",\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil1,0.4,,\n"
+                                                 "  Coil:Cooling:ITE:UserDefined,Coil2,,LoadFracSched,\n"
+                                                 "  ,,,,\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil3,0.2,,\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil4,0.1,,\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil5,0.2;")));
+    EXPECT_FALSE(has_err_output());
+    setUpITELiquidCooledTest(*state);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 1);
+    InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
+    auto const &thisEquip = state->dataHeatBal->ZoneITELiquidCooled(1);
+
+    ASSERT_EQ(thisEquip.CoolingCoils.size(), 5u);
+    EXPECT_EQ(thisEquip.CoolingCoils[0].CoilName, "COIL1");
+    EXPECT_ENUM_EQ(thisEquip.CoolingCoils[1].CoilType, ITECoolingCoilType::UserDefined);
+    EXPECT_NE(thisEquip.CoolingCoils[1].LoadFractionSched, nullptr);
+    EXPECT_EQ(thisEquip.CoolingCoils[2].CoilName, "COIL3"); // the blank entry was skipped
+    EXPECT_EQ(thisEquip.CoolingCoils[4].CoilName, "COIL5");
+
+    // The end-use fields now come before the coil list
+    EXPECT_EQ(thisEquip.EndUseSubcategoryCPU, "CPU-Cat");
+    EXPECT_EQ(thisEquip.EndUseSubcategoryFan, "Fan-Cat");
+
+    // Fractions sum to 0.4 + 0.1 + 0.2 + 0.1 + 0.2 = 1.0 of the 8000 W liquid target
+    constexpr Real64 tol = 0.001;
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 8000.0, tol);
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
+    // A coil beyond the original four is reachable: 10000 * 0.8 * 0.2 = 1600 W
+    EXPECT_NEAR(InternalHeatGains::GetITEColdPlateDesignLoadPerPlate(*state, "Coil5"), 1600.0, tol);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_SingleCoilDefaults)
+{
+    using namespace DataHeatBalance;
+
+    // A lone coil with no load fraction takes the entire liquid load, and blank end-use fields use their defaults
+    ASSERT_TRUE(process_idf(iteLiquidCooledInput("", "", ",\n  Coil:Cooling:ITE:ColdPlate,Coil1;")));
+    EXPECT_FALSE(has_err_output());
+    setUpITELiquidCooledTest(*state);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
+    auto const &thisEquip = state->dataHeatBal->ZoneITELiquidCooled(1);
+
+    ASSERT_EQ(thisEquip.CoolingCoils.size(), 1u);
+    EXPECT_DOUBLE_EQ(thisEquip.CoolingCoils[0].LoadFraction, 1.0);
+    EXPECT_EQ(thisEquip.EndUseSubcategoryCPU, "ITE-CPU");
+    EXPECT_EQ(thisEquip.EndUseSubcategoryFan, "ITE-Fans");
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 8000.0, 0.001);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_NoCoilsIsError)
+{
+    ASSERT_TRUE(process_idf(iteLiquidCooledInput("", "", ";")));
+    setUpITELiquidCooledTest(*state);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring("At least one cooling coil must be specified."));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_MissingLoadFractionWithMultipleCoilsIsError)
+{
+    ASSERT_TRUE(process_idf(iteLiquidCooledInput("",
+                                                 "",
+                                                 ",\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil1,0.5,,\n"
+                                                 "  Coil:Cooling:ITE:ColdPlate,Coil2;")));
+    setUpITELiquidCooledTest(*state);
+
+    EXPECT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring("must be specified for coil 2 when more than one cooling coil is referenced."));
 }
 
 TEST_F(EnergyPlusFixture, InternalHeatGains_SpaceAllocation)

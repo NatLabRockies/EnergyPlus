@@ -71,11 +71,11 @@ Table 2. Core fields of the new objects
 
 | Object or interface | Purpose | Key inputs/outputs | Notes |
 | --- | --- | --- | --- |
-| ElectricEquipment:ITE:LiquidCooled | Calculates transient server power consumption and passes the resulting thermal load to one or more specified cooling coils. | Zone name, operating schedule, design power input, multiplier, up to four cooling coil object type/name/load fraction sets. | Uses a multiplier field for rapid scaling of identical racks. Acts as the parent object defining total heat generation; when more than one Cooling Coil N slot is in use, splits the target liquid load across the active coils by each slot's Load Fraction (or Load Fraction Schedule) before passing each coil its own apportioned share, and reports—rather than itself registering—the resulting liquid/air split via its output variables. |
+| ElectricEquipment:ITE:LiquidCooled | Calculates transient server power consumption and passes the resulting thermal load to one or more specified cooling coils. | Zone name, operating schedule, design power input, multiplier, an extensible list of cooling coil object type/name/load fraction sets. | Uses a multiplier field for rapid scaling of identical racks. Acts as the parent object defining total heat generation; when more than one cooling coil is referenced, splits the target liquid load across the active coils by each coil's Load Fraction (or Load Fraction Schedule) before passing each coil its own apportioned share, and reports—rather than itself registering—the resulting liquid/air split via its output variables. |
 | Coil:Cooling:ITE:ColdPlate | Defines the physical heat transfer between the IT equipment and the standard E+ plant loop for single-phase coolants; owns the final liquid/air load split. | Heat transfer input method (UA or thermal resistance), maximum allowable chip temperature, fluid inlet/outlet nodes, design pressure drop, design maximum flow rate, **Zone or Space Name** (air-spillover destination). | Establishes the maximum thermal ceiling, dictating when cooling capacity is maxed out and residual heat must spill over into the zone air. The coil registers that spillover itself via `SetupZoneInternalGain` against its own Zone or Space Name field, mirroring the `Zone Name for Condenser Placement` field already on DX coils (DXCoils.cc) rather than passing a value back through the parent. Note: this object is implemented under a separate NFP led by PNNL; this table flags the `Design Maximum Flow Rate` and `Zone or Space Name` fields as requirements for that implementation, representing the vendor-specified physical flow limit independent of the thermally-derived flow. No IDD for this object is authored here. |
 | Coil:Cooling:ITE:UserDefined | Provides a hook for EMS/Python-driven workflows to override default heat transfer physics at the IT-to-coolant interface. | Fluid inlet/outlet nodes, EMS Program Calling Manager Name, Design Fluid Flow Rate. | Allows researchers to model proprietary two-phase boiling behaviors, RDHx, or immersion cooling while retaining standard E+ plant loop connectivity. This is the only supported path for two-phase/immersion modeling in this phase; no default built-in two-phase model is provided. NLR will lead the implementation of this object/feature. |
 
-At a high level, the ElectricEquipment:ITE:LiquidCooled object evaluates the total IT load and applies the Liquid Heat Capture Fraction to get a target total liquid load. A rack may reference up to four cooling coils (Table 2 lists one, but the object supports four Cooling Coil N slots, each with its own Load Fraction or Load Fraction Schedule); when more than one slot is in use, the parent splits the target total liquid load across the active coils by their Load Fractions before any coil-side capacity check occurs. Each coil then receives only its own apportioned share, passed down as the entire target assigned to it—not a value pre-capped by that coil's physical capacity. The coil checks the current fluid supply conditions from the facility plant loop and calculates the maximum physical heat transfer possible given its thermal properties, its Design Maximum Flow Rate, and the maximum allowable chip temperature. It absorbs min(target, physical limit) into the liquid loop and returns that achieved value back to the parent, which sums the achieved and target values across all of the rack's active coils solely to populate the ITE object's own Liquid Heat Gain and Air Heat Gain to Zone output variables—the parent no longer registers any part of the air spillover as its own zone gain.
+At a high level, the ElectricEquipment:ITE:LiquidCooled object evaluates the total IT load and applies the Liquid Heat Capture Fraction to get a target total liquid load. A rack may reference any number of cooling coils (Table 2 lists one, but the coil list is extensible, and each coil has its own Load Fraction or Load Fraction Schedule); when more than one coil is referenced, the parent splits the target total liquid load across the active coils by their Load Fractions before any coil-side capacity check occurs. Each coil then receives only its own apportioned share, passed down as the entire target assigned to it—not a value pre-capped by that coil's physical capacity. The coil checks the current fluid supply conditions from the facility plant loop and calculates the maximum physical heat transfer possible given its thermal properties, its Design Maximum Flow Rate, and the maximum allowable chip temperature. It absorbs min(target, physical limit) into the liquid loop and returns that achieved value back to the parent, which sums the achieved and target values across all of the rack's active coils solely to populate the ITE object's own Liquid Heat Gain and Air Heat Gain to Zone output variables—the parent no longer registers any part of the air spillover as its own zone gain.
 
 For a given coil, any remaining heat—that coil's own apportioned target minus its own achieved liquid load—is diverted directly into the data center space as a sensible air load. Each coil pushes its own shortfall itself, via its own `SetupZoneInternalGain` registration against the Zone or Space Name field on that coil object (see Table 2), rather than the parent object doing so or one coil's registration accounting for another's. Finally, the E+ plant loop automatically aggregates the heat and fluid flow from all connected cold plate coils. This aggregated hot fluid travels through the standard E+ plant pipe network to the secondary side of a HeatExchanger:FluidToFluid (representing the CDU), which then rejects the data center heat to the primary facility cooling plant.
 
@@ -187,14 +187,24 @@ ElectricEquipment:ITE:LiquidCooled,
        \type object-list
        \object-list ScheduleNames
        \note If provided, this schedule multiplies the Liquid Heat Capture Fraction field. This allows the capture effectiveness to vary dynamically during the simulation.
-  A7 , \field Cooling Coil 1 Object Type
-       \required-field
+  A7 , \field CPU End-Use Subcategory
+       \type alpha
+       \retaincase
+       \default ITE-CPU
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+  A8 , \field Fan End-Use Subcategory
+       \type alpha
+       \retaincase
+       \default ITE-Fans
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+  A9 , \field Cooling Coil 1 Object Type
+       \begin-extensible
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
        \note The type of the first cooling component handling physical heat transfer.
-  A8 , \field Cooling Coil 1 Name
-       \required-field
+       \note At least one cooling coil must be specified. This list is extensible; there is no limit on the number of cooling coils a rack may reference.
+  A10, \field Cooling Coil 1 Name
        \type object-list
        \object-list CoilCoolingITENames
        \note The specific name of the first cooling component handling physical heat transfer.
@@ -205,65 +215,55 @@ ElectricEquipment:ITE:LiquidCooled,
        \maximum 1.0
        \note A static fraction (0.0 to 1.0) of the total IT liquid load directed to this coil.
        \note If this field is used, the Schedule Name field below should be left blank.
-       \note If this is the only active Cooling Coil N slot on the object and neither this field nor the schedule below is specified, this coil is assumed to receive the entire liquid load (fraction = 1.0). If more than one Cooling Coil N slot is active, one of this field or the schedule below must be specified for every active slot.
-  A9 , \field Cooling Coil 1 Load Fraction Schedule Name
+       \note If this is the only cooling coil on the object and neither this field nor the schedule below is specified, this coil is assumed to receive the entire liquid load (fraction = 1.0). If more than one cooling coil is specified, one of this field or the schedule below must be specified for every coil.
+  A11, \field Cooling Coil 1 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
        \note Schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this coil.
        \note If this field is used, the static Load Fraction field above should be left blank.
-  A10, \field Cooling Coil 2 Object Type
+  A12, \field Cooling Coil 2 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
        \note The type of the second cooling component, if applicable (e.g., a secondary RDHx).
-  A11, \field Cooling Coil 2 Name
+  A13, \field Cooling Coil 2 Name
        \type object-list
        \object-list CoilCoolingITENames
   N6 , \field Cooling Coil 2 Load Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  A12, \field Cooling Coil 2 Load Fraction Schedule Name
+  A14, \field Cooling Coil 2 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
-  A13, \field Cooling Coil 3 Object Type
+  A15, \field Cooling Coil 3 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
-  A14, \field Cooling Coil 3 Name
+  A16, \field Cooling Coil 3 Name
        \type object-list
        \object-list CoilCoolingITENames
   N7 , \field Cooling Coil 3 Load Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  A15, \field Cooling Coil 3 Load Fraction Schedule Name
+  A17, \field Cooling Coil 3 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
-  A16, \field Cooling Coil 4 Object Type
+  A18, \field Cooling Coil 4 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
-  A17, \field Cooling Coil 4 Name
+  A19, \field Cooling Coil 4 Name
        \type object-list
        \object-list CoilCoolingITENames
   N8 , \field Cooling Coil 4 Load Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  A18, \field Cooling Coil 4 Load Fraction Schedule Name
+  A20; \field Cooling Coil 4 Load Fraction Schedule Name
        \type object-list
-       \object-list ScheduleName
-  A19, \field CPU End-Use Subcategory
-       \type alpha
-       \retaincase
-       \default ITE-CPU
-       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
-  A20; \field Fan End-Use Subcategory
-       \type alpha
-       \retaincase
-       \default ITE-Fans
-       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \object-list ScheduleNames
 ```
 
 The `CPU End-Use Subcategory` and `Fan End-Use Subcategory` fields mirror the equivalent fields already present on `ElectricEquipment:ITE:AirCooled`, so that CPU and fan electricity can be separated in ABUPS reporting. This directly addresses the concern that CDU pump and fan energy is often bundled into IT compute load when calculating PUE- and ITUE-adjacent metrics.

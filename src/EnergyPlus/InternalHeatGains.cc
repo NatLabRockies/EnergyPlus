@@ -4223,10 +4223,11 @@ namespace InternalHeatGains {
 
         if (state.dataHeatBal->TotITELiquidCooledEquip > 0) {
             state.dataHeatBal->ZoneITELiquidCooled.allocate(state.dataHeatBal->TotITELiquidCooledEquip);
-            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilTypeAlphaIdx = {7, 10, 13, 16};
-            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilNameAlphaIdx = {8, 11, 14, 17};
-            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilLoadFracNumIdx = {5, 6, 7, 8};
-            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilLoadFracSchedAlphaIdx = {9, 12, 15, 18};
+            // The extensible cooling coil fields start here: each coil has three alpha fields (type, name,
+            // load fraction schedule) and one numeric field (load fraction).
+            static constexpr int firstCoilAlphaIdx = 9;
+            static constexpr int firstCoilNumIdx = 5;
+            static constexpr int numAlphasPerCoil = 3;
 
             // Each cooling coil (cold plate, or a coil used to model immersion cooling / a rear door heat
             // exchanger via Coil:Cooling:ITE:UserDefined) is dedicated to a single rack, so track which
@@ -4289,24 +4290,24 @@ namespace InternalHeatGains {
                     }
                 }
 
-                std::array<DataHeatBalance::ITELiquidCoolingCoilSpec, DataHeatBalance::MaxITELiquidCoolingCoils> coolingCoils;
-                std::array<bool, DataHeatBalance::MaxITELiquidCoolingCoils> coilIsActive{};
-                std::array<bool, DataHeatBalance::MaxITELiquidCoolingCoils> coilHasLoadFracInput{};
-                for (int coilIdx = 0; coilIdx < DataHeatBalance::MaxITELiquidCoolingCoils; ++coilIdx) {
-                    int const typeAlpha = coilTypeAlphaIdx[coilIdx];
-                    int const nameAlpha = coilNameAlphaIdx[coilIdx];
-                    int const loadFracNum = coilLoadFracNumIdx[coilIdx];
-                    int const loadFracSchedAlpha = coilLoadFracSchedAlphaIdx[coilIdx];
-                    auto &thisCoil = coolingCoils[coilIdx];
+                // Trailing blank fields may be omitted from the input, so a coil counts as present if any of
+                // its fields were read. Rounding up handles a last coil that stops before its schedule field.
+                int const numCoilEntries =
+                    std::max((IHGNumAlphas - firstCoilAlphaIdx + numAlphasPerCoil) / numAlphasPerCoil, IHGNumNumbers - firstCoilNumIdx + 1);
+
+                std::vector<DataHeatBalance::ITELiquidCoolingCoilSpec> coolingCoils;
+                coolingCoils.reserve(std::max(numCoilEntries, 0));
+                std::vector<int> coilEntriesWithoutLoadFrac; // zero-based entries with no load fraction or schedule
+                for (int coilIdx = 0; coilIdx < numCoilEntries; ++coilIdx) {
+                    int const typeAlpha = firstCoilAlphaIdx + coilIdx * numAlphasPerCoil;
+                    int const nameAlpha = typeAlpha + 1;
+                    int const loadFracSchedAlpha = typeAlpha + 2;
+                    int const loadFracNum = firstCoilNumIdx + coilIdx;
 
                     if (IHGAlphaFieldBlanks(typeAlpha) && IHGAlphaFieldBlanks(nameAlpha)) {
-                        if (coilIdx == 0) {
-                            ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(typeAlpha));
-                            ErrorsFound = true;
-                        }
-                        continue; // this coil slot is not used
+                        continue; // a blank entry in the coil list is ignored
                     }
-                    coilIsActive[coilIdx] = true;
+                    auto &thisCoil = coolingCoils.emplace_back();
 
                     thisCoil.CoilType =
                         static_cast<ITECoolingCoilType>(getEnumValue(ITECoolingCoilTypeNamesUC, Util::makeUPPER(IHGAlphas(typeAlpha))));
@@ -4315,7 +4316,8 @@ namespace InternalHeatGains {
                         ErrorsFound = true;
                     }
                     if (IHGAlphaFieldBlanks(nameAlpha)) {
-                        ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(nameAlpha));
+                        // Extensible field names do not include the coil number, so add it to locate the entry
+                        ShowSevereEmptyField(state, eoh, std::format("{} (coil {})", IHGAlphaFieldNames(nameAlpha), coilIdx + 1));
                         ErrorsFound = true;
                     } else {
                         thisCoil.CoilName = IHGAlphas(nameAlpha);
@@ -4331,13 +4333,16 @@ namespace InternalHeatGains {
 
                     bool const hasLoadFrac = !IHGNumericFieldBlanks(loadFracNum);
                     bool const hasLoadFracSched = !IHGAlphaFieldBlanks(loadFracSchedAlpha);
-                    coilHasLoadFracInput[coilIdx] = hasLoadFrac || hasLoadFracSched;
+                    if (!hasLoadFrac && !hasLoadFracSched) {
+                        coilEntriesWithoutLoadFrac.push_back(coilIdx);
+                    }
                     if (hasLoadFrac && hasLoadFracSched) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          std::format("Both {} and {} are specified; the schedule will be used.",
+                                          std::format("Both {} and {} are specified for coil {}; the schedule will be used.",
                                                       IHGNumericFieldNames(loadFracNum),
-                                                      IHGAlphaFieldNames(loadFracSchedAlpha)));
+                                                      IHGAlphaFieldNames(loadFracSchedAlpha),
+                                                      coilIdx + 1));
                     }
                     if (hasLoadFracSched) {
                         thisCoil.LoadFractionSched = Sched::GetSchedule(state, IHGAlphas(loadFracSchedAlpha));
@@ -4350,33 +4355,30 @@ namespace InternalHeatGains {
                     }
                 }
 
-                // A Load Fraction (static or scheduled) is only truly ambiguous when more than one coil
-                // slot is active; a lone active coil with neither specified is assumed to take the entire
-                // liquid load, matching the common single-coil-per-rack case.
-                int numActiveCoils = 0;
-                for (bool const active : coilIsActive) {
-                    if (active) {
-                        ++numActiveCoils;
-                    }
+                if (coolingCoils.empty()) {
+                    ShowSevereCustom(state, eoh, "At least one cooling coil must be specified.");
+                    ErrorsFound = true;
                 }
-                for (int coilIdx = 0; coilIdx < DataHeatBalance::MaxITELiquidCoolingCoils; ++coilIdx) {
-                    if (!coilIsActive[coilIdx] || coilHasLoadFracInput[coilIdx]) {
-                        continue;
-                    }
-                    if (numActiveCoils == 1) {
-                        coolingCoils[coilIdx].LoadFraction = 1.0;
-                    } else {
+
+                // A Load Fraction (static or scheduled) is only truly ambiguous when there is more than one
+                // coil; a lone coil with neither specified is assumed to take the entire liquid load, matching
+                // the common single-coil-per-rack case.
+                if (coolingCoils.size() == 1 && !coilEntriesWithoutLoadFrac.empty()) {
+                    coolingCoils.front().LoadFraction = 1.0;
+                } else if (coolingCoils.size() > 1) {
+                    for (int const coilIdx : coilEntriesWithoutLoadFrac) {
                         ShowSevereCustom(state,
                                          eoh,
-                                         std::format("{} or {} must be specified when more than one cooling coil is referenced.",
-                                                     IHGNumericFieldNames(coilLoadFracNumIdx[coilIdx]),
-                                                     IHGAlphaFieldNames(coilLoadFracSchedAlphaIdx[coilIdx])));
+                                         std::format("{} or {} must be specified for coil {} when more than one cooling coil is referenced.",
+                                                     IHGNumericFieldNames(firstCoilNumIdx + coilIdx),
+                                                     IHGAlphaFieldNames(firstCoilAlphaIdx + coilIdx * numAlphasPerCoil + 2),
+                                                     coilIdx + 1));
                         ErrorsFound = true;
                     }
                 }
 
-                std::string const endUseSubcategoryCPU = (IHGNumAlphas > 18) ? std::string(IHGAlphas(19)) : "ITE-CPU";
-                std::string const endUseSubcategoryFan = (IHGNumAlphas > 19) ? std::string(IHGAlphas(20)) : "ITE-Fans";
+                std::string const endUseSubcategoryCPU = IHGAlphas(7);
+                std::string const endUseSubcategoryFan = IHGAlphas(8);
 
                 auto &thisITEqLCInput = iTEqLiquidCooledObjects(itEqLCInputNum);
                 for (int Item1 = 1; Item1 <= thisITEqLCInput.numOfSpaces; ++Item1) {
@@ -10273,8 +10275,8 @@ namespace InternalHeatGains {
         //
         // Note: This object is not yet wired up to call into Coil:Cooling:ITE:ColdPlate or
         // Coil:Cooling:ITE:UserDefined, which are being developed in parallel, separate PRs. The total
-        // target liquid load is split across this rack's coil slots by each slot's Load Fraction below,
-        // but until that integration lands, each slot's share is simply assumed to be fully captured,
+        // target liquid load is split across this rack's coils by each coil's Load Fraction below,
+        // but until that integration lands, each coil's share is simply assumed to be fully captured,
         // with no physical capacity limit applied. Once wired up, each coil's achieved liquid load will
         // instead be queried from the coil itself and capped at its own physical maximum, with any
         // shortfall added to Air Heat Gain to Zone instead.
@@ -10332,15 +10334,12 @@ namespace InternalHeatGains {
             liquidHeatCaptureFraction = min(max(liquidHeatCaptureFraction, 0.0), 1.0);
             Real64 const targetTotalLiquidHeat = totalHeatGen * liquidHeatCaptureFraction;
 
-            // Split the target liquid load across this rack's active coil slots by Load Fraction (static or
-            // scheduled), then sum each coil's achieved load back up. Cooling Coil 1-4 do not yet perform any
-            // physical capacity limiting (see function header note), so each coil's achieved load is assumed
-            // equal to its own apportioned target for now.
+            // Split the target liquid load across this rack's coils by Load Fraction (static or scheduled),
+            // then sum each coil's achieved load back up. The coils do not yet perform any physical capacity
+            // limiting (see function header note), so each coil's achieved load is assumed equal to its own
+            // apportioned target for now.
             Real64 liquidHeatGain = 0.0;
             for (auto const &coil : thisEquip.CoolingCoils) {
-                if (coil.CoilType == ITECoolingCoilType::Invalid) {
-                    continue; // this coil slot is not used
-                }
                 Real64 const loadFraction = (coil.LoadFractionSched != nullptr) ? coil.LoadFractionSched->getCurrentVal() : coil.LoadFraction;
                 Real64 const targetForThisCoil = targetTotalLiquidHeat * loadFraction;
                 Real64 const achievedForThisCoil = targetForThisCoil; // no physical cap available until the coil exists
@@ -10376,7 +10375,7 @@ namespace InternalHeatGains {
 
         // PURPOSE OF THIS FUNCTION:
         // Returns the design (nameplate) liquid heat load apportioned to a single Coil:Cooling:ITE:ColdPlate
-        // slot by the ElectricEquipment:ITE:LiquidCooled object that references it, for use by that coil's
+        // by the ElectricEquipment:ITE:LiquidCooled object that references it, for use by that coil's
         // own sizing routine. The returned value is per-plate (i.e., NOT multiplied by the ITE object's own
         // Multiplier field): it represents the design load of a single rack sharing this coil, consistent
         // with the coil's own capacity and flow rate fields also being specified on a per-plate basis.

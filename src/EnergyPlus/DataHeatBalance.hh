@@ -1107,16 +1107,14 @@ namespace DataHeatBalance {
         Real64 RHBelowDeltaRH = 0.0;       // ITE Air Inlet Relative Humidity Difference Below Operating Range [%]
     };
 
-    // One Cooling Coil N Object Type/Name/Load Fraction slot for ElectricEquipment:ITE:LiquidCooled
+    // One entry in the extensible cooling coil list of ElectricEquipment:ITE:LiquidCooled
     struct ITELiquidCoolingCoilSpec
     {
-        ITECoolingCoilType CoilType = ITECoolingCoilType::Invalid; // Cooling Coil N Object Type
-        std::string CoilName;                                      // Cooling Coil N Name
-        Real64 LoadFraction = 0.0;                                 // Cooling Coil N Load Fraction (static)
-        Sched::Schedule *LoadFractionSched = nullptr;              // Cooling Coil N Load Fraction Schedule Name
+        ITECoolingCoilType CoilType = ITECoolingCoilType::Invalid; // Cooling Coil Object Type
+        std::string CoilName;                                      // Cooling Coil Name
+        Real64 LoadFraction = 0.0;                                 // Cooling Coil Load Fraction (static)
+        Sched::Schedule *LoadFractionSched = nullptr;              // Cooling Coil Load Fraction Schedule Name
     };
-
-    static constexpr int MaxITELiquidCoolingCoils = 4;
 
     struct ITEquipDataLiquidCooled // Liquid-Cooled IT Equipment
     {
@@ -1133,7 +1131,7 @@ namespace DataHeatBalance {
         Real64 LiquidHeatCaptureFractionDesign = 0.8; // Design (nominal) fraction of total heat generation captured by the liquid loop
         Sched::Schedule *liquidHeatCaptureFracSched = nullptr; // Optional schedule multiplying the design liquid heat capture fraction
 
-        std::array<ITELiquidCoolingCoilSpec, MaxITELiquidCoolingCoils> CoolingCoils;
+        std::vector<ITELiquidCoolingCoilSpec> CoolingCoils;
         std::string EndUseSubcategoryCPU; // User defined name for the end use category for the CPU
         std::string EndUseSubcategoryFan; // User defined name for the end use category for the Fans
 

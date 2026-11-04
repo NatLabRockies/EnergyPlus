@@ -301,6 +301,8 @@
     ,                        !- IT Equipment Power Modifier Curve Name
     0.8,                     !- Liquid Heat Capture Fraction
     ,                        !- Liquid Heat Capture Fraction Schedule Name
+    ,                        !- CPU End-Use Subcategory
+    ,                        !- Fan End-Use Subcategory
     Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type
     ColdPlate1,              !- Cooling Coil 1 Name
     1.0,                     !- Cooling Coil 1 Load Fraction

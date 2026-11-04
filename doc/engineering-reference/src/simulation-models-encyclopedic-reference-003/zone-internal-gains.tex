@@ -461,7 +461,7 @@ The effective liquid heat capture fraction is the design value modified by its o
 \textrm{LHCF} = \textrm{clamp}\left(\textrm{LHCF}_{\textrm{Design}} \cdot \textrm{SchLHCF},\ 0,\ 1\right)
 \end{equation}
 
-The target total liquid heat load is then split across each active Cooling Coil $i$ slot by that coil's Load Fraction (the schedule value SchLF$_i$ is used in place of LF$_{i,\textrm{Design}}$ whenever a schedule is provided; if exactly one coil slot is active and neither a static Load Fraction nor a schedule is specified for it, that coil is assumed to receive the entire liquid load):
+The target total liquid heat load is then split across each Cooling Coil $i$ by that coil's Load Fraction (the schedule value SchLF$_i$ is used in place of LF$_{i,\textrm{Design}}$ whenever a schedule is provided; if exactly one coil is specified and neither a static Load Fraction nor a schedule is specified for it, that coil is assumed to receive the entire liquid load):
 
 \begin{equation}
 Q_{\textrm{Liquid,Target}} = Q_{\textrm{Total}} \cdot \textrm{LHCF}
