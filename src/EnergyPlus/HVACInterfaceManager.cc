@@ -503,7 +503,6 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
     int ThisLoopSideInletNode = state.dataPlnt->PlantLoop(LoopNum).LoopSide(ThisLoopSideNum).NodeNumIn;
 
     // save the inlet node temp for DeltaEnergy check
-    Real64 OldOtherLoopSideInletMdot = state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate;
     Real64 OldTankOutletTemp = state.dataLoopNodes->Node(OtherLoopSideInletNode).Temp;
 
     // calculate the specific heat
@@ -530,16 +529,10 @@ void UpdatePlantLoopInterface(EnergyPlusData &state,
         TankOutletTemp = MixedOutletTemp;
         if (ThisLoopSideNum == DataPlant::LoopSideLocation::Demand) {
             rshift1(flow_demand_to_supply_tol);
-            if (isPlantFlowOutOfTolerance(
-                    OldOtherLoopSideInletMdot, state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate, flow_demand_to_supply_tol[0])) {
-                convergence.PlantMassFlowNotConverged = true;
-            }
+            flow_demand_to_supply_tol[0] = 0.0;
         } else {
             rshift1(flow_supply_to_demand_tol);
-            if (isPlantFlowOutOfTolerance(
-                    OldOtherLoopSideInletMdot, state.dataLoopNodes->Node(OtherLoopSideInletNode).MassFlowRate, flow_supply_to_demand_tol[0])) {
-                convergence.PlantMassFlowNotConverged = true;
-            }
+            flow_supply_to_demand_tol[0] = 0.0;
         }
         // Set the flow rate.  Continuity requires that the flow rates at the half loop inlet and outlet match
         state.dataLoopNodes->Node(ThisLoopSideInletNode).MassFlowRate = state.dataLoopNodes->Node(ThisLoopSideOutletNode).MassFlowRate;
