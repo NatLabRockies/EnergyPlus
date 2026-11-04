@@ -549,6 +549,7 @@
     Main Zone Thermostat,    !- Name
     Main Zone,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Control;   !- Control 1 Name
 

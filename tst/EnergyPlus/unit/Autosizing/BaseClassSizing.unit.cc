@@ -684,7 +684,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_setOAFracForZoneEqSizing_Test)
 
     // ATMixer flow rate = 0 so oaFrac depends on ZoneEqSizing.OAVolFlow
     oaFrac = sizer.setOAFracForZoneEqSizing(*state, DesMassFlow, zoneEqSizing);
-    EXPECT_EQ(oaFrac, oaFrac_Test);
+    EXPECT_DOUBLE_EQ(oaFrac, oaFrac_Test);
 
     zoneEqSizing.ATMixerVolFlow = 0.11;
 
@@ -694,7 +694,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_setOAFracForZoneEqSizing_Test)
 
     // ATMixer flow rate > 0 so oaFrac depends on ZoneEqSizing.ATMixerVolFlow
     oaFrac = sizer.EnergyPlus::BaseSizer::setOAFracForZoneEqSizing(*state, DesMassFlow, zoneEqSizing);
-    EXPECT_EQ(oaFrac, oaFrac_Test);
+    EXPECT_DOUBLE_EQ(oaFrac, oaFrac_Test);
 
     DesMassFlow = 0.0;
     oaFrac = 1.0;
@@ -1293,6 +1293,7 @@ TEST_F(EnergyPlusFixture, BaseSizer_SupplyAirTempLessThanZoneTStatTest)
         "      Zone Thermostat,         !- Name",
         "      ZONE ONE,                !- Zone or ZoneList Name",
         "      Zone Control Type Sched, !- Control Type Schedule Name",
+        "      ,                        !- Temperature Difference Between Cutout And Setpoint",
         "      ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "      Temperature Setpoints;   !- Control 1 Name",
 

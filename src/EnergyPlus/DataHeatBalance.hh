@@ -1007,7 +1007,8 @@ namespace DataHeatBalance {
 
     enum class PERptVars
     {
-        CPU = 0,       // ITE CPU Electric Power/Energy
+        Invalid = -1,
+        CPU,           // ITE CPU Electric Power/Energy
         Fan,           // ITE Fan Electric Power/Energy
         UPS,           // ITE UPS Electric Power/Energy
         CPUAtDesign,   // ITE CPU Electric Power/Energy at Design Inlet Conditions
@@ -1032,7 +1033,7 @@ namespace DataHeatBalance {
     enum class LiquidITERptVars
     {
         Invalid = -1,
-        CPU = 0,        // ITE CPU Electric Power/Energy
+        CPU,            // ITE CPU Electric Power/Energy
         Fan,            // ITE Fan Electric Power/Energy
         TotalElectric,  // ITE Total Electric Power/Energy
         TotalHeatGen,   // ITE Total Heat Generation Power(Rate)/Energy
@@ -1123,11 +1124,11 @@ namespace DataHeatBalance {
         int ZonePtr = 0;                              // Which zone internal gain is in
         int spaceIndex = 0;                           // Space index for this equipment instance
         Sched::Schedule *availSched = nullptr;        // Availability schedule
-        Sched::Schedule *computeLoadSched = nullptr;  // Compute Load Schedule (0.0-1.0 CPU loading fraction)
+        Sched::Schedule *computeLoadSched = nullptr;  // Compute Load Schedule (0.0-1.0 total rack loading fraction)
         Real64 DesignTotalPower = 0.0;                // Design Power Input [W]
         Real64 Multiplier = 1.0;                      // Scales power and heat to represent multiple identical racks
         Real64 DesignFanPowerInputFraction = 0.0;     // Fraction of design power input that is for auxiliary fans
-        int PowerModifierCurve = 0;                   // Index for power modifier function of CPU loading (x) and zone air temperature (y) curve
+        int PowerModifierCurve = 0;                   // Index for power modifier function of compute loading (x) and zone air temperature (y) curve
         Real64 LiquidHeatCaptureFractionDesign = 0.8; // Design (nominal) fraction of total heat generation captured by the liquid loop
         Sched::Schedule *liquidHeatCaptureFracSched = nullptr; // Optional schedule multiplying the design liquid heat capture fraction
 
@@ -1136,9 +1137,10 @@ namespace DataHeatBalance {
         std::string EndUseSubcategoryFan; // User defined name for the end use category for the Fans
 
         // Report variables
-        std::array<Real64, (int)LiquidITERptVars::Num> PowerRpt;
-        std::array<Real64, (int)LiquidITERptVars::Num> EnergyRpt;
-        Real64 LiquidHeatCaptureFraction = 0.0; // Current effective liquid heat capture fraction []
+        std::array<Real64, (int)LiquidITERptVars::Num> PowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> EnergyRpt{};
+        Real64 LiquidHeatCaptureFraction = 0.0; // Current achieved liquid heat capture fraction []
+        int LoadFractionSumWarnIndex = 0;       // Recurring warning index for scheduled Load Fractions summing above 1.0
     };
 
     struct BBHeatData
@@ -1812,9 +1814,9 @@ namespace DataHeatBalance {
         Real64 ITEqTimeBelowRH = 0.0;          // Zone ITE Air Inlet Relative Humidity Below Operating Range Time [hr]
         Real64 ITEAdjReturnTemp = 0.0;         // Zone ITE Adjusted Return Air Temperature
         // Liquid-Cooled IT Equipment
-        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEPowerRpt;
-        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEEnergyRpt;
-        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone ITE Liquid Heat Capture Fraction []
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEPowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEEnergyRpt{};
+        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone/space achieved ITE Liquid Heat Capture Fraction []
         // Overall Zone Variables
         Real64 TotRadiantGain = 0.0;
         Real64 TotVisHeatGain = 0.0;

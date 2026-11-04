@@ -5483,6 +5483,7 @@
     conditioned space Thermostat,  !- Name
     conditioned space,       !- Zone or ZoneList Name
     conditioned space Thermostat Schedule,  !- Control Type Schedule Name
+    0,                       !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     conditioned space temperature setpoint,  !- Control 1 Name
     ,                        !- Control 2 Object Type
@@ -5490,8 +5491,7 @@
     ,                        !- Control 3 Object Type
     ,                        !- Control 3 Name
     ,                        !- Control 4 Object Type
-    ,                        !- Control 4 Name
-    0;                       !- Temperature Difference Between Cutout And Setpoint {deltaC}
+    ;                        !- Control 4 Name
 
 !-   ===========  ALL OBJECTS IN CLASS: THERMOSTATSETPOINT:DUALSETPOINT ===========
 

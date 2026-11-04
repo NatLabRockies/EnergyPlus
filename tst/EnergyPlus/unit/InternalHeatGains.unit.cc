@@ -56,6 +56,7 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -1601,7 +1602,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ZoneBaseboardOutdoorTemperatureContr
     EXPECT_EQ(25.0, thisBBHeat2.ZnHtgSetTemp);
     EXPECT_EQ(-17.3, thisBBHeat2.LowTemperature);
     EXPECT_EQ(25.0, thisBBHeat2.HighTemperature);
-    EXPECT_EQ(1269.0 * 0.75, thisBBHeat2.CapatLowTemperature);
+    EXPECT_DOUBLE_EQ(1269.0 * 0.75, thisBBHeat2.CapatLowTemperature);
     EXPECT_EQ(0.0, thisBBHeat2.CapatHighTemperature);
 
     EXPECT_EQ(20.0, thisBBHeat3.ZnHtgSetTemp);
@@ -3731,7 +3732,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_BasicCalc)
         "  ,                        !- Fan End-Use Subcategory",
         "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
         "  ColdPlate1,              !- Cooling Coil 1 Name",
-        "  1.0,                     !- Cooling Coil 1 Load Fraction",
+        "  0.5,                     !- Cooling Coil 1 Load Fraction",
         "  ;                        !- Cooling Coil 1 Load Fraction Schedule Name",
     });
 
@@ -3761,9 +3762,9 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_BasicCalc)
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::Fan], 1000.0, tol); // 10% of total
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::CPU], 9000.0, tol);
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::TotalHeatGen], 10000.0, tol); // all electricity is heat
-    EXPECT_NEAR(thisEquip.LiquidHeatCaptureFraction, 0.8, tol);
-    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 8000.0, tol);
-    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
+    EXPECT_NEAR(thisEquip.LiquidHeatCaptureFraction, 0.4, tol);
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 4000.0, tol);
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 6000.0, tol);
 
     // Energy = Power * TimeStepZoneSec (1 hour timestep here)
     EXPECT_NEAR(thisEquip.EnergyRpt[(int)LiquidITERptVars::TotalElectric], 10000.0 * state->dataGlobal->TimeStepZoneSec, tol);
@@ -3771,8 +3772,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_BasicCalc)
     // Zone-level rollup should match the single instance
     auto const &thisZnRpt = state->dataHeatBal->ZoneRpt(1);
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::TotalElectric], 10000.0, tol);
-    EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
-    EXPECT_NEAR(thisZnRpt.LiquidITEHeatCaptureFraction, 0.8, tol);
+    EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::AirHeatGain], 6000.0, tol);
+    EXPECT_NEAR(thisZnRpt.LiquidITEHeatCaptureFraction, 0.4, tol);
 }
 
 TEST_F(EnergyPlusFixture, InternalHeatGains_GetITEColdPlateDesignLoadPerPlate)
@@ -3847,6 +3848,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_GetITEColdPlateDesignLoadPerPlate)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
+    state->dataInternalHeatGains->GetInternalHeatGainsInputFlag = false;
     ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 2);
 
     constexpr Real64 tol = 0.001;
@@ -3928,8 +3930,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_AvailabilityOff)
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::Fan], 0.0, tol);
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 0.0, tol);
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 0.0, tol);
-    // ...but the reported Liquid Heat Capture Fraction reflects the design value regardless of availability.
-    EXPECT_NEAR(thisEquip.LiquidHeatCaptureFraction, 0.8, tol);
+    // The achieved Liquid Heat Capture Fraction is also zero when no heat is generated.
+    EXPECT_NEAR(thisEquip.LiquidHeatCaptureFraction, 0.0, tol);
 }
 
 TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_CaptureFractionScheduleAndClamp)
@@ -4144,6 +4146,11 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ZoneRollupMultipleIn
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 2);
 
+    // The coil-not-simulated warning is issued once per run, not once per object
+    EXPECT_TRUE(match_err_stream("reference Cooling Coil objects that are not yet simulated"));
+    EXPECT_TRUE(match_err_stream("Occurs for 2 object(s)."));
+    EXPECT_FALSE(match_err_stream("not yet simulated[\\s\\S]*not yet simulated", true));
+
     InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
 
     // Rack 1: 10000 W total, 8000 W liquid, 2000 W air
@@ -4154,6 +4161,508 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ZoneRollupMultipleIn
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::TotalElectric], 15000.0, tol);
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 10500.0, tol);
     EXPECT_NEAR(thisZnRpt.LiquidITEPowerRpt[(int)LiquidITERptVars::AirHeatGain], 4500.0, tol);
+    EXPECT_NEAR(thisZnRpt.LiquidITEHeatCaptureFraction, 0.7, tol);
+    auto const &thisSpaceRpt = state->dataHeatBal->spaceRpt(state->dataHeatBal->ZoneITELiquidCooled(1).spaceIndex);
+    EXPECT_NEAR(thisSpaceRpt.LiquidITEHeatCaptureFraction, 0.7, tol);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_MultiSpaceZone)
+{
+    using namespace DataHeatBalance;
+
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  20.0;                    !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1A,                  !- Name",
+        "ZONE ONE,                  !- Zone Name",
+        ",                          !- Ceiling Height {m}",
+        ",                          !- Volume {m3}",
+        "5.0;                       !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1B,                  !- Name",
+        "ZONE ONE,                  !- Zone Name",
+        ",                          !- Ceiling Height {m}",
+        ",                          !- Volume {m3}",
+        "15.0;                      !- Floor Area {m2}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  1.0,                     !- Cooling Coil 1 Load Fraction",
+        "  ;                        !- Cooling Coil 1 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    state->dataInternalHeatGains->GetInternalHeatGainsInputFlag = false;
+    ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 2);
+
+    // The design power is apportioned to the two Spaces by floor area (5/20 and 15/20), not copied to each
+    constexpr Real64 tol = 0.001;
+    EXPECT_NEAR(state->dataHeatBal->ZoneITELiquidCooled(1).DesignTotalPower, 2500.0, tol);
+    EXPECT_NEAR(state->dataHeatBal->ZoneITELiquidCooled(2).DesignTotalPower, 7500.0, tol);
+
+    InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
+    EXPECT_NEAR(state->dataHeatBal->ZoneRpt(1).LiquidITEPowerRpt[(int)LiquidITERptVars::TotalElectric], 10000.0, tol);
+    EXPECT_NEAR(state->dataHeatBal->ZoneRpt(1).LiquidITEPowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
+
+    // Both per-Space instances reference ColdPlate1, so the design load sums back to the full object
+    EXPECT_NEAR(InternalHeatGains::GetITEColdPlateDesignLoadPerPlate(*state, "ColdPlate1"), 8000.0, tol);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_StaticLoadFractionSumAboveOne)
+{
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  0.7,                     !- Cooling Coil 1 Load Fraction",
+        "  ,                        !- Cooling Coil 1 Load Fraction Schedule Name",
+        "  Coil:Cooling:ITE:UserDefined,  !- Cooling Coil 2 Object Type",
+        "  RDHx1,                   !- Cooling Coil 2 Name",
+        "  0.7,                     !- Cooling Coil 2 Load Fraction",
+        "  ;                        !- Cooling Coil 2 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
+    EXPECT_TRUE(match_err_stream("The sum of the Cooling Coil Load Fractions (1.4000) must not exceed 1.0."));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ScheduledLoadFractionsNormalized)
+{
+    using namespace DataHeatBalance;
+
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+        " Schedule:Constant,LoadFracSched,,0.75;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  ,                        !- Cooling Coil 1 Load Fraction",
+        "  LoadFracSched,           !- Cooling Coil 1 Load Fraction Schedule Name",
+        "  Coil:Cooling:ITE:UserDefined,  !- Cooling Coil 2 Object Type",
+        "  RDHx1,                   !- Cooling Coil 2 Name",
+        "  ,                        !- Cooling Coil 2 Load Fraction",
+        "  LoadFracSched;           !- Cooling Coil 2 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 1);
+
+    InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
+    auto const &thisEquip = state->dataHeatBal->ZoneITELiquidCooled(1);
+
+    // 0.75 + 0.75 = 1.5 is normalized to 1.0, so the liquid gain is capped at Q_Total * LHCF and the air gain stays positive
+    constexpr Real64 tol = 0.001;
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 8000.0, tol);
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
+
+    // A recurring warning records the over-unity sum
+    ASSERT_GT(thisEquip.LoadFractionSumWarnIndex, 0);
+    auto const &recurringWarning = state->dataErrTracking->RecurringErrors(thisEquip.LoadFractionSumWarnIndex);
+    EXPECT_EQ(recurringWarning.Count, 1);
+    EXPECT_NEAR(recurringWarning.MaxValue, 1.5, tol);
+
+    // The design load for sizing normalizes the same way: 10000 * 0.8 * (0.75 / 1.5) = 4000 W, not 6000 W
+    state->dataInternalHeatGains->GetInternalHeatGainsInputFlag = false;
+    EXPECT_NEAR(InternalHeatGains::GetITEColdPlateDesignLoadPerPlate(*state, "ColdPlate1"), 4000.0, tol);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_LoadFractionSumWithinWarningToleranceNormalized)
+{
+    using namespace DataHeatBalance;
+
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+        " Schedule:Constant,LoadFracSched,,0.50000025;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  1.0,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  ,                        !- Cooling Coil 1 Load Fraction",
+        "  LoadFracSched,           !- Cooling Coil 1 Load Fraction Schedule Name",
+        "  Coil:Cooling:ITE:UserDefined,  !- Cooling Coil 2 Object Type",
+        "  RDHx1,                   !- Cooling Coil 2 Name",
+        "  ,                        !- Cooling Coil 2 Load Fraction",
+        "  LoadFracSched;           !- Cooling Coil 2 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+    ASSERT_EQ(state->dataHeatBal->TotITELiquidCooledEquip, 1);
+
+    InternalHeatGains::CalcZoneITEqLiquidCooled(*state);
+    auto const &thisEquip = state->dataHeatBal->ZoneITELiquidCooled(1);
+
+    // A small over-unity sum is normalized even when it is within the warning tolerance.
+    constexpr Real64 tol = 0.001;
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 10000.0, tol);
+    EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 0.0, tol);
+    EXPECT_NEAR(thisEquip.LiquidHeatCaptureFraction, 1.0, tol);
+    EXPECT_EQ(thisEquip.LoadFractionSumWarnIndex, 0);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ComputeLoadScheduleAboveOne)
+{
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+        " Schedule:Constant,ComputeLoadSched,,50.0;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  ComputeLoadSched,        !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  1.0,                     !- Cooling Coil 1 Load Fraction",
+        "  ;                        !- Cooling Coil 1 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
+    EXPECT_TRUE(match_err_stream("schedule contains values that are"));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_LoadFractionScheduleOutOfRange)
+{
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+        " Schedule:Constant,LoadFracSched,,1.5;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  ,                       !- Cooling Coil 1 Load Fraction",
+        "  LoadFracSched;          !- Cooling Coil 1 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
+    EXPECT_TRUE(match_err_stream("schedule contains values that are"));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_MultiSpaceZoneZeroFloorArea)
+{
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  0.0;                     !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1A,                  !- Name",
+        "ZONE ONE,                  !- Zone Name",
+        ",                          !- Ceiling Height {m}",
+        ",                          !- Volume {m3}",
+        "0.0;                       !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1B,                  !- Name",
+        "ZONE ONE,                  !- Zone Name",
+        ",                          !- Ceiling Height {m}",
+        ",                          !- Volume {m3}",
+        "0.0;                       !- Floor Area {m2}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  1.0,                    !- Cooling Coil 1 Load Fraction",
+        "  ;                       !- Cooling Coil 1 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
+    // Reported by the shared setDesignLevel apportioning used by the other internal gain objects
+    EXPECT_TRUE(match_err_stream("Zone floor area is zero when allocating ElectricEquipment:ITE:LiquidCooled loads to Spaces."));
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_BlankCoilTypeWithName)
+{
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  ZONE ONE,                !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate;           !- Volume {m3}",
+
+        " Schedule:Constant,AlwaysOn,,1.0;",
+
+        " ElectricEquipment:ITE:LiquidCooled,",
+        "  ITE Rack 1,              !- Name",
+        "  ZONE ONE,                !- Zone or Space Name",
+        "  AlwaysOn,                !- Availability Schedule Name",
+        "  AlwaysOn,                !- Compute Load Schedule Name",
+        "  10000,                   !- Design Power Input {W}",
+        "  1.0,                     !- Multiplier",
+        "  0.0,                     !- Design Fan Power Input Fraction",
+        "  ,                        !- IT Equipment Power Modifier Curve Name",
+        "  0.8,                     !- Liquid Heat Capture Fraction",
+        "  ,                        !- Liquid Heat Capture Fraction Schedule Name",
+        "  ,                        !- CPU End-Use Subcategory",
+        "  ,                        !- Fan End-Use Subcategory",
+        "  Coil:Cooling:ITE:ColdPlate,  !- Cooling Coil 1 Object Type",
+        "  ColdPlate1,              !- Cooling Coil 1 Name",
+        "  0.5,                     !- Cooling Coil 1 Load Fraction",
+        "  ,                        !- Cooling Coil 1 Load Fraction Schedule Name",
+        "  ,                        !- Cooling Coil 2 Object Type",
+        "  RDHx1,                   !- Cooling Coil 2 Name",
+        "  0.5,                     !- Cooling Coil 2 Load Fraction",
+        "  ;                        !- Cooling Coil 2 Load Fraction Schedule Name",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
+    EXPECT_TRUE(match_err_stream("Cooling Coil Object Type (coil 2) cannot be empty."));
 }
 
 namespace {
@@ -4231,6 +4740,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ITELiquidCooled_ExtensibleCoilList)
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain], 8000.0, tol);
     EXPECT_NEAR(thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain], 2000.0, tol);
     // A coil beyond the original four is reachable: 10000 * 0.8 * 0.2 = 1600 W
+    state->dataInternalHeatGains->GetInternalHeatGainsInputFlag = false;
     EXPECT_NEAR(InternalHeatGains::GetITEColdPlateDesignLoadPerPlate(*state, "Coil5"), 1600.0, tol);
 }
 

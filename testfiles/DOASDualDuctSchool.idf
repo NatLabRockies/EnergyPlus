@@ -1605,6 +1605,7 @@
     Corner_Class_1_Pod_1 Thermostat,  !- Name
     Corner_Class_1_Pod_1,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corner_Class_1_Pod_1 DualSPSched;  !- Control 1 Name
 
@@ -2489,6 +2490,7 @@
     Mult_Class_1_Pod_1 Thermostat,  !- Name
     Mult_Class_1_Pod_1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Mult_Class_1_Pod_1 DualSPSched;  !- Control 1 Name
 
@@ -2887,6 +2889,7 @@
     Corridor_Pod_1 Thermostat,  !- Name
     Corridor_Pod_1,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corridor_Pod_1 DualSPSched;  !- Control 1 Name
 
@@ -3391,6 +3394,7 @@
     Corner_Class_2_Pod_1 Thermostat,  !- Name
     Corner_Class_2_Pod_1,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Corner_Class_2_Pod_1 DualSPSched;  !- Control 1 Name
 
@@ -4075,6 +4079,7 @@
     Mult_Class_2_Pod_1 Thermostat,  !- Name
     Mult_Class_2_Pod_1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Mult_Class_2_Pod_1 DualSPSched;  !- Control 1 Name
 
@@ -4640,6 +4645,7 @@
     Main_Corridor Thermostat,!- Name
     Main_Corridor,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Main_Corridor DualSPSched;  !- Control 1 Name
 
@@ -5132,6 +5138,7 @@
     Lobby Thermostat,        !- Name
     Lobby,                   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Lobby DualSPSched;       !- Control 1 Name
 
@@ -5589,6 +5596,7 @@
     Mech Thermostat,         !- Name
     Mech,                    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Mech DualSPSched;        !- Control 1 Name
 
@@ -6001,6 +6009,7 @@
     Bathrooms Thermostat,    !- Name
     Bathrooms,               !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Bathrooms DualSPSched;   !- Control 1 Name
 
@@ -6883,6 +6892,7 @@
     Offices Thermostat,      !- Name
     Offices,                 !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Offices DualSPSched;     !- Control 1 Name
 
@@ -7554,6 +7564,7 @@
     Media_Center Thermostat, !- Name
     Media_Center,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Media_Center DualSPSched;!- Control 1 Name
 

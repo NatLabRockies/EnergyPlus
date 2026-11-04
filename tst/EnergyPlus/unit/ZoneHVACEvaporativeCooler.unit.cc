@@ -264,7 +264,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectCelDekPad_CyclingUnit_Sim)
     EXPECT_NEAR(HalfOfFullLoad, SensOutputProvided, 0.01);
 }
 
-TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
+TEST_F(ZoneHVACEvapCoolerUnitTest, DirectUserEffectiveness_CyclingUnit_Sim)
 {
     int ActualZoneNum = 1;
     int ZoneEquipIndex = 1;
@@ -287,8 +287,8 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "   ZoneTemperatureDeadbandOnOffCycling,  !- Cooler Unit Control Method",
         "   1.0,                          !- Throttling Range Temperature Difference {deltaC}",
         "   100.0,                        !- Cooling Load Control Threshold Heat Transfer Rate {W}",
-        "   EvaporativeCooler:Direct:ResearchSpecial,  !- First Evaporative Cooler Object Type",
-        "   Direct ResearchSpecial EvapCooler;  !- First Evaporative Cooler Object Name",
+        "   EvaporativeCooler:Direct:UserEffectiveness,  !- First Evaporative Cooler Object Type",
+        "   Direct UserEffectiveness EvapCooler;  !- First Evaporative Cooler Object Name",
 
         " Fan:OnOff,",
         "    ZoneEvapCool Supply Fan,     !- Name",
@@ -301,14 +301,14 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "    ZoneEvapCool OA Inlet,       !- Air Inlet Node Name",
         "    ZoneEvapCool Fan outlet;     !- Air Outlet Node Name",
 
-        " EvaporativeCooler:Direct:ResearchSpecial,",
-        "   Direct ResearchSpecial EvapCooler,  !- Name",
+        " EvaporativeCooler:Direct:UserEffectiveness,",
+        "   Direct UserEffectiveness EvapCooler,  !- Name",
         "    ,                            !- Availability Schedule Name",
         "    0.7,                         !- Cooler Design Effectiveness",
         "    ,                            !- Effectiveness Flow Ratio Modifier Curve Name",
         "    1.0,                         !- Primary Air Design Flow Rate {m3/s}",
         "    55,                          !- Recirculating Water Pump Power Consumption {W}",
-        "    ,                            !- Water Pump Power Sizing Factor {W/(m3/s)}",
+        "    ,                            !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}",
         "    ,                            !- Water Pump Power Modifier Curve Name",
         "    ZoneEvapCool Fan outlet,     !- Air Inlet Node Name",
         "    ZoneEvapCool Inlet Node,     !- Air Outlet Node Name",

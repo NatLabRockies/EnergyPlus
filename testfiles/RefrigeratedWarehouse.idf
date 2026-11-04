@@ -5389,6 +5389,7 @@
     SubFreezer Thermostat,   !- Name
     SubFreezer,              !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Blast Freeze;  !- Control 1 Name
 
@@ -5426,6 +5427,7 @@
     Freezer_1 Thermostat,    !- Name
     Freezer_1,               !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Freeze;    !- Control 1 Name
 
@@ -5472,6 +5474,7 @@
     Freezer_2 Thermostat,    !- Name
     Freezer_2,               !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Freeze;    !- Control 1 Name
 
@@ -5509,6 +5512,7 @@
     Freezer_3 Thermostat,    !- Name
     Freezer_3,               !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Freeze;    !- Control 1 Name
 
@@ -5546,6 +5550,7 @@
     Freezer_4 Thermostat,    !- Name
     Freezer_4,               !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Freeze;    !- Control 1 Name
 
@@ -5583,6 +5588,7 @@
     Freezer_5 Thermostat,    !- Name
     Freezer_5,               !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Freeze;    !- Control 1 Name
 
@@ -5626,6 +5632,7 @@
     Cooler_1 Thermostat,     !- Name
     Cooler_1,                !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Cooler;    !- Control 1 Name
 
@@ -5707,6 +5714,7 @@
     Cooler_2 Thermostat,     !- Name
     Cooler_2,                !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Cooler;    !- Control 1 Name
 
@@ -5784,6 +5792,7 @@
     Cooler_3 Thermostat,     !- Name
     Cooler_3,                !- Zone or ZoneList Name
     Zone Control Type Sched Dual YearRound,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Dual Setpoint Cooler;    !- Control 1 Name
 
@@ -5861,6 +5870,7 @@
     Dock Thermostat,         !- Name
     Dock,                    !- Zone or ZoneList Name
     Zone Control Type Sched for SinglePointSeasonal,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint Dock,   !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -5978,6 +5988,7 @@
     Office1_Lower Thermostat,!- Name
     Office1_Lower,           !- Zone or ZoneList Name
     Zone Control Type Sched for SinglePointSeasonal,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint Office, !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -6038,6 +6049,7 @@
     Office1_Upper Thermostat,!- Name
     Office1_Upper,           !- Zone or ZoneList Name
     Zone Control Type Sched for SinglePointSeasonal,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint Office, !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -6098,6 +6110,7 @@
     Office2_Lower Thermostat,!- Name
     Office2_Lower,           !- Zone or ZoneList Name
     Zone Control Type Sched for SinglePointSeasonal,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint Office, !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -6158,6 +6171,7 @@
     Office2_Upper Thermostat,!- Name
     Office2_Upper,           !- Zone or ZoneList Name
     Zone Control Type Sched for SinglePointSeasonal,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint Office, !- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
