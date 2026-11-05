@@ -95,8 +95,11 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   endif()
 
   # ADDITIONAL DEBUG-MODE-SPECIFIC FLAGS
-  target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:/Ob0>) # Disable inlining
-  target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:/RTCsu>) # Runtime checks
+  # Optimized Debug targets must omit these options because MSVC rejects /RTC with optimization
+  # and /Ob0 would override the inlining enabled by /O1.
+  set(msvc_unoptimized_debug_genex "$<AND:$<CONFIG:Debug>,$<NOT:$<BOOL:$<TARGET_PROPERTY:ENERGYPLUS_OPTIMIZED_DEBUG>>>>")
+  target_compile_options(project_options INTERFACE $<${msvc_unoptimized_debug_genex}:/Ob0>) # Disable inlining
+  target_compile_options(project_options INTERFACE $<${msvc_unoptimized_debug_genex}:/RTCsu>) # Runtime checks
   target_compile_options(project_fp_options INTERFACE $<$<CONFIG:Debug>:/fp:strict>) # Floating point model
   target_compile_options(turn_off_warnings INTERFACE /W0)
   target_compile_options(warnings_as_not_error INTERFACE /WX-) # Disable treating warnings as errors
