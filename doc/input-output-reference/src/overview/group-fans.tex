@@ -100,7 +100,7 @@ This field is the name of a performance curve or table that describes how electr
 
 \paragraph{Field: Night Ventilation Mode Fan Total Efficiency}\label{field-nite-vent-total-eff-fansysmodel}
 
-This optional numeric field is the fan total efficiency used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank the normal fan total efficiency determined from design flow, pressure, and electric power is used instead.
+This optional numeric field is the fan total efficiency used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. If this field is left blank, the calculated normal-mode fan efficiency is used instead: the efficiency determined from design flow, pressure, and electric power, or the per-speed efficiencies for multispeed Discrete fans.
 
 These night performance fields replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object, which is not needed with this fan.
 

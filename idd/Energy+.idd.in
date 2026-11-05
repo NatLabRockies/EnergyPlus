@@ -52719,7 +52719,7 @@ Fan:SystemModel,
        \object-list UnivariateFunctions
   N10, \field Night Ventilation Mode Fan Total Efficiency
        \note Fan total efficiency to use when in night mode using AvailabilityManager:NightVentilation
-       \note If left blank the Fan Total Efficiency field above is used.
+       \note If left blank, the calculated normal-mode fan efficiency is used, including per-speed efficiencies for multispeed Discrete fans.
        \type real
        \minimum> 0.0
        \maximum 1.0
