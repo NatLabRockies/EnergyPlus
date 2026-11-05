@@ -49,7 +49,7 @@ if (MSVC)
             )
 else ()
     target_compile_options(${PROJECT_NAME} PRIVATE
-            $<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>>:-Og>
+            $<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>>:-O1>
             )
 endif ()
 
