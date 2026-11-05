@@ -409,7 +409,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
         "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
         "    100.0,                       !- Design Pressure Rise",
         "    0.9 ,                        !- Motor Efficiency",
-        "    1.0 ,                        !- Motor In Air Stream Fraction",
+        "    0.25,                        !- Motor In Air Stream Fraction",
         "    100.0,                       !- Design Electric Power Consumption",
         "    ,                            !- Design Power Sizing Method",
         "    ,                            !- Electric Power Per Unit Flow Rate",
@@ -456,6 +456,18 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
     locFanElecPower = fanSystem->totalPower;
     locExpectPower = 0.125 * 100.0;
     EXPECT_NEAR(locFanElecPower, locExpectPower, 0.01);
+
+    EXPECT_DOUBLE_EQ(0.0, fanSystem->nightVentMotorEff);
+    EXPECT_FALSE(fanSystem->nightVentMotorInAirFracSpecified);
+    state->dataHVACGlobal->NightVentOn = true;
+    auto &inletNode = state->dataLoopNodes->Node(fanSystem->inletNodeNum);
+    inletNode.MassFlowRateMaxAvail = fanSystem->maxAirMassFlowRate;
+    inletNode.MassFlowRate = 0.75 * fanSystem->maxAirMassFlowRate;
+    state->dataLoopNodes->Node(fanSystem->outletNodeNum).MassFlowRateMax = fanSystem->maxAirMassFlowRate;
+    fanSystem->simulate(*state, false, _, _);
+    EXPECT_NEAR(0.75 * fanSystem->maxAirMassFlowRate, fanSystem->outletAirMassFlowRate, 0.0001);
+    EXPECT_NEAR(56.25, fanSystem->totalPower, 0.01);
+    EXPECT_NEAR(52.03125, fanSystem->powerLossToAir, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc2)
