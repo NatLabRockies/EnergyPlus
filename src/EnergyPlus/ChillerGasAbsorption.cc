@@ -538,7 +538,6 @@ void GetGasAbsorberInput(EnergyPlusData &state)
             }
         }
         thisChiller.CHWLowLimitTemp = s_ipsc->rNumericArgs(15);
-        thisChiller.FuelHeatingValue = s_ipsc->rNumericArgs(16);
         thisChiller.SizFac = s_ipsc->rNumericArgs(17);
 
         // Validate fuel type input

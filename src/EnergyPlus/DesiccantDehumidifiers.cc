@@ -299,7 +299,6 @@ namespace DesiccantDehumidifiers {
             desicDehum.Name = Alphas(1);
             desicDehum.DehumType = CurrentModuleObject;
             desicDehum.DehumTypeCode = DesicDehumType::Solid;
-            desicDehum.Sched = Alphas(2);
 
             if (lAlphaBlanks(2)) {
                 desicDehum.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -369,7 +368,6 @@ namespace DesiccantDehumidifiers {
                 desicDehum.controlType = DesicDehumCtrlType::FixedHumratBypass;
             }
             desicDehum.HumRatSet = Numbers(1);
-            desicDehum.NomProcAirVolFlow = Numbers(2);
             desicDehum.NomProcAirVel = Numbers(3);
 
             desicDehum.RegenCoilName = Alphas(9);
@@ -666,7 +664,6 @@ namespace DesiccantDehumidifiers {
                 ErrorsFoundGeneric = true;
             }
 
-            desicDehum.Sched = Alphas(2);
             if (lAlphaBlanks(2)) {
                 desicDehum.availSched = Sched::GetScheduleAlwaysOn(state);
             } else if ((desicDehum.availSched = Sched::GetSchedule(state, Alphas(2))) == nullptr) {
@@ -1070,15 +1067,15 @@ namespace DesiccantDehumidifiers {
                                                                     Node::ConnectionType::Inlet,
                                                                     Node::CompFluidStream::Primary,
                                                                     Node::ObjectIsParent);
-                desicDehum.RegenAirOutNode = Node::GetOnlySingleNode(state,
-                                                                     RegenAirOutlet,
-                                                                     ErrorsFound,
-                                                                     Node::ConnectionObjectType::DehumidifierDesiccantSystem,
-                                                                     desicDehum.Name,
-                                                                     Node::FluidType::Air,
-                                                                     Node::ConnectionType::Outlet,
-                                                                     Node::CompFluidStream::Primary,
-                                                                     Node::ObjectIsParent);
+                (void)Node::GetOnlySingleNode(state,
+                                              RegenAirOutlet,
+                                              ErrorsFound,
+                                              Node::ConnectionObjectType::DehumidifierDesiccantSystem,
+                                              desicDehum.Name,
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Outlet,
+                                              Node::CompFluidStream::Primary,
+                                              Node::ObjectIsParent);
                 if (!lAlphaBlanks(10)) {
                     if (desicDehum.RegenFanOutNode != desicDehum.RegenCoilInletNode) {
                         ShowSevereError(state, std::format("{} \"{}\"", desicDehum.DehumType, desicDehum.Name));
@@ -1115,15 +1112,15 @@ namespace DesiccantDehumidifiers {
                     }
                 }
             } else { // ELSE for IF (desicDehum%RegenFanPlacement == HVAC::BlowThru)THEN
-                desicDehum.RegenAirOutNode = Node::GetOnlySingleNode(state,
-                                                                     RegenFanOutlet,
-                                                                     ErrorsFound,
-                                                                     Node::ConnectionObjectType::DehumidifierDesiccantSystem,
-                                                                     desicDehum.Name,
-                                                                     Node::FluidType::Air,
-                                                                     Node::ConnectionType::Outlet,
-                                                                     Node::CompFluidStream::Primary,
-                                                                     Node::ObjectIsParent);
+                (void)Node::GetOnlySingleNode(state,
+                                              RegenFanOutlet,
+                                              ErrorsFound,
+                                              Node::ConnectionObjectType::DehumidifierDesiccantSystem,
+                                              desicDehum.Name,
+                                              Node::FluidType::Air,
+                                              Node::ConnectionType::Outlet,
+                                              Node::CompFluidStream::Primary,
+                                              Node::ObjectIsParent);
                 if (!lAlphaBlanks(10)) {
                     desicDehum.RegenAirInNode = Node::GetOnlySingleNode(state,
                                                                         RegenCoilInlet,
@@ -1732,7 +1729,6 @@ namespace DesiccantDehumidifiers {
             int ProcInNode = desicDehum.ProcAirInNode;
             desicDehum.ProcAirInTemp = state.dataLoopNodes->Node(ProcInNode).Temp;
             desicDehum.ProcAirInHumRat = state.dataLoopNodes->Node(ProcInNode).HumRat;
-            desicDehum.ProcAirInEnthalpy = state.dataLoopNodes->Node(ProcInNode).Enthalpy;
             desicDehum.ProcAirInMassFlowRate = state.dataLoopNodes->Node(ProcInNode).MassFlowRate;
 
             //  Determine heating coil inlet conditions by calling it with zero load
@@ -1741,8 +1737,6 @@ namespace DesiccantDehumidifiers {
 
             int RegenInNode = desicDehum.RegenAirInNode;
             desicDehum.RegenAirInTemp = state.dataLoopNodes->Node(RegenInNode).Temp;
-            desicDehum.RegenAirInHumRat = state.dataLoopNodes->Node(RegenInNode).HumRat;
-            desicDehum.RegenAirInEnthalpy = state.dataLoopNodes->Node(RegenInNode).Enthalpy;
 
             desicDehum.WaterRemove = 0.0;
             desicDehum.ElecUseEnergy = 0.0;
@@ -2338,7 +2332,6 @@ namespace DesiccantDehumidifiers {
         desicDehum.ElecUseRate = ElecUseRate;
         desicDehum.PartLoad = PartLoad;
 
-        desicDehum.ProcAirOutMassFlowRate = ProcAirMassFlowRate;
         desicDehum.ProcAirOutTemp = ProcAirOutTemp;
         desicDehum.ProcAirOutHumRat = ProcAirOutHumRat;
         desicDehum.ProcAirOutEnthalpy = Psychrometrics::PsyHFnTdbW(ProcAirOutTemp, ProcAirOutHumRat);

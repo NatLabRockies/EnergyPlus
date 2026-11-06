@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 
 // ObjexxFCL Headers
@@ -189,7 +190,7 @@ namespace DXFEarClipping {
         int ncverts;
 
         // Object Data
-        Array1D<Vector_2d> vertex(nsides);
+        Array1D<Vector2D> vertex(nsides);
         Array1D<dTriangle> Triangle(nsides);
 
         if (surfclass == DataSurfaces::SurfaceClass::Floor || surfclass == DataSurfaces::SurfaceClass::Roof ||
@@ -237,7 +238,7 @@ namespace DXFEarClipping {
         removed = false;
         while (nvertcur > 3) {
             generate_ears(state, nsides, vertex, ears, nears, r_angles, nrangles, c_vertices, ncverts, removed, earverts, rangles);
-            if (!any_gt(ears, 0)) {
+            if (!std::ranges::any_of(ears, [](int const v) { return v > 0; })) {
                 ShowWarningError(state,
                                  std::format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
                                              surfname,
@@ -356,9 +357,9 @@ namespace DXFEarClipping {
         return angle;
     }
 
-    bool polygon_contains_point_2d(int const nsides,            // number of sides (vertices)
-                                   Array1D<Vector_2d> &polygon, // points of polygon
-                                   Vector_2d const &point       // point to be tested
+    bool polygon_contains_point_2d(int const nsides,           // number of sides (vertices)
+                                   Array1D<Vector2D> &polygon, // points of polygon
+                                   Vector2D const &point       // point to be tested
     )
     {
 
@@ -405,7 +406,7 @@ namespace DXFEarClipping {
 
     void generate_ears(EnergyPlusData &state,
                        int const nvert, // number of vertices in polygon
-                       Array1D<Vector_2d> &vertex,
+                       Array1D<Vector2D> &vertex,
                        Array1D_int &ears,       // number of ears possible (dimensioned to nvert)
                        int &nears,              // number of ears found
                        Array1D_int &r_vertices, // number of reflex vertices (>180) possible
@@ -446,8 +447,8 @@ namespace DXFEarClipping {
         bool inpoly = false; // in polygon or not
 
         // Object Data
-        Vector_2d point;               // structure for point
-        Array1D<Vector_2d> testtri(3); // structure for triangle
+        Vector2D point;               // structure for point
+        Array1D<Vector2D> testtri(3); // structure for triangle
 
         // initialize, always recalculate
         ears = 0;
@@ -633,9 +634,9 @@ namespace DXFEarClipping {
     //{
 
     //    // Locals
-    //    // type (Vector_2d) nvertex(nvert)
+    //    // type (Vector2D) nvertex(nvert)
     //    // integer i
-    //    // type (Vector_2d) point
+    //    // type (Vector2D) point
     //    // integer nrep
 
     //    //  Vertex, nverts is in cw order, reorder for calc

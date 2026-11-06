@@ -2221,7 +2221,7 @@ Evaporative Coolers
 
 -  EvaporativeCooler:Indirect:WetCoil
 
--  EvaporativeCooler:Indirect:ResearchSpecial
+-  EvaporativeCooler:Indirect:UserEffectiveness
 
 Humidifiers and Dehumidifiers
 

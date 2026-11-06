@@ -316,7 +316,8 @@ namespace PlantValves {
                                     // is Valve inlet node an outlet node of a splitter
                                     if (thisLoopSide.Splitter.Exists) {
                                         if (allocated(thisLoopSide.Splitter.NodeNumOut)) {
-                                            if (any_eq(thisLoopSide.Splitter.NodeNumOut, this->PltInletNodeNum)) {
+                                            if (std::ranges::any_of(thisLoopSide.Splitter.NodeNumOut,
+                                                                    [&](auto const &elem) { return elem == this->PltInletNodeNum; })) {
                                                 InNodeOnSplitter = true;
                                             }
                                         } // allocated
@@ -329,7 +330,8 @@ namespace PlantValves {
 
                                     // is stream 2 node an inlet to the mixer ?
                                     if (thisLoopSide.Mixer.Exists) {
-                                        if (any_eq(thisLoopSide.Mixer.NodeNumIn, this->PltStream2NodeNum)) {
+                                        if (std::ranges::any_of(thisLoopSide.Mixer.NodeNumIn,
+                                                                [&](auto const &elem) { return elem == this->PltStream2NodeNum; })) {
                                             int thisInnerBranchCtr = 0;
                                             for (auto const &thisInnerBranch : thisLoopSide.Branch) {
                                                 thisInnerBranchCtr++;

@@ -15,6 +15,8 @@
 #ifndef ITOA_H_INCLUDED
 #define ITOA_H_INCLUDED
 
+#include <cassert>
+
 inline const char* GetDigitsLut() {
     static const char cDigitsLut[200] = {
         '0','0','0','1','0','2','0','3','0','4','0','5','0','6','0','7','0','8','0','9',

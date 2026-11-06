@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <format>
 
 // EnergyPlus Headers
@@ -150,13 +151,15 @@ void GLHEBase::calcGroundHeatExchanger(EnergyPlusData &state)
 
     // Store currentSimTime in prevTimeSteps only if a time step occurs
     if (this->prevTimeSteps(1) != this->currentSimTime) {
-        this->prevTimeSteps = eoshift(this->prevTimeSteps, -1, this->currentSimTime);
+        std::shift_right(this->prevTimeSteps.begin(), this->prevTimeSteps.end(), 1);
+        this->prevTimeSteps(1) = this->currentSimTime;
         ++this->N;
     }
 
     if (this->N != PrevN) {
         PrevN = this->N;
-        this->QnSubHr = eoshift(this->QnSubHr, -1, this->lastQnSubHr);
+        std::shift_right(this->QnSubHr.begin(), this->QnSubHr.end(), 1);
+        this->QnSubHr(1) = this->lastQnSubHr;
     }
 
     calcAggregateLoad(state);
@@ -418,8 +421,10 @@ void GLHEBase::calcAggregateLoad([[maybe_unused]] const EnergyPlusData &state)
         } else {
             SumQnHr /= 0.05; // estimated small timestep
         }
-        this->QnHr = eoshift(this->QnHr, -1, SumQnHr);
-        this->LastHourN = eoshift(this->LastHourN, -1, this->N);
+        std::shift_right(this->QnHr.begin(), this->QnHr.end(), 1);
+        this->QnHr(1) = SumQnHr;
+        std::shift_right(this->LastHourN.begin(), this->LastHourN.end(), 1);
+        this->LastHourN(1) = this->N;
     }
 
     // CHECK IF A MONTH PASSES...
@@ -546,22 +551,25 @@ Real64 GLHEBase::interpGFunc(Real64 const x_val) const
 
     auto const &x = this->myRespFactors->LNTTS;
     auto const &y = this->myRespFactors->GFNC;
-    auto const &upper_it = std::upper_bound(x.begin(), x.end(), x_val);
+    // Using raw pointers to avoid too much overhead due to safe iterators in Debug mode (`_GLIBCXX_DEBUG`)
+    auto const *x_begin = x.data();
+    auto const *x_end = x_begin + x.size();
+    auto const *upper_it = std::upper_bound(x_begin, x_end, x_val);
 
     unsigned int l_idx = 0;
     unsigned int u_idx = 0;
 
-    if (upper_it == x.begin()) {
+    if (upper_it == x_begin) {
         // Linear extrapolation beyond the lower bound
         l_idx = 0;
         u_idx = 1;
-    } else if (upper_it == x.end()) {
+    } else if (upper_it == x_end) {
         // Linear extrapolation beyond the upper bound
         u_idx = x.size() - 1;
         l_idx = u_idx - 1;
     } else {
         // In the middle of the range
-        u_idx = std::distance(x.begin(), upper_it);
+        u_idx = static_cast<unsigned int>(upper_it - x_begin);
         l_idx = u_idx - 1;
     }
 

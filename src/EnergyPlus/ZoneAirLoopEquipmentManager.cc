@@ -154,10 +154,7 @@ namespace ZoneAirLoopEquipmentManager {
 
         // Find the correct Zone Air Distribution Unit Equipment
         if (CompIndex == 0) {
-            AirDistUnitNum = Util::FindItemInList(ZoneAirLoopEquipName, state.dataDefineEquipment->AirDistUnit);
-            if (AirDistUnitNum == 0) {
-                ShowFatalError(state, std::format("ManageZoneAirLoopEquipment: Unit not found={}", ZoneAirLoopEquipName));
-            }
+            AirDistUnitNum = getAirDistUnitIndex(state, ZoneAirLoopEquipName);
             CompIndex = AirDistUnitNum;
         } else {
             AirDistUnitNum = CompIndex;
@@ -186,6 +183,21 @@ namespace ZoneAirLoopEquipmentManager {
         // Call one-time init to fill termunit sizing and other data for the ADU - can't do this until the actual terminal unit nodes have been
         // matched to zone euqip config nodes
         InitZoneAirLoopEquipment(state, AirDistUnitNum, ControlledZoneNum);
+    }
+
+    int getAirDistUnitIndex(EnergyPlusData &state, std::string const &ZoneAirLoopEquipName)
+    {
+        // make sure the input data is read in only once
+        if (state.dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag) {
+            GetZoneAirLoopEquipment(state);
+            state.dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag = false;
+        }
+
+        int const AirDistUnitNum = Util::FindItemInList(ZoneAirLoopEquipName, state.dataDefineEquipment->AirDistUnit);
+        if (AirDistUnitNum == 0) {
+            ShowFatalError(state, std::format("ManageZoneAirLoopEquipment: Unit not found={}", ZoneAirLoopEquipName));
+        }
+        return AirDistUnitNum;
     }
 
     void GetZoneAirLoopEquipment(EnergyPlusData &state)

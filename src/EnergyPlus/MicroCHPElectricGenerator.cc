@@ -785,12 +785,8 @@ void MicroCHPDataStruct::InitMicroCHPNoNormalizeGenerators(EnergyPlusData &state
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).CurrentOpMode = DataGenerators::OperatingMode::Off;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FractionalDayofLastShutDown = 0.0;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FractionalDayofLastStartUp = 0.0;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).HasBeenOn = false;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).DuringStartUp = false;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).DuringShutDown = false;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FuelMdotLastTimestep = 0.0;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).PelLastTimeStep = 0.0;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).NumCycles = 0;
 
         state.dataGenerator->FuelSupply(this->FuelSupplyID).QskinLoss = 0.0;
 

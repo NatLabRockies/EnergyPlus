@@ -1168,34 +1168,6 @@ bool shading_factor_calculator::fbeam(size_t hour_of_year, double minute, double
 }
 
 
-bool shading_factor_calculator::fbeam_shade_db(ShadeDB8_mpp * p_shadedb, size_t hour, double minute, double solalt, double solazi, double gpoa, double dpoa, double pv_cell_temp, int mods_per_str, double str_vmp_stc, double mppt_lo, double mppt_hi)
-{
-	bool ok = false;
-	double dc_factor = 1.0;
-	double beam_factor = 1.0;
-	size_t irow = get_row_index_for_input(hour, minute);
-	if (irow < m_beamFactors.nrows())
-	{
-		std::vector<double> shad_fracs;
-		for (size_t icol = 0; icol < m_beamFactors.ncols(); icol++)
-			shad_fracs.push_back(m_beamFactors.at(irow, icol));
-		dc_factor = 1.0 - p_shadedb->get_shade_loss(gpoa, dpoa, shad_fracs, true, pv_cell_temp, mods_per_str, str_vmp_stc, mppt_lo, mppt_hi);
-		// apply mxh factor
-		if (m_enMxH && (irow < m_mxhFactors.nrows()))
-			beam_factor *= m_mxhFactors(irow, 0);
-		// apply azi alt shading factor
-		if (m_enAzAlt)
-			beam_factor *= util::bilinear(solalt, solazi, m_azaltvals);
-
-		m_dc_shade_factor = dc_factor;
-		m_beam_shade_factor = beam_factor;
-
-		ok = true;
-	}
-	return ok;
-}
-
-
 double shading_factor_calculator::fdiff()
 {
 	return m_diffFactor;

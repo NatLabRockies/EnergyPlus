@@ -9322,7 +9322,7 @@ Objects that are recognized by the HVAC diagram are shown in
   DistrictHeating                                     none
   EvaporativeCooler:Direct:CelDekPad                  aliceblue
   EvaporativeCooler:Indirect:CelDekPad                aliceblue
-  EvaporativeCooler:Indirect:ResearchSpecial          aliceblue
+  EvaporativeCooler:Indirect:UserEffectiveness        aliceblue
   Fan:ConstantVolume                                  silver
   Fan:OnOff                                           silver
   Fan:VariableVolume                                  silver
@@ -9369,7 +9369,7 @@ Objects that are recognized by the HVAC diagram are shown in
   =================================================== ==============
   EvaporativeCooler:Direct:CelDekPad                  aliceblue
   EvaporativeCooler:Indirect:CelDekPad                aliceblue
-  EvaporativeCooler:Indirect:ResearchSpecial          aliceblue
+  EvaporativeCooler:Indirect:UserEffectiveness        aliceblue
   ZoneHVAC:EquipmentConnections                       chartreuse
   Boiler:HotWater                                     indianred
   Humidifier:Steam:Electric                           lavender

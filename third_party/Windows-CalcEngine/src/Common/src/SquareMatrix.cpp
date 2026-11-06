@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <stdexcept>
 #include <cassert>
 #include <cmath>
@@ -88,8 +89,8 @@ namespace FenestrationCommon
 
         for(auto m = 0u; m <= size; ++m)
         {
-            fill(d.begin(), d.end(), 0);
-            fill(y.begin(), y.end(), 0);
+            std::fill(d.begin(), d.end(), 0);
+            std::fill(y.begin(), y.end(), 0);
             d[m] = 1;
             for(auto i = 0; i <= int(size); ++i)
             {

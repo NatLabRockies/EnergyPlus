@@ -65,17 +65,14 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataWater.hh>
-#include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
-#include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
-#include <EnergyPlus/SimAirServingZones.hh>
 #include <EnergyPlus/StandardRatings.hh>
 #include <EnergyPlus/WaterManager.hh>
 
@@ -152,7 +149,6 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
 
     ErrorObjectHeader eoh{routineName, "Coil:Cooling:DX", input_data.name};
 
-    this->original_input_specs = input_data;
     bool errorsFound = false;
     this->name = input_data.name;
     this->coilType = HVAC::CoilType::CoolingDX;
@@ -208,7 +204,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
     if (!input_data.condensate_collection_water_storage_tank_name.empty()) {
         WaterManager::SetupTankSupplyComponent(state,
                                                this->name,
-                                               state.dataCoilCoolingDX->coilCoolingDXObjectName,
+                                               this->reclaimHeat.SourceType,
                                                input_data.condensate_collection_water_storage_tank_name,
                                                errorsFound,
                                                this->condensateTankIndex,
@@ -218,7 +214,7 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
     if (!input_data.evaporative_condenser_supply_water_storage_tank_name.empty()) {
         WaterManager::SetupTankDemandComponent(state,
                                                this->name,
-                                               state.dataCoilCoolingDX->coilCoolingDXObjectName,
+                                               this->reclaimHeat.SourceType,
                                                input_data.evaporative_condenser_supply_water_storage_tank_name,
                                                errorsFound,
                                                this->evaporativeCondSupplyTankIndex,
@@ -238,16 +234,12 @@ void CoilCoolingDX::instantiateFromInputSpec(EnergyPlusData &state, const CoilCo
         // Setup zone data here
     }
 
-    Node::TestCompSet(state,
-                      state.dataCoilCoolingDX->coilCoolingDXObjectName,
-                      this->name,
-                      input_data.evaporator_inlet_node_name,
-                      input_data.evaporator_outlet_node_name,
-                      "Air Nodes");
+    Node::TestCompSet(
+        state, this->reclaimHeat.SourceType, this->name, input_data.evaporator_inlet_node_name, input_data.evaporator_outlet_node_name, "Air Nodes");
 
     if (errorsFound) {
         ShowFatalError(state,
-                       std::string{routineName} + "Errors found in getting " + state.dataCoilCoolingDX->coilCoolingDXObjectName +
+                       std::string{routineName} + "Errors found in getting " + this->reclaimHeat.SourceType +
                            " input. Preceding condition(s) causes termination.");
     }
 }
@@ -605,12 +597,11 @@ int CoilCoolingDX::getOpModeCapFTIndex(HVAC::CoilMode const mode)
     return this->performance->indexCapFT(mode);
 }
 
-void CoilCoolingDX::setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, int _airLoopNum)
+void CoilCoolingDX::setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName)
 {
     this->supplyFanIndex = fanIndex;
     this->supplyFanName = fanName;
     this->supplyFanType = fanType;
-    this->airLoopNum = _airLoopNum;
 }
 
 void CoilCoolingDX::getFixedData(int &_evapInletNodeIndex,
@@ -807,11 +798,7 @@ void CoilCoolingDX::simulate(EnergyPlusData &state,
             // report out fan information
             // should work for all fan types
             if (this->supplyFanIndex > 0) {
-                ReportCoilSelection::setCoilSupplyFanInfo(state,
-                                                          this->coilReportNum,
-                                                          state.dataFans->fans(this->supplyFanIndex)->Name,
-                                                          state.dataFans->fans(this->supplyFanIndex)->type,
-                                                          this->supplyFanIndex);
+                ReportCoilSelection::setCoilSupplyFanInfo(state, this->coilReportNum, this->supplyFanName, this->supplyFanType, this->supplyFanIndex);
             }
 
             // report out coil rating conditions, just create a set of dummy nodes and run calculate on them

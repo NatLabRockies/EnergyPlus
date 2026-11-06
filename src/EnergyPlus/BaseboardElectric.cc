@@ -55,7 +55,6 @@
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
-#include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
@@ -63,7 +62,6 @@
 #include <EnergyPlus/GlobalNames.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -79,7 +77,6 @@ namespace BaseboardElectric {
 
     // MODULE PARAMETER DEFINITIONS
     constexpr std::string_view cCMO_BBRadiator_Electric = "ZoneHVAC:Baseboard:Convective:Electric";
-    constexpr Real64 SimpConvAirFlowSpeed(0.5); // m/s
 
     void SimElectricBaseboard(EnergyPlusData &state, std::string const &EquipName, int const ControlledZoneNum, Real64 &PowerMet, int &CompIndex)
     {
@@ -132,7 +129,7 @@ namespace BaseboardElectric {
             }
         }
 
-        InitBaseboard(state, BaseboardNum, ControlledZoneNum);
+        InitBaseboard(state, BaseboardNum);
 
         QZnReq = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ControlledZoneNum).RemainingOutputReqToHeatSP;
 
@@ -217,10 +214,10 @@ namespace BaseboardElectric {
                 thisBaseboard.EquipName = s_ipsc->cAlphaArgs(1);                 // name of this baseboard
                 thisBaseboard.EquipType = Util::makeUPPER(cCurrentModuleObject); // the type of baseboard-rename change
                 thisBaseboard.Schedule = s_ipsc->cAlphaArgs(2);
-                if (s_ipsc->lAlphaFieldBlanks(2)) {
+                if (thisBaseboard.Schedule.empty()) {
                     thisBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
-                } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+                } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, thisBaseboard.Schedule)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), thisBaseboard.Schedule);
                     ErrorsFound = true;
                 }
                 // get inlet node number
@@ -363,7 +360,7 @@ namespace BaseboardElectric {
         }
     }
 
-    void InitBaseboard(EnergyPlusData &state, int const BaseboardNum, int const ControlledZoneNum)
+    void InitBaseboard(EnergyPlusData &state, int const BaseboardNum)
     {
 
         // SUBROUTINE INFORMATION:
@@ -386,11 +383,6 @@ namespace BaseboardElectric {
         baseboard->baseboards(BaseboardNum).Power = 0.0;
         baseboard->baseboards(BaseboardNum).ElecUseLoad = 0.0;
         baseboard->baseboards(BaseboardNum).ElecUseRate = 0.0;
-
-        // Do the every time step initializations
-        int ZoneNode = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).ZoneNode;
-        baseboard->baseboards(BaseboardNum).AirInletTemp = state.dataLoopNodes->Node(ZoneNode).Temp;
-        baseboard->baseboards(BaseboardNum).AirInletHumRat = state.dataLoopNodes->Node(ZoneNode).HumRat;
     }
 
     void SizeElectricBaseboard(EnergyPlusData &state, int const BaseboardNum)
@@ -475,21 +467,14 @@ namespace BaseboardElectric {
         // in a pure Electricconvective baseboard heater.
 
         // METHODOLOGY EMPLOYED:
-        // Currently this is primarily modified from HW Convective baseboard which has connections to
-        //  a water loop and was necessary to calculate temps, flow rates and other things.  This
-        //  model might be made more sophisticated and might use some of those data structures in the future
-        //  so they are left in place even though this model does not utilize them.
+        // Meet the requested zone load up to the nominal baseboard capacity and calculate electricity
+        // consumption using the baseboard efficiency.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 AirOutletTemp;
         Real64 QBBCap;
 
         auto &baseboard = state.dataBaseboardElectric->baseboards(BaseboardNum);
 
-        Real64 AirInletTemp = baseboard.AirInletTemp;
-        Real64 CpAir = Psychrometrics::PsyCpAirFnW(baseboard.AirInletHumRat);
-        Real64 AirMassFlowRate = SimpConvAirFlowSpeed;
-        Real64 CapacitanceAir = CpAir * AirMassFlowRate;
         // currently only the efficiency is used to calculate the electric consumption.  There could be some
         //  thermal loss that could be accounted for with this efficiency input.
         Real64 Effic = baseboard.BaseboardEfficiency;
@@ -503,20 +488,15 @@ namespace BaseboardElectric {
                 QBBCap = LoadMet;
             }
 
-            // this could be utilized somehow or even reported so the data structures are left in place
-            AirOutletTemp = AirInletTemp + QBBCap / CapacitanceAir;
-
             // The Baseboard electric Load is calculated using the efficiency
             baseboard.ElecUseRate = QBBCap / Effic;
 
         } else {
             // if there is an off condition the BB does nothing.
-            AirOutletTemp = AirInletTemp;
             QBBCap = 0.0;
             baseboard.ElecUseRate = 0.0;
         }
 
-        baseboard.AirOutletTemp = AirOutletTemp;
         baseboard.Power = QBBCap;
     }
 

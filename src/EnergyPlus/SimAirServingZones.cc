@@ -739,9 +739,7 @@ void GetAirPathData(EnergyPlusData &state)
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf = CompTypes(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name = CompNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompIndex = 0;
-                primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNameIn = InletNodeNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNumIn = InletNodeNumbers(CompNum);
-                primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNameOut = OutletNodeNames(CompNum);
                 primaryAirSystems.Branch(BranchNum).Comp(CompNum).NodeNumOut = OutletNodeNumbers(CompNum);
                 primaryAirSystems.Branch(BranchNum).NodeNum(CompNum + 1) = OutletNodeNumbers(CompNum);
 
@@ -816,7 +814,6 @@ void GetAirPathData(EnergyPlusData &state)
 
             } // end of component loop
 
-            primaryAirSystems.Branch(BranchNum).ControlType = "";
             primaryAirSystems.Branch(BranchNum).NodeNumIn = InletNodeNumbers(1);
             primaryAirSystems.Branch(BranchNum).NodeNumOut = OutletNodeNumbers(NumCompsOnBranch);
 
@@ -1271,9 +1268,9 @@ void GetAirPathData(EnergyPlusData &state)
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
                     } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:WETCOIL") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
-                    } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL") {
+                    } else if (componentType == "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
-                    } else if (componentType == "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL") {
+                    } else if (componentType == "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS") {
                         primaryAirSystems.Branch(BranchNum).Comp(CompNum).CompType_Num = CompType::EvapCooler;
 
                         // Desiccant Dehumidifier Types for the air system simulation
@@ -1436,8 +1433,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
     int const numPrimaryAirSys = state.dataHVACGlobal->NumPrimaryAirSys;
 
     bool ErrorsFound = false;
-    state.dataHVACGlobal->AirLoopInit = true;
-
     // Do the one time initializations
     if (state.dataSimAirServingZones->InitAirLoopsOneTimeFlag) {
 
@@ -1686,9 +1681,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
                                 cooledZone(NumZonesCool).termUnitSizingIndex =
                                     state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).AirDistUnitCool(ZoneInNum).TermUnitSizingIndex;
                                 if (AirLoopNum > 0) {
-                                    if (thisPrimaryAirSys.OASysExists) {
-                                        state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).ZoneHasAirLoopWithOASys = true;
-                                    }
                                 }
                                 state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).InletNodeAirLoopNum(ZoneInNum) = AirLoopNum;
                                 FoundSupPathZoneConnect = true;
@@ -1950,7 +1942,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
             int SupFanIndex = 0;
             int RetFanIndex = 0;
             bool FoundOASys = false;
-            thisPrimaryAirSys.FanDesCoolLoad = 0.0;
             HVAC::FanType supFanType = HVAC::FanType::Invalid;
             HVAC::FanType retFanType = HVAC::FanType::Invalid;
 
@@ -2003,7 +1994,6 @@ void InitAirLoops(EnergyPlusData &state, bool const FirstHVACIteration) // TRUE 
             }
 
             thisPrimaryAirSys.retFanType = retFanType;
-            thisPrimaryAirSys.retFanNum = RetFanIndex;
         }
         // Check whether there are Central Heating Coils in the Primary Air System
         for (int AirLoopNum = 1; AirLoopNum <= numPrimaryAirSys; ++AirLoopNum) {
@@ -2590,6 +2580,7 @@ void SimAirLoops(EnergyPlusData &state, bool const FirstHVACIteration, bool &Sim
 
     } // End of Air Loop iteration
 
+    state.dataHVACGlobal->NightVentOn = false;
     if ((int)state.dataAirLoopHVACDOAS->airloopDOAS.size() > 0) {
         int index;
         Real64 OAMassFLowrate = 0.0;
@@ -2676,6 +2667,7 @@ void SimAirLoops(EnergyPlusData &state, bool const FirstHVACIteration, bool &Sim
             AirLoopHVACDOAS::CheckConvergence(state);
         }
     }
+    state.dataHVACGlobal->NightVentOn = false;
     // Reset current system number for sizing routines
     state.dataSize->CurSysNum = 0;
 }
@@ -3401,7 +3393,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
     // (1) update branch connection with (BeforeBranchSim)
     // (2) simulate each component
     // (3) update branch connection with (AfterBranchSim) to enforce continuity through splitter
-    // Sets current branch number to CurBranchNum defined in MODULE DataSizing
     // Sets duct type of current branch to CurDuctType defined in MODULE DataSizing
     // Upon exiting, resets both counters to 0.
 
@@ -3411,7 +3402,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
 
         UpdateBranchConnections(state, AirLoopNum, BranchNum, BeforeBranchSim);
 
-        state.dataSize->CurBranchNum = BranchNum;
         state.dataSize->CurDuctType = primaryAirSystems.Branch(BranchNum).DuctType;
 
         // Loop over components in branch
@@ -3438,7 +3428,6 @@ void SimAirLoopComponents(EnergyPlusData &state,
 
     } // End of branch loop
 
-    state.dataSize->CurBranchNum = 0;
     state.dataSize->CurDuctType = HVAC::AirDuctType::Invalid;
 }
 
@@ -3664,7 +3653,7 @@ void SimAirLoopComponent(EnergyPlusData &state,
         // Evap Cooler Types for the air system simulation
     } break;
     case CompType::EvapCooler: { // 'EvaporativeCooler:Direct:CelDekPad', 'EvaporativeCooler:Indirect:CelDekPad'
-        // 'EvaporativeCooler:Indirect:WetCoil', 'EvaporativeCooler:Indirect:ResearchSpecial'
+        // 'EvaporativeCooler:Indirect:WetCoil', 'EvaporativeCooler:Indirect:UserEffectiveness'
         SimEvapCooler(state, CompName, CompIndex, state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR);
         // Desiccant Dehumidifier Types for the air system simulation
     } break;
@@ -4239,7 +4228,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
             sysSizing.AirPriLoopName = primaryAirSystems.Name;
             sysSizing.loadSizingType = sysSizInput.loadSizingType;
             sysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-            sysSizing.CoolCapControl = sysSizInput.CoolCapControl;
             sysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
             sysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
             sysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -4302,7 +4290,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
         // move data from system sizing input
         finalSysSizing.loadSizingType = sysSizInput.loadSizingType;
         finalSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-        finalSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
         finalSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
         finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         finalSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -4351,7 +4338,6 @@ void SetUpSysSizingArrays(EnergyPlusData &state)
 
         calcSysSizing.loadSizingType = sysSizInput.loadSizingType;
         calcSysSizing.coolingPeakLoad = sysSizInput.coolingPeakLoad;
-        calcSysSizing.CoolCapControl = sysSizInput.CoolCapControl;
         calcSysSizing.heatCoilSizingMethod = sysSizInput.heatCoilSizingMethod;
         calcSysSizing.maxHeatCoilToCoolingLoadSizingRatio = sysSizInput.maxHeatCoilToCoolingLoadSizingRatio;
         calcSysSizing.DesOutAirVolFlow = sysSizInput.DesOutAirVolFlow;
@@ -4805,8 +4791,7 @@ void SizeSysOutdoorAir(EnergyPlusData &state)
                     }
                     auto &termUnitSizing = state.dataSize->TermUnitSizing(TermUnitSizingIndex);
                     auto &termUnitFinalZoneSizing = state.dataSize->TermUnitFinalZoneSizing(TermUnitSizingIndex);
-                    int MatchingCooledZoneNum =
-                        General::FindNumberInList(TermUnitSizingIndex, airToZoneNodeInfo.TermUnitCoolSizingIndex, NumZonesCooled);
+                    int MatchingCooledZoneNum = General::FindNumberInList(TermUnitSizingIndex, airToZoneNodeInfo.TermUnitCoolSizingIndex);
                     if (MatchingCooledZoneNum == 0) {
                         if (SysSizNum > 0) {
                             ZoneOAUnc = termUnitFinalZoneSizing.TotalOAFromPeople +
@@ -5812,8 +5797,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                         if (numZonesHeated > 0) {
                             for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
                                 int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                MatchingCooledZoneNum = FindNumberInList(
-                                    TermUnitSizingIndex, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled);
+                                MatchingCooledZoneNum =
+                                    FindNumberInList(TermUnitSizingIndex, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                                 if (MatchingCooledZoneNum == 0) {
                                     // Zone air secondary recirculation fraction
                                     state.dataSimAirServingZones->Er =
@@ -6129,8 +6114,8 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                         if (numZonesHeated > 0) {
                             for (int ZonesHeatedNum = 1; ZonesHeatedNum <= numZonesHeated; ++ZonesHeatedNum) {
                                 int TermUnitSizingIndex = state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitHeatSizingIndex(ZonesHeatedNum);
-                                MatchingCooledZoneNum = FindNumberInList(
-                                    TermUnitSizingIndex, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex, NumZonesCooled);
+                                MatchingCooledZoneNum =
+                                    FindNumberInList(TermUnitSizingIndex, state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).TermUnitCoolSizingIndex);
                                 if (MatchingCooledZoneNum == 0) {
                                     // Zone air secondary recirculation fraction
                                     state.dataSimAirServingZones->Er =
@@ -6465,7 +6450,6 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                 if (sysSizing.CoinCoolMassFlow > state.dataSize->CalcSysSizing(AirLoopNum).CoinCoolMassFlow) {
                     state.dataSize->CalcSysSizing(AirLoopNum).CoinCoolMassFlow = sysSizing.CoinCoolMassFlow;
                     state.dataSize->SysSizPeakDDNum(AirLoopNum).CoolFlowPeakDD = DDNum;
-                    state.dataSize->SysSizPeakDDNum(AirLoopNum).cCoolFlowPeakDDDate = state.dataSize->DesDayWeath(DDNum).DateString;
                 }
 
                 if (sysSizing.HeatCap > state.dataSize->CalcSysSizing(AirLoopNum).HeatCap) {

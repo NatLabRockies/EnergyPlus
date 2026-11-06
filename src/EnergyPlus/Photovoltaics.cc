@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -409,11 +410,12 @@ namespace Photovoltaics {
             case CellIntegration::SurfaceOutsideFace:
             case CellIntegration::TranspiredCollector:
             case CellIntegration::ExteriorVentedCavity: {
-                dupPtr = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).SurfaceName,
-                                              state.dataPhotovoltaic->PVarray({PVnum + 1, state.dataPhotovoltaic->NumPVs}),
-                                              &PVArrayStruct::SurfaceName);
-                if (dupPtr != 0) {
-                    dupPtr += PVnum; // to correct for shortened array in find item
+                dupPtr = 0;
+                for (int iPV = PVnum + 1; iPV <= state.dataPhotovoltaic->NumPVs; ++iPV) {
+                    if (state.dataPhotovoltaic->PVarray(iPV).SurfaceName == state.dataPhotovoltaic->PVarray(PVnum).SurfaceName) {
+                        dupPtr = iPV;
+                        break;
+                    }
                 }
                 if (dupPtr != 0) {
                     auto &thisPVarray = state.dataPhotovoltaic->PVarray(dupPtr);
@@ -881,7 +883,7 @@ namespace Photovoltaics {
     void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
     {
         // Recalculate PV that depends on a surface or collector temperature before the heat balance uses its current sink.
-        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        auto const &pv = state.dataPhotovoltaic->PVarray(PVnum);
         switch (pv.CellIntegrationMode) {
         case CellIntegration::SurfaceOutsideFace:
         case CellIntegration::TranspiredCollector:
@@ -993,11 +995,11 @@ namespace Photovoltaics {
         thisPVarray.SNLPVinto.IcDiffuse =
             state.dataHeatBal->SurfQRadSWOutIncident(ThisSurf) - state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/ m2)(was kJ/hr m2)
         thisPVarray.SNLPVinto.IncidenceAngle =
-            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;         // (deg) from dataHeatBalance
-        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS(3)) / Constant::DegToRad; //(degrees),
-        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                   //(deg. C)
-        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);                // (m/s)
-        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                    // from DataEnvironment via USE
+            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;        // (deg) from dataHeatBalance
+        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS.z) / Constant::DegToRad; //(degrees),
+        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                  //(deg. C)
+        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);               // (m/s)
+        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                   // from DataEnvironment via USE
 
         if (((thisPVarray.SNLPVinto.IcBeam + thisPVarray.SNLPVinto.IcDiffuse) > DataPhotovoltaics::MinIrradiance) && (RunFlag)) {
 
@@ -1246,7 +1248,7 @@ namespace Photovoltaics {
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.TimeElapsed = TimeElapsed;
         }
 
-        if (any_gt(state.dataHeatBal->SurfQRadSWOutIncident, 0.0)) {
+        if (std::ranges::any_of(state.dataHeatBal->SurfQRadSWOutIncident, [](Real64 const v) { return v > 0.0; })) {
             //  Determine the amount of radiation incident on each PV
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation =
                 state.dataHeatBal->SurfQRadSWOutIncident(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr); //[W/m2]
@@ -1490,18 +1492,12 @@ namespace Photovoltaics {
         PA = IA * VA;
 
         // Place local variables into the reporting structure
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayCurrent = IA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoltage = VA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayEfficiency = ETA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayEfficiency = ETA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).Report.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTempK = CellTemp;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayIsc = ISCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayIsc = ISCA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink = PA;
     }

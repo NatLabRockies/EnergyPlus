@@ -123,7 +123,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,26.2;
+  Version,27.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1375,6 +1375,7 @@
     SalesFloor Thermostat,   !- Name
     SalesFloor,              !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 

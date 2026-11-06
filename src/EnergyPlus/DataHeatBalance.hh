@@ -48,11 +48,16 @@
 #ifndef DataHeatBalance_hh_INCLUDED
 #define DataHeatBalance_hh_INCLUDED
 
+// C++ Headers
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <vector>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Array3D.hh>
-#include <ObjexxFCL/Array4D.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -280,6 +285,7 @@ namespace DataHeatBalance {
         ElectricLoadCenterConverter,
         FanSystemModel,
         IndoorGreen,
+        FanZoneExhaust,
         Num
     };
 
@@ -362,7 +368,8 @@ namespace DataHeatBalance {
         "COIL:HEATING:DX:MULTISPEED",
         "ELECTRICLOADCENTER:STORAGE:CONVERTER",
         "FAN:SYSTEMMODEL",
-        "INDOORGREEN"};
+        "INDOORGREEN",
+        "FAN:ZONEEXHAUST"};
 
     static constexpr std::array<std::string_view, static_cast<int>(DataHeatBalance::IntGainType::Num)> IntGainTypeNamesCC = {
         "People",
@@ -420,7 +427,8 @@ namespace DataHeatBalance {
         "Coil:Heating:DX:MultiSpeed",
         "ElectricLoadCenter:Storage:Converter",
         "Fan:SystemModel",
-        "IndoorGreen"};
+        "IndoorGreen",
+        "Fan:ZoneExhaust"};
 
     // Parameters for checking surface heat transfer models
     constexpr Real64 HighDiffusivityThreshold(1.e-5);   // used to check if Material properties are out of line.
@@ -457,7 +465,6 @@ namespace DataHeatBalance {
         EPVector<std::string> tags;                            // Optional tags for reporting
         EPVector<int> surfaces;                                // Pointers to surfaces in this space
         bool hasFloor = false;                                 // Has "Floor" surface
-        Real64 fracZoneFloorArea = 0.0;                        // fraction of total floor area for all spaces in zone
         Real64 fracZoneVolume = 0.0;                           // fraction of total volume for all spaces in zone
         Real64 extWindowArea = 0.0;                            // Exterior Window Area for space
         Real64 totalSurfArea = 0.0;                            // Total surface area for space
@@ -494,7 +501,6 @@ namespace DataHeatBalance {
         int OpaqOrWinSurfaceFirst = 0;     // First opaque (including IntMass) or window (non TDD Dome) Surface in space
         int OpaqOrWinSurfaceLast = -1;     // Last  opaque (including IntMass) or window (non TDD Dome) Surface in space
         int TDDDomeFirst = 0;              // First TDD Dome Surface in space
-        int TDDDomeLast = -1;              // Last  TDD Dome Surface in space
 
         Real64 sumHATsurf(EnergyPlusData &state);
     };
@@ -589,10 +595,8 @@ namespace DataHeatBalance {
         Real64 geometricCeilingArea = 0.0;        // Ceiling area area including air boundary surfaces
         bool ceilingHeightEntered = false;        // True is user input ceiling height
         bool HasFloor = false;                    // Has "Floor" surface
-        bool HasRoof = false;                     // Has "Roof" or "Ceiling" Surface
         bool HasWindow = false;                   // Window(s) present in this zone
         Real64 ExtWindowArea = 0.0;               // Exterior Window Area for Zone
-        Real64 ExtWindowArea_Multiplied = 0.0;    // Exterior Window Area for Zone with multipliers
         Real64 ExtGrossWallArea_Multiplied = 0.0; // Exterior Wall Area for Zone (Gross) with multipliers
         Real64 ExtNetWallArea = 0.0;              // Exterior Wall Area for Zone (Net)
         Real64 TotalSurfArea = 0.0;               // Total surface area for Zone
@@ -690,7 +694,6 @@ namespace DataHeatBalance {
         Real64 MCPIHM = 0.0;                                // Calculated mass flow rate by hybrid model
         Real64 InfilOAAirChangeRateHM = 0.0;                // Calculated infiltration air change per hour by hybrid model
         Real64 NumOccHM = 0.0;                              // Inversely solved people count
-        Real64 delta_T = 0.0;                               // Indoor and outdoor temperature
 
         bool zoneOAQuadratureSum = false; // True when zone OA balance method is Quadrature
         int zoneOABalanceIndex = 0;       // Index to ZoneAirBalance for this zone, if any
@@ -945,12 +948,9 @@ namespace DataHeatBalance {
         Real64 TbaffleLast; // Old value for modeled surface temperature for baffle [C]
         Real64 HrPlen;      // Modeled radiation coef for OSCM [W/m2-C]
         Real64 HcPlen;      // Modeled Convection coef for OSCM [W/m2-C]
-        Real64 MdotVent;    // air mass flow exchanging with ambient when passive.
         Real64 Tilt;        // Tilt from area weighted average of underlying surfaces
-        Real64 Azimuth;     // Azimuth from area weighted average of underlying surfaces
         Real64 QdotSource;  // Source/sink term
         // reporting data
-        Real64 Isc;              // total incident solar on baffle [W]
         Real64 PassiveACH;       // air changes per hour when passive [1/hr]
         Real64 PassiveMdotVent;  // Total Nat Vent air change rate  [kg/s]
         Real64 PassiveMdotWind;  // Nat Vent air change rate from Wind-driven [kg/s]
@@ -960,8 +960,8 @@ namespace DataHeatBalance {
         ExtVentedCavityStruct()
             : OSCMPtr(0), Porosity(0.0), LWEmitt(0.0), SolAbsorp(0.0), BaffleRoughness(Material::SurfaceRoughness::VeryRough), PlenGapThick(0.0),
               NumSurfs(0), HdeltaNPL(0.0), AreaRatio(0.0), Cv(0.0), Cd(0.0), ActualArea(0.0), ProjArea(0.0), Centroid(0.0, 0.0, 0.0), TAirCav(0.0),
-              Tbaffle(0.0), TairLast(20.0), TbaffleLast(20.0), HrPlen(0.0), HcPlen(0.0), MdotVent(0.0), Tilt(0.0), Azimuth(0.0), QdotSource(0.0),
-              Isc(0.0), PassiveACH(0.0), PassiveMdotVent(0.0), PassiveMdotWind(0.0), PassiveMdotTherm(0.0)
+              Tbaffle(0.0), TairLast(20.0), TbaffleLast(20.0), HrPlen(0.0), HcPlen(0.0), Tilt(0.0), QdotSource(0.0), PassiveACH(0.0),
+              PassiveMdotVent(0.0), PassiveMdotWind(0.0), PassiveMdotTherm(0.0)
         {
         }
     };
@@ -1205,7 +1205,6 @@ namespace DataHeatBalance {
     {
         // Members
         std::string Name;                            // Object name
-        std::string ZoneName;                        // Zone name
         int ZonePtr = 0;                             // Zone number
         AirBalance BalanceMethod = AirBalance::None; // Air Balance Method
         Real64 InducedAirRate = 0.0;                 // Induced Outdoor Air Due to Duct Leakage Unbalance [m3/s]
@@ -1349,20 +1348,6 @@ namespace DataHeatBalance {
         int numberOfDevices = 0;
         int maxNumberOfDevices = 0;
         Array1D<GenericComponentZoneIntGainStruct> device;
-    };
-
-    struct ZoneCatEUseData
-    {
-        // Members
-        Array1D<Real64> EEConvected; // Category (0 to 25) Energy Convected from Electric Equipment
-        Array1D<Real64> EERadiated;  // Category (0 to 25) Energy Radiated from Electric Equipment
-        Array1D<Real64> EELost;      // Category (0 to 25) Energy from Electric Equipment (lost)
-        Array1D<Real64> EELatent;    // Category (0 to 25) Latent Energy from Electric Equipment
-
-        // Default Constructor
-        ZoneCatEUseData() : EEConvected({0, 25}, 0.0), EERadiated({0, 25}, 0.0), EELost({0, 25}, 0.0), EELatent({0, 25}, 0.0)
-        {
-        }
     };
 
     struct RefrigCaseCreditData
@@ -1790,6 +1775,72 @@ namespace DataHeatBalance {
 
     void AllocateIntGains(EnergyPlusData &state);
 
+    // A back surface receiving beam solar radiation from an exterior window
+    struct WinBackSurfOverlap
+    {
+        int backSurfNum = 0;      // Back surface number, 0 marks the end of the list for a window
+        Real64 overlapArea = 0.0; // Area of the exterior window sending beam solar radiation to backSurfNum
+    };
+
+    // For a given hour and timestep, a list of up to maxBkSurf back surfaces receiving beam solar radiation from each exterior window.
+    // Accessed with 1-based (hour, timeStep, iBack, surfNum), stored as [hour][timeStep][surfNum][iBack] so each window's list is contiguous.
+    class WinBackSurfOverlaps
+    {
+    public:
+        void allocate(int const numHours, int const numTimeSteps, int const maxBkSurf, int const numSurfaces)
+        {
+            m_numTimeSteps = numTimeSteps;
+            m_maxBkSurf = maxBkSurf;
+            m_numSurfaces = numSurfaces;
+            m_data.assign(static_cast<std::size_t>(numHours) * numTimeSteps * numSurfaces * maxBkSurf, WinBackSurfOverlap{});
+        }
+
+        void deallocate()
+        {
+            m_data = std::vector<WinBackSurfOverlap>(); // move-assign an empty vector to release the memory ({} would keep the capacity)
+            m_numTimeSteps = m_maxBkSurf = m_numSurfaces = 0;
+        }
+
+        // Reset all entries
+        void reset()
+        {
+            std::fill(m_data.begin(), m_data.end(), WinBackSurfOverlap{});
+        }
+
+        // Reset all entries of one hour and timestep
+        void reset(int const hour, int const timeStep)
+        {
+            std::fill_n(m_data.begin() + index(hour, timeStep, 1, 1), static_cast<std::size_t>(m_numSurfaces) * m_maxBkSurf, WinBackSurfOverlap{});
+        }
+
+        WinBackSurfOverlap const &operator()(int const hour, int const timeStep, int const iBack, int const surfNum) const
+        {
+            return m_data[index(hour, timeStep, iBack, surfNum)];
+        }
+
+        WinBackSurfOverlap &operator()(int const hour, int const timeStep, int const iBack, int const surfNum)
+        {
+            return m_data[index(hour, timeStep, iBack, surfNum)];
+        }
+
+    private:
+        std::size_t index(int const hour, int const timeStep, int const iBack, int const surfNum) const
+        {
+            assert(1 <= hour);
+            assert((1 <= timeStep) && (timeStep <= m_numTimeSteps));
+            assert((1 <= iBack) && (iBack <= m_maxBkSurf));
+            assert((1 <= surfNum) && (surfNum <= m_numSurfaces));
+            assert(static_cast<std::size_t>(hour) <= m_data.size() / (static_cast<std::size_t>(m_numTimeSteps) * m_numSurfaces * m_maxBkSurf));
+            return ((static_cast<std::size_t>(hour - 1) * m_numTimeSteps + (timeStep - 1)) * m_numSurfaces + (surfNum - 1)) * m_maxBkSurf +
+                   (iBack - 1);
+        }
+
+        std::vector<WinBackSurfOverlap> m_data;
+        int m_numTimeSteps = 0;
+        int m_maxBkSurf = 0;
+        int m_numSurfaces = 0;
+    };
+
 } // namespace DataHeatBalance
 
 struct HeatBalanceData : BaseGlobalStruct
@@ -2000,10 +2051,8 @@ struct HeatBalanceData : BaseGlobalStruct
     Array3D<Real64> SurfSunlitFrac;              // TimeStep fraction of heat transfer surface that is sunlit
     Array3D<Real64> SurfSunlitFracWithoutReveal; // For a window with reveal, the sunlit fraction  without shadowing by the reveal
     Array3D<Real64> SurfCosIncAng;               // TimeStep cosine of beam radiation incidence angle on surface
-    Array4D_int SurfWinBackSurfaces;     // For a given hour and timestep, a list of up to 20 surfaces receiving  beam solar radiation from a given
-                                         // exterior window
-    Array4D<Real64> SurfWinOverlapAreas; // For a given hour and timestep, the areas of the exterior window sending beam solar radiation to the
-                                         // surfaces listed in BackSurfaces
+    // For a given hour and timestep, the back surfaces receiving beam solar radiation from each exterior window, and their overlap areas
+    DataHeatBalance::WinBackSurfOverlaps SurfWinBackSurfOverlaps;
     Real64 zeroPointerVal = 0.0;
     EPVector<DataHeatBalance::ZonePreDefRepType> ZonePreDefRep;
     DataHeatBalance::ZonePreDefRepType BuildingPreDefRep;
@@ -2033,7 +2082,6 @@ struct HeatBalanceData : BaseGlobalStruct
     EPVector<DataHeatBalance::MixingData> CrossMixing;
     EPVector<DataHeatBalance::AirBoundaryMixingSpecs> airBoundaryMixing;
     EPVector<DataHeatBalance::MixingData> RefDoorMixing;
-    EPVector<DataHeatBalance::ZoneCatEUseData> ZoneIntEEuse;
     EPVector<DataHeatBalance::RefrigCaseCreditData> RefrigCaseCredit;
     EPVector<DataHeatBalance::HeatReclaimDataBase> HeatReclaimRefrigeratedRack;
     EPVector<DataHeatBalance::HeatReclaimRefrigCondenserData> HeatReclaimRefrigCondenser;

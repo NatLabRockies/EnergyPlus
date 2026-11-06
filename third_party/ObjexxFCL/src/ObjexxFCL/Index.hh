@@ -18,7 +18,6 @@
 
 // C++ Headers
 #include <cassert>
-#include <iosfwd>
 #include <type_traits>
 #include <utility>
 
@@ -190,16 +189,6 @@ operator !=( int const a, Index const & b )
 {
 	return !( a == b );
 }
-
-// I/O
-
-// Stream >> Index
-std::istream &
-operator >>( std::istream & stream, Index & a );
-
-// Stream << Index
-std::ostream &
-operator <<( std::ostream & stream, Index const & a );
 
 } // ObjexxFCL
 

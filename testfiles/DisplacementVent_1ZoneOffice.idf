@@ -74,7 +74,7 @@
 ! HVAC:                       single duct VAV with hot water reheat, single boiler, chiller and
 !                             cooling tower, supply air temperature = 19C
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -2061,6 +2061,7 @@
     ZONE1 Thermostat,        !- Name
     ZONE1,                   !- Zone or ZoneList Name
     Dual Control,            !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 

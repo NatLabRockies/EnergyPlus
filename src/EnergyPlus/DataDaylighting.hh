@@ -167,7 +167,7 @@ namespace Dayltg {
     struct DaylRefPt
     {
         int num = 0;
-        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        Vector3D absCoords = {0.0, 0.0, 0.0};
         bool inBounds = true;
         Real64 fracZoneDaylit = 0.0;
         Real64 illumSetPoint = 0.0;
@@ -192,7 +192,6 @@ namespace Dayltg {
         int TotalDaylRefPoints = 0;                                         // Number of daylighting reference points for this control
 
         Array1D<DaylRefPt> refPts;                              // Points 1 and 2 are the control reference points
-        Real64 sumFracLights = 0.0;                             // Sum of lighting control fractions for this daylighting control
         LtgCtrlType LightControlType = LtgCtrlType::Continuous; // Lighting control type (same for all reference points)
         int glareRefPtNumber = 0;                               // from field: Glare Calculation Daylighting Reference Point Name
         Real64 ViewAzimuthForGlare = 0.0;                       // View direction relative to window for glare calculation (deg)
@@ -232,7 +231,7 @@ namespace Dayltg {
 
     struct DaylMapPt
     {
-        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        Vector3D absCoords = {0.0, 0.0, 0.0};
         bool inBounds = true;
         std::array<Real64, (int)Lum::Num> lums = {0.0, 0.0, 0.0};
         std::array<Real64, (int)Lum::Num> lumsHr = {0.0, 0.0, 0.0};
@@ -274,9 +273,9 @@ namespace Dayltg {
 
     struct RefPointData
     {
-        std::string Name;                         // Map name
-        int ZoneNum = 0;                          // Pointer to zone being referenced
-        Vector3<Real64> coords = {0.0, 0.0, 0.0}; // x coordinate
+        std::string Name;                  // Map name
+        int ZoneNum = 0;                   // Pointer to zone being referenced
+        Vector3D coords = {0.0, 0.0, 0.0}; // x coordinate
         int indexToFracAndIllum = 0;
     };
 

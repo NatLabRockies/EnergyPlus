@@ -50,7 +50,6 @@
 #include <format>
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/time.hh>
 
 // EnergyPlus Headers
@@ -474,6 +473,7 @@ void resetActuator(EnergyPlusState state, int handle)
     if (handle >= 1 && handle <= thisState->dataRuntimeLang->numEMSActuatorsAvailable) {
         const auto &theActuator(thisState->dataRuntimeLang->EMSActuatorAvailable(handle));
         *theActuator.Actuated = false;
+        thisState->dataRuntimeLang->anyActuatorWritten = true;
     } else {
         if (thisState->dataGlobal->errorCallback) {
             std::cout << "ERROR: Actuator handle out of range in resetActuator, returning but caller should take note and likely abort." << std::endl;
@@ -502,6 +502,7 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
             // allow small tolerance while passing between languages and types
         }
         *theActuator.Actuated = true;
+        thisState->dataRuntimeLang->anyActuatorWritten = true;
     } else {
         if (thisState->dataGlobal->errorCallback) {
             std::cout << "ERROR: Actuator handle out of range in setActuatorValue, returning but caller should take note and likely abort."
@@ -1013,7 +1014,7 @@ int actualTime(EnergyPlusState)
     const std::string datestring;
     Array1D_int datevalues(8);
     ObjexxFCL::date_and_time(datestring, _, _, datevalues);
-    return sum(datevalues({5, 8}));
+    return datevalues(5) + datevalues(6) + datevalues(7) + datevalues(8);
 }
 
 int actualDateTime(EnergyPlusState)

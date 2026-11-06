@@ -273,10 +273,10 @@ namespace BaseboardRadiator {
                     thisBaseboard.EquipID = baseboardName;
                     thisBaseboard.EquipType = DataPlant::PlantEquipmentType::Baseboard_Conv_Water;
                     thisBaseboard.Schedule = availabilityScheduleName;
-                    if (availabilityScheduleName.empty()) {
+                    if (thisBaseboard.Schedule.empty()) {
                         thisBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
-                    } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, availabilityScheduleFieldName, availabilityScheduleName);
+                    } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, thisBaseboard.Schedule)) == nullptr) {
+                        ShowSevereItemNotFound(state, eoh, availabilityScheduleFieldName, thisBaseboard.Schedule);
                         ErrorsFound = true;
                     }
                     thisBaseboard.WaterInletNode = GetOnlySingleNode(state,

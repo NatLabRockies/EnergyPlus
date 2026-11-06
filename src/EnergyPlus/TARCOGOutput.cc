@@ -132,11 +132,11 @@ void WriteInputArguments(EnergyPlusData &state,
                          const Array1D<Real64> &tvent,
                          const Array1D<Real64> &presure,
                          const Array1D_int &nmix,
-                         Array2A_int const iprop,
-                         Array2A<Real64> const frct,
-                         Array2A<Real64> const xgcon,
-                         Array2A<Real64> const xgvis,
-                         Array2A<Real64> const xgcp,
+                         Array2D_int const &iprop,
+                         Array2D<Real64> const &frct,
+                         Array2D<Real64> const &xgcon,
+                         Array2D<Real64> const &xgvis,
+                         Array2D<Real64> const &xgcp,
                          const Array1D<Real64> &xwght)
 {
 
@@ -169,11 +169,6 @@ void WriteInputArguments(EnergyPlusData &state,
     EP_SIZE_CHECK(tvent, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
 
     // Locals
@@ -473,13 +468,13 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
                             int const nlayer,
                             const Array1D<TARCOGParams::TARCOGLayerType> &LayerType,
                             const Array1D_int &nmix,
-                            Array2A<Real64> const frct,
+                            Array2D<Real64> const &frct,
                             const Array1D<Real64> &thick,
                             const Array1D<Real64> &scon,
                             const Array1D<Real64> &gap,
-                            Array2A<Real64> const xgcon,
-                            Array2A<Real64> const xgvis,
-                            Array2A<Real64> const xgcp,
+                            Array2D<Real64> const &xgcon,
+                            Array2D<Real64> const &xgvis,
+                            Array2D<Real64> const &xgcp,
                             const Array1D<Real64> &xwght)
 {
 
@@ -487,13 +482,9 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     // Argument array dimensioning
     EP_SIZE_CHECK(LayerType, maxlay);
     EP_SIZE_CHECK(nmix, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(thick, maxlay);
     EP_SIZE_CHECK(scon, maxlay);
     EP_SIZE_CHECK(gap, MaxGap);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
 
     // Locals
@@ -963,11 +954,11 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
                           const Array1D<Real64> &tvent,
                           const Array1D<Real64> &presure,
                           const Array1D_int &nmix,
-                          Array2A_int const iprop,
-                          Array2A<Real64> const frct,
-                          Array2A<Real64> const xgcon,
-                          Array2A<Real64> const xgvis,
-                          Array2A<Real64> const xgcp,
+                          Array2D_int const &iprop,
+                          Array2D<Real64> const &frct,
+                          Array2D<Real64> const &xgcon,
+                          Array2D<Real64> const &xgvis,
+                          Array2D<Real64> const &xgcp,
                           const Array1D<Real64> &xwght,
                           const Array1D<Real64> &gama)
 {
@@ -1006,11 +997,6 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
     EP_SIZE_CHECK(tvent, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
 

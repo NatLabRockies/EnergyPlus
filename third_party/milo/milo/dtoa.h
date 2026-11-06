@@ -19,6 +19,8 @@
 #ifndef DTOA_H_INCLUDED
 #define DTOA_H_INCLUDED
 
+#include <cassert>
+
 #include "itoa.h" // GetDigitsLut()
 #include "diyfp.h"
 #include "ieee754.h"

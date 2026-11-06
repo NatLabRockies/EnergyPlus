@@ -191,9 +191,9 @@ namespace CostEstimateManager {
             state.dataCostEstimateManager->CostLineItem(Item).PerSquareMeter = state.dataIPShortCut->rNumericArgs(2);
             state.dataCostEstimateManager->CostLineItem(Item).PerKiloWattCap = state.dataIPShortCut->rNumericArgs(3);
             state.dataCostEstimateManager->CostLineItem(Item).PerKWCapPerCOP = state.dataIPShortCut->rNumericArgs(4);
-            state.dataCostEstimateManager->CostLineItem(Item).PerCubicMeter = state.dataIPShortCut->rNumericArgs(5);
-            state.dataCostEstimateManager->CostLineItem(Item).PerCubMeterPerSec = state.dataIPShortCut->rNumericArgs(6);
-            state.dataCostEstimateManager->CostLineItem(Item).PerUAinWattperDelK = state.dataIPShortCut->rNumericArgs(7);
+            // N5 Unused, Cost per Volume
+            // N6 Unused, Cost per Volume Rate
+            // N7 Unused, Cost per Energy Temperature Difference
             state.dataCostEstimateManager->CostLineItem(Item).Qty = state.dataIPShortCut->rNumericArgs(8);
         }
 

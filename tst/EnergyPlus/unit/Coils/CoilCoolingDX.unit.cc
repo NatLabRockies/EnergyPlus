@@ -77,6 +77,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXInput)
     auto const &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     EXPECT_EQ("COOLINGCOIL", thisCoil.name);
     EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance->name);
+    EXPECT_EQ("Coil:Cooling:DX", thisCoil.reclaimHeat.SourceType);
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
@@ -1847,7 +1848,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->SysSizInput.allocate(1);
     state->dataSize->SysSizInput(1).AirLoopNum = state->dataSize->CurSysNum;

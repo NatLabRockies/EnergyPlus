@@ -94,15 +94,10 @@ namespace DataAirSystems {
         SimAirServingZones::CompType CompType_Num = SimAirServingZones::CompType::Invalid; // Numeric designator for CompType (TypeOf)
         int CompIndex = 0;                                                                 // Component Index in whatever is using this component
         HVACSystemData *compPointer = nullptr;                                             // pointer to HVAC system
-        bool Parent = false;     // When true, the designated component is made up of sub-components
-        std::string NodeNameIn;  // Component inlet node name
-        std::string NodeNameOut; // Component outlet node name
-        int NodeNumIn = 0;       // Component inlet node number
-        int NodeNumOut = 0;      // Component outlet node number
+        int NodeNumIn = 0;                                                                 // Component inlet node number
+        int NodeNumOut = 0;                                                                // Component outlet node number
         int NumMeteredVars = 0;
         int NumSubComps = 0;
-        int EnergyTransComp = 0;           // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
-        int AirSysToPlantPtr = 0;          // =0 No plant loop connection, >0 index to AirSysToPlant array
         Array1D<MeterData> MeteredVar;     // Index of energy output report data
         Array1D<SubcomponentData> SubComp; // Component list
     };
@@ -111,7 +106,6 @@ namespace DataAirSystems {
     {
         // Members
         std::string Name;                                        // Name of the branch
-        std::string ControlType;                                 // Control type for the branch (not used)
         int TotalComponents = 0;                                 // Total number of high level components on the branch
         int NodeNumIn = 0;                                       // Branch inlet node number
         int NodeNumOut = 0;                                      // Branch outlet node number
@@ -193,8 +187,6 @@ namespace DataAirSystems {
         int supFanNum = 0; // index of the supply fan in the Fan data structure when model type is StructArrayLegacyFanModels
         HVAC::FanPlace supFanPlace = HVAC::FanPlace::Invalid; // location of fan relative to coil
         HVAC::FanType retFanType = HVAC::FanType::Invalid;    // indicates which type of fan model to call for return fan, legacy or new OO
-        int retFanNum = 0;                       // index of the return fan in the Fan data structure when model type is StructArrayLegacyFanModels
-        Real64 FanDesCoolLoad = 0.0;             // design fan heat gain for the air loop [W]
         bool EconomizerStagingCheckFlag = false; // flag to indicate that the applicability of the selected economizer staging operation mode is valid
     };
 

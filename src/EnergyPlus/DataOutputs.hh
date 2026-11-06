@@ -80,7 +80,6 @@ namespace DataOutputs {
         OutputReportingVariables(EnergyPlusData &state, std::string const &KeyValue, std::string const &VariableName);
 
         std::string const key;
-        std::string const variableName;
         bool is_simple_string = true;
         std::shared_ptr<RE2> pattern = nullptr;
         std::shared_ptr<RE2> case_insensitive_pattern = nullptr;

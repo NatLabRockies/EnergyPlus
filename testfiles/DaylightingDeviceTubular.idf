@@ -15,7 +15,7 @@
 ! FCW, 6/17/04: changed height for daylighting illuminance map from 0.0m to 0.8m to correspond
 !               to reference point height
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     Tubular Daylighting Device Example,  !- Name
@@ -1020,6 +1020,7 @@
     Daylit Zone Thermostat,  !- Name
     Daylit Zone,             !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 
@@ -1078,6 +1079,7 @@
     Standard Zone Thermostat,!- Name
     Standard Zone,           !- Zone or ZoneList Name
     Zone Control Type Sch,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeatingOrCooling,  !- Control 1 Object Type
     Heating Cooling Setpoint;!- Control 1 Name
 

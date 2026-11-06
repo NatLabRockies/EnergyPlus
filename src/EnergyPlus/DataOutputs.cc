@@ -145,7 +145,7 @@ bool isKeyRegexLike(std::string_view key)
 }
 
 OutputReportingVariables::OutputReportingVariables(EnergyPlusData &state, std::string const &KeyValue, std::string const &VariableName)
-    : key(KeyValue), variableName(VariableName), is_simple_string(!DataOutputs::isKeyRegexLike(KeyValue))
+    : key(KeyValue), is_simple_string(!DataOutputs::isKeyRegexLike(KeyValue))
 {
 
     if (is_simple_string) {

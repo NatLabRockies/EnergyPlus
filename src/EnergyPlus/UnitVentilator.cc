@@ -2991,6 +2991,7 @@ namespace UnitVentilator {
             inletNode.MassFlowRate = inletNode.MassFlowRateMax * PartLoadFrac;
             // Set the fan inlet node maximum available mass flow rates for cycling fans
             inletNode.MassFlowRateMaxAvail = inletNode.MassFlowRate;
+            inletNode.MassFlowRateMinAvail = min(inletNode.MassFlowRateMinAvail, inletNode.MassFlowRateMaxAvail);
 
             if (unitVent.ATMixerExists) {
                 state.dataUnitVentilators->ATMixOutNode = unitVent.ATMixerOutNode;

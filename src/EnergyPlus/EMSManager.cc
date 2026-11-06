@@ -247,7 +247,7 @@ namespace EMSManager {
 
     void ManageEMS(EnergyPlusData &state,
                    EMSCallFrom const iCalledFrom,                    // indicates where subroutine was called from, parameters in DataGlobals.
-                   bool &anyProgramRan,                              // true if any Erl programs ran for this call
+                   bool &anyProgramRan,                              // at the HVAC iteration point, true only if an actuator was written
                    ObjexxFCL::Optional_int_const ProgramManagerToRun // specific program manager to run
     )
     {
@@ -271,6 +271,8 @@ namespace EMSManager {
         }
 
         InitEMS(state, iCalledFrom);
+
+        state.dataRuntimeLang->anyActuatorWritten = false;
 
         // also call plugins and callbacks here for convenience
         if (iCalledFrom != EMSCallFrom::UserDefinedComponentModel) { // don't run user-defined component plugins this way
@@ -371,6 +373,12 @@ namespace EMSManager {
         }
 
         ReportEMS(state);
+
+        // At this calling point, anyProgramRan requests additional air loop iterations. Callbacks and Erl programs that wrote no actuator
+        // still execute and report normally, but they do not request those iterations.
+        if (iCalledFrom == EMSCallFrom::HVACIterationLoop && !state.dataRuntimeLang->anyActuatorWritten) {
+            anyProgramRan = false;
+        }
     }
 
     void InitEMS(EnergyPlusData &state, EMSCallFrom const iCalledFrom) // indicates where subroutine was called from, parameters in DataGlobals.
@@ -748,6 +756,7 @@ namespace EMSManager {
                     } else {
                         VariableNum = RuntimeLanguageProcessor::NewEMSVariable(state, cAlphaArgs(1), 0);
                         thisEMSactuator.ErlVariableNum = VariableNum;
+                        state.dataRuntimeLang->ErlVariable(VariableNum).IsActuator = true;
                         // initialize Erl variable for actuator to null
                         state.dataRuntimeLang->ErlVariable(VariableNum).Value = state.dataRuntimeLang->Null;
                         if (ActuatorNum > state.dataRuntimeLang->numActuatorsUsed) {
@@ -818,7 +827,6 @@ namespace EMSManager {
                     } else {
                         VariableNum = RuntimeLanguageProcessor::NewEMSVariable(state, cAlphaArgs(1), 0);
                         state.dataRuntimeLang->EMSInternalVarsUsed(InternVarNum).ErlVariableNum = VariableNum;
-                        state.dataRuntimeLang->ErlVariable(VariableNum).SetByInternalVariable = true;
                     }
 
                     state.dataRuntimeLang->EMSInternalVarsUsed(InternVarNum).UniqueIDName = cAlphaArgs(2);
@@ -1243,18 +1251,31 @@ namespace EMSManager {
             print(state.files.edd, "! <EnergyManagementSystem:Actuator Available>, *, Component Type, Control Type, Units\n");
             int FoundTypeName;
             int FoundControlType;
+            auto const &actuatorsAvailable = state.dataRuntimeLang->EMSActuatorAvailable;
+            // Is the value of `member` of actuator `ref` also found in actuators `first` to `last`?
+            auto const repeatedLater = [&actuatorsAvailable](int const ref,
+                                                             int const first,
+                                                             int const last,
+                                                             std::string DataRuntimeLanguage::EMSActuatorAvailableType::*const member) {
+                for (int i = first; i <= last; ++i) {
+                    if (actuatorsAvailable(ref).*member == actuatorsAvailable(i).*member) {
+                        return true;
+                    }
+                }
+                return false;
+            };
             for (int ActuatorLoop = 1; ActuatorLoop <= state.dataRuntimeLang->numEMSActuatorsAvailable; ++ActuatorLoop) {
                 if (ActuatorLoop + 1 <= state.dataRuntimeLang->numEMSActuatorsAvailable) {
-                    FoundTypeName = Util::FindItemInList(
-                        state.dataRuntimeLang->EMSActuatorAvailable(ActuatorLoop).ComponentTypeName,
-                        state.dataRuntimeLang->EMSActuatorAvailable({ActuatorLoop + 1, state.dataRuntimeLang->numEMSActuatorsAvailable}),
-                        &DataRuntimeLanguage::EMSActuatorAvailableType::ComponentTypeName,
-                        state.dataRuntimeLang->numEMSActuatorsAvailable - (ActuatorLoop + 1));
-                    FoundControlType = Util::FindItemInList(
-                        state.dataRuntimeLang->EMSActuatorAvailable(ActuatorLoop).ControlTypeName,
-                        state.dataRuntimeLang->EMSActuatorAvailable({ActuatorLoop + 1, state.dataRuntimeLang->numEMSActuatorsAvailable}),
-                        &DataRuntimeLanguage::EMSActuatorAvailableType::ControlTypeName,
-                        state.dataRuntimeLang->numEMSActuatorsAvailable - (ActuatorLoop + 1));
+                    // The search stops before the last available actuator (the count used to be numEMSActuatorsAvailable - (ActuatorLoop + 1))
+                    int const lastSearched = state.dataRuntimeLang->numEMSActuatorsAvailable - 1;
+                    FoundTypeName =
+                        repeatedLater(ActuatorLoop, ActuatorLoop + 1, lastSearched, &DataRuntimeLanguage::EMSActuatorAvailableType::ComponentTypeName)
+                            ? 1
+                            : 0;
+                    FoundControlType =
+                        repeatedLater(ActuatorLoop, ActuatorLoop + 1, lastSearched, &DataRuntimeLanguage::EMSActuatorAvailableType::ControlTypeName)
+                            ? 1
+                            : 0;
                 } else {
                     FoundTypeName = 1;
                     FoundControlType = 1;
@@ -1299,11 +1320,15 @@ namespace EMSManager {
             for (int InternalDataLoop = 1; InternalDataLoop <= state.dataRuntimeLang->numEMSInternalVarsAvailable; ++InternalDataLoop) {
                 int Found(0);
                 if (InternalDataLoop + 1 <= state.dataRuntimeLang->numEMSInternalVarsAvailable) {
-                    Found = Util::FindItemInList(
-                        state.dataRuntimeLang->EMSInternalVarsAvailable(InternalDataLoop).DataTypeName,
-                        state.dataRuntimeLang->EMSInternalVarsAvailable({InternalDataLoop + 1, state.dataRuntimeLang->numEMSInternalVarsAvailable}),
-                        &DataRuntimeLanguage::InternalVarsAvailableType::DataTypeName,
-                        state.dataRuntimeLang->numEMSInternalVarsAvailable - (InternalDataLoop + 1));
+                    // The search stops before the last available internal variable
+                    // (the count used to be numEMSInternalVarsAvailable - (InternalDataLoop + 1))
+                    auto const &internalVarsAvailable = state.dataRuntimeLang->EMSInternalVarsAvailable;
+                    for (int i = InternalDataLoop + 1; i <= state.dataRuntimeLang->numEMSInternalVarsAvailable - 1; ++i) {
+                        if (internalVarsAvailable(InternalDataLoop).DataTypeName == internalVarsAvailable(i).DataTypeName) {
+                            Found = i;
+                            break;
+                        }
+                    }
                 }
                 if (Found == 0) {
                     print(state.files.edd,
@@ -1477,8 +1502,10 @@ namespace EMSManager {
                 // push into trend
                 state.dataRuntimeLang->TrendVariable(TrendNum).tempTrendARR = state.dataRuntimeLang->TrendVariable(TrendNum).TrendValARR;
                 state.dataRuntimeLang->TrendVariable(TrendNum).TrendValARR(1) = currentVal;
-                state.dataRuntimeLang->TrendVariable(TrendNum).TrendValARR({2, TrendDepth}) =
-                    state.dataRuntimeLang->TrendVariable(TrendNum).tempTrendARR({1, TrendDepth - 1});
+                for (int i = 2; i <= TrendDepth; ++i) {
+                    state.dataRuntimeLang->TrendVariable(TrendNum).TrendValARR(i) =
+                        state.dataRuntimeLang->TrendVariable(TrendNum).tempTrendARR(i - 1);
+                }
             }
         }
     }
