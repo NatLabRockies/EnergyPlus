@@ -2892,6 +2892,16 @@ void FanSystem::calcSimpleSystemFan(
         _localFlowRatio[mode] = min(1.0, _localFlowRatio[mode]);
     }
 
+    Real64 _localAverageFlowFrac = _localFlowFrac;
+    if (_useFlowRatiosAndRunTimeFracs) {
+        Real64 _totalRuntimeFrac = _localRuntimeFrac[0] + _localRuntimeFrac[1];
+        // Continuous control applies the nonlinear power curve to average flow, not to each mode separately.
+        _localAverageFlowFrac = (maxAirMassFlowRate > 0.0 && _totalRuntimeFrac > 0.0)
+                                    ? (_localAirMassFlow[0] + _localAirMassFlow[1]) / (maxAirMassFlowRate * _totalRuntimeFrac)
+                                    : 0.0;
+        _localAverageFlowFrac = min(1.0, _localAverageFlowFrac);
+    }
+
     // zero these now, because the may accumulate across multiple operating modes
     powerLossToAir = 0.0;
     totalPower = 0.0;
@@ -3041,6 +3051,9 @@ void FanSystem::calcSimpleSystemFan(
                 if (_useFlowRatiosAndRunTimeFracs) {
                     _locFlowRatio = _localFlowRatio[mode];
                     _locRuntimeFrac = _localRuntimeFrac[mode];
+                    if (speedControl == SpeedControl::Continuous) {
+                        _locFlowRatio = _localAverageFlowFrac;
+                    }
                 } else {
                     _locFlowRatio = _localFlowFrac;
                     _locRuntimeFrac = 1.0;
