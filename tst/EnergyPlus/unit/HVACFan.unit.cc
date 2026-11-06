@@ -273,6 +273,56 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
 
     Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+
+    // A zero-flow mode still contributes runtime to the average and power scaling.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 1.0, 0.5, 0.0, 0.5, _);
+    Real64 expectedZeroFlowModePower = pow(0.5, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    EXPECT_NEAR(expectedZeroFlowModePower, fanSystem.totalPower, 0.01);
+}
+
+// Verify the continuous low-flow temperature safeguard linearizes fan power and limits temperature rise.
+TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousLowFlowTemperatureSafeguard)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Constant Continuous Fan Power Fraction");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[0] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 1000.0;
+    fanSystem.totalEff = 1.0;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.minPowerFlowFrac = 0.2;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    // Two low-flow modes have a 1% average flow and 50% total runtime.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.005, 0.25, 0.015, 0.25, _);
+
+    Real64 expectedPower = 0.5 * 0.01 * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress /
+                           (fanSystem.totalEff * fanSystem.rhoAirStdInit * 0.1);
+    EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_LT(fanSystem.outletAirTemp - fanSystem.inletAirTemp, 20.0);
+
+    Real64 splitModePower = fanSystem.totalPower;
+    Real64 splitModeTemperatureRise = fanSystem.outletAirTemp - fanSystem.inletAirTemp;
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.0075, 0.25, 0.0125, 0.25, _);
+    EXPECT_NEAR(splitModePower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(splitModeTemperatureRise, fanSystem.outletAirTemp - fanSystem.inletAirTemp, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)

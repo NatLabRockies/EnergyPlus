@@ -283,6 +283,38 @@ TEST_F(EnergyPlusFixture, VAVFanObj_ContinuousPowerCurveUsesAverageFlow)
     EXPECT_NEAR(expectedPower, fan.totalPower, 0.01);
 }
 
+// Verify the continuous low-flow temperature safeguard linearizes fan power and limits temperature rise.
+TEST_F(EnergyPlusFixture, VAVFanObj_ContinuousLowFlowTemperatureSafeguard)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    FanComponent fan;
+    fan.type = HVAC::FanType::VAV;
+    fan.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fan.maxAirFlowRate = 1.0;
+    fan.maxAirMassFlowRate = 1.2;
+    fan.minAirFlowRate = 0.0;
+    fan.inletAirMassFlowRate = 0.01 * fan.maxAirMassFlowRate;
+    fan.inletAirTemp = 20.0;
+    fan.inletAirHumRat = 0.008;
+    fan.inletAirEnthalpy = 40000.0;
+    fan.rhoAirStdInit = 1.2;
+    fan.deltaPress = 1000.0;
+    fan.totalEff = 1.0;
+    fan.motorEff = 1.0;
+    fan.motorInAirFrac = 1.0;
+    fan.coeffs = {1.0, 0.0, 0.0, 0.0, 0.0};
+    fan.simulateVAV(*state);
+
+    Real64 expectedPower = 0.01 * 1.0 * fan.maxAirMassFlowRate * fan.deltaPress /
+                           (fan.totalEff * fan.rhoAirStdInit * 0.1);
+    EXPECT_NEAR(expectedPower, fan.totalPower, 0.01);
+    EXPECT_LT(fan.outletAirTemp - fan.inletAirTemp, 20.0);
+}
+
 // Verify alternate night performance across ConstantVolume, VAV, OnOff, and ZoneExhaust fan models.
 TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
 {
