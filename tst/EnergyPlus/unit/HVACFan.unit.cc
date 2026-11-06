@@ -271,8 +271,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
     // Half runtime at 0.5 flow and half at 1.0 flow gives 0.75 average flow.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, _);
 
-    Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress /
-                           (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
 }
 
