@@ -429,13 +429,14 @@ F\(_{f}\) & Form factor of frame’s outside or inside face for IR & - & - \tabu
 F\(_{p1}\), F\(_{p2}\) & Form factor of frame outside projection for exterior IR; form factor of frame inside projection for interior IR & - & - \tabularnewline
 E\(_{o}\) & Exterior IR incident on window plane & W/m\(^{2}\) & outir \tabularnewline
 E\(_{i}\) & Interior IR incident on window plane & W/m\(^{2}\) & SurroundIRfromParentZone \tabularnewline
+q\(^{\prime\prime}_{HVAC}\) & Current radiant HVAC heat flux incident on a surface & W/m\(^{2}\) & SurfQdotRadHVACInPerArea \tabularnewline
 $\varepsilon$\(_{1}\), $\varepsilon$\(_{2}\) & Outside, inside frame surface emissivity & - & FrameEmis \tabularnewline
 $\theta$\(_{1}\), $\theta$\(_{2}\) & Frame outside, inside surface temperature & K & FrameTempSurfOut, FrameSurfTempIn \tabularnewline
 T\(_{o}\), T\(_{i}\) & Outdoor and indoor air temperatures & K & tout, tin \tabularnewline
 h\(_{o,c}\), h\(_{i,c}\) & Frame outside and inside air film convective conductance & W/m\(^{2}\)-K & HOutConv, HInConv \tabularnewline
 k & Effective inside-surface to outside-surface conductance of frame per unit area of frame projected onto window plane & W/m\(^{2}\)-K & FrameConductance, FrameCon \tabularnewline
-S\(_{1}\) & Q\(_{abs}\)/A\(_{f}\) & W/m\(^{2}\)-K & FrameQRadOutAbs \tabularnewline
-S\(_{2}\) & Interior short-wave radiation plus interior IR from internal sources absorbed by inside of frame divided by A\(_{f}\) & W/m\(^{2}\)-K & FrameQRadInAbs \tabularnewline
+S\(_{1}\) & Q\(_{abs}\)/A\(_{f}\) & W/m\(^{2}\) & FrameQRadOutAbs \tabularnewline
+S\(_{2}\) & Interior short-wave radiation, interior IR from internal sources, and current radiant HVAC heat flux absorbed by inside of frame divided by A\(_{f}\) & W/m\(^{2}\) & FrameQRadInAbs, SurfQdotRadHVACInPerArea \tabularnewline
 $\eta$\(_{1}\), $\eta$\(_{2}\) & A\(_{p1}\)/A\(_{f}\), A\(_{p2}\)/A\(_{f}\) & - & - \tabularnewline
 H & Height of glazed portion of window & m & Surface\%Height \tabularnewline
 W & Width of glazed portion of window & m & Surface\%Width \tabularnewline
@@ -593,6 +594,14 @@ where
 
 and \emph{E\(_{i}\)} is the interior IR irradiance incident on the plane of the window.
 
+The current radiant HVAC heat flux is also absorbed by the room-side frame. The frame is assumed not to be covered by an interior shade or blind, so its absorbed radiant HVAC contribution per unit frame face area is
+
+\begin{equation}
+S_{2,HVAC}^{fr} = q^{\prime\prime}_{HVAC}{\varepsilon_2}\left( {1 + \frac{1}{2}{\eta_2}} \right).
+\end{equation}
+
+Solar radiation, interior short-wave radiation, and IR from ordinary internal gains are evaluated once per zone timestep. Radiant HVAC systems can change output while the HVAC and inside surface heat balances are being iterated. Therefore \emph{q\(^{\prime\prime}_{HVAC}\)} is evaluated and added to the frame heat balance each time the inside surface heat balance is recalculated rather than being accumulated in the timestep-static absorbed-radiation term.
+
 Solving Equations~\ref{eq:horEquation} and~\ref{eq:hirEquation} simultaneously gives:
 
 \begin{equation}
@@ -663,7 +672,49 @@ Assuming that the inside and outside frame profile is rectangular introduces an 
 
 \subsubsection{Divider Temperature Calculation}\label{divider-temperature-calculation}
 
-The divider inside and outside surface temperatures are determined by a heat balance calculation that is analogous to the frame heat balance calculation described above.
+The divider inside and outside surface temperatures are determined by a heat balance calculation that is analogous to the frame heat balance calculation described above. A projecting divider differs from a perimeter frame because it has two projection surfaces, one on each side of the divider face. Let \emph{A\(_d\)} be the divider face area and \emph{A\(_{pd,j}\)} be the area of one projection surface on side \emph{j}, where \emph{j} is 1 for outside and 2 for inside. The divider projection area ratio is
+
+\begin{equation}
+{\eta_{d,j}} = \frac{{{A_{pd,j}}}}{{{A_d}}}.
+\end{equation}
+
+For isotropic radiation incident from the room or exterior, the form factor of each projection surface is 0.5. The effective divider area receiving radiation from the corresponding environment is therefore
+
+\begin{equation}
+{A_d} + 2\left( {\frac{1}{2}{A_{pd,j}}} \right) = {A_d}\left( {1 + {\eta_{d,j}}} \right).
+\end{equation}
+
+Both complete projection surfaces emit IR and exchange heat by convection. The area used for those terms is
+
+\begin{equation}
+{A_d} + 2{A_{pd,j}} = {A_d}\left( {1 + 2{\eta_{d,j}}} \right).
+\end{equation}
+
+For example, the effective room-side radiative temperature for the divider is
+
+\begin{equation}
+T_{i,r,d} = {\left[ {\frac{{{E_i}}}{\sigma}\frac{{1 + {\eta_{d,2}}}}{{1 + 2{\eta_{d,2}}}}} \right]^{1/4}}.
+\end{equation}
+
+The other half of the view from each projection surface is toward the adjacent glazing. The two half-area contributions combine to an area factor of \emph{$\eta_{d,j}$} for IR exchange between the glazing and the divider projections.
+
+An interior shade or blind is assumed to cover the glazed area and dividers, but not the frame. Only IR transmitted by an interior shading device is incident directly on the divider. The effective room-side divider thermal absorptance is
+
+\begin{equation}
+\alpha_{d,eff} = \varepsilon_{d,i}\tau_{IR},
+\end{equation}
+
+where \emph{$\varepsilon_{d,i}$} is the inside divider thermal emissivity for a divided-lite divider, or the effective room-side glass thermal absorptance for a suspended divider. The IR transmittance \emph{$\tau_{IR}$} is 1.0 without an interior shading device, the shade thermal transmittance with an interior shade, or the current back-side effective IR transmittance with an interior blind. The latter depends on the current blind optical state.
+
+The current radiant HVAC contribution absorbed by the divider per unit divider face area is consequently
+
+\begin{equation}
+S_{2,HVAC}^{d} = q^{\prime\prime}_{HVAC}{\alpha_{d,eff}}\left( {1 + {\eta_{d,2}}} \right).
+\end{equation}
+
+As for the frame, this contribution is evaluated whenever the inside surface heat balance is recalculated so that changes in radiant HVAC output during HVAC resimulation are represented without accumulating the contribution in the timestep-static divider absorbed-radiation term.
+
+This model assumes rectangular divider profiles and isotropic incident radiation. Radiant HVAC equipment is represented by a scalar surface heat flux; the source direction and source-to-divider view factors are not calculated. For an interior shading device, the model applies direct IR transmission to the divider but does not solve detailed multiple reflections or radiative exchange among the divider, shading device, and glazing.
 
 \subsection{Beam Solar Reflection from Window Reveal Surfaces}\label{beam-solar-reflection-from-window-reveal-surfaces}
 
