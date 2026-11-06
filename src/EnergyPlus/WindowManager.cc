@@ -5649,11 +5649,14 @@ namespace Window {
             HOutRad = 0.5 * s_surf->SurfWinFrameEmis(SurfNum) * Constant::StefanBoltzmann *
                       pow_3(TOutRadFr + s_surf->SurfWinFrameTempSurfOut(SurfNum) + Constant::Kelvin);
             HOutConvFr = HOutConv;
-            // Solar and interior short-wave and radiant gains absorbed by the frame, set once per time step in
-            // InitSolarHeatGains and InitIntSolarDistribution. The projection long-wave terms below are added to local
-            // copies so that repeated calls in a time step do not accumulate them.
+            // Solar and interior short-wave and radiant internal gains absorbed by the frame, set once per time step in
+            // InitSolarHeatGains and InitIntSolarDistribution. System radiant gains are refreshed before every inside heat
+            // balance, so add them here. The projection long-wave terms below are also added to local copies so that repeated
+            // calls in a time step do not accumulate them.
             Real64 FrameQRadOutAbs = s_surf->SurfWinFrameQRadOutAbs(SurfNum);
             Real64 FrameQRadInAbs = s_surf->SurfWinFrameQRadInAbs(SurfNum);
+            FrameQRadInAbs +=
+                state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum) * s_surf->SurfWinFrameEmis(SurfNum) * (1.0 + 0.5 * ProjCorrFrIn);
             auto const &frdiv = s_surf->FrameDivider(FrDivNum);
             if (frdiv.FrameProjectionOut > 0.0) {
                 HOutRad *= (1.0 + ProjCorrFrOut);
@@ -5713,10 +5716,22 @@ namespace Window {
             HOutRad =
                 0.5 * DivEmisOut * Constant::StefanBoltzmann * pow_3(TOutRadDiv + s_surf->SurfWinDividerTempSurfOut(SurfNum) + Constant::Kelvin);
             HOutConvDiv = HOutConv;
-            // Solar and interior short-wave and radiant gains absorbed by the divider (see frame above); the projection
-            // long-wave terms are added to local copies.
+            // Solar and interior short-wave and radiant internal gains absorbed by the divider (see frame above).
             Real64 DividerQRadOutAbs = s_surf->SurfWinDividerQRadOutAbs(SurfNum);
+            Real64 DividerThermAbs = DivEmisIn;
+            if (ShadeFlag == WinShadingType::IntShade) {
+                int const ConstrNumSh = s_surf->SurfWinActiveShadedConstruction(SurfNum);
+                auto const &constructionSh = state.dataConstruction->Construct(ConstrNumSh);
+                int const MatNumSh = constructionSh.LayerPoint(constructionSh.TotLayers);
+                auto const *matSh = dynamic_cast<Material::MaterialFen const *>(s_mat->materials(MatNumSh));
+                assert(matSh != nullptr);
+                DividerThermAbs *= matSh->TransThermal;
+            } else if (ShadeFlag == WinShadingType::IntBlind) {
+                DividerThermAbs *= s_surf->surfShades(SurfNum).blind.TAR.IR.Bk.Tra;
+            }
             Real64 DividerQRadInAbs = s_surf->SurfWinDividerQRadInAbs(SurfNum);
+            DividerQRadInAbs +=
+                state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum) * DividerThermAbs * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum));
             auto const &frdiv = s_surf->FrameDivider(FrDivNum);
             if (frdiv.DividerProjectionOut > 0.0) {
                 HOutRad *= (1.0 + 2.0 * s_surf->SurfWinProjCorrDivOut(SurfNum));

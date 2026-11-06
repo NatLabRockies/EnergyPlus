@@ -420,7 +420,7 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
 
 TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
 {
-    // The solar absorbed by window frames and dividers and their share of the interior short-wave and radiant gains
+    // The solar absorbed by window frames and dividers and their share of the interior short-wave and radiant internal gains
     // (SurfWinFrameQRadOutAbs, SurfWinFrameQRadInAbs, SurfWinDividerQRadOutAbs, SurfWinDividerQRadInAbs) are set once
     // per time step in InitSolarHeatGains and InitIntSolarDistribution. The inside surface heat balance must pass them
     // to the frame and divider heat balance, and repeated calls in a time step must not change them.
@@ -586,7 +586,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
     };
 
     Real64 constexpr frameOutAbs = 400.0; // W/m2, e.g. 500 W/m2 incident with a solar absorptance of 0.8
-    Real64 constexpr frameInAbs = 40.0;   // W/m2, interior short-wave and radiant gains
+    Real64 constexpr frameInAbs = 40.0;   // W/m2, interior short-wave and radiant internal gains
     Real64 constexpr divOutAbs = 300.0;
     Real64 constexpr divInAbs = 30.0;
 
@@ -623,6 +623,30 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
         Real64 const frameAbsorbed = s_surf->SurfWinFrameArea(winNum) * (frameOutAbs + frameInAbs);
         EXPECT_GT(s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum), frameGainNoAbs + 0.1 * frameAbsorbed);
     }
+
+    // System radiant gains can change between inside heat balance calls as radiant equipment is simulated. They must be
+    // applied using the current value without changing the timestep-static absorbed-radiation arrays.
+    s_surf->SurfWinProjCorrFrIn(winNum) = 0.0;
+    s_surf->SurfWinProjCorrDivIn(winNum) = 0.0;
+    state->dataSurface->allGetsRadiantHeatSurfaceList.emplace_back(winNum);
+    auto &surfQRadFromHVAC = state->dataHeatBalFanSys->surfQRadFromHVAC(winNum);
+    setAbsorbed(0.0, 0.0, 0.0, 0.0);
+    surfQRadFromHVAC.HTRadSys = 0.0;
+    HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+    HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+    Real64 const frameTempInNoHVAC = s_surf->SurfWinFrameTempIn(winNum);
+    Real64 const divTempInNoHVAC = s_surf->SurfWinDividerTempIn(winNum);
+    Real64 const frameGainNoHVAC = s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum);
+
+    surfQRadFromHVAC.HTRadSys = 200.0;
+    HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+    HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+
+    EXPECT_DOUBLE_EQ(0.0, s_surf->SurfWinFrameQRadInAbs(winNum));
+    EXPECT_DOUBLE_EQ(0.0, s_surf->SurfWinDividerQRadInAbs(winNum));
+    EXPECT_GT(s_surf->SurfWinFrameTempIn(winNum), frameTempInNoHVAC + 1.0);
+    EXPECT_GT(s_surf->SurfWinDividerTempIn(winNum), divTempInNoHVAC + 1.0);
+    EXPECT_GT(s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum), frameGainNoHVAC);
 }
 
 TEST_F(EnergyPlusFixture, WindowManager_TransAndReflAtPhi)
