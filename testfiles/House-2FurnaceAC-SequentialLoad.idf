@@ -74,7 +74,7 @@
 ! Coils:                          Coil:Cooling:DX:SingleSpeed
 !                                 Coil:Heating:Fuel
 
-  Version,26.2;
+  Version,27.1;
 
   Building,
     House with 2 Furnace AC, !- Name
@@ -1131,6 +1131,7 @@
     LIVING ZONE Thermostat,  !- Name
     LIVING ZONE,             !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Main Tstat Dual SP Control;  !- Control 1 Name
 

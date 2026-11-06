@@ -489,7 +489,6 @@ struct HVACGlobalsData : BaseGlobalStruct
     Real64 HPWHInletDBTemp = 0.0;     // Used by curve objects when calculating DX coil performance for HEAT PUMP:WATER HEATER
     Real64 HPWHInletWBTemp = 0.0;     // Used by curve objects when calculating DX coil performance for HEAT PUMP:WATER HEATER
     Real64 HPWHCrankcaseDBTemp = 0.0; // Used for HEAT PUMP:WATER HEATER crankcase heater ambient temperature calculations
-    bool AirLoopInit = false;         // flag for whether InitAirLoops has been called
     bool AirLoopsSimOnce = false;     // True means that the air loops have been simulated once in this environment
     bool GetAirPathDataDone = false;  // True means that air loops inputs have been processed
     bool StandardRatingsMyOneTimeFlag = true;

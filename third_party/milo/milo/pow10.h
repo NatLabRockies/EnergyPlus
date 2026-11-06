@@ -15,6 +15,8 @@
 #ifndef POW10_H_INCLUDED
 #define POW10_H_INCLUDED
 
+#include <cassert>
+
 //! Computes integer powers of 10 in double (10.0^n).
 /*! This function uses lookup table for fast and accurate results.
     \param n non-negative exponent. Must <= 308.

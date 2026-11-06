@@ -108,11 +108,11 @@ int ArgCheck(EnergyPlusData &state,
              Real64 const heightt,
              Real64 const width,
              const Array1D<Real64> &presure,
-             Array2A_int const iprop,
-             Array2A<Real64> const frct,
-             Array2A<Real64> const xgcon,
-             Array2A<Real64> const xgvis,
-             Array2A<Real64> const xgcp,
+             Array2D_int const &iprop,
+             Array2D<Real64> const &frct,
+             Array2D<Real64> const &xgcon,
+             Array2D<Real64> const &xgvis,
+             Array2D<Real64> const &xgcp,
              const Array1D<Real64> &xwght,
              const Array1D<Real64> &gama,
              const Array1D_int &nmix,
@@ -160,11 +160,6 @@ int ArgCheck(EnergyPlusData &state,
     EP_SIZE_CHECK(emis, maxlay2);
     EP_SIZE_CHECK(asol, maxlay);
     EP_SIZE_CHECK(presure, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(nmix, maxlay1);

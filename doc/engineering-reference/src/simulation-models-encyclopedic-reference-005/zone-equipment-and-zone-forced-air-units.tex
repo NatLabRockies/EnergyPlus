@@ -2829,14 +2829,26 @@ The fan flow rate is either constant or variable depending on if the user input 
 \dot m = {f_{Fract}}{\dot m_{Des}}
 \end{equation}
 
-The exhaust fan model is similar to, but simpler than, the models used for air system fans.~ The electric power calculation is simplified and uses a constant overall efficiency.~ All of the fan power is added to the air stream.
+The exhaust fan model is similar to, but simpler than, the models used for air system fans.~ The electric power calculation is simplified and uses a constant overall efficiency.
 
 \begin{equation}
 {\dot Q_{fan}} = \frac{{\dot m{\mathrm{}}\Delta P}}{{{e_{tot}}{\rho_{air}}}}
 \end{equation}
 
+All or a portion of the fan power is added to the air stream and the remainder is directed either outdoors or to a zone.~ The portion of the total fan power that is always added to the airstream is the mass flow rate of the air multiplied by the pressure rise divided by the air density.
+
 \begin{equation}
-{h_{out}} = {h_{in}} + \frac{{{{\dot Q}_{fan}}}}{{\dot m}}
+{\dot Q_{fluid}} = \frac{{\dot m{\mathrm{}}\Delta P}}{{\rho_{air}}}}
+\end{equation}
+
+The difference between the total fan power (Q,fan) and the power added to the airstream (Q,fluid) can either be directed outdoors or to a zone based on a user specified motor in airstream fraction. The motor in airstream fraction is constant and must be between 0 and 1 (default).
+
+\begin{equation}
+{\dot Q_{airstream}} = \dot Q_{fluid} + ({\dot Q_{fan} - \dot Q_{fluid}}) * Frac_{Motor\ In\ Airstream}
+\end{equation}
+
+\begin{equation}
+{h_{out}} = {h_{in}} + \frac{{{{\dot Q}_{airstream}}}}{{\dot m}}
 \end{equation}
 
 \begin{equation}
@@ -2845,6 +2857,12 @@ The exhaust fan model is similar to, but simpler than, the models used for air s
 
 \begin{equation}
 {T_{out}} = PsyTdbFnHW\left( {{h_{out}},{w_{out}}} \right)
+\end{equation}
+
+The remainder of the fan power is diverted to the Motor Loss Location and is user defined as either Zone or Outside. When zone is selected this remaining fan heat is added to the heat balance for the zone specified, otherwise the remaining fan heat is directed outside (default).
+
+\begin{equation}
+{\dot Q_{Zone\ or\ Outside}} = \left( \dot Q_{fan} - \dot Q_{airstream} \right)
 \end{equation}
 
 The controls for determining if the the exhaust fan will operate can be based on a number of factors including: an on/off availability schedule, interaction with system availability managers, minimum zone air temperature control limits and a variable flow fraction schedule.~ When the fan is coupled to the system availability managers then it will operate if either the local availability schedule or the system availability manager's indicate that the fan should run.~ When the fan is not coupled to the system availability manager, then it only uses the local availability schedule and ignores availability managers.~ If using the flow fraction schedule and the resulting flow is zero, then fan will not run.~ If using the minimum zone temperature limit schedule then the fan will only run if the fan inlet temperature is warmer than the limit.

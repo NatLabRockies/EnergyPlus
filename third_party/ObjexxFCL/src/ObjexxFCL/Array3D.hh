@@ -142,23 +142,6 @@ public: // Creation
 	 Super( a )
 	{}
 
-	// Slice Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	explicit
-	Array3D( Array3S< U > const & a ) :
-	 Super( a )
-	{
-		setup_real();
-		size_type l( 0u );
-		for ( int i1 = 1, e1 = a.u1(); i1 <= e1; ++i1 ) {
-			for ( int i2 = 1, e2 = a.u2(); i2 <= e2; ++i2 ) {
-				for ( int i3 = 1, e3 = a.u3(); i3 <= e3; ++i3, ++l ) {
-					initialize( l, a( i1, i2, i3 ) );
-				}
-			}
-		}
-	}
-
 
 	// IndexRange Constructor
 	Array3D( IR const & I1, IR const & I2, IR const & I3 ) :
@@ -201,23 +184,6 @@ public: // Creation
 		initialize( a );
 	}
 
-	// IndexRange + Slice Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array3D( IR const & I1, IR const & I2, IR const & I3, Array3S< U > const & a ) :
-	 Super( I1, I2, I3, InitializerSentinel{} )
-	{
-		assert( conformable( a ) );
-		setup_real();
-		size_type l( 0u );
-		for ( int i1 = 1, e1 = a.u1(); i1 <= e1; ++i1 ) {
-			for ( int i2 = 1, e2 = a.u2(); i2 <= e2; ++i2 ) {
-				for ( int i3 = 1, e3 = a.u3(); i3 <= e3; ++i3, ++l ) {
-					initialize( l, a( i1, i2, i3 ) );
-				}
-			}
-		}
-	}
-
 
 	// Super + IndexRange Constructor Template
 	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
@@ -229,63 +195,7 @@ public: // Creation
 		initialize( a );
 	}
 
-	// IndexRange + Base Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array3D( IR const & I1, IR const & I2, IR const & I3, Array< U > const & a ) :
-	 Super( I1, I2, I3, InitializerSentinel{} )
-	{
-		assert( size_ == a.size() );
-		setup_real();
-		initialize( a );
-	}
 
-	// Base + IndexRange Constructor Template
-	template< typename U, class = typename std::enable_if< std::is_constructible< T, U >::value >::type >
-	Array3D( Array< U > const & a, IR const & I1, IR const & I2, IR const & I3 ) :
-	 Super( I1, I2, I3, InitializerSentinel{} )
-	{
-		assert( size_ == a.size() );
-		setup_real();
-		initialize( a );
-	}
-
-	// Array Range Named Constructor Template
-	template< typename U >
-	static
-	Array3D
-	range( Array3< U > const & a )
-	{
-		return Array3D( a.I1_, a.I2_, a.I3_ );
-	}
-
-	// Array Range + Initializer Value Named Constructor Template
-	template< typename U >
-	static
-	Array3D
-	range( Array3< U > const & a, T const & t )
-	{
-		return Array3D( a.I1_, a.I2_, a.I3_, t );
-	}
-
-
-
-	// One-Based Copy Named Constructor Template
-	template< typename U >
-	static
-	Array3D
-	one_based( Array3< U > const & a )
-	{
-		return Array3D( a, a.isize1(), a.isize2(), a.isize3() );
-	}
-
-	// One-Based Slice Named Constructor Template
-	template< typename U >
-	static
-	Array3D
-	one_based( Array3S< U > const & a )
-	{
-		return Array3D( a.isize1(), a.isize2(), a.isize3(), a );
-	}
 
 	// Destructor
 	virtual
@@ -360,15 +270,6 @@ public: // Assignment: Array
 		} else {
 			Base::initialize( a );
 		}
-		return *this;
-	}
-
-	// Slice Assignment Template
-	template< typename U, class = typename std::enable_if< std::is_assignable< T&, U >::value >::type >
-	Array3D &
-	operator =( Array3S< U > const & a )
-	{
-		Super::operator =( a );
 		return *this;
 	}
 

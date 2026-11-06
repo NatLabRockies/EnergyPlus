@@ -105,12 +105,12 @@ namespace ThermalEN673Calc {
                     Real64 const dir,
                     const Array1D<Real64> &asol,
                     const Array1D<Real64> &presure,
-                    Array2A_int const iprop,
-                    Array2A<Real64> const frct,
+                    Array2D_int const &iprop,
+                    Array2D<Real64> const &frct,
                     const Array1D_int &nmix,
-                    Array2A<Real64> const xgcon,
-                    Array2A<Real64> const xgvis,
-                    Array2A<Real64> const xgcp,
+                    Array2D<Real64> const &xgcon,
+                    Array2D<Real64> const &xgvis,
+                    Array2D<Real64> const &xgcp,
                     const Array1D<Real64> &xwght,
                     Array1D<Real64> &theta,
                     Real64 &ufactor,
@@ -145,12 +145,7 @@ namespace ThermalEN673Calc {
         EP_SIZE_CHECK(emis, maxlay2);
         EP_SIZE_CHECK(asol, maxlay);
         EP_SIZE_CHECK(presure, maxlay1);
-        iprop.dim(maxgas, maxlay1);
-        frct.dim(maxgas, maxlay1);
         EP_SIZE_CHECK(nmix, maxlay1);
-        xgcon.dim(3, maxgas);
-        xgvis.dim(3, maxgas);
-        xgcp.dim(3, maxgas);
         EP_SIZE_CHECK(xwght, maxgas);
         EP_SIZE_CHECK(theta, maxlay2);
         EP_SIZE_CHECK(ibc, 2);
@@ -239,11 +234,11 @@ namespace ThermalEN673Calc {
                        const Array1D<Real64> &thick,
                        const Array1D<Real64> &scon,
                        Real64 const tilt,
-                       Array2A_int const iprop,
-                       Array2A<Real64> const frct,
-                       Array2A<Real64> const xgcon,
-                       Array2A<Real64> const xgvis,
-                       Array2A<Real64> const xgcp,
+                       Array2D_int const &iprop,
+                       Array2D<Real64> const &frct,
+                       Array2D<Real64> const &xgcon,
+                       Array2D<Real64> const &xgvis,
+                       Array2D<Real64> const &xgcp,
                        const Array1D<Real64> &xwght,
                        const Array1D<Real64> &presure,
                        const Array1D_int &nmix,
@@ -269,11 +264,6 @@ namespace ThermalEN673Calc {
         EP_SIZE_CHECK(gap, MaxGap);
         EP_SIZE_CHECK(thick, maxlay);
         EP_SIZE_CHECK(scon, maxlay);
-        iprop.dim(maxgas, maxlay1);
-        frct.dim(maxgas, maxlay1);
-        xgcon.dim(3, maxgas);
-        xgvis.dim(3, maxgas);
-        xgcp.dim(3, maxgas);
         EP_SIZE_CHECK(xwght, maxgas);
         EP_SIZE_CHECK(presure, maxlay1);
         EP_SIZE_CHECK(nmix, maxlay1);

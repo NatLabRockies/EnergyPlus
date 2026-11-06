@@ -51,9 +51,6 @@
 // C++ Headers
 #include <span>
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1A.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>

@@ -205,9 +205,9 @@ constexpr std::array<std::string_view, static_cast<int>(Node::ConnectionObjectTy
     "Duct",
     "ElectricEquipment:ITE:AirCooled",
     "EvaporativeCooler:Direct:CelDekPad",
-    "EvaporativeCooler:Direct:ResearchSpecial",
+    "EvaporativeCooler:Direct:UserEffectiveness",
     "EvaporativeCooler:Indirect:CelDekPad",
-    "EvaporativeCooler:Indirect:ResearchSpecial",
+    "EvaporativeCooler:Indirect:UserEffectiveness",
     "EvaporativeCooler:Indirect:WetCoil",
     "EvaporativeFluidCooler:SingleSpeed",
     "EvaporativeFluidCooler:TwoSpeed",
@@ -492,9 +492,9 @@ constexpr std::array<std::string_view, static_cast<int>(Node::ConnectionObjectTy
     "DUCT",
     "ELECTRICEQUIPMENT:ITE:AIRCOOLED",
     "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
-    "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL",
+    "EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS",
     "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD",
-    "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL",
+    "EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS",
     "EVAPORATIVECOOLER:INDIRECT:WETCOIL",
     "EVAPORATIVEFLUIDCOOLER:SINGLESPEED",
     "EVAPORATIVEFLUIDCOOLER:TWOSPEED",
@@ -769,7 +769,8 @@ void RegisterNodeConnection(EnergyPlusData &state,
                 ShowContinueError(state, std::format("In Field={}", InputFieldName));
                 ShowContinueError(state,
                                   std::format("Already used in {}=\"{}\".",
-                                              objTypeStr,
+                                              Node::ConnectionObjectTypeNamesUC[static_cast<int>(
+                                                  state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectType)],
                                               state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectName));
                 ShowContinueError(state,
                                   std::format(" as type={}, In Field={}",
@@ -1573,19 +1574,15 @@ void GetParentData(EnergyPlusData &state,
         InletNodeName = state.dataBranchNodeConnections->ParentNodeList(Which).InletNodeName;
         OutletNodeName = state.dataBranchNodeConnections->ParentNodeList(Which).OutletNodeName;
         // Get Node Numbers
-        InletNodeNum =
-            Util::FindItemInList(InletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
-        OutletNodeNum =
-            Util::FindItemInList(OutletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
+        InletNodeNum = Util::FindItemInList(InletNodeName, state.dataLoopNodes->NodeID, state.dataLoopNodes->NumOfNodes);
+        OutletNodeNum = Util::FindItemInList(OutletNodeName, state.dataLoopNodes->NodeID, state.dataLoopNodes->NumOfNodes);
     } else if (IsParentObjectCompSet(state, ComponentType, ComponentName)) {
         Which = WhichCompSet(state, ComponentType, ComponentName);
         if (Which != 0) {
             InletNodeName = state.dataBranchNodeConnections->CompSets(Which).InletNodeName;
             OutletNodeName = state.dataBranchNodeConnections->CompSets(Which).OutletNodeName;
-            InletNodeNum = Util::FindItemInList(
-                InletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
-            OutletNodeNum = Util::FindItemInList(
-                OutletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
+            InletNodeNum = Util::FindItemInList(InletNodeName, state.dataLoopNodes->NodeID, state.dataLoopNodes->NumOfNodes);
+            OutletNodeNum = Util::FindItemInList(OutletNodeName, state.dataLoopNodes->NodeID, state.dataLoopNodes->NumOfNodes);
         } else {
             ErrInObject = true;
             ShowWarningError(state,

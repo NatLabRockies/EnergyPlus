@@ -166,9 +166,6 @@ namespace DataWindowEquivalentLayer {
         // Members
         std::string Name; // ID of layer
         LayerType LTYPE;  // layer type (see ltyXXX above)
-        int iGZS;         // re spectral glazing
-        //   = GZSTbl idx of LTYPE=ltyGZS (spectral glazing)
-        //   else 0
         // material properties
         //  ltyGLAZE, ltyROLLB: as measured
         CFSSWP SWP_MAT; // ltyGZS: derived from GSZ file data
@@ -209,7 +206,7 @@ namespace DataWindowEquivalentLayer {
         //                   PHI_DEG = 20 if diffuse only
 
         // Default Constructor
-        CFSLAYER() : LTYPE(LayerType::Invalid), iGZS(0), S(0.0), W(0.0), C(0.0), PHI_DEG(0.0), CNTRL(0)
+        CFSLAYER() : LTYPE(LayerType::Invalid), S(0.0), W(0.0), C(0.0), PHI_DEG(0.0), CNTRL(0)
         {
         }
     };

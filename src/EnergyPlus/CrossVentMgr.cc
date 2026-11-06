@@ -404,9 +404,9 @@ namespace RoomAir {
         CosPhi = std::cos((state.dataEnvrn->WindDir - SurfNorm) * Constant::DegToRad);
         if (CosPhi <= 0) {
             state.dataRoomAir->AirModel(ZoneNum).SimAirModel = false;
-            auto flows(state.dataRoomAir->CrossVentJetRecFlows(_, ZoneNum)); // This is an array slice, need to get rid of this (THIS_AUTO_OK)
-            for (int i = 1, u = flows.u(); i <= u; ++i) {
-                auto &e(flows(i));
+            // CrossVentJetRecFlows is allocated with a first index starting at 0
+            for (int i = state.dataRoomAir->CrossVentJetRecFlows.l1(), u = state.dataRoomAir->CrossVentJetRecFlows.u1(); i <= u; ++i) {
+                auto &e(state.dataRoomAir->CrossVentJetRecFlows(i, ZoneNum));
                 e.Ujet = e.Urec = 0.0;
             }
             state.dataRoomAir->Urec(ZoneNum) = 0.0;
@@ -461,7 +461,7 @@ namespace RoomAir {
         // is a Window or Door it looks for the second base surface).
         // Dstar is Droom corrected for wind angle
 
-        Vector3<Real64> baseCentroid;
+        Vector3D baseCentroid;
 
         Wroom = state.dataHeatBal->Zone(ZoneNum).Volume / state.dataHeatBal->Zone(ZoneNum).FloorArea;
         auto const &baseSurface = state.dataSurface->Surface(thisSurface.BaseSurf);
@@ -478,7 +478,7 @@ namespace RoomAir {
             baseCentroid /= double(NSides);
         }
 
-        Vector3<Real64> wallCentroid;
+        Vector3D wallCentroid;
         Real64 const Wroom_2(pow_2(Wroom));
         for (int Ctd = state.dataRoomAir->PosZ_Wall(ZoneNum).beg; Ctd <= state.dataRoomAir->PosZ_Wall(ZoneNum).end; ++Ctd) {
             if ((state.dataSurface->Surface(state.dataRoomAir->APos_Wall(Ctd)).Sides == 3) ||
@@ -560,9 +560,9 @@ namespace RoomAir {
             state.dataRoomAir->Urec(ZoneNum) = 0.0;
             state.dataRoomAir->Ujet(ZoneNum) = 0.0;
             state.dataRoomAir->Qrec(ZoneNum) = 0.0;
-            auto flows(state.dataRoomAir->CrossVentJetRecFlows(_, ZoneNum)); // This is an array slice, need to get rid of this (THIS_AUTO_OK)
-            for (int i = 1, u = flows.u(); i <= u; ++i) {
-                auto &e(flows(i));
+            // CrossVentJetRecFlows is allocated with a first index starting at 0
+            for (int i = state.dataRoomAir->CrossVentJetRecFlows.l1(), u = state.dataRoomAir->CrossVentJetRecFlows.u1(); i <= u; ++i) {
+                auto &e(state.dataRoomAir->CrossVentJetRecFlows(i, ZoneNum));
                 e.Ujet = e.Urec = 0.0;
             }
             return;
@@ -584,9 +584,9 @@ namespace RoomAir {
             state.dataRoomAir->Ujet(ZoneNum) = 0.0;
             state.dataRoomAir->Qrec(ZoneNum) = 0.0;
             state.dataRoomAir->RecInflowRatio(ZoneNum) = 0.0;
-            auto flows(state.dataRoomAir->CrossVentJetRecFlows(_, ZoneNum)); // This is an array slice, need to get rid of this (THIS_AUTO_OK)
-            for (int i = 1, u = flows.u(); i <= u; ++i) {
-                auto &e(flows(i));
+            // CrossVentJetRecFlows is allocated with a first index starting at 0
+            for (int i = state.dataRoomAir->CrossVentJetRecFlows.l1(), u = state.dataRoomAir->CrossVentJetRecFlows.u1(); i <= u; ++i) {
+                auto &e(state.dataRoomAir->CrossVentJetRecFlows(i, ZoneNum));
                 e.Ujet = e.Urec = 0.0;
             }
             if (thisSurface.ExtBoundCond > 0) {
@@ -628,9 +628,9 @@ namespace RoomAir {
         state.dataRoomAir->Urec(ZoneNum) = 0.0;
         state.dataRoomAir->Qrec(ZoneNum) = 0.0;
         state.dataRoomAir->Qtot(ZoneNum) = 0.0;
-        auto flows(state.dataRoomAir->CrossVentJetRecFlows(_, ZoneNum)); // This is an array slice, need to get rid of this (THIS_AUTO_OK)
-        for (int i = 1, u = flows.u(); i <= u; ++i) {
-            auto &e(flows(i));
+        // CrossVentJetRecFlows is allocated with a first index starting at 0
+        for (int i = state.dataRoomAir->CrossVentJetRecFlows.l1(), u = state.dataRoomAir->CrossVentJetRecFlows.u1(); i <= u; ++i) {
+            auto &e(state.dataRoomAir->CrossVentJetRecFlows(i, ZoneNum));
             e.Ujet = e.Urec = e.Qrec = 0.0;
         }
         for (int Ctd = 1; Ctd <= state.dataRoomAir->AFNSurfaceCrossVent(0, ZoneNum); ++Ctd) {

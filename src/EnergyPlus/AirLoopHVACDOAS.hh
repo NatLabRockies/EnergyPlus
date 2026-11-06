@@ -147,8 +147,6 @@ namespace AirLoopHVACDOAS {
         std::string OASystemName;
         std::string AirLoopMixerName;
         std::string AirLoopSplitterName;
-        std::string FanName;
-
         std::vector<int> m_AirLoopNum; // array of AirLoop number
         std::vector<std::string> AirLoopName;
         std::vector<int> m_OACtrlNum; // array of OA controller number

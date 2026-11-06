@@ -173,7 +173,6 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     state->dataHeatBal->Zone(ZoneNum).ZoneVolCapMultpSens = 1;
 
     state->dataRoomAir->AFNZoneInfo(ZoneNum).IsUsed = true;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).ActualZoneID = ZoneNum;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).NumOfAirNodes = NumOfAirNodes;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node.allocate(NumOfAirNodes);
     state->dataRoomAir->AFNZoneInfo(ZoneNum).ControlAirNodeID = 1;
@@ -209,8 +208,6 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions.allocate(1);
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsFractions(1) = 0.4;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions(1) = 0.6;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasIntGainsAssigned = true;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasIntGainsAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasSurfacesAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasSurfacesAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasHVACAssigned = true;

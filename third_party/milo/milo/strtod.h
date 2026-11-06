@@ -15,6 +15,8 @@
 #ifndef STRTOD_H_INCLUDED
 #define STRTOD_H_INCLUDED
 
+#include <cassert>
+
 #include "ieee754.h"
 #include "biginteger.h"
 #include "diyfp.h"

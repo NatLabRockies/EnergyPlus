@@ -16,6 +16,5 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1.fwd.hh>
 #include <ObjexxFCL/Array1D.fwd.hh>
-#include <ObjexxFCL/Array1A.fwd.hh>
 
 #endif // ObjexxFCL_Array1_all_fwd_hh_INCLUDED

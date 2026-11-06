@@ -50,13 +50,11 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Vector3.hh>
-
-using ObjexxFCL::Vector3;
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector3D.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
@@ -99,7 +97,6 @@ struct EnvironmentData : BaseGlobalStruct
     bool EMSBeamSolarRadOverrideOn = false;    // EMS flag for beam normal solar irradiance
     Real64 EMSBeamSolarRadOverrideValue = 0.0; // EMS override value for beam normal solar irradiance
     int DayOfMonth = 0;                        // Current day of the month
-    int DayOfMonthTomorrow = 0;                // Tomorrow's day of the month
     int DayOfWeek = 0;                         // Current day of the week (Sunday=1, Monday=2, ...)
     int DayOfWeekTomorrow = 0;                 // Tomorrow's day of the week (Sunday=1, Monday=2, ...)
     int DayOfYear = 0;                         // Current day of the year (01JAN=1, 02JAN=2, ...)
@@ -154,8 +151,7 @@ struct EnvironmentData : BaseGlobalStruct
     Real64 EMSWindSpeedOverrideValue = 0.0;                     // EMS override value for outdoor air wind speed
     Real64 WaterMainsTemp = 0.0;                                // Current water mains temperature
     int Year = 0;                                               // Current calendar year of the simulation from the weather file
-    int YearTomorrow = 0;                                       // Tomorrow's calendar year of the simulation
-    Vector3<Real64> SOLCOS = {0.0, 0.0, 0.0};                   // Solar direction cosines at current time step
+    Vector3D SOLCOS = {0.0, 0.0, 0.0};                          // Solar direction cosines at current time step
     Real64 CloudFraction = 0.0;                                 // Fraction of sky covered by clouds
     Real64 HISKF = 0.0;                                         // Exterior horizontal illuminance from sky (lux).
     Real64 HISUNF = 0.0;                                        // Exterior horizontal beam illuminance (lux)
@@ -183,11 +179,8 @@ struct EnvironmentData : BaseGlobalStruct
     int TotalOverallSimDays = 0;                                // Count of all possible simulation days in all environments
     int MaxNumberSimYears = 0;                                  // Maximum number of simulation years requested in all RunPeriod statements
     int RunPeriodStartDayOfWeek = 0;                            // Day of week of the first day of the run period. (or design day - day of week)
-    Real64 CosSolarDeclinAngle = 0.0;                           // Cosine of the solar declination angle
-    Real64 EquationOfTime = 0.0;                                // Value of the equation of time formula
     Real64 SinLatitude = 0.0;                                   // Sine of Latitude
     Real64 CosLatitude = 0.0;                                   // Cosine of Latitude
-    Real64 SinSolarDeclinAngle = 0.0;                           // Sine of the solar declination angle
     Real64 TS1TimeOffset = -0.5;                                // offset when TS=1 for solar calculations
     Real64 WeatherFileWindModCoeff = 1.5863;                    // =(WindBLHeight/WindSensorHeight)**WindExp for conditions at the weather station
     Real64 WeatherFileTempModCoeff = 0.0;                       // =AtmosphericTempGradient*EarthRadius*SensorHeight/(EarthRadius+SensorHeight)
@@ -204,8 +197,6 @@ struct EnvironmentData : BaseGlobalStruct
     bool PrintEnvrnStampWarmup = false;
     bool PrintEnvrnStampWarmupPrinted = false;
     bool RunPeriodEnvironment = false; // True if Run Period, False if DesignDay
-    int StartYear = 0;                 // Start year for Environment
-    int EndYear = 0;                   // End year for Environment
     std::string EnvironmentStartEnd;   // Start/End dates for Environment
     bool CurrentYearIsLeapYear =
         false; // true when current year is leap year (convoluted logic dealing with whether weather file allows leap years, runperiod inputs.

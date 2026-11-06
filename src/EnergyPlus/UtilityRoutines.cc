@@ -52,8 +52,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
-#include <ObjexxFCL/char.functions.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // Third Party Headers
@@ -269,28 +267,6 @@ namespace Util {
         return 0; // Not found
     }
 
-    int FindItemInList(std::string_view const String, Array1S_string const ListOfItems, int const NumItems)
-    {
-
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Linda K. Lawrie
-        //       DATE WRITTEN   September 1997
-
-        // PURPOSE OF THIS FUNCTION:
-        // This function looks up a string in a similar list of
-        // items and returns the index of the item in the list, if
-        // found.  This routine is not case insensitive and doesn't need
-        // for most inputs -- they are automatically turned to UPPERCASE.
-        // If you need case insensitivity use FindItem.
-
-        for (int Count = 1; Count <= NumItems; ++Count) {
-            if (String == ListOfItems(Count)) {
-                return Count;
-            }
-        }
-        return 0; // Not found
-    }
-
     int FindItem(std::string_view const String, Array1D_string const &ListOfItems, int const NumItems)
     {
 
@@ -316,38 +292,11 @@ namespace Util {
         return 0; // Not found
     }
 
-    int FindItem(std::string_view const String, Array1S_string const ListOfItems, int const NumItems)
-    {
-
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Linda K. Lawrie
-        //       DATE WRITTEN   April 1999
-
-        // PURPOSE OF THIS FUNCTION:
-        // This function looks up a string in a similar list of
-        // items and returns the index of the item in the list, if
-        // found.  This routine is case insensitive.
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-
-        int FindItem = Util::FindItemInList(String, ListOfItems, NumItems);
-        if (FindItem != 0) {
-            return FindItem;
-        }
-
-        for (int Count = 1; Count <= NumItems; ++Count) {
-            if (equali(String, ListOfItems(Count))) {
-                return Count;
-            }
-        }
-        return 0; // Not found
-    }
-
     void setDesignObjectNameAndPointer(EnergyPlusData &state,
                                        std::string &nameToBeSet,
                                        int &ptrToBeSet,
                                        std::string const &userName,
-                                       Array1S_string const &listOfNames,
+                                       Array1D_string const &listOfNames,
                                        std::string const &itemType,
                                        std::string const &itemName,
                                        bool &errorFound)
@@ -365,6 +314,17 @@ namespace Util {
             ShowContinueError(state, "  The Design Object Name was not found or was left blank.  This is not allowed.");
             ShowContinueError(state, std::format("  A valid Design Object Name must be provided for any {} object.", itemType));
         }
+    }
+
+    std::string getEnvVar(std::string const &name)
+    {
+        char const *const val = std::getenv(name.c_str());
+        if (val == nullptr) {
+            return "";
+        }
+        std::string s = val;
+        s.erase(s.find_last_not_of(' ') + 1); // strip trailing spaces (npos + 1 == 0 clears an all-space string)
+        return s;
     }
 
     size_t case_insensitive_hasher::operator()(std::string_view const key) const noexcept
@@ -772,7 +732,7 @@ bool env_var_on(std::string const &env_var_str)
     // PURPOSE OF THIS FUNCTION:
     // Test if a boolean environment variable value is "on" (has value starting with Y or T)
 
-    return ((!env_var_str.empty()) && is_any_of(env_var_str[0], "YyTt"));
+    return ((!env_var_str.empty()) && std::string_view("YyTt").find(env_var_str[0]) != std::string_view::npos);
 }
 
 void emitErrorMessage(EnergyPlusData &state, [[maybe_unused]] ErrorMessageCategory category, std::string const &msg, bool shouldFatal)
