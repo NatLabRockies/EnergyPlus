@@ -1130,8 +1130,8 @@ TEST_F(EnergyPlusFixture, ZoneTempPredictorCorrector_ThirdOrderComponentLoadStor
     state->init_state(*state);
 
     state->dataHeatBal->Zone.allocate(1);
-    state->dataHeatBalFanSys->SumConvHTRadSys.allocate(1);
-    state->dataHeatBalFanSys->SumConvPool.allocate(1);
+    state->dataHeatBalFanSys->SumConvHTRadSys.dimension(1, 0.0);
+    state->dataHeatBalFanSys->SumConvPool.dimension(1, 0.0);
 
     ZoneTempPredictorCorrector::ZoneHeatBalanceData zoneHB;
     zoneHB.AirPowerCap = 100.0;

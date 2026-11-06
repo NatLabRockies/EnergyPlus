@@ -84,7 +84,6 @@ namespace DataSystemVariables {
     constexpr const char *cDisplayUnusedObjects("DisplayUnusedObjects");
     constexpr const char *cDisplayUnusedSchedules("DisplayUnusedSchedules");
     constexpr const char *cDisplayZoneAirHeatBalanceOffBalance("DisplayZoneAirHeatBalanceOffBalance");
-    constexpr const char *cSortIDD("SortIDD");
     constexpr const char *cReportDuringWarmup("ReportDuringWarmup");
     constexpr const char *cReportDuringHVACSizingSimulation("REPORTDURINGHVACSIZINGSIMULATION");
     constexpr const char *cIgnoreSolarRadiation("IgnoreSolarRadiation");
@@ -96,7 +95,6 @@ namespace DataSystemVariables {
     constexpr const char *cInputPath1("epin");       // EP-Launch setting.  Full path + project name
     constexpr const char *cInputPath2("input_path"); // RunEplus.bat setting.  Full path
     constexpr const char *cProgramPath("program_path");
-    constexpr const char *cTimingFlag("TimingFlag");
     constexpr const char *TrackAirLoopEnvVar("TRACK_AIRLOOP"); // To generate a file with runtime statistics
     // for each controller on each air loop
     constexpr const char *TraceAirLoopEnvVar("TRACE_AIRLOOP"); // To generate a trace file with the converged
@@ -253,10 +251,6 @@ namespace DataSystemVariables {
             state.dataEnvrn->IgnoreSolarRadiation = env_var_on(cEnvValue); // Yes or True
         }
 
-        if (std::string const cEnvValue = Util::getEnvVar(cSortIDD); !cEnvValue.empty()) {
-            state.dataSysVars->SortedIDD = env_var_on(cEnvValue); // Yes or True
-        }
-
         if (std::string const cEnvValue = Util::getEnvVar(MinReportFrequencyEnvVar); !cEnvValue.empty()) {
             state.dataSysVars->MinReportFrequency = cEnvValue; // turned into value later
         }
@@ -283,10 +277,6 @@ namespace DataSystemVariables {
 
         if (std::string const cEnvValue = Util::getEnvVar(cMinimalShadowing); !cEnvValue.empty()) {
             state.dataSysVars->lMinimalShadowing = env_var_on(cEnvValue); // Yes or True
-        }
-
-        if (std::string const cEnvValue = Util::getEnvVar(cTimingFlag); !cEnvValue.empty()) {
-            state.dataSysVars->TimingFlag = env_var_on(cEnvValue); // Yes or True
         }
 
         // Initialize env flags for air loop simulation debugging

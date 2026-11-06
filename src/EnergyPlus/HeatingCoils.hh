@@ -124,6 +124,7 @@ namespace HeatingCoils {
         int PLFErrorIndex = 0;                 // used in recurring error warnings
         int PLFErrorCount = 0;                 // used in recurring error warnings
         std::string ReclaimHeatingCoilName;    // Name of reclaim heating coil
+        std::string ReclaimHeatingSourceType;  // Object type of reclaim heating source
         int ReclaimHeatingSourceIndexNum = 0;  // Index to reclaim heating source (condenser) of a specific type
         HeatObjTypes ReclaimHeatingSource = HeatObjTypes::Invalid; // The source for the Reclaim Heating Coil
         int NumOfStages = 0;                                       // Number of speeds

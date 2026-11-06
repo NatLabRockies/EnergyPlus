@@ -5893,9 +5893,9 @@
     ,                        !- Reclamation Water Storage Tank Name
     ,                        !- Hot Water Supply Temperature Schedule Name
     ,                        !- Cold Water Supply Temperature Schedule Name
-    ,                        !- Drain Water Heat Exchanger Type
-    ,                        !- Drain Water Heat Exchanger Destination
-    ,                        !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
+    CounterFlow,             !- Drain Water Heat Exchanger Type
+    PlantAndEquipment,       !- Drain Water Heat Exchanger Destination
+    250,                     !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
     ZN5_CORE_SPACE_1SHOWERS; !- Water Use Equipment 1 Name
 
   WaterUse:Equipment,
@@ -5938,8 +5938,8 @@
     ,                        !- Reclamation Water Storage Tank Name
     ,                        !- Hot Water Supply Temperature Schedule Name
     ,                        !- Cold Water Supply Temperature Schedule Name
-    ,                        !- Drain Water Heat Exchanger Type
-    ,                        !- Drain Water Heat Exchanger Destination
+    Ideal,                   !- Drain Water Heat Exchanger Type
+    Equipment,               !- Drain Water Heat Exchanger Destination
     ,                        !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
     ZN5_CORE_SPACE_1LIGHT FOOD PREP;  !- Water Use Equipment 1 Name
 
@@ -5983,9 +5983,9 @@
     ,                        !- Reclamation Water Storage Tank Name
     ,                        !- Hot Water Supply Temperature Schedule Name
     ,                        !- Cold Water Supply Temperature Schedule Name
-    ,                        !- Drain Water Heat Exchanger Type
-    ,                        !- Drain Water Heat Exchanger Destination
-    ,                        !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
+    CrossFlow,               !- Drain Water Heat Exchanger Type
+    Plant,                   !- Drain Water Heat Exchanger Destination
+    1500,                    !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
     ZN5_CORE_SPACE_1BATHROOM HANDWASHING;  !- Water Use Equipment 1 Name
 
   WaterUse:Equipment,
@@ -6093,6 +6093,24 @@
   Output:Variable,*,Water Use Equipment Target Water Temperature,timestep;
 
   Output:Variable,*,Water Use Equipment Drain Water Temperature,timestep;
+
+  Output:Variable,*,Water Use Connections Hot Water Volume Flow Rate,timestep;
+
+  Output:Variable,*,Water Use Connections Cold Water Volume Flow Rate,timestep;
+
+  Output:Variable,*,Water Use Connections Drain Water Temperature,timestep;
+
+  Output:Variable,*,Water Use Connections Heat Recovery Mass Flow Rate,timestep;
+
+  Output:Variable,*,Water Use Connections Heat Recovery Effectiveness,timestep;
+
+  Output:Variable,*,Water Use Connections Heat Recovery Rate,timestep;
+
+  Output:Variable,*,Water Use Connections Heat Recovery Water Temperature,timestep;
+
+  Output:Variable,*,Water Use Connections Return Water Temperature,timestep;
+
+  Output:Variable,*,Water Use Connections Waste Water Temperature,timestep;
 
   Output:Variable,*,Water System Rainwater Collector Volume,timestep;
 

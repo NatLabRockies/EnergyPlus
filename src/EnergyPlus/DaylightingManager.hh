@@ -500,9 +500,7 @@ struct DaylightingData : BaseGlobalStruct
     bool FirstTimeDaylFacCalc = true;
     bool VeryFirstTime = true;
     bool mapFirstTime = true;
-    bool CheckTDDs_firstTime = true;
     bool DayltgExtHorizIllum_firstTime = true; // flag for first time thru to initialize
-    bool DayltgInteriorMapIllum_FirstTimeFlag = true;
     bool ReportIllumMap_firstTime = true;
     bool SQFirstTime = true;
     bool doSkyReporting = true;
@@ -581,9 +579,7 @@ struct DaylightingData : BaseGlobalStruct
         this->FirstTimeDaylFacCalc = true;
         this->VeryFirstTime = true;
         this->mapFirstTime = true;
-        this->CheckTDDs_firstTime = true;
         this->DayltgExtHorizIllum_firstTime = true;
-        this->DayltgInteriorMapIllum_FirstTimeFlag = true;
         this->ReportIllumMap_firstTime = true;
         this->SQFirstTime = true;
         this->doSkyReporting = true;

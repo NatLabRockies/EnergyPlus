@@ -10120,7 +10120,6 @@ void CalcExteriorVentedCavity(EnergyPlusData &state, int const SurfNum) // index
 
     } // sequential solution
     // now fill results into derived types
-    state.dataHeatBal->ExtVentedCavity(CavNum).Isc = Isc;
     state.dataHeatBal->ExtVentedCavity(CavNum).TAirCav = TmpTaPlen;
     state.dataHeatBal->ExtVentedCavity(CavNum).Tbaffle = TmpTscoll;
     state.dataHeatBal->ExtVentedCavity(CavNum).HrPlen = HrPlen;

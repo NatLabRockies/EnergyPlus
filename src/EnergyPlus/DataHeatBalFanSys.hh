@@ -82,7 +82,6 @@ namespace DataHeatBalFanSys {
     struct ZoneComfortControlsFangerData
     {
         // Members
-        int FangerType = 0;      // Index for Fanger type
         Real64 LowPMV = 0.0;     // Low PMV value
         Real64 HighPMV = 0.0;    // High PMV Value
         int DualPMVErrCount = 0; // Dual PMV setpoint error count

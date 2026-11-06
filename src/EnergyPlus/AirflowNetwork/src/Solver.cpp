@@ -1321,8 +1321,6 @@ namespace AirflowNetwork {
                 DisSysCompDuctData(i).LamDynCoef = 64.0;       // Laminar dynamic loss coefficient
                 DisSysCompDuctData(i).LamFriCoef = dlc;        // Laminar friction loss coefficient
                 DisSysCompDuctData(i).InitLamCoef = 128.0;     // Coefficient of linear initialization
-                DisSysCompDuctData(i).RelRough = e / D;        // e/D: relative roughness
-                DisSysCompDuctData(i).A1 = 1.14 - 0.868589 * std::log(DisSysCompDuctData(i).RelRough); // 1.14 - 0.868589*ln(e/D)
 
                 // Add the element to the lookup table, check for name overlaps
                 if (elements.find(thisObjectName) == elements.end()) {
@@ -4821,7 +4819,6 @@ namespace AirflowNetwork {
                             for (int m = 1; m <= AirflowNetworkNumOfSurfaces; ++m) {
                                 if (AirflowNetworkLinkageData(m).NodeNums[0] == i) {
                                     m_state.dataRoomAir->AFNZoneInfo(n).Node(j).Link(k).AFNSimuID = m;
-                                    m_state.dataRoomAir->AFNZoneInfo(n).Node(j).Link(k).AFNDataID = m;
                                     k = k + 1;
                                     if (k > AirflowNetworkNodeData(i).NumOfLinks) {
                                         break;
@@ -4829,7 +4826,6 @@ namespace AirflowNetwork {
                                 }
                                 if (AirflowNetworkLinkageData(m).NodeNums[1] == i) {
                                     m_state.dataRoomAir->AFNZoneInfo(n).Node(j).Link(k).AFNSimuID = m;
-                                    m_state.dataRoomAir->AFNZoneInfo(n).Node(j).Link(k).AFNDataID = m;
                                     k = k + 1;
                                     if (k > AirflowNetworkNodeData(i).NumOfLinks) {
                                         break;
@@ -11709,12 +11705,11 @@ namespace AirflowNetwork {
         struct AFNExtSurfacesProp // External opening information
         {
             // Members
-            int SurfNum;          // row index of the external opening in the Surface array
-            int ZoneNum;          // EnergyPlus zone number
-            int MZDZoneNum;       // row index of the zone in the MultizoneZoneData array
-            int ExtNodeNum;       // External node number; = row index in MultizoneExternalNodeData array +
-                                  // AirflowNetworkNumOfZones
-            std::string ZoneName; // EnergyPlus zone name
+            int SurfNum;    // row index of the external opening in the Surface array
+            int ZoneNum;    // EnergyPlus zone number
+            int MZDZoneNum; // row index of the zone in the MultizoneZoneData array
+            int ExtNodeNum; // External node number; = row index in MultizoneExternalNodeData array +
+                            // AirflowNetworkNumOfZones
             int facadeNum;
             Real64 NodeHeight; // Elevation of the opening node
             Real64 DischCoeff; // Opening discharge coefficient
@@ -11859,7 +11854,6 @@ namespace AirflowNetwork {
             extSurf.SurfNum = MultizoneSurfaceData(SrfNum).SurfNum;
             extSurf.NodeHeight = surf.Centroid.z;
             extSurf.ZoneNum = surf.Zone;
-            extSurf.ZoneName = surf.ZoneName;
             extSurf.MZDZoneNum = MZDZoneNum;
             // External node of this surface (MultizoneSurfaceData is indexed by SrfNum, not by the opening counter)
             extSurf.ExtNodeNum = MultizoneSurfaceData(SrfNum).NodeNums[1];
@@ -13001,23 +12995,15 @@ namespace AirflowNetwork {
             if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::SupplyTrunk) {
                 disSysCompDuct.hydraulicDiameter = SupplyTrunkD;
                 disSysCompDuct.A = SupplyTrunkArea;
-                disSysCompDuct.RelRough = disSysCompDuct.roughness / SupplyTrunkD;       // e/D: relative roughness
-                disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::SupplyBranch) {
                 disSysCompDuct.hydraulicDiameter = SupplyBranchD;
                 disSysCompDuct.A = SupplyBranchArea;
-                disSysCompDuct.RelRough = disSysCompDuct.roughness / SupplyBranchD;      // e/D: relative roughness
-                disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::ReturnTrunk) {
                 disSysCompDuct.hydraulicDiameter = ReturnTrunkD;
                 disSysCompDuct.A = ReturnTrunkArea;
-                disSysCompDuct.RelRough = disSysCompDuct.roughness / ReturnTrunkD;       // e/D: relative roughness
-                disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
             } else if (AirflowNetworkLinkageData(AFNLinkNum).ductLineType == DuctLineType::ReturnBranch) {
                 disSysCompDuct.hydraulicDiameter = ReturnBranchD;
                 disSysCompDuct.A = ReturnBranchArea;
-                disSysCompDuct.RelRough = disSysCompDuct.roughness / ReturnBranchD;      // e/D: relative roughness
-                disSysCompDuct.A1 = 1.14 - 0.868589 * std::log(disSysCompDuct.RelRough); // 1.14 - 0.868589*ln(e/D)
             }
         }
 
