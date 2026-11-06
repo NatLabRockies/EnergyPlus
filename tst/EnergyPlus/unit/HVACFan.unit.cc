@@ -570,35 +570,35 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     std::string const idf_objects = delimited_string({
 
         "  Fan:SystemModel,",
-        "    Test Fan ,                   !- Name",
-        "    ,                            !- Availability Schedule Name",
-        "    TestFanAirInletNode,         !- Air Inlet Node Name",
-        "    TestFanOutletNode,           !- Air Outlet Node Name",
-        "    1.0 ,                        !- Design Maximum Air Flow Rate",
-        "    Continuous ,                   !- Speed Control Method",
-        "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
-        "    100.0,                       !- Design Pressure Rise",
-        "    0.9 ,                        !- Motor Efficiency",
-        "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
-        "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  simple cubic; !- Electric Power Function of Flow Fraction Curve Name",
+        "    Test Fan,               !- Name",
+        "    ,                       !- Availability Schedule Name",
+        "    TestFanAirInletNode,    !- Air Inlet Node Name",
+        "    TestFanOutletNode,      !- Air Outlet Node Name",
+        "    1.0,                    !- Design Maximum Air Flow Rate",
+        "    Continuous,             !- Speed Control Method",
+        "    0.0,                    !- Electric Power Minimum Flow Rate Fraction",
+        "    100.0,                  !- Design Pressure Rise",
+        "    0.9,                    !- Motor Efficiency",
+        "    1.0,                    !- Motor In Air Stream Fraction",
+        "    100.0,                  !- Design Electric Power Consumption",
+        "    ,                       !- Design Power Sizing Method",
+        "    ,                       !- Electric Power Per Unit Flow Rate",
+        "    ,                       !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                       !- Fan Total Efficiency",
+        "    simple cubic;           !- Electric Power Function of Flow Fraction Curve Name",
 
         "  Curve:Cubic,",
-        "    simple cubic,  !- Name",
+        "    simple cubic,           !- Name",
         "    0.0,                    !- Coefficient1 Constant",
-        "    0.0,                     !- Coefficient2 x",
-        "    0.0,                     !- Coefficient3 x**2",
+        "    0.0,                    !- Coefficient2 x",
+        "    0.0,                    !- Coefficient3 x**2",
         "    1.0,                    !- Coefficient4 x**3",
-        "    0.0,                     !- Minimum Value of x",
-        "    1.0,                     !- Maximum Value of x",
-        "    0.0,                     !- Minimum Curve Output",
-        "    1.0,                     !- Maximum Curve Output",
-        "    Dimensionless,           !- Input Unit Type for X",
-        "    Dimensionless;           !- Output Unit Type",
+        "    0.0,                    !- Minimum Value of x",
+        "    1.0,                    !- Maximum Value of x",
+        "    0.0,                    !- Minimum Curve Output",
+        "    1.0,                    !- Maximum Curve Output",
+        "    Dimensionless,          !- Input Unit Type for X",
+        "    Dimensionless;          !- Output Unit Type",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -616,8 +616,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     Real64 locFanSizeVdot = fanSystem->maxAirFlowRate;
     EXPECT_NEAR(1.00, locFanSizeVdot, 0.00001);
 
-    // 50% of the time at 0.5 flow and 50% at 1.0 flow, average flow 0.75 for the full timestep.
-    // Continuous control evaluates the curve after averaging flow, not power after evaluating each mode.
+    // 50% of the time at speed 1 (0.5 flow) and 50% of the time at speed 2 (1.0 flow), average flow 0.75, on for entire timestep
     Real64 designMassFlowRate = locFanSizeVdot * state->dataEnvrn->StdRhoAir;
     Real64 massFlow1 = 0.5 * designMassFlowRate;
     Real64 massFlow2 = designMassFlowRate;
@@ -625,6 +624,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     Real64 runTimeFrac2 = 0.5;
     fanSystem->simulate(*state, false, _, _, _, massFlow1, runTimeFrac1, massFlow2, runTimeFrac2);
     Real64 locFanElecPower = fanSystem->totalPower;
+    // Continuous evaluates the curve at average flow, not P_design * sum(runtime_i * curve(flow_i)).
     Real64 locExpectPower = pow(0.75, 3) * fanSystem->designElecPower;
     EXPECT_NEAR(locFanElecPower, locExpectPower, 0.01);
 
