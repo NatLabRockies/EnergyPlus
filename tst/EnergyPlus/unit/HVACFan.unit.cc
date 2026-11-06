@@ -238,6 +238,44 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
     EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
 }
 
+// Verify a continuous SystemModel fan evaluates its power curve at average flow across operating modes.
+TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Cubic Continuous Fan Power Fraction");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[3] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.9;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 100.0;
+    fanSystem.totalEff = 1.0;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    // Half runtime at 0.5 flow and half at 1.0 flow gives 0.75 average flow.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, _);
+
+    Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress /
+                           (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+}
+
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
 {
     // this unit test mimics "EnergyPlusFixture.Fans_FanSizing"
@@ -578,7 +616,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     Real64 locFanSizeVdot = fanSystem->maxAirFlowRate;
     EXPECT_NEAR(1.00, locFanSizeVdot, 0.00001);
 
-    // 50% of the time at speed 1 (0.5 flow) and 50% of the time at speed 2 (1.0 flow), average flow 0.75, on for entire timestep
+    // 50% of the time at 0.5 flow and 50% at 1.0 flow, average flow 0.75 for the full timestep.
+    // Continuous control evaluates the curve after averaging flow, not power after evaluating each mode.
     Real64 designMassFlowRate = locFanSizeVdot * state->dataEnvrn->StdRhoAir;
     Real64 massFlow1 = 0.5 * designMassFlowRate;
     Real64 massFlow2 = designMassFlowRate;
@@ -586,7 +625,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     Real64 runTimeFrac2 = 0.5;
     fanSystem->simulate(*state, false, _, _, _, massFlow1, runTimeFrac1, massFlow2, runTimeFrac2);
     Real64 locFanElecPower = fanSystem->totalPower;
-    Real64 locExpectPower = (0.5 * pow(0.5, 3) + 0.5 * 1.0) * fanSystem->designElecPower;
+    Real64 locExpectPower = pow(0.75, 3) * fanSystem->designElecPower;
     EXPECT_NEAR(locFanElecPower, locExpectPower, 0.01);
 
     // 100% of the time at average flow 0.75, on for entire timestep

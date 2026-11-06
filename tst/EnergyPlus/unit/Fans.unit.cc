@@ -249,6 +249,40 @@ TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
     EXPECT_DOUBLE_EQ(Result2_FanPower, fan1->totalPower); // expects zero
 }
 
+// Verify a VAV fan calculates power from its cubic curve at the requested average flow.
+TEST_F(EnergyPlusFixture, VAVFanObj_ContinuousPowerCurveUsesAverageFlow)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    // Turn the fan on despite its always-off availability schedule.
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    FanComponent fan;
+    fan.type = HVAC::FanType::VAV;
+    fan.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fan.maxAirFlowRate = 1.0;
+    fan.maxAirMassFlowRate = 1.2;
+    fan.minAirFlowRate = 0.0;
+    // Evaluate the power curve at 75% of design flow.
+    fan.inletAirMassFlowRate = 0.75 * fan.maxAirMassFlowRate;
+    fan.inletAirTemp = 20.0;
+    fan.inletAirHumRat = 0.008;
+    fan.inletAirEnthalpy = 40000.0;
+    fan.rhoAirStdInit = 1.2;
+    fan.deltaPress = 100.0;
+    fan.totalEff = 1.0;
+    fan.motorEff = 1.0;
+    fan.motorInAirFrac = 1.0;
+    // A cubic-only curve gives a direct expected power fraction of 0.75^3.
+    fan.coeffs = {0.0, 0.0, 0.0, 1.0, 0.0};
+    fan.simulateVAV(*state);
+
+    // Scale design fan power by the curve fraction at the requested flow.
+    Real64 expectedPower = std::pow(0.75, 3) * fan.maxAirMassFlowRate * fan.deltaPress / (fan.totalEff * fan.rhoAirStdInit);
+    EXPECT_NEAR(expectedPower, fan.totalPower, 0.01);
+}
+
 // Verify alternate night performance across ConstantVolume, VAV, OnOff, and ZoneExhaust fan models.
 TEST_F(EnergyPlusFixture, Fans_NightVentilationPerformanceAcrossFanTypes)
 {
