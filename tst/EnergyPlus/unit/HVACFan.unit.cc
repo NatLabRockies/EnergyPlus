@@ -238,6 +238,93 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
     EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
 }
 
+// Verify a continuous SystemModel fan evaluates its power curve at average flow across operating modes.
+TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Cubic Continuous Fan Power Fraction");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[3] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.inletAirMassFlowRate = 0.9;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 100.0;
+    fanSystem.totalEff = 1.0;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    // Half runtime at 0.5 flow and half at 1.0 flow gives 0.75 average flow.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, _);
+
+    Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+
+    // A zero-flow mode still contributes runtime to the average and power scaling.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 1.0, 0.5, 0.0, 0.5, _);
+    Real64 expectedZeroFlowModePower = pow(0.5, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    EXPECT_NEAR(expectedZeroFlowModePower, fanSystem.totalPower, 0.01);
+}
+
+// Verify the continuous low-flow temperature safeguard linearizes fan power and limits temperature rise.
+TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousLowFlowTemperatureSafeguard)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.2;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+
+    auto *powerCurve = Curve::AddCurve(*state, "Constant Continuous Fan Power Fraction");
+    powerCurve->curveType = Curve::CurveType::Cubic;
+    powerCurve->coeff[0] = 1.0;
+    powerCurve->inputLimits[0].min = 0.0;
+    powerCurve->inputLimits[0].max = 1.0;
+
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Continuous;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.2;
+    fanSystem.rhoAirStdInit = 1.2;
+    fanSystem.deltaPress = 1000.0;
+    fanSystem.totalEff = 1.0;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.minPowerFlowFrac = 0.2;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
+
+    // Two low-flow modes have a 1% average flow and 50% total runtime.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.005, 0.25, 0.015, 0.25, _);
+
+    Real64 expectedPower = 0.5 * 0.01 * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress /
+                           (fanSystem.totalEff * fanSystem.rhoAirStdInit * 0.1);
+    EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_LT(fanSystem.outletAirTemp - fanSystem.inletAirTemp, 20.0);
+
+    Real64 splitModePower = fanSystem.totalPower;
+    Real64 splitModeTemperatureRise = fanSystem.outletAirTemp - fanSystem.inletAirTemp;
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.0075, 0.25, 0.0125, 0.25, _);
+    EXPECT_NEAR(splitModePower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(splitModeTemperatureRise, fanSystem.outletAirTemp - fanSystem.inletAirTemp, 0.01);
+}
+
 TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
 {
     // this unit test mimics "EnergyPlusFixture.Fans_FanSizing"
@@ -532,35 +619,35 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     std::string const idf_objects = delimited_string({
 
         "  Fan:SystemModel,",
-        "    Test Fan ,                   !- Name",
-        "    ,                            !- Availability Schedule Name",
-        "    TestFanAirInletNode,         !- Air Inlet Node Name",
-        "    TestFanOutletNode,           !- Air Outlet Node Name",
-        "    1.0 ,                        !- Design Maximum Air Flow Rate",
-        "    Continuous ,                   !- Speed Control Method",
-        "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
-        "    100.0,                       !- Design Pressure Rise",
-        "    0.9 ,                        !- Motor Efficiency",
-        "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    100.0,                    !- Design Electric Power Consumption",
-        "    ,                      !- Design Power Sizing Method",
-        "    ,                      !- Electric Power Per Unit Flow Rate",
-        "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    ,                        !- Fan Total Efficiency",
-        "  simple cubic; !- Electric Power Function of Flow Fraction Curve Name",
+        "    Test Fan,               !- Name",
+        "    ,                       !- Availability Schedule Name",
+        "    TestFanAirInletNode,    !- Air Inlet Node Name",
+        "    TestFanOutletNode,      !- Air Outlet Node Name",
+        "    1.0,                    !- Design Maximum Air Flow Rate",
+        "    Continuous,             !- Speed Control Method",
+        "    0.0,                    !- Electric Power Minimum Flow Rate Fraction",
+        "    100.0,                  !- Design Pressure Rise",
+        "    0.9,                    !- Motor Efficiency",
+        "    1.0,                    !- Motor In Air Stream Fraction",
+        "    100.0,                  !- Design Electric Power Consumption",
+        "    ,                       !- Design Power Sizing Method",
+        "    ,                       !- Electric Power Per Unit Flow Rate",
+        "    ,                       !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                       !- Fan Total Efficiency",
+        "    simple cubic;           !- Electric Power Function of Flow Fraction Curve Name",
 
         "  Curve:Cubic,",
-        "    simple cubic,  !- Name",
+        "    simple cubic,           !- Name",
         "    0.0,                    !- Coefficient1 Constant",
-        "    0.0,                     !- Coefficient2 x",
-        "    0.0,                     !- Coefficient3 x**2",
+        "    0.0,                    !- Coefficient2 x",
+        "    0.0,                    !- Coefficient3 x**2",
         "    1.0,                    !- Coefficient4 x**3",
-        "    0.0,                     !- Minimum Value of x",
-        "    1.0,                     !- Maximum Value of x",
-        "    0.0,                     !- Minimum Curve Output",
-        "    1.0,                     !- Maximum Curve Output",
-        "    Dimensionless,           !- Input Unit Type for X",
-        "    Dimensionless;           !- Output Unit Type",
+        "    0.0,                    !- Minimum Value of x",
+        "    1.0,                    !- Maximum Value of x",
+        "    0.0,                    !- Minimum Curve Output",
+        "    1.0,                    !- Maximum Curve Output",
+        "    Dimensionless,          !- Input Unit Type for X",
+        "    Dimensionless;          !- Output Unit Type",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -586,7 +673,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc4)
     Real64 runTimeFrac2 = 0.5;
     fanSystem->simulate(*state, false, _, _, _, massFlow1, runTimeFrac1, massFlow2, runTimeFrac2);
     Real64 locFanElecPower = fanSystem->totalPower;
-    Real64 locExpectPower = (0.5 * pow(0.5, 3) + 0.5 * 1.0) * fanSystem->designElecPower;
+    // Continuous evaluates the curve at average flow, not P_design * sum(runtime_i * curve(flow_i)).
+    Real64 locExpectPower = pow(0.75, 3) * fanSystem->designElecPower;
     EXPECT_NEAR(locFanElecPower, locExpectPower, 0.01);
 
     // 100% of the time at average flow 0.75, on for entire timestep
