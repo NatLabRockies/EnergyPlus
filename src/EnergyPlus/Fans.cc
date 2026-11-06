@@ -3087,7 +3087,8 @@ void FanSystem::calcSimpleSystemFan(
             Real64 _minFlowFracLimitFanHeat = 0.10;
             if (_deltaTAcrossFan > 20.0 && _localAverageFlowFrac < _minFlowFracLimitFanHeat) {
                 Real64 _localFlowFracForPower = max(minPowerFlowFrac, _localAverageFlowFrac);
-                Real64 _flowFracForLinearizedPower = (_localFlowFracForPower < _minFlowFracLimitFanHeat) ? _localFlowFracForPower : _localAverageFlowFrac;
+                Real64 _flowFracForLinearizedPower =
+                    (_localFlowFracForPower < _minFlowFracLimitFanHeat) ? _localFlowFracForPower : _localAverageFlowFrac;
                 Real64 _powerFracAtLowMin = Curve::CurveValue(state, powerModFuncFlowFracCurveNum, _minFlowFracLimitFanHeat);
                 Real64 _runtimeWeightedPressureRise = 0.0;
                 for (int mode = 0; mode < _numModes; ++mode) {

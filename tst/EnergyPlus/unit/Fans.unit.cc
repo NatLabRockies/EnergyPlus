@@ -309,8 +309,7 @@ TEST_F(EnergyPlusFixture, VAVFanObj_ContinuousLowFlowTemperatureSafeguard)
     fan.coeffs = {1.0, 0.0, 0.0, 0.0, 0.0};
     fan.simulateVAV(*state);
 
-    Real64 expectedPower = 0.01 * 1.0 * fan.maxAirMassFlowRate * fan.deltaPress /
-                           (fan.totalEff * fan.rhoAirStdInit * 0.1);
+    Real64 expectedPower = 0.01 * 1.0 * fan.maxAirMassFlowRate * fan.deltaPress / (fan.totalEff * fan.rhoAirStdInit * 0.1);
     EXPECT_NEAR(expectedPower, fan.totalPower, 0.01);
     EXPECT_LT(fan.outletAirTemp - fan.inletAirTemp, 20.0);
 }

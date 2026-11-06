@@ -276,7 +276,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
 
     // A zero-flow mode still contributes runtime to the average and power scaling.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.0, 0.5, 0.0, 0.5, _);
-    Real64 expectedZeroFlowModePower = pow(0.5, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+    Real64 expectedZeroFlowModePower =
+        pow(0.5, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedZeroFlowModePower, fanSystem.totalPower, 0.01);
 }
 
@@ -313,8 +314,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousLowFlowTemperatureSafeguard)
     // Two low-flow modes have a 1% average flow and 50% total runtime.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.005, 0.25, 0.015, 0.25, _);
 
-    Real64 expectedPower = 0.5 * 0.01 * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress /
-                           (fanSystem.totalEff * fanSystem.rhoAirStdInit * 0.1);
+    Real64 expectedPower = 0.5 * 0.01 * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit * 0.1);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
     EXPECT_LT(fanSystem.outletAirTemp - fanSystem.inletAirTemp, 20.0);
 
