@@ -52,7 +52,7 @@ This numeric field is the design volume flow rate of the fan as installed in the
 
 \paragraph{Field: Speed Control Method}\label{field-speed-method-fansysmodel}
 
-This field selects how the fan speed is controlled. The choices are Continuous and Discrete; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
+This field selects how the fan speed is controlled. The choices are Discrete and Continuous; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. When multiple operating-mode flows are supplied (e.g., half the runtime at 50% flow and half at 100% flow, for an average flow fraction of 75%), the curve is evaluated at the runtime-weighted average flow fraction and the resulting fan power is scaled by total runtime. A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
 
 \paragraph{Field: Electric Power Minimum Flow Rate Fraction}\label{field-power-min-flow-fraction-fansysmodel}
 
