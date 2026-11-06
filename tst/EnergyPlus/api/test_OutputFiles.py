@@ -53,8 +53,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from contextlib import closing
 import glob as gb
 import os
+import sqlite3
 import tempfile
 import unittest
 
@@ -162,6 +164,65 @@ class TestAPIFlushOutput(unittest.TestCase):
             lines = f.read().splitlines()
         self.assertTrue(lines, "eplusout.err is empty!")
         self.assertIn("EnergyPlus Terminated", lines[-1])
+
+
+class TestSQLiteCompletion(unittest.TestCase):
+    """Completion metadata must be written before shutdown closes SQLite."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.api = EnergyPlusAPI()
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.state = self.api.state_manager.new_state()
+        self.addCleanup(self.api.state_manager.delete_state, self.state)
+
+    def run_example(self, sqlite=True, abort=False):
+        with open(idf_path, encoding="utf-8") as stream:
+            text = stream.read()
+        if sqlite:
+            text += "\nOutput:SQLite,SimpleAndTabular;\n"
+        if abort:
+            text += """
+EnergyManagementSystem:Program,
+    StopAfterInitialization,
+    SET stop = @FatalHaltEp 1;
+EnergyManagementSystem:ProgramCallingManager,
+    StopAtFirstEnvironment,
+    BeginNewEnvironment,
+    StopAfterInitialization;
+"""
+        model = os.path.join(self.directory.name, "in.idf")
+        with open(model, "w", encoding="utf-8") as stream:
+            stream.write(text)
+        return self.api.runtime.run_energyplus(self.state, ["-d", self.directory.name, "-D", model])
+
+    def completion_record(self):
+        database = os.path.join(self.directory.name, "eplusout.sql")
+        self.assertTrue(os.path.isfile(database))
+        with closing(sqlite3.connect(database)) as connection:
+            return connection.execute("SELECT Completed, CompletedSuccessfully FROM Simulations").fetchall()
+
+    def test_success_is_recorded_before_state_deletion(self):
+        self.assertEqual(self.run_example(), 0)
+        self.assertEqual(self.completion_record(), [(1, 1)])
+
+    def test_failed_simulation_is_not_recorded_as_successful(self):
+        self.assertEqual(self.run_example(abort=True), 1)
+        self.assertEqual(self.completion_record(), [(1, 0)])
+
+    def test_state_reset_after_failed_sqlite_run(self):
+        self.assertEqual(self.run_example(abort=True), 1)
+        self.assertEqual(self.completion_record(), [(1, 0)])
+        self.api.state_manager.reset_state(self.state)
+        self.assertEqual(self.run_example(), 0)
+        self.assertEqual(self.completion_record(), [(1, 1)])
+
+    def test_success_without_sqlite(self):
+        self.assertEqual(self.run_example(sqlite=False), 0)
+        self.assertFalse(os.path.exists(os.path.join(self.directory.name, "eplusout.sql")))
 
 
 if __name__ == "__main__":
