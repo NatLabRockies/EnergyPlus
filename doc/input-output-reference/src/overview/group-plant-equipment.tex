@@ -6329,6 +6329,9 @@ only one unit (compressor multiplier is 1). When there are multiple units, the
 schedule values are: 0=off, positive integer k=number of heating units on,
 negative integer -k=number of cooling units on. Note that this only applies to
 the case where all units are in the same heating/cooling mode.
+\paragraph{Field: Minimum Part Load Ratio} This field is the minimum part load
+ratio of the heat pump. The default value is 0.0. Below this operating limit,
+compressor cycling will occur.
 \paragraph{Field: Flow Mode} This field selects how the water flow rate through
 the heat pump is controlled. It applies to both the hot water and the chilled
 water sides. The choices are \emph{ConstantFlow} and
@@ -6373,9 +6376,6 @@ the operation boundary, the heat pump will not operate.
 This optional alpha field specifies the name of a univariate curve or table that defines
 the maximum leaving water temperature. When the air-water temperature combination is outside of
 the operation boundary, the heat pump will not operate.
-\paragraph{Field: Minimum Part Load Ratio} This field is the minimum part load
-ratio of the heat pump. The default value is 0.1. Below this operating limit,
-compressor cycling will occur.
 \paragraph{Field: Sizing Factor for Heating} This field is a multiplier for the
 autosized capacity and flow rates. The default value is 1.0.
 \paragraph{Field: Rated Inlet Air Temperature in Cooling Mode} This field is the
