@@ -402,8 +402,6 @@ namespace SurfaceGeometry {
                     (thisSurface.Class != SurfaceClass::TDD_Dome)) {
                     thisZone.ExtWindowArea += thisSurface.GrossArea;
                     thisSpace.extWindowArea += thisSurface.GrossArea;
-                    thisZone.ExtWindowArea_Multiplied =
-                        thisZone.ExtWindowArea + thisSurface.GrossArea * thisSurface.Multiplier * thisZone.Multiplier * thisZone.ListMultiplier;
                     if (DetailedWWR) {
                         print(state.files.debug,
                               "{},Window,{:.2f},{:.1f}\n",
@@ -817,9 +815,6 @@ namespace SurfaceGeometry {
         // Allocation is dependent on the user input file.
 
         state.dataSurface->ShadeV.allocate(state.dataSurface->TotSurfaces);
-        for (auto &e : state.dataSurface->ShadeV) {
-            e.NVert = 0;
-        }
         // Individual components (XV,YV,ZV) allocated in routine ProcessSurfaceVertices
         state.dataSurface->X0.dimension(state.dataSurface->TotSurfaces, 0.0);
         state.dataSurface->Y0.dimension(state.dataSurface->TotSurfaces, 0.0);
@@ -2312,7 +2307,6 @@ namespace SurfaceGeometry {
                     }
                     if (thisSurf.Class == SurfaceClass::Roof) {
                         thisZone.CeilingArea += thisSurf.Area;
-                        thisZone.HasRoof = true;
                     }
                 }
                 if (thisSpace.userEnteredFloorArea != Constant::AutoCalculate) {
@@ -2432,15 +2426,6 @@ namespace SurfaceGeometry {
                 } else {
                     thisZone.FloorArea = zoneCalcFloorArea;
                 }
-                Real64 totSpacesFloorArea = 0.0;
-                for (int spaceNum : thisZone.spaceIndexes) {
-                    totSpacesFloorArea += state.dataHeatBal->space(spaceNum).FloorArea;
-                }
-                if (totSpacesFloorArea > 0.0) {
-                    for (int spaceNum : thisZone.spaceIndexes) {
-                        state.dataHeatBal->space(spaceNum).fracZoneFloorArea = state.dataHeatBal->space(spaceNum).FloorArea / totSpacesFloorArea;
-                    }
-                } // else leave fractions at zero
             }
         }
 
@@ -3153,7 +3138,6 @@ namespace SurfaceGeometry {
                         if (thisSpace.TDDDomeFirst == 0) {
                             thisSpace.TDDDomeFirst = SurfNum;
                         }
-                        thisSpace.TDDDomeLast = SurfNum;
                     } else {
                         thisSpace.OpaqOrWinSurfaceLast = SurfNum;
                     }
@@ -7128,7 +7112,6 @@ namespace SurfaceGeometry {
             }
 
             if (!s_ipsc->lAlphaFieldBlanks(4)) {
-                state.dataSurface->IntMassObjects(Item).spaceOrSpaceListName = s_ipsc->cAlphaArgs(4);
                 Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->space);
                 int SLItem = 0;
                 if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0) {
@@ -7730,7 +7713,6 @@ namespace SurfaceGeometry {
                 // endif
             }
             state.dataHeatBal->ExtVentedCavity(Item).Tilt = AvgTilt;
-            state.dataHeatBal->ExtVentedCavity(Item).Azimuth = AvgAzimuth;
 
             // find area weighted centroid.
             //            ExtVentedCavity( Item ).Centroid.z = sum( Surface( ExtVentedCavity( Item ).SurfPtrs ).Centroid.z * Surface(
@@ -13347,7 +13329,6 @@ namespace SurfaceGeometry {
 
         // Transfer to XV,YV,ZV arrays
 
-        state.dataSurface->ShadeV(ThisSurf).NVert = surf.Sides;
         state.dataSurface->ShadeV(ThisSurf).XV.allocate(surf.Sides);
         state.dataSurface->ShadeV(ThisSurf).YV.allocate(surf.Sides);
         state.dataSurface->ShadeV(ThisSurf).ZV.allocate(surf.Sides);
@@ -14496,11 +14477,9 @@ namespace SurfaceGeometry {
                 }
                 state.dataSurfaceGeometry->firstTime = false;
                 state.dataSurfaceGeometry->noTransform = false;
-                state.dataSurface->AspectTransform = true;
                 if (state.dataSurface->WorldCoordSystem) {
                     ShowWarningError(state, std::format("{}: must use Relative Coordinate System.  Transform request ignored.", CurrentModuleObject));
                     state.dataSurfaceGeometry->noTransform = true;
-                    state.dataSurface->AspectTransform = false;
                 }
             } else {
                 state.dataSurfaceGeometry->firstTime = false;

@@ -77,6 +77,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXInput)
     auto const &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     EXPECT_EQ("COOLINGCOIL", thisCoil.name);
     EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance->name);
+    EXPECT_EQ("Coil:Cooling:DX", thisCoil.reclaimHeat.SourceType);
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)

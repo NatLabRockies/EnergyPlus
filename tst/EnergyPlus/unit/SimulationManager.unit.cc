@@ -276,7 +276,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_DefaultState)
     EXPECT_FALSE(state->dataEnvrn->IgnoreBeamRadiation);
     EXPECT_FALSE(state->dataEnvrn->IgnoreDiffuseRadiation);
     EXPECT_FALSE(state->dataSysVars->DeveloperFlag);
-    EXPECT_FALSE(state->dataSysVars->TimingFlag);
 
     // no error message from
     EXPECT_TRUE(compare_err_stream("", true));
@@ -394,8 +393,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
         "    IgnoreSolarRadiation,",
         "    IgnoreBeamRadiation,",
         "    IgnoreDiffuseRadiation,",
-        "    DeveloperFlag,",
-        "    TimingFlag;",
+        "    DeveloperFlag;",
     });
 
     // This will throw a warning in InputProcessor since these aren't supported keys, so do not use assertions
@@ -411,8 +409,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
         "against any enum values.",
         "   ** Severe  ** <root>[Output:Diagnostics][Output:Diagnostics 1][diagnostics][3][key] - \"DeveloperFlag\" - Failed to match against any "
         "enum values.",
-        "   ** Severe  ** <root>[Output:Diagnostics][Output:Diagnostics 1][diagnostics][4][key] - \"TimingFlag\" - Failed to match against any enum "
-        "values.",
     });
     EXPECT_TRUE(compare_err_stream(expected_warning, true));
 
@@ -434,7 +430,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
     EXPECT_TRUE(state->dataEnvrn->IgnoreBeamRadiation);
     EXPECT_TRUE(state->dataEnvrn->IgnoreDiffuseRadiation);
     EXPECT_TRUE(state->dataSysVars->DeveloperFlag);
-    EXPECT_TRUE(state->dataSysVars->TimingFlag);
 
     // no error message from
     EXPECT_TRUE(compare_err_stream("", true));

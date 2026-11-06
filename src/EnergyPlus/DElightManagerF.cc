@@ -842,11 +842,9 @@ namespace DElightManagerF {
                                              ": invalid " + state.dataIPShortCut->cAlphaFieldNames(1) + "=" + cAlphas(1) + "...ignored."));
             }
             doTransform = true;
-            state.dataSurface->AspectTransform = true;
         }
         if (state.dataSurface->WorldCoordSystem) {
             doTransform = false;
-            state.dataSurface->AspectTransform = false;
         }
     }
 
