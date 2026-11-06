@@ -152,6 +152,7 @@
     SingleMode,              !- Operating Mode Control Option for Multiple Unit
     ,                        !- Operating Mode Control Schedule Name
     ,                        !- Minimum Part Load Ratio
+    ,                        !- Flow Mode
     ,                        !- Rated Inlet Air Temperature in Heating Mode {C}
     ,                        !- Rated Air Flow Rate in Heating Mode {m3/s}
     ,                        !- Rated Leaving Water Temperature in Heating Mode {C}
