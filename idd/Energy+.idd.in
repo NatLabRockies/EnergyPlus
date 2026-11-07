@@ -1915,6 +1915,59 @@ Site:GroundTemperature:Undisturbed:FiniteDifference,
        \note  = 1   : standard reference state (12 cm grass)
        \note  = 1.5 : wild growth
 
+Site:GroundTemperature:Undisturbed:GradientSegments,
+   \memo Vertically-segmented ground temperature model for vertical ground heat
+   \memo exchanger simulation. Supports user-specified piecewise-linear temperature
+   \memo gradient segments with a Kusuda-to-gradient blending zone at shallow depth.
+   \extensible:3
+   \min-fields 8
+   A1, \field Name
+       \required-field
+       \type alpha
+       \reference UndisturbedGroundTempModels
+   N1, \field Number of Segments
+       \required-field
+       \type integer
+       \minimum 1
+   N2, \field Transition Depth
+       \type real
+       \units m
+       \default 15.0
+   N3, \field Blend Width
+       \type real
+       \units m
+       \default 5.0
+   N4, \field Reference Temperature
+    \type real
+    \units C
+    \default 15.0
+N5, \field Upper Depth 1
+       \required-field
+       \begin-extensible
+       \type real
+       \units m
+       \minimum 0.0
+   N6, \field Lower Depth 1
+       \required-field
+       \type real
+       \units m
+       \minimum 0.0
+   N7, \field Gradient 1
+       \required-field
+       \type real
+       \units K/m
+   N8, \field Upper Depth 2
+       \type real
+       \units m
+       \minimum 0.0
+   N9, \field Lower Depth 2
+       \type real
+       \units m
+       \minimum 0.0
+   N10; \field Gradient 2
+       \type real
+       \units K/m
+
 Site:GroundTemperature:Undisturbed:KusudaAchenbach,
        \memo Undisturbed ground temperature object using the
        \memo Kusuda-Achenbach 1965 correlation.
@@ -81534,7 +81587,8 @@ GroundHeatExchanger:System,
         \required-field
         \type choice
         \key Site:GroundTemperature:Undisturbed:FiniteDifference
-        \key Site:GroundTemperature:Undisturbed:KusudaAchenbach
+       \key Site:GroundTemperature:Undisturbed:GradientSegments
+       \key Site:GroundTemperature:Undisturbed:KusudaAchenbach
         \key Site:GroundTemperature:Undisturbed:Xing
   A5,  \field Undisturbed Ground Temperature Model Name
         \required-field

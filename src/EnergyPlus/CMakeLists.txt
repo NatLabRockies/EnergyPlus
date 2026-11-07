@@ -335,6 +335,8 @@ set(SRC
     GroundTemperatureModeling/GroundTemperatureModelManager.hh
     GroundTemperatureModeling/KusudaAchenbachGroundTemperatureModel.cc
     GroundTemperatureModeling/KusudaAchenbachGroundTemperatureModel.hh
+GroundTemperatureModeling/GradientsGTM.cc
+GroundTemperatureModeling/GradientsGTM.hh
     GroundTemperatureModeling/SiteBuildingSurfaceGroundTemperatures.cc
     GroundTemperatureModeling/SiteBuildingSurfaceGroundTemperatures.hh
     GroundTemperatureModeling/SiteDeepGroundTemperatures.cc

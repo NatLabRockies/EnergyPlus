@@ -1282,6 +1282,73 @@ Site:GroundTemperature:Undisturbed:Xing,
   30;                         !- Phase Shift of Temperature Amplitude 2 {days}
 \end{lstlisting}
 
+
+\subsection{Site:GroundTemperature:Undisturbed:GradientSegments}\label{sitegroundtemperatureundisturbedgradientsegments}
+
+Site:GroundTemperature:Undisturbed:GradientSegments is appropriate for all GroundHeatExchanger:Vertical objects. It should be used to replace Site:GroundTemperature:Undisturbed:KusudaAchenbach in the GroundHeatExchanger:System object. The name in the IDF below is Melbourne Ground Gradients Temp
+
+It fills the gap of increasing stable ground temperature with depth that is missing in EnergyPlusv26.2.0's KusudaAcchenbach, FiniteDifference and Xing models. It extends KusudaAchenbach's depth- and time-varying near-surface (<15m) temperatures with a Transition Depth, Blend Zone and Reference Temperature with an extensible set of linear gradients and segment lengths to model any non-linear stable deep ground temperature profiles for any length of vertical ground heat exchangers. 
+
+\label{inputs-gradientsegments}
+
+\paragraph{Field: Number of Segments}\label{field-number-of-segments}
+
+The number of linear gradient segments to be modeled in the deep geothermal region.
+
+\paragraph{Field: Transition Depth}\label{field-transition-depth}
+
+The depth at which amplitudes of KusudaAchenbach's temperatures vanish, in m, defaults to 15.
+
+\paragraph{Field: Blend width}\label{field-blend-width}
+
+The ramp blend width symmetrical about the Transition depth, in m, defaults to 5. 
+
+\paragraph{Field: Reference Temperature}\label{field-reference-temperatures} Can use the Annual Surface temperature in KusudaAchenbach object
+
+The start of the stable geothermal temperatures in deep ground, in deg C.
+
+\paragraph{Field: Upper Depth 1}\label{field-upper-depth-1}
+
+The depth at the start of stable time-invariant ground temperatures, in m.
+
+\paragraph{Field: Lower Depth 1}\label{field-lower-depth-1}
+
+The lower depth of the 1st linear geothermal gradient, in m.
+
+\paragraph{Field: Gradient 1}\label{field-gradient-1}
+
+The first stable linear geothermal gradient, in K/m
+
+\paragraph{Field: Upper Depth 2}\label{field-upper-depth-2}
+
+The depth at the start of stable time-invariant ground temperatures, in m.
+
+\paragraph{Field: Lower Depth 2}\label{field-lower-depth-2}
+
+The lower depth of the 2nd linear geothermal gradient, in m.
+
+\paragraph{Field: Gradient 2}\label{field-gradient-2}
+
+The second stable linear geothermal gradient, in K/m
+
+An IDF example:
+
+\begin{lstlisting}
+Site:GroundTemperature:Undisturbed:GradientSegments,
+    Melbourne Gradient Ground Temps,  !- Name
+    2,                                !- Number of Segments
+    15.0,                             !- Transition Depth {m}
+    5.0,                              !- Blend Width {m}
+    15.0,                             !- Reference Temperature {C}
+    15.0,                             !- Upper Depth 1 {m}
+    50,                               !- Lower Depth 1 {m}
+    0.057,                            !- Gradient 1 {K/m}
+    50,                               !- Upper Depth 2 {m}
+    400,                              !- Lower Depth 2 {m}
+    0.040;                            !- Gradient 2 {K/m}
+\end{lstlisting}
+
+
 \subsection{Site:GroundDomain:Slab}\label{sitegrounddomainslab}
 
 This section documents the input object used to simulate ground coupled heat transfer with horizontal building surfaces within EnergyPlus. Horizontal ground surfaces within EnergyPlus interact with the Site:GroundDomain object by utilizing the \hyperref[surfacepropertyothersideconditionsmodel]{SurfaceProperty:OtherSideConditionsModel} object. By utilizing this object, multiple horizontal surfaces can be coupled to the same Site:GroundDomain object. Each horizontal surface may also have its unique ground domain, however, runtime will be adversely affected.
