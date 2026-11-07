@@ -2,7 +2,7 @@ name: Self-Hosted Build and Test
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ "**" ]
   workflow_dispatch:
     inputs:
       ref:

@@ -58,8 +58,6 @@ std::size_t RegularGridInterpolatorImplementation::add_grid_point_data_set(
     number_of_grid_point_data_sets++;
     temporary_grid_point_data.resize(number_of_grid_point_data_sets);
     results.resize(number_of_grid_point_data_sets);
-    hypercube_grid_point_data.resize(hypercube.size(),
-                                     std::vector<double>(number_of_grid_point_data_sets));
     hypercube_cache.clear();
     if (target_is_set) {
         set_results();
@@ -309,7 +307,7 @@ void RegularGridInterpolatorImplementation::set_axis_sizes()
 
 void RegularGridInterpolatorImplementation::set_results()
 {
-    set_hypercube_grid_point_data();
+    const auto& hypercube_grid_point_data = get_hypercube_grid_point_data();
     std::fill(results.begin(), results.end(), 0.0);
     for (std::size_t hypercube_index = 0; hypercube_index < hypercube.size(); ++hypercube_index) {
         hypercube_weights[hypercube_index] =
@@ -483,8 +481,6 @@ void RegularGridInterpolatorImplementation::set_hypercube(std::vector<Method> me
         hypercube = std::move(r);
     }
     if (hypercube.size() != previous_size) {
-        hypercube_grid_point_data.resize(hypercube.size(),
-                                         std::vector<double>(number_of_grid_point_data_sets));
         hypercube_weights.resize(hypercube.size());
     }
 }
@@ -529,19 +525,23 @@ void RegularGridInterpolatorImplementation::calculate_interpolation_coefficients
     }
 }
 
-void RegularGridInterpolatorImplementation::set_hypercube_grid_point_data()
+const std::vector<std::vector<double>>&
+RegularGridInterpolatorImplementation::get_hypercube_grid_point_data()
 {
-    if (hypercube_cache.count({floor_grid_point_index, hypercube_size_hash})) {
-        hypercube_grid_point_data =
-            hypercube_cache.at({floor_grid_point_index, hypercube_size_hash});
-        return;
+    const auto cache_key = std::make_pair(floor_grid_point_index, hypercube_size_hash);
+    if (const auto cached_hypercube = hypercube_cache.find(cache_key);
+        cached_hypercube != hypercube_cache.end()) {
+        return cached_hypercube->second;
     }
+
+    std::vector<std::vector<double>> hypercube_grid_point_data(
+        hypercube.size(), std::vector<double>(number_of_grid_point_data_sets));
     std::size_t hypercube_index = 0;
     for (const auto& v : hypercube) {
         hypercube_grid_point_data[hypercube_index] =
             get_grid_point_data_relative(floor_grid_point_coordinates, v);
         ++hypercube_index;
     }
-    hypercube_cache[{floor_grid_point_index, hypercube_size_hash}] = hypercube_grid_point_data;
+    return hypercube_cache.emplace(cache_key, std::move(hypercube_grid_point_data)).first->second;
 }
 } // namespace Btwxt
