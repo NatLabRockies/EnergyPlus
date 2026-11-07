@@ -42,7 +42,22 @@ fi
 
 HEADER="=============== ReadVarsESO ================="
 # Name of executable
-PRG_N=ReadVarsESO
+PRG_N=energyplus
+
+# Resolve the installation directory from this script when ENERGYPLUS_DIR was
+# not supplied, including when the script was reached through its symlink.
+READVARS_ROOT="$ENERGYPLUS_DIR"
+if $auto_eplus_dir; then
+  READVARS_SCRIPT="$0"
+  if [ -n "`readlink "$0"`" ]; then
+    READVARS_SCRIPT=`readlink "$0"`
+  fi
+  READVARS_ROOT=$(cd "$(dirname "$READVARS_SCRIPT")"; pwd)
+fi
+
+run_readvars() {
+  "$READVARS_ROOT/$PRG_N" auxiliary readvars "$@"
+}
 # Output files extension
 OUT_EXT="csv"
 
@@ -135,33 +150,25 @@ case $EXT in
     if [ $BASE == eplusout ]; then
       echo $HEADER
       rm -f eplusout.csv
-      if $auto_eplus_dir; then
-        $ENERGYPLUS_DIR/bin/$PRG_N;
-      else
-        $ENERGYPLUS_DIR/PostProcess/$PRG_N;
-      fi
+      run_readvars
+      readvars_status=$?
     else
       echo $HEADER
       rm -f eplusout.eso $BASE.csv eplusout.csv;
       ln -s $1 eplusout.eso;
-      if $auto_eplus_dir; then
-        $ENERGYPLUS_DIR/bin/$PRG_N;
-      else
-        $ENERGYPLUS_DIR/PostProcess/$PRG_N;
-      fi
+      run_readvars
+      readvars_status=$?
       rm -f eplusout.eso;
-      mv -f eplusout.csv $BASE.csv;
+      if [ $readvars_status -eq 0 ]; then
+        mv -f eplusout.csv $BASE.csv || readvars_status=$?;
+      fi
     fi
-    exit 0;
+    exit $readvars_status;
     ;;
   rvi | mvi)
     echo $HEADER
-    if $auto_eplus_dir; then
-      $ENERGYPLUS_DIR/bin/$PRG_N $1
-    else
-      $ENERGYPLUS_DIR/PostProcess/$PRG_N  $1
-    fi
-    exit 0;
+    run_readvars "$@"
+    exit $?;
     ;;*)
     Usage; ExitWithError;
 esac

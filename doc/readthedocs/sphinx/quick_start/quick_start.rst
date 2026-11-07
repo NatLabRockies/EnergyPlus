@@ -402,9 +402,10 @@ Step-By-Step Instructions
 
       $/energyplus -i /Energy+.idd -w USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -r 5ZAC_DailyGas.idf
 
-   The “-r” option (synonymous with “--readvars”) will
-   execute the ReadVarsESO program after EnergyPlus
-   runs to generates a CSV file from the ESO.
+   The “-r” option (synonymous with “--readvars”) runs
+   ReadVarsESO from the ``readvars`` Python package installed with
+   EnergyPlus after the simulation, generating CSV files from the ESO
+   and MTR output files.
 
 **Note**—Strictly speaking, making a separate copy of
 the input file before making any changes is not

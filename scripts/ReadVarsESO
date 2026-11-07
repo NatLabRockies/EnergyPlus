@@ -1,0 +1,18 @@
+#!/bin/sh
+
+launcher_path=$0
+link_target=$(readlink "$launcher_path" 2>/dev/null || true)
+if [ -n "$link_target" ]; then
+  case "$link_target" in
+    /*) launcher_path=$link_target ;;
+    *) launcher_path=$(dirname "$launcher_path")/$link_target ;;
+  esac
+fi
+
+launcher_dir=$(CDPATH= cd "$(dirname "$launcher_path")" && pwd)
+energyplus="$launcher_dir/energyplus"
+if [ ! -x "$energyplus" ]; then
+  energyplus="$launcher_dir/../energyplus"
+fi
+
+exec "$energyplus" auxiliary readvars "$@"
