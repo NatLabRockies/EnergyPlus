@@ -2960,8 +2960,9 @@ void FanSystem::calcSimpleSystemFan(
                             }
                             Real64 _locLowSpeedTimeFrac =
                                 (flowFracAtSpeed[_hiSideSpeed] - _locFlowRatio) / (flowFracAtSpeed[_hiSideSpeed] - flowFracAtSpeed[_lowSideSpeed]);
-                            _locLowSpeedRuntimeFrac = _locLowSpeedTimeFrac * _localRuntimeFrac[mode];
-                            _locHiSpeedRuntimeFrac = (1 - _locLowSpeedTimeFrac) * _localRuntimeFrac[mode];
+                            // Split the PLF-corrected runtime between speeds, not the uncorrected parent request.
+                            _locLowSpeedRuntimeFrac = _locLowSpeedTimeFrac * _locRuntimeFrac;
+                            _locHiSpeedRuntimeFrac = (1 - _locLowSpeedTimeFrac) * _locRuntimeFrac;
                             runtimeFracAtSpeed[_lowSideSpeed] += _locLowSpeedRuntimeFrac;
                             runtimeFracAtSpeed[_hiSideSpeed] += _locHiSpeedRuntimeFrac;
                         }
