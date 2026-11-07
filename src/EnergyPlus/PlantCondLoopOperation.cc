@@ -3604,6 +3604,12 @@ void AdjustChangeInLoadByHowServed(EnergyPlusData &state,
 
         //- Retrieve data from the plant loop data structure
         CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+        // A component in a modulated flow mode controls its own flow rate to hold the leaving setpoint, so it can raise
+        // its flow up to whatever the branch can deliver. Judging its capacity by the current flow, which may still be
+        // sitting at the branch pump minimum, understates it and spills load onto the next machine in the list.
+        if (this_component.ModulatedFlow) {
+            CurMassFlowRate = max(CurMassFlowRate, state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRateMaxAvail);
+        }
         ToutLowLimit = this_component.MinOutletTemp;
         Tinlet = state.dataLoopNodes->Node(this_component.NodeNumIn).Temp;
         CurSpecHeat = plantLoc.loop->glycol->getSpecificHeat(state, Tinlet, RoutineName);
@@ -3688,11 +3694,13 @@ void AdjustChangeInLoadByHowServed(EnergyPlusData &state,
             this_component.Available = true;
             this_component.FreeCoolCntrlShutDown = false;
             CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+            if (this_component.ModulatedFlow) {
+                CurMassFlowRate = max(CurMassFlowRate, state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRateMaxAvail);
+            }
             ToutLowLimit = this_component.MinOutletTemp;
             Tinlet = state.dataLoopNodes->Node(this_component.NodeNumIn).Temp;
             CurSpecHeat = plantLoc.loop->glycol->getSpecificHeat(state, Tinlet, RoutineName);
             QdotTmp = CurMassFlowRate * CurSpecHeat * (Tinlet - ToutLowLimit);
-
             //        !- Don't correct if Q is zero, as this could indicate a component which this hasn't been implemented or not yet turned
             //        on
             if (CurMassFlowRate > 0.0) {
