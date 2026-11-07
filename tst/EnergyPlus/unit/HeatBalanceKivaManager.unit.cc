@@ -911,6 +911,8 @@ protected:
         layer.material = Kiva::Material(1.95, 2400.0, 900.0);
         foundation.slab.layers.push_back(layer);
         foundation.wall.layers.push_back(layer);
+        foundation.wall.heightAboveGrade = 0.1;
+        foundation.wall.depthBelowSlab = 0.2;
         foundation.polygon.outer() = {{-3.0, -3.0}, {-3.0, 3.0}, {3.0, 3.0}, {3.0, -3.0}};
         manager.kivaInstances.emplace_back(*state, foundation, 1, std::vector<int>{}, 1, 20.0, 1.0, 0, &manager);
         auto &ground = *manager.kivaInstances[0].instance.ground;
