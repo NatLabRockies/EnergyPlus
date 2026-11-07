@@ -277,6 +277,7 @@ namespace DataHeatBalance {
         AirTerminalUserDefined,
         PackagedTESCoilTank,
         ElectricEquipmentITEAirCooled,
+        ElectricEquipmentITELiquidCooled,
         SecCoolingDXCoilSingleSpeed,
         SecHeatingDXCoilSingleSpeed,
         SecCoolingDXCoilTwoSpeed,
@@ -361,6 +362,7 @@ namespace DataHeatBalance {
         "AIRTERMINAL:SINGLEDUCT:USERDEFINED",
         "COIL:COOLING:DX:SINGLESPEED:THERMALSTORAGE",
         "ELECTRICEQUIPMENT:ITE:AIRCOOLED",
+        "ELECTRICEQUIPMENT:ITE:LIQUIDCOOLED",
         "COIL:COOLING:DX:SINGLESPEED",
         "COIL:HEATING:DX:SINGLESPEED",
         "COIL:COOLING:DX:TWOSPEED",
@@ -420,6 +422,7 @@ namespace DataHeatBalance {
         "AirTerminal:SingleDuct:UserDefined",
         "Coil:Cooling:DX:SingleSpeed:ThermalStorage",
         "ElectricEquipment:ITE:AirCooled",
+        "ElectricEquipment:ITE:LiquidCooled",
         "Coil:Cooling:DX:SingleSpeed",
         "Coil:Heating:DX:SingleSpeed",
         "Coil:Cooling:DX:TwoSpeed",
@@ -996,7 +999,8 @@ namespace DataHeatBalance {
 
     enum class PERptVars
     {
-        CPU = 0,       // ITE CPU Electric Power/Energy
+        Invalid = -1,
+        CPU,           // ITE CPU Electric Power/Energy
         Fan,           // ITE Fan Electric Power/Energy
         UPS,           // ITE UPS Electric Power/Energy
         CPUAtDesign,   // ITE CPU Electric Power/Energy at Design Inlet Conditions
@@ -1004,6 +1008,29 @@ namespace DataHeatBalance {
         UPSGainToZone, // ITE UPS Heat Gain to Zone Power(Rate)/Energy - convective gain
         ConGainToZone, // ITE Total Heat Gain to Zone Power(Rate)/Energy - convective gain - includes heat gain from UPS, plus CPU and Fans if
                        // room air model not used
+        Num
+    };
+
+    // Liquid-cooled ITE Equipment cooling coil type (Cooling Coil N Object Type field)
+    enum class ITECoolingCoilType
+    {
+        Invalid = -1,
+        ColdPlate,
+        UserDefined,
+        Num
+    };
+    static constexpr std::array<std::string_view, static_cast<int>(ITECoolingCoilType::Num)> ITECoolingCoilTypeNamesUC = {
+        "COIL:COOLING:ITE:COLDPLATE", "COIL:COOLING:ITE:USERDEFINED"};
+
+    enum class LiquidITERptVars
+    {
+        Invalid = -1,
+        CPU,            // ITE CPU Electric Power/Energy
+        Fan,            // ITE Fan Electric Power/Energy
+        TotalElectric,  // ITE Total Electric Power/Energy
+        TotalHeatGen,   // ITE Total Heat Generation Power(Rate)/Energy
+        LiquidHeatGain, // ITE Liquid Heat Gain Power(Rate)/Energy
+        AirHeatGain,    // ITE Air Heat Gain to Zone Power(Rate)/Energy - convective gain
         Num
     };
 
@@ -1071,6 +1098,41 @@ namespace DataHeatBalance {
         Real64 DewpointTBelowDeltaT = 0.0; // ITE Air Inlet Dewpoint Temperature Difference Below Operating Range [deltaC]
         Real64 RHAboveDeltaRH = 0.0;       // ITE Air Inlet Relative Humidity Difference Above Operating Range [%]
         Real64 RHBelowDeltaRH = 0.0;       // ITE Air Inlet Relative Humidity Difference Below Operating Range [%]
+    };
+
+    // One entry in the extensible cooling coil list of ElectricEquipment:ITE:LiquidCooled
+    struct ITELiquidCoolingCoilSpec
+    {
+        ITECoolingCoilType CoilType = ITECoolingCoilType::Invalid; // Cooling Coil Object Type
+        std::string CoilName;                                      // Cooling Coil Name
+        Real64 LoadFraction = 0.0;                                 // Cooling Coil Load Fraction (static)
+        Sched::Schedule *LoadFractionSched = nullptr;              // Cooling Coil Load Fraction Schedule Name
+    };
+
+    struct ITEquipDataLiquidCooled // Liquid-Cooled IT Equipment
+    {
+        // Members
+        std::string Name;                             // EQUIPMENT object name
+        int ZonePtr = 0;                              // Which zone internal gain is in
+        int spaceIndex = 0;                           // Space index for this equipment instance
+        Sched::Schedule *availSched = nullptr;        // Availability schedule
+        Sched::Schedule *computeLoadSched = nullptr;  // Compute Load Schedule (0.0-1.0 total rack loading fraction)
+        Real64 DesignTotalPower = 0.0;                // Design Power Input [W]
+        Real64 Multiplier = 1.0;                      // Scales power and heat to represent multiple identical racks
+        Real64 DesignFanPowerInputFraction = 0.0;     // Fraction of design power input that is for auxiliary fans
+        int PowerModifierCurve = 0;                   // Index for power modifier function of compute loading (x) and zone air temperature (y) curve
+        Real64 LiquidHeatCaptureFractionDesign = 0.8; // Design (nominal) fraction of total heat generation captured by the liquid loop
+        Sched::Schedule *liquidHeatCaptureFracSched = nullptr; // Optional schedule multiplying the design liquid heat capture fraction
+
+        std::vector<ITELiquidCoolingCoilSpec> CoolingCoils;
+        std::string EndUseSubcategoryCPU; // User defined name for the end use category for the CPU
+        std::string EndUseSubcategoryFan; // User defined name for the end use category for the Fans
+
+        // Report variables
+        std::array<Real64, (int)LiquidITERptVars::Num> PowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> EnergyRpt{};
+        Real64 LiquidHeatCaptureFraction = 0.0; // Current achieved liquid heat capture fraction []
+        int LoadFractionSumWarnIndex = 0;       // Recurring warning index for scheduled Load Fractions summing above 1.0
     };
 
     struct BBHeatData
@@ -1728,6 +1790,10 @@ namespace DataHeatBalance {
         Real64 ITEqTimeAboveRH = 0.0;          // Zone ITE Air Inlet Relative Humidity Above Operating Range Time [hr]
         Real64 ITEqTimeBelowRH = 0.0;          // Zone ITE Air Inlet Relative Humidity Below Operating Range Time [hr]
         Real64 ITEAdjReturnTemp = 0.0;         // Zone ITE Adjusted Return Air Temperature
+        // Liquid-Cooled IT Equipment
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEPowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEEnergyRpt{};
+        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone/space achieved ITE Liquid Heat Capture Fraction []
         // Overall Zone Variables
         Real64 TotRadiantGain = 0.0;
         Real64 TotVisHeatGain = 0.0;
@@ -1904,26 +1970,27 @@ struct HeatBalanceData : BaseGlobalStruct
     Real64 SysTotalHVACReliefHeatLoss = 0.0;       // Building total heat emission through HVAC system relief air;
     Real64 SysTotalHVACRejectHeatLoss = 0.0;       // Building total heat emission through HVAC system heat rejection;
     // END SiteData
-    int NumOfZoneLists = 0;    // Total number of zone lists
-    int NumOfZoneGroups = 0;   // Total number of zone groups
-    int TotPeople = 0;         // Total People instances after expansion to spaces
-    int totZoneMRT = 0;        // Total ZoneMRTCalculation instances
-    int TotLights = 0;         // Total Lights instances after expansion to spaces
-    int TotElecEquip = 0;      // Total Electric Equipment instances after expansion to spaces
-    int TotGasEquip = 0;       // Total Gas Equipment instances after expansion to spaces
-    int TotOthEquip = 0;       // Total Other Equipment instances after expansion to spaces
-    int TotHWEquip = 0;        // Total Hot Water Equipment instances after expansion to spaces
-    int TotStmEquip = 0;       // Total Steam Equipment instances after expansion to spaces
-    int TotITEquip = 0;        // Total IT Equipment instances after expansion to spaces
-    int TotInfiltration = 0;   // Total Infiltration (all types) instances after expansion to spaces
-    int TotVentilation = 0;    // Total Ventilation (all types) instances after expansion to spaces
-    int TotMixing = 0;         // Total Mixing Statementsn instances after expansion to spaces
-    int TotCrossMixing = 0;    // Total Cross Mixing Statementsn instances after expansion to spaces
-    int TotRefDoorMixing = 0;  // Total RefrigerationDoor Mixing Statements in input
-    int TotBBHeat = 0;         // Total BBHeat Statements instances after expansion to spaces
-    int TotConstructs = 0;     // Total number of unique constructions in this simulation
-    int TotZoneAirBalance = 0; // Total Zone Air Balance Statements in input
-    int TotFrameDivider = 0;   // Total number of window frame/divider objects
+    int NumOfZoneLists = 0;          // Total number of zone lists
+    int NumOfZoneGroups = 0;         // Total number of zone groups
+    int TotPeople = 0;               // Total People instances after expansion to spaces
+    int totZoneMRT = 0;              // Total ZoneMRTCalculation instances
+    int TotLights = 0;               // Total Lights instances after expansion to spaces
+    int TotElecEquip = 0;            // Total Electric Equipment instances after expansion to spaces
+    int TotGasEquip = 0;             // Total Gas Equipment instances after expansion to spaces
+    int TotOthEquip = 0;             // Total Other Equipment instances after expansion to spaces
+    int TotHWEquip = 0;              // Total Hot Water Equipment instances after expansion to spaces
+    int TotStmEquip = 0;             // Total Steam Equipment instances after expansion to spaces
+    int TotITEquip = 0;              // Total IT Equipment instances after expansion to spaces
+    int TotITELiquidCooledEquip = 0; // Total Liquid-Cooled IT Equipment instances after expansion to spaces
+    int TotInfiltration = 0;         // Total Infiltration (all types) instances after expansion to spaces
+    int TotVentilation = 0;          // Total Ventilation (all types) instances after expansion to spaces
+    int TotMixing = 0;               // Total Mixing Statementsn instances after expansion to spaces
+    int TotCrossMixing = 0;          // Total Cross Mixing Statementsn instances after expansion to spaces
+    int TotRefDoorMixing = 0;        // Total RefrigerationDoor Mixing Statements in input
+    int TotBBHeat = 0;               // Total BBHeat Statements instances after expansion to spaces
+    int TotConstructs = 0;           // Total number of unique constructions in this simulation
+    int TotZoneAirBalance = 0;       // Total Zone Air Balance Statements in input
+    int TotFrameDivider = 0;         // Total number of window frame/divider objects
     bool AirFlowFlag = false;
     int TotCO2Gen = 0;                       // Total CO2 source and sink statements in input
     bool CalcWindowRevealReflection = false; // True if window reveal reflection is to be calculated for at least one exterior window
@@ -2074,6 +2141,7 @@ struct HeatBalanceData : BaseGlobalStruct
     EPVector<DataHeatBalance::ZoneEquipData> ZoneHWEq;
     EPVector<DataHeatBalance::ZoneEquipData> ZoneSteamEq;
     EPVector<DataHeatBalance::ITEquipData> ZoneITEq;
+    EPVector<DataHeatBalance::ITEquipDataLiquidCooled> ZoneITELiquidCooled;
     EPVector<DataHeatBalance::BBHeatData> ZoneBBHeat;
     EPVector<DataHeatBalance::InfiltrationData> Infiltration;
     EPVector<DataHeatBalance::VentilationData> Ventilation;
