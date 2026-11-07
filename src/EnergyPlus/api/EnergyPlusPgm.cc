@@ -421,11 +421,15 @@ int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath
     try {
         EnergyPlus::SimulationManager::ManageSimulation(state);
     } catch (const EnergyPlus::FatalError &e) {
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
 #ifdef NDEBUG
     } catch (const std::exception &e) {
         ShowSevereError(state, e.what());
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
 #endif
     }
 
@@ -477,10 +481,14 @@ int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<
     try {
         EnergyPlus::SimulationManager::ManageSimulation(state);
     } catch (const EnergyPlus::FatalError &e) {
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
     } catch (const std::exception &e) {
         ShowSevereError(state, e.what());
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
     }
     return wrapUpEnergyPlus(state);
 }

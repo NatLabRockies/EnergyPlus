@@ -53,12 +53,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from contextlib import closing
 import glob as gb
 import os
 import sqlite3
 import tempfile
 import unittest
+from contextlib import closing
 
 from pyenergyplus.api import EnergyPlusAPI
 
