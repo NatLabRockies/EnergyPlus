@@ -171,6 +171,9 @@ namespace ZonePlenum {
 
     int getReturnPlenumIndexFromInletNode(EnergyPlusData &state, int InNodeNum);
 
+    // True if any return node of the controlled zone (ZoneEquipConfig index) is an inlet of an AirLoopHVAC:ReturnPlenum
+    bool zoneReturnFeedsPlenum(EnergyPlusData &state, int zoneEqNum);
+
     bool ValidateInducedNode(EnergyPlusData &state, int InduceNodeNum, int NumReturnNodes, Array1D<int> const &ReturnNode);
 
 } // namespace ZonePlenum
