@@ -5172,6 +5172,16 @@ namespace VariableSpeedCoils {
         }
     }
 
+    static void updateCrankcaseHeaterReport(VariableSpeedCoilData &coil,
+                                            Real64 const availablePower,
+                                            Real64 const runtimeFraction,
+                                            Real64 const companionRuntimeFraction,
+                                            Real64 const timeStepSeconds)
+    {
+        coil.CrankcaseHeaterPower = availablePower * (1.0 - max(runtimeFraction, companionRuntimeFraction));
+        coil.CrankcaseHeaterConsumption = coil.CrankcaseHeaterPower * timeStepSeconds;
+    }
+
     void CalcVarSpeedCoilCooling(EnergyPlusData &state,
                                  int const DXCoilNum,                             // Heat Pump Number
                                  HVAC::FanOp const fanOp,                         // Fan/Compressor cycling scheme indicator
@@ -5283,6 +5293,9 @@ namespace VariableSpeedCoils {
             return;
         }
 
+        varSpeedCoil.CrankcaseHeaterPower = 0.0;
+        varSpeedCoil.CrankcaseHeaterConsumption = 0.0;
+
         MaxSpeed = varSpeedCoil.NumOfSpeeds;
 
         // must be placed inside the loop, otherwise cause bug in release mode, need to be present at two places
@@ -5374,6 +5387,8 @@ namespace VariableSpeedCoils {
             } else {
                 state.dataVariableSpeedCoils->CrankcaseHeatingPower_CalcVarSpeedCoilCooling = 0.0;
             }
+            updateCrankcaseHeaterReport(
+                varSpeedCoil, state.dataVariableSpeedCoils->CrankcaseHeatingPower_CalcVarSpeedCoilCooling, 0.0, 0.0, TimeStepSysSec);
         } else {
             state.dataVariableSpeedCoils->SourceSideMassFlowRate = varSpeedCoil.WaterMassFlowRate;
             state.dataVariableSpeedCoils->SourceSideInletTemp = varSpeedCoil.InletWaterTemp;
@@ -5752,8 +5767,8 @@ namespace VariableSpeedCoils {
                 varSpeedCoil.BasinHeaterPower *= (1.0 - varSpeedCoil.RunFrac);
             }
 
-            varSpeedCoil.CrankcaseHeaterPower =
-                state.dataVariableSpeedCoils->CrankcaseHeatingPower_CalcVarSpeedCoilCooling * (1.0 - varSpeedCoil.RunFrac);
+            updateCrankcaseHeaterReport(
+                varSpeedCoil, state.dataVariableSpeedCoils->CrankcaseHeatingPower_CalcVarSpeedCoilCooling, varSpeedCoil.RunFrac, 0.0, TimeStepSysSec);
 
             // set water system demand request (if needed)
             if (varSpeedCoil.EvapWaterSupplyMode == WaterSupplyFromTank) {
@@ -5821,7 +5836,6 @@ namespace VariableSpeedCoils {
         varSpeedCoil.EnergySensible = state.dataVariableSpeedCoils->QSensible * TimeStepSysSec;
         varSpeedCoil.EnergyLatent = (state.dataVariableSpeedCoils->QLoadTotal - state.dataVariableSpeedCoils->QSensible) * TimeStepSysSec;
         varSpeedCoil.EnergySource = state.dataVariableSpeedCoils->QSource * TimeStepSysSec;
-        varSpeedCoil.CrankcaseHeaterConsumption = varSpeedCoil.CrankcaseHeaterPower * TimeStepSysSec;
         varSpeedCoil.EvapWaterConsump = varSpeedCoil.EvapWaterConsumpRate * TimeStepSysSec;
         varSpeedCoil.BasinHeaterConsumption = varSpeedCoil.BasinHeaterPower * TimeStepSysSec;
         varSpeedCoil.EvapCondPumpElecConsumption = varSpeedCoil.EvapCondPumpElecPower * TimeStepSysSec;
@@ -6476,6 +6490,13 @@ namespace VariableSpeedCoils {
             return;
         }
 
+        varSpeedCoil.CrankcaseHeaterPower = 0.0;
+        varSpeedCoil.CrankcaseHeaterConsumption = 0.0;
+        Real64 const companionRuntimeFraction =
+            varSpeedCoil.coilType == HVAC::CoilType::HeatingDXVariableSpeed && varSpeedCoil.CompanionUpstreamDXCoil > 0
+                ? state.dataVariableSpeedCoils->VarSpeedCoil(varSpeedCoil.CompanionUpstreamDXCoil).RunFrac
+                : 0.0;
+
         // ADDED VARIABLES FOR air source coil
         int MaxSpeed = varSpeedCoil.NumOfSpeeds;
 
@@ -6525,6 +6546,8 @@ namespace VariableSpeedCoils {
             } else {
                 state.dataVariableSpeedCoils->CrankcaseHeatingPower = 0.0;
             }
+            updateCrankcaseHeaterReport(
+                varSpeedCoil, state.dataVariableSpeedCoils->CrankcaseHeatingPower, 0.0, companionRuntimeFraction, TimeStepSysSec);
         } else {
             state.dataVariableSpeedCoils->SourceSideMassFlowRate = varSpeedCoil.WaterMassFlowRate;
             state.dataVariableSpeedCoils->SourceSideInletTemp = varSpeedCoil.InletWaterTemp;
@@ -6808,7 +6831,8 @@ namespace VariableSpeedCoils {
                 }
             }
 
-            varSpeedCoil.CrankcaseHeaterPower = state.dataVariableSpeedCoils->CrankcaseHeatingPower * (1.0 - varSpeedCoil.RunFrac);
+            updateCrankcaseHeaterReport(
+                varSpeedCoil, state.dataVariableSpeedCoils->CrankcaseHeatingPower, varSpeedCoil.RunFrac, companionRuntimeFraction, TimeStepSysSec);
             //! Modify total heating capacity based on defrost heating capacity multiplier
             //! MaxHeatCap passed from parent object VRF Condenser and is used to limit capacity of TU's to that available from condenser
             //  IF(PRESENT(MaxHeatCap))THEN
@@ -6876,7 +6900,6 @@ namespace VariableSpeedCoils {
         varSpeedCoil.EnergySensible = state.dataVariableSpeedCoils->QSensible * TimeStepSysSec;
         varSpeedCoil.EnergyLatent = 0.0;
         varSpeedCoil.EnergySource = state.dataVariableSpeedCoils->QSource * TimeStepSysSec;
-        varSpeedCoil.CrankcaseHeaterConsumption = varSpeedCoil.CrankcaseHeaterPower * TimeStepSysSec;
         varSpeedCoil.DefrostConsumption = varSpeedCoil.DefrostPower * TimeStepSysSec;
         if (varSpeedCoil.RunFrac == 0.0) {
             varSpeedCoil.COP = 0.0;
