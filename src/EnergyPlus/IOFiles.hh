@@ -327,6 +327,7 @@ public:
     InputOutputFile mtd{"eplusout.mtd"};
     InputOutputFile edd{"eplusout.edd", true}; // write to stdout if no file never opened
     InputOutputFile shade{"eplusshading.csv"};
+    InputOutputFile shadeDiffuse{"eplusshading_diffuse.csv"};
 
     InputOutputFile csv{"eplusout.csv"};
     InputOutputFile mtr_csv{"eplusmtr.csv"};

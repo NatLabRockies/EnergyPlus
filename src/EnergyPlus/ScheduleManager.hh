@@ -529,6 +529,10 @@ struct ScheduleManagerData : BaseGlobalStruct
     bool ScheduleInputProcessed = false;       // This is false until the Schedule Input has been processed.
     bool ScheduleFileShadingProcessed = false; // This is false unless there is a Schedule:File:Shading object.
 
+    // Resolved path of the file given in the Schedule:File:Shading object, retained so that SolarShading can
+    // locate the companion file of externally-computed diffuse shading ratios.
+    fs::path ShadingSunlitFracFilePath;
+
     // Object Data
     std::vector<Sched::ScheduleType *> scheduleTypes; // Allowed Schedule Types
     std::vector<Sched::Schedule *> schedules;         // Year schedule
@@ -560,6 +564,7 @@ struct ScheduleManagerData : BaseGlobalStruct
 
         ScheduleInputProcessed = false;
         ScheduleFileShadingProcessed = false;
+        ShadingSunlitFracFilePath.clear();
 
         for (auto &scheduleType : scheduleTypes) {
             delete scheduleType;

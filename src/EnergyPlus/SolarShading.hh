@@ -49,8 +49,11 @@
 #define SolarShading_hh_INCLUDED
 
 // C++ Headers
+#include <array>
 #include <fstream>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array2D.hh>
@@ -220,6 +223,12 @@ namespace SolarShading {
 
     void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const iTimeStep);
 
+    bool ImportDiffuseShading(EnergyPlusData &state);
+
+    int ImportedDiffuseShadingRow(EnergyPlusData &state, int const iHour, int const iTimeStep);
+
+    void ReportDiffuseShading(EnergyPlusData &state);
+
     void DetermineShadowingCombinations(EnergyPlusData &state);
 
     void SHADOW(EnergyPlusData &state,
@@ -376,6 +385,13 @@ struct SolarShadingData : BaseGlobalStruct
     Array1D<Real64> SurfMultIsoSky;             // Contribution to eff sky view factor from isotropic sky
     Array1D<Real64> SurfMultCircumSolar;        // Contribution to eff sky view factor from circumsolar brightening
     Array1D<Real64> SurfMultHorizonZenith;      // Contribution to eff sky view factor from horizon or zenith brightening
+
+    // Externally-computed diffuse sky shading, read by ImportDiffuseShading from the companion file of the
+    // Schedule:File:Shading file. Indexed [surface number][row], where each row holds
+    // {DifShdgRatioIsoSky, DifShdgRatioHoriz, ViewFactorSkyIR, ViewFactorGroundIR}. Empty when nothing was imported.
+    std::unordered_map<int, std::vector<std::array<Real64, 4>>> importedDiffuseShading;
+    int importedDiffuseShadingRows = 0;         // Number of data rows imported; 0 when nothing was imported
+    bool importedDiffuseShadingChecked = false; // True once an import has been attempted for this run
 
     int FBKSHC = 0;                 // HC location of first back surface
     int FGSSHC = 0;                 // HC location of first general shadowing surface
@@ -544,6 +560,9 @@ struct SolarShadingData : BaseGlobalStruct
         this->SurfMultIsoSky.deallocate();
         this->SurfMultCircumSolar.deallocate();
         this->SurfMultHorizonZenith.deallocate();
+        this->importedDiffuseShading.clear();
+        this->importedDiffuseShadingRows = 0;
+        this->importedDiffuseShadingChecked = false;
         this->FBKSHC = 0;
         this->FGSSHC = 0;
         this->FINSHC = 0;
