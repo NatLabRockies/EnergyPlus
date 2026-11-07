@@ -285,6 +285,7 @@ namespace DataHeatBalance {
         ElectricLoadCenterConverter,
         FanSystemModel,
         IndoorGreen,
+        CoilCoolingITEColdPlate,
         FanZoneExhaust,
         Num
     };
@@ -369,6 +370,7 @@ namespace DataHeatBalance {
         "ELECTRICLOADCENTER:STORAGE:CONVERTER",
         "FAN:SYSTEMMODEL",
         "INDOORGREEN",
+        "COIL:COOLING:ITE:COLDPLATE",
         "FAN:ZONEEXHAUST"};
 
     static constexpr std::array<std::string_view, static_cast<int>(DataHeatBalance::IntGainType::Num)> IntGainTypeNamesCC = {
@@ -428,6 +430,7 @@ namespace DataHeatBalance {
         "ElectricLoadCenter:Storage:Converter",
         "Fan:SystemModel",
         "IndoorGreen",
+        "Coil:Cooling:ITE:ColdPlate",
         "Fan:ZoneExhaust"};
 
     // Parameters for checking surface heat transfer models

@@ -271,6 +271,9 @@ Coil:Cooling:DX:VariableSpeed \tabularnewline
  & Gross Rated Total Cooling Capacity At Selected Nominal Speed Level \tabularnewline
  & Rated Air Flow Rate At Selected Nominal Speed Level \tabularnewline
  & Evaporative Condenser Pump Rated Power Consumption \tabularnewline
+Coil:Cooling:ITE:ColdPlate \tabularnewline
+ & Nominal Liquid Flow Rate \tabularnewline
+ & Maximum Liquid Flow Rate \tabularnewline
 Coil:Cooling:Water \tabularnewline
  & Design Water Flow Rate \tabularnewline
  & Design Air Flow Rate \tabularnewline
@@ -792,10 +795,10 @@ ChillerHeater:Absorption:DirectFired & ChillerHeater:Absorption:DoubleEffect \ta
 ChillerHeaterPerformance:Electric:EIR & Coil:Cooling:DX:MultiSpeed \tabularnewline
 Coil:Cooling:DX:SingleSpeed & Coil:Cooling:DX:SingleSpeed:ThermalStorage \tabularnewline
 Coil:Cooling:DX:TwoSpeed & Coil:Cooling:DX:VariableRefrigerantFlow \tabularnewline
-Coil:Cooling:DX:VariableSpeed & Coil:Cooling:Water \tabularnewline
-Coil:Cooling:Water:DetailedGeometry & Coil:Cooling:WaterToAirHeatPump:EquationFit \tabularnewline
-Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit & \tabularnewline
- & Coil:Heating:DX:MultiSpeed \tabularnewline
+Coil:Cooling:DX:VariableSpeed & Coil:Cooling:ITE:ColdPlate \tabularnewline
+Coil:Cooling:Water & Coil:Cooling:Water:DetailedGeometry \tabularnewline
+Coil:Cooling:WaterToAirHeatPump:EquationFit & \tabularnewline
+Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit & Coil:Heating:DX:MultiSpeed \tabularnewline
 Coil:Heating:DX:SingleSpeed & Coil:Heating:DX:VariableRefrigerantFlow \tabularnewline
 Coil:Heating:DX:VariableSpeed & Coil:Heating:Electric \tabularnewline
 Coil:Heating:Electric:MultiStage & Coil:Heating:Fuel \tabularnewline

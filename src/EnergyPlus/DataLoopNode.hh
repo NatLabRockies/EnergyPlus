@@ -223,6 +223,7 @@ namespace Node {
         CoilCoolingDXVariableRefrigerantFlow,
         CoilCoolingDXVariableRefrigerantFlowFluidTemperatureControl,
         CoilCoolingDXVariableSpeed,
+        CoilCoolingITEColdPlate,
         CoilCoolingWater,
         CoilCoolingWaterDetailedGeometry,
         CoilCoolingWaterToAirHeatPumpEquationFit,
