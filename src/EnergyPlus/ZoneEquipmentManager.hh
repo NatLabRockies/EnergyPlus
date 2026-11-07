@@ -181,6 +181,8 @@ namespace ZoneEquipmentManager {
                                             Array2D<DataSizing::ZoneSizingData> &zsCalcSizing,
                                             int const zoneOrSpaceNum);
 
+    bool getZoneEquipmentNightVentStatus(EnergyPlusData &state, DataZoneEquipment::ZoneEquipType zoneEquipType, int zoneCompNum, bool validSAMComp);
+
     void SimZoneEquipment(EnergyPlusData &state, bool FirstHVACIteration, bool &SimAir);
 
     bool getZoneEquipmentNightVentStatus(EnergyPlusData &state, DataZoneEquipment::ZoneEquipType zoneEquipType, int zoneCompNum, bool validSAMComp);
