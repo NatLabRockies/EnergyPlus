@@ -491,7 +491,7 @@
     25,                      !- Maximum Number of Warmup Days
     6;                       !- Minimum Number of Warmup Days
 
-  Timestep,4;
+  Timestep,4,1;
 
   SurfaceConvectionAlgorithm:Inside,Simple;
 
