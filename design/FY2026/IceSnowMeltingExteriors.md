@@ -66,7 +66,7 @@ Snow-melting and freeze-protection applications are discussed in ASHRAE Handbook
 
 ## Example File and Transition Changes
 
-No new top-level object is proposed. Existing input files remain valid because the new geometry reference is optional. Add an example using a `GroundHeatExchanger:Surface` connected to a plant loop and a matching `Shading:Site:Detailed` surface for a sloped or shaded panel.
+No new top-level object is proposed, and no input transition is required because the new geometry reference is optional. The Input Output Reference example shows a `GroundHeatExchanger:Surface` connected to a plant loop and a matching `Shading:Site:Detailed` surface for panel geometry.
 
 ## References
 
