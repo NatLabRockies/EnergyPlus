@@ -80,6 +80,8 @@ namespace SurfaceGroundHeatExchanger {
         Real64 TubeSpacing;                      // tube spacing
         Real64 SurfaceLength;                    // active length of surface GHE
         Real64 SurfaceWidth;                     // active width of surface GHE
+        std::string ShadingSurfaceName;          // detailed shading surface used for orientation and solar exposure
+        int ShadingSurfaceNum;                   // detailed shading surface index
         Real64 TopThermAbs;                      // Thermal absortivity of top layer
         Real64 TopSolarAbs;                      // solar absortivity of top layer
         Real64 BtmThermAbs;                      // Thermal absortivity of bottom layer
@@ -144,26 +146,37 @@ namespace SurfaceGroundHeatExchanger {
         Real64 Energy;               // cumulative energy, Joules
         Real64 SurfEnergy;           // cumulative energy, Joules
         Real64 SourceTemp;           // Source temperature
+        Real64 SnowIceMass;           // accumulated snow and ice mass per unit area (kg/m2)
+        Real64 PreviousSnowIceMass;   // snow and ice mass before current weather accumulation (kg/m2)
+        Real64 PreviousSnowDepth;     // weather-file snow depth at prior time step (m)
+        Real64 SnowIceMassOutput;     // reported snow and ice mass on the surface (kg)
+        Real64 SnowIceMeltRate;       // snow and ice melt rate (kg/s)
+        Real64 SnowIceMeltEnergyRate; // latent heat transfer rate used to melt snow and ice (W)
+        Real64 SnowIceMeltEnergy;     // latent heat energy used to melt snow and ice (J)
+        Real64 PastSolarRad;          // prior timestep incident solar radiation on this surface (W/m2)
 
         bool MyFlag;
         bool InitQTF;
         bool MyEnvrnFlag;
+        bool SnowStateInitialized;
         Real64 SurfaceArea; // surface GHE surface area
         bool firstTimeThrough;
 
         // Default Constructor
         SurfaceGroundHeatExchangerData()
-            : DesignMassFlowRate(0.0), TubeDiameter(0.0), TubeSpacing(0.0), SurfaceLength(0.0), SurfaceWidth(0.0), TopThermAbs(0.0), TopSolarAbs(0.0),
-              BtmThermAbs(0.0), LowerSurfCond(0), TubeCircuits(0), ConstructionNum(0), InletNodeNum(0), OutletNodeNum(0),
-              TopRoughness(Material::SurfaceRoughness::Invalid), BtmRoughness(Material::SurfaceRoughness::Invalid), FrozenErrIndex1(0),
+            : DesignMassFlowRate(0.0), TubeDiameter(0.0), TubeSpacing(0.0), SurfaceLength(0.0), SurfaceWidth(0.0), ShadingSurfaceNum(0),
+              TopThermAbs(0.0), TopSolarAbs(0.0), BtmThermAbs(0.0), LowerSurfCond(0), TubeCircuits(0), ConstructionNum(0), InletNodeNum(0),
+              OutletNodeNum(0), TopRoughness(Material::SurfaceRoughness::Invalid), BtmRoughness(Material::SurfaceRoughness::Invalid), FrozenErrIndex1(0),
               FrozenErrIndex2(0), ConvErrIndex1(0), ConvErrIndex2(0), ConvErrIndex3(0), plantLoc{}, TsrcConstCoef(0.0), TsrcVarCoef(0.0),
               QbtmConstCoef(0.0), QbtmVarCoef(0.0), QtopConstCoef(0.0), QtopVarCoef(0.0), NumCTFTerms(0), QSrc(0.0), QSrcAvg(0.0), LastQSrc(0.0),
               LastSysTimeElapsed(0.0), LastTimeStepSys(0.0),
 
               InletTemp(0.0), OutletTemp(0.0), MassFlowRate(0.0), TopSurfaceTemp(0.0), BtmSurfaceTemp(0.0), TopSurfaceFlux(0.0), BtmSurfaceFlux(0.0),
-              HeatTransferRate(0.0), SurfHeatTransferRate(0.0), Energy(0.0), SurfEnergy(0.0), SourceTemp(0.0),
+              HeatTransferRate(0.0), SurfHeatTransferRate(0.0), Energy(0.0), SurfEnergy(0.0), SourceTemp(0.0), SnowIceMass(0.0),
+              PreviousSnowIceMass(0.0), PreviousSnowDepth(0.0), SnowIceMassOutput(0.0), SnowIceMeltRate(0.0), SnowIceMeltEnergyRate(0.0),
+              SnowIceMeltEnergy(0.0), PastSolarRad(0.0),
 
-              MyFlag(true), InitQTF(true), MyEnvrnFlag(true), SurfaceArea(0.0), firstTimeThrough(true)
+              MyFlag(true), InitQTF(true), MyEnvrnFlag(true), SnowStateInitialized(false), SurfaceArea(0.0), firstTimeThrough(true)
         {
         }
 
@@ -181,6 +194,12 @@ namespace SurfaceGroundHeatExchanger {
 
         void CalcSurfaceGroundHeatExchanger(EnergyPlusData &state, bool FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep
         );
+
+        void UpdateSnowIceAccumulation(EnergyPlusData &state);
+
+        void UpdateSnowIceMelt(EnergyPlusData &state, Real64 MeltFlux);
+
+        Real64 IncidentSolarRadiation(EnergyPlusData &state) const;
 
         //==============================================================================
 
@@ -226,12 +245,13 @@ namespace SurfaceGroundHeatExchanger {
                              Real64 ThisDryBulb,         // dry bulb temperature
                              Real64 ThisWetBulb,         // wet bulb temperature
                              Real64 ThisSkyTemp,         // sky temperature
-                             Real64 ThisBeamSolarRad,    // beam solar radiation
-                             Real64 ThisDifSolarRad,     // diffuse solar radiation
-                             Real64 ThisSolarDirCosVert, // vertical component of solar normal
+                             Real64 ThisSolarRad,        // incident solar radiation on the surface
                              Real64 ThisWindSpeed,       // wind speed
                              bool ThisIsRain,            // rain flag
-                             bool ThisIsSnow             // snow flag
+                             bool ThisIsSnow,            // snow flag
+                             Real64 SnowIceMass,         // snow and ice mass per unit area
+                             Real64 TimeStepSec,         // simulation time step in seconds
+                             Real64 &MeltFlux            // latent heat flux used for melting
         );
 
         //==============================================================================
@@ -259,6 +279,9 @@ namespace SurfaceGroundHeatExchanger {
     };
 
     void GetSurfaceGroundHeatExchanger(EnergyPlusData &state);
+
+    Real64 estimateSnowIceAccumulation(Real64 SnowDepthIncrease, Real64 LiquidPrecipitation, bool FreezingRain);
+    Real64 calculateSnowIceMeltFlux(Real64 NetHeatFluxAtFreezing, Real64 SnowIceMass, Real64 TimeStepSec);
 
     inline std::array<Real64, Construction::MaxCTFTerms>
     eoshiftArray(std::array<Real64, Construction::MaxCTFTerms> const &a, int const shift, Real64 const initialValue)
@@ -288,9 +311,6 @@ struct SurfaceGroundHeatExchangersData : BaseGlobalStruct
     Array1D_bool CheckEquipName;
 
     // weather data records updated every zone time step
-    Real64 PastBeamSolarRad = 0.0;    // Previous beam normal solar irradiance
-    Real64 PastSolarDirCosVert = 0.0; // Previous vertical component of solar normal
-    Real64 PastDifSolarRad = 0.0;     // Previous sky diffuse solar horizontal irradiance
     Real64 PastGroundTemp = 0.0;      // Previous ground temperature
     bool PastIsRain = false;          // Previous Surfaces are wet for this time interval
     bool PastIsSnow = false;          // Previous Snow on the ground for this time interval
@@ -331,9 +351,6 @@ struct SurfaceGroundHeatExchangersData : BaseGlobalStruct
         BtmSurfFlux = 0.0;
         SourceFlux = 0.0;
         CheckEquipName.clear();
-        PastBeamSolarRad = 0.0;
-        PastSolarDirCosVert = 0.0;
-        PastDifSolarRad = 0.0;
         PastGroundTemp = 0.0;
         PastIsRain = false;
         PastIsSnow = false;
