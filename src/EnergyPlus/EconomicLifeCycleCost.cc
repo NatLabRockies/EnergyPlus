@@ -1110,14 +1110,15 @@ void ExpressAsCashFlows(EnergyPlusData &state)
     if (state.dataCostEstimateManager->CurntBldg.GrandTotal >
         0.0) { // from DataCostEstimate and computed in WriteCompCostTable within OutputReportTabular
         ++elcc->numNonrecurringCost;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].name = "Total of ComponentCost:*";
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].lineItem = "";
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].category = CostCategory::Construction;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].cost = state.dataCostEstimateManager->CurntBldg.GrandTotal;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].startOfCosts = StartCosts::BasePeriod;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].yearsFromStart = 0;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].monthsFromStart = 0;
-        elcc->NonrecurringCost[elcc->numNonrecurringCost].totalMonthsFromStart = 0;
+        int vIndex = elcc->numNonrecurringCost - 1; // note: vectors go from 0 to size minus one not 1 to size
+        elcc->NonrecurringCost[vIndex].name = "Total of ComponentCost:*";
+        elcc->NonrecurringCost[vIndex].lineItem = "";
+        elcc->NonrecurringCost[vIndex].category = CostCategory::Construction;
+        elcc->NonrecurringCost[vIndex].cost = state.dataCostEstimateManager->CurntBldg.GrandTotal;
+        elcc->NonrecurringCost[vIndex].startOfCosts = StartCosts::BasePeriod;
+        elcc->NonrecurringCost[vIndex].yearsFromStart = 0;
+        elcc->NonrecurringCost[vIndex].monthsFromStart = 0;
+        elcc->NonrecurringCost[vIndex].totalMonthsFromStart = 0;
     }
 
     // gather costs from EconomicTariff for each end use
