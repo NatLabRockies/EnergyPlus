@@ -148,6 +148,45 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPressureFallsBackToDesignPressur
     EXPECT_NEAR(150.0, fanSystem.totalPower, 0.0001);
 }
 
+// Verify PLF-corrected runtime is preserved when a discrete fan splits operation across adjacent speeds.
+TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteSpeedRuntimeIncludesPLFCorrection)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+    state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+
+    // Use fixed efficiencies and airflow values so runtime allocation determines power directly.
+    Fans::FanSystem fanSystem;
+    fanSystem.speedControl = Fans::SpeedControl::Discrete;
+    fanSystem.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fanSystem.maxAirFlowRate = 1.0;
+    fanSystem.maxAirMassFlowRate = 1.0;
+    fanSystem.rhoAirStdInit = 1.0;
+    fanSystem.motorEff = 1.0;
+    fanSystem.motorInAirFrac = 1.0;
+    fanSystem.inletAirTemp = 20.0;
+    fanSystem.inletAirHumRat = 0.008;
+    fanSystem.inletAirEnthalpy = 40000.0;
+    fanSystem.numSpeeds = 2;
+    // A 0.75 flow ratio is halfway between these speeds.
+    fanSystem.flowFracAtSpeed = {0.5, 1.0};
+    fanSystem.massFlowAtSpeed = {0.5, 1.0};
+    fanSystem.totalEffAtSpeed = {1.0, 1.0};
+    fanSystem.runtimeFracAtSpeed = {0.0, 0.0};
+
+    // Supplying both modes selects the flow-ratio path; mode 2 remains inactive.
+    fanSystem.calcSimpleSystemFan(*state, _, 100.0, 0.75, 0.4, 0.0, 0.0, _);
+
+    // The 0.4 parent runtime is corrected to 0.5 by the 0.8 PLF, then split evenly.
+    EXPECT_DOUBLE_EQ(0.25, fanSystem.runtimeFracAtSpeed[0]);
+    EXPECT_DOUBLE_EQ(0.25, fanSystem.runtimeFracAtSpeed[1]);
+    // PLF changes fan runtime and power, not the airflow requested by the parent.
+    EXPECT_DOUBLE_EQ(0.3, fanSystem.outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(37.5, fanSystem.totalPower);
+}
+
 // Verify fouled-filter operation preserves night pressure while validating its curve against rated pressure.
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentFouledFilterUsesNightPressure)
 {
