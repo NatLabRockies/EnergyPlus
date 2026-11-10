@@ -3,7 +3,6 @@
 
 // Standard
 #include <sstream>
-#include <unordered_map>
 
 #include <btwxt/btwxt.h>
 
@@ -40,6 +39,14 @@ RegularGridInterpolatorImplementation::RegularGridInterpolatorImplementation(
     , cubic_slope_coefficients(number_of_grid_axes, std::vector<double>(2, 0.))
     , logger(logger)
 {
+    interpolation_methods.resize(number_of_grid_axes);
+    extrapolation_methods.resize(number_of_grid_axes);
+    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; ++axis_index) {
+        interpolation_methods[axis_index] =
+            to_method(this->grid_axes[axis_index].get_interpolation_method());
+        extrapolation_methods[axis_index] =
+            to_method(this->grid_axes[axis_index].get_extrapolation_method());
+    }
     set_axis_sizes();
 }
 
@@ -81,6 +88,11 @@ void RegularGridInterpolatorImplementation::set_target(const std::vector<double>
     }
     target = target_in;
     target_is_set = true;
+    calculate_at_target();
+}
+
+void RegularGridInterpolatorImplementation::calculate_at_target()
+{
     set_floor_grid_point_coordinates();
     calculate_floor_to_ceiling_fractions();
     consolidate_methods();
@@ -241,32 +253,6 @@ const std::vector<double>& RegularGridInterpolatorImplementation::get_grid_point
 }
 
 // Internal getter methods
-std::vector<Method> RegularGridInterpolatorImplementation::get_interpolation_methods() const
-{
-    std::vector<Method> interpolation_methods(number_of_grid_axes);
-    static const std::unordered_map<InterpolationMethod, Method> interpolation_method_map {
-        {InterpolationMethod::linear, Method::linear}, {InterpolationMethod::cubic, Method::cubic}};
-
-    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {
-        interpolation_methods[axis_index] =
-            interpolation_method_map.at(grid_axes[axis_index].get_interpolation_method());
-    }
-    return interpolation_methods;
-}
-
-std::vector<Method> RegularGridInterpolatorImplementation::get_extrapolation_methods() const
-{
-    std::vector<Method> extrapolation_methods(number_of_grid_axes);
-    static const std::unordered_map<ExtrapolationMethod, Method> extrapolation_method_map {
-        {ExtrapolationMethod::constant, Method::constant},
-        {ExtrapolationMethod::linear, Method::linear}};
-    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {
-        extrapolation_methods[axis_index] =
-            extrapolation_method_map.at(grid_axes[axis_index].get_extrapolation_method());
-    }
-    return extrapolation_methods;
-}
-
 std::size_t RegularGridInterpolatorImplementation::get_grid_point_index(
     const std::vector<std::size_t>& coords) const
 {
@@ -406,9 +392,8 @@ void RegularGridInterpolatorImplementation::consolidate_methods()
 // If outside of extrapolation limits, send a warning and perform constant extrapolation.
 {
     previous_methods = methods;
-    methods = get_interpolation_methods();
+    methods = interpolation_methods;
     if (target_is_set) {
-        auto extrapolation_methods = get_extrapolation_methods();
         constexpr std::string_view exception_format {"The target ({:.3g}) is {} the extrapolation "
                                                      "limit ({:.3g}) for grid axis (name=\"{}\")."};
         for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {

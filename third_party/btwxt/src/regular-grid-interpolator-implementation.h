@@ -19,6 +19,16 @@ namespace Btwxt {
 
 enum class Method { undefined, constant, linear, cubic };
 
+inline Method to_method(InterpolationMethod method)
+{
+    return method == InterpolationMethod::cubic ? Method::cubic : Method::linear;
+}
+
+inline Method to_method(ExtrapolationMethod method)
+{
+    return method == ExtrapolationMethod::linear ? Method::linear : Method::constant;
+}
+
 class RegularGridInterpolatorImplementation {
   public:
     RegularGridInterpolatorImplementation() = default;
@@ -37,12 +47,16 @@ class RegularGridInterpolatorImplementation {
     {
         check_axis_index(axis_index, "set axis interpolation method");
         grid_axes[axis_index].set_interpolation_method(method);
+        interpolation_methods[axis_index] =
+            to_method(grid_axes[axis_index].get_interpolation_method());
     }
 
     void set_axis_extrapolation_method(const std::size_t axis_index, ExtrapolationMethod method)
     {
         check_axis_index(axis_index, "set axis extrapolation method");
         grid_axes[axis_index].set_extrapolation_method(method);
+        extrapolation_methods[axis_index] =
+            to_method(grid_axes[axis_index].get_extrapolation_method());
     }
 
     void set_axis_extrapolation_limits(const std::size_t axis_index,
@@ -153,9 +167,15 @@ class RegularGridInterpolatorImplementation {
     get_grid_point_data_relative(const std::vector<std::size_t>& coordinates,
                                  const std::vector<short>& translation);
 
-    [[nodiscard]] std::vector<Method> get_interpolation_methods() const;
+    [[nodiscard]] const std::vector<Method>& get_interpolation_methods() const
+    {
+        return interpolation_methods;
+    }
 
-    [[nodiscard]] std::vector<Method> get_extrapolation_methods() const;
+    [[nodiscard]] const std::vector<Method>& get_extrapolation_methods() const
+    {
+        return extrapolation_methods;
+    }
 
     [[nodiscard]] std::size_t
     get_grid_point_index(const std::vector<std::size_t>& coordinates) const;
@@ -189,7 +209,9 @@ class RegularGridInterpolatorImplementation {
                                                     // is between its floor and ceiling axis values
     std::vector<TargetBoundsStatus>
         target_bounds_status; // for each axis, for deciding interpolation vs. extrapolation;
-    std::vector<Method> methods;
+    std::vector<Method> interpolation_methods; // Per-axis methods as set on the grid axes
+    std::vector<Method> extrapolation_methods; // Per-axis methods as set on the grid axes
+    std::vector<Method> methods; // Per-axis methods used at the current target
     std::vector<Method> previous_methods;
     std::vector<std::vector<short>> hypercube; // A minimal set of indices near the target needed to
                                                // perform interpolation calculations.
@@ -215,6 +237,8 @@ class RegularGridInterpolatorImplementation {
                                               const std::vector<short>& translation);
 
     void set_axis_sizes();
+
+    void calculate_at_target();
 
     void calculate_floor_to_ceiling_fractions();
 
