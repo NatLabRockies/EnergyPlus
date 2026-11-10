@@ -1920,17 +1920,19 @@ namespace FanCoilUnits {
             zoneEqSizing.MaxCWVolFlow = fanCoil.MaxColdWaterVolFlow;
             zoneEqSizing.DesCoolingLoad = fanCoil.DesCoolingLoad;
             zoneEqSizing.DesHeatingLoad = fanCoil.DesHeatingLoad;
-            if (state.dataSize->ZoneSizingRunDone) {
+            if (state.dataSize->ZoneSizingRunDone && maxAirFlowIsAutosized) {
                 // the fan coil has a single input for Maximum Supply Air Flow Rate
                 // it is odd to use two coil airflows if autosizing and a single air flow for both coils when not autosizing
                 // however, this method does minimize water coil sizes instead of upsizing one of the coils to meet the maximum air flow rate
                 // if user specified autosized air flow rate then size water coil using zone sizing design cooling/heating air flow rates
-                if (maxAirFlowIsAutosized) {
-                    zoneEqSizing.CoolingAirFlow = true;
-                    zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
-                    zoneEqSizing.HeatingAirFlow = true;
-                    zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
-                }
+                zoneEqSizing.CoolingAirFlow = true;
+                zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
+                zoneEqSizing.HeatingAirFlow = true;
+                zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+            } else if (!maxAirFlowIsAutosized) {
+                // pass singular hard-sized fan coil unit air flow to child coil objects
+                WaterCoils::SetCoilDesFlow(state, CoolingCoilType, CoolingCoilName, fanCoil.MaxAirVolFlow, ErrorsFound);
+                WaterCoils::SetCoilDesFlow(state, fanCoil.HCoilType, fanCoil.HCoilName, fanCoil.MaxAirVolFlow, ErrorsFound);
             }
             // when DesignSizeFromParent is set, sizing will use AirVolFlow in CoolingAirFlowSizing and HeatingAirFlowSizing
             // if CoolingAirFlow and HeatingAirFlow are also set (as above), then sizing will use the CoolingAirVolFlow and HeatingAirVolFlow values

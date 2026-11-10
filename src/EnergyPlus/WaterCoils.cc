@@ -2456,9 +2456,9 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             } else {
                 NomCapUserInp = false;
             }
-            bool bPRINT = true;                                                // print this sizing request
+            bool bPRINT = false;                                               // do not print this sizing request
             TempSize = DataSizing::AutoSize;                                   // get the autosized air volume flow rate for use in other calculations
-            SizingString = "Design Air Flow Rate [m3/s]";                      // not a field, reporting for documentation
+            SizingString = "Design Air Flow Rate [m3/s]";                      // doesn't matter
             CompType = HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater]; // "Coil:Heating:Water"
             std::string const &CompName = waterCoil.Name;
             if (waterCoil.DesiccantRegenerationCoil) {
@@ -2489,14 +2489,14 @@ void SizeWaterCoil(EnergyPlusData &state, int const CoilNum)
             TempSize = sizingHeatingAirFlow.size(state, TempSize, ErrorsFound);
             // reset the design air volume flow rate for air loop coils only or coils where airflow is not set by SetCoilDesFlow
             if (state.dataSize->CurSysNum > 0 || waterCoil.DesAirVolFlowRate == 0.0) {
-                // Issue 7276 removed SetCoilDesFlow from FanCoils. This causes DesAirVolFlowRate to be 0, so allow sizing airflow for that case.
-                // The SetCoilDesFlow function should be removed from all components.
+                // DesAirVolFlowRate can be 0 from some components (e.g., ZoneHVAC:OutdoorAirUnit), so allow sizing airflow for those cases.
                 waterCoil.DesAirVolFlowRate = TempSize;
             }
             waterCoil.InletAirMassFlowRate = state.dataEnvrn->StdRhoAir * TempSize; // inlet air mass flow rate is not the autosized value
             state.dataSize->DataAirFlowUsedForSizing = TempSize;
             state.dataSize->DataFlowUsedForSizing = TempSize; // many autosized inputs use the design (autosized) air flow rate, save this value
 
+            bPRINT = true;
             if (waterCoil.CoilPerfInpMeth == state.dataWaterCoils->NomCap && NomCapUserInp) {
                 TempSize = waterCoil.DesTotWaterCoilLoad;
                 state.dataSize->DataNomCapInpMeth = true;

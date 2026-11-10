@@ -2190,14 +2190,12 @@ namespace UnitVentilator {
             CoolingCoilName = unitVent.CCoilName;
             CoolingCoilType = unitVent.CCoilTypeCh;
         }
-        // WaterCoils::SetCoilDesFlow(state, CoolingCoilType, CoolingCoilName, unitVent.MaxAirVolFlow, ErrorsFound);
-        // WaterCoils::SetCoilDesFlow(state, unitVent.HCoilTypeCh, unitVent.HCoilName, unitVent.MaxAirVolFlow, ErrorsFound);
+        WaterCoils::SetCoilDesFlow(state, CoolingCoilType, CoolingCoilName, unitVent.MaxAirVolFlow, ErrorsFound);
+        WaterCoils::SetCoilDesFlow(state, unitVent.HCoilTypeCh, unitVent.HCoilName, unitVent.MaxAirVolFlow, ErrorsFound);
 
         if (state.dataSize->CurZoneEqNum > 0) {
             ZoneEqSizing.MaxHWVolFlow = unitVent.MaxVolHotWaterFlow;
             ZoneEqSizing.MaxCWVolFlow = unitVent.MaxVolColdWaterFlow;
-            ZoneEqSizing.DesignSizeFromParent = true;
-            ZoneEqSizing.AirVolFlow = unitVent.MaxAirVolFlow;
         }
 
         if (ErrorsFound) {
