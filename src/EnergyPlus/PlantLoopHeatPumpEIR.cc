@@ -167,15 +167,17 @@ Real64 EIRPlantLoopHeatPump::getLoadSideOutletSetPointTemp(EnergyPlusData &state
         return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint;
     }
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
+        bool const isCooling = this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling ||
+                               this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
         if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
             // there will be a valid set-point on outlet
-            if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
+            if (isCooling) {
                 return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointHi;
             }
             return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointLo;
 
         } // use plant loop overall set-point
-        if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
+        if (isCooling) {
             return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointHi;
         }
         return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointLo;
