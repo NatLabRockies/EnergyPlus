@@ -65349,8 +65349,7 @@ AirLoopHVAC:UnitarySystem,
        \note Enter the type of supply air fan if included in the unitary system.
        \note Fan:ConstantVolume only works with continuous fan operating mode (i.e. supply
        \note air fan operating mode schedule values greater than 0).
-       \note Specify a Fan:SystemModel or a Fan:OnOff object when the Supply Air Fan Operating Mode Schedule Name
-       \note input field above is left blank.
+       \note Fan:SystemModel, Fan:OnOff, and Fan:VariableVolume support cycling and continuous fan operating modes.
        \note Specify a Fan:SystemModel or a Fan:VariableVolume when modeling VAV systems which used setpoint based control
        \note if the fan is included in the unitary system object.
        \note The ComponentModel fan type may be substituted for the ConstantVolume or VariableVolume
@@ -65369,16 +65368,15 @@ AirLoopHVAC:UnitarySystem,
   A11, \field Supply Air Fan Operating Mode Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note A fan operating mode schedule value of 0 indicates cycling fan mode (supply air
-       \note fan cycles on and off in tandem with the cooling or heating coil).
-       \note Any other schedule value indicates continuous fan mode (supply air fan operates
-       \note continuously regardless of cooling or heating coil operation). Provide a schedule
-       \note with non-zero values when high humidity control is specified.
-       \note Leaving this schedule name blank will default to constant fan mode for the
-       \note entire simulation period.
-       \note This field is not used when set point based control is used where a set point
-       \note controls the coil.
-       \note SingleZoneVAV control type is only active when constant fan operating mode is active.
+       \note A schedule value of 0 selects cycling fan operation; any other value selects continuous fan operation.
+       \note If blank, defaults to cycling for Control Type = Load or SingleZoneVAV,
+       \note and continuous for Control Type = Setpoint.
+       \note For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be
+       \note Fan:SystemModel, Fan:OnOff, or Fan:VariableVolume.
+       \note For Control Type = Setpoint or Supply Fan Object Type = Fan:ConstantVolume,
+       \note any specified schedule must have values greater than 0 and less than or equal to 1.
+       \note SingleZoneVAV uses load-based control during cycling fan operation.
+       \note Use nonzero schedule values when high humidity control is specified.
   A12, \field Heating Coil Object Type
        \type choice
        \key Coil:Heating:DX:SingleSpeed
