@@ -104,7 +104,7 @@ void RegularGridInterpolatorImplementation::clear_target()
     results = std::vector<double>(number_of_grid_axes, 0.);
 }
 
-std::vector<double> RegularGridInterpolatorImplementation::get_results() const
+const std::vector<double>& RegularGridInterpolatorImplementation::get_results() const
 {
     if (number_of_grid_point_data_sets == 0u) {
         logger->warning(std::format("There are no grid point data sets. No results returned."));
@@ -115,7 +115,7 @@ std::vector<double> RegularGridInterpolatorImplementation::get_results() const
     return results;
 }
 
-std::vector<double>
+const std::vector<double>&
 RegularGridInterpolatorImplementation::get_results(const std::vector<double>& target_in)
 {
     set_target(target_in);

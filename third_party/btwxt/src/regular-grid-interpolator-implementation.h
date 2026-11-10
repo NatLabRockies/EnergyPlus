@@ -59,9 +59,9 @@ class RegularGridInterpolatorImplementation {
 
     void clear_target();
 
-    [[nodiscard]] std::vector<double> get_results() const;
+    [[nodiscard]] const std::vector<double>& get_results() const;
 
-    std::vector<double> get_results(const std::vector<double>& target);
+    const std::vector<double>& get_results(const std::vector<double>& target);
 
     void normalize_grid_point_data_sets_at_target(double scalar = 1.0);
 
