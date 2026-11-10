@@ -54,6 +54,7 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -7790,6 +7791,47 @@ TEST_F(VariableSpeedCrankcaseFixture, DriverOffPathsAndRuntime)
     simulate(2, HVAC::CompressorOp::Off);
     EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
     EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, PairedCoolingCoilHasNoHeaterOfItsOwn)
+{
+    prepareDriver();
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    heatCoil.Name = "HEAT COIL";
+    heatCoil.VarSpeedCoilType = "Coil:Heating:DX:VariableSpeed";
+    coolCoil.Name = "COOL COIL";
+    coolCoil.VarSpeedCoilType = "Coil:Cooling:DX:VariableSpeed";
+    auto &compSets = state->dataBranchNodeConnections->CompSets;
+    compSets.allocate(2);
+    state->dataBranchNodeConnections->NumCompSets = 2;
+    for (int index = 1; index <= 2; ++index) {
+        compSets(index).ParentObjectType = Node::ConnectionObjectType::AirLoopHVACUnitaryHeatPumpAirToAir;
+        compSets(index).ParentCName = "HEAT PUMP";
+    }
+    compSets(1).ComponentObjectType = Node::ConnectionObjectType::CoilHeatingDXVariableSpeed;
+    compSets(1).CName = heatCoil.Name;
+    compSets(2).ComponentObjectType = Node::ConnectionObjectType::CoilCoolingDXVariableSpeed;
+    compSets(2).CName = coolCoil.Name;
+
+    // the upstream cooling coil is simulated before the heating coil has found it
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+
+    // initialization of the heating coil pairs the two coils
+    heatCoil.FindCompanionUpStreamCoil = true;
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_EQ(2, heatCoil.CompanionUpstreamDXCoil);
+    EXPECT_FALSE(coolCoil.ReportCoolingCoilCrankcasePower);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+
+    // from then on only the heating coil carries the heater of the heat pump
+    simulate(2, HVAC::CompressorOp::Off);
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterConsumption);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, heatCoil.CrankcaseHeaterConsumption);
 }
 
 } // namespace EnergyPlus

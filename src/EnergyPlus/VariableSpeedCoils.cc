@@ -3391,7 +3391,10 @@ namespace VariableSpeedCoils {
             if (varSpeedCoil.coilType == HVAC::CoilType::HeatingDXVariableSpeed) {
                 varSpeedCoil.CompanionUpstreamDXCoil = GetHPCoolingCoilIndex(state, varSpeedCoil.VarSpeedCoilType, varSpeedCoil.Name, DXCoilNum);
                 if (varSpeedCoil.CompanionUpstreamDXCoil > 0) {
-                    state.dataVariableSpeedCoils->VarSpeedCoil(varSpeedCoil.CompanionUpstreamDXCoil).ReportCoolingCoilCrankcasePower = false;
+                    auto &companionCoil = state.dataVariableSpeedCoils->VarSpeedCoil(varSpeedCoil.CompanionUpstreamDXCoil);
+                    companionCoil.ReportCoolingCoilCrankcasePower = false;
+                    // The heating coil reports the one crankcase heater of the heat pump, so the cooling coil carries none of its own
+                    companionCoil.CrankcaseHeaterCapacity = 0.0;
                     varSpeedCoil.FindCompanionUpStreamCoil = false;
                 } else {
                     varSpeedCoil.FindCompanionUpStreamCoil = false;
