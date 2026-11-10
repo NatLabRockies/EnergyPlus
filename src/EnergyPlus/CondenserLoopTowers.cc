@@ -5371,7 +5371,7 @@ namespace CondenserLoopTowers {
         Real64 FullSpeedFanQdot =
             this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
         Real64 FanPowerAdjustFac = 0.0;
-        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // full speed is what we want.
+        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the current cells cannot exceed the load at full speed
 
             if ((FullSpeedFanQdot + HVAC::SmallLoad) < std::abs(MyLoad) && (this->NumCellOn < this->NumCell) &&
                 ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin)) {
@@ -5391,14 +5391,15 @@ namespace CondenserLoopTowers {
                                       ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin);
                 }
             }
-            this->Qactual = FullSpeedFanQdot;
-            CalcBasinHeaterPower(
-                state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
-            // now calculate fan power
-            FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
-            this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
-
-            return;
+            if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the active cells still cannot exceed the load
+                this->Qactual = FullSpeedFanQdot;
+                CalcBasinHeaterPower(
+                    state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
+                // now calculate fan power
+                FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
+                this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
+                return;
+            }
         }
 
         // next find minimum air flow ratio cooling rate
