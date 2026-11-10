@@ -91,11 +91,18 @@ void RegularGridInterpolatorImplementation::set_target(const std::vector<double>
 
 void RegularGridInterpolatorImplementation::calculate_at_target()
 {
-    set_floor_grid_point_coordinates();
-    calculate_floor_to_ceiling_fractions();
-    consolidate_methods();
-    calculate_interpolation_coefficients();
-    set_results();
+    try {
+        set_floor_grid_point_coordinates();
+        calculate_floor_to_ceiling_fractions();
+        consolidate_methods();
+        calculate_interpolation_coefficients();
+        set_results();
+    }
+    catch (...) {
+        // The calculation did not complete: results do not correspond to the target
+        target_is_set = false;
+        throw;
+    }
 }
 
 const std::vector<double>& RegularGridInterpolatorImplementation::get_target() const
