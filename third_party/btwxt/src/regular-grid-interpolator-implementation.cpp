@@ -234,7 +234,7 @@ RegularGridInterpolatorImplementation::get_grid_point_data(const std::vector<std
     return get_grid_point_data(grid_point_index);
 }
 
-std::vector<double> RegularGridInterpolatorImplementation::get_grid_point_data_relative(
+const std::vector<double>& RegularGridInterpolatorImplementation::get_grid_point_data_relative(
     const std::vector<std::size_t>& coords, const std::vector<short>& translation)
 {
     return get_grid_point_data(get_grid_point_index_relative(coords, translation));

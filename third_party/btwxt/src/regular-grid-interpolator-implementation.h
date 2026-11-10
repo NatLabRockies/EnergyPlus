@@ -149,8 +149,9 @@ class RegularGridInterpolatorImplementation {
     const std::vector<double>& get_grid_point_data(const std::vector<std::size_t>& coordinates);
     const std::vector<double>& get_grid_point_data(std::size_t grid_point_index);
 
-    std::vector<double> get_grid_point_data_relative(const std::vector<std::size_t>& coordinates,
-                                                     const std::vector<short>& translation);
+    const std::vector<double>&
+    get_grid_point_data_relative(const std::vector<std::size_t>& coordinates,
+                                 const std::vector<short>& translation);
 
     [[nodiscard]] std::vector<Method> get_interpolation_methods() const;
 
