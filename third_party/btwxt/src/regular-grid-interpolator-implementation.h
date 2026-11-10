@@ -46,24 +46,42 @@ class RegularGridInterpolatorImplementation {
     void set_axis_interpolation_method(std::size_t axis_index, InterpolationMethod method)
     {
         check_axis_index(axis_index, "set axis interpolation method");
+        if (grid_axes[axis_index].get_interpolation_method() == method) {
+            return; // Unchanged: avoid recalculating (e.g. libtk205 sets methods before every lookup)
+        }
         grid_axes[axis_index].set_interpolation_method(method);
         interpolation_methods[axis_index] =
             to_method(grid_axes[axis_index].get_interpolation_method());
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     void set_axis_extrapolation_method(const std::size_t axis_index, ExtrapolationMethod method)
     {
         check_axis_index(axis_index, "set axis extrapolation method");
+        if (grid_axes[axis_index].get_extrapolation_method() == method) {
+            return; // Unchanged: avoid recalculating
+        }
         grid_axes[axis_index].set_extrapolation_method(method);
         extrapolation_methods[axis_index] =
             to_method(grid_axes[axis_index].get_extrapolation_method());
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     void set_axis_extrapolation_limits(const std::size_t axis_index,
                                        const std::pair<double, double>& limits)
     {
         check_axis_index(axis_index, "set axis extrapolation limits");
+        if (grid_axes[axis_index].get_extrapolation_limits() == limits) {
+            return; // Unchanged: avoid recalculating
+        }
         grid_axes[axis_index].set_extrapolation_limits(limits);
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     // Public methods (mirrored)
