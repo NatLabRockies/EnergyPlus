@@ -71,7 +71,7 @@
 
 namespace EnergyPlus {
 
-TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelNoCooling)
+TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelVSCooling)
 {
     std::string const idf_objects = delimited_string(
         {"  Site:Location,",
@@ -476,6 +476,7 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelNoCooling)
         });
     ASSERT_TRUE(process_idf(idf_objects));
 
+    static constexpr std::string_view RoutineName("calculateMerkelVariableSpeedTower");
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
@@ -498,17 +499,87 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelNoCooling)
     SimulationManager::SetupSimulation(*state, ErrorsFound);
     CondenserLoopTowers::GetTowerInput(*state);
 
-    state->dataCondenserLoopTowers->towers(1).initialize(*state);
-    state->dataCondenserLoopTowers->towers(1).SizeVSMerkelTower(*state);
-    state->dataCondenserLoopTowers->towers(1).initialize(*state);
+    auto &vsTower = state->dataCondenserLoopTowers->towers(1);
+    vsTower.initialize(*state);
+    vsTower.SizeVSMerkelTower(*state);
+    vsTower.initialize(*state);
     Real64 MyLoad = 0.0;
     bool RunFlag = false;
-    state->dataCondenserLoopTowers->towers(1).calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
-    state->dataCondenserLoopTowers->towers(1).update(*state);
-    state->dataCondenserLoopTowers->towers(1).report(*state, true);
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    vsTower.update(*state);
+    vsTower.report(*state, true);
 
     // test that tower is really not cooling with no load so temp in and out is the same issue #4927
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(9).Temp, state->dataLoopNodes->Node(10).Temp);
+    EXPECT_ENUM_EQ(vsTower.cellCtrl, CondenserLoopTowers::CellCtrl::MaxCell);
+    EXPECT_NEAR(vsTower.DesWaterMassFlowRate, 0.53814, 0.00001);
+    EXPECT_NEAR(vsTower.DesWaterMassFlowRate, state->dataLoopNodes->Node(vsTower.WaterOutletNodeNum).MassFlowRate, 0.00001);
+    EXPECT_NEAR(vsTower.TowerNominalCapacity, 10000.0, 0.00001);
+    EXPECT_EQ(vsTower.NumCell, 1);
+    EXPECT_EQ(vsTower.NumCellOn, 1);
+    EXPECT_NEAR(vsTower.Qactual, 0.0, 0.001);
+
+    MyLoad = -2500.0; // these load choices are arbitrary and do not match the actual load on the tower based on mass flow and water temps
+    RunFlag = true;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 2500.0, 0.001);
+
+    MyLoad = -5500.0;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 5500.0, 0.001);
+
+    MyLoad = -8500.0;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 8500.0, 0.001);
+
+    MyLoad = -10000.0;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 8981.865, 0.001);
+    EXPECT_NEAR(vsTower.InletWaterTemp, 30.007, 0.001);
+    EXPECT_NEAR(vsTower.OutletWaterTemp, 26.014, 0.001);
+    int const chwLoopNum = vsTower.plantLoc.loopNum;
+    Real64 CpWater = state->dataPlnt->PlantLoop(chwLoopNum)
+                         .glycol->getSpecificHeat(*state, state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).Temp, RoutineName);
+    Real64 Qtower = state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate * CpWater * (vsTower.InletWaterTemp - vsTower.OutletWaterTemp);
+    EXPECT_NEAR(Qtower, 8981.865, 0.001);
+
+    vsTower.NumCell = 3;
+
+    MyLoad = -1500.0;
+    state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate =
+        vsTower.DesWaterMassFlowRate * (vsTower.MinFracFlowRate - 0.01); // just under min flow
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 1500.0, 0.001);
+    EXPECT_EQ(vsTower.NumCellOn, 3);
+
+    vsTower.cellCtrl = CondenserLoopTowers::CellCtrl::MinCell; // change to cell control = MinCell
+
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 1500.0, 0.001);
+    EXPECT_EQ(vsTower.NumCellOn, 1);
+    Qtower = state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate * CpWater * (vsTower.InletWaterTemp - vsTower.OutletWaterTemp);
+    EXPECT_NEAR(Qtower, 1500.0, 0.001);
+    EXPECT_NEAR(vsTower.airFlowRateRatio, 0.5401, 0.0001); // tower hit load request by modulating fan
+
+    MyLoad = -2500.0;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 3877.101, 0.001); // tower allowed to overcool at NumCellOn < NumCell
+    EXPECT_EQ(vsTower.NumCellOn, 2);
+    Qtower = state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate * CpWater * (vsTower.InletWaterTemp - vsTower.OutletWaterTemp);
+    EXPECT_NEAR(Qtower, 3877.101, 0.001);
+    EXPECT_NEAR(vsTower.airFlowRateRatio, 1.0, 0.0001); // this should have modulated the fan at NumCellOn = 2 of 3? load request exceeded
+
+    state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate =
+        vsTower.DesWaterMassFlowRate * (vsTower.MinFracFlowRate + 0.01); // just over min flow
+    MyLoad = -4000.0;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_NEAR(vsTower.Qactual, 4883.192, 0.001); // tower allowed to overcool
+    EXPECT_EQ(vsTower.NumCellOn, 3);
+    Qtower = state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate * CpWater * (vsTower.InletWaterTemp - vsTower.OutletWaterTemp);
+    EXPECT_NEAR(Qtower, 4883.192, 0.001);
+    // merkel tower cooling at max available output that exceeds load request, does not modulate fan,
+    // does not track a load/setpoint using cell control = MinCell when NumCellsOn > 1
+    EXPECT_NEAR(vsTower.airFlowRateRatio, 1.0, 0.0001);
 }
 
 TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedSizing)
