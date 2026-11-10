@@ -118,7 +118,7 @@ void RegularGridInterpolatorImplementation::clear_target()
 {
     target_is_set = false;
     target = std::vector<double>(number_of_grid_axes, 0.);
-    results = std::vector<double>(number_of_grid_axes, 0.);
+    results = std::vector<double>(number_of_grid_point_data_sets, 0.);
 }
 
 const std::vector<double>& RegularGridInterpolatorImplementation::get_results() const
