@@ -2218,6 +2218,7 @@ TEST_F(EnergyPlusFixture, TestReadingCoilCoolingHeatingDX)
                                                 OnOffAirFlowRatio,
                                                 SpeedRatio,
                                                 state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).NumOfSpeeds);
+    VariableSpeedCoils::UpdateVarSpeedCoil(*state, VarSpeedCoilNum);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).CrankcaseHeaterPower, 160.0);
 
     VarSpeedCoilNum = 2;
@@ -2236,10 +2237,21 @@ TEST_F(EnergyPlusFixture, TestReadingCoilCoolingHeatingDX)
                                                 OnOffAirFlowRatio,
                                                 SpeedRatio,
                                                 state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).NumOfSpeeds);
-    // here the runtime fraction is 1.0 when the number of speed is more than 1. crankcase heater capacity is modified but power is not affected as a
-    // result
-    EXPECT_EQ(state->dataVariableSpeedCoils->CrankcaseHeatingPower, 180.0);
+    VariableSpeedCoils::UpdateVarSpeedCoil(*state, VarSpeedCoilNum);
+    // here the runtime fraction is 1.0 when the number of speed is more than 1, so the crankcase heater does not operate
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).CrankcaseHeaterPower, 0.0);
+    // with the compressor off, the heater operates at the capacity modified by the curve
+    VariableSpeedCoils::CalcVarSpeedCoilHeating(*state,
+                                                VarSpeedCoilNum,
+                                                fanOp,
+                                                SensLoad,
+                                                HVAC::CompressorOp::Off,
+                                                PLR,
+                                                OnOffAirFlowRatio,
+                                                SpeedRatio,
+                                                state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).NumOfSpeeds);
+    VariableSpeedCoils::UpdateVarSpeedCoil(*state, VarSpeedCoilNum);
+    EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(VarSpeedCoilNum).CrankcaseHeaterPower, 180.0);
 
     // VarSpeedCoilNum = 3;
     // // power = 32 + 2x

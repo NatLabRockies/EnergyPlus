@@ -593,25 +593,23 @@ struct VariableSpeedCoilsData : BaseGlobalStruct
     Real64 LoadSideInletEnth_Init = 0.0;
     Real64 CpAir_Init = 0.0;
 
-    Real64 OutdoorCoilT = 0.0;                                  // Outdoor coil temperature (C)
-    Real64 OutdoorCoildw = 0.0;                                 // Outdoor coil delta w assuming coil temp of OutdoorCoilT (kg/kg)
-    Real64 OutdoorDryBulb = 0.0;                                // Outdoor dry-bulb temperature at condenser (C)
-    Real64 OutdoorWetBulb = 0.0;                                // Outdoor wet-bulb temperature at condenser (C)
-    Real64 OutdoorHumRat = 0.0;                                 // Outdoor humidity ratio at condenser (kg/kg)
-    Real64 OutdoorPressure = 0.0;                               // Outdoor barometric pressure at condenser (Pa)
-    Real64 FractionalDefrostTime = 0.0;                         // Fraction of time step system is in defrost
-    Real64 HeatingCapacityMultiplier = 0.0;                     // Multiplier for heating capacity when system is in defrost
-    Real64 InputPowerMultiplier = 0.0;                          // Multiplier for power when system is in defrost
-    Real64 LoadDueToDefrost = 0.0;                              // Additional load due to defrost
-    Real64 CrankcaseHeatingPower = 0.0;                         // power due to crankcase heater
-    Real64 DefrostEIRTempModFac = 0.0;                          // EIR modifier for defrost (function of entering wetbulb, outside drybulb)
-    Real64 TotRatedCapacity = 0.0;                              // total rated capacity at the given speed and speed ratio for defrosting
-    Real64 OutdoorDryBulb_CalcVarSpeedCoilCooling = 0.0;        // Outdoor dry-bulb temperature at condenser (C)
-    Real64 OutdoorWetBulb_CalcVarSpeedCoilCooling = 0.0;        // Outdoor wet-bulb temperature at condenser (C)
-    Real64 OutdoorHumRat_CalcVarSpeedCoilCooling = 0.0;         // Outdoor humidity ratio at condenser (kg/kg)
-    Real64 OutdoorPressure_CalcVarSpeedCoilCooling = 0.0;       // Outdoor barometric pressure at condenser (Pa)
-    Real64 CrankcaseHeatingPower_CalcVarSpeedCoilCooling = 0.0; // power due to crankcase heater
-    Real64 CompAmbTemp_CalcVarSpeedCoilCooling = 0.0;           // Ambient temperature at compressor
+    Real64 OutdoorCoilT = 0.0;                            // Outdoor coil temperature (C)
+    Real64 OutdoorCoildw = 0.0;                           // Outdoor coil delta w assuming coil temp of OutdoorCoilT (kg/kg)
+    Real64 OutdoorDryBulb = 0.0;                          // Outdoor dry-bulb temperature at condenser (C)
+    Real64 OutdoorWetBulb = 0.0;                          // Outdoor wet-bulb temperature at condenser (C)
+    Real64 OutdoorHumRat = 0.0;                           // Outdoor humidity ratio at condenser (kg/kg)
+    Real64 OutdoorPressure = 0.0;                         // Outdoor barometric pressure at condenser (Pa)
+    Real64 FractionalDefrostTime = 0.0;                   // Fraction of time step system is in defrost
+    Real64 HeatingCapacityMultiplier = 0.0;               // Multiplier for heating capacity when system is in defrost
+    Real64 InputPowerMultiplier = 0.0;                    // Multiplier for power when system is in defrost
+    Real64 LoadDueToDefrost = 0.0;                        // Additional load due to defrost
+    Real64 DefrostEIRTempModFac = 0.0;                    // EIR modifier for defrost (function of entering wetbulb, outside drybulb)
+    Real64 TotRatedCapacity = 0.0;                        // total rated capacity at the given speed and speed ratio for defrosting
+    Real64 OutdoorDryBulb_CalcVarSpeedCoilCooling = 0.0;  // Outdoor dry-bulb temperature at condenser (C)
+    Real64 OutdoorWetBulb_CalcVarSpeedCoilCooling = 0.0;  // Outdoor wet-bulb temperature at condenser (C)
+    Real64 OutdoorHumRat_CalcVarSpeedCoilCooling = 0.0;   // Outdoor humidity ratio at condenser (kg/kg)
+    Real64 OutdoorPressure_CalcVarSpeedCoilCooling = 0.0; // Outdoor barometric pressure at condenser (Pa)
+    Real64 CompAmbTemp_CalcVarSpeedCoilCooling = 0.0;     // Ambient temperature at compressor
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -666,14 +664,12 @@ struct VariableSpeedCoilsData : BaseGlobalStruct
         this->HeatingCapacityMultiplier = 0.0;
         this->InputPowerMultiplier = 0.0;
         this->LoadDueToDefrost = 0.0;
-        this->CrankcaseHeatingPower = 0.0;
         this->DefrostEIRTempModFac = 0.0;
         this->TotRatedCapacity = 0.0;
         this->OutdoorDryBulb_CalcVarSpeedCoilCooling = 0.0;
         this->OutdoorWetBulb_CalcVarSpeedCoilCooling = 0.0;
         this->OutdoorHumRat_CalcVarSpeedCoilCooling = 0.0;
         this->OutdoorPressure_CalcVarSpeedCoilCooling = 0.0;
-        this->CrankcaseHeatingPower_CalcVarSpeedCoilCooling = 0.0;
         this->CompAmbTemp_CalcVarSpeedCoilCooling = 0.0;
     }
 
