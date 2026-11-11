@@ -134,6 +134,7 @@ namespace EIRPlantLoopHeatPumps {
         bool referenceCapacityWasAutoSized = false;
         Real64 referenceCOP = 0.0;
         Real64 minimumPLR = 0.0;
+        Real64 maximumPLR = 0.0;
         Real64 partLoadRatio = 0.0;
         Real64 cyclingRatio = 0.0;
         Real64 minSourceTempLimit = -999.0;
@@ -392,11 +393,6 @@ namespace EIRPlantLoopHeatPumps {
         Real64 desTempLift = 11.1;
         OATempCurveVar oaTempCurveInputVar = OATempCurveVar::DryBulb;
         WaterTempCurveVar waterTempCurveInputVar = WaterTempCurveVar::EnteringCondenser;
-        // int capFuncTempCurveIndex = 0;
-        // int powerRatioFuncTempCurveIndex = 0;
-        //  int powerRatioFuncPLRCurveIndex = 0;
-        Real64 minPLR = 0.1;
-        Real64 maxPLR = 1.0;
 
         int defrostEIRCurveIndex = 0;
         DefrostType defrostType = DefrostType::OnDemand;

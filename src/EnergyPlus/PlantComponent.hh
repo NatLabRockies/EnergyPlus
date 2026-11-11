@@ -48,8 +48,6 @@
 #ifndef PLANTCOMPONENT_HH_INCLUDED
 #define PLANTCOMPONENT_HH_INCLUDED
 
-#include <EnergyPlus/DataGlobals.hh>
-
 namespace EnergyPlus {
 
 // Forward declarations
