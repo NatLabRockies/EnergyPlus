@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -5250,9 +5251,10 @@ namespace CondenserLoopTowers {
         // Find a fan speed that operates the tower to meet MyLoad
 
         // SUBROUTINE PARAMETER DEFINITIONS:
-        Real64 constexpr DesignWetBulb(25.56); // tower outdoor air entering wetbulb for design [C]
-        int constexpr MaxIte(500);             // Maximum number of iterations for solver
-        Real64 constexpr Acc(1.e-3);           // Accuracy of solver result
+        Real64 constexpr DesignWetBulb(25.56);    // tower outdoor air entering wetbulb for design [C]
+        int constexpr MaxIte(500);                // Maximum number of iterations for solver
+        Real64 constexpr LoadAbsTolerance(1.e-3); // Absolute load tolerance [W]
+        Real64 constexpr LoadRelTolerance(1.e-7); // Relative load tolerance [fraction]
         static constexpr std::string_view RoutineName("calculateMerkelVariableSpeedTower");
 
         Real64 const CpWater =
@@ -5435,7 +5437,8 @@ namespace CondenserLoopTowers {
                 return std::abs(MyLoad) - Qdot;
             };
             int SolFla = 0;
-            General::SolveRoot(state, Acc, MaxIte, SolFla, this->airFlowRateRatio, f, this->MinimumVSAirFlowFrac, 1.0);
+            Real64 const loadTolerance = std::max(LoadAbsTolerance, LoadRelTolerance * std::abs(MyLoad));
+            General::SolveRoot(state, loadTolerance, MaxIte, SolFla, this->airFlowRateRatio, f, this->MinimumVSAirFlowFrac, 1.0);
 
             if (SolFla == -1) {
                 if (!state.dataGlobal->WarmupFlag) {
@@ -5615,8 +5618,9 @@ namespace CondenserLoopTowers {
     Real64 CoolingTower::calculateVariableTowerOutletTemp(EnergyPlusData &state,
                                                           Real64 const WaterFlowRateRatio,    // current water flow rate ratio (capped if applicable)
                                                           Real64 const airFlowRateRatioLocal, // current air flow rate ratio
-                                                          Real64 const Twb // current inlet air wet-bulb temperature (C, capped if applicable)
-    )
+                                                          Real64 const Twb, // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                          bool const reportErrors,
+                                                          bool *outletTempIsUsable)
     {
 
         // SUBROUTINE INFORMATION:
@@ -5656,19 +5660,29 @@ namespace CondenserLoopTowers {
         int SolFla = 0;
         General::SolveRoot(state, Acc, MaxIte, SolFla, Tr, f, 0.001, max(this->MaxRangeTemp, VSTowerMaxRangeTemp));
 
+        if (outletTempIsUsable != nullptr) {
+            *outletTempIsUsable = (SolFla != General::SOLVEROOT_ERROR_ITER);
+        }
+
         // calculate outlet temperature
         Real64 outletWaterTempLocal = this->WaterTemp - min(Tr, this->MaxRangeTemp);
 
-        if (SolFla == -1) {
+        // A root outside the model bounds has a usable maximum-range fallback.
+        if (SolFla == General::SOLVEROOT_ERROR_INIT) {
+            outletWaterTempLocal = this->WaterTemp - this->MaxRangeTemp;
+        }
+
+        if (!reportErrors) {
+            return outletWaterTempLocal;
+        }
+
+        if (SolFla == General::SOLVEROOT_ERROR_ITER) {
             ShowSevereError(state, "Iteration limit exceeded in calculating tower nominal capacity at minimum air flow ratio");
             ShowContinueError(
                 state,
                 "Design inlet air wet-bulb or approach temperature must be modified to achieve an acceptable range at the minimum air flow rate");
             ShowContinueError(state, std::format("Cooling tower simulation failed to converge for tower {}", this->Name));
-        } else if (SolFla == -2) {
-            // bad starting value means that solution corresponds to a range that is beyond
-            // the bounds of the model; The maximum range is used here
-            outletWaterTempLocal = this->WaterTemp - this->MaxRangeTemp;
+        } else if (SolFla == General::SOLVEROOT_ERROR_INIT) {
             ++this->VSErrorCountTRCalc;
             if (this->VSErrorCountTRCalc < 2) {
                 ShowWarningError(
@@ -6286,9 +6300,9 @@ namespace CondenserLoopTowers {
         Real64 constexpr waterFlowRateRatio = 1.0;
         Real64 const CpWater =
             this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp, routineName);
-        // use operating max (i.e., at current plant flow rates, could be 0 if plant is off) or max available capacity?
-        // Real64 waterMassFlowRate = state.dataLoopNodes->Node(this->WaterInletNodeNum).MassFlowRateMaxAvail;
-        Real64 waterMassFlowRate = this->DesWaterMassFlowRate;
+        // Use design flow when estimating maximum available capacity. Current flow may be zero for idle equipment,
+        // which would prevent subsequent towers from being staged when the operating tower cannot meet the remaining load.
+        Real64 const waterMassFlowRate = this->DesWaterMassFlowRate;
         this->AirWetBulb = (this->OutdoorAirInletNodeNum > 0) ? state.dataLoopNodes->Node(this->OutdoorAirInletNodeNum).OutAirWetBulb
                                                               : state.dataEnvrn->OutWetBulbTemp;
 
@@ -6304,29 +6318,19 @@ namespace CondenserLoopTowers {
             outletWaterTemp = this->calculateSimpleTowerOutletTemp(state, WaterMassFlowRatePerCell, AirFlowRate, UAdesign);
         } break;
         case DataPlant::PlantEquipmentType::CoolingTower_VarSpd: {
-            Real64 TrCapped; // range temp passed to VS tower model
-            Real64 TaCapped; // approach temp passed to VS tower model
-            Real64 Twb = this->AirWetBulb;
-            Real64 TwbCapped = this->AirWetBulb;
-            // water temperature setpoint
-            Real64 TempSetPoint(0.0); // Outlet water temperature setpoint (C)
-            switch (this->plantLoc.loop->LoopDemandCalcScheme) {
-            case DataPlant::LoopDemandCalcScheme::SingleSetPoint: {
-                TempSetPoint = this->plantLoc.side->TempSetPoint;
-            } break;
-            case DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand: {
-                TempSetPoint = this->plantLoc.side->TempSetPointHi;
-            } break;
-            default: {
-                assert(false);
-            } break;
+            Real64 const TwbCapped = std::clamp(this->AirWetBulb, this->MinInletAirWBTemp, this->MaxInletAirWBTemp);
+            // YorkCalc limits liquid-to-gas ratio during actual operation instead of limiting water flow ratio.
+            bool const isYorkCalc = this->TowerModelType == ModelType::YorkCalcModel || this->TowerModelType == ModelType::YorkCalcUserDefined;
+            Real64 const waterFlowRateRatioCapped =
+                isYorkCalc ? waterFlowRateRatio : std::clamp(waterFlowRateRatio, this->MinWaterFlowRatio, this->MaxWaterFlowRatio);
+            bool outletTempIsUsable = false;
+            outletWaterTemp =
+                this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, ratedAirFlowRateRatio, TwbCapped, false, &outletTempIsUsable);
+            if (!outletTempIsUsable) {
+                minLoad = 0.0;
+                optLoad = 0.0;
+                return 0.0;
             }
-            Real64 Tr = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - TempSetPoint;
-            Real64 Ta = TempSetPoint - this->AirWetBulb;
-            Real64 waterFlowRateRatioCapped = 0.0; // Water flow rate ratio passed to VS tower model
-            // check independent inputs with respect to model boundaries
-            this->checkModelBounds(state, Twb, Tr, Ta, waterFlowRateRatio, TwbCapped, TrCapped, TaCapped, waterFlowRateRatioCapped);
-            outletWaterTemp = this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, ratedAirFlowRateRatio, TwbCapped);
         } break;
         case DataPlant::PlantEquipmentType::CoolingTower_VarSpdMerkel: {
             // only needed for calculateSimpleTowerOutletTemp
@@ -6345,7 +6349,7 @@ namespace CondenserLoopTowers {
         default:
             assert(false);
         }
-        Real64 maxLoad = waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
+        Real64 const maxLoad = waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
         minLoad = 0.0;
         optLoad = maxLoad;
         return maxLoad;

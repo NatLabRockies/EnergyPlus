@@ -383,9 +383,11 @@ namespace CondenserLoopTowers {
         Real64 calculateSimpleTowerOutletTemp(EnergyPlusData &state, Real64 waterMassFlowRate, Real64 AirFlowRate, Real64 UAdesign);
 
         Real64 calculateVariableTowerOutletTemp(EnergyPlusData &state,
-                                                Real64 WaterFlowRateRatio,    // current water flow rate ratio (capped if applicable)
-                                                Real64 airFlowRateRatioLocal, // current air flow rate ratio
-                                                Real64 Twb                    // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                Real64 WaterFlowRateRatio,         // current water flow rate ratio (capped if applicable)
+                                                Real64 airFlowRateRatioLocal,      // current air flow rate ratio
+                                                Real64 Twb,                        // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                bool reportErrors = true,          // report solver failures during normal simulation
+                                                bool *outletTempIsUsable = nullptr // optional solver result usability status
         );
 
         void calculateWaterUsage(EnergyPlusData &state);
