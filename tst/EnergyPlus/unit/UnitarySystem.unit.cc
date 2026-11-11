@@ -8533,6 +8533,32 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
         "  0.5,                        !- Speed 1 Electric Power Fraction",
         "  1.0,                        !- Speed 2 Flow Fraction",
         "  1.0;                        !- Speed 2 Electric Power Fraction",
+        "",
+        "Fan:SystemModel,",
+        "  Continuous Fan,            !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  System Inlet,               !- Air Inlet Node Name",
+        "  Supplemental Inlet,         !- Air Outlet Node Name",
+        "  1.0,                        !- Design Maximum Air Flow Rate {m3/s}",
+        "  Continuous,                 !- Speed Control Method",
+        "  0.0,                        !- Electric Power Minimum Flow Rate Fraction",
+        "  300.0,                      !- Design Pressure Rise {Pa}",
+        "  0.9,                        !- Motor Efficiency",
+        "  1.0,                        !- Motor In Air Stream Fraction",
+        "  600.0,                      !- Design Electric Power Consumption {W}",
+        "  TotalEfficiencyAndPressure, !- Design Power Sizing Method",
+        "  ,                           !- Electric Power Per Unit Flow Rate {W/(m3/s)}",
+        "  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}",
+        "  0.5,                        !- Fan Total Efficiency",
+        "  Constant Modifier,          !- Electric Power Function of Flow Fraction Curve Name",
+        "  ,                           !- Night Ventilation Mode Pressure Rise {Pa}",
+        "  ,                           !- Night Ventilation Mode Flow Fraction",
+        "  ,                           !- Motor Loss Zone Name",
+        "  ,                           !- Motor Loss Radiative Fraction",
+        "  ,                           !- End-Use Subcategory",
+        "  1,                          !- Number of Speeds",
+        "  1.0,                        !- Speed 1 Flow Fraction",
+        "  1.0;                        !- Speed 1 Electric Power Fraction",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -8685,7 +8711,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
         auto &coil = supplementalCoil;
         state->dataEnvrn->OutDryBulbTemp = -10.0;
         // With no primary coils, both placement choices still have the fan upstream of the supplemental heater.
-        for (auto const &fanName : {"SUPPLY FAN", "ONOFF FAN", "MULTISPEED FAN"}) {
+        for (auto const &fanName : {"SUPPLY FAN", "ONOFF FAN", "MULTISPEED FAN", "CONTINUOUS FAN"}) {
             for (auto const fanPlacement : {HVAC::FanPlace::BlowThru, HVAC::FanPlace::DrawThru}) {
                 SCOPED_TRACE(fanName);
                 SCOPED_TRACE(static_cast<int>(fanPlacement));
@@ -8694,6 +8720,9 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 auto *fan = state->dataFans->fans(fanIndex);
                 ASSERT_NE(nullptr, fan);
                 ASSERT_GT(coil.PLFCurveIndex, 0);
+                auto *systemFan = dynamic_cast<Fans::FanSystem *>(fan);
+                bool const continuousSpeedSystemModel =
+                  systemFan != nullptr && systemFan->speedControl == Fans::SpeedControl::Continuous;
                 // Bypass the primary coil for this scenario; the same fan now feeds the supplemental inlet directly.
                 fan->outletNodeNum = coil.AirInletNodeNum;
 
@@ -8706,6 +8735,10 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 fan->simulate(*state, false);
                 Real64 const fullLoadFanPower = fan->totalPower;
                 ASSERT_NEAR(600.0, fullLoadFanPower, 0.001);
+                auto expectedFanPower = [&](Real64 const coilRuntime) {
+                  Real64 const runtime = continuousSpeedSystemModel ? 0.25 : max(0.25, coilRuntime);
+                  return fullLoadFanPower * runtime;
+                };
 
                 UnitarySys thisSys;
                 thisSys.AirInNode = fan->inletNodeNum;
@@ -8766,14 +8799,14 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 ASSERT_NEAR(0.3125, coil.RTF, 0.000001);
                 // The supplemental coil follows the fan in either placement. Its PLF requires another component pass
                 // to update fan power and downstream temperatures, while preserving the original PLR-based airflow.
-                EXPECT_NEAR(fullLoadFanPower * coil.RTF, fan->totalPower, 0.001);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
                 EXPECT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
-                EXPECT_DOUBLE_EQ(1.0, state->dataHVACGlobal->OnOffFanPartLoadFraction);
+                EXPECT_DOUBLE_EQ(continuousSpeedSystemModel ? 0.8 : 1.0, state->dataHVACGlobal->OnOffFanPartLoadFraction);
                 // Repeating the call must not apply the same PLF a second time.
                 simulate();
-                EXPECT_NEAR(187.5, fan->totalPower, 0.001);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
 
-                if (auto *systemFan = dynamic_cast<Fans::FanSystem *>(fan); systemFan != nullptr && systemFan->numSpeeds > 1) {
+                if (systemFan != nullptr && systemFan->speedControl == Fans::SpeedControl::Discrete && systemFan->numSpeeds > 1) {
                     // An on-cycle flow between speeds must split the corrected RTF between both speeds.
                     state->dataUnitarySystems->CompOnMassFlow = 0.75;
                     state->dataUnitarySystems->m_massFlow1 = 0.75;
@@ -8789,7 +8822,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 simulate();
                 EXPECT_LE(state->dataLoopNodes->Node(thisSys.AirOutNode).Temp, 25.0 + 0.00001);
                 EXPECT_LT(coil.HeatingCoilRate, 2500.0);
-                EXPECT_NEAR(fullLoadFanPower * max(0.25, coil.RTF), fan->totalPower, 0.001);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
 
                 // A looser limit keeps coil RTF above PLR and exercises fan-heat/coil-output convergence.
                 thisSys.DesignMaxOutletTemp = 29.0;
@@ -8797,7 +8830,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 EXPECT_NEAR(29.0, state->dataLoopNodes->Node(thisSys.AirOutNode).Temp, 0.00001);
                 EXPECT_GT(coil.RTF, 0.25);
                 EXPECT_LT(coil.HeatingCoilRate, 2500.0);
-                EXPECT_NEAR(fullLoadFanPower * coil.RTF, fan->totalPower, 0.001);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
 
                 // Removing cycling losses must restore PLR-based fan power, without a stale correction.
                 thisSys.DesignMaxOutletTemp = 100.0;
@@ -8814,7 +8847,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
                 thisSys.m_HeatingFanSpeedRatio = 1.0;
                 state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 0.8;
                 simulate(1.0);
-                EXPECT_NEAR(187.5, fan->totalPower, 0.001);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
                 EXPECT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
                 thisSys.m_DXHeatingCoil = false;
                 thisSys.m_HeatingSpeedNum = 0;
