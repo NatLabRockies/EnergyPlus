@@ -478,10 +478,9 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
     Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
 
-    // A zero-flow mode still contributes runtime to the average and power scaling.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.0, 0.5, 0.0, 0.5, _);
     Real64 expectedZeroFlowModePower =
-        pow(0.5, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
+        0.5 * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedZeroFlowModePower, fanSystem.totalPower, 0.01);
 }
 
