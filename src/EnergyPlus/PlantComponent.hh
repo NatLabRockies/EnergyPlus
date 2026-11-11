@@ -90,7 +90,7 @@ public:
     {
     }
 
-    virtual Real64 getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state)
+    virtual Real64 getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] Real64 &minLoad, [[maybe_unused]] Real64 &optLoad)
     {
         return 0.0;
     }

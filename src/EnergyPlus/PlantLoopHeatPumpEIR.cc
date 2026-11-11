@@ -2865,14 +2865,17 @@ bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
     return true;
 }
 
-Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     Real64 sourceInletTemp = state.dataLoopNodes->Node(this->sourceSideNodes.inlet).Temp;
     Real64 loadSideOutletSetpointTemp = this->getLoadSideOutletSetPointTemp(state);
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp =
         (this->capFuncTempCurveIndex > 0) ? Curve::CurveValue(state, this->capFuncTempCurveIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
-    return this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void EIRPlantLoopHeatPump::report(EnergyPlusData &state)
@@ -4513,7 +4516,7 @@ void EIRFuelFiredHeatPump::report(EnergyPlusData &state)
     state.dataLoopNodes->Node(this->sourceSideNodes.outlet).Temp = this->sourceSideOutletTemp;
 }
 
-Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     // Source (air) side temperature variable
     auto &thisSourceSideInletNode = state.dataLoopNodes->Node(this->sourceSideNodes.inlet);
@@ -4545,7 +4548,10 @@ Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
 
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->capFuncTempCurveIndex, waterTempforCurve, oaTempforCurve);
-    return this->referenceCapacity * capacityModifierFuncTemp;
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp;
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 currentLoad, OperatingModeControlOptionMultipleUnit modeCalcMethod)

@@ -406,7 +406,9 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
 
     // Test getDynamicMaxCapacity function for use by plant manager
     PlantComponent *thisChiller = &thisEIR;
-    Real64 dynCap = thisChiller->getDynamicMaxCapacity(*state);
+    Real64 minCap = 0.0;
+    Real64 optCap = 0.0;
+    Real64 dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
     EXPECT_NEAR(18582.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 12 C OAT and 6 C leaving CHW temperature
     EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 
@@ -419,7 +421,7 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
     EXPECT_GT(thisEIR.Power, 1200.0);             // power is non-zero
 
     // Test getDynamicMaxCapacity function for use by plant manager
-    dynCap = thisChiller->getDynamicMaxCapacity(*state);
+    dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
     EXPECT_NEAR(14354.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 5 C OAT and 6 C leaving CHW temperature
     EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 

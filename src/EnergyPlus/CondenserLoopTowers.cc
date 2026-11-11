@@ -6275,7 +6275,7 @@ namespace CondenserLoopTowers {
         }
     }
 
-    Real64 CoolingTower::getDynamicMaxCapacity(EnergyPlusData &state)
+    Real64 CoolingTower::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
     {
         // TODO: does not include faults object impact
         static constexpr std::string_view routineName("getDynamicMaxCapacity");
@@ -6344,7 +6344,10 @@ namespace CondenserLoopTowers {
         default:
             assert(false);
         }
-        return waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
+        Real64 maxLoad = waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
+        minLoad = 0.0;
+        optLoad = maxLoad;
+        return maxLoad;
     }
 
 } // namespace CondenserLoopTowers
