@@ -8718,14 +8718,15 @@ namespace InternalHeatGains {
         }
 
         // ElectricEquipment:ITE:LiquidCooled
-        // Output variable names without the "Rate"/"Energy" suffix or the Zone/Space prefix. The CPU and Fan names
-        // carry "Liquid Cooled" so they do not collide with the ElectricEquipment:ITE:AirCooled outputs.
-        constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> LiquidITEOutputVariableBaseNames = {"ITE Liquid Cooled CPU Electricity",
-                                                                                                               "ITE Liquid Cooled Fan Electricity",
-                                                                                                               "ITE Total Electricity",
-                                                                                                               "ITE Total Heat Generation",
-                                                                                                               "ITE Liquid Heat Gain",
-                                                                                                               "ITE Air Heat Gain to Zone"};
+        // Output variable names without the "Rate"/"Energy" suffix or the Zone/Space prefix. All names carry
+        // "Liquid Cooled" so they are clearly distinguished from the ElectricEquipment:ITE:AirCooled outputs.
+        constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> LiquidITEOutputVariableBaseNames = {
+            "ITE Liquid Cooled CPU Electricity",
+            "ITE Liquid Cooled Fan Electricity",
+            "ITE Liquid Cooled Total Electricity",
+            "ITE Liquid Cooled Total Heat Generation",
+            "ITE Liquid Cooled Heat Transfer to Liquid Loop",
+            "ITE Liquid Cooled Air Heat Gain to Zone"};
 
         // Object report variables
         for (int itEqLCNum = 1; itEqLCNum <= state.dataHeatBal->TotITELiquidCooledEquip; ++itEqLCNum) {
@@ -8779,7 +8780,7 @@ namespace InternalHeatGains {
             }
 
             SetupOutputVariable(state,
-                                "ITE Liquid Heat Capture Fraction",
+                                "ITE Liquid Cooled Heat Capture Fraction",
                                 Constant::Units::None,
                                 thisITELC.LiquidHeatCaptureFraction,
                                 OutputProcessor::TimeStepType::Zone,
@@ -8810,7 +8811,7 @@ namespace InternalHeatGains {
                                     key);
             }
             SetupOutputVariable(state,
-                                std::format("{} ITE Liquid Heat Capture Fraction", prefix),
+                                std::format("{} ITE Liquid Cooled Heat Capture Fraction", prefix),
                                 Constant::Units::None,
                                 heatCaptureFraction,
                                 OutputProcessor::TimeStepType::Zone,

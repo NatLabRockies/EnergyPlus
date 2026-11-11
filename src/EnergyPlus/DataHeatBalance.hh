@@ -1036,9 +1036,9 @@ namespace DataHeatBalance {
         CPU,            // ITE CPU Electric Power/Energy
         Fan,            // ITE Fan Electric Power/Energy
         TotalElectric,  // ITE Total Electric Power/Energy
-        TotalHeatGen,   // ITE Total Heat Generation Power(Rate)/Energy
-        LiquidHeatGain, // ITE Liquid Heat Gain Power(Rate)/Energy
-        AirHeatGain,    // ITE Air Heat Gain to Zone Power(Rate)/Energy - convective gain
+        TotalHeatGen,   // ITE Liquid Cooled Total Heat Generation Power(Rate)/Energy
+        LiquidHeatGain, // ITE Liquid Cooled Heat Transfer to Liquid Loop Power(Rate)/Energy
+        AirHeatGain,    // ITE Liquid Cooled Air Heat Gain to Zone Power(Rate)/Energy - convective gain
         Num
     };
 
@@ -1816,7 +1816,7 @@ namespace DataHeatBalance {
         // Liquid-Cooled IT Equipment
         std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEPowerRpt{};
         std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEEnergyRpt{};
-        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone/space achieved ITE Liquid Heat Capture Fraction []
+        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone/space achieved ITE Liquid Cooled Heat Capture Fraction []
         // Overall Zone Variables
         Real64 TotRadiantGain = 0.0;
         Real64 TotVisHeatGain = 0.0;

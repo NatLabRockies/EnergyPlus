@@ -314,21 +314,21 @@
 
   Output:Variable,*,ITE Liquid Cooled Fan Electricity Rate,hourly;
 
-  Output:Variable,*,ITE Total Electricity Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled Total Electricity Rate,hourly;
 
-  Output:Variable,*,ITE Total Heat Generation Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled Total Heat Generation Rate,hourly;
 
-  Output:Variable,*,ITE Liquid Heat Capture Fraction,hourly;
+  Output:Variable,*,ITE Liquid Cooled Heat Capture Fraction,hourly;
 
-  Output:Variable,*,ITE Liquid Heat Gain Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled Heat Transfer to Liquid Loop Rate,hourly;
 
-  Output:Variable,*,ITE Air Heat Gain to Zone Rate,hourly;
+  Output:Variable,*,ITE Liquid Cooled Air Heat Gain to Zone Rate,hourly;
 
-  Output:Variable,*,Zone ITE Total Electricity Rate,hourly;
+  Output:Variable,*,Zone ITE Liquid Cooled Total Electricity Rate,hourly;
 
-  Output:Variable,*,Zone ITE Air Heat Gain to Zone Rate,hourly;
+  Output:Variable,*,Zone ITE Liquid Cooled Air Heat Gain to Zone Rate,hourly;
 
-  Output:Variable,*,Space ITE Total Electricity Rate,hourly;
+  Output:Variable,*,Space ITE Liquid Cooled Total Electricity Rate,hourly;
 
   Output:VariableDictionary,IDF;
 

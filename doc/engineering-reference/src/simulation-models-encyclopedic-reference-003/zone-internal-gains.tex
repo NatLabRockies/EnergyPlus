@@ -390,7 +390,7 @@ The input object ElectricEquipment:ITE:LiquidCooled describes liquid-cooled data
 \item
   LHCF$_\textrm{Design}$ is the design (nominal) liquid heat capture fraction
 \item
-  LF$_{i,\textrm{Design}}$ is the static Load Fraction of Cooling Coil $i$ ($i=1\ldots4$), each a fraction (0.0 to 1.0) of the total liquid load directed to that coil
+  LF$_{i,\textrm{Design}}$ is the static Load Fraction of Cooling Coil $i$ ($i=1\ldots N$, where $N \geq 1$ is the number of cooling coils the rack references; the object is extensible, so there is no upper limit on $N$), each a fraction (0.0 to 1.0) of the total liquid load directed to that coil
 \end{itemize}
 
 \subsubsection{Variable Definitions---Simulation Inputs:}\label{variable-definitions-simulation-inputs-liquidcooled}

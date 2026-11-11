@@ -4649,26 +4649,26 @@ ElectricEquipment:ITE:LiquidCooled Outputs:
 \item
   Zone,Sum,ITE Liquid Cooled Fan Electricity Energy {[}J{]}
 \item
-  Zone,Average,ITE Total Electricity Rate {[}W{]}
+  Zone,Average,ITE Liquid Cooled Total Electricity Rate {[}W{]}
 \item
-  Zone,Sum,ITE Total Electricity Energy {[}J{]}
+  Zone,Sum,ITE Liquid Cooled Total Electricity Energy {[}J{]}
 \item
-  Zone,Average,ITE Total Heat Generation Rate {[}W{]}
+  Zone,Average,ITE Liquid Cooled Total Heat Generation Rate {[}W{]}
 \item
-  Zone,Sum,ITE Total Heat Generation Energy {[}J{]}
+  Zone,Sum,ITE Liquid Cooled Total Heat Generation Energy {[}J{]}
 \item
-  Zone,Average,ITE Liquid Heat Capture Fraction {[]}
+  Zone,Average,ITE Liquid Cooled Heat Capture Fraction {[]}
 \item
-  Zone,Average,ITE Liquid Heat Gain Rate {[}W{]}
+  Zone,Average,ITE Liquid Cooled Heat Transfer to Liquid Loop Rate {[}W{]}
 \item
-  Zone,Sum,ITE Liquid Heat Gain Energy {[}J{]}
+  Zone,Sum,ITE Liquid Cooled Heat Transfer to Liquid Loop Energy {[}J{]}
 \item
-  Zone,Average,ITE Air Heat Gain to Zone Rate {[}W{]}
+  Zone,Average,ITE Liquid Cooled Air Heat Gain to Zone Rate {[}W{]}
 \item
-  Zone,Sum,ITE Air Heat Gain to Zone Energy {[}J{]}
+  Zone,Sum,ITE Liquid Cooled Air Heat Gain to Zone Energy {[}J{]}
 \end{itemize}
 
-Corresponding Space and Zone level aggregations (e.g.\ ``Zone ITE Total Electricity Rate'', ``Space ITE Air Heat Gain to Zone Rate'') are automatically generated for every variable listed above, following the same convention as \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled}. The Space and Zone liquid heat capture fractions are calculated from aggregate liquid heat gain divided by aggregate total heat generation, so racks are weighted by their current heat generation.
+Corresponding Space and Zone level aggregations (e.g.\ ``Zone ITE Liquid Cooled Total Electricity Rate'', ``Space ITE Liquid Cooled Air Heat Gain to Zone Rate'') are automatically generated for every variable listed above, following the same convention as \hyperref[electricequipmentiteaircooled]{ElectricEquipment:ITE:AirCooled}. The Space and Zone liquid heat capture fractions are calculated from aggregate liquid heat gain divided by aggregate total heat generation, so racks are weighted by their current heat generation.
 
 \paragraph{ITE Liquid Cooled CPU Electricity Rate {[}W{]}}\label{ite-cpu-electricity-rate-liquidcooled}
 
@@ -4678,25 +4678,25 @@ The power consumed specifically by the compute components of the IT equipment.
 
 The power consumed by the internal fans used to assist with thermal management within the equipment.
 
-\paragraph{ITE Total Electricity Rate {[}W{]}}\label{ite-total-electricity-rate-liquidcooled}
+\paragraph{ITE Liquid Cooled Total Electricity Rate {[}W{]}}\label{ite-liquid-cooled-total-electricity-rate}
 
 The overall power consumption of the liquid-cooled IT equipment, the sum of the CPU and fan electricity rates above.
 
-\paragraph{ITE Total Heat Generation Rate {[}W{]}}\label{ite-total-heat-generation-rate-liquidcooled}
+\paragraph{ITE Liquid Cooled Total Heat Generation Rate {[}W{]}}\label{ite-liquid-cooled-total-heat-generation-rate}
 
 The entire thermal load produced by the equipment, which is inherently equal to the total electricity rate above.
 
-\paragraph{ITE Liquid Heat Capture Fraction {[]}}\label{ite-liquid-heat-capture-fraction}
+\paragraph{ITE Liquid Cooled Heat Capture Fraction {[]}}\label{ite-liquid-cooled-heat-capture-fraction}
 
 The achieved liquid heat gain divided by total heat generation at the current time step, or zero when no heat is generated. This accounts for the Liquid Heat Capture Fraction field, its optional schedule, and the cooling coil Load Fractions.
 
-\paragraph{ITE Liquid Heat Gain Rate {[}W{]}}\label{ite-liquid-heat-gain-rate}
+\paragraph{ITE Liquid Cooled Heat Transfer to Liquid Loop Rate {[}W{]}}\label{ite-liquid-cooled-heat-transfer-to-liquid-loop-rate}
 
-The portion of ITE Total Heat Generation Rate that is captured and removed by the attached liquid cooling loop.
+The portion of ITE Liquid Cooled Total Heat Generation Rate that is captured and removed by the attached liquid cooling loop.
 
-\paragraph{ITE Air Heat Gain to Zone Rate {[}W{]}}\label{ite-air-heat-gain-to-zone-rate}
+\paragraph{ITE Liquid Cooled Air Heat Gain to Zone Rate {[}W{]}}\label{ite-liquid-cooled-air-heat-gain-to-zone-rate}
 
-The remaining portion of ITE Total Heat Generation Rate that is not captured by the liquid loop, dissipated into the surrounding zone air as a convective sensible heat gain. The referenced cooling coils are not yet simulated, so each coil's share of the liquid load is currently assumed to be fully removed and this output equals ITE Total Heat Generation Rate less ITE Liquid Heat Gain Rate.
+The remaining portion of ITE Liquid Cooled Total Heat Generation Rate that is not captured by the liquid loop, dissipated into the surrounding zone air as a convective sensible heat gain. The referenced cooling coils are not yet simulated, so each coil's share of the liquid load is currently assumed to be fully removed and this output equals ITE Liquid Cooled Total Heat Generation Rate less ITE Liquid Cooled Heat Transfer to Liquid Loop Rate.
 
 An IDF example:
 

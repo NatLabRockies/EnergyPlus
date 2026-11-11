@@ -281,15 +281,15 @@ The outputs for `ElectricEquipment:ITE:LiquidCooled` are as follows
    Zone,Sum,ITE Liquid Cooled CPU Electricity Energy [J]
    Zone,Average,ITE Liquid Cooled Fan Electricity Rate [W]
    Zone,Sum,ITE Liquid Cooled Fan Electricity Energy [J]
-   Zone,Average,ITE Total Electricity Rate [W]
-   Zone,Sum,ITE Total Electricity Energy [J]
-   Zone,Average,ITE Total Heat Generation Rate [W]
-   Zone,Sum,ITE Total Heat Generation Energy [J]
-   Zone,Average,ITE Liquid Heat Capture Fraction []
-   Zone,Average,ITE Liquid Heat Gain Rate [W]
-   Zone,Sum,ITE Liquid Heat Gain Energy [J]
-   Zone,Average,ITE Air Heat Gain to Zone Rate [W]
-   Zone,Sum,ITE Air Heat Gain to Zone Energy [J]
+   Zone,Average,ITE Liquid Cooled Total Electricity Rate [W]
+   Zone,Sum,ITE Liquid Cooled Total Electricity Energy [J]
+   Zone,Average,ITE Liquid Cooled Total Heat Generation Rate [W]
+   Zone,Sum,ITE Liquid Cooled Total Heat Generation Energy [J]
+   Zone,Average,ITE Liquid Cooled Heat Capture Fraction []
+   Zone,Average,ITE Liquid Cooled Heat Transfer to Liquid Loop Rate [W]
+   Zone,Sum,ITE Liquid Cooled Heat Transfer to Liquid Loop Energy [J]
+   Zone,Average,ITE Liquid Cooled Air Heat Gain to Zone Rate [W]
+   Zone,Sum,ITE Liquid Cooled Air Heat Gain to Zone Energy [J]
 ```
 
 The ITE CPU electricity rate and energy outputs represent the power and energy consumed specifically by the compute components of the IT equipment. The ITE fan electricity rate and energy outputs represent the power and energy consumed by the internal fans used to assist with thermal management within the equipment. The ITE total electricity rate and energy outputs represent the overall power and energy consumption of the liquid-cooled IT equipment, which is the sum of the CPU and fan electricity usage.
@@ -298,7 +298,7 @@ The ITE total heat generation rate and energy outputs represent the entire therm
 
 The CPU and Fan End-Use Subcategory fields (see Input Description) let the CPU and Fan electricity outputs above roll up separately in the ABUPS End Uses by Subcategory table, so downstream PUE- and ITUE-adjacent analysis can distinguish IT compute load from auxiliary fan load rather than relying on manual post-processing.
 
-Once Coil:Cooling:ITE:ColdPlate is wired up (see Overview and "Zone Heat Gain Registration for Air Spillover"), the ITE Liquid Heat Gain and ITE Air Heat Gain to Zone outputs reported here reflect the coil's achieved split from its *previous* plant-side `simulate()` call, not a value computed in direct response to this timestep's target — the same one-timestep lag already noted for the coil's own zone registration. In other words, the sensible heat actually entering the zone's air heat balance this timestep (via the coil's own `SetupZoneInternalGain` registration) may differ slightly from what `ITE Air Heat Gain to Zone Rate` reports for that same timestep; the two track closely but are not guaranteed to match instantaneously.
+Once Coil:Cooling:ITE:ColdPlate is wired up (see Overview and "Zone Heat Gain Registration for Air Spillover"), the ITE Liquid Cooled Heat Transfer to Liquid Loop and ITE Liquid Cooled Air Heat Gain to Zone outputs reported here reflect the coil's achieved split from its *previous* plant-side `simulate()` call, not a value computed in direct response to this timestep's target — the same one-timestep lag already noted for the coil's own zone registration. In other words, the sensible heat actually entering the zone's air heat balance this timestep (via the coil's own `SetupZoneInternalGain` registration) may differ slightly from what `ITE Liquid Cooled Air Heat Gain to Zone Rate` reports for that same timestep; the two track closely but are not guaranteed to match instantaneously.
 
 ## Engineering Reference ##
 
