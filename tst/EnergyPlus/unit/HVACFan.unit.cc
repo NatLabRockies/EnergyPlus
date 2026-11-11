@@ -1091,6 +1091,22 @@ TEST_F(EnergyPlusFixture, SystemFanObj_EMSActuators)
 
         fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
         EXPECT_NEAR(160.0, fanSystem->totalPower, 0.00001);
+
+        if (fanIndex == 1) {
+            // Exercise below-first-speed cycling and power contributions from both speeds.
+            fanSystem->EMSAirMassFlowValue = 0.6;
+            fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+            EXPECT_NEAR(240.0, fanSystem->totalPower, 0.00001);
+
+            fanSystem->EMSAirMassFlowValue = 0.2;
+            fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+            EXPECT_NEAR(80.0, fanSystem->totalPower, 0.00001);
+
+            // Use the parent-provided flow ratios and runtimes instead of EMS flow.
+            fanSystem->EMSMaxMassFlowOverrideOn = false;
+            fanSystem->calcSimpleSystemFan(*state, _, _, 0.75, 0.4, 0.25, 0.6, _);
+            EXPECT_NEAR(144.0, fanSystem->totalPower, 0.00001);
+        }
     }
 }
 
