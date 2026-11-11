@@ -51,12 +51,14 @@
 #include <gtest/gtest.h>
 
 // EnergyPlus Headers
+#include <EnergyPlus/ChillerElectricASHRAE205.hh>
 #include <EnergyPlus/ChillerElectricEIR.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSizing.hh>
+#include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
@@ -64,11 +66,22 @@
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::ChillerElectricEIR;
+
+TEST_F(EnergyPlusFixture, ChillerElectricASHRAE205_DynamicCapacityNotAvailable)
+{
+    ChillerElectricASHRAE205::ASHRAE205ChillerSpecs chiller;
+    PlantComponent *plantComponent = &chiller;
+    Real64 minLoad = 0.0;
+    Real64 optLoad = 0.0;
+
+    EXPECT_EQ(0.0, plantComponent->getDynamicMaxCapacity(*state, minLoad, optLoad));
+}
 
 TEST_F(EnergyPlusFixture, ChillerElectricEIR_TestNegativeCurveRoundingError)
 {
@@ -408,8 +421,13 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
     PlantComponent *thisChiller = &thisEIR;
     Real64 minCap = 0.0;
     Real64 optCap = 0.0;
+    thisEIR.MaxPartLoadRat = 1.1;
     Real64 dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
-    EXPECT_NEAR(18582.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 12 C OAT and 6 C leaving CHW temperature
+    EXPECT_NEAR(18582.6 * thisEIR.MaxPartLoadRat,
+                dynCap,
+                1.0); // maximum load used by plant manager, calculated at 12 C OAT and 6 C leaving CHW temperature
+    EXPECT_NEAR(18582.6 * thisEIR.MinPartLoadRat, minCap, 1.0);
+    EXPECT_NEAR(18582.6 * thisEIR.OptPartLoadRat, optCap, 1.0);
     EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 
     state->dataLoopNodes->Node(thisEIR.CondInletNodeNum).OutAirDryBulb = 5.0; // condenser inlet temp < evap outlet temp
@@ -422,7 +440,9 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
 
     // Test getDynamicMaxCapacity function for use by plant manager
     dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
-    EXPECT_NEAR(14354.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 5 C OAT and 6 C leaving CHW temperature
+    EXPECT_NEAR(14354.6 * thisEIR.MaxPartLoadRat,
+                dynCap,
+                1.0);                          // maximum load used by plant manager, calculated at 5 C OAT and 6 C leaving CHW temperature
     EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 
     MyLoad /= 25.0; // reduce load such that thermosiphon can meet load
@@ -434,6 +454,27 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
     EXPECT_GT(thermosiphonCapFrac, thisEIR.ChillerPartLoadRatio); // thermosiphon capacity can meet load
     EXPECT_EQ(thisEIR.thermosiphonStatus, 1);                     // thermosiphon is on
     EXPECT_EQ(thisEIR.Power, 0.0);                                // power is zero
+
+    state->dataPlnt->PlantLoop(1).LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
+    thisEIR.FlowMode = DataPlant::FlowMode::LeavingSetpointModulated;
+    thisEIR.ModulatedFlowSetToLoop = true;
+    state->dataLoopNodes->Node(thisEIR.EvapOutletNodeNum).TempSetPoint = 10.0;
+    state->dataLoopNodes->Node(thisEIR.EvapOutletNodeNum).TempSetPointHi = 6.0;
+    Real64 capacityModifier = Curve::CurveValue(*state, thisEIR.ChillerCapFTIndex, 6.0, 5.0);
+    Real64 availableCapacity = thisEIR.RefCap * capacityModifier;
+
+    dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
+    EXPECT_NEAR(availableCapacity * thisEIR.MaxPartLoadRat, dynCap, 0.01);
+
+    state->dataFaultsMgr->FaultsChillerFouling.allocate(1);
+    auto &foulingFault = state->dataFaultsMgr->FaultsChillerFouling(1);
+    foulingFault.availSched = Sched::GetScheduleAlwaysOn(*state);
+    foulingFault.FoulingFactor = 0.8;
+    thisEIR.FaultyChillerFoulingFlag = true;
+    thisEIR.FaultyChillerFoulingIndex = 1;
+
+    dynCap = thisChiller->getDynamicMaxCapacity(*state, minCap, optCap);
+    EXPECT_NEAR(availableCapacity * foulingFault.FoulingFactor * thisEIR.MaxPartLoadRat, dynCap, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, ChillerElectricEIR_EvaporativelyCooled_Calculate)

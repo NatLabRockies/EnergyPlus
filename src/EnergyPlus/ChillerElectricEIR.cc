@@ -2666,16 +2666,19 @@ Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state, Rea
                 min(state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp, EvapOutletTempSetPoint_ff - this->FaultyChillerSWTOffset));
         this->FaultyChillerSWTOffset = EvapOutletTempSetPoint_ff - loadSideOutletSetpointTemp;
     }
-    if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) && this->ModulatedFlowSetToLoop) {
-        loadSideOutletSetpointTemp = state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum).TempSetPoint;
-    }
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp =
         (this->ChillerCapFTIndex > 0) ? Curve::CurveValue(state, this->ChillerCapFTIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
-    Real64 maxLoad = this->RefCap * capacityModifierFuncTemp;
-    minLoad = maxLoad * this->MinPartLoadRat; // TRANE
-    optLoad = maxLoad * this->OptPartLoadRat; // TRANE
-    return maxLoad;                           // TRANE
+    Real64 adjustedRefCap = this->RefCap;
+    if (this->FaultyChillerFoulingFlag && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing) &&
+        (!state.dataGlobal->KickOffSimulation)) {
+        this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(this->FaultyChillerFoulingIndex).CalFoulingFactor(state);
+        adjustedRefCap *= this->FaultyChillerFoulingFactor;
+    }
+    Real64 availableLoad = adjustedRefCap * capacityModifierFuncTemp;
+    minLoad = availableLoad * this->MinPartLoadRat;
+    optLoad = availableLoad * this->OptPartLoadRat;
+    return availableLoad * this->MaxPartLoadRat;
 }
 
 } // namespace EnergyPlus::ChillerElectricEIR
