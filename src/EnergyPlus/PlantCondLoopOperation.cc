@@ -3040,6 +3040,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
                 ++numAvail;
+                this_component.updateDynamicCapacity(state);
 
                 if (this_component.OptLoad > 0.0) {
                     ChangeInLoad = min(this_component.OptLoad, std::abs(RemLoopDemand));
@@ -3090,7 +3091,6 @@ void DistributePlantLoad(EnergyPlusData &state,
                     }
 
                     NewLoad = this_component.MyLoad;
-                    this_component.updateDynamicCapacity(state);
                     NewLoad = min(this_component.MaxLoad, std::abs(NewLoad) + DivideLoad);
                     ChangeInLoad = NewLoad - std::abs(this_component.MyLoad);
                     this_component.MyLoad = sign(NewLoad, RemLoopDemand);

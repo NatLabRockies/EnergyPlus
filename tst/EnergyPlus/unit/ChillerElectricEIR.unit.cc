@@ -400,7 +400,7 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
 
     thisEIR.initialize(*state, RunFlag, MyLoad);
     thisEIR.calculate(*state, MyLoad, RunFlag);
-    EXPECT_GT(thisEIR.ChillerPartLoadRatio, 0.4); // load is largeMax
+    EXPECT_GT(thisEIR.ChillerPartLoadRatio, 0.4); // load is large
     EXPECT_EQ(thisEIR.thermosiphonStatus, 0);     // thermosiphon is off
     EXPECT_GT(thisEIR.Power, 1300.0);             // power is non-zero
 
