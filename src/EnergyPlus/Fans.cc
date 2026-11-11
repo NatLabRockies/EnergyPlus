@@ -2883,6 +2883,9 @@ void FanSystem::calcSimpleSystemFan(
         _localFlowFrac = _localAirMassFlow[0] / maxAirMassFlowRate;
         _localFlowFrac = min(1.0, _localFlowFrac);
 
+        if (speedControl == SpeedControl::Continuous && _localAirMassFlow[mode] == 0.0) {
+            _localRuntimeFrac[mode] = 0.0;
+        }
         if (_localRuntimeFrac[mode] > 0.0) {
             _localFlowRatio[mode] = _localAirMassFlow[mode] / (maxAirMassFlowRate * _localRuntimeFrac[mode]);
         }
@@ -2917,7 +2920,7 @@ void FanSystem::calcSimpleSystemFan(
         for (int mode = 0; mode < _numModes; ++mode) {
 
             // if no flow for this mode then continue to the next mode
-            if (_localAirMassFlow[mode] == 0.0 && speedControl != SpeedControl::Continuous) {
+            if (_localAirMassFlow[mode] == 0.0) {
                 continue;
             }
 
