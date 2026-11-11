@@ -52,7 +52,7 @@ This numeric field is the design volume flow rate of the fan as installed in the
 
 \paragraph{Field: Speed Control Method}\label{field-speed-method-fansysmodel}
 
-This field selects how the fan speed is controlled. The choices are Continuous and Discrete; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
+This field selects how the fan speed is controlled. The choices are Discrete and Continuous; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. When the parent supplies a flow fraction and runtime fraction for each operating condition, the curve is evaluated at the runtime-weighted average flow fraction (the sum of each flow fraction multiplied by its runtime fraction, divided by total runtime). For example, half the runtime at 50% flow and half at 100% flow gives a 75% average flow fraction. The resulting power is scaled by total runtime to obtain timestep-average fan power. These flow/runtime pairs are supplied internally by the parent (e.g., \hyperref[airloophvacunitarysystem]{AirLoopHVAC:UnitarySystem} passes compressor-on and compressor-off pairs; compressor-off flow may be nonzero). A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
 
 \paragraph{Field: Electric Power Minimum Flow Rate Fraction}\label{field-power-min-flow-fraction-fansysmodel}
 
@@ -235,17 +235,11 @@ Fan:SystemModel,
   HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
 \item
   HVAC,Average,Fan Heat Gain to Air {[}W{]}
-\end{itemize}
-
-There are additional variables for fans that can be discretely varied.
-For single-speed fans:
-
-\begin{itemize}
 \item
   HVAC,Average,Fan Runtime Fraction {[]}
 \end{itemize}
 
-For two-speed and multi-speed fans:
+There are additional variables for two-speed and multi-speed fans that can be discretely varied:
 
 \begin{itemize}
 \item
@@ -274,7 +268,7 @@ This output contains the average power in Watts lost to the process air stream f
 
 \paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction-fansysmodel}
 
-This output contains the fraction of time that this fan operated for the timestep being reported. Applicable only for single-speed fans that can be discretely varied (i.e., Speed Control Method = Discrete).
+This output contains the fraction of time that this fan operated at any speed for the timestep being reported. It is available for both discrete and continuous speed control. For discrete speed control, it is the sum of the runtime fractions at each speed. For continuous speed control, it is 1.0 when the fan runs throughout the timestep, even at reduced airflow, and less than 1.0 when the parent system cycles the fan. It is zero when the fan is off.
 
 \paragraph{Fan Runtime Fraction Speed <\#> {[]}}\label{fan-runtime-fraction-speed-fansysmodel}
 
