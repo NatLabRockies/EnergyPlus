@@ -2,7 +2,7 @@ name: Self-Hosted Build and Test
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ "**" ]
   workflow_dispatch:
     inputs:
       ref:
@@ -26,6 +26,12 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      - name: Set up Python 3.12
+        id: setup-python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
       - name: Configure
         run: >
           cmake -S . -B build
@@ -37,6 +43,8 @@ jobs:
           -DDOCUMENTATION_BUILD=DoNotBuild
           -DLINK_WITH_PYTHON=ON
           -DPYTHON_CLI=ON
+          -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
+          -DPython_ROOT_DIR:PATH="$(dirname "$(dirname "${{ steps.setup-python.outputs.python-path }}")")"
 
       - name: Build
         run: cmake --build build -j "$(nproc)"
