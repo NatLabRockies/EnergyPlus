@@ -52,7 +52,11 @@ This numeric field is the design volume flow rate of the fan as installed in the
 
 \paragraph{Field: Speed Control Method}\label{field-speed-method-fansysmodel}
 
-This field selects how the fan speed is controlled. The choices are Continuous and Discrete; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow rate to vary smoothly up to the Design Maximum Air Flow Rate and calculates electric power from the Electric Power Function of Flow Fraction Curve Name. A constant-volume or on-off fan should use Discrete with Number of Speeds set to 1. A variable-air-volume fan should use Continuous.
+This field selects how the fan speed is controlled. The choices are Discrete and Continuous; the default is Discrete. Discrete control operates at one or more specified speed levels. When an intermediate flow is required, the model time-weights operation between adjacent speed levels. Continuous control allows the flow to vary smoothly up to the Design Maximum Air Flow Rate and calculates power using the Electric Power Function of Flow Fraction Curve Name. Either speed-control method can cycle on and off under parent-system control.
+
+When the parent supplies operating flows and runtimes, continuous control evaluates the power curve at the runtime-weighted average operating flow and weights power by the runtimes, adjusted for any coil part load fraction (PLF). Without these inputs, an available fan with nonzero airflow operates for the full timestep at the requested flow. Unlike \hyperref[fanvariablevolume]{Fan:VariableVolume}, Fan:SystemModel can account separately for operating flow and cycling runtime. See the Engineering Reference for calculation details.
+
+A constant-volume or fixed-speed on-off fan should use Discrete with Number of Speeds set to 1. A fan with continuously variable speed should use Continuous, whether or not the parent cycles it.
 
 \paragraph{Field: Electric Power Minimum Flow Rate Fraction}\label{field-power-min-flow-fraction-fansysmodel}
 
@@ -268,7 +272,7 @@ This output contains the average power in Watts lost to the process air stream f
 
 \paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction-fansysmodel}
 
-This output contains the fraction of time that this fan operated at any speed for the timestep being reported. It is available for both discrete and continuous speed control. For discrete speed control, it is the sum of the runtime fractions at each speed. For continuous speed control, it is 1.0 when the fan runs throughout the timestep, even at reduced airflow, and less than 1.0 when the parent system cycles the fan. It is zero when the fan is off.
+This output contains the fan runtime fraction for the timestep being reported. For discrete control, it is the sum of the runtimes at each speed. For continuous control, it is the sum of runtimes for modes with airflow, adjusted for coil PLF when supplied. Without parent-supplied runtimes, a running continuous-speed fan reports 1.0. The output is zero when the fan is off. PLF-corrected mode runtimes are capped individually, so their sum can exceed 1.0.
 
 \paragraph{Fan Runtime Fraction Speed <\#> {[]}}\label{fan-runtime-fraction-speed-fansysmodel}
 
