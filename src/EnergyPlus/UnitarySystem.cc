@@ -11530,9 +11530,9 @@ namespace UnitarySystems {
             localFanPartLoadRatio = this->m_EconoPartLoadRatio;
         }
         int SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum, this->m_EconoSpeedNum);
-        // Extend load-controlled cycling airflow for supplemental heat without changing continuous-fan or ASHRAE-model control.
-        if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && this->m_SuppCoilExists &&
-            !this->m_SimASHRAEModel) {
+        // Stop retained DX heating requests from running a cycling fan when the compressor is unavailable.
+        // Supplemental heat can still require airflow through the same unitary system.
+        if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && !this->m_SimASHRAEModel) {
             if (state.dataUnitarySystems->HeatingLoad && state.dataUnitarySystems->MoistureLoad >= 0.0 && this->m_DXHeatingCoil) {
                 // Use the condenser-node temperature when valid, matching the heating-coil simulation's outdoor-temperature selection.
                 Real64 outdoorDryBulb = state.dataEnvrn->OutDryBulbTemp;
@@ -11555,8 +11555,10 @@ namespace UnitarySystems {
                     state.dataUnitarySystems->m_massFlow2 = 0.0;
                 }
             }
-            // This maximum uses requested part-load fractions, not actual coil RTFs; existing downstream DX cycling corrections remain.
-            localFanPartLoadRatio = max(localFanPartLoadRatio, this->m_SuppHeatPartLoadFrac);
+            if (this->m_SuppCoilExists) {
+                // Supplemental heat still needs the shared fan while the primary DX compressor is unavailable.
+                localFanPartLoadRatio = max(localFanPartLoadRatio, this->m_SuppHeatPartLoadFrac);
+            }
         }
         int InletNode = this->AirInNode;
 

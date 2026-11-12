@@ -8409,6 +8409,46 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_SupplementalHeatingCyclingFanAirFlo
     EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction2);
 }
 
+TEST_F(EnergyPlusFixture, UnitarySystemModel_CyclingFanStopsWhenDXHeatingUnavailableWithoutSupplementalCoil)
+{
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(1);
+
+    UnitarySys thisSys;
+    thisSys.AirInNode = 1;
+    thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+    thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+    thisSys.m_SuppCoilExists = false;
+    thisSys.m_DXHeatingCoil = true;
+    thisSys.MaxHeatAirMassFlow = 1.0;
+    thisSys.m_HeatingFanSpeedRatio = 1.0;
+    thisSys.m_MinOATCompressorHeating = -5.0;
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    state->dataUnitarySystems->HeatingLoad = true;
+    state->dataUnitarySystems->CompOnMassFlow = 1.0;
+    state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+    state->dataUnitarySystems->CompOffMassFlow = 0.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+    Real64 OnOffAirFlowRatio = 0.0;
+
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOff(*state);
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = -10.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+}
+
 // Verify DX-only, supplemental-only, and combined heating fan PLF corrections with shared component inputs.
 // Scenario traces distinguish runtime dominance, lockout, temperature limits, and repeated-call regressions.
 TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
