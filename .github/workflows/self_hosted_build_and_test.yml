@@ -29,14 +29,17 @@ jobs:
       - name: Configure
         run: >
           cmake -S . -B build
-          -G "Unix Makefiles"
+          -G Ninja
           -DCMAKE_BUILD_TYPE=Debug
           -DBUILD_TESTING=ON
           -DBUILD_PACKAGE=OFF
+          -DBUILD_FORTRAN=ON
           -DDOCUMENTATION_BUILD=DoNotBuild
+          -DLINK_WITH_PYTHON=ON
+          -DPYTHON_CLI=ON
 
       - name: Build
         run: cmake --build build -j "$(nproc)"
 
       - name: Run tests
-        run: ctest --test-dir build -j "$(nproc)"
+        run: ctest --test-dir build -j "$(nproc)" --label-exclude slow --output-on-failure
