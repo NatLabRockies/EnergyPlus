@@ -2897,7 +2897,7 @@ void FanSystem::calcSimpleSystemFan(
         Real64 _totalRuntimeFrac = _localRuntimeFrac[0] + _localRuntimeFrac[1];
         // Continuous control applies the nonlinear power curve to average flow, not to each mode separately.
         _localAverageFlowFrac = (maxAirMassFlowRate > 0.0 && _totalRuntimeFrac > 0.0)
-                                    ? (_localAirMassFlow[0] + _localAirMassFlow[1]) / (maxAirMassFlowRate * _totalRuntimeFrac)
+                                    ? (_localFlowRatio[0] * _localRuntimeFrac[0] + _localFlowRatio[1] * _localRuntimeFrac[1]) / _totalRuntimeFrac
                                     : 0.0;
         _localAverageFlowFrac = min(1.0, _localAverageFlowFrac);
     }
