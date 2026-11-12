@@ -2052,7 +2052,7 @@ Cooling Capacity” (in W), and “Autosized Rated Sensible Heat Ratio” (in
 W/W). Actuators called "Coil:Cooling:DX:Multispeed" are available with
 control types "Autosized Rated Air Flow Rate Speed n" (in m3/s), and
 "Autosized Rated Total Cooling Capacity Speed n" (in W) where n is an
-integer between 2 and 4.  These are only useful from the calling point
+integer between 1 and 4.  These are only useful from the calling point
 named AfterComponentInputReadIn.
 
 DX Heating Coils
@@ -2064,7 +2064,7 @@ actuator is called “Coil:Heating:DX:SingleSpeed” with control type
 “Autosized Rated Total Heating Capacity” (in W). Another
 actuator is called “Coil:Heating:DX:MultiSpeed” with control type
 “Autosized Rated Total Heating Capacity Speed n” (in W) where n is
-an integer between 2 and 4.  It is only useful from the calling
+an integer between 1 and 4.  It is only useful from the calling
 point named AfterComponentInputReadIn.
 
 A sample EMS program might look like this:
