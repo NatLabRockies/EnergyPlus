@@ -1409,7 +1409,7 @@ The convergence tolerance for the unit heating output. This field allows the use
 The unit is controlled by matching the unit output to the zone demand. For units with water coils, the model must be numerically inverted to obtain a specified output. The heating convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {{Q_{unit{\kern 1pt} heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
+\frac{{\left| {{Q_{unit heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
 \end{equation}
 
 \paragraph{Field: Availability Manager List Name}\label{field-availability-manager-list-name-2}
@@ -1579,7 +1579,7 @@ This numeric input field defines the magnitude, in Watts, of a significant zone 
 
 \paragraph{Field: First Evaporative Cooler Object Type}\label{field-first-evaporative-cooler-object-type}
 
-This alpha input field defines the type of evaporative cooler used in the unit. The zone evaporative cooler unit can have one or two separate cooler components and this field is for the first cooler. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectresearchspecial]{EvaporativeCooler:Direct:ResearchSpecial}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectresearchspecial]{EvaporativeCooler:Indirect:ResearchSpecial}.
+This alpha input field defines the type of evaporative cooler used in the unit. The zone evaporative cooler unit can have one or two separate cooler components and this field is for the first cooler. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectusereffectiveness]{EvaporativeCooler:Direct:UserEffectiveness}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectusereffectiveness]{EvaporativeCooler:Indirect:UserEffectiveness}.
 
 \paragraph{Field: First Evaporative Cooler Object Name}\label{field-first-evaporative-cooler-object-name}
 
@@ -1587,7 +1587,7 @@ This alpha input field defines the user-defined name of the first evaporative co
 
 \paragraph{Field: Second Evaporative Cooler Object Type}\label{field-second-evaporative-cooler-object-type}
 
-This optional alpha input field defines the type of evaporative cooler used in the unit. This field is used when the zone evaporative cooler unit has two separate evaporative cooler sections arranged in series. For example, some coolers are arranged with both direct and indirect evaporative coolers. If the unit has only one type of cooler, this field should be left blank. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectresearchspecial]{EvaporativeCooler:Direct:ResearchSpecial}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectresearchspecial]{EvaporativeCooler:Indirect:ResearchSpecial}
+This optional alpha input field defines the type of evaporative cooler used in the unit. This field is used when the zone evaporative cooler unit has two separate evaporative cooler sections arranged in series. For example, some coolers are arranged with both direct and indirect evaporative coolers. If the unit has only one type of cooler, this field should be left blank. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectusereffectiveness]{EvaporativeCooler:Direct:UserEffectiveness}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectusereffectiveness]{EvaporativeCooler:Indirect:UserEffectiveness}
 
 \paragraph{Field: Second Evaporative Cooler Name}\label{field-second-evaporative-cooler-name}
 
@@ -2040,7 +2040,7 @@ This input field defines the convergence tolerance for the unit's cooling output
 The window air conditioner is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX coil is frequently non-linear, the air conditioner model must call the DX coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2640,7 +2640,7 @@ This numeric field defines the convergence tolerance for the unit's heating outp
 The heat pump is controlled by matching its sensible (temperature) heating output to the zone sensible load (demand). Because the performance of the DX heating coil is frequently non-linear, the heat pump model must call the DX heating coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The heating convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2671,7 +2671,7 @@ This numeric field defines the convergence tolerance for the unit's cooling outp
 The heat pump is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX cooling coil is frequently non-linear, the heat pump model must call the DX cooling coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.

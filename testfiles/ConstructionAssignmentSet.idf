@@ -43,7 +43,7 @@
 !
 ! Location:                Chicago, IL
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,6;
 
@@ -56,7 +56,7 @@
     ,                        !- Solar Distribution
     ,                        !- Maximum Number of Warmup Days
     ,                        !- Minimum Number of Warmup Days
-    Default Construction Set;  !- Construction Assignment Set Name
+    Default Construction Set;!- Construction Assignment Set Name
 
   Zone,
     Zone1,                   !- Name
@@ -100,18 +100,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1 RoofCeiling,      !- Name
@@ -125,18 +117,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1 Wall 1,           !- Name
@@ -150,18 +134,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     InteriorDoor - Door,     !- Name
@@ -173,18 +149,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex 1 X-coordinate {m}
-    4.6,                     !- Vertex 1 Y-coordinate {m}
-    2.0,                     !- Vertex 1 Z-coordinate {m}
-    10.0,                    !- Vertex 2 X-coordinate {m}
-    4.6,                     !- Vertex 2 Y-coordinate {m}
-    0.0,                     !- Vertex 2 Z-coordinate {m}
-    10.0,                    !- Vertex 3 X-coordinate {m}
-    5.4,                     !- Vertex 3 Y-coordinate {m}
-    0.0,                     !- Vertex 3 Z-coordinate {m}
-    10.0,                    !- Vertex 4 X-coordinate {m}
-    5.4,                     !- Vertex 4 Y-coordinate {m}
-    2.0;                     !- Vertex 4 Z-coordinate {m}
+    10.0,4.6,2.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,4.6,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,5.4,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,5.4,2.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1 Wall 2,           !- Name
@@ -198,18 +166,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     ExteriorDoor - Door,     !- Name
@@ -221,18 +181,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    4.6,                     !- Vertex 1 X-coordinate {m}
-    0.0,                     !- Vertex 1 Y-coordinate {m}
-    2.0,                     !- Vertex 1 Z-coordinate {m}
-    4.6,                     !- Vertex 2 X-coordinate {m}
-    0.0,                     !- Vertex 2 Y-coordinate {m}
-    0.0,                     !- Vertex 2 Z-coordinate {m}
-    5.4,                     !- Vertex 3 X-coordinate {m}
-    0.0,                     !- Vertex 3 Y-coordinate {m}
-    0.0,                     !- Vertex 3 Z-coordinate {m}
-    5.4,                     !- Vertex 4 X-coordinate {m}
-    0.0,                     !- Vertex 4 Y-coordinate {m}
-    2.0;                     !- Vertex 4 Z-coordinate {m}
+    4.6,0.0,2.0,  !- X,Y,Z ==> Vertex 1 {m}
+    4.6,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    5.4,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    5.4,0.0,2.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1 Wall 3,           !- Name
@@ -246,18 +198,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     ExteriorDoor - OverheadDoor,  !- Name
@@ -269,18 +213,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex 1 X-coordinate {m}
-    7.5,                     !- Vertex 1 Y-coordinate {m}
-    2.5,                     !- Vertex 1 Z-coordinate {m}
-    0.0,                     !- Vertex 2 X-coordinate {m}
-    7.5,                     !- Vertex 2 Y-coordinate {m}
-    0.0,                     !- Vertex 2 Z-coordinate {m}
-    0.0,                     !- Vertex 3 X-coordinate {m}
-    2.5,                     !- Vertex 3 Y-coordinate {m}
-    0.0,                     !- Vertex 3 Z-coordinate {m}
-    0.0,                     !- Vertex 4 X-coordinate {m}
-    2.5,                     !- Vertex 4 Y-coordinate {m}
-    2.5;                     !- Vertex 4 Z-coordinate {m}
+    0.0,7.5,2.5,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,7.5,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,2.5,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,2.5,2.5;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1 Wall 4,           !- Name
@@ -294,21 +230,13 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
-    ExteriorDoor - GlassDoor,  !- Name
+    ExteriorDoor - GlassDoor,!- Name
     GlassDoor,               !- Surface Type
     ,                        !- Construction Name
     Space1 Wall 4,           !- Building Surface Name
@@ -317,18 +245,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    5.4,                     !- Vertex 1 X-coordinate {m}
-    10.0,                    !- Vertex 1 Y-coordinate {m}
-    2.0,                     !- Vertex 1 Z-coordinate {m}
-    5.4,                     !- Vertex 2 X-coordinate {m}
-    10.0,                    !- Vertex 2 Y-coordinate {m}
-    0.0,                     !- Vertex 2 Z-coordinate {m}
-    4.6,                     !- Vertex 3 X-coordinate {m}
-    10.0,                    !- Vertex 3 Y-coordinate {m}
-    0.0,                     !- Vertex 3 Z-coordinate {m}
-    4.6,                     !- Vertex 4 X-coordinate {m}
-    10.0,                    !- Vertex 4 Y-coordinate {m}
-    2.0;                     !- Vertex 4 Z-coordinate {m}
+    5.4,10.0,2.0,  !- X,Y,Z ==> Vertex 1 {m}
+    5.4,10.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    4.6,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    4.6,10.0,2.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   ZoneInfiltration:DesignFlowRate,
     Space1 Infil 1,          !- Name
@@ -380,18 +300,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2 RoofCeiling,      !- Name
@@ -405,18 +317,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2 Wall 1,           !- Name
@@ -430,18 +334,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2 Wall 2,           !- Name
@@ -455,18 +351,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2 Wall 3,           !- Name
@@ -480,18 +368,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     InteriorDoor - Door - Reversed,  !- Name
@@ -503,18 +383,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex 1 X-coordinate {m}
-    5.4,                     !- Vertex 1 Y-coordinate {m}
-    2.0,                     !- Vertex 1 Z-coordinate {m}
-    0.0,                     !- Vertex 2 X-coordinate {m}
-    5.4,                     !- Vertex 2 Y-coordinate {m}
-    0.0,                     !- Vertex 2 Z-coordinate {m}
-    0.0,                     !- Vertex 3 X-coordinate {m}
-    4.6,                     !- Vertex 3 Y-coordinate {m}
-    0.0,                     !- Vertex 3 Z-coordinate {m}
-    0.0,                     !- Vertex 4 X-coordinate {m}
-    4.6,                     !- Vertex 4 Y-coordinate {m}
-    2.0;                     !- Vertex 4 Z-coordinate {m}
+    0.0,5.4,2.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,5.4,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,4.6,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,4.6,2.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2 Wall 4,           !- Name
@@ -528,18 +400,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     ExteriorWindow - FixedWindow,  !- Name
@@ -551,18 +415,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    9.9746,                  !- Vertex 1 X-coordinate {m}
-    10.0,                    !- Vertex 1 Y-coordinate {m}
-    1.96812712579906,        !- Vertex 1 Z-coordinate {m}
-    9.9746,                  !- Vertex 2 X-coordinate {m}
-    10.0,                    !- Vertex 2 Y-coordinate {m}
-    0.762,                   !- Vertex 2 Z-coordinate {m}
-    0.0254000000000012,      !- Vertex 3 X-coordinate {m}
-    10.0,                    !- Vertex 3 Y-coordinate {m}
-    0.762,                   !- Vertex 3 Z-coordinate {m}
-    0.0254000000000012,      !- Vertex 4 X-coordinate {m}
-    10.0,                    !- Vertex 4 Y-coordinate {m}
-    1.96812712579906;        !- Vertex 4 Z-coordinate {m}
+    9.9746,10.0,1.96812712579906,  !- X,Y,Z ==> Vertex 1 {m}
+    9.9746,10.0,0.762,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0254000000000012,10.0,0.762,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0254000000000012,10.0,1.96812712579906;  !- X,Y,Z ==> Vertex 4 {m}
 
   ZoneInfiltration:DesignFlowRate,
     Space2 Infil 1,          !- Name
@@ -601,7 +457,7 @@
     ,                        !- Volume {m3}
     ,                        !- Floor Area {m2}
     ,                        !- Space Type
-    Space3 Construction Set;  !- Construction Assignment Set Name
+    Space3 Construction Set; !- Construction Assignment Set Name
 
   BuildingSurface:Detailed,
     Space3 Floor,            !- Name
@@ -615,18 +471,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3 RoofCeiling,      !- Name
@@ -640,18 +488,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3 Wall 1,           !- Name
@@ -665,18 +505,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     InteriorWindow - FixedWindow,  !- Name
@@ -688,18 +520,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex 1 X-coordinate {m}
-    0.0254,                  !- Vertex 1 Y-coordinate {m}
-    1.96812712579906,        !- Vertex 1 Z-coordinate {m}
-    10.0,                    !- Vertex 2 X-coordinate {m}
-    0.0254,                  !- Vertex 2 Y-coordinate {m}
-    0.762,                   !- Vertex 2 Z-coordinate {m}
-    10.0,                    !- Vertex 3 X-coordinate {m}
-    9.9746,                  !- Vertex 3 Y-coordinate {m}
-    0.762,                   !- Vertex 3 Z-coordinate {m}
-    10.0,                    !- Vertex 4 X-coordinate {m}
-    9.9746,                  !- Vertex 4 Y-coordinate {m}
-    1.96812712579906;        !- Vertex 4 Z-coordinate {m}
+    10.0,0.0254,1.96812712579906,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0254,0.762,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,9.9746,0.762,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,9.9746,1.96812712579906;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3 Wall 2,           !- Name
@@ -713,18 +537,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     ExteriorWindow - OperableWindow,  !- Name
@@ -736,18 +552,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    0.0254,                  !- Vertex 1 X-coordinate {m}
-    0.0,                     !- Vertex 1 Y-coordinate {m}
-    1.96812712579906,        !- Vertex 1 Z-coordinate {m}
-    0.0254,                  !- Vertex 2 X-coordinate {m}
-    0.0,                     !- Vertex 2 Y-coordinate {m}
-    0.762,                   !- Vertex 2 Z-coordinate {m}
-    9.9746,                  !- Vertex 3 X-coordinate {m}
-    0.0,                     !- Vertex 3 Y-coordinate {m}
-    0.762,                   !- Vertex 3 Z-coordinate {m}
-    9.9746,                  !- Vertex 4 X-coordinate {m}
-    0.0,                     !- Vertex 4 Y-coordinate {m}
-    1.96812712579906;        !- Vertex 4 Z-coordinate {m}
+    0.0254,0.0,1.96812712579906,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0254,0.0,0.762,  !- X,Y,Z ==> Vertex 2 {m}
+    9.9746,0.0,0.762,  !- X,Y,Z ==> Vertex 3 {m}
+    9.9746,0.0,1.96812712579906;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3 Wall 3,           !- Name
@@ -761,21 +569,13 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
-    ExteriorWindow - Window,  !- Name
+    ExteriorWindow - Window, !- Name
     Window,                  !- Surface Type
     ,                        !- Construction Name
     Space3 Wall 3,           !- Building Surface Name
@@ -784,18 +584,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex 1 X-coordinate {m}
-    9.9746,                  !- Vertex 1 Y-coordinate {m}
-    1.96812712579906,        !- Vertex 1 Z-coordinate {m}
-    0.0,                     !- Vertex 2 X-coordinate {m}
-    9.9746,                  !- Vertex 2 Y-coordinate {m}
-    0.762,                   !- Vertex 2 Z-coordinate {m}
-    0.0,                     !- Vertex 3 X-coordinate {m}
-    0.0254000000000012,      !- Vertex 3 Y-coordinate {m}
-    0.762,                   !- Vertex 3 Z-coordinate {m}
-    0.0,                     !- Vertex 4 X-coordinate {m}
-    0.0254000000000012,      !- Vertex 4 Y-coordinate {m}
-    1.96812712579906;        !- Vertex 4 Z-coordinate {m}
+    0.0,9.9746,1.96812712579906,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,9.9746,0.762,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0254000000000012,0.762,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0254000000000012,1.96812712579906;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3 Wall 4,           !- Name
@@ -809,18 +601,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   ZoneInfiltration:DesignFlowRate,
     Space3 Infil 1,          !- Name
@@ -872,18 +656,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space4 RoofCeiling,      !- Name
@@ -897,18 +673,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     ExteriorWindow - Skylight,  !- Name
@@ -920,18 +688,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    1.83772233983162,        !- Vertex 1 X-coordinate {m}
-    8.16227766016838,        !- Vertex 1 Y-coordinate {m}
-    3.0,                     !- Vertex 1 Z-coordinate {m}
-    1.83772233983162,        !- Vertex 2 X-coordinate {m}
-    1.83772233983162,        !- Vertex 2 Y-coordinate {m}
-    3.0,                     !- Vertex 2 Z-coordinate {m}
-    8.16227766016838,        !- Vertex 3 X-coordinate {m}
-    1.83772233983162,        !- Vertex 3 Y-coordinate {m}
-    3.0,                     !- Vertex 3 Z-coordinate {m}
-    8.16227766016838,        !- Vertex 4 X-coordinate {m}
-    8.16227766016838,        !- Vertex 4 Y-coordinate {m}
-    3.0;                     !- Vertex 4 Z-coordinate {m}
+    1.83772233983162,8.16227766016838,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    1.83772233983162,1.83772233983162,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    8.16227766016838,1.83772233983162,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    8.16227766016838,8.16227766016838,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space4 Wall 1,           !- Name
@@ -945,18 +705,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space4 Wall 2,           !- Name
@@ -970,18 +722,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space4 Wall 3,           !- Name
@@ -995,18 +739,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   FenestrationSurface:Detailed,
     InteriorWindow - FixedWindow - Reversed,  !- Name
@@ -1018,18 +754,10 @@
     ,                        !- Frame and Divider Name
     ,                        !- Multiplier
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex 1 X-coordinate {m}
-    9.9746,                  !- Vertex 1 Y-coordinate {m}
-    1.96812712579906,        !- Vertex 1 Z-coordinate {m}
-    0.0,                     !- Vertex 2 X-coordinate {m}
-    9.9746,                  !- Vertex 2 Y-coordinate {m}
-    0.762,                   !- Vertex 2 Z-coordinate {m}
-    0.0,                     !- Vertex 3 X-coordinate {m}
-    0.0254000000000012,      !- Vertex 3 Y-coordinate {m}
-    0.762,                   !- Vertex 3 Z-coordinate {m}
-    0.0,                     !- Vertex 4 X-coordinate {m}
-    0.0254000000000012,      !- Vertex 4 Y-coordinate {m}
-    1.96812712579906;        !- Vertex 4 Z-coordinate {m}
+    0.0,9.9746,1.96812712579906,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,9.9746,0.762,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0254000000000012,0.762,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0254000000000012,1.96812712579906;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space4 Wall 4,           !- Name
@@ -1043,18 +771,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   ZoneInfiltration:DesignFlowRate,
     Space4 Infil 1,          !- Name
@@ -1096,7 +816,7 @@
     Yes;                     !- Use Weather File Snow Indicators
 
   Output:Table:SummaryReports,
-    AllSummary;              !- Report Name
+    AllSummary;              !- Report 1 Name
 
   GlobalGeometryRules,
     UpperLeftCorner,         !- Starting Vertex Position
@@ -1107,8 +827,8 @@
 
   ScheduleTypeLimits,
     Fractional,              !- Name
-    0.0,                     !- Lower Limit Value {BasedOnField A3}
-    1.0,                     !- Upper Limit Value {BasedOnField A3}
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
     Continuous;              !- Numeric Type
 
   Schedule:Constant,INFIL-SCH,Fractional,1.0;
@@ -1189,7 +909,7 @@
   Site:GroundTemperature:BuildingSurface,20.03,20.03,20.13,20.3,20.43,20.52,20.62,20.77,20.78,20.55,20.44,20.2;
 
   ConstructionAssignmentSet,
-    Default Construction Set,  !- Name
+    Default Construction Set,!- Name
     Exterior Surface Constructions,  !- Exterior Surface Construction Assignments Name
     Interior Surface Constructions,  !- Interior Surface Construction Assignments Name
     Ground Surface Constructions,  !- Ground Contact Surface Construction Assignments Name
@@ -1213,8 +933,8 @@
   SurfaceConstructionAssignments,
     Ground Surface Constructions,  !- Name
     Ground Floor Construction,  !- Floor Construction Name
-    Ground Wall Construction,  !- Wall Construction Name
-    Ground Roof Construction;  !- Roof Ceiling Construction Name
+    Ground Wall Construction,!- Wall Construction Name
+    Ground Roof Construction;!- Roof Ceiling Construction Name
 
   SubSurfaceConstructionAssignments,
     Exterior SubSurface Constructions,  !- Name
@@ -1239,7 +959,7 @@
     Interior TubularDaylightDiffuser Construction;  !- Tubular Daylight Diffuser Construction Name
 
   ConstructionAssignmentSet,
-    Space3 Construction Set,  !- Name
+    Space3 Construction Set, !- Name
     Space3 Exterior Surface Constructions;  !- Exterior Surface Construction Assignments Name
 
   SurfaceConstructionAssignments,
@@ -1284,12 +1004,12 @@
     R13LAYER;                !- Layer 2
 
   Construction,
-    Ground Wall Construction,  !- Name
+    Ground Wall Construction,!- Name
     C5 - 4 IN HW CONCRETE,   !- Outside Layer
     R13LAYER;                !- Layer 2
 
   Construction,
-    Ground Roof Construction,  !- Name
+    Ground Roof Construction,!- Name
     C5 - 4 IN HW CONCRETE,   !- Outside Layer
     R13LAYER;                !- Layer 2
 
@@ -1425,3 +1145,4 @@
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
+

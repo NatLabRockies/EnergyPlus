@@ -51,7 +51,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Array2S.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -115,7 +114,7 @@ namespace MatrixDataManager {
 
     void Get2DMatrix(EnergyPlusData &state,
                      int const Idx, // pointer index to location in MatData
-                     Array2S<Real64> Mat2D);
+                     Array2D<Real64> &Mat2D);
 
     void Get2DMatrixDimensions(EnergyPlusData &state,
                                int const Idx, // pointer index to location in MatData

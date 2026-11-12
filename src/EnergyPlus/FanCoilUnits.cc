@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -2688,7 +2689,7 @@ namespace FanCoilUnits {
                 OAMassFlow = OAVolumeFlowRate * RhoAir;
             }
 
-            MinSAMassFlowRate = min(max(OAMassFlow, fanCoil.MaxAirMassFlow * fanCoil.LowSpeedRatio), fanCoil.MaxAirMassFlow);
+            MinSAMassFlowRate = std::clamp(OAMassFlow, fanCoil.MaxAirMassFlow * fanCoil.LowSpeedRatio, fanCoil.MaxAirMassFlow);
             MaxSAMassFlowRate = fanCoil.MaxAirMassFlow;
             state.dataFanCoilUnits->HeatingLoad = false;
             state.dataFanCoilUnits->CoolingLoad = false;

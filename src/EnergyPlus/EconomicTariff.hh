@@ -49,7 +49,7 @@
 #define EconomicTariff_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array1A.hh>
+#include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
@@ -338,7 +338,6 @@ namespace EconomicTariff {
         Sched::Schedule *chargeSched = nullptr;  // index to the charge schedule
         Sched::Schedule *baseUseSched = nullptr; // index to the baseline use schedule
         std::string groupName;                   // name of the group
-        std::string monetaryUnit;                // text string representing monetary unit, usually $
         BuySell buyOrSell;                       // enumerated choice index of the buy or sell options
         // index to the first and last category variables
         int firstCategory; // first category referenced
@@ -599,9 +598,9 @@ namespace EconomicTariff {
 
     void ComputeTariff(EnergyPlusData &state);
 
-    void pushStack(EnergyPlusData &state, Array1A<Real64> const monthlyArray, int const variablePointer);
+    void pushStack(EnergyPlusData &state, Array1D<Real64> const &monthlyArray, int const variablePointer);
 
-    void popStack(EnergyPlusData &state, Array1A<Real64> monthlyArray, int &variablePointer);
+    void popStack(EnergyPlusData &state, Array1D<Real64> &monthlyArray, int &variablePointer);
 
     void evaluateChargeSimple(EnergyPlusData &state, int const usingVariable);
 
@@ -634,7 +633,7 @@ namespace EconomicTariff {
 
     void selectTariff(EnergyPlusData &state);
 
-    void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1A<Real64> outMonthlyCosts);
+    void GetMonthlyCostForResource(EnergyPlusData const &state, Constant::eResource const inResourceNumber, Array1D<Real64> &outMonthlyCosts);
 
 } // namespace EconomicTariff
 

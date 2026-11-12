@@ -28,3 +28,7 @@ set(INCLUDED_IMAGES ${PROJECT_SOURCE_DIR}/interface-developer/media/image001.png
                     ${PROJECT_SOURCE_DIR}/interface-developer/media/image003.png)
 
 create_doc_target("interface-developer" "InterfaceDeveloper")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("interface-developer" "interface-developer")
+endif()

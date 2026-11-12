@@ -300,7 +300,7 @@ Let $\Delta t$ be the system timestep in seconds. The net power into the PCM is
 \end{equation}
 The stored energy state is advanced explicitly:
 \begin{equation}
-E(t+\Delta t) = \min\!\Bigl(E_{\max}, \max\!\bigl(0,\, E(t) + \dot Q_{\mathrm{net}} \,\Delta t \bigr)\Bigr),
+E(t+\Delta t) = \min\!\bigl(E_{\max}, \max\!\bigl(0,\, E(t) + \dot Q_{\mathrm{net}} \,\Delta t \bigr)\bigr),
 \end{equation}
 and $\mathrm{SOC}(t+\Delta t) = E(t+\Delta t)/E_{\max}$.
 

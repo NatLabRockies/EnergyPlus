@@ -73,6 +73,7 @@
 #include <EnergyPlus/SolarShading.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+#include <EnergyPlus/Vectors.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 #include <algorithm>
@@ -95,9 +96,6 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->MaxVerticesPerSurface = 5;
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->ShadeV.allocate(state->dataSurface->TotSurfaces);
-    for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
-        state->dataSurface->Surface(SurfNum).Vertex.allocate(state->dataSurface->MaxVerticesPerSurface);
-    }
 
     bool ErrorsFound(false);
     int ThisSurf(0);
@@ -107,6 +105,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -134,6 +133,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 8.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -161,6 +161,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 4;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -188,6 +189,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 3;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -211,6 +213,7 @@ TEST_F(EnergyPlusFixture, BaseSurfaceRectangularTest)
     state->dataSurface->Surface(ThisSurf).Azimuth = 180.0;
     state->dataSurface->Surface(ThisSurf).Tilt = 90.0;
     state->dataSurface->Surface(ThisSurf).Sides = 5;
+    state->dataSurface->Surface(ThisSurf).Vertex.allocate(state->dataSurface->Surface(ThisSurf).Sides);
     state->dataSurface->Surface(ThisSurf).GrossArea = 10.0;
 
     state->dataSurface->Surface(ThisSurf).Vertex(1).x = 0.0;
@@ -801,9 +804,9 @@ TEST_F(EnergyPlusFixture, SurfacesGeometry_CalcSurfaceCentroid_NonconvexRealisti
 
     CalcSurfaceCentroid(*state);
 
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.x, 667.);
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.y, 0.);
-    EXPECT_EQ(state->dataSurface->Surface(1).Centroid.z, 10.);
+    EXPECT_DOUBLE_EQ(state->dataSurface->Surface(1).Centroid.x, 667.);
+    EXPECT_NEAR(state->dataSurface->Surface(1).Centroid.y, 0., 1e-12);
+    EXPECT_DOUBLE_EQ(state->dataSurface->Surface(1).Centroid.z, 10.);
 }
 
 TEST_F(EnergyPlusFixture, MakeEquivalentRectangle)
@@ -1083,8 +1086,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometryUnitTests_isAlmostEqual3dPt)
 
 TEST_F(EnergyPlusFixture, SurfaceGeometryUnitTests_isAlmostEqual2dPt)
 {
-    DataVectorTypes::Vector_2d a;
-    DataVectorTypes::Vector_2d b;
+    Vector2D a;
+    Vector2D b;
 
     a.x = 0.;
     a.y = 0.;
@@ -3005,6 +3008,198 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_VertexNumberMismatchTest)
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
+// Reproduces issue #11707: use another polygon edge when the 2-3 edge is too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAlternateEdge)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "BLOCK BATIMENT0000000293627145-PART231 STOREY 0 ROOF 0001";
+    surface.Sides = 3;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {696212.1442928468, 7044674.109177616, 6.8};
+    surface.Vertex(2) = {696211.199943949, 7044696.100094359, 6.8};
+    surface.Vertex(3) = {696211.1998310842, 7044696.100282936, 6.8};
+
+    Vectors::CreateNewellSurfaceNormalVector(surface.Vertex, surface.Sides, surface.NewellSurfaceNormalVector);
+    Vectors::DetermineAzimuthAndTilt(
+        surface.Vertex, surface.Azimuth, surface.Tilt, surface.lcsx, surface.lcsy, surface.lcsz, surface.NewellSurfaceNormalVector);
+
+    Vector compCoordTranslVector(0.0, 0.0, 0.0);
+    EXPECT_NO_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector));
+    Vector const edge31 = surface.Vertex(1) - surface.Vertex(3);
+    Real64 const gamma = (surface.Vertex(2) - surface.Vertex(3)).dot(edge31) / edge31.length_squared();
+    Vector const expectedTranslation = surface.Vertex(3) + gamma * edge31;
+    EXPECT_NEAR(compCoordTranslVector.x, expectedTranslation.x, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.y, expectedTranslation.y, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.z, expectedTranslation.z, 1.0e-9);
+    EXPECT_NEAR(surface.lcsx.length_squared(), 1.0, 1.0e-12);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+// Verify the fatal error remains when all three triangle edges are too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationAllEdgesInvalid)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "COLLAPSED TRIANGLE";
+    surface.Sides = 3;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {1.0, 2.0, 3.0};
+    surface.Vertex(2) = {1.0006, 2.0002, 3.0};
+    surface.Vertex(3) = {1.0004, 2.0006, 3.0};
+
+    Vector compCoordTranslVector;
+    EXPECT_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector), std::runtime_error);
+
+    std::string const error_string = delimited_string({
+        "   ** Severe  ** CalcCoordinateTransformation: No boundary edge longer than 1 mm; cannot establish coordinate transformation for "
+        "surface=\"COLLAPSED TRIANGLE\":",
+        "   **   ~~~   **  (   1.000,   2.000,   3.000)",
+        "   **   ~~~   **  (   1.001,   2.000,   3.000)",
+        "   **   ~~~   **  (   1.000,   2.001,   3.000)",
+        "   **  Fatal  ** CalcCoordinateTransformation: Program terminates due to preceding condition.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=1",
+        "   ..... Last severe error=CalcCoordinateTransformation: No boundary edge longer than 1 mm; cannot establish coordinate transformation for "
+        "surface=\"COLLAPSED TRIANGLE\":",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+// Verify a pentagon falls back to edge 3-4 when edges 2-3 and 1-2 are too short.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationPentagonFallback)
+{
+    state->dataSurface->Surface.allocate(1);
+    auto &surface = state->dataSurface->Surface(1);
+    surface.Name = "PENTAGON WITH CLUSTERED INITIAL VERTICES";
+    surface.Sides = 5;
+    surface.Vertex.allocate(surface.Sides);
+    surface.Vertex(1) = {0.0, 0.0, 0.0};
+    surface.Vertex(2) = {0.0002, 0.0, 0.0};
+    surface.Vertex(3) = {0.0004, 0.0002, 0.0};
+    surface.Vertex(4) = {10.0, 10.0, 0.0};
+    surface.Vertex(5) = {-10.0, 10.0, 0.0};
+
+    EXPECT_LE((surface.Vertex(2) - surface.Vertex(3)).length_squared(), Constant::OneMillionth);
+    EXPECT_LE((surface.Vertex(2) - surface.Vertex(1)).length_squared(), Constant::OneMillionth);
+
+    Vector compCoordTranslVector(0.0, 0.0, 0.0);
+    EXPECT_NO_THROW(CalcCoordinateTransformation(*state, 1, compCoordTranslVector));
+
+    Vector const edge34 = surface.Vertex(4) - surface.Vertex(3);
+    Real64 const gamma = (surface.Vertex(2) - surface.Vertex(3)).dot(edge34) / edge34.length_squared();
+    Vector const expectedTranslation = surface.Vertex(3) + gamma * edge34;
+    EXPECT_NEAR(compCoordTranslVector.x, expectedTranslation.x, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.y, expectedTranslation.y, 1.0e-9);
+    EXPECT_NEAR(compCoordTranslVector.z, expectedTranslation.z, 1.0e-9);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+// With edges 2-3 and 1-2 too short, edge 3-4 supplies the fallback origin. On this nonhorizontal parent, the child's
+// local shading coordinates change, but its world placement (original 3D coordinates) is unchanged when transformed
+// with the matching parent origin and basis.
+// This confirms the fallback produces a consistent transform for this nonhorizontal parent/child case.
+TEST_F(EnergyPlusFixture, SurfaceGeometry_CalcCoordinateTransformationFallbackShiftsChildCoordinates)
+{
+    state->init_state(*state);
+
+    // Allocate the parent/child surfaces and arrays consumed by ProcessSurfaceVertices.
+    state->dataSurface->TotSurfaces = 2;
+    state->dataSurface->MaxVerticesPerSurface = 5;
+    state->dataSurface->Surface.allocate(2);
+    state->dataSurface->ShadeV.allocate(2);
+    state->dataSurface->X0.dimension(2, 0.0);
+    state->dataSurface->Y0.dimension(2, 0.0);
+    state->dataSurface->Z0.dimension(2, 0.0);
+
+    Real64 const tiltRadians = 30.0 * Constant::DegToRad;
+    Vector const rotationAxis = Vectors::VecNormalize(Vector{0.0002, 0.0002, 0.0});
+    Real64 const cosTilt = std::cos(tiltRadians);
+    Real64 const sinTilt = std::sin(tiltRadians);
+    auto const tiltPoint = [rotationAxis, cosTilt, sinTilt](Vector const &point) {
+        return cosTilt * point + sinTilt * rotationAxis.cross(point) + (1.0 - cosTilt) * rotationAxis.dot(point) * rotationAxis;
+    };
+
+    auto &base = state->dataSurface->Surface(1);
+    base.Name = "TILTED BASE WITH SHORT REFERENCE EDGE";
+    base.Class = SurfaceClass::Roof;
+    base.BaseSurf = 1;
+    base.HeatTransSurf = true;
+    base.Sides = 5;
+    base.GrossArea = 100.0;
+    base.Vertex.allocate(base.Sides);
+    base.Vertex(1) = tiltPoint(Vector{10.0, 10.0, 0.0});
+    base.Vertex(2) = tiltPoint(Vector{10.0002, 10.0, 0.0});
+    base.Vertex(3) = tiltPoint(Vector{10.0004, 10.0002, 0.0});
+    base.Vertex(4) = tiltPoint(Vector{20.0, 20.0, 0.0});
+    base.Vertex(5) = tiltPoint(Vector{0.0, 20.0, 0.0});
+
+    // Edges 2-3 and 1-2 are both below the 1 mm threshold; initialize the parent's local basis.
+    EXPECT_LE((base.Vertex(2) - base.Vertex(3)).length_squared(), Constant::OneMillionth);
+    EXPECT_LE((base.Vertex(2) - base.Vertex(1)).length_squared(), Constant::OneMillionth);
+    Vectors::CreateNewellSurfaceNormalVector(base.Vertex, base.Sides, base.NewellSurfaceNormalVector);
+    Vectors::DetermineAzimuthAndTilt(base.Vertex, base.Azimuth, base.Tilt, base.lcsx, base.lcsy, base.lcsz, base.NewellSurfaceNormalVector);
+    EXPECT_NEAR(base.Tilt, 30.0, 1.0e-8);
+
+    // Define a child in world coordinates so its processed local coordinates can be compared with the fallback origin.
+    auto &child = state->dataSurface->Surface(2);
+    child.Name = "CHILD TRIANGULAR WINDOW";
+    child.Class = SurfaceClass::Window;
+    child.BaseSurf = 1;
+    child.HeatTransSurf = true;
+    child.Sides = 3;
+    child.Area = 0.125;
+    child.Azimuth = base.Azimuth;
+    child.Tilt = base.Tilt;
+    child.Vertex.allocate(child.Sides);
+    child.Vertex(1) = tiltPoint(Vector{11.0, 14.0, 0.0});
+    child.Vertex(2) = tiltPoint(Vector{12.0, 14.0, 0.0});
+    child.Vertex(3) = tiltPoint(Vector{11.5, 15.0, 0.0});
+
+    // The parent must be processed first because it establishes the origin and shifts inherited by the child.
+    bool errorsFound = false;
+    ProcessSurfaceVertices(*state, 1, errorsFound);
+    ASSERT_FALSE(errorsFound);
+    ProcessSurfaceVertices(*state, 2, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    // Reconstruct the origin that the original 2-3 projection would have produced, for comparison only.
+    Vector const fallbackOrigin{state->dataSurface->X0(1), state->dataSurface->Y0(1), state->dataSurface->Z0(1)};
+    Vector const originalEdge = base.Vertex(3) - base.Vertex(2);
+    Real64 const originalGamma = (base.Vertex(1) - base.Vertex(2)).dot(originalEdge) / originalEdge.length_squared();
+    Vector const originalOrigin = base.Vertex(2) + originalGamma * originalEdge;
+
+    // Compute the parent shifts and the child's local coordinates under the fallback and original origins.
+    auto const &baseShade = state->dataSurface->ShadeV(1);
+    Vector const processedBaseVertex2{baseShade.XV(2), baseShade.YV(2), baseShade.ZV(2)};
+    Vector const baseVertexOffset = processedBaseVertex2 - fallbackOrigin;
+    Real64 const fallbackXShift = base.lcsx.dot(baseVertexOffset);
+    Real64 const fallbackYShift = base.lcsy.dot(baseVertexOffset);
+    Vector const childVertexOffset = child.Vertex(1) - base.Vertex(2);
+    Real64 const childRelativeX =
+        -childVertexOffset.x * std::cos(base.Azimuth * Constant::DegToRad) + childVertexOffset.y * std::sin(base.Azimuth * Constant::DegToRad);
+    Real64 const childRelativeY = -childVertexOffset.x * std::sin(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) -
+                                  childVertexOffset.y * std::cos(base.Azimuth * Constant::DegToRad) * std::cos(base.Tilt * Constant::DegToRad) +
+                                  childVertexOffset.z * std::sin(base.Tilt * Constant::DegToRad);
+    Real64 const originalXShift = base.lcsx.dot(processedBaseVertex2 - originalOrigin);
+    Real64 const originalYShift = base.lcsy.dot(processedBaseVertex2 - originalOrigin);
+    Real64 const originalChildX = childRelativeX + originalXShift;
+    Real64 const originalChildY = childRelativeY + originalYShift;
+    auto const &childShade = state->dataSurface->ShadeV(2);
+
+    // The origin change is visible in local coordinates, even though it does not move the child in world space.
+    EXPECT_NE(childShade.XV(1), originalChildX);
+    EXPECT_NEAR(childShade.YV(1), originalChildY, 1.0e-4);
+    EXPECT_NEAR(childShade.XV(1), childRelativeX + fallbackXShift, 1.0e-4);
+    EXPECT_NEAR(childShade.YV(1), childRelativeY + fallbackYShift, 1.0e-4);
+
+    // Applying the fallback origin and basis to the stored child coordinates recovers its input world vertex.
+    Vector const reconstructedChildVertex = fallbackOrigin + childShade.XV(1) * base.lcsx + childShade.YV(1) * base.lcsy;
+    EXPECT_NEAR(reconstructedChildVertex.x, child.Vertex(1).x, 1.0e-4);
+    EXPECT_NEAR(reconstructedChildVertex.y, child.Vertex(1).y, 1.0e-4);
+    EXPECT_NEAR(reconstructedChildVertex.z, child.Vertex(1).z, 1.0e-4);
+}
+
 TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest)
 {
 
@@ -3213,7 +3408,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     surface.GrossArea = 100.0;
     vertices.deallocate();
     vertices.allocate(8);
-    vertices = actualVertices;
+    std::copy(actualVertices.begin(), actualVertices.end(), vertices.begin());
     CheckConvexity(*state, 1, surface.Sides);
 
     EXPECT_EQ(4, surface.Sides);
@@ -3270,7 +3465,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_ASHRAE901_Hospital_
         {27.4320, 48.7680, 21.3415},
         {9.1440, 48.7680, 21.3415},
     };
-    surface.Vertex = vertices;
+    surface.Vertex.allocate(static_cast<int>(vertices.size()));
+    std::copy(vertices.begin(), vertices.end(), surface.Vertex.begin());
 
     CheckConvexity(*state, 1, surface.Sides);
 
@@ -3328,7 +3524,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexity_ColinearStability)
         floorSurface.Name = "Floor";
         floorSurface.Vertex.allocate(nVertices);
 
-        floorSurface.Vertex = floorVertices;
+        std::copy(floorVertices.begin(), floorVertices.end(), floorSurface.Vertex.begin());
 
         CheckConvexity(*state, floorSurfNum, floorSurface.Sides);
 
@@ -3347,7 +3543,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexity_ColinearStability)
         ceilingSurface.Name = "Ceiling";
         ceilingSurface.Vertex.allocate(nVertices);
 
-        ceilingSurface.Vertex = ceilingVertices;
+        std::copy(ceilingVertices.begin(), ceilingVertices.end(), ceilingSurface.Vertex.begin());
 
         CheckConvexity(*state, ceilingSurfNum, ceilingSurface.Sides);
 
@@ -5829,6 +6025,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     // SetupZoneGeometry calls SurfaceGeometry::SetupSolarEnclosuresAndAirBoundaries
     // SetupZoneGeometry calls SurfaceGeometry::SetupRadiantEnclosuresAndAirBoundaries
     EXPECT_FALSE(ErrorsFound); // expect no errors
+    state->dataHeatBalSurf->SurfAbsThermalInt.dimension(state->dataSurface->TotSurfaces, 0.9);
     HeatBalanceIntRadExchange::InitSolarViewFactors(*state);
     HeatBalanceIntRadExchange::InitInteriorRadExchange(*state);
 
@@ -5888,7 +6085,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     // Check MRT calculations
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(3);
     state->dataZoneTempPredictorCorrector->spaceHeatBalance.allocate(3);
-    state->dataHeatBalSurf->SurfTempIn.allocate(7);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(7);
     auto &zoneHB1 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(1);
     auto &zoneHB2 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(2);
     auto &zoneHB3 = state->dataZoneTempPredictorCorrector->zoneHeatBalance(3);
@@ -5899,11 +6096,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     auto &encl2 = state->dataViewFactor->EnclRadInfo(2);
 
     // Case 1 - all surfaces the same temperature
-    state->dataHeatBalSurf->SurfTempIn(Zone1Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone1Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone3Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone3Floor) = 10.0;
 
     HeatBalanceSurfaceManager::CalculateZoneMRT(*state);
     EXPECT_NEAR(zoneHB1.MRT, 10.0, 0.001);
@@ -5916,11 +6113,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_SetupEnclosuresWithAirBounda
     EXPECT_EQ(spaceHB3.MRT, encl1.MRT);
 
     // Case 2 - all surfaces in each zone same temperature
-    state->dataHeatBalSurf->SurfTempIn(Zone1Surface1) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Surface1) = 20.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone1Floor) = 10.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone2Floor) = 20.0;
-    state->dataHeatBalSurf->SurfTempIn(Zone3Floor) = 30.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Surface1) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Surface1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone1Floor) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone2Floor) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(Zone3Floor) = 30.0;
 
     HeatBalanceSurfaceManager::CalculateZoneMRT(*state);
     EXPECT_NEAR(zoneHB1.MRT, 10.0, 0.001);
@@ -8947,7 +9144,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder)
     EXPECT_EQ(state->dataHeatBal->space(3).WindowSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Reporting (legacy) Order (zero-based)
     //  SHADING SURFACES:
@@ -9808,7 +10004,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder2)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, wallEastGable);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;
@@ -10670,7 +10865,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder3)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, wallEastGable);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;
@@ -11436,7 +11630,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder4)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, 0);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, -1);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, 0);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, -1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;

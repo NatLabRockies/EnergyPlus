@@ -120,16 +120,8 @@ namespace GeneratorDynamicsManager {
         thisGen.WarmUpByTimeDelay = thisMicroCHP.A42Model.WarmUpByTimeDelay;
         thisGen.WarmUpByEngineTemp = thisMicroCHP.A42Model.WarmUpByEngineTemp;
         thisGen.MandatoryFullCoolDown = thisMicroCHP.A42Model.MandatoryFullCoolDown;
-        thisGen.WarmRestartOkay = thisMicroCHP.A42Model.WarmRestartOkay;
-        thisGen.WarmUpDelay = thisMicroCHP.A42Model.WarmUpDelay;
         thisGen.CoolDownDelay = thisMicroCHP.A42Model.CoolDownDelay / Constant::rSecsInHour; // seconds to hours
-        thisGen.PcoolDown = thisMicroCHP.A42Model.PcoolDown;
-        thisGen.Pstandby = thisMicroCHP.A42Model.Pstandby;
-        thisGen.MCeng = thisMicroCHP.A42Model.MCeng;
-        thisGen.MCcw = thisMicroCHP.A42Model.MCcw;
-        thisGen.kf = thisMicroCHP.A42Model.kf;
         thisGen.TnomEngOp = thisMicroCHP.A42Model.TnomEngOp;
-        thisGen.kp = thisMicroCHP.A42Model.kp;
         thisGen.availSched = thisMicroCHP.availSched;
         thisGen.StartUpTimeDelay = thisMicroCHP.A42Model.WarmUpDelay / Constant::rSecsInHour; // seconds to hours
 

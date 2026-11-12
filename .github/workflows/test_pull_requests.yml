@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: macos-14
+        - os: macos-15
           macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64

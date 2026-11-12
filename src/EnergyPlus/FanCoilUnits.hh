@@ -93,9 +93,7 @@ namespace FanCoilUnits {
         // Members
         // Input data
         int UnitType_Num = 0;
-        std::string availSchedName;                     // availability schedule
         Sched::Schedule *availSched = nullptr;          // availability schedule
-        std::string SchedOutAir;                        // outside air schedule, multipliy maximum outdoor air flow rate
         Sched::Schedule *oaSched = nullptr;             // outside air schedule
         HVAC::FanType fanType = HVAC::FanType::Invalid; // fan type
         int SpeedFanSel = 0;                            // Speed fan selected
@@ -132,8 +130,6 @@ namespace FanCoilUnits {
         HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid; // Numeric equivalent for type of cooling coil
         std::string CCoilPlantName;                            // name of cooling coil (child<=CoilSystem:Cooling:Water:HeatExchangerAssisted)
         DataPlant::PlantEquipmentType CCoilPlantType = DataPlant::PlantEquipmentType::Invalid;
-        int ControlCompTypeNum = 0;
-        int CompErrIndex = 0;
         Real64 MaxColdWaterVolFlow = 0.0; // m3/s
         Real64 MinColdWaterVolFlow = 0.0; // m3/s
         Real64 MinColdWaterFlow = 0.0;    // kg/s

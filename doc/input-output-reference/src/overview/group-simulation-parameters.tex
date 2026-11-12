@@ -664,7 +664,7 @@ Allowable choices are:
 
 \textbf{DisplayAdvancedReportVariables} -- use this to be able to use certain advanced output variables where the name may be misleading and you need to understand the concepts or reasons for use. If you put in this field, then you will be able to report on these features. They are noted in the descriptions of objects or output variables.
 
-\textbf{DisplayZoneAirHeatBalanceOffBalance} -- this is a developer diagnostic which you can turn on, if you desire.
+\textbf{DisplayZoneAirHeatBalanceOffBalance} -- this is a developer diagnostic which you can turn on, if you desire. It calculates the Zone and Space Air Heat Balance Deviation Rate output variables (which also need the DisplayAdvancedReportVariables key) and issues a warning when the imbalance of a zone air heat balance is larger than 20\% of the root sum of squares of its terms.
 
 \textbf{DoNotMirrorDetachedShading} -- use this to turn off the automatic mirroring of detached shading surfaces. These surfaces are automatically mirrored so that the user does not need to worry about facing direction of the surface and the shading surface will shade the building as appropriate.
 
@@ -990,7 +990,7 @@ Although this input field may eventually affect all coils, the current implement
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{SystemLoad} - \textnormal{OutputOff}}{\textnormal{OutputFull} - \textnormal{OutputOff}}
+    \textrm{PLR} = \frac{\textrm{SystemLoad} - \textrm{OutputOff}}{\textrm{OutputFull} - \textrm{OutputOff}}
 \end{equation}
 
 where
@@ -1006,7 +1006,7 @@ OutputFull = System output at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{SystemLoad} - \textnormal{OutputFull}_{i-1}}{\textnormal{OutputFull}_{i} - \textnormal{OutputFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{SystemLoad} - \textrm{OutputFull}_{i-1}}{\textrm{OutputFull}_{i} - \textrm{OutputFull}_{i-1}}
 \end{equation}
 
 where
@@ -1026,7 +1026,7 @@ When coils of Coil:Cooling:DX:VariableSpeed, Coil:Heating:DX:SingleSpeed, and Co
 The Part Load Ratio (PLR) for a single speed coil or a multiple speed coil at speed 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{PLR} = \frac{\textnormal{DesOutTemp} - \textnormal{InletTemp}}{\textnormal{OutTempFull} - \textnormal{InletTemp}}
+    \textrm{PLR} = \frac{\textrm{DesOutTemp} - \textrm{InletTemp}}{\textrm{OutTempFull} - \textrm{InletTemp}}
 \end{equation}
 
 where
@@ -1042,7 +1042,7 @@ OutTemptFull = Outlet temperature at PLR = 1 as full output.
 The Speed Ratio for a multiple speed coil at speed > 1 is calculated using the equation below:
 
 \begin{equation}
-    \textnormal{SpeedRatio} = \frac{\textnormal{DesOutTemp} - \textnormal{OutTempFull}_{i-1}}{\textnormal{OutTempFull}_{i} - \textnormal{OutTempFull}_{i-1}}
+    \textrm{SpeedRatio} = \frac{\textrm{DesOutTemp} - \textrm{OutTempFull}_{i-1}}{\textrm{OutTempFull}_{i} - \textrm{OutTempFull}_{i-1}}
 \end{equation}
 
 where

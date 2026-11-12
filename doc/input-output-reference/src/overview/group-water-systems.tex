@@ -41,7 +41,7 @@ Refrigeration:Condenser:EvaporativeCooled & Water supplied by WaterUse:Storage \
 EvaporativeCooler:Direct:CelDekPad & Evaporation water supplied by WaterUse:Storage \tabularnewline
 EvaporativeCooler:Indirect:CelDekPad & Evaporation water supplied by WaterUse:Storage \tabularnewline
 EvaporativeCooler:Indirect:WetCoil & Evaporation water supplied by WaterUse:Storage \tabularnewline
-EvaporativeCooler:Indirect:ResearchSpecial & Evaporation water supplied by WaterUse:Storage \tabularnewline
+EvaporativeCooler:Indirect:UserEffectiveness & Evaporation water supplied by WaterUse:Storage \tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -329,7 +329,7 @@ This field (even if blank) overrides the Cold Water Supply Temperature Schedule 
 
 \paragraph{Field: Drain Water Heat Exchanger Type}\label{field-drain-water-heat-exchanger-type}
 
-The heat exchanger type to be used for drainwater heat recovery. None indicates no heat recovery is to be simulated. Ideal sets a heat exchanger effectiveness of 1.0. Effectiveness is calculated dynamically for CounterFlow and CrossFlow options.
+The heat exchanger type to be used for drainwater heat recovery. None indicates no heat recovery is to be simulated. Ideal sets a heat exchanger effectiveness of 1.0. Effectiveness is calculated dynamically for CounterFlow and CrossFlow options. For every type, the effectiveness is 0 and no heat is recovered when either side of the heat exchanger has no flow.
 
 One popular type of drainwater heat exchanger is the Gravity-Film Heat Exchanger (GFX). The GFX is most closely approximated with the CounterFlow option, but keep in mind that the UA varies more with flow rate for the GFX than for most traditional heat exchangers.
 
@@ -478,7 +478,7 @@ The water temperature at the drain equal to the mixed water temperature minus an
 
 \paragraph{Water Use Connections Return Water Temperature {[}C{]}}\label{water-use-connections-return-water-temperature-c}
 
-The temperature of make-up water returned to the plant loop, in units of degrees Celsius (C).
+The temperature of make-up water returned to the plant loop from the fixtures, before mixing with any plant flow that bypasses the fixtures, in units of degrees Celsius (C). When the plant loop forces more flow through the connection than the fixtures use, the plant outlet node temperature differs from this value.
 
 \paragraph{Water Use Connections Waste Water Temperature {[}C{]}}\label{water-use-connections-waste-water-temperature-c}
 
@@ -486,11 +486,11 @@ The temperature of the water leaving the heat exchanger. If no heat exchanger, t
 
 \paragraph{Water Use Connections Heat Recovery Water Temperature {[}C{]}}\label{water-use-connections-heat-recovery-water-temperature-c}
 
-The temperature of the water leaving the heat exchanger. If no heat exchanger, the waste water temperature equals the drain water temperature, in units of degrees Celsius (C).
+The temperature of the make-up water leaving the recovery side of the heat exchanger. If no heat is recovered, the heat recovery water temperature equals the cold water supply temperature, in units of degrees Celsius (C).
 
 \paragraph{Water Use Connections Heat Recovery Effectiveness {[]}}\label{water-use-connections-heat-recovery-effectiveness}
 
-The effectiveness value of the heat exchanger. The units are dimensionless.
+The effectiveness value of the heat exchanger. The effectiveness is 0 when either side of the heat exchanger has no flow, for example with the Plant configuration and no hot water flow. The units are dimensionless.
 
 \paragraph{Water Use Connections Heat Recovery Rate {[}W{]}}\label{water-use-connections-heat-recovery-rate-w}
 
@@ -570,27 +570,27 @@ Reference to the schedule object specifying the temperature {[}C{]} of the water
 
 \paragraph{Field: Ambient Temperature Indicator}\label{field-ambient-temperature-indicator-001}
 
-Reserved for future use. The field can be Schedule, Zone, or Outdoors.
+This field is currently unused for tank thermal calculations and does not affect the simulation. It is reserved for future use. The field can be Schedule, Zone, or Outdoors; the selected option is still validated.
 
 \paragraph{Field: Ambient Temperature Schedule Name}\label{field-ambient-temperature-schedule-name-002}
 
-Reserved for future use. Schedule name for ambient temperature when previous field is Schedule.
+This field is currently unused for tank thermal calculations and does not affect the simulation. It is reserved for future use. When Ambient Temperature Indicator is Schedule, the schedule name is still required and validated, but its values are not used.
 
 \paragraph{Field: Zone Name}\label{field-zone-name-1-010}
 
-Reserved for future use. Name of zone where the tank is located.
+This field is currently unused for tank thermal calculations and does not affect the simulation. It is reserved for future use. When Ambient Temperature Indicator is Zone, the zone name is still validated.
 
 \paragraph{Field: Tank Surface Area}\label{field-tank-surface-area}
 
-Reserved for future zone thermal model.
+This field is currently unused and does not affect the simulation. It is reserved for a future zone thermal model.
 
 \paragraph{Field: Tank U Value}\label{field-tank-u-value}
 
-Reserved for future zone thermal model.
+This field is currently unused and does not affect the simulation. It is reserved for a future zone thermal model.
 
 \paragraph{Field: Tank Outside Surface Material Name}\label{field-tank-outside-surface-material-name}
 
-Reserved for future zone thermal model.
+This field is currently unused and does not affect the simulation. It is reserved for a future zone thermal model.
 
 IDF examples:
 
@@ -687,7 +687,7 @@ This the temperature of overflow water leaving the tank.
 
 \subsection{WaterUse:RainCollector}\label{wateruseraincollector}
 
-The WaterUse:RainCollector object is used for harvesting rainwater falling on building surfaces. The rainwater is sent to a \hyperref[waterusestorage]{WaterUse:Storage} object. Up till version 9.6, in order to use this object, it is necessary to also include a \hyperref[siteprecipitation]{Site:Precipitation} object to describe the rates of rainfall. For newer versions, if the \hyperref[siteprecipitation]{Site:Precipitation} object is not defined, precipitation depth in the weather input .epw will be used instead. When this is the case, a warning message will be displayed. Please make sure the precipitation in the .epw is accurate. This \href{table by the State Climate Extreme Committee}{https://www.ncdc.noaa.gov/extremes/scec/records/all/maxp} could be a reference for sanity check of extreme values in the precipitation data. The tabular report ``Monthly Precipitation Summary'' provides a monthly summary of rainfall in the weather file and the amount used in the rain collector calculation.
+The WaterUse:RainCollector object is used for harvesting rainwater falling on building surfaces. The rainwater is sent to a \hyperref[waterusestorage]{WaterUse:Storage} object. Up till version 9.6, in order to use this object, it is necessary to also include a \hyperref[siteprecipitation]{Site:Precipitation} object to describe the rates of rainfall. For newer versions, if the \hyperref[siteprecipitation]{Site:Precipitation} object is not defined, precipitation depth in the weather input .epw will be used instead. When this is the case, a warning message will be displayed. Please make sure the precipitation in the .epw is accurate. This \href{https://www.ncdc.noaa.gov/extremes/scec/records/all/maxp}{table by the State Climate Extreme Committee} could be a reference for sanity check of extreme values in the precipitation data. The tabular report ``Monthly Precipitation Summary'' provides a monthly summary of rainfall in the weather file and the amount used in the rain collector calculation.
 
 \subsubsection{Inputs}\label{inputs-3-041}
 
@@ -768,7 +768,7 @@ A reference to a \hyperref[waterusestorage]{WaterUse:Storage} object where the r
 
 \paragraph{Field: Pump Depth}\label{field-pump-depth}
 
-Reserved for future use. Effective depth of well in {[}m{]}.
+This field is currently unused and does not affect simulated well flow or pump power. It is reserved for future use and represents the effective depth of the well in {[}m{]}.
 
 \paragraph{Field: Pump Rated Flow Rate}\label{field-pump-rated-flow-rate}
 
@@ -776,7 +776,7 @@ This is the nominal pump flow rate in {[}m3/s{]}. This field is required.
 
 \paragraph{Field: Pump Rated Head}\label{field-pump-rated-head}
 
-Reserved for future use {[}Pa{]}. Pump head at rated conditions in Pascals.
+This field is currently unused and does not affect simulated well flow or pump power. It is reserved for future use and represents the pump head at rated conditions in {[}Pa{]}.
 
 \paragraph{Field: Pump Rated Power Consumption}\label{field-pump-rated-power-consumption}
 
@@ -784,27 +784,27 @@ This is the pump power at the nominal pump flow rate {[}W{]}. This field is requ
 
 \paragraph{Field: Pump Efficiency}\label{field-pump-efficiency}
 
-Reserved for future use.
+This field is currently unused and does not affect simulated well flow or pump power. It is reserved for future use.
 
 \paragraph{Field: Well Recovery Rate}\label{field-well-recovery-rate}
 
-Reserved for future use. Rate at which ground water enters well during a sustained draw, e.g., 2 hour well test. The unit is {[}m3/s{]}.
+This field is currently unused and does not affect simulated well flow. It is reserved for future use and represents the rate at which ground water enters the well during a sustained draw, e.g., a 2-hour well test. The unit is {[}m3/s{]}.
 
 \paragraph{Field: Nominal Well Storage Volume}\label{field-nominal-well-storage-volume}
 
-Reserved for future use. Capacity in well after long period of inactivity and the usual water table depth. The unit is {[}m3{]}.
+This field is currently unused and does not affect simulated well flow. It is reserved for future use and represents the capacity in the well after a long period of inactivity at the usual water table depth. The unit is {[}m3{]}.
 
 \paragraph{Field: Water Table Depth Mode}\label{field-water-table-depth-mode}
 
-Reserved for future use. Two options are available: \emph{Constant} or \emph{Scheduled}.
+This field is currently unused by the well model and does not affect simulated well flow or pump power. It is reserved for future use. Two options are available: \emph{Constant} or \emph{Scheduled}. The selected option is still validated, and \emph{Scheduled} requires a valid Water Table Depth Schedule Name.
 
 \paragraph{Field: Water Table Depth}\label{field-water-table-depth}
 
-Reserved for future use. Depth of water table from \hyperref[waterusestorage]{WaterUse:Storage}.
+This field is currently unused and does not affect simulated well flow or pump power. It is reserved for future use and represents the depth of the water table from \hyperref[waterusestorage]{WaterUse:Storage}.
 
 \paragraph{Field: Water Table Depth Schedule Name}\label{field-water-table-depth-schedule-name}
 
-Reserved for future use.
+The schedule name is required and validated when Water Table Depth Mode is \emph{Scheduled}, but the schedule values are currently unused and do not affect simulated well flow or pump power. This field is reserved for future use.
 
 An example input object:
 

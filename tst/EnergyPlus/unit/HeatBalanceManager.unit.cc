@@ -4161,13 +4161,16 @@ TEST_F(EnergyPlusFixture, ZoneMRTCalculation_CalculationTest)
     auto &dataHBSurf = state->dataHeatBalSurf;
     auto &dataVF = state->dataViewFactor;
 
-    dataHBSurf->SurfInsideTempHist.allocate(1);
-    dataHBSurf->SurfInsideTempHist(1).allocate(5);
+    dataHBSurf->SurfTempInTmp.allocate(5);
+    dataHBSurf->SurfAbsThermalInt.allocate(5);
+    for (int surfNum = 1; surfNum <= 5; ++surfNum) {
+        dataHBSurf->SurfAbsThermalInt(surfNum) = state->dataConstruction->Construct(dataSurf->Surface(surfNum).Construction).InsideAbsorpThermal;
+    }
 
     // Test 1: Zone 1 (Shire) is a combination of two people statements one enclosure averaged and one surface weighted (ZoneMRT=3)
     zoneMRTNum = 3;
     dataVF->EnclRadInfo(1).MRT = 22.0;
-    dataHBSurf->SurfInsideTempHist(1)(1) = 12.0;
+    dataHBSurf->SurfTempInTmp(1) = 12.0;
     expectedResult = 20.2; // Note that MAT defaults to 23.0 for only one surface here so that the surface weighted is the average of the surface
                            // temperature and MAT
     actualResult = HeatBalanceSurfaceManager::calcUserZoneMRT(*state, zoneMRTNum);
@@ -4176,7 +4179,7 @@ TEST_F(EnergyPlusFixture, ZoneMRTCalculation_CalculationTest)
     // Test 2: Zone 2 (Rivendell) has only one people statement that is surface weighted (only one surface) (ZoneMRT=1)
     zoneMRTNum = 1;
     dataVF->EnclRadInfo(2).MRT = 21.0;
-    dataHBSurf->SurfInsideTempHist(1)(2) = 11.0;
+    dataHBSurf->SurfTempInTmp(2) = 11.0;
     expectedResult = 17.0; // Note that MAT defaults to 23.0 for only one surface here so that the surface weighted is the average of the surface
                            // temperature and MAT
     actualResult = HeatBalanceSurfaceManager::calcUserZoneMRT(*state, zoneMRTNum);
@@ -4185,9 +4188,9 @@ TEST_F(EnergyPlusFixture, ZoneMRTCalculation_CalculationTest)
     // Test 3: Zone 3 (Gondor) has three people statements--one enclosure averaged, one surface weighted, and one view factor based (ZoneMRT=2)
     zoneMRTNum = 2;
     dataVF->EnclRadInfo(3).MRT = 20.0;
-    dataHBSurf->SurfInsideTempHist(1)(3) = 10.0;
-    dataHBSurf->SurfInsideTempHist(1)(4) = 12.0;
-    dataHBSurf->SurfInsideTempHist(1)(5) = 14.0;
+    dataHBSurf->SurfTempInTmp(3) = 10.0;
+    dataHBSurf->SurfTempInTmp(4) = 12.0;
+    dataHBSurf->SurfTempInTmp(5) = 14.0;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).MRT = 25.0;
     expectedResult = 15.4526; // Note that MAT defaults to 23.0 for surface weighted and standard MRT
     actualResult = HeatBalanceSurfaceManager::calcUserZoneMRT(*state, zoneMRTNum);

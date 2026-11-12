@@ -1205,6 +1205,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabular_ZoneMultiplierTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",
@@ -1212,6 +1213,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabular_ZoneMultiplierTest)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",
@@ -1897,6 +1899,7 @@ TEST_F(EnergyPlusFixture, AirloopHVAC_ZoneSumTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1904,6 +1907,7 @@ TEST_F(EnergyPlusFixture, AirloopHVAC_ZoneSumTest)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2879,6 +2883,7 @@ TEST_F(EnergyPlusFixture, AirloopHVAC_ZoneSumTest)
 //" Space Thermostat,         !- Name",
 //" Space,                    !- Zone or ZoneList Name",
 //" Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+//" ,                         !- Temperature Difference Between Cutout And Setpoint",
 //" ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
 //" Space DualSPSched;        !- Control 1 Name",
 
@@ -2886,6 +2891,7 @@ TEST_F(EnergyPlusFixture, AirloopHVAC_ZoneSumTest)
 //" Spacex10 Thermostat,      !- Name",
 //" Spacex10,                 !- Zone or ZoneList Name",
 //" Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+//" ,                         !- Temperature Difference Between Cutout And Setpoint",
 //" ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
 //" Space DualSPSched;        !- Control 1 Name",
 
@@ -7396,6 +7402,20 @@ TEST_F(SQLiteFixture, WriteVeriSumTable_TestNotPartOfTotal_DualUnits)
     }
 }
 
+namespace {
+// The "no formatting" JSON output path (RealToStr with formatReals=false) prints the shortest
+// round-trip representation of the raw double, so it is sensitive to last-bit differences (eg.
+// from -ffast-math). Compare the numeric value of each cell instead of the literal string.
+void expectNumericRowsNear(const ResultsFramework::json &row, const std::vector<std::string> &expected, Real64 tol = 1e-9)
+{
+    std::vector<std::string> rowStrs = row.get<std::vector<std::string>>();
+    ASSERT_EQ(expected.size(), rowStrs.size());
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_NEAR(std::stod(expected[i]), std::stod(rowStrs[i]), tol) << "Mismatch at column " << i;
+    }
+}
+} // namespace
+
 TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
 {
     state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
@@ -7742,17 +7762,17 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
                     std::vector<std::string> colHeaders = subTable["Cols"];
                     EXPECT_EQ(colHeaders, expectColHeaders);
                     auto &row = subTable["Rows"]["Exterior Lighting:AnotherEndUseSubCat"];
-                    EXPECT_EQ(row, expectExtLtgAnother);
+                    expectNumericRowsNear(row, expectExtLtgAnother);
                     row = subTable["Rows"]["Heating:General"];
-                    EXPECT_EQ(row, expectHeating);
+                    expectNumericRowsNear(row, expectHeating);
                 }
                 if (subTable["TableName"] == "End Uses") {
                     std::vector<std::string> colHeaders = subTable["Cols"];
                     EXPECT_EQ(colHeaders, expectColHeaders);
                     auto &row = subTable["Rows"]["Exterior Lighting"];
-                    EXPECT_EQ(row, expectExtLtg);
+                    expectNumericRowsNear(row, expectExtLtg);
                     row = subTable["Rows"]["Heating"];
-                    EXPECT_EQ(row, expectHeating);
+                    expectNumericRowsNear(row, expectHeating);
                 }
             }
         }
@@ -9133,7 +9153,6 @@ TEST_F(SQLiteFixture, WriteVeriSumSpaceTables_Test)
 TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,26.2;
 
   Timestep,4;
 
@@ -9317,15 +9336,9 @@ TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
     Test Zone Thermostat,  !- Name
     Test Zone,        !- Zone or ZoneList Name
     Test Zone Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
-    DualThermostat,          !- Control 1 Name
-    ,                        !- Control 2 Object Type
-    ,                        !- Control 2 Name
-    ,                        !- Control 3 Object Type
-    ,                        !- Control 3 Name
-    ,                        !- Control 4 Object Type
-    ,                        !- Control 4 Name
-    0;                       !- Temperature Difference Between Cutout And Setpoint {deltaC}
+    DualThermostat;          !- Control 1 Name
 
   Schedule:Compact,
     Test Zone Thermostat Schedule,  !- Name
@@ -9977,7 +9990,6 @@ TEST_F(SQLiteFixture, DOASDirectToZone_ZoneMultiplierRemoved)
 TEST_F(SQLiteFixture, UpdateSizing_EndSysSizingCalc)
 {
     std::string const idf_objects_1 = R"IDF(
-  Version,26.2;
 
   Timestep,4;
 
@@ -10159,15 +10171,9 @@ TEST_F(SQLiteFixture, UpdateSizing_EndSysSizingCalc)
     Thermal Zone one Thermostat,  !- Name
     Thermal Zone one,        !- Zone or ZoneList Name
     Thermal Zone one Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
-    DualThermostat,          !- Control 1 Name
-    ,                        !- Control 2 Object Type
-    ,                        !- Control 2 Name
-    ,                        !- Control 3 Object Type
-    ,                        !- Control 3 Name
-    ,                        !- Control 4 Object Type
-    ,                        !- Control 4 Name
-    0;                       !- Temperature Difference Between Cutout And Setpoint {deltaC}
+    DualThermostat;          !- Control 1 Name
 
   Schedule:Compact,
     Thermal Zone one Thermostat Schedule,  !- Name

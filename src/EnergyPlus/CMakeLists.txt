@@ -13,6 +13,9 @@ target_architecture(TARGET_ARCH)
 set(PYTHON_API_VERSION_MAJOR 0)
 set(PYTHON_API_VERSION_MINOR 2)
 set(BUILD_PLATFORM_STRING "${SYSTEM_NICKNAME}_${TARGET_ARCH}")
+if(ENABLE_NATIVE_OPTIMIZATION)
+  string(APPEND BUILD_PLATFORM_STRING " With Native Optimizations")
+endif()
 configure_file(DataStringGlobals.in.cc "${CMAKE_CURRENT_BINARY_DIR}/DataStringGlobals.cc")
 configure_file(ConfiguredFunctions.in.cc "${CMAKE_CURRENT_BINARY_DIR}/ConfiguredFunctions.cc")
 
@@ -304,6 +307,10 @@ set(SRC
     GeneratorDynamicsManager.hh
     GeneratorFuelSupply.cc
     GeneratorFuelSupply.hh
+    Geometry/Plane.cc
+    Geometry/Plane.hh
+    Geometry/Vector2D.hh
+    Geometry/Vector3D.hh
     GlobalNames.cc
     GlobalNames.hh
     GroundHeatExchangers/Base.cc
@@ -789,6 +796,11 @@ if(DEBUG_PYTHON_CONFIG)
   target_compile_definitions(energypluslib PUBLIC DEBUG_PYTHON_CONFIG=1)
 endif()
 
+# Detect incorrect recurring error MsgIndex usage (throw on every recurring error call). Always on for Debug configs.
+option(FORCE_DEBUG_MSG_INDEX "Force-enable detection of incorrect recurring error MsgIndex usage in non Debug mode" OFF)
+mark_as_advanced(FORCE_DEBUG_MSG_INDEX)
+target_compile_definitions(energypluslib PUBLIC $<$<OR:$<CONFIG:Debug>,$<BOOL:${FORCE_DEBUG_MSG_INDEX}>>:DEBUG_MSG_INDEX>)
+
 if(ENABLE_UNITY)
   set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
 endif()
@@ -890,6 +902,7 @@ else() # windows
   add_executable(energyplus main.cc "${CMAKE_CURRENT_BINARY_DIR}/energyplus.rc")
 endif()
 target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
+target_compile_options(energyplus PRIVATE ${ENERGYPLUS_RECORD_SWITCHES_FLAGS})
 
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})

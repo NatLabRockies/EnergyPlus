@@ -17,3 +17,7 @@ set(INCLUDED_TEX
 set(INCLUDED_IMAGES)
 
 create_doc_target("using-energyplus-for-compliance" "UsingEnergyPlusForCompliance")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("using-energyplus-for-compliance" "using-energyplus-for-compliance")
+endif()

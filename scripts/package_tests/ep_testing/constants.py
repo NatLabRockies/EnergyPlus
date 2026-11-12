@@ -54,6 +54,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from enum import IntEnum, StrEnum
+from typing import Optional
 
 
 class OS(StrEnum):
@@ -69,23 +70,35 @@ class MSVC(IntEnum):
 
     V16 = 16
     V17 = 17
-    # V18 = 18  # Future version placeholder
+    V18 = 18
 
     def generator_name(self) -> str:
         """Get the CMake generator name for the MSVC version."""
         return MSVC_GENERATOR_MAPPING[self]
+
+    def toolset_name(self) -> Optional[str]:
+        """Get an explicitly selected CMake toolset, when needed."""
+        return MSVC_TOOLSET_MAPPING.get(self)
 
 
 # Alias mapping for common version names to MSVC enum, for argparse
 MSVC_ALIAS_MAPPING = {
     "2017": MSVC.V16,
     "2022": MSVC.V17,
+    "2026": MSVC.V18,
 }
 
 # Mapping from MSVC enum to CMake generator names
 MSVC_GENERATOR_MAPPING = {
     MSVC.V16: "Visual Studio 16 2019",
     MSVC.V17: "Visual Studio 17 2022",
+    MSVC.V18: "Visual Studio 18 2026",
+}
+
+# Visual Studio 2026 defaults to the v145 toolset. Continue building Windows
+# packages with v143 while using its native ARM64 generator.
+MSVC_TOOLSET_MAPPING = {
+    MSVC.V18: "v143",
 }
 
 

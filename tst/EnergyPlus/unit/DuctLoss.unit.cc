@@ -109,8 +109,6 @@ TEST_F(EnergyPlusFixture, DuctLoss_test)
 
     std::string const idf_objects0 = R"IDF(
 
-  Version,26.2;
-
   Building,
     House with AirflowNetwork simulation,  !- Name
     0,                       !- North Axis {deg}
@@ -1687,6 +1685,7 @@ TEST_F(EnergyPlusFixture, DuctLoss_test)
     Zone Thermostat,         !- Name
     LIVING ZONE,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint",
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints;               !- Control 1 Name
 

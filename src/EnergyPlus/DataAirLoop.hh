@@ -105,7 +105,6 @@ namespace DataAirLoop {
         Avail::Status availStatus = Avail::Status::NoAction; // system availability status
         int StartTime = 0;                                   // cycle on time (in SimTimeSteps)
         int StopTime = 0;                                    // cycle off time (in SimTimeSteps)
-        Real64 ReqSupplyFrac = 0.0;                          // required system flow rate (as a fraction)
         Array1D<Avail::AvailManagerNTN> availManagers;       // type of availability manager
     };
 
@@ -120,7 +119,6 @@ namespace DataAirLoop {
     struct AirLoopControlData // Derived type for air control information
     {
         // Members
-        std::string OACtrlName;                     // name of OA controller
         int OACtrlNum = 0;                          // index of OA controller
         int OASysNum = 0;                           // index of OA System
         bool CyclingFan = false;                    // TRUE if currently the air loop supply fan is cycling
@@ -130,7 +128,6 @@ namespace DataAirLoop {
         bool UnitarySys = false;                    // TRUE if a unitary system
         bool UnitarySysSimulating = true;           // set FALSE for AirloopUnitarySystem after simulating to downstream coils can size independently
         bool Simple = false;                        // TRUE if system has 1 branch and 1 component
-        bool CanNotLockoutEcono = false;            // user input says econo lockout not allowed
         bool CanLockoutEconoWithHeating = false;    // user input says econo lockout with heating is allowed
         bool CanLockoutEconoWithCompressor = false; // user input says econo lockout with compressor is allowed
         bool ReqstEconoLockoutWithHeating = false;  // there is a request to lockout the economizer due to heating
@@ -167,8 +164,6 @@ namespace DataAirLoop {
         Real64 ReqSupplyFrac = 1.0;         // required flow (as a fraction of DesSupply) set by a manager
         Real64 MinOutAir = 0.0;             // minimum outside air mass flow rate [kg/s]
         Real64 MaxOutAir = 0.0;             // current maximum available outside air mass flow rate [kg/s]
-        Real64 OAMinFrac = 0.0;             // minimum outside air flow fraction this time step
-        Real64 Previous = 0.0;              // Previous mass air flow rate for this loop [kg/s]
         Real64 SupFlow = 0.0;               // supply air flow rate (includes LeakFlow) [kg/s]
         Real64 ZoneRetFlow = 0.0;           // return air flow rate at all zone return air nodes (includes RecircFlow, excludes LeakFlow) [kg/s]
         Real64 ZoneRetFlowRatio = 1.0;      // ratio for adjusting zone return flows for excess zone exhaust

@@ -299,7 +299,7 @@ void EIRPlantLoopHeatPump::setOperatingFlowRatesASHP(EnergyPlusData &state, bool
         // apply min/max operating limits based on source side entering fluid temperature
         // or if parallel configuration and no/very small load, the unit is turned off
         bool tempOutOfRange = this->minSourceTempLimit > this->sourceSideInletTemp || this->maxSourceTempLimit < this->sourceSideInletTemp;
-        auto &comp = DataPlant::CompData::getPlantComponent(state, this->loadSidePlantLoc);
+        auto const &comp = DataPlant::CompData::getPlantComponent(state, this->loadSidePlantLoc);
         bool loadIndicator = false;
         if (this->sysControlType == ControlType::Setpoint) {
             Real64 leavingSetpoint = this->getLoadSideOutletSetPointTemp(state);
@@ -978,7 +978,7 @@ void EIRPlantLoopHeatPump::heatRecoveryEIRModCurveCheck(EnergyPlusData &state, R
             std::format("{} \"{}\": Heat Recovery mode EIR Modifier curve (function of Temperatures) output is negative warning continues...",
                         DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
                         this->name),
-            this->eirModFTErrorIndex,
+            this->heatRecEIRModFTErrorIndex,
             eirModifierFuncTemp,
             eirModifierFuncTemp);
         eirModifierFuncTemp = 0.0;
@@ -2835,14 +2835,14 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
     this->oneTimeInitFlagAWHP = false;
 }
 
-// TODO: sizeLoadSide() is not virtual, and the only production call site (EIRPlantLoopHeatPump::onInitLoopEquip,
-// via `this->sizeLoadSide(state);`) is compiled in the base class's own scope, so it always statically resolves to
-// EIRPlantLoopHeatPump::sizeLoadSide. This override is therefore unreachable dead code today; the
-// referenceCapacityOneUnit recompute below never runs. Pre-existing issue, unrelated to the Wshadow-field cleanup.
 void HeatPumpAirToWater::sizeLoadSide(EnergyPlusData &state)
 {
     EIRPlantLoopHeatPump::sizeLoadSide(state);
     this->referenceCapacityOneUnit = this->referenceCapacity / this->heatPumpMultiplier;
+    if (this->referenceCapacityWasAutoSized) {
+        // only the highest speed can be autosized, keep it in sync with the sized value
+        this->ratedCapacity[this->numSpeeds - 1] = this->referenceCapacityOneUnit;
+    }
 }
 
 bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
@@ -4148,7 +4148,7 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                     std::string const capFtName = Util::makeUPPER(fields.at(capFtFieldName).get<std::string>());
                     thisAWHP.ratedCapacity[i] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
                         fields, schemaProps, std::format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1));
-                    if (i != thisAWHP.numSpeeds - 1 && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
+                    if ((i != thisAWHP.numSpeeds - 1 || thisAWHP.boosterOn) && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
                         ShowSevereError(state,
                                         std::format("cannot autosize capacity below maximum speed (name={}, field={})",
                                                     thisAWHP.name,
@@ -4577,8 +4577,9 @@ void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 cu
         auto capacityModifierFuncTemp = Curve::CurveValue(state, curveIndex, this->loadSideOutletTemp, this->sourceSideInletTemp);
         auto availableCapacityOneUnit = this->referenceCapacityOneUnit * capacityModifierFuncTemp;
 
+        auto companionCurveIndex = companionCoil.capFuncTempCurveIndices[companionCoil.numSpeeds - 1];
         auto companionCapacityModifierFuncTemp =
-            Curve::CurveValue(state, curveIndex, companionCoil.loadSideOutletTemp, companionCoil.sourceSideInletTemp);
+            Curve::CurveValue(state, companionCurveIndex, companionCoil.loadSideOutletTemp, companionCoil.sourceSideInletTemp);
         auto companionAvailableCapacityOneUnit = companionCoil.referenceCapacityOneUnit * companionCapacityModifierFuncTemp;
         if (this->OperationModeEMSOverrideOn) {
             if (this->OperationModeEMSOverrideValue > 0) {

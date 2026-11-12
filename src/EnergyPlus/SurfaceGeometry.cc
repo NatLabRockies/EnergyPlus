@@ -50,6 +50,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <ranges>
 #include <string>
 
 // ObjexxFCL Headers
@@ -77,6 +78,7 @@
 #include <EnergyPlus/DisplayRoutines.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/General.hh>
+#include <EnergyPlus/Geometry/Plane.hh>
 #include <EnergyPlus/GlobalNames.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
@@ -400,8 +402,6 @@ namespace SurfaceGeometry {
                     (thisSurface.Class != SurfaceClass::TDD_Dome)) {
                     thisZone.ExtWindowArea += thisSurface.GrossArea;
                     thisSpace.extWindowArea += thisSurface.GrossArea;
-                    thisZone.ExtWindowArea_Multiplied =
-                        thisZone.ExtWindowArea + thisSurface.GrossArea * thisSurface.Multiplier * thisZone.Multiplier * thisZone.ListMultiplier;
                     if (DetailedWWR) {
                         print(state.files.debug,
                               "{},Window,{:.2f},{:.1f}\n",
@@ -815,9 +815,6 @@ namespace SurfaceGeometry {
         // Allocation is dependent on the user input file.
 
         state.dataSurface->ShadeV.allocate(state.dataSurface->TotSurfaces);
-        for (auto &e : state.dataSurface->ShadeV) {
-            e.NVert = 0;
-        }
         // Individual components (XV,YV,ZV) allocated in routine ProcessSurfaceVertices
         state.dataSurface->X0.dimension(state.dataSurface->TotSurfaces, 0.0);
         state.dataSurface->Y0.dimension(state.dataSurface->TotSurfaces, 0.0);
@@ -1288,14 +1285,14 @@ namespace SurfaceGeometry {
                 // Outward normal unit vector (pointing away from room)
                 newSurf.OutNormVec = newSurf.NewellSurfaceNormalVector;
                 for (int n = 1; n <= 3; ++n) {
-                    if (std::abs(newSurf.OutNormVec(n) - 1.0) < 1.e-06) {
-                        newSurf.OutNormVec(n) = +1.0;
+                    if (std::abs(newSurf.OutNormVec[n - 1] - 1.0) < 1.e-06) {
+                        newSurf.OutNormVec[n - 1] = +1.0;
                     }
-                    if (std::abs(newSurf.OutNormVec(n) + 1.0) < 1.e-06) {
-                        newSurf.OutNormVec(n) = -1.0;
+                    if (std::abs(newSurf.OutNormVec[n - 1] + 1.0) < 1.e-06) {
+                        newSurf.OutNormVec[n - 1] = -1.0;
                     }
-                    if (std::abs(newSurf.OutNormVec(n)) < 1.e-06) {
-                        newSurf.OutNormVec(n) = 0.0;
+                    if (std::abs(newSurf.OutNormVec[n - 1]) < 1.e-06) {
+                        newSurf.OutNormVec[n - 1] = 0.0;
                     }
                 }
 
@@ -1928,6 +1925,8 @@ namespace SurfaceGeometry {
                                               state.dataSurface->Surface(SurfNum).Area * MultSurfNum) /
                                              state.dataSurface->Surface(Found).Area * MultFound) > 0.02) { // 2% difference in areas
                                     ++state.dataSurfaceGeometry->ErrCount4;
+                                    ++state.dataErrTracking
+                                          ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InterZoneSurfaceAreaMismatch)];
                                     if (state.dataSurfaceGeometry->ErrCount4 == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                                         ShowWarningError(
                                             state,
@@ -1978,6 +1977,8 @@ namespace SurfaceGeometry {
                             // Check opposites Azimuth and Tilt
                             // Tilt
                             if (std::abs(std::abs(state.dataSurface->Surface(Found).Tilt + state.dataSurface->Surface(SurfNum).Tilt) - 180.0) > 1.0) {
+                                ++state.dataErrTracking
+                                      ->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InterZoneSurfaceTiltMismatch)];
                                 ShowWarningError(state, std::format("{}InterZone Surface Tilts do not match as expected.", RoutineName));
                                 ShowContinueError(state,
                                                   std::format("  Tilt={:.1f} in Surface={}, Zone={}",
@@ -2039,6 +2040,8 @@ namespace SurfaceGeometry {
                                              180.0) > 1.0) {
                                     if (std::abs(state.dataSurface->Surface(SurfNum).SinTilt) > 0.5 || state.dataGlobal->DisplayExtraWarnings) {
                                         // if horizontal surfaces, then these are windows/doors/etc in those items.
+                                        ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(
+                                            DataErrorTracking::ErrorSummaryType::InterZoneSurfaceAzimuthMismatch)];
                                         ShowWarningError(state, std::format("{}InterZone Surface Azimuths do not match as expected.", RoutineName));
                                         ShowContinueError(state,
                                                           std::format("  Azimuth={:.1f}, Tilt={:.1f}, in Surface={}, Zone={}",
@@ -2304,7 +2307,6 @@ namespace SurfaceGeometry {
                     }
                     if (thisSurf.Class == SurfaceClass::Roof) {
                         thisZone.CeilingArea += thisSurf.Area;
-                        thisZone.HasRoof = true;
                     }
                 }
                 if (thisSpace.userEnteredFloorArea != Constant::AutoCalculate) {
@@ -2424,15 +2426,6 @@ namespace SurfaceGeometry {
                 } else {
                     thisZone.FloorArea = zoneCalcFloorArea;
                 }
-                Real64 totSpacesFloorArea = 0.0;
-                for (int spaceNum : thisZone.spaceIndexes) {
-                    totSpacesFloorArea += state.dataHeatBal->space(spaceNum).FloorArea;
-                }
-                if (totSpacesFloorArea > 0.0) {
-                    for (int spaceNum : thisZone.spaceIndexes) {
-                        state.dataHeatBal->space(spaceNum).fracZoneFloorArea = state.dataHeatBal->space(spaceNum).FloorArea / totSpacesFloorArea;
-                    }
-                } // else leave fractions at zero
             }
         }
 
@@ -2819,6 +2812,7 @@ namespace SurfaceGeometry {
                 if (!state.dataConstruction->Construct(surf.Construction).TypeIsIRT) {
                     continue;
                 }
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::InfraredTransparentUsage)];
                 if (!state.dataGlobal->DisplayExtraWarnings) {
                     ++iTmp1;
                 } else {
@@ -3144,7 +3138,6 @@ namespace SurfaceGeometry {
                         if (thisSpace.TDDDomeFirst == 0) {
                             thisSpace.TDDDomeFirst = SurfNum;
                         }
-                        thisSpace.TDDDomeLast = SurfNum;
                     } else {
                         thisSpace.OpaqOrWinSurfaceLast = SurfNum;
                     }
@@ -3641,7 +3634,7 @@ namespace SurfaceGeometry {
                     }
                 }
                 surfTemp.Vertex.allocate(surfTemp.Sides);
-                GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs({2, _}));
+                GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs, 2);
                 CheckConvexity(state, SurfNum, surfTemp.Sides);
                 if (state.dataReportFlag->MakeMirroredDetachedShading) {
                     MakeMirrorSurface(state, SurfNum);
@@ -4409,7 +4402,7 @@ namespace SurfaceGeometry {
                 }
                 surfTemp.Vertex.allocate(surfTemp.Sides);
                 surfTemp.NewVertex.allocate(surfTemp.Sides);
-                GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs({3, _}));
+                GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs, 3);
                 if (surfTemp.Area <= 0.0) {
                     ShowSevereError(
                         state,
@@ -4976,14 +4969,14 @@ namespace SurfaceGeometry {
 
         surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
         for (int n = 1; n <= 3; ++n) {
-            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
-                surfTemp.OutNormVec(n) = +1.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1] - 1.0) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = +1.0;
             }
-            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
-                surfTemp.OutNormVec(n) = -1.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1] + 1.0) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = -1.0;
             }
-            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
-                surfTemp.OutNormVec(n) = 0.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1]) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = 0.0;
             }
         }
 
@@ -5394,7 +5387,7 @@ namespace SurfaceGeometry {
                 surfTemp.Multiplier = 1.0;
             }
 
-            GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs({4, _}));
+            GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs, 4);
 
             CheckConvexity(state, SurfNum, surfTemp.Sides);
             surfTemp.windowShadingControlList.clear();
@@ -6358,14 +6351,14 @@ namespace SurfaceGeometry {
         // Outward normal unit vector (pointing away from room)
         surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
         for (int n = 1; n <= 3; ++n) {
-            if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
-                surfTemp.OutNormVec(n) = +1.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1] - 1.0) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = +1.0;
             }
-            if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
-                surfTemp.OutNormVec(n) = -1.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1] + 1.0) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = -1.0;
             }
-            if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
-                surfTemp.OutNormVec(n) = 0.0;
+            if (std::abs(surfTemp.OutNormVec[n - 1]) < 1.e-06) {
+                surfTemp.OutNormVec[n - 1] = 0.0;
             }
         }
 
@@ -6569,7 +6562,7 @@ namespace SurfaceGeometry {
                 surfTemp.Sides = s_ipsc->rNumericArgs(1);
             }
             surfTemp.Vertex.allocate(surfTemp.Sides);
-            GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs({2, _}));
+            GetVertices(state, SurfNum, surfTemp.Sides, s_ipsc->rNumericArgs, 2);
             CheckConvexity(state, SurfNum, surfTemp.Sides);
             //    IF (SurfaceTmp(SurfNum)%Sides == 3) THEN
             //      CALL ShowWarningError(state, TRIM(s_ipsc->cCurrentModuleObject)//'="'//TRIM(SurfaceTmp(SurfNum)%Name)//  &
@@ -7119,7 +7112,6 @@ namespace SurfaceGeometry {
             }
 
             if (!s_ipsc->lAlphaFieldBlanks(4)) {
-                state.dataSurface->IntMassObjects(Item).spaceOrSpaceListName = s_ipsc->cAlphaArgs(4);
                 Item1 = Util::FindItemInList(s_ipsc->cAlphaArgs(4), state.dataHeatBal->space);
                 int SLItem = 0;
                 if (Item1 == 0 && int(state.dataHeatBal->spaceList.size()) > 0) {
@@ -7721,7 +7713,6 @@ namespace SurfaceGeometry {
                 // endif
             }
             state.dataHeatBal->ExtVentedCavity(Item).Tilt = AvgTilt;
-            state.dataHeatBal->ExtVentedCavity(Item).Azimuth = AvgAzimuth;
 
             // find area weighted centroid.
             //            ExtVentedCavity( Item ).Centroid.z = sum( Surface( ExtVentedCavity( Item ).SurfPtrs ).Centroid.z * Surface(
@@ -9212,9 +9203,10 @@ namespace SurfaceGeometry {
     }
 
     void GetVertices(EnergyPlusData &state,
-                     int const SurfNum,             // Current surface number
-                     int const NSides,              // Number of sides to figure
-                     Array1S<Real64> const Vertices // Vertices, in specified order
+                     int const SurfNum,              // Current surface number
+                     int const NSides,               // Number of sides to figure
+                     Array1D<Real64> const &Numbers, // Numeric input fields, vertices in specified order
+                     int const firstVertexIndex      // Index in Numbers of the first vertex coordinate
     )
     {
 
@@ -9250,7 +9242,6 @@ namespace SurfaceGeometry {
         Real64 dotp;
 
         // Object Data
-        Vector const TestVector(0.0, 0.0, 1.0);
         Vector temp;
 
         auto &surfTemp = state.dataSurfaceGeometry->SurfaceTmp(SurfNum);
@@ -9258,13 +9249,13 @@ namespace SurfaceGeometry {
         if (NSides > state.dataSurface->MaxVerticesPerSurface) {
             state.dataSurface->MaxVerticesPerSurface = NSides;
         }
-        int Ptr = 1;
+        int Ptr = firstVertexIndex;
         for (n = 1; n <= NSides; ++n) {
-            surfTemp.Vertex(n).x = Vertices(Ptr);
+            surfTemp.Vertex(n).x = Numbers(Ptr);
             ++Ptr;
-            surfTemp.Vertex(n).y = Vertices(Ptr);
+            surfTemp.Vertex(n).y = Numbers(Ptr);
             ++Ptr;
-            surfTemp.Vertex(n).z = Vertices(Ptr);
+            surfTemp.Vertex(n).z = Numbers(Ptr);
             ++Ptr;
         }
 
@@ -9432,7 +9423,7 @@ namespace SurfaceGeometry {
             surfTemp.NetAreaShadowCalc = surfTemp.Area;
             Vectors::DetermineAzimuthAndTilt(
                 surfTemp.Vertex, SurfWorldAz, SurfTilt, surfTemp.lcsx, surfTemp.lcsy, surfTemp.lcsz, surfTemp.NewellSurfaceNormalVector);
-            dotp = dot(surfTemp.NewellSurfaceNormalVector, TestVector);
+            dotp = surfTemp.NewellSurfaceNormalVector.dot(Vector3D::UnitZ());
             if (surfTemp.Class == SurfaceClass::Roof && dotp < -0.000001) {
                 TiltString = std::format("{:.1f}", SurfTilt);
                 ShowWarningError(state,
@@ -9488,14 +9479,14 @@ namespace SurfaceGeometry {
             // Outward normal unit vector (pointing away from room)
             surfTemp.OutNormVec = surfTemp.NewellSurfaceNormalVector;
             for (n = 1; n <= 3; ++n) {
-                if (std::abs(surfTemp.OutNormVec(n) - 1.0) < 1.e-06) {
-                    surfTemp.OutNormVec(n) = +1.0;
+                if (std::abs(surfTemp.OutNormVec[n - 1] - 1.0) < 1.e-06) {
+                    surfTemp.OutNormVec[n - 1] = +1.0;
                 }
-                if (std::abs(surfTemp.OutNormVec(n) + 1.0) < 1.e-06) {
-                    surfTemp.OutNormVec(n) = -1.0;
+                if (std::abs(surfTemp.OutNormVec[n - 1] + 1.0) < 1.e-06) {
+                    surfTemp.OutNormVec[n - 1] = -1.0;
                 }
-                if (std::abs(surfTemp.OutNormVec(n)) < 1.e-06) {
-                    surfTemp.OutNormVec(n) = 0.0;
+                if (std::abs(surfTemp.OutNormVec[n - 1]) < 1.e-06) {
+                    surfTemp.OutNormVec[n - 1] = 0.0;
                 }
             }
 
@@ -9640,14 +9631,14 @@ namespace SurfaceGeometry {
             // Outward normal unit vector (pointing away from room)
             newSurface.OutNormVec = newSurface.NewellSurfaceNormalVector;
             for (int n = 1; n <= 3; ++n) {
-                if (std::abs(newSurface.OutNormVec(n) - 1.0) < 1.e-06) {
-                    newSurface.OutNormVec(n) = +1.0;
+                if (std::abs(newSurface.OutNormVec[n - 1] - 1.0) < 1.e-06) {
+                    newSurface.OutNormVec[n - 1] = +1.0;
                 }
-                if (std::abs(newSurface.OutNormVec(n) + 1.0) < 1.e-06) {
-                    newSurface.OutNormVec(n) = -1.0;
+                if (std::abs(newSurface.OutNormVec[n - 1] + 1.0) < 1.e-06) {
+                    newSurface.OutNormVec[n - 1] = -1.0;
                 }
-                if (std::abs(newSurface.OutNormVec(n)) < 1.e-06) {
-                    newSurface.OutNormVec(n) = 0.0;
+                if (std::abs(newSurface.OutNormVec[n - 1]) < 1.e-06) {
+                    newSurface.OutNormVec[n - 1] = 0.0;
                 }
             }
 
@@ -11594,14 +11585,14 @@ namespace SurfaceGeometry {
                 }
             }
 
-            if (s_ipsc->rNumericArgs(1) > 0.0 && !any_ne(s_ipsc->rNumericArgs({3, 7}), 0.0) &&
-                (!state.dataSurface->OSC(OSCNum).SinusoidalConstTempCoef)) {
+            bool const allCoefficientsZero = std::ranges::all_of(std::views::iota(3, 8), [&](int const i) { return s_ipsc->rNumericArgs(i) == 0.0; });
+
+            if (s_ipsc->rNumericArgs(1) > 0.0 && allCoefficientsZero && (!state.dataSurface->OSC(OSCNum).SinusoidalConstTempCoef)) {
                 ShowSevereError(state, std::format("{}=\"{}\" has zeros for all coefficients.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "...The outdoor air temperature for surfaces using this OtherSideCoefficients object will always be 0C.");
             }
 
-            if (s_ipsc->rNumericArgs(1) <= 0.0 && !any_ne(s_ipsc->rNumericArgs({3, 7}), 0.0) &&
-                (!state.dataSurface->OSC(OSCNum).SinusoidalConstTempCoef)) {
+            if (s_ipsc->rNumericArgs(1) <= 0.0 && allCoefficientsZero && (!state.dataSurface->OSC(OSCNum).SinusoidalConstTempCoef)) {
                 ShowSevereError(state, std::format("{}=\"{}\" has zeros for all coefficients.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state,
                                   "...The outside surface temperature for surfaces using this OtherSideCoefficients object will always be 0C.");
@@ -12094,7 +12085,9 @@ namespace SurfaceGeometry {
                 thisFace.FacePoints.allocate(thisSurface.Sides);
                 thisFace.NSides = thisSurface.Sides;
                 thisFace.SurfNum = SurfNum;
-                thisFace.FacePoints({1, thisSurface.Sides}) = thisSurface.Vertex({1, thisSurface.Sides});
+                for (int i = 1; i <= thisSurface.Sides; ++i) {
+                    thisFace.FacePoints(i) = thisSurface.Vertex(i);
+                }
                 Vectors::CreateNewellAreaVector(thisFace.FacePoints, thisFace.NSides, thisFace.NewellAreaVector);
                 SumAreas += Vectors::VecLength(thisFace.NewellAreaVector);
             }
@@ -12373,11 +12366,8 @@ namespace SurfaceGeometry {
 
         std::vector<EdgeOfSurf> inBoth;
         for (const auto &e1 : edges1) {
-            for (const auto &e2 : edges2) {
-                if (edgesEqualOnSameSurface(e1, e2)) {
-                    inBoth.push_back(e1);
-                    break;
-                }
+            if (std::any_of(edges2.begin(), edges2.end(), [&e1](auto const &e2) { return edgesEqualOnSameSurface(e1, e2); })) {
+                inBoth.push_back(e1);
             }
         }
         return inBoth;
@@ -12474,19 +12464,10 @@ namespace SurfaceGeometry {
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             for (int jVertex = 1; jVertex <= zonePoly.SurfaceFace(iFace).NSides; ++jVertex) {
                 Vector curVertex = zonePoly.SurfaceFace(iFace).FacePoints(jVertex);
-                if (uniqVertices.empty()) {
+                if (std::none_of(uniqVertices.begin(), uniqVertices.end(), [&curVertex](auto const &uniqueVertex) {
+                        return isAlmostEqual3dPt(curVertex, uniqueVertex);
+                    })) {
                     uniqVertices.emplace_back(curVertex);
-                } else {
-                    bool found = false;
-                    for (const auto &unqV : uniqVertices) {
-                        if (isAlmostEqual3dPt(curVertex, unqV)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        uniqVertices.emplace_back(curVertex);
-                    }
                 }
             }
         }
@@ -12538,6 +12519,13 @@ namespace SurfaceGeometry {
         return updZonePoly;
     }
 
+    namespace {
+        struct Vector2dCount : Vector2D
+        {
+            int count{};
+        };
+    } // namespace
+
     // test if the ceiling and floor are the same except for their height difference by looking at the corners
     bool areFloorAndCeilingSame(EnergyPlusData &state, DataVectorTypes::Polyhedron const &zonePoly)
     {
@@ -12548,7 +12536,7 @@ namespace SurfaceGeometry {
         // so if you could all the unique vertices of the floor and ceiling, ignoring the z-coordinate, they
         // should always be even (they would be two but you might define multiple surfaces that meet in a corner)
 
-        std::vector<DataVectorTypes::Vector2dCount> floorCeilingXY;
+        std::vector<Vector2dCount> floorCeilingXY;
         floorCeilingXY.reserve(zonePoly.NumSurfaceFaces * 6);
 
         // make list of x and y coordinates for all faces that are on the floor or ceiling
@@ -12558,13 +12546,13 @@ namespace SurfaceGeometry {
                 state.dataSurface->Surface(curSurfNum).Class == SurfaceClass::Roof) {
                 for (int jVertex = 1; jVertex <= zonePoly.SurfaceFace(iFace).NSides; ++jVertex) {
                     Vector curVertex = zonePoly.SurfaceFace(iFace).FacePoints(jVertex);
-                    DataVectorTypes::Vector2dCount curXYc;
+                    Vector2dCount curXYc;
                     curXYc.x = curVertex.x;
                     curXYc.y = curVertex.y;
                     curXYc.count = 1;
                     bool found = false;
-                    for (DataVectorTypes::Vector2dCount &curFloorCeiling : floorCeilingXY) { // can't use just "auto" because updating floorCeilingXY
-                        if (isAlmostEqual2dPt(curXYc, curFloorCeiling)) {                    // count ignored in comparison
+                    for (Vector2dCount &curFloorCeiling : floorCeilingXY) { // can't use just "auto" because updating floorCeilingXY
+                        if (isAlmostEqual2dPt(curXYc, curFloorCeiling)) {   // count ignored in comparison
                             ++curFloorCeiling.count;
                             found = true;
                             break;
@@ -12578,17 +12566,9 @@ namespace SurfaceGeometry {
         }
         // now make sure every point has been counted and even number of times (usually twice)
         // if they are then the ceiling and floor are (almost certainly) the same x and y coordinates.
-        bool areFlrAndClgSame = true;
-        if (!floorCeilingXY.empty()) {
-            for (auto const &curFloorCeiling : floorCeilingXY) {
-                if (curFloorCeiling.count % 2 != 0) {
-                    areFlrAndClgSame = false;
-                    break;
-                }
-            }
-        } else {
-            areFlrAndClgSame = false;
-        }
+        bool areFlrAndClgSame = !floorCeilingXY.empty() && std::none_of(floorCeilingXY.begin(), floorCeilingXY.end(), [](auto const &floorCeiling) {
+            return floorCeiling.count % 2 != 0;
+        });
         return areFlrAndClgSame;
     }
 
@@ -12776,15 +12756,7 @@ namespace SurfaceGeometry {
     }
 
     // test if two points on a plane are in the same position based on a small tolerance
-    bool isAlmostEqual2dPt(DataVectorTypes::Vector_2d v1, DataVectorTypes::Vector_2d v2)
-    {
-        // J. Glazer - March 2017
-
-        return ((std::abs(v1.x - v2.x) < Constant::OneCentimeter) && (std::abs(v1.y - v2.y) < Constant::OneCentimeter));
-    }
-
-    // test if two points on a plane are in the same position based on a small tolerance (based on Vector2dCount comparison)
-    bool isAlmostEqual2dPt(DataVectorTypes::Vector2dCount v1, DataVectorTypes::Vector2dCount v2)
+    bool isAlmostEqual2dPt(Vector2D v1, Vector2D v2)
     {
         // J. Glazer - March 2017
 
@@ -12820,7 +12792,7 @@ namespace SurfaceGeometry {
 
         DataVectorTypes::Vector other = test - start;
 
-        DataVectorTypes::Vector projection = DataVectorTypes::cross(t, other); // normal unit vector, that's the distance component
+        DataVectorTypes::Vector projection = t.cross(other); // normal unit vector, that's the distance component
         return projection.length();
     }
 
@@ -12908,7 +12880,6 @@ namespace SurfaceGeometry {
         Real64 OutOfLine;
 
         // Object Data
-        Vectors::PlaneEq BasePlane;
         Vector TVect;
         Vector CoordinateTransVector;
 
@@ -12948,6 +12919,7 @@ namespace SurfaceGeometry {
             Vectors::CalcCoPlanarNess(surf.Vertex, surf.Sides, IsCoPlanar, OutOfLine, LastVertexInError);
             if (!IsCoPlanar) {
                 if (OutOfLine > 0.01) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::NonPlanarSurfaces)];
                     ShowSevereError(state,
                                     std::format("{}Suspected non-planar surface:\"{}\", Max \"out of line\"={:.5f} at Vertex # {}",
                                                 RoutineName,
@@ -13045,16 +13017,16 @@ namespace SurfaceGeometry {
             }
 
             // Setting relative coordinates for shadowing calculations for subsurfaces
-            bool SError; // Bool used for return value of calls to PlaneEquation
             switch (ThisShape) {
             case DataSurfaces::SurfaceShape::RectangularDoorWindow: { // Rectangular heat transfer subsurface
-                Vectors::PlaneEquation(
-                    state.dataSurface->Surface(surf.BaseSurf).Vertex, state.dataSurface->Surface(surf.BaseSurf).Sides, BasePlane, SError);
-                if (SError) {
+                Plane const basePlane(Plane::fromVertices(state.dataSurface->Surface(surf.BaseSurf).Vertex));
+                if (basePlane.isDegenerate()) {
                     ShowSevereError(state, std::format("{}Degenerate surface (likely two vertices equal):\"{}\".", RoutineName, surf.Name));
                     ErrorInSurface = true;
+                    ThisReveal = 0.0;
+                } else {
+                    ThisReveal = -basePlane.signedDistance(surf.Vertex(2));
                 }
-                ThisReveal = -Vectors::Pt2Plane(surf.Vertex(2), BasePlane);
                 if (std::abs(ThisReveal) < 0.0002) {
                     ThisReveal = 0.0;
                 }
@@ -13202,13 +13174,14 @@ namespace SurfaceGeometry {
             } break;
             case DataSurfaces::SurfaceShape::TriangularWindow:
             case DataSurfaces::SurfaceShape::TriangularDoor: {
-                Vectors::PlaneEquation(
-                    state.dataSurface->Surface(surf.BaseSurf).Vertex, state.dataSurface->Surface(surf.BaseSurf).Sides, BasePlane, SError);
-                if (SError) {
+                Plane const basePlane(Plane::fromVertices(state.dataSurface->Surface(surf.BaseSurf).Vertex));
+                if (basePlane.isDegenerate()) {
                     ShowSevereError(state, std::format("{}Degenerate surface (likely two vertices equal):\"{}\".", RoutineName, surf.Name));
                     ErrorInSurface = true;
+                    ThisReveal = 0.0;
+                } else {
+                    ThisReveal = -basePlane.signedDistance(surf.Vertex(2));
                 }
-                ThisReveal = -Vectors::Pt2Plane(surf.Vertex(2), BasePlane);
                 if (std::abs(ThisReveal) < 0.0002) {
                     ThisReveal = 0.0;
                 }
@@ -13356,7 +13329,6 @@ namespace SurfaceGeometry {
 
         // Transfer to XV,YV,ZV arrays
 
-        state.dataSurface->ShadeV(ThisSurf).NVert = surf.Sides;
         state.dataSurface->ShadeV(ThisSurf).XV.allocate(surf.Sides);
         state.dataSurface->ShadeV(ThisSurf).YV.allocate(surf.Sides);
         state.dataSurface->ShadeV(ThisSurf).ZV.allocate(surf.Sides);
@@ -13432,46 +13404,52 @@ namespace SurfaceGeometry {
         //       AUTHOR         George Walton, BLAST
         //       DATE WRITTEN   August 1976
         //       MODIFIED       LKL, May 2004 -- >4 sided polygons
+        //                      Joe Robertson, Oct. 2026 -- fall back to another polygon edge when edge 2-3 is too short
         //       RE-ENGINEERED  Yes
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine develops a coordinate transformation such that the X-axis goes
-        // through points 2 and 3 and the Y-axis goes through point 1
-        // of a plane figure in 3-d space.
+        // This subroutine projects a reference vertex onto a polygon edge to establish the coordinate origin. It tries boundary edges in
+        // cyclic order, starting with edge 2-3, until it finds one that is long enough.
 
         // REFERENCES:
         // 'NECAP' - NASA'S Energy-Cost Analysis Program
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 Gamma; // Intermediate Result
-        Real64 DotSelfX23;
-
-        // Object Data
-        Vector x21;
-        Vector x23;
-
-        // Determine Components of the Coordinate Translation Vector.
         auto const &surf = state.dataSurface->Surface(SurfNum);
 
-        x21 = surf.Vertex(2) - surf.Vertex(1);
-        x23 = surf.Vertex(2) - surf.Vertex(3);
-
-        DotSelfX23 = magnitude_squared(x23);
-
-        if (DotSelfX23 <= Constant::OneMillionth) {
-            ShowSevereError(state, std::format("CalcCoordinateTransformation: Invalid dot product, surface=\"{}\":", surf.Name));
-            for (int I = 1; I <= surf.Sides; ++I) {
-                auto const &point = surf.Vertex(I);
-                ShowContinueError(state, std::format(" ({:8.3F},{:8.3F},{:8.3F})", point.x, point.y, point.z));
+        auto const projectOntoEdge = [&](int const edgeStartIndex, int const edgeEndIndex, int const vertexToProjectIndex) {
+            auto const &edgeStart = surf.Vertex(edgeStartIndex);
+            Vector const edge = surf.Vertex(edgeEndIndex) - edgeStart;
+            Real64 const edgeLengthSquared = edge.length_squared();
+            if (edgeLengthSquared <= Constant::OneMillionth) {
+                return false;
             }
-            ShowFatalError(
-                state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
-            return;
+
+            Real64 const gamma = (surf.Vertex(vertexToProjectIndex) - edgeStart).dot(edge) / edgeLengthSquared;
+            CompCoordTranslVector = edgeStart + gamma * edge;
+            return true;
+        };
+
+        for (int edgeOffset = 0; edgeOffset < surf.Sides; ++edgeOffset) {
+            int const edgeStartIndex = (edgeOffset + 1) % surf.Sides + 1;
+            int const edgeEndIndex = (edgeStartIndex == surf.Sides) ? 1 : edgeStartIndex + 1;
+            int const vertexToProjectIndex = (edgeStartIndex == 1) ? surf.Sides : edgeStartIndex - 1;
+            if (projectOntoEdge(edgeStartIndex, edgeEndIndex, vertexToProjectIndex)) {
+                return;
+            }
         }
 
-        Gamma = dot(x21, x23) / magnitude_squared(x23);
-
-        CompCoordTranslVector = surf.Vertex(2) + Gamma * (surf.Vertex(3) - surf.Vertex(2));
+        ShowSevereError(
+            state,
+            std::format(
+                "CalcCoordinateTransformation: No boundary edge longer than 1 mm; cannot establish coordinate transformation for surface=\"{}\":",
+                surf.Name));
+        for (int I = 1; I <= surf.Sides; ++I) {
+            auto const &point = surf.Vertex(I);
+            ShowContinueError(state, std::format(" ({:8.3F},{:8.3F},{:8.3F})", point.x, point.y, point.z));
+        }
+        ShowFatalError(state, "CalcCoordinateTransformation: Program terminates due to preceding condition.", OptionalOutputFileRef{state.files.eso});
+        return;
     }
 
     void CreateShadedWindowConstruction(EnergyPlusData &state,
@@ -13542,7 +13520,9 @@ namespace SurfaceGeometry {
             if (state.dataSurface->WindowShadingControl(WSCPtr).ShadingType == DataSurfaces::WinShadingType::IntShade ||
                 state.dataSurface->WindowShadingControl(WSCPtr).ShadingType == DataSurfaces::WinShadingType::IntBlind) {
                 // Interior shading device
-                thisConstructNewSh.LayerPoint({1, TotLayersOld}) = state.dataConstruction->Construct(ConstrNum).LayerPoint({1, TotLayersOld});
+                for (int i = 1; i <= TotLayersOld; ++i) {
+                    thisConstructNewSh.LayerPoint(i) = state.dataConstruction->Construct(ConstrNum).LayerPoint(i);
+                }
                 thisConstructNewSh.LayerPoint(TotLayersNew) = ShDevNum;
                 thisConstructNewSh.InsideAbsorpSolar = thisMaterialSh->AbsorpSolarIn;
                 thisConstructNewSh.InsideAbsorpThermal = thisMaterialSh->AbsorpThermalBack;
@@ -13552,7 +13532,9 @@ namespace SurfaceGeometry {
             } else {
                 // Exterior shading device
                 thisConstructNewSh.LayerPoint(1) = ShDevNum;
-                thisConstructNewSh.LayerPoint({2, TotLayersNew}) = state.dataConstruction->Construct(ConstrNum).LayerPoint({1, TotLayersOld});
+                for (int i = 2; i <= TotLayersNew; ++i) {
+                    thisConstructNewSh.LayerPoint(i) = state.dataConstruction->Construct(ConstrNum).LayerPoint(i - 1);
+                }
                 auto const *thisMaterialShInside = s_mat->materials(state.dataConstruction->Construct(ConstrNewSh).LayerPoint(TotLayersNew));
                 thisConstructNewSh.InsideAbsorpSolar = thisMaterialShInside->AbsorpSolarIn;
                 thisConstructNewSh.InsideAbsorpThermal = thisMaterialShInside->AbsorpThermalBack;
@@ -13755,10 +13737,12 @@ namespace SurfaceGeometry {
             thisConstruct.setArraysBasedOnMaxSolidWinLayers(state);
 
             int TotLayersOld = state.dataConstruction->Construct(oldConstruction).TotLayers;
-            thisConstruct.LayerPoint({1, Construction::MaxLayersInConstruct}) = 0;
+            thisConstruct.LayerPoint = 0; // sized to Construction::MaxLayersInConstruct
             thisConstruct.LayerPoint(1) = stormMaterial;
             thisConstruct.LayerPoint(2) = gapMaterial;
-            thisConstruct.LayerPoint({3, TotLayersOld + 2}) = state.dataConstruction->Construct(oldConstruction).LayerPoint({1, TotLayersOld});
+            for (int i = 3; i <= TotLayersOld + 2; ++i) {
+                thisConstruct.LayerPoint(i) = state.dataConstruction->Construct(oldConstruction).LayerPoint(i - 2);
+            }
             thisConstruct.Name = name;
             thisConstruct.TotLayers = TotLayersOld + 2;
             thisConstruct.TotSolidLayers = state.dataConstruction->Construct(oldConstruction).TotSolidLayers + 1;
@@ -13896,7 +13880,9 @@ namespace SurfaceGeometry {
         H = Vectors::VecLength(TVect); // SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2 + (Z(1)-Z(2))**2)
 
         // Save coordinates of original window in case Window 5 data overwrites.
-        OriginalCoord.Vertex({1, surfTemp.Sides}) = surfTemp.Vertex({1, surfTemp.Sides});
+        for (int i = 1; i <= surfTemp.Sides; ++i) {
+            OriginalCoord.Vertex(i) = surfTemp.Vertex(i);
+        }
 
         // Height and width of first glazing system
         h1 = state.dataConstruction->Construct(IConst).W5FileGlazingSysHeight;
@@ -14067,7 +14053,9 @@ namespace SurfaceGeometry {
         H = Vectors::VecLength(TVect); // SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2 + (Z(1)-Z(2))**2)
 
         // Save coordinates of original window in case Window 5 data overwrites.
-        OriginalCoord.Vertex({1, surfTemp.Sides}) = surfTemp.Vertex({1, surfTemp.Sides});
+        for (int i = 1; i <= surfTemp.Sides; ++i) {
+            OriginalCoord.Vertex(i) = surfTemp.Vertex(i);
+        }
 
         // Height and width of first glazing system
         h1 = state.dataConstruction->Construct(IConst).W5FileGlazingSysHeight;
@@ -14489,11 +14477,9 @@ namespace SurfaceGeometry {
                 }
                 state.dataSurfaceGeometry->firstTime = false;
                 state.dataSurfaceGeometry->noTransform = false;
-                state.dataSurface->AspectTransform = true;
                 if (state.dataSurface->WorldCoordSystem) {
                     ShowWarningError(state, std::format("{}: must use Relative Coordinate System.  Transform request ignored.", CurrentModuleObject));
                     state.dataSurfaceGeometry->noTransform = true;
-                    state.dataSurface->AspectTransform = false;
                 }
             } else {
                 state.dataSurfaceGeometry->firstTime = false;
@@ -14552,7 +14538,6 @@ namespace SurfaceGeometry {
 
         auto &Triangle1 = state.dataSurfaceGeometry->Triangle1;
         auto &Triangle2 = state.dataSurfaceGeometry->Triangle2;
-        static Vector const zero_vector(0.0);
         Vector centroid;
 
         int negZcount(0); // for warning error in surface centroids
@@ -14569,7 +14554,7 @@ namespace SurfaceGeometry {
 
             if (surface.Sides == 3) { // 3-sided polygon
 
-                centroid = cen(vertex(1), vertex(2), vertex(3));
+                centroid = (vertex(1) + vertex(2) + vertex(3)) / 3.0;
 
             } else if (surface.Sides == 4) { // 4-sided polygon
 
@@ -14615,10 +14600,10 @@ namespace SurfaceGeometry {
                 }
 
                 // get centroid of Triangle 1
-                Vector cen1(cen(Triangle1(1), Triangle1(2), Triangle1(3)));
+                Vector cen1((Triangle1(1) + Triangle1(2) + Triangle1(3)) / 3.0);
 
                 // get centroid of Triangle 2
-                Vector cen2(cen(Triangle2(1), Triangle2(2), Triangle2(3)));
+                Vector cen2((Triangle2(1) + Triangle2(2) + Triangle2(3)) / 3.0);
 
                 // find area weighted combination of the two centroids (coded to avoid temporary Vectors)
                 cen1 *= Tri1Area;
@@ -14641,7 +14626,7 @@ namespace SurfaceGeometry {
                 //        Zcm=(Z1+Z2)/2.0d0
 
                 // Calc centroid as average of surfaces
-                centroid = 0.0;
+                centroid = Vector3D();
                 for (int vert = 1; vert <= surface.Sides; ++vert) {
                     centroid += vertex(vert);
                 }
@@ -14658,7 +14643,7 @@ namespace SurfaceGeometry {
                                       "...surface name is blank. Examine surfaces -- this may be a problem with ill-formed interzone surfaces.");
                     ShowContinueError(state, std::format("... number of sides must be >= 3, this surface # sides={}", surface.Sides));
                 }
-                centroid = 0.0;
+                centroid = Vector3D();
             }
 
             // store result in the surface structure in DataSurfaces
@@ -14973,13 +14958,11 @@ namespace SurfaceGeometry {
                         int spaceNum1 = min(surf.spaceNum, state.dataSurface->Surface(surf.ExtBoundCond).spaceNum);
                         int spaceNum2 = max(surf.spaceNum, state.dataSurface->Surface(surf.ExtBoundCond).spaceNum);
                         // This pair already saved?
-                        bool found = false;
-                        for (auto const &thisAirBoundaryMixing : state.dataHeatBal->airBoundaryMixing) {
-                            if ((spaceNum1 == thisAirBoundaryMixing.space1) && (spaceNum2 == thisAirBoundaryMixing.space2)) {
-                                found = true;
-                                break;
-                            }
-                        }
+                        bool found = std::any_of(state.dataHeatBal->airBoundaryMixing.begin(),
+                                                 state.dataHeatBal->airBoundaryMixing.end(),
+                                                 [spaceNum1, spaceNum2](auto const &airBoundaryMixing) {
+                                                     return spaceNum1 == airBoundaryMixing.space1 && spaceNum2 == airBoundaryMixing.space2;
+                                                 });
                         if (!found) {
                             // Store the space pairs, schedule, and flow rate to use later to create cross mixing objects
                             DataHeatBalance::AirBoundaryMixingSpecs newAirBoundaryMixing;
@@ -15266,12 +15249,12 @@ namespace SurfaceGeometry {
 
         for (int n = 1; n <= NSides; ++n) { // perform convexity test in the plane determined above.
 
-            DataVectorTypes::Vector_2d pt0(A(n), B(n));
-            DataVectorTypes::Vector_2d pt1(A(n + 1), B(n + 1));
-            DataVectorTypes::Vector_2d pt2(A(n + 2), B(n + 2));
+            Vector2D pt0(A(n), B(n));
+            Vector2D pt1(A(n + 1), B(n + 1));
+            Vector2D pt2(A(n + 2), B(n + 2));
 
-            DataVectorTypes::Vector_2d V1 = pt1 - pt0;
-            DataVectorTypes::Vector_2d V2 = pt2 - pt1;
+            Vector2D V1 = pt1 - pt0;
+            Vector2D V2 = pt2 - pt1;
 
             Real64 V1len = V1.length(); // = norm_L2()
             Real64 V2len = V2.length();
@@ -15411,7 +15394,7 @@ namespace SurfaceGeometry {
         if (std::abs(Diagonal1 - Diagonal2) < 0.020) { // This tolerance based on coincident vertex tolerance of 0.01
             Vect32 = Vectors::VecNormalize(surf.Vertex(3) - surf.Vertex(2));
             Vect21 = Vectors::VecNormalize(surf.Vertex(2) - surf.Vertex(1));
-            DotProd = dot(Vect32, Vect21);
+            DotProd = Vect32.dot(Vect21);
             if (std::abs(DotProd) <= cos89deg) {
                 return true;
             }

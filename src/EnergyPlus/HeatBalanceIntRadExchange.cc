@@ -46,18 +46,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
@@ -102,7 +104,7 @@ namespace HeatBalanceIntRadExchange {
     //  McGraw-Hill, Inc., New York, 1967.
 
     void CalcInteriorRadExchange(EnergyPlusData &state,
-                                 Array1S<Real64> const SurfaceTemp,              // Current surface temperatures
+                                 Array1D<Real64> const &SurfaceTemp,             // Current surface temperatures
                                  int const SurfIterations,                       // Number of iterations in calling subroutine
                                  Array1D<Real64> &NetLWRadToSurf,                // Net long wavelength radiant exchange from other surfaces
                                  ObjexxFCL::Optional_int_const ZoneToResimulate, // if passed in, then only calculate for this zone
@@ -266,7 +268,9 @@ namespace HeatBalanceIntRadExchange {
                     } else {
                         CalcScriptF(state, n_zone_Surfaces, zone_info.Area, zone_info.F, zone_info.Emissivity, zone_ScriptF);
                         // precalc - multiply by StefanBoltzmannConstant
-                        zone_ScriptF *= Constant::StefanBoltzmann;
+                        for (Real64 &sf : zone_ScriptF) {
+                            sf *= Constant::StefanBoltzmann;
+                        }
                     }
                 }
 
@@ -689,7 +693,10 @@ namespace HeatBalanceIntRadExchange {
                         print(state.files.eio, "\n");
 
                         for (int Findex : thisEnclosure.SurfaceReportNums) {
-                            Real64 RowSum = sum(SaveApproximateViewFactors(_, Findex));
+                            Real64 RowSum = 0.0;
+                            for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                                RowSum += SaveApproximateViewFactors(jSurf, Findex);
+                            }
                             print(state.files.eio,
                                   "{},{},{},{:.4f}",
                                   "View Factor",
@@ -710,7 +717,10 @@ namespace HeatBalanceIntRadExchange {
                     print(state.files.eio, "\n");
 
                     for (int Findex : thisEnclosure.SurfaceReportNums) {
-                        Real64 RowSum = sum(thisEnclosure.F(_, Findex));
+                        Real64 RowSum = 0.0;
+                        for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                            RowSum += thisEnclosure.F(jSurf, Findex);
+                        }
                         print(state.files.eio,
                               "{},{},{},{:.4f}",
                               "View Factor",
@@ -785,7 +795,11 @@ namespace HeatBalanceIntRadExchange {
                 if (!useSolarViewFactors) {
                     Real64 RowSum = 0.0;
                     for (int Findex : thisEnclosure.SurfaceReportNums) {
-                        RowSum += sum(thisEnclosure.F(_, Findex));
+                        Real64 colSum = 0.0;
+                        for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                            colSum += thisEnclosure.F(jSurf, Findex);
+                        }
+                        RowSum += colSum;
                     }
                     RowSum = std::abs(RowSum - thisEnclosure.NumOfSurfaces);
                     FixedRowSum = std::abs(FixedRowSum - thisEnclosure.NumOfSurfaces);
@@ -1003,7 +1017,10 @@ namespace HeatBalanceIntRadExchange {
                 print(state.files.eio, "\n");
 
                 for (int Findex : thisEnclosure.SurfaceReportNums) {
-                    Real64 RowSum = sum(SaveApproximateViewFactors(_, Findex));
+                    Real64 RowSum = 0.0;
+                    for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                        RowSum += SaveApproximateViewFactors(jSurf, Findex);
+                    }
                     print(state.files.eio,
                           "Solar View Factor,{},{},{:.4f}",
                           state.dataSurface->Surface(thisEnclosure.SurfacePtr(Findex)).Name,
@@ -1022,7 +1039,10 @@ namespace HeatBalanceIntRadExchange {
                 print(state.files.eio, "\n");
 
                 for (int Findex : thisEnclosure.SurfaceReportNums) {
-                    Real64 RowSum = sum(thisEnclosure.F(_, Findex));
+                    Real64 RowSum = 0.0;
+                    for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                        RowSum += thisEnclosure.F(jSurf, Findex);
+                    }
                     print(state.files.eio,
                           "{},{},{},{:.4f}",
                           "Solar View Factor",
@@ -1080,7 +1100,11 @@ namespace HeatBalanceIntRadExchange {
 
             Real64 RowSum = 0.0;
             for (int Findex : thisEnclosure.SurfaceReportNums) {
-                RowSum += sum(thisEnclosure.F(_, Findex));
+                Real64 colSum = 0.0;
+                for (int jSurf = 1; jSurf <= thisEnclosure.NumOfSurfaces; ++jSurf) {
+                    colSum += thisEnclosure.F(jSurf, Findex);
+                }
+                RowSum += colSum;
             }
             RowSum = std::abs(RowSum - thisEnclosure.NumOfSurfaces);
             FixedRowSum = std::abs(FixedRowSum - thisEnclosure.NumOfSurfaces);
@@ -1106,7 +1130,7 @@ namespace HeatBalanceIntRadExchange {
     void GetInputViewFactors(EnergyPlusData &state,
                              std::string const &ZoneName,              // Needed to check for user input view factors.
                              int const N,                              // NUMBER OF SURFACES
-                             Array2A<Real64> F,                        // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
+                             Array2D<Real64> &F,                       // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
                              [[maybe_unused]] const Array1D_int &SPtr, // pointer to actual surface number
                              bool &NoUserInputF,                       // Flag signifying no input F's for this
                              bool &ErrorsFound                         // True when errors are found in number of fields vs max args
@@ -1121,8 +1145,6 @@ namespace HeatBalanceIntRadExchange {
         // PURPOSE OF THIS SUBROUTINE:
         // This routine gets the user view factor info.
 
-        // Argument array dimensioning
-        F.dim(N, N);
         // EP_SIZE_CHECK(SPtr, N);
 
         NoUserInputF = true;
@@ -1220,14 +1242,9 @@ namespace HeatBalanceIntRadExchange {
                     }
                     if (spaceListNum > 0) {
                         for (int sListSpaceNum : state.dataHeatBal->spaceList(spaceListNum).spaces) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == sListSpaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [sListSpaceNum](int enclSpaceNum) { return enclSpaceNum == sListSpaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;
@@ -1236,14 +1253,9 @@ namespace HeatBalanceIntRadExchange {
                     } else if (zoneListNum > 0) {
                         for (int zListZoneNum : state.dataHeatBal->ZoneList(zoneListNum).Zone) {
                             for (int spaceNum : state.dataHeatBal->Zone(zListZoneNum).spaceIndexes) {
-                                // Search for matching spaces
-                                bool thisSpaceFound = false;
-                                for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                    if (enclSpaceNum == spaceNum) {
-                                        thisSpaceFound = true;
-                                        break;
-                                    }
-                                }
+                                bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                                  thisEnclosure.spaceNums.end(),
+                                                                  [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                                 if (!thisSpaceFound) {
                                     anySpaceNotFound = true;
                                     break;
@@ -1255,14 +1267,9 @@ namespace HeatBalanceIntRadExchange {
                         }
                     } else if (inputZoneNum > 0) {
                         for (int spaceNum : state.dataHeatBal->Zone(inputZoneNum).spaceIndexes) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == spaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;
@@ -1311,7 +1318,7 @@ namespace HeatBalanceIntRadExchange {
     void GetInputViewFactorsbyName(EnergyPlusData &state,
                                    std::string const &EnclosureName, // Needed to check for user input view factors.
                                    int const N,                      // NUMBER OF SURFACES
-                                   Array2A<Real64> F,                // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
+                                   Array2D<Real64> &F,               // USER INPUT DIRECT VIEW FACTOR MATRIX (N X N)
                                    const Array1D_int &SPtr,          // pointer to actual surface number
                                    bool &NoUserInputF,               // Flag signifying no input F's for this
                                    bool &ErrorsFound                 // True when errors are found in number of fields vs max args
@@ -1327,7 +1334,6 @@ namespace HeatBalanceIntRadExchange {
         // This routine gets the user view factor info for an enclosure which could be a zone or a group of zones
 
         // Argument array dimensioning
-        F.dim(N, N);
         EP_SIZE_CHECK(SPtr, N);
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
@@ -1403,7 +1409,7 @@ namespace HeatBalanceIntRadExchange {
                                     const Array1D<Real64> &A,       // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
                                     const Array1D<Real64> &Azimuth, // Facing angle of the surface (in degrees)
                                     const Array1D<Real64> &Tilt,    // Tilt angle of the surface (in degrees)
-                                    Array2A<Real64> F,              // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
+                                    Array2D<Real64> &F,             // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
                                     const Array1D_int &SPtr         // pointer to REAL(r64) surface number (for error message)
     )
     {
@@ -1433,7 +1439,6 @@ namespace HeatBalanceIntRadExchange {
         EP_SIZE_CHECK(A, N);
         EP_SIZE_CHECK(Azimuth, N);
         EP_SIZE_CHECK(Tilt, N);
-        F.dim(N, N);
         EP_SIZE_CHECK(SPtr, N);
 
         // SUBROUTINE PARAMETER DEFINITIONS:
@@ -1516,7 +1521,7 @@ namespace HeatBalanceIntRadExchange {
     void FixViewFactors(EnergyPlusData &state,
                         int const N,                       // NUMBER OF SURFACES
                         const Array1D<Real64> &A,          // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
-                        Array2A<Real64> F,                 // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
+                        Array2D<Real64> &F,                // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
                         std::string &enclName,             // Name of Enclosure being fixed
                         std::vector<int> const &spaceNums, // Zones which are part of this enclosure
                         Real64 &OriginalCheckValue,        // check of SUM(F) - N
@@ -1553,7 +1558,6 @@ namespace HeatBalanceIntRadExchange {
 
         // Argument array dimensioning
         EP_SIZE_CHECK(A, N);
-        F.dim(N, N);
 
         // SUBROUTINE PARAMETER DEFINITIONS:
         Real64 constexpr PrimaryConvergence(0.001);
@@ -1608,8 +1612,17 @@ namespace HeatBalanceIntRadExchange {
             }
         }
 
-        //  Enforce reciprocity by averaging AiFij and AjFji
-        FixedAF = 0.5 * (AF + transpose(AF)); // Performance Slow way to average with transpose (heap use)
+        //  Enforce reciprocity by averaging AiFij and AjFji: dst = 0.5 * (src + src^T), also valid in place (src and dst the same matrix)
+        auto const enforceReciprocity = [N](Array2D<Real64> const &src, Array2D<Real64> &dst) {
+            for (int i = 1; i <= N; ++i) {
+                for (int j = i; j <= N; ++j) {
+                    Real64 const avg = 0.5 * (src(i, j) + src(j, i));
+                    dst(i, j) = avg;
+                    dst(j, i) = avg;
+                }
+            }
+        };
+        enforceReciprocity(AF, FixedAF);
 
         AF.deallocate();
 
@@ -1663,7 +1676,10 @@ namespace HeatBalanceIntRadExchange {
                 if (MaxFixedFRowSum < 1.0) {
                     ShowFatalError(state, " FixViewFactors: Three surface or less zone failing ViewFactorFix correction which should never happen.");
                 } else {
-                    FixedF *= (1.0 / MaxFixedFRowSum);
+                    Real64 const invMaxFixedFRowSum(1.0 / MaxFixedFRowSum);
+                    for (Real64 &f : FixedF) {
+                        f *= invMaxFixedFRowSum;
+                    }
                 }
                 RowSum = sum(FixedF); // needs to be recalculated
             }
@@ -1683,17 +1699,22 @@ namespace HeatBalanceIntRadExchange {
             ++NumIterations;
             for (int i = 1; i <= N; ++i) {
                 // Determine row coefficients which will enforce closure.
-                Real64 const sum_FixedAF_i(sum(FixedAF(_, i)));
+                Real64 sum_FixedAF_i = 0.0;
+                for (int j = 1; j <= N; ++j) {
+                    sum_FixedAF_i += FixedAF(j, i);
+                }
                 if (std::abs(sum_FixedAF_i) > 1.0e-10) {
                     RowCoefficient(i) = A(i) / sum_FixedAF_i;
                 } else {
                     RowCoefficient(i) = 1.0;
                 }
-                FixedAF(_, i) *= RowCoefficient(i);
+                for (int j = 1; j <= N; ++j) {
+                    FixedAF(j, i) *= RowCoefficient(i);
+                }
             }
 
             //  Enforce reciprocity by averaging AiFij and AjFji
-            FixedAF = 0.5 * (FixedAF + transpose(FixedAF));
+            enforceReciprocity(FixedAF, FixedAF);
 
             //  Form FixedF matrix
             for (int i = 1; i <= N; ++i) {
@@ -1713,7 +1734,7 @@ namespace HeatBalanceIntRadExchange {
             ConvrgOld = ConvrgNew;
             if (NumIterations > 400) { //  If everything goes bad,enforce reciprocity and go home.
                 //  Enforce reciprocity by averaging AiFij and AjFji
-                FixedAF = 0.5 * (FixedAF + transpose(FixedAF));
+                enforceReciprocity(FixedAF, FixedAF);
 
                 //  Form FixedF matrix
                 for (int i = 1; i <= N; ++i) {
@@ -1731,6 +1752,7 @@ namespace HeatBalanceIntRadExchange {
                             std::format("FixViewFactors: View factors convergence has failed and will lead to heat balance errors in zone=\"{}\".",
                                         enclName));
                     }
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::IncompleteViewFactors)];
                     ShowWarningError(
                         state,
                         std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
@@ -1774,6 +1796,7 @@ namespace HeatBalanceIntRadExchange {
                 F = FixedF;
                 FinalCheckValue = FixedCheckValue;
             } else {
+                ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::IncompleteViewFactors)];
                 ShowWarningError(
                     state,
                     std::format("FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone=\"{}\".",
@@ -1800,9 +1823,9 @@ namespace HeatBalanceIntRadExchange {
     void CalcScriptF(EnergyPlusData &state,
                      int const N,              // Number of surfaces
                      Array1D<Real64> const &A, // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
-                     Array2<Real64> const &F,  // DIRECT VIEW FACTOR MATRIX (N X N)
+                     Array2D<Real64> const &F, // DIRECT VIEW FACTOR MATRIX (N X N)
                      Array1D<Real64> &EMISS,   // VECTOR OF SURFACE EMISSIVITIES
-                     Array2<Real64> &ScriptF   // MATRIX OF SCRIPT F FACTORS (N X N) //Tuned Transposed
+                     Array2D<Real64> &ScriptF  // MATRIX OF SCRIPT F FACTORS (N X N) //Tuned Transposed
     )
     {
 
@@ -1896,8 +1919,8 @@ namespace HeatBalanceIntRadExchange {
         }
     }
 
-    void CalcMatrixInverse(Array2<Real64> &A, // Matrix: Gets reduced to L\U form
-                           Array2<Real64> &I  // Returned as inverse matrix
+    void CalcMatrixInverse(Array2D<Real64> &A, // Matrix: Gets reduced to L\U form
+                           Array2D<Real64> &I  // Returned as inverse matrix
     )
     {
         // SUBROUTINE INFORMATION:

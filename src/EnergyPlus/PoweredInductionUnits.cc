@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -1446,7 +1447,6 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
 
     if (CurTermUnitSizingNum > 0) {
         TermUnitSizing(CurTermUnitSizingNum).MinPriFlowFrac = thisPIU.MinPriAirFlowFrac;
-        TermUnitSizing(CurTermUnitSizingNum).plenumIndex = thisPIU.plenumIndex;
         TermUnitSizing(CurTermUnitSizingNum).MaxHWVolFlow = thisPIU.MaxVolHotWaterFlow;
         TermUnitSizing(CurTermUnitSizingNum).MaxSTVolFlow = thisPIU.MaxVolHotSteamFlow;
         TermUnitSizing(CurTermUnitSizingNum).DesHeatingLoad = DesCoilLoad; // coil report
@@ -1635,7 +1635,7 @@ void CalcSeriesPIU(EnergyPlusData &state,
                         thisPIU.MaxTotAirMassFlow * (state.dataLoopNodes->Node(thisPIU.SecAirInNode).Temp - MixTempNeeded) /
                         max(SmallTempDiff,
                             state.dataLoopNodes->Node(thisPIU.SecAirInNode).Temp - state.dataLoopNodes->Node(thisPIU.PriAirInNode).Temp);
-                    thisPIU.PriAirMassFlow = min(max(thisPIU.PriAirMassFlow, PriAirMassFlowMin), PriAirMassFlowMax);
+                    thisPIU.PriAirMassFlow = std::clamp(thisPIU.PriAirMassFlow, PriAirMassFlowMin, PriAirMassFlowMax);
                 }
                 thisPIU.SecAirMassFlow = max(0.0, thisPIU.MaxTotAirMassFlow - thisPIU.PriAirMassFlow);
                 if (QZnReq < 0) {
@@ -1989,7 +1989,7 @@ void CalcParallelPIU(EnergyPlusData &state,
                 thisPIU.SecAirMassFlow = thisPIU.MaxSecAirMassFlow;
             }
             // Cap at maximum primary airflow rate
-            thisPIU.PriAirMassFlow = max(min(thisPIU.PriAirMassFlow, PriAirMassFlowMax), PriAirMassFlowMin);
+            thisPIU.PriAirMassFlow = std::clamp(thisPIU.PriAirMassFlow, PriAirMassFlowMin, PriAirMassFlowMax);
             // PIU leakage calculations
             if (thisPIU.leakFracCurve > 0 && state.dataHVACGlobal->TurnFansOn == false) {
                 // Determine leakage fraction as a function of the primary airflow fraction

@@ -959,8 +959,6 @@ namespace WaterThermalTanks {
 
         std::string InletNodeName1;
         std::string OutletNodeName1;
-        std::string InletNodeName2;
-        std::string OutletNodeName2;
 
         // Default Constructor
         WaterHeaterDesuperheaterData()

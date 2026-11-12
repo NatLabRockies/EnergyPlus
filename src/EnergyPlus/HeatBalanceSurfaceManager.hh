@@ -193,6 +193,9 @@ namespace HeatBalanceSurfaceManager {
                                            const std::vector<int> &IZSurfs, // Last zone to simulate
                                            ObjexxFCL::Optional_int_const ZoneToResimulate = _);
 
+    void CalcInsideSurfTempWithMovableInsulation(
+        EnergyPlusData &state, int surfNum, Real64 hMovInsul, Real64 hConvIn, Real64 ctfInside, Real64 ctfCross, Real64 tempOutside);
+
     void
     TestSurfTempCalcHeatBalanceInsideSurf(EnergyPlusData &state, Real64 TH12, int const SurfNum, DataHeatBalance::ZoneData &zone, int WarmupSurfTemp);
 

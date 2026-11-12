@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.2;
+  Version,27.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 !========================
@@ -2460,6 +2460,7 @@
     SouthZone-Thermostat,    !- Name
     SouthZone,               !- Zone or ZoneList Name
     SouthZone-Control Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SouthZone-Heating Setpoint with SB;  !- Control 1 Name
 

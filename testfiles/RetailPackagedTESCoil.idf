@@ -41,7 +41,7 @@
 ! ***GENERAL SIMULATION PARAMETERS***
 ! Number of Zones: 5
 
-  Version,26.2;
+  Version,27.1;
 
   SimulationControl,
     YES,                     !- Do Zone Sizing Calculation
@@ -2170,6 +2170,7 @@
     Back_Space Thermostat,   !- Name
     Back_Space,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Back_Space DualSPSched;  !- Control 1 Name
 
@@ -2177,6 +2178,7 @@
     Core_Retail Thermostat,  !- Name
     Core_Retail,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Core_Retail DualSPSched; !- Control 1 Name
 
@@ -2184,6 +2186,7 @@
     Front_Entry Thermostat,  !- Name
     Front_Entry,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Front_Entry DualSPSched; !- Control 1 Name
 
@@ -2191,6 +2194,7 @@
     Front_Retail Thermostat, !- Name
     Front_Retail,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Front_Retail DualSPSched;!- Control 1 Name
 
@@ -2198,6 +2202,7 @@
     Point_Of_Sale Thermostat,!- Name
     Point_Of_Sale,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Point_Of_Sale DualSPSched;  !- Control 1 Name
 
@@ -7949,8 +7954,8 @@
     SET SumReliefMCT = SumReliefMCT + (h_Relief_4 * mdotRelief_4 );  !- <none>
 
   EnergyManagementSystem:Program,
-    InitializeRoofTemperature, !- Name
-    Set Troof = 0.0;           !- Program Line 1
+    InitializeRoofTemperature,  !- Name
+    Set Troof = 0.0;         !- Program Line 1
 
   EnergyManagementSystem:Program,
     InitializeParameters,    !- Name
@@ -8103,9 +8108,9 @@
     Set NatBouyMCT = NatBouyMC * Ta;  !- <none>
 
   EnergyManagementSystem:ProgramCallingManager,
-    InitializeRoofTemperatureOnBeginNewEnvironment, !- Name
-    BeginNewEnvironment,          !- EnergyPlus Model Calling Point
-    InitializeRoofTemperature;    !- Program Name 1
+    InitializeRoofTemperatureOnBeginNewEnvironment,  !- Name
+    BeginNewEnvironment,     !- EnergyPlus Model Calling Point
+    InitializeRoofTemperature;  !- Program Name 1
 
   EnergyManagementSystem:ProgramCallingManager,
     Model Flat Roof Microclimate,  !- Name

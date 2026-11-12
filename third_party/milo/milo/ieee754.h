@@ -15,6 +15,8 @@
 #ifndef IEEE754_H_INCLUDED
 #define IEEE754_H_INCLUDED
 
+#include <cassert>
+
 #ifndef UINT64_C2
 #define UINT64_C2(high32, low32) ((static_cast<uint64_t>(high32) << 32) | static_cast<uint64_t>(low32))
 #endif

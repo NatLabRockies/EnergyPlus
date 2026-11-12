@@ -2472,6 +2472,38 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
     EXPECT_NEAR(state->dataSize->CompDesWaterFlow(2).DesVolFlowRate, supSizData.DesVolFlowRate / 0.75, 0.00001); // HX Dem side registered flow rate
 }
 
+TEST_F(EnergyPlusFixture, PlantHXCalculateReadsCurrentNodeTemperatures)
+{
+    // Verify that each calculation reads the current inlet node temperatures and updates both outlet nodes.
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(4);
+    state->dataPlnt->PlantLoop.allocate(2);
+
+    state->dataPlantHXFluidToFluid->FluidHX.allocate(1);
+    auto &fluidHX = state->dataPlantHXFluidToFluid->FluidHX(1);
+    fluidHX.HeatExchangeModelType = PlantHeatExchangerFluidToFluid::FluidHXType::Ideal;
+    fluidHX.SupplySideLoop.inletNodeNum = 1;
+    fluidHX.SupplySideLoop.outletNodeNum = 3;
+    fluidHX.DemandSideLoop.inletNodeNum = 2;
+    fluidHX.DemandSideLoop.outletNodeNum = 4;
+    fluidHX.SupplySideLoop.loop = &state->dataPlnt->PlantLoop(1);
+    fluidHX.DemandSideLoop.loop = &state->dataPlnt->PlantLoop(2);
+    fluidHX.SupplySideLoop.loop->glycol = Fluid::GetWater(*state);
+    fluidHX.DemandSideLoop.loop->glycol = Fluid::GetWater(*state);
+
+    state->dataLoopNodes->Node(1).Temp = 20.0;
+    state->dataLoopNodes->Node(2).Temp = 10.0;
+    fluidHX.calculate(*state, 1.0, 1.0);
+    EXPECT_NEAR(state->dataLoopNodes->Node(3).Temp, 10.0, 0.05);
+    EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, 20.0, 0.05);
+
+    state->dataLoopNodes->Node(1).Temp = 18.0;
+    state->dataLoopNodes->Node(2).Temp = 12.0;
+    fluidHX.calculate(*state, 1.0, 1.0);
+    EXPECT_NEAR(state->dataLoopNodes->Node(3).Temp, 12.0, 0.05);
+    EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, 18.0, 0.05);
+}
+
 TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverride)
 {
     // this unit test is for issue #5626.  Fixed logic for CoolingSetpointOnOffWithComponentOverride.

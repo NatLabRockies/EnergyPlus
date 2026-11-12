@@ -54,6 +54,7 @@
 #include <gtest/gtest.h>
 
 // EnergyPlus Headers
+#include <EnergyPlus/CostEstimateManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/EconomicLifeCycleCost.hh>
@@ -504,6 +505,8 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_GetMonthNumber)
 
 TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ExpressAsCashFlows)
 {
+    Real64 constexpr allowableTolerance = 0.001;
+
     state->dataEconLifeCycleCost->baseDateYear = 2020;
     state->dataEconLifeCycleCost->baseDateMonth = 0;
 
@@ -536,7 +539,6 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ExpressAsCashFlows)
     state->dataEconLifeCycleCost->numNonrecurringCost = 1;
     state->dataEconLifeCycleCost->NonrecurringCost.resize(1);
     state->dataEconLifeCycleCost->NonrecurringCost[0].name = "MiscConstruction";
-    state->dataEconLifeCycleCost->NonrecurringCost[0].name = "MiscConstruction";
     state->dataEconLifeCycleCost->NonrecurringCost[0].category = CostCategory::Construction;
     state->dataEconLifeCycleCost->NonrecurringCost[0].cost = 123456.;
     state->dataEconLifeCycleCost->NonrecurringCost[0].startOfCosts = StartCosts::ServicePeriod;
@@ -547,46 +549,59 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_ExpressAsCashFlows)
     EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[16].mnAmount(47), 123456., 0.001); // 36 months plus 10 months plus one month
 
     // first year
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(37), 101., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(38), 102., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(39), 103., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(40), 104., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(41), 105., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(42), 106., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(43), 107., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(44), 108., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(45), 109., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(46), 110., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(47), 111., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(48), 112., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(37), 101., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(38), 102., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(39), 103., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(40), 104., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(41), 105., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(42), 106., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(43), 107., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(44), 108., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(45), 109., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(46), 110., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(47), 111., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(48), 112., allowableTolerance);
     // second  year
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(49), 101., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(50), 102., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(51), 103., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(52), 104., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(53), 105., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(54), 106., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(55), 107., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(56), 108., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(57), 109., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(58), 110., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(59), 111., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(60), 112., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(49), 101., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(50), 102., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(51), 103., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(52), 104., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(53), 105., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(54), 106., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(55), 107., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(56), 108., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(57), 109., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(58), 110., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(59), 111., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].mnAmount(60), 112., allowableTolerance);
 
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].yrAmount(4), 1278., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].yrAmount(5), 1278., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].yrAmount(4), 1278., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[17].yrAmount(5), 1278., allowableTolerance);
 
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Energy].yrAmount(4), 1278., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Energy].yrAmount(5), 1278., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Energy].yrAmount(4), 1278., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Energy].yrAmount(5), 1278., allowableTolerance);
 
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotEnergy].yrAmount(4), 1278., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotEnergy].yrAmount(5), 1278., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotEnergy].yrAmount(4), 1278., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotEnergy].yrAmount(5), 1278., allowableTolerance);
 
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Construction].yrAmount(4), 123456, 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotCaptl].yrAmount(4), 123456, 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::Construction].yrAmount(4), 123456, allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotCaptl].yrAmount(4), 123456, allowableTolerance);
 
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotGrand].yrAmount(4), 1278. + 123456., 0.001);
-    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotGrand].yrAmount(5), 1278., 0.001);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotGrand].yrAmount(4), 1278. + 123456., allowableTolerance);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->CashFlow[CostCategory::TotGrand].yrAmount(5), 1278., allowableTolerance);
+
+    // Check nonrecurring costs with additional building grand total (test of Defect 11901)
+    state->dataEconLifeCycleCost->NonrecurringCost.resize(2);
+    state->dataCostEstimateManager->CurntBldg.GrandTotal = 123456789.0;
+
+    ExpressAsCashFlows(*state);
+
+    EXPECT_EQ(state->dataEconLifeCycleCost->numNonrecurringCost, 2);
+    EXPECT_EQ(state->dataEconLifeCycleCost->NonrecurringCost[1].name, "Total of ComponentCost:*");
+    EXPECT_EQ(state->dataEconLifeCycleCost->NonrecurringCost[1].category, CostCategory::Construction);
+    EXPECT_NEAR(state->dataEconLifeCycleCost->NonrecurringCost[1].cost, 123456789.0, allowableTolerance);
+    EXPECT_EQ(state->dataEconLifeCycleCost->NonrecurringCost[1].startOfCosts, StartCosts::BasePeriod);
+    EXPECT_EQ(state->dataEconLifeCycleCost->NonrecurringCost[1].totalMonthsFromStart, 0);
 }
 
 TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_GetInput_EnsureFuelTypesAllRecognized)

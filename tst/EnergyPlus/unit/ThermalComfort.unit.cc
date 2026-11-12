@@ -47,6 +47,11 @@
 
 // EnergyPlus::ThermalComfort Unit Tests
 
+// C++ Headers
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -771,8 +776,8 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT)
     state->dataThermalComforts->AngleFactorList.allocate(1);
     state->dataSurface->TotSurfaces = 3;
     state->dataGlobal->NumOfZones = 1;
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
     state->dataHeatBal->Zone.allocate(1);
@@ -796,9 +801,12 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT)
     state->dataHeatBal->Zone(1).spaceIndexes.emplace_back(1);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 3;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 15.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(2) = 15.0;
+    state->dataHeatBalSurf->SurfTempInTmp(3) = 10.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(1) = 1.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(2) = 0.9;
+    state->dataHeatBalSurf->SurfAbsThermalInt(3) = 0.8;
 
     state->dataViewFactor->EnclRadInfo.allocate(state->dataGlobal->NumOfZones);
     state->dataViewFactor->EnclRadInfo(1).SurfacePtr.dimension(3);
@@ -857,16 +865,19 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcAngleFactorMRT)
     state->dataThermalComforts->AngleFactorList(1).AngleFactor(3) = 0.2;
 
     state->dataSurface->TotSurfaces = state->dataThermalComforts->AngleFactorList(1).TotAngleFacSurfaces;
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(state->dataSurface->TotSurfaces);
     state->dataSurface->Surface.deallocate();
     state->dataConstruction->Construct.deallocate();
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
 
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 15.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
+    state->dataHeatBalSurf->SurfTempInTmp(1) = 20.0;
+    state->dataHeatBalSurf->SurfTempInTmp(2) = 15.0;
+    state->dataHeatBalSurf->SurfTempInTmp(3) = 10.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(1) = 1.0;
+    state->dataHeatBalSurf->SurfAbsThermalInt(2) = 0.9;
+    state->dataHeatBalSurf->SurfAbsThermalInt(3) = 0.8;
     state->dataSurface->Surface(1).Construction = 1;
     state->dataSurface->Surface(2).Construction = 2;
     state->dataSurface->Surface(3).Construction = 3;
@@ -1096,6 +1107,31 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcThermalComfortASH55)
     CalcThermalComfortAnkleDraftASH(*state);
     // TODO: This is being calculated about 0.2 degrees different on x86* and ARM, so I loosened up the tolerance, but why??
     EXPECT_NEAR(state->dataThermalComforts->ThermalComfortData(1).AnkleDraftPPDASH55, 25.0, 0.25);
+}
+
+TEST_F(EnergyPlusFixture, ThermalComfort_CalcStandardEffectiveTemp_ContinuousAtCriticalWettedness)
+{
+    // When the skin wettedness reaches EvapEff, SkinWetSweat must invert SkinWetTot = 0.06 + 0.94 * SkinWetSweat, i.e.
+    // (SkinWetTot - 0.06) / 0.94 as in Gagge et al. (1986). SET should then change smoothly and monotonically with temperature.
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    Real64 constexpr RelHum = 0.7;
+    Real64 constexpr AirVel = 0.1;
+    Real64 constexpr ActMet = 1.1;
+    Real64 constexpr CloUnit = 0.5;
+    Real64 constexpr WorkEff = 0.0;
+
+    Real64 maxStep = 0.0;
+    Real64 minStep = std::numeric_limits<Real64>::max();
+    Real64 previous = CalcStandardEffectiveTemp(*state, 32.5, 32.5, RelHum, AirVel, ActMet, CloUnit, WorkEff);
+    for (int i = 1; i <= 1500; ++i) {
+        Real64 const temp = 32.5 + i * 0.001;
+        Real64 const current = CalcStandardEffectiveTemp(*state, temp, temp, RelHum, AirVel, ActMet, CloUnit, WorkEff);
+        maxStep = std::max(maxStep, std::abs(current - previous));
+        minStep = std::min(minStep, current - previous);
+        previous = current;
+    }
+    EXPECT_LT(maxStep, 0.01);
+    EXPECT_GT(minStep, 0.0); // monotonic, so the cooling effect has a single root
 }
 
 TEST_F(EnergyPlusFixture, ThermalComfort_CalcThermalComfortFanger_Correct_TimeStep)
@@ -1898,8 +1934,8 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT_Enclosure_Based)
     state->dataGlobal->NumOfZones = 2;
     state->dataGlobal->numSpaces = 2;
 
-    state->dataHeatBalSurf->SurfInsideTempHist.allocate(1);
-    state->dataHeatBalSurf->SurfInsideTempHist(1).allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfTempInTmp.allocate(state->dataSurface->TotSurfaces);
+    state->dataHeatBalSurf->SurfAbsThermalInt.dimension(state->dataSurface->TotSurfaces, 0.9);
     state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
     state->dataConstruction->Construct.allocate(state->dataSurface->TotSurfaces);
     state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
@@ -1983,19 +2019,12 @@ TEST_F(EnergyPlusFixture, ThermalComfort_CalcSurfaceWeightedMRT_Enclosure_Based)
     state->dataHeatBal->space.allocate(1);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 6;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(1) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(2) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(3) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(4) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(5) = 10.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(6) = 10.0; // this should air boundary
-
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(7) = 20.0; // this should air boundary
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(8) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(9) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(10) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(11) = 20.0;
-    state->dataHeatBalSurf->SurfInsideTempHist(1)(12) = 20.0;
+    for (int surfNum = 1; surfNum <= 6; ++surfNum) {
+        state->dataHeatBalSurf->SurfTempInTmp(surfNum) = 10.0;
+    }
+    for (int surfNum = 7; surfNum <= 12; ++surfNum) {
+        state->dataHeatBalSurf->SurfTempInTmp(surfNum) = 20.0;
+    }
 
     state->dataViewFactor->EnclRadInfo.allocate(1); // (state->dataGlobal->NumOfZones);
     state->dataViewFactor->EnclRadInfo(1).SurfacePtr.dimension(12);

@@ -26,39 +26,55 @@ A variable of a system described by a system of differential algebraic equations
 \caption{System with two variables that could be either differential or algebraic variables. \protect \label{fig:system-with-two-variables-that-could-be}}
 \end{figure}
 
-Because in subsequent discussions, it will be distinguished between algebraic and differential variables, a notation for different system of equations that involve algebraic and differential variables will be introduced. Let \(q\in\mathbf{N}\) , then
+Because in subsequent discussions, it will be distinguished between algebraic and differential variables, a notation for different system of equations that involve algebraic and differential variables will be introduced. Let \(q \in \mathbb{N}\), then
 
 \begin{itemize}
 \tightlist
 \item
-  If x\(_{1}\) and x\(_{2}\)~are differential variables, then the system is
+  If \(x_1\) and \(x_2\) are differential variables, then the system is
 \end{itemize}
 
-\(F\left(\dot x_1,x_1,\dot x_2,x_2,u,t\right) = 0\) ~with \emph{F}: ℝ\(^{n}\) x ℝ\(^{n}\) x ℝ\(^{m}\) x ℝ\(^{m}\) x ℝ\(^{q}\) x ℝ → ℝ\(^{n+m}\).
+\[
+F\left(\dot{x}_1,x_1,\dot{x}_2,x_2,u,t\right) = 0,
+\qquad
+F: \mathbb{R}^{n} \times \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R}^{m} \times \mathbb{R}^{q} \times \mathbb{R} \to \mathbb{R}^{n+m}.
+\]
 
 \begin{itemize}
 \tightlist
 \item
-  If x\(_{1}\) is a differential variable and x\(_{2}\)~is an algebraic variable, then the system is
+  If \(x_1\) is a differential variable and \(x_2\) is an algebraic variable, then the system is
 \end{itemize}
 
-\(G\left(\dot x_1,x_1,x_2,u,t\right) = 0\) ~with \emph{G}: ℝ\(^{n}\) x ℝ\(^{n}\) x ℝ\(^{m}\) x ℝ\(^{q}\) x ℝ → ℝ\(^{n+m}\).
+\[
+G\left(\dot{x}_1,x_1,x_2,u,t\right) = 0,
+\qquad
+G: \mathbb{R}^{n} \times \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R}^{q} \times \mathbb{R} \to \mathbb{R}^{n+m}.
+\]
 
 \begin{itemize}
 \tightlist
 \item
-  If x\(_{1}\)~is an algebraic variable and x\(_{2}\)~is a differential variable, then the system is
+  If \(x_1\) is an algebraic variable and \(x_2\) is a differential variable, then the system is
 \end{itemize}
 
-\(H\left(x_1,\dot x_2,x_2,u,t\right) = 0\) ~with \emph{H:} ℝ\(^{n}\) xℝ\(^{m}\) xℝ\(^{m}\) xℝ\(^{q}\) xℝ →ℝ\(^{n+m}\).
+\[
+H\left(x_1,\dot{x}_2,x_2,u,t\right) = 0,
+\qquad
+H: \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R}^{m} \times \mathbb{R}^{q} \times \mathbb{R} \to \mathbb{R}^{n+m}.
+\]
 
 \begin{itemize}
 \tightlist
 \item
-  If x\(_{1}\)~is an algebraic variable and x\(_{2}\)~is an algebraic variable, then the system is
+  If \(x_1\) is an algebraic variable and \(x_2\) is an algebraic variable, then the system is
 \end{itemize}
 
-\(I\left(x_1,x_2,u,t\right) = 0\) with \emph{I}: ℝ\(^{n}\) xℝ\(^{m}\) xℝ\(^{q}\) xℝ →ℝ\(^{n+m}\).
+\[
+I\left(x_1,x_2,u,t\right) = 0,
+\qquad
+I: \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R}^{q} \times \mathbb{R} \to \mathbb{R}^{n+m}.
+\]
 
 Figure~\ref{fig:system-with-one-fmu-linked-to-energyplus.}~shows a case where a FMU is linked to an EnergyPlus model for co-simulation. The FMU and EnergyPlus could be linked through differential or algebraic variables.
 
@@ -72,13 +88,13 @@ Table \ref{table:use-cases-with-different-system-configurations} shows the diffe
 
 \begin{itemize}
 \item
-  In the first case, the variable x\(_{1}\)~and x\(_{2}\)~are differential variables in both systems.
+  In the first case, the variables \(x_1\) and \(x_2\) are differential variables in both systems.
 \item
-  In the second case, the variable x\(_{1}\)~is a differential variable and the variable x\(_{2}\)~is an algebraic variable.
+  In the second case, the variable \(x_1\) is a differential variable and the variable \(x_2\) is an algebraic variable.
 \item
-  In the third case, the variable x\(_{1}\)~is an algebraic variable and the variable x\(_{2}\) is a differential variable.
+  In the third case, the variable \(x_1\) is an algebraic variable and the variable \(x_2\) is a differential variable.
 \item
-  In the fourth case, the variable x\(_{1}\)~is an algebraic variable and the variable x\(_{2}\) is an algebraic variable.
+  In the fourth case, the variable \(x_1\) is an algebraic variable and the variable \(x_2\) is an algebraic variable.
 \end{itemize}
 
 In the current implementation, it will be focused on the first and the second cases since the third and the fourth cases will constrain the FMU to be solved numerically in the iteration solver loop of EnergyPlus. This will necessitate the ability of the FMU to reject time steps (Modelisar, 2010) which is currently not implemented in the EnergyPlus FMU for co-simulation import. Applications for case 1 and 2 are described in the next sections.
@@ -105,47 +121,69 @@ Case & EnergyPlus & FMU (e.g. from Modelica) \tabularnewline
 
 \subsection{Case 1: Linking two systems through differential variables}\label{case-1-linking-two-systems-through-differential-variables}
 
-This case could be for an application where a wall with a phase change material (PCM) is modeled in a FMU and is linked to a room model in EnergyPlus. The room air temperature is the differential variable in EnergyPlus and the temperature of the wall with PCM is the differential variable in the FMU. Each system solves a differential equation that is connected~to the differential equation of the other system. For simplicity, we assume that \emph{y\(_{1}\)(.)} = \emph{x\(_{1}\)(.) and y\(_{2}\)(.)} = \emph{x\(_{2}\)(.).}The systems are described by the ordinary differential equations
+This case could be for an application where a wall with a phase change material (PCM) is modeled in a FMU and is linked to a room model in EnergyPlus. The room air temperature is the differential variable in EnergyPlus and the temperature of the wall with PCM is the differential variable in the FMU. Each system solves a differential equation that is connected~to the differential equation of the other system. For simplicity, we assume that \(y_1(\cdot) = x_1(\cdot)\) and \(y_2(\cdot) = x_2(\cdot)\). The systems are described by the ordinary differential equations
 
-dx\(_{1}\)/dt = f\(_{1}\)(x\(_{1}\), x\(_{2}\)), with x\(_{1}\)(0) = x\(_{1,0}\) ,
+\[
+\frac{dx_1}{dt} = f_1(x_1,x_2),
+\qquad
+x_1(0) = x_{1,0},
+\]
 
-dx\(_{2}\)/dt = f\(_{2}\)(x\(_{2}\), x\(_{1}\)), with x\(_{2}\)(0) = x\(_{2,0\\ .}\)
+\[
+\frac{dx_2}{dt} = f_2(x_2,x_1),
+\qquad
+x_2(0) = x_{2,0}.
+\]
 
-Let \(N\in\textbf{N}\) ~denote the number of time steps and let \emph{t\(_{k}\)} with \(k\in\left\{1,...,N\right\}\) denote the time steps. We will use the subscripts \emph{1} and \emph{2} to denote the variables and the functions that compute the next state variable of the simulator \emph{1} and \emph{2}, respectively.
+Let \(N \in \mathbb{N}\) denote the number of time steps and let \(t_k\), with \(k \in \{1,\ldots,N\}\), denote the time steps. We will use the subscripts 1 and 2 to denote the variables and the functions that compute the next state variable of simulators 1 and 2, respectively.
 
-The first system computes, for \(k\in\left\{0,...,N-1\right\}\) and some \(\tilde{F}_1\) : ℝ\(^{n}\) x ℝ\(^{m}\) x ℝ x ℝ → ℝ\(^{n}\), the sequence
+The first system computes, for \(k \in \{0,\ldots,N-1\}\) and some \(\tilde{F}_1: \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R} \times \mathbb{R} \to \mathbb{R}^{n}\), the sequence
 
-x\(_{1}\)(t\(_{k+1}\)) = \(\tilde{F}_1\) (x\(_{1}\)(t\(_{k}\)), x\(_{2}\)(t\(_{k}\)), t\(_{k}\), t\(_{k+1}\))
+\[
+x_1(t_{k+1}) = \tilde{F}_1\left(x_1(t_k),x_2(t_k),t_k,t_{k+1}\right)
+\]
 
-and, similarly, the simulator \emph{2} computes for some \(\tilde{F}_2\) : ℝ\(^{m}\) x ℝ\(^{n}\) x ℝ x ℝ → ℝ\(^{m}\) the sequence
+and, similarly, simulator 2 computes for some \(\tilde{F}_2: \mathbb{R}^{m} \times \mathbb{R}^{n} \times \mathbb{R} \times \mathbb{R} \to \mathbb{R}^{m}\) the sequence
 
-x\(_{2}\)(t\(_{k+1}\)) = \(\tilde{F}_2\) (x\(_{2}\)(t\(_{k}\)), x\(_{1}\)(t\(_{k}\)), t\(_{k}\), t\(_{k+1}\))
+\[
+x_2(t_{k+1}) = \tilde{F}_2\left(x_2(t_k),x_1(t_k),t_k,t_{k+1}\right)
+\]
 
-with initial conditions \emph{x\(_{1}\)(0) = x\(_{1,0}\)} and \emph{x\(_{2}\)(0) = x\(_{2,0.}\)} \(\tilde{F}_1\) ~and \(\tilde{F}_2\) ~*are the functions that are used to compute the value of the state variables at the new time step
+with initial conditions \(x_1(0) = x_{1,0}\) and \(x_2(0) = x_{2,0}\). The functions \(\tilde{F}_1\) and \(\tilde{F}_2\) compute the values of the state variables at the new time step.
 
-To advance from time \emph{t\(_{k}\)} to \emph{t\(_{k+1}\)}, each system uses its own time integration algorithm. At the end of the time step, EnergyPlus sends the new state \emph{x\(_{1}\)(t\(_{k+1}\))} to the FMU and it receives the state \emph{x\(_{2}\)(t\(_{k+1}\))} from the FMU. The same procedure is done with the FMU.
+To advance from time \(t_k\) to \(t_{k+1}\), each system uses its own time integration algorithm. At the end of the time step, EnergyPlus sends the new state \(x_1(t_{k+1})\) to the FMU and receives the state \(x_2(t_{k+1})\) from the FMU. The FMU follows the same procedure.
 
 \subsection{Case 2: Linking two systems through algebraic and differential variables}\label{case-2-linking-two-systems-through-algebraic-and-differential-variables}
 
-This case could be for an application where a fan is modeled in a FMU and is linked to a room model in EnergyPlus. The room temperature is the differential variable in EnergyPlus and the pressure difference of the fan is the algebraic variable in the FMU. For simplicity, we assume that \emph{y\(_{1}\)(.)} = \emph{x\(_{1}\)(.) and y\(_{2}\)(.)} = \emph{x\(_{2}\)(.).} In this application, the systems are described by the following equations
+This case could be for an application where a fan is modeled in a FMU and is linked to a room model in EnergyPlus. The room temperature is the differential variable in EnergyPlus and the pressure difference of the fan is the algebraic variable in the FMU. For simplicity, we assume that \(y_1(\cdot) = x_1(\cdot)\) and \(y_2(\cdot) = x_2(\cdot)\). In this application, the systems are described by the following equations
 
-dx\(_{1}\)/dt = g\(_{1}\)(x\(_{1}\), x\(_{2}\)), with x\(_{1}\)(0) = x\(_{1,0,}\)
+\[
+\frac{dx_1}{dt} = g_1(x_1,x_2),
+\qquad
+x_1(0) = x_{1,0},
+\]
 
-0 = g\(_{2}\)(x\(_{2}\), x\(_{1}\)).
+\[
+0 = g_2(x_2,x_1).
+\]
 
-Let \(N\in\mathbf{N}\) ~denote the number of time steps and let \emph{t\(_{k}\)} with \(k\in\left\{1,...,N\right\}\) ~denote the time steps. We use the same subscripts \emph{1} and \emph{2} as for the first case to denote the variable and the function that computes the next variable of the simulator \emph{1} and \emph{2}, respectively.
+Let \(N \in \mathbb{N}\) denote the number of time steps and let \(t_k\), with \(k \in \{1,\ldots,N\}\), denote the time steps. We use the same subscripts 1 and 2 as for the first case to denote the variable and the function that computes the next variable of simulators 1 and 2, respectively.
 
-The first system computes, for \(k\in\left\{0,...,N-1\right\}\) and some \(\tilde{G}_1\) : ℝ\(^{n}\) x ℝ\(^{m}\) x ℝ x ℝ → ℝ\(^{n}\), the sequence
+The first system computes, for \(k \in \{0,\ldots,N-1\}\) and some \(\tilde{G}_1: \mathbb{R}^{n} \times \mathbb{R}^{m} \times \mathbb{R} \times \mathbb{R} \to \mathbb{R}^{n}\), the sequence
 
-x\(_{1}\)(t\(_{k+1}\)) = \(\tilde{G}_1\) (x\(_{1}\)(t\(_{k}\)), x\(_{2}\)(t\(_{k}\)), t\(_{k}\), t\(_{k+1}\))
+\[
+x_1(t_{k+1}) = \tilde{G}_1\left(x_1(t_k),x_2(t_k),t_k,t_{k+1}\right)
+\]
 
-and, similarly, the simulator \emph{2} computes for some \(\tilde{G}_2\) : ℝ\(^{m}\) x ℝ\(^{n}\) x ℝ → ℝ\(^{m}\) the sequence
+and, similarly, simulator 2 computes for some \(\tilde{G}_2: \mathbb{R}^{m} \times \mathbb{R}^{n} \times \mathbb{R} \to \mathbb{R}^{m}\) the sequence
 
-x\(_{2}\)(t\(_{k+1}\)) = \(\tilde{G}_2\) (x\(_{2}\)(t\(_{k+1}\)), x\(_{1}\)(t\(_{k+1}\)), t\(_{k+1}\))
+\[
+x_2(t_{k+1}) = \tilde{G}_2\left(x_2(t_{k+1}),x_1(t_{k+1}),t_{k+1}\right)
+\]
 
-with initial condition \emph{x\(_{1}\)(0) = x\(_{1,0}\)}. \(\tilde{G}_1\) and \(\tilde{G}_2\) are the functions that compute the value of the variables at the new time step.
+with initial condition \(x_1(0) = x_{1,0}\). The functions \(\tilde{G}_1\) and \(\tilde{G}_2\) compute the values of the variables at the new time step.
 
-To advance from time \emph{t\(_{k}\)} to \emph{t\(_{k+1}\)}, each system uses its own time integration algorithm. At the end of the time step, EnergyPlus sends the new value \emph{x\(_{1}\)(t\(_{k+1}\))} to the FMU and it receives the value \emph{x\(_{2}\)(t\(_{k+1}\))} from the FMU. The same procedure is done with the FMU.
+To advance from time \(t_k\) to \(t_{k+1}\), each system uses its own time integration algorithm. At the end of the time step, EnergyPlus sends the new value \(x_1(t_{k+1})\) to the FMU and receives the value \(x_2(t_{k+1})\) from the FMU. The FMU follows the same procedure.
 
 \subsection{Requirements}\label{requirements}
 

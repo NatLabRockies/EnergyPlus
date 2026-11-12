@@ -128,7 +128,6 @@ namespace HVACMultiSpeedHeatPump {
         Real64 AuxOffCyclePower;                                   // Auxiliary Off-Cycle Electric Power
         Real64 DesignHeatRecFlowRate;                              // Design water volume flow rate through heat recovery loop [m3/s]
         bool HeatRecActive;                                        // True when entered Heat Rec Vol Flow Rate > 0
-        std::string HeatRecName;                                   // heat recovery water inlet name
         int HeatRecInletNodeNum;                                   // Node number on heat recovery water inlet
         int HeatRecOutletNodeNum;                                  // Node number on heat recovery water outlet
         Real64 MaxHeatRecOutletTemp;                               // Maximum outlet water temperature for heat recovery
@@ -208,7 +207,8 @@ namespace HVACMultiSpeedHeatPump {
         bool MyStagedFlag;
         bool EMSOverrideCoilSpeedNumOn;
         Real64 EMSOverrideCoilSpeedNumValue;
-        int CoilSpeedErrIndex;
+        int CoilSpeedErrIndexHeating;
+        int CoilSpeedErrIndexCooling;
         Real64 HeatingSizingRatio = 1.0;
         bool isHeatPump = false;
         bool reportACCAManualS = true;
@@ -232,7 +232,7 @@ namespace HVACMultiSpeedHeatPump {
               StageNum(0), Staged(false), CoolCountAvail(0), CoolIndexAvail(0), HeatCountAvail(0), HeatIndexAvail(0), FirstPass(true),
               MinOATCompressorCooling(0.0), MinOATCompressorHeating(0.0), MyEnvrnFlag(true), MySizeFlag(true), MyCheckFlag(true),
               MyFlowFracFlag(true), MyPlantScantFlag(true), MyStagedFlag(true), EMSOverrideCoilSpeedNumOn(false), EMSOverrideCoilSpeedNumValue(0.0),
-              CoilSpeedErrIndex(0)
+              CoilSpeedErrIndexHeating(0), CoilSpeedErrIndexCooling(0)
         {
         }
     };

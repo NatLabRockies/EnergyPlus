@@ -72,12 +72,6 @@ struct BaseSizerWithScalableInputs : BaseSizerWithFanHeatInputs
     Real64 dataAutosizedHeatingCapacity = 0.0;
 
     // capacity sizing
-    Real64 dataCoilSizingAirInTemp = 0.0;
-    Real64 dataCoilSizingAirInHumRat = 0.0;
-    Real64 dataCoilSizingAirOutTemp = 0.0;
-    Real64 dataCoilSizingAirOutHumRat = 0.0;
-    Real64 dataCoilSizingFanCoolLoad = 0.0;
-    Real64 dataCoilSizingCapFT = 0.0;
     Real64 dataTotCapCurveValue = 0.0;
     Real64 dataFracOfAutosizedCoolingCapacity = 0.0;
     Real64 dataFracOfAutosizedHeatingCapacity = 0.0;
@@ -110,12 +104,6 @@ struct BaseSizerWithScalableInputs : BaseSizerWithFanHeatInputs
         dataAutosizedCoolingCapacity = 0.0;
         dataFlowPerHeatingCapacity = 0.0;
         dataAutosizedHeatingCapacity = 0.0;
-        dataCoilSizingAirInTemp = 0.0;
-        dataCoilSizingAirInHumRat = 0.0;
-        dataCoilSizingAirOutTemp = 0.0;
-        dataCoilSizingAirOutHumRat = 0.0;
-        dataCoilSizingFanCoolLoad = 0.0;
-        dataCoilSizingCapFT = 0.0;
         dataTotCapCurveIndex = 0.0;
         dataTotCapCurveValue = 0.0;
         dataFracOfAutosizedCoolingCapacity = 0.0;

@@ -70,3 +70,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/getting-started/media/image024.jpg)
 
 create_doc_target("getting-started" "GettingStarted")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("getting-started" "getting-started")
+endif()

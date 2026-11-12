@@ -144,7 +144,7 @@ namespace TARCOGCommon {
     }
 
     void matrixQBalance(int const nlayer,
-                        Array2<Real64> &a,
+                        Array2D<Real64> &a,
                         Array1D<Real64> &b,
                         Array1D<Real64> const &sconScaled, // Solid layer coduction coefficient divided by thickness
                         Array1D<Real64> const &hcgas,
@@ -265,7 +265,7 @@ namespace TARCOGCommon {
         }
     }
 
-    void EquationsSolver(EnergyPlusData &state, Array2<Real64> &a, Array1D<Real64> &b, int const n, int &nperr, std::string &ErrorMessage)
+    void EquationsSolver(EnergyPlusData &state, Array2D<Real64> &a, Array1D<Real64> &b, int const n, int &nperr, std::string &ErrorMessage)
     {
         //***********************************************************************
         // Purpose: solves the main system of energy balance equations
@@ -295,7 +295,7 @@ namespace TARCOGCommon {
         lubksb(a, n, indx, b);
     }
 
-    void ludcmp(EnergyPlusData &state, Array2<Real64> &a, int const n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage)
+    void ludcmp(EnergyPlusData &state, Array2D<Real64> &a, int const n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage)
     {
 
         // Locals
@@ -368,10 +368,9 @@ namespace TARCOGCommon {
         } // j
     }
 
-    void lubksb(Array2A<Real64> const a, int const n, const Array1D_int &indx, Array1D<Real64> &b)
+    void lubksb(Array2D<Real64> const &a, int const n, const Array1D_int &indx, Array1D<Real64> &b)
     {
         // Argument array dimensioning
-        a.dim(n, n);
         EP_SIZE_CHECK(indx, n);
         EP_SIZE_CHECK(b, n);
 

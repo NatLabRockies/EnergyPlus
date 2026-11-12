@@ -4282,84 +4282,47 @@ Line Item SubTotal & -- & -- & -- & -- & -- & 720964.07 \tabularnewline
 
 The tables discussed in this section can also be output in an XML format that may be easier for some other programs to extract specific results. An excerpt of the XML file format is shown below. This report presents the same output results as the other tabular report formats but using XML tags.
 
-\textless{}?xml version = ``1.0''?\textgreater{}
+\begin{lstlisting}
+<?xml version="1.0"?>
+<EnergyPlusTabularReports>
+  <BuildingName>NONE</BuildingName>
+  <EnvironmentName>Chicago Ohare Intl Ap IL USA TMY3 WMO# = 725300</EnvironmentName>
+  <WeatherFileLocationTitle>Chicago Ohare Intl Ap IL USA TMY3 WMO# = 725300</WeatherFileLocationTitle>
+  <ProgramVersion>EnergyPlus, Version 8.0, YMD = 2013.02.18 15:50</ProgramVersion>
+  <SimulationTimestamp>
+    <Date>
+      2013-02-18
+    </Date>
+    <Time>
+      15:50:33
+    </Time>
+  </SimulationTimestamp>
+  <AnnualBuildingUtilityPerformanceSummary>
+    <for>Entire Facility</for>
+    <SiteAndSourceEnergy>
+      <name>TotalSiteEnergy</name>
+      <TotalEnergy units="kBtu">200671.97</TotalEnergy>
+      <EnergyPerTotalBuildingArea units="kBtu/ft2">143.32</EnergyPerTotalBuildingArea>
+      <EnergyPerConditionedBuildingArea units="kBtu/ft2">143.32</EnergyPerConditionedBuildingArea>
+    </SiteAndSourceEnergy>
+    <SiteAndSourceEnergy>
+      <name>NetSiteEnergy</name>
+      <TotalEnergy units="kBtu">200671.97</TotalEnergy>
+      <EnergyPerTotalBuildingArea units="kBtu/ft2">143.32</EnergyPerTotalBuildingArea>
+      <EnergyPerConditionedBuildingArea units="kBtu/ft2">143.32</EnergyPerConditionedBuildingArea>
+    </SiteAndSourceEnergy>
+    <SiteAndSourceEnergy>
+      <name>TotalSourceEnergy</name>
+      <TotalEnergy units="kBtu">442504.19</TotalEnergy>
+      <EnergyPerTotalBuildingArea units="kBtu/ft2">316.04</EnergyPerTotalBuildingArea>
+      <EnergyPerConditionedBuildingArea units="kBtu/ft2">316.04</EnergyPerConditionedBuildingArea>
+    </SiteAndSourceEnergy>
+    <SiteAndSourceEnergy>
+      <name>NetSourceEnergy</name>
+      <TotalEnergy units="kBtu">397810.98</TotalEnergy>
+      <EnergyPerTotalBuildingArea units="kBtu/ft2">284.12</EnergyPerTotalBuildingArea>
+      <EnergyPerConditionedBuildingArea units="kBtu/ft2">284.12</EnergyPerConditionedBuildingArea>
+    </SiteAndSourceEnergy>
+\end{lstlisting}
 
-\textless{}EnergyPlusTabularReports\textgreater{}
-
-~ \textless{}BuildingName\textgreater{}NONE\textless{}/BuildingName\textgreater{}
-
-~ \textless{}EnvironmentName\textgreater{}Chicago Ohare Intl Ap IL USA TMY3 WMO\# = 725300\textless{}/EnvironmentName\textgreater{}
-
-~ \textless{}WeatherFileLocationTitle\textgreater{}Chicago Ohare Intl Ap IL USA TMY3 WMO\# = 725300\textless{}/WeatherFileLocationTitle\textgreater{}
-
-~ \textless{}ProgramVersion\textgreater{}EnergyPlus, Version 8.0, YMD = 2013.02.18 15:50\textless{}/ProgramVersion\textgreater{}
-
-~ \textless{}SimulationTimestamp\textgreater{}
-
-~~~ \textless{}Date\textgreater{}
-
-~~~~~ 2013-02-18
-
-~~~ \textless{}/Date\textgreater{}
-
-~~~ \textless{}Time\textgreater{}
-
-~~~~~ 15:50:33
-
-~~~ \textless{}/Time\textgreater{}
-
-~ \textless{}/SimulationTimestamp\textgreater{}
-
-\textless{}AnnualBuildingUtilityPerformanceSummary\textgreater{}
-
-~ \textless{}for\textgreater{}Entire Facility\textless{}/for\textgreater{}
-
-~ \textless{}SiteAndSourceEnergy\textgreater{}
-
-~~~ \textless{}name\textgreater{}TotalSiteEnergy\textless{}/name\textgreater{}
-
-~~~ \textless{}TotalEnergy units = ``kBtu''\textgreater{}200671.97\textless{}/TotalEnergy\textgreater{}
-
-~~~ \textless{}EnergyPerTotalBuildingArea units = ``kBtu/ft2''\textgreater{}143.32\textless{}/EnergyPerTotalBuildingArea\textgreater{}
-
-~~~ \textless{}EnergyPerConditionedBuildingArea units = ``kBtu/ft2''\textgreater{}143.32\textless{}/EnergyPerConditionedBuildingArea\textgreater{}
-
-~ \textless{}/SiteAndSourceEnergy\textgreater{}
-
-~ \textless{}SiteAndSourceEnergy\textgreater{}
-
-~~~ \textless{}name\textgreater{}NetSiteEnergy\textless{}/name\textgreater{}
-
-~~~ \textless{}TotalEnergy units = ``kBtu''\textgreater{}200671.97\textless{}/TotalEnergy\textgreater{}
-
-~~~ \textless{}EnergyPerTotalBuildingArea units = ``kBtu/ft2''\textgreater{}143.32\textless{}/EnergyPerTotalBuildingArea\textgreater{}
-
-~~~ \textless{}EnergyPerConditionedBuildingArea units = ``kBtu/ft2''\textgreater{}143.32\textless{}/EnergyPerConditionedBuildingArea\textgreater{}
-
-~ \textless{}/SiteAndSourceEnergy\textgreater{}
-
-~ \textless{}SiteAndSourceEnergy\textgreater{}
-
-~~~ \textless{}name\textgreater{}TotalSourceEnergy\textless{}/name\textgreater{}
-
-~~~ \textless{}TotalEnergy units = ``kBtu''\textgreater{}442504.19\textless{}/TotalEnergy\textgreater{}
-
-~~~ \textless{}EnergyPerTotalBuildingArea units = ``kBtu/ft2''\textgreater{}316.04\textless{}/EnergyPerTotalBuildingArea\textgreater{}
-
-~~~ \textless{}EnergyPerConditionedBuildingArea units = ``kBtu/ft2''\textgreater{}316.04\textless{}/EnergyPerConditionedBuildingArea\textgreater{}
-
-~ \textless{}/SiteAndSourceEnergy\textgreater{}
-
-~ \textless{}SiteAndSourceEnergy\textgreater{}
-
-~~~ \textless{}name\textgreater{}NetSourceEnergy\textless{}/name\textgreater{}
-
-~~~ \textless{}TotalEnergy units = ``kBtu''\textgreater{}397810.98\textless{}/TotalEnergy\textgreater{}
-
-~~~ \textless{}EnergyPerTotalBuildingArea units = ``kBtu/ft2''\textgreater{}284.12\textless{}/EnergyPerTotalBuildingArea\textgreater{}
-
-~~~ \textless{}EnergyPerConditionedBuildingArea units = ``kBtu/ft2''\textgreater{}284.12\textless{}/EnergyPerConditionedBuildingArea\textgreater{}
-
-~ \textless{}/SiteAndSourceEnergy\textgreater{}
-
-\emph{An actual file will be much longer than this example but follows this format.}
+\textit{An actual file will be much longer than this example but follows this format.}

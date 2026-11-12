@@ -175,14 +175,4 @@ template <typename... Param> bool readList(std::string_view input, Param &&...pa
 
 } // namespace EnergyPlus
 
-namespace ObjexxFCL {
-// since this is a slice (reference) we want to bind to temporaries
-// so we're going to allow that where the one provided by Array1S.hh does not
-template <typename T> std::istream &operator>>(std::istream &stream, Array1S<T> &&a)
-{
-    // just pass on to the `&` version of this operator>>
-    return stream >> a;
-}
-} // namespace ObjexxFCL
-
 #endif

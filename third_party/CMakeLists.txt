@@ -21,30 +21,7 @@ set(all_third_party_targets "")
 
 # SAM Is included up here to make sure it doesn't get the C++20 flags
 # SAM Simulation Core (SSC)
-mark_as_advanced(FORCE JSONCPP_USE_SECURE_MEMORY)
-mark_as_advanced(FORCE JSONCPP_WITH_CMAKE_PACKAGE)
-mark_as_advanced(FORCE JSONCPP_WITH_EXAMPLE)
-mark_as_advanced(FORCE JSONCPP_WITH_PKGCONFIG_SUPPORT)
-mark_as_advanced(FORCE JSONCPP_WITH_STRICT_ISO)
-mark_as_advanced(FORCE JSONCPP_WITH_TESTS)
-set(JSONCPP_WITH_TESTS
-    OFF
-    CACHE BOOL "Compile and (for jsoncpp_check) run JsonCpp test executables" FORCE)
-mark_as_advanced(FORCE JSONCPP_WITH_WARNING_AS_ERROR)
-mark_as_advanced(FORCE DEBUG_LIBNAME_SUFFIX)
-mark_as_advanced(FORCE JSONCPP_WITH_POST_BUILD_UNITTEST)
-set(JSONCPP_WITH_POST_BUILD_UNITTEST
-    OFF
-    CACHE BOOL "Automatically run unit-tests as a post build step" FORCE)
 mark_as_advanced(FORCE CCACHE_FOUND)
-set(SAM_SKIP_TOOLS
-    ON
-    CACHE BOOL "Skips the sdktool and tcsconsole builds" FORCE)
-mark_as_advanced(FORCE SAM_SKIP_TOOLS)
-set(SAM_SKIP_TESTS
-    ON
-    CACHE BOOL "Skips building tests" FORCE)
-mark_as_advanced(FORCE SAM_SKIP_TESTS)
 set(SAMAPI_EXPORT
     OFF
     CACHE BOOL "Export of ssc binaries to the SAM_api directory; for Unix, compile ssc libraries for SAM_api" FORCE)
@@ -52,12 +29,11 @@ mark_as_advanced(FORCE SAMAPI_EXPORT)
 add_subdirectory(ssc)
 set_target_properties(ssc PROPERTIES FOLDER ThirdParty/ssc)
 set_target_properties(shared PROPERTIES FOLDER ThirdParty/ssc)
-set_target_properties(splinter PROPERTIES FOLDER ThirdParty/ssc)
 target_compile_features(ssc PRIVATE cxx_std_11)
 if(MSVC)
   target_compile_options(shared PRIVATE /wd4244)
 endif()
-list(APPEND all_third_party_targets ssc shared splinter)
+list(APPEND all_third_party_targets ssc shared)
 
 # Make sure C++20 flag is kept at 20 after SSC
 set(CMAKE_CXX_STANDARD 20)
@@ -167,8 +143,6 @@ list(APPEND all_third_party_targets libkiva)
 # libkiva exports "${kiva_SOURCE_DIR}/vendor/eigen" as a PUBLIC include, but our vendored Kiva
 # has vendor/eigen removed: point it at the shared copy instead. PUBLIC because libkiva's public
 # headers (e.g. Ground.hpp) include Eigen, so consumers (energypluslib) need it too.
-# Note: ssc/splinter carries its own private, flattened Eigen 3.2.8 copy and does not use this one
-# (upstream ssc removed it in favor of OR-Tools in 2026, see NatLabRockies/ssc#1367).
 # SYSTEM is needed here: the add_subdirectory(third_party SYSTEM) property only makes interface
 # includes system for *consumers*, while this Eigen dir must also be -isystem when libkiva
 # compiles its own sources (old Eigen triggers -Wdeprecated-enum-enum-conversion under C++20).
@@ -237,7 +211,7 @@ target_link_libraries(libtk205 PRIVATE project_options project_fp_options)
 list(APPEND all_third_party_targets libtk205)
 
 # unconditionnally turn off zlib and ssc
-set(too_noisy_targets miniziplib ssc splinter shared)
+set(too_noisy_targets miniziplib ssc shared)
 foreach(target IN LISTS too_noisy_targets)
   target_link_libraries(${target} PRIVATE turn_off_warnings)
 endforeach()

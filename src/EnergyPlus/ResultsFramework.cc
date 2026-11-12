@@ -57,7 +57,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Reference.fwd.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // Third Party Headers

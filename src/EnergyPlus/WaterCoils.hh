@@ -83,8 +83,6 @@ namespace WaterCoils {
     {
         // Members
         std::string Name;                            // Name of the WaterCoil
-        std::string WaterCoilTypeA;                  // Type of WaterCoil ie. Heating or Cooling
-        std::string WaterCoilModelA;                 // Type of WaterCoil ie. Simple, Detailed, etc.
         DataPlant::PlantEquipmentType WaterCoilType; // Type of WaterCoil ie. Heating or Cooling
 
         HVAC::CoilType coilType = HVAC::CoilType::Invalid;

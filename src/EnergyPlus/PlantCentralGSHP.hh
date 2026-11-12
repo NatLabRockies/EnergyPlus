@@ -133,8 +133,6 @@ namespace PlantCentralGSHP {
         Real64 ChillerCapFT = 0.0;                      // Chiller capacity curve output value
         Real64 ChillerEIRFT = 0.0;                      // Chiller EIRFT curve output value
         Real64 ChillerEIRFPLR = 0.0;                    // Chiller EIRFPLR curve output value
-        Real64 CondenserFanPowerUse = 0.0;              // Air-cooled condenser fan power [W]
-        Real64 CondenserFanEnergy = 0.0;                // Air-cooled condenser fan energy [J]
         Real64 ChillerPartLoadRatioSimul = 0.0;         // Chiller PLR (Load/Capacity) for simul clg/htg mode
         Real64 ChillerCyclingRatioSimul = 0.0;          // Chiller cycling ratio (time on/time step) for simul clg/htg mode
         Real64 ChillerFalseLoadSimul = 0.0;             // Chiller false load for simul clg/htg mode [J]
@@ -164,12 +162,6 @@ namespace PlantCentralGSHP {
         CondenserModeTemperature CondMode = CondenserModeTemperature::Invalid;        // Current mode temperature curve input variable
         bool ConstantFlow = false;                                                    // True if this is a Constant Flow Chiller
         bool VariableFlow = false;                                                    // True if this is a Variable Flow Chiller
-        bool CoolSetPointSetToLoop = false;                                           // True if the setpoint is missing at the outlet node
-        bool HeatSetPointSetToLoop = false;                                           // True if the setpoint is missing at the outlet node
-        bool CoolSetPointErrDone = false;                                             // true if setpoint warning issued
-        bool HeatSetPointErrDone = false;                                             // true if setpoint warning issued
-        bool PossibleSubcooling = false;                                              // flag to indicate chiller is doing less cooling that requested
-        int ChillerHeaterNum = 1;                                                     // Chiller heater number
         int ChillerCapFTCoolingIDX = 0;                                               // Cooling capacity function of temperature curve index
         int ChillerEIRFTCoolingIDX = 0;           // Elec Input to Cooling Output ratio function of temperature curve index
         int ChillerEIRFPLRCoolingIDX = 0;         // Elec Input to cooling output ratio function of PLR curve index
@@ -179,20 +171,9 @@ namespace PlantCentralGSHP {
         int ChillerCapFTIDX = 0;                  // Capacity function of temperature curve index
         int ChillerEIRFTIDX = 0;                  // Elec Input to demand output ratio function of temperature curve index
         int ChillerEIRFPLRIDX = 0;                // Elec Input to demand output ratio function of PLR curve index
-        int EvapInletNodeNum = 0;                 // Node number on the inlet side of the plant (evaporator side)
-        int EvapOutletNodeNum = 0;                // Node number on the outlet side of the plant (evaporator side)
-        int CondInletNodeNum = 0;                 // Node number on the inlet side of the condenser
-        int CondOutletNodeNum = 0;                // Node number on the outlet side of the condenser
         int ChillerCapFTError = 0;                // Used for negative capacity as a function of temp warnings
         int ChillerCapFTErrorIndex = 0;           // Used for negative capacity as a function of temp warnings
-        int ChillerEIRFTError = 0;                // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFTErrorIndex = 0;           // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFPLRError = 0;              // Used for negative EIR as a function of PLR warnings
-        int ChillerEIRFPLRErrorIndex = 0;         // Used for negative EIR as a function of PLR warnings
         int ChillerEIRRefTempErrorIndex = 0;      // Used for reference temperature problems
-        int DeltaTErrCount = 0;                   // Evaporator delta T equals 0 for variable flow chiller warning messages
-        int DeltaTErrCountIndex = 0;              // Index to evaporator delta T = 0 for variable flow chiller warning messages
-        int CondMassFlowIndex = 0;                // Index to condenser mass flow rate
         Real64 RefCapCooling = 0.0;               // Reference cooling-mode evaporator capacity [W]
         bool RefCapCoolingWasAutoSized = false;   // true if reference cooling capacity was autosize on input
         Real64 RefCOPCooling = 0.0;               // Reference cooling-mode COP
@@ -224,10 +205,6 @@ namespace PlantCentralGSHP {
         Real64 CondVolFlowRate = 0.0;             // Reference water volumetric flow rate through the condenser [m3/s]
         bool CondVolFlowRateWasAutoSized = false; // true if condenser flow rate was autosize on input
         Real64 tmpCondVolFlowRate = 0.0;          // temporary ref water vol flow rate for intermediate sizing [m3/s]
-        Real64 CondMassFlowRateMax = 0.0;         // Reference water mass flow rate through condenser [kg/s]
-        Real64 EvapMassFlowRateMax = 0.0;         // Reference water mass flow rate through evaporator [kg/s]
-        Real64 Evapmdot = 0.0;                    // Evaporator mass flow rate [kg/s]
-        Real64 Condmdot = 0.0;                    // Condenser mass flow rate [kg/s]
         Real64 DesignHotWaterVolFlowRate = 0.0;   // Design hot water volumetric flow rate through the condenser [m3/s]
         Real64 OpenMotorEff = 0.0;                // Open chiller motor efficiency [fraction, 0 to 1]
         Real64 SizFac = 0.0;                      // sizing factor
@@ -237,17 +214,11 @@ namespace PlantCentralGSHP {
         Real64 TempRefCondIn = 0.0;               // Reference condenser entering temperature [C]
         Real64 TempRefCondOut = 0.0;              // Reference condenser leaving temperature [C]
         Real64 OptPartLoadRat = 0.0;              // Optimal operating fraction of full load
-        Real64 ChillerEIRFPLRMin = 0.0;           // Minimum value of PLR from EIRFPLR curve
-        Real64 ChillerEIRFPLRMax = 0.0;           // Maximum value of PLR from EIRFPLR curve
         CHReportVars Report;
     };
 
     struct WrapperReportVars
     {
-        Real64 Power = 0.0;                  // Wrapper power, W
-        Real64 QCHW = 0.0;                   // Chilled water heat transfer rate [W]
-        Real64 QHW = 0.0;                    // Hot Water heat transfer rate [W]
-        Real64 QGLHE = 0.0;                  // Geo-field heat transfer rate [W]
         Real64 TotElecCooling = 0.0;         // Wrapper cooling electric consumption [J]
         Real64 TotElecHeating = 0.0;         // Wrapper heating electric consumption [J]
         Real64 CoolingEnergy = 0.0;          // Chilled water heat transfer energy [J]
@@ -284,7 +255,6 @@ namespace PlantCentralGSHP {
         std::string Name;                               // User identifier
         bool VariableFlowCH = false;                    // True if all chiller heaters are variable flow control
         Sched::Schedule *ancillaryPowerSched = nullptr; // Schedule value for ancillary power control
-        Sched::Schedule *chSched = nullptr;             // Schedule value for individual chiller heater control
         int CHWInletNodeNum = 0;                        // Node number on the inlet side of the plant (Chilled Water side)
         int CHWOutletNodeNum = 0;                       // Node number on the outlet side of the plant (Chilled Water side)
         int HWInletNodeNum = 0;                         // Node number on the inlet side of the plant (Hot Water side)
@@ -293,11 +263,7 @@ namespace PlantCentralGSHP {
         int GLHEOutletNodeNum = 0;                      // Node number on the outlet side of the plant (GLHE Water side)
         int CoolSetPointTempNode = 0;                   // Node number of the cooling setpoint temperature node
         int HeatSetPointTempNode = 0;                   // Node number of the heating setpoint temperature node
-        bool EvapOutletMinTempCheck = true;             // True if minimum evaporator outlet temperature warning is enabled
         int NumOfComp = 0;                              // Number of Components under the wrapper
-        Real64 CHWMassFlowRate = 0.0;                   // Chilled water mass flow rate
-        Real64 HWMassFlowRate = 0.0;                    // Hot water mass flow rate
-        Real64 GLHEMassFlowRate = 0.0;                  // Condenser water mass flow rate
         Real64 CHWMassFlowRateMax = 0.0;                // Maximum chilled water mass flow rate
         Real64 HWMassFlowRateMax = 0.0;                 // Maximum hot water mass flow rate
         Real64 GLHEMassFlowRateMax = 0.0;               // Maximum condenser water mass flow rate
@@ -312,10 +278,6 @@ namespace PlantCentralGSHP {
         PlantLocation CWPlantLoc = {};             // Chilled water plant loop component index
         PlantLocation HWPlantLoc = {};             // Hot water plant loop component index
         PlantLocation GLHEPlantLoc = {};           // Geo-field water plant loop component index
-        int CHWMassFlowIndex = 0;                  // Chilled water flow index
-        int HWMassFlowIndex = 0;                   // Hot water flow index
-        int GLHEMassFlowIndex = 0;                 // Condenser side flow index
-        Real64 SizingFactor = 1.0;                 // Sizing factor to adjust the capacity
         Real64 CHWVolFlowRate = 0.0;               // Chilled water volume flow rate [kg/s]
         Real64 HWVolFlowRate = 0.0;                // Hot water volume flow rate [kg/s]
         Real64 GLHEVolFlowRate = 0.0;              // Geo-field volume flow rate [kg/s]

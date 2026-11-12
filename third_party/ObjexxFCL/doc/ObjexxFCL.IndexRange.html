@@ -75,15 +75,15 @@ std::cout &lt;&lt; I.u() &lt;&lt; std::endl; // Prints 5
 std::cout &lt;&lt; I.size() &lt;&lt; std::endl; // Prints 11</pre></td>
 				</tr>
 			</table>
-			<p class="body">A number of predicate (boolean) functions are available for IndexRanges, including <span class="source">initialized</span>, <span class="source">bounded</span>, <span class="source">unbounded</span>, and <span class="source">legal</span>. You can also ask an IndexRange whether it <span class="source">contains</span> an index or another range or whether it <span class="source">intersects</span> another range.</p>
-			<p class="body">The <span class="source">contain</span> and <span class="source">intersect</span> modifying member functions will modify an IndexRange to contain a specified index or range or to intersect a specified range, respectively. The <span class="source">clear</span> member function will clear an IndexRange back to a default-constructed state.</p>
+			<p class="body">A number of predicate (boolean) functions are available for IndexRanges, including <span class="source">initialized</span>, <span class="source">bounded</span>, <span class="source">unbounded</span>, and <span class="source">legal</span>. You can also ask an IndexRange whether it <span class="source">contains</span> an index or whether it <span class="source">intersects</span> another range.</p>
+			<p class="body">The <span class="source">contain</span> modifying member function will modify an IndexRange to contain a specified index. The <span class="source">clear</span> member function will clear an IndexRange back to a default-constructed state.</p>
 			<p class="body">You can compare two index ranges with the operators { ==, !=, &gt;, &gt;=, &lt;, &lt;= }.</p>
 			<h2 class="h4">Notes on IndexRanges</h2>
 			<ul class="body">
 				<li>An index range is indicated by [<em>l</em>,<em>u</em>] in the following notes.</li>
 				<li>A <b>zero-sized</b> IndexRange is indicated by a range of the form [<i>l</i>,<i>l</i>-1].</li>
 				<li>An <b>unbounded</b> IndexRange has an unknown upper extent and is indicated by a range of the form [<i>l</i>,<i>l</i>-2] and is generally specified by passing an underscore, <span class="source">_</span>, as the upper index. Such an IndexRange includes all indices &gt;= <i>l</i>. The size of an unbounded IndexRange is set to the constant <span class="source">npos</span> defined in IndexRange. The IndexRange member functions <span class="source">bounded</span> and <span class="source">unbounded</span> can be used to test for this condition.</li>
-				<li>IndexRange has a number of useful functions to query the lower and upper indices, check whether it contains a given index or intersects another IndexRange, and functions that can modify it such as the <span class="source">contain</span> and <span class="source">intersect</span> functions.</li>
+				<li>IndexRange has a number of useful functions to query the lower and upper indices, check whether it contains a given index or intersects another IndexRange, and functions that can modify it such as the <span class="source">contain</span> function.</li>
 				<li>IndexRanges are indexed by the int type.</li>
 				<li>On platforms with a 32-bit int:
 				<ul>

@@ -946,100 +946,100 @@ TEST_F(ConvectionCoefficientsFixture, DynamicIntConvSurfaceClassification)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 30.0;
     state->dataZoneTempPredictorCorrector->spaceHeatBalance(1).MAT = 30.0;
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 1);
+    Convect::DynamicIntConvSurfaceClassification(*state, 1, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(1).convClass, Convect::IntConvClass::A3_SimpleBuoy_VertWalls);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 2);
+    Convect::DynamicIntConvSurfaceClassification(*state, 2, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(2).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 3);
+    Convect::DynamicIntConvSurfaceClassification(*state, 3, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(3).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 4);
+    Convect::DynamicIntConvSurfaceClassification(*state, 4, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(4).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 5);
+    Convect::DynamicIntConvSurfaceClassification(*state, 5, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(5).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 
     // vertical floor is currently not a valid case, so returns zero with a severe error
     //    DynamicIntConvSurfaceClassification(*state, 6);
     //    EXPECT_EQ(state->dataSurface->SurfIntConvClassification(6), 0);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 7);
+    Convect::DynamicIntConvSurfaceClassification(*state, 7, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(7).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 8);
+    Convect::DynamicIntConvSurfaceClassification(*state, 8, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(8).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 9);
+    Convect::DynamicIntConvSurfaceClassification(*state, 9, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(9).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 10);
+    Convect::DynamicIntConvSurfaceClassification(*state, 10, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(10).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 11);
+    Convect::DynamicIntConvSurfaceClassification(*state, 11, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(11).convClass, Convect::IntConvClass::A3_SimpleBuoy_VertWalls);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 12);
+    Convect::DynamicIntConvSurfaceClassification(*state, 12, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(12).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 13);
+    Convect::DynamicIntConvSurfaceClassification(*state, 13, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(13).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 14);
+    Convect::DynamicIntConvSurfaceClassification(*state, 14, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(14).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 15);
+    Convect::DynamicIntConvSurfaceClassification(*state, 15, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(15).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
     // Case 2 - Zone air colder than surfaces
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 10.0;
     state->dataZoneTempPredictorCorrector->spaceHeatBalance(1).MAT = 10.0;
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 1);
+    Convect::DynamicIntConvSurfaceClassification(*state, 1, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(1).convClass, Convect::IntConvClass::A3_SimpleBuoy_VertWalls);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 2);
+    Convect::DynamicIntConvSurfaceClassification(*state, 2, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(2).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 3);
+    Convect::DynamicIntConvSurfaceClassification(*state, 3, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(3).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 4);
+    Convect::DynamicIntConvSurfaceClassification(*state, 4, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(4).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 5);
+    Convect::DynamicIntConvSurfaceClassification(*state, 5, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(5).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
     // vertical floor is currently not a valid case, so returns zero with a severe error
     //    DynamicIntConvSurfaceClassification(*state, 6);
     //    EXPECT_EQ(state->dataSurface->surfIntConv().convClass(6), 0));
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 7);
+    Convect::DynamicIntConvSurfaceClassification(*state, 7, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(7).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 8);
+    Convect::DynamicIntConvSurfaceClassification(*state, 8, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(8).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 9);
+    Convect::DynamicIntConvSurfaceClassification(*state, 9, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(9).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 10);
+    Convect::DynamicIntConvSurfaceClassification(*state, 10, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(10).convClass, Convect::IntConvClass::A3_SimpleBuoy_UnstableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 11);
+    Convect::DynamicIntConvSurfaceClassification(*state, 11, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(11).convClass, Convect::IntConvClass::A3_SimpleBuoy_VertWalls);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 12);
+    Convect::DynamicIntConvSurfaceClassification(*state, 12, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(12).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 13);
+    Convect::DynamicIntConvSurfaceClassification(*state, 13, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(13).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableTilted);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 14);
+    Convect::DynamicIntConvSurfaceClassification(*state, 14, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(14).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 
-    Convect::DynamicIntConvSurfaceClassification(*state, 15);
+    Convect::DynamicIntConvSurfaceClassification(*state, 15, state->dataHeatBalSurf->SurfInsideTempHist(1));
     EXPECT_ENUM_EQ(state->dataSurface->surfIntConv(15).convClass, Convect::IntConvClass::A3_SimpleBuoy_StableHoriz);
 }
 
@@ -1100,8 +1100,15 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
                                                      state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT,
                                                      -state->dataSurface->Surface(SurfNum).CosTilt);
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
+    EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
+
+    // Verify that the supplied temperature is used instead of the stored surface-temperature history.
+    Real64 constexpr suppliedSurfaceTemperature = 25.0;
+    HcExpectedValue = Convect::CalcASHRAETARPNatural(
+        suppliedSurfaceTemperature, state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT, -state->dataSurface->Surface(SurfNum).CosTilt);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, suppliedSurfaceTemperature);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 
     // Test 2: Ceiling Diffuser Model
@@ -1113,7 +1120,7 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
                                                      state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT,
                                                      -state->dataSurface->Surface(SurfNum).CosTilt);
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 
@@ -1126,7 +1133,7 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
                                                      state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT,
                                                      -state->dataSurface->Surface(SurfNum).CosTilt);
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 
@@ -1142,7 +1149,7 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
 
     HcExpectedValue = 4.122;
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 
@@ -1153,7 +1160,7 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
 
     HcExpectedValue = 9.476;
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 
@@ -1164,7 +1171,7 @@ TEST_F(ConvectionCoefficientsFixture, EvaluateIntHcModelsFisherPedersen)
 
     HcExpectedValue = 3.212;
 
-    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum);
+    Hc = Convect::EvaluateIntHcModels(*state, SurfNum, ConvModelEquationNum, state->dataHeatBalSurf->SurfInsideTempHist(1)(SurfNum));
     EXPECT_EQ(state->dataSurface->SurfTAirRef(SurfNum), DataSurfaces::RefAirTemp::ZoneMeanAirTemp);
     EXPECT_NEAR(Hc, HcExpectedValue, 0.1);
 }
@@ -3197,7 +3204,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofPerimeter_PerfectSquare_Rotated)
         if (i == surface.Sides) {
             inext = 1;
         }
-        actual_roof_perimeter += distance(surface.Vertex(i), surface.Vertex(inext));
+        actual_roof_perimeter += surface.Vertex(i).distance(surface.Vertex(inext));
     }
     EXPECT_NEAR(80.0, actual_roof_perimeter, 0.0001);
 
@@ -3418,7 +3425,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofPerimeter_WeirderShape)
         if (i == surface.Sides) {
             inext = 1;
         }
-        actual_roof_perimeter += distance(surface.Vertex(i), surface.Vertex(inext));
+        actual_roof_perimeter += surface.Vertex(i).distance(surface.Vertex(inext));
     }
     EXPECT_NEAR(126.92728, actual_roof_perimeter, 0.0001);
 
@@ -3440,10 +3447,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 0.0;
         surf1.Azimuth = 0.0;
         surf1.Area = 400.0;
-        surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-        surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-        surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+        surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+        surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+        surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+        surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3467,10 +3474,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 0.0;
         surf2.Azimuth = 0.0;
         surf2.Area = 400.0;
-        surf2.Vertex(1) = Vector3<Real64>(30.0, 10.0, 3.0);
-        surf2.Vertex(2) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf2.Vertex(3) = Vector3<Real64>(10.0, -10.0, 3.0);
-        surf2.Vertex(4) = Vector3<Real64>(30.0, -10.0, 3.0);
+        surf2.Vertex(1) = Vector3D(30.0, 10.0, 3.0);
+        surf2.Vertex(2) = Vector3D(10.0, 10.0, 3.0);
+        surf2.Vertex(3) = Vector3D(10.0, -10.0, 3.0);
+        surf2.Vertex(4) = Vector3D(30.0, -10.0, 3.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3494,10 +3501,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf3.Tilt = 0.0;
         surf3.Azimuth = 0.0;
         surf3.Area = 400.0;
-        surf3.Vertex(1) = Vector3<Real64>(50.0, 10.0, 6.0);
-        surf3.Vertex(2) = Vector3<Real64>(30.0, 10.0, 6.0);
-        surf3.Vertex(3) = Vector3<Real64>(30.0, -10.0, 6.0);
-        surf3.Vertex(4) = Vector3<Real64>(50.0, -10.0, 6.0);
+        surf3.Vertex(1) = Vector3D(50.0, 10.0, 6.0);
+        surf3.Vertex(2) = Vector3D(30.0, 10.0, 6.0);
+        surf3.Vertex(3) = Vector3D(30.0, -10.0, 6.0);
+        surf3.Vertex(4) = Vector3D(50.0, -10.0, 6.0);
         surf3.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf3.HeatTransSurf = true;
 
@@ -3525,10 +3532,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 22.61986494804042;
         surf1.Azimuth = 270.0;
         surf1.Area = 130.0;
-        surf1.Vertex(1) = Vector3<Real64>(12.0, 10.0, 5.0);
-        surf1.Vertex(2) = Vector3<Real64>(0.0, 10.0, 0.0);
-        surf1.Vertex(3) = Vector3<Real64>(0.0, 0.0, 0.0);
-        surf1.Vertex(4) = Vector3<Real64>(12.0, 0.0, 5.0);
+        surf1.Vertex(1) = Vector3D(12.0, 10.0, 5.0);
+        surf1.Vertex(2) = Vector3D(0.0, 10.0, 0.0);
+        surf1.Vertex(3) = Vector3D(0.0, 0.0, 0.0);
+        surf1.Vertex(4) = Vector3D(12.0, 0.0, 5.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3553,10 +3560,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 22.61986494804042;
         surf2.Azimuth = 90.0;
         surf2.Area = 130.0;
-        surf2.Vertex(1) = Vector3<Real64>(24.0, 10.0, 0.0);
-        surf2.Vertex(2) = Vector3<Real64>(12.0, 10.0, 5.0);
-        surf2.Vertex(3) = Vector3<Real64>(12.0, 0.0, 5.0);
-        surf2.Vertex(4) = Vector3<Real64>(24.0, 0.0, 0.0);
+        surf2.Vertex(1) = Vector3D(24.0, 10.0, 0.0);
+        surf2.Vertex(2) = Vector3D(12.0, 10.0, 5.0);
+        surf2.Vertex(3) = Vector3D(12.0, 0.0, 5.0);
+        surf2.Vertex(4) = Vector3D(24.0, 0.0, 0.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3580,10 +3587,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf3.Tilt = 0.0;
         surf3.Azimuth = 0.0;
         surf3.Area = 260.0;
-        surf3.Vertex(1) = Vector3<Real64>(50.0, 10.0, 0.0);
-        surf3.Vertex(2) = Vector3<Real64>(24.0, 10.0, 0.0);
-        surf3.Vertex(3) = Vector3<Real64>(24.0, 0.0, 0.0);
-        surf3.Vertex(4) = Vector3<Real64>(50.0, 0.0, 0.0);
+        surf3.Vertex(1) = Vector3D(50.0, 10.0, 0.0);
+        surf3.Vertex(2) = Vector3D(24.0, 10.0, 0.0);
+        surf3.Vertex(3) = Vector3D(24.0, 0.0, 0.0);
+        surf3.Vertex(4) = Vector3D(50.0, 0.0, 0.0);
         surf3.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf3.HeatTransSurf = true;
 
@@ -3611,10 +3618,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf1.Tilt = 0.0;
         surf1.Azimuth = 0.0;
         surf1.Area = 400.0;
-        surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-        surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-        surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-        surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+        surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+        surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+        surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+        surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
         surf1.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf1.HeatTransSurf = true;
 
@@ -3628,7 +3635,7 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
     }
 
     {
-        // Same, just translated by Vector3<Real64>(30.0, 0.0, 0.0) so that it's detached
+        // Same, just translated by Vector3D(30.0, 0.0, 0.0) so that it's detached
         state->dataSurface->Surface.resize(2);
         auto &surf2 = state->dataSurface->Surface(2);
         surf2.Name = "Translated Normal Surface not touching";
@@ -3638,10 +3645,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofGeometryInformation)
         surf2.Tilt = 0.0;
         surf2.Azimuth = 0.0;
         surf2.Area = 400.0;
-        surf2.Vertex(1) = Vector3<Real64>(40.0, 10.0, 3.0);
-        surf2.Vertex(2) = Vector3<Real64>(20.0, 10.0, 3.0);
-        surf2.Vertex(3) = Vector3<Real64>(20.0, -10.0, 3.0);
-        surf2.Vertex(4) = Vector3<Real64>(40.0, -10.0, 3.0);
+        surf2.Vertex(1) = Vector3D(40.0, 10.0, 3.0);
+        surf2.Vertex(2) = Vector3D(20.0, 10.0, 3.0);
+        surf2.Vertex(3) = Vector3D(20.0, -10.0, 3.0);
+        surf2.Vertex(4) = Vector3D(40.0, -10.0, 3.0);
         surf2.ExtBoundCond = EnergyPlus::DataSurfaces::ExternalEnvironment;
         surf2.HeatTransSurf = true;
 
@@ -3755,10 +3762,10 @@ TEST_F(ConvectionCoefficientsFixture, RoofExtConvectionCoefficient)
     surf1.Tilt = 0.0;
     surf1.Azimuth = 0.0;
     surf1.Area = 400.0;
-    surf1.Vertex(1) = Vector3<Real64>(10.0, 10.0, 3.0);
-    surf1.Vertex(2) = Vector3<Real64>(-10.0, 10.0, 3.0);
-    surf1.Vertex(3) = Vector3<Real64>(-10.0, -10.0, 3.0);
-    surf1.Vertex(4) = Vector3<Real64>(10.0, -10.0, 3.0);
+    surf1.Vertex(1) = Vector3D(10.0, 10.0, 3.0);
+    surf1.Vertex(2) = Vector3D(-10.0, 10.0, 3.0);
+    surf1.Vertex(3) = Vector3D(-10.0, -10.0, 3.0);
+    surf1.Vertex(4) = Vector3D(10.0, -10.0, 3.0);
     surf1.ExtBoundCond = DataSurfaces::ExternalEnvironment;
     surf1.HeatTransSurf = true;
     surf1.Construction = 1;

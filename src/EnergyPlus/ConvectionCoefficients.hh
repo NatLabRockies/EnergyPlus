@@ -50,7 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -83,8 +82,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        RefTemp refTempType = RefTemp::Invalid;
-        bool suppressRainChange = false;
         RefWind windSpeedType = RefWind::Invalid;
         int hfFnWindSpeedCurveNum = 0;
         int hnFnTempDiffCurveNum = 0;
@@ -197,7 +194,6 @@ namespace Convect {
     {
         // Members
         std::string Name;
-        bool suppressRainChange = false;
 
         std::array<HcExt, static_cast<int>(ExtConvClass2::Num)> extConvClass2EqNums = {
             HcExt::SparrowWindward,                      // WindConvection_WindwardWall
@@ -289,7 +285,7 @@ namespace Convect {
                                     int SurfNum,                                       // surface number for which coefficients are being calculated
                                     const Array1D<Real64> &SurfaceTemperatures,        // Temperature of surfaces for evaluation of HcIn
                                     Array1D<Real64> &HcIn,                             // Interior Convection Coeff Array
-                                    ObjexxFCL::Optional<Array1S<Real64> const> Vhc = _ // Velocity array for forced convection coeff calculation
+                                    ObjexxFCL::Optional<Array1D<Real64> const> Vhc = _ // Velocity array for forced convection coeff calculation
     );
 
     Real64 CalcZoneSupplyAirTemp(EnergyPlusData &state, int ZoneNum);
@@ -337,7 +333,7 @@ namespace Convect {
 
     Real64 SetExtConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
 
-    Real64 SetIntConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
+    Real64 SetIntConvCoeff(EnergyPlusData &state, int SurfNum, Real64 SurfaceTemperature);
 
     Real64 CalcISO15099WindowIntConvCoeff(EnergyPlusData &state,
                                           Real64 SurfaceTemperature, // Temperature of surface for evaluation of HcIn
@@ -358,12 +354,12 @@ namespace Convect {
 
     void SetupAdaptiveConvRadiantSurfaceData(EnergyPlusData &state);
 
-    void ManageIntAdaptiveConvAlgo(EnergyPlusData &state, int SurfNum); // surface number for which coefficients are being calculated
+    void ManageIntAdaptiveConvAlgo(EnergyPlusData &state, int SurfNum, const Array1D<Real64> &SurfaceTemperatures);
 
     Real64 ManageExtAdaptiveConvAlgo(EnergyPlusData &state,
                                      int SurfNum); // surface number for which coefficients are being calculated
 
-    Real64 EvaluateIntHcModels(EnergyPlusData &state, int SurfNum, HcInt ConvModelEquationNum);
+    Real64 EvaluateIntHcModels(EnergyPlusData &state, int SurfNum, HcInt ConvModelEquationNum, Real64 SurfaceTemperature);
 
     Real64 EvaluateExtHcModels(EnergyPlusData &state, int SurfNum, HcExt NaturalConvModelEqNum, HcExt ForcedConvModelEqNum);
 
@@ -371,11 +367,11 @@ namespace Convect {
 
     void MapExtConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface number
 
-    void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int SurfNum); // surface number
+    void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int SurfNum, const Array1D<Real64> &SurfaceTemperatures);
 
     void MapIntConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface pointer index
 
-    Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
+    Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum, Real64 SurfaceTemperature);
 
     Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
 
@@ -783,7 +779,6 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;
-    bool FirstRoofSurf = true;
 
     // Object Data
     Convect::IntAdaptiveConvAlgo intAdaptiveConvAlgo; // stores rules for Hc model equations

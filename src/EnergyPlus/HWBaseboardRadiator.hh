@@ -92,17 +92,13 @@ namespace HWBaseboardRadiator {
         Real64 WaterMassFlowRateMax = 0.0;
         Real64 WaterMassFlowRateStd = 0.0;
         Real64 WaterVolFlowRateMax = 0.0;
-        Real64 WaterInletTempStd = 0.0;
         Real64 WaterInletTemp = 0.0;
         Real64 WaterInletEnthalpy = 0.0;
-        Real64 WaterOutletTempStd = 0.0;
         Real64 WaterOutletTemp = 0.0;
         Real64 WaterOutletEnthalpy = 0.0;
-        Real64 AirInletTempStd = 0.0;
         Real64 AirInletTemp = 0.0;
         Real64 AirOutletTemp = 0.0;
         Real64 AirInletHumRat = 0.0;
-        Real64 AirOutletTempStd = 0.0;
         Real64 FracConvect = 0.0;
         Array1D<Real64> FracDistribToSurf;
         Real64 TotPower = 0.0;
@@ -148,17 +144,6 @@ namespace HWBaseboardRadiator {
 
         // Default Constructor
         HWBaseboardNumericFieldData()
-        {
-        }
-    };
-
-    struct HWBaseboardDesignNumericFieldData
-    {
-        // Members
-        Array1D_string FieldNames;
-
-        // Default Constructor
-        HWBaseboardDesignNumericFieldData()
         {
         }
     };

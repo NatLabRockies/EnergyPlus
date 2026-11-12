@@ -67,16 +67,6 @@ struct EnergyPlusData;
 
 namespace GlobalNames {
 
-    struct ComponentNameData
-    {
-        // Members
-        std::string CompType; // Component Type
-        std::string CompName; // Component Name (user supplied)
-
-        // Default Constructor
-        ComponentNameData() = default;
-    };
-
     void IntraObjUniquenessCheck(EnergyPlusData &state,
                                  std::string const &NameToVerify,
                                  std::string_view const CurrentModuleObject,

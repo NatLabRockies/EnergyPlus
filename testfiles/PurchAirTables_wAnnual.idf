@@ -99,7 +99,7 @@
 ! Environmental Emissions:        Yes
 ! Utility Tariffs:                None
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,6;
 
@@ -1018,6 +1018,7 @@
     Zone 1 Thermostat,       !- Name
     West Zone,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -1027,6 +1028,7 @@
     Zone 2 Thermostat,       !- Name
     EAST ZONE,               !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -1036,6 +1038,7 @@
     Zone 3 Thermostat,       !- Name
     NORTH ZONE,              !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     Heating Setpoint with SB,!- Control 1 Name
     ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type
@@ -2344,6 +2347,20 @@
     Zone Electric Equipment Electricity Energy,  !- Variable or Meter or EMS Variable or Field 4 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 4
     ;                        !- Digits After Decimal 4
+
+  Output:Table:Annual,
+    Zone Lights During Hours Shown Annual Report,  !- Name
+    ,                        !- Filter
+    ,                        !- Schedule Name
+    Zone Mean Air Temperature,  !- Variable or Meter or EMS Variable or Field 1 Name
+    HoursNonNegative,        !- Aggregation Type for Variable or Meter 1
+    2,                       !- Digits After Decimal 1
+    Zone Lights Electricity Energy,  !- Variable or Meter or EMS Variable or Field 2 Name
+    SumOrAverageDuringHoursShown,  !- Aggregation Type for Variable or Meter 2
+    2,                       !- Digits After Decimal 2
+    Zone Lights Electricity Energy,  !- Variable or Meter or EMS Variable or Field 3 Name
+    SumOrAverage,            !- Aggregation Type for Variable or Meter 3
+    2;                       !- Digits After Decimal 3
 
   Output:Table:Annual,
     Window Annual Report,    !- Name

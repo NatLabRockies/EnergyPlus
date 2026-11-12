@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -2068,9 +2069,7 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
     auto &supplyCoilData = this->SupplySideLoop.loop->compDesWaterFlowRate;
     std::vector<Real64> supplyFlowData;
     supplyFlowData.resize(size_t(Constant::iHoursInDay * state.dataGlobal->TimeStepsInHour + 1));
-    for (double &i : supplyFlowData) {
-        i = 0.0;
-    }
+    std::fill(supplyFlowData.begin(), supplyFlowData.end(), 0.0);
     if (supplyCompSize > 0) {
         for (size_t comp = 0; comp < supplyCoilData.size(); ++comp) {
             if (static_cast<int>(comp) == supplyArrayIndex) {
@@ -2096,9 +2095,7 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
         // if the supply side of the HX contains a TES system then copy demand side coil data to supply side so TES can size on the whole load
         std::vector<Real64> demandFlowData;
         demandFlowData.resize(size_t(24 * state.dataGlobal->TimeStepsInHour + 1));
-        for (double &i : demandFlowData) {
-            i = 0.0;
-        }
+        std::fill(demandFlowData.begin(), demandFlowData.end(), 0.0);
         if (demandCompSize > 0) {
             for (size_t comp = 0; comp < demandCoilData.size(); ++comp) {
                 if (static_cast<int>(comp) == demandArrayIndex) {
@@ -2127,16 +2124,13 @@ void HeatExchangerStruct::updateCompFlowData(EnergyPlusData &state)
 
 bool HeatExchangerStruct::hasSupplySideTES([[maybe_unused]] EnergyPlusData &state)
 {
-    for (auto const &loopSide : this->SupplySideLoop.loop->LoopSide) {
-        for (auto const &branch : loopSide.Branch) {
-            for (auto const &comp : branch.Comp) {
-                if (comp.Type == DataPlant::PlantEquipmentType::TS_IceDetailed || comp.Type == DataPlant::PlantEquipmentType::TS_IceSimple) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
+    return std::any_of(this->SupplySideLoop.loop->LoopSide.begin(), this->SupplySideLoop.loop->LoopSide.end(), [](auto const &loopSide) {
+        return std::any_of(loopSide.Branch.begin(), loopSide.Branch.end(), [](auto const &branch) {
+            return std::any_of(branch.Comp.begin(), branch.Comp.end(), [](auto const &comp) {
+                return comp.Type == DataPlant::PlantEquipmentType::TS_IceDetailed || comp.Type == DataPlant::PlantEquipmentType::TS_IceSimple;
+            });
+        });
+    });
 }
 
 } // namespace EnergyPlus::PlantHeatExchangerFluidToFluid

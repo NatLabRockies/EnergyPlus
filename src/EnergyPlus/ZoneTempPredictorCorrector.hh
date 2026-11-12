@@ -51,7 +51,6 @@
 // C++ Headers
 #include <string>
 #include <unordered_set>
-#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -59,7 +58,6 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
@@ -160,7 +158,6 @@ namespace ZoneTempPredictorCorrector {
         Real64 SumHmAW = 0.0;   // SUM OF ZONE AREA*Moist CONVECTION COEFF*INSIDE Humidity Ratio
         Real64 SumHmARa = 0.0;  // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air
         Real64 SumHmARaW = 0.0; // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air* Inside Humidity Ration
-        Real64 SumHmARaZ = 0.0;
 
         Real64 TempDepCoef = 0.0; // Temperature dependent coefficient
         Real64 TempIndCoef = 0.0; // Temperature ndependent coefficient

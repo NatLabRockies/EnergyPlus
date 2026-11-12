@@ -52,8 +52,7 @@ doc/title.tex
 
 # ignore the doxygen and sphinx built API docs
 doc/readthedocs/doxygen/_build
-doc/readthedocs/sphinx/_build
-doc/readthedocs/sphinx/_build_c
+doc/readthedocs/sphinx/_build*
 /doc/readthedocs/sphinx/schema.rst
 
 # now that we have python, ignore some things

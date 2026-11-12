@@ -70,7 +70,6 @@ namespace SwimmingPool {
         std::string Name;                // name of swimming pool
         std::string SurfaceName;         // surface name of pool
         int SurfacePtr;                  // index to surface array
-        std::string ZoneName;            // Name of zone the pool is in
         int ZonePtr;                     // Pointer to this zone in the Zone derived type
         std::string WaterInletNodeName;  // water inlet node name
         int WaterInletNode;              // water inlet node number

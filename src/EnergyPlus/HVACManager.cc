@@ -80,6 +80,7 @@
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACManager.hh>
 #include <EnergyPlus/HVACSizingSimulationManager.hh>
+#include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/IceThermalStorage.hh>
 #include <EnergyPlus/IndoorGreen.hh>
 #include <EnergyPlus/InternalHeatGains.hh>

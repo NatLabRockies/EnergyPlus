@@ -69,7 +69,6 @@ namespace ChillerElectricEIR {
     {
         // Members
         std::string Name;                                                           // User identifier
-        int TypeNum = 0;                                                            // plant loop type identifier
         DataPlant::CondenserType CondenserType = DataPlant::CondenserType::Invalid; // Type of Condenser - Air Cooled, Water Cooled or Evap Cooled
         Real64 RefCap = 0.0;                                                        // Reference capacity of chiller [W]
         bool RefCapWasAutoSized = false;                                            // reference capacity was autosized on input
@@ -131,8 +130,6 @@ namespace ChillerElectricEIR {
         int ChillerEIRFTErrorIndex = 0;              // Used for negative EIR as a function of temp warnings
         int ChillerEIRFPLRError = 0;                 // Used for negative EIR as a function of PLR warnings
         int ChillerEIRFPLRErrorIndex = 0;            // Used for negative EIR as a function of PLR warnings
-        Real64 ChillerEIRFPLRMin = 0.0;              // Minimum value of PLR from EIRFPLR curve
-        Real64 ChillerEIRFPLRMax = 0.0;              // Maximum value of PLR from EIRFPLR curve
         int DeltaTErrCount = 0;                      // Evaporator delta T equals 0 for variable flow chiller warning messages
         int DeltaTErrCountIndex = 0;                 // Index to evaporator delta T = 0 for variable flow chiller warning messages
         PlantLocation CWPlantLoc;                    // chilled water plant loop component index
@@ -189,7 +186,6 @@ namespace ChillerElectricEIR {
         Real64 BasinHeaterConsumption = 0.0;        // Basin heater energy consumption (J)
         bool IPLVFlag = true;
         int ChillerCondLoopFlowFLoopPLRIndex = 0; // Condenser loop flow rate fraction function of loop PLR
-        int CondDT = 0;                           // Temperature difference across condenser
         Sched::Schedule *condDTSched = nullptr;   // Temperature difference across condenser schedule
         Real64 MinCondFlowRatio = 0.2;            // Minimum condenser flow fraction
         DataBranchAirLoopPlant::ControlType EquipFlowCtrl = DataBranchAirLoopPlant::ControlType::Invalid;

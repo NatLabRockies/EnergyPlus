@@ -2559,6 +2559,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_02_Speed_4400W_SEER2_2023_ValueT
         "  SPACE2-1 Thermostat,                                     !- Name",
         "  SPACE2-1,                                                !- Zone or ZoneList Name",
         "  HVACTemplate-Always 4,                                   !- Control Type Schedule Name",
+        "  ,                                                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,                         !- Control Object Type",
         "  All Zones Dual SP Control;                               !- Control Name",
 
@@ -3132,6 +3133,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_03_Speed_12000W_SEER2_2023_Value
         "  SPACE2-1 Thermostat,                                     !- Name",
         "  SPACE2-1,                                                !- Zone or ZoneList Name",
         "  HVACTemplate-Always 4,                                   !- Control Type Schedule Name",
+        "  ,                                                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,                         !- Control Object Type",
         "  All Zones Dual SP Control;                               !- Control Name",
 
@@ -4342,6 +4344,7 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_03_Speeds_27717W_IEER_2022_Value
         "  SPACE2-1 Thermostat,                                     !- Name",
         "  SPACE2-1,                                                !- Zone or ZoneList Name",
         "  HVACTemplate-Always 4,                                   !- Control Type Schedule Name",
+        "  ,                                                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,                         !- Control Object Type",
         "  All Zones Dual SP Control;                               !- Control Name",
 
@@ -10364,8 +10367,8 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_18000W_SEER2_2023_ValueTest)
                                    TSRatedAirVolFlowRate,
                                    thisCoil.EIRFFlow, // EIRFFlowCurveIndex, | Only High Speed
                                    TSRatedCOP,
-                                   TSEIRFTemp,      // EIRFTempCurveIndex,
-                                   thisCoil.PLFFPLR // PLFFPLRCurveIndex | Coil Level Decleration
+                                   TSEIRFTemp,         // EIRFTempCurveIndex,
+                                   thisCoil.PLFFPLR(1) // PLFFPLRCurveIndex | Coil Level Decleration
         );
     NetCoolingCapRatedMaxSpeed = NetCoolingCapRated2023;
     EXPECT_TRUE(SEER2_User > 0.0);

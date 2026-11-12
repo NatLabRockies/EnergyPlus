@@ -4985,7 +4985,6 @@ namespace CondenserLoopTowers {
         this->FanPower = 0.0;
         this->OutletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
 
-        this->WaterUsage = 0.0;
         Real64 Twb = this->AirWetBulb;
         Real64 TwbCapped = this->AirWetBulb;
 
@@ -5372,7 +5371,7 @@ namespace CondenserLoopTowers {
         Real64 FullSpeedFanQdot =
             this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
         Real64 FanPowerAdjustFac = 0.0;
-        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // full speed is what we want.
+        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the current cells cannot exceed the load at full speed
 
             if ((FullSpeedFanQdot + HVAC::SmallLoad) < std::abs(MyLoad) && (this->NumCellOn < this->NumCell) &&
                 ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin)) {
@@ -5386,20 +5385,21 @@ namespace CondenserLoopTowers {
                     UAadjustedPerCell = UAdesignPerCell * UAwetbulbAdjFac * UAairflowAdjFac * UAwaterflowAdjFac;
                     this->OutletWaterTemp =
                         this->calculateSimpleTowerOutletTemp(state, WaterMassFlowRatePerCell, AirFlowRatePerCell, UAadjustedPerCell);
+                    FullSpeedFanQdot =
+                        this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
                     IncrNumCellFlag = (FullSpeedFanQdot + HVAC::SmallLoad) < std::abs(MyLoad) && (this->NumCellOn < this->NumCell) &&
                                       ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin);
                 }
-                FullSpeedFanQdot =
-                    this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
             }
-            this->Qactual = FullSpeedFanQdot;
-            CalcBasinHeaterPower(
-                state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
-            // now calculate fan power
-            FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
-            this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
-
-            return;
+            if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the active cells still cannot exceed the load
+                this->Qactual = FullSpeedFanQdot;
+                CalcBasinHeaterPower(
+                    state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
+                // now calculate fan power
+                FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
+                this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
+                return;
+            }
         }
 
         // next find minimum air flow ratio cooling rate
@@ -6242,7 +6242,6 @@ namespace CondenserLoopTowers {
             this->FanPower = 0.0;
             this->FanEnergy = 0.0;
             this->AirFlowRatio = 0.0;
-            this->WaterAmountUsed = 0.0;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
             this->FanCyclingRatio = 0.0;
             this->BypassFraction = 0.0; // added for fluid bypass
@@ -6252,7 +6251,6 @@ namespace CondenserLoopTowers {
             this->InletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
             this->FanEnergy = this->FanPower * ReportingConstant;
             this->AirFlowRatio = this->airFlowRateRatio;
-            this->WaterAmountUsed = this->WaterUsage * ReportingConstant;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
         }
     }

@@ -261,7 +261,6 @@ namespace RoomAir {
                     if (!afnZoneInfo.IsUsed) {
                         continue;
                     }
-                    afnZoneInfo.ActualZoneID = iZone;
                     SupplyFrac = 0.0;
                     ReturnFrac = 0.0;
                     NodeFound = false;
@@ -606,9 +605,6 @@ namespace RoomAir {
         } else {
             afnNode.HumRat = (B + C * (3.0 * NodeHumRatX[0] - (3.0 / 2.0) * NodeHumRatX[1] + (1.0 / 3.0) * NodeHumRatX[2])) / ((11.0 / 6.0) * C + A);
         }
-
-        afnNode.AirCap = AirCap;
-        afnNode.AirHumRat = C;
 
         afnNode.RelHumidity =
             PsyRhFnTdbWPb(state, afnNode.AirTemp, afnNode.HumRat, state.dataEnvrn->OutBaroPress, "CalcRoomAirModelAirflowNetwork") * 100.0;

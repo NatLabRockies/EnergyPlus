@@ -56,9 +56,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Vector4.fwd.hh>
-
-using ObjexxFCL::Vector4;
 
 // EnergyPlus Headers
 #include <EnergyPlus/ConstructionAssignmentSet.hh>
@@ -67,8 +64,9 @@ using ObjexxFCL::Vector4;
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataVectorTypes.hh>
-#include <EnergyPlus/DataWindowEquivalentLayer.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Plane.hh>
+#include <EnergyPlus/Geometry/Vector2D.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/Shape.hh>
@@ -496,22 +494,16 @@ namespace DataSurfaces {
     {
 
     public: // Types
-        using Vertex = ObjexxFCL::Vector2<Real64>;
+        using Vertex = Vector2D;
         using Vertices = ObjexxFCL::Array1D<Vertex>;
         using Edge = Vertices::size_type; // The Surface2D vertex and edge index
         using EdgeXY = Real64;            // The edge x/y inverse slope
         using Edges = std::vector<Edge>;
         using EdgesXY = std::vector<EdgeXY>;
 
-    public: // Creation
-            // Constructor
-        Surface2DSlab(Real64 const yl, Real64 const yu) : xl(0.0), xu(0.0), yl(yl), yu(yu)
-        {
-        }
-
     public:              // Data
-        Real64 xl, xu;   // Lower and upper x coordinates of slab bounding box
-        Real64 yl, yu;   // Lower and upper y coordinates of slab
+        Real64 xl = 0.0; // Lower x coordinate of slab bounding box
+        Real64 xu = 0.0; // Upper x coordinate of slab bounding box
         Edges edges;     // Left-to-right ordered edges crossing the slab
         EdgesXY edgesXY; // Edge x/y inverse slopes
 
@@ -522,7 +514,6 @@ namespace DataSurfaces {
     {
 
     public: // Types
-        using Vector2D = Vector2<Real64>;
         using Edge = Vector2D;
         using Vertices = Array1D<Vector2D>;
         using Vectors = Array1D<Vector2D>;
@@ -541,36 +532,14 @@ namespace DataSurfaces {
         // Constructor
         Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v, Vector2D const &vl, Vector2D const &vu);
 
-    public: // Predicates
-            // Bounding box contains a point?
-        bool bb_contains(Vector2D const &v) const
-        {
-            return (vl.x <= v.x) && (v.x <= vu.x) && (vl.y <= v.y) && (v.y <= vu.y);
-        }
-
-    public: // Comparison
-            // Equality
-        friend bool operator==(Surface2D const &a, Surface2D const &b)
-        {
-            auto const &v1 = a.vertices;
-            auto const &v2 = b.vertices;
-            return eq(v1, v2);
-        }
-
-        // Inequality
-        friend bool operator!=(Surface2D const &a, Surface2D const &b)
-        {
-            return !(a == b);
-        }
-
-    public:                                              // Data
-        int axis = 0;                                    // Axis of projection (0=x, 1=y, 2=z)
-        Vertices vertices;                               // Vertices
-        Vector2D vl = Vector2D(0.0), vu = Vector2D(0.0); // Bounding box lower and upper corner vertices
-        Vectors edges;                                   // Edge vectors around the vertices
-        Real64 s1 = 0.0, s3 = 0.0;                       // Rectangle side widths squared
-        SlabYs slabYs;                                   // Y coordinates of slabs
-        Slabs slabs;                                     // Y slice slabs for fast nonconvex and many vertex intersections
+    public:                                        // Data
+        int axis = 0;                              // Axis of projection (0=x, 1=y, 2=z)
+        Vertices vertices;                         // Vertices
+        Vector2D vl = Vector2D(), vu = Vector2D(); // Bounding box lower and upper corner vertices
+        Vectors edges;                             // Edge vectors around the vertices
+        Real64 s1 = 0.0, s3 = 0.0;                 // Rectangle side widths squared
+        SlabYs slabYs;                             // Y coordinates of slabs
+        Slabs slabs;                               // Y slice slabs for fast nonconvex and many vertex intersections
 
     }; // Surface2D
 
@@ -713,7 +682,6 @@ namespace DataSurfaces {
 
         // Types
         using Vertices = Array1D<Vector>;
-        using Plane = Vector4<Real64>;
 
         // Members
         std::string Name; // User supplied name of the surface (must be unique)
@@ -755,23 +723,23 @@ namespace DataSurfaces {
 
         // Vertices
         Array1D<Vector> NewVertex;
-        Vertices Vertex;          // Surface Vertices are represented by Number of Sides and Vector (type)
-        Vector3<Real64> Centroid; // computed centroid (also known as center of mass or surface balance point)
-        Vector3<Real64> lcsx;
-        Vector3<Real64> lcsy;
-        Vector3<Real64> lcsz;
-        Vector3<Real64> NewellAreaVector;
-        Vector3<Real64> NewellSurfaceNormalVector; // same as OutNormVec in vector notation
-        Vector3<Real64> OutNormVec;                // Direction cosines (outward normal vector) for surface
-        Real64 SinAzim;                            // Sine of surface azimuth angle
-        Real64 CosAzim;                            // Cosine of surface azimuth angle
-        Real64 SinTilt;                            // Sine of surface tilt angle
-        Real64 CosTilt;                            // Cosine of surface tilt angle
-        bool IsConvex;                             // true if the surface is convex.
-        bool IsDegenerate;                         // true if the surface is degenerate.
-        bool VerticesProcessed;                    // true if vertices have been processed (only used for base surfaces)
-        Real64 XShift;                             // relative coordinate shift data - used by child subsurfaces
-        Real64 YShift;                             // relative coordinate shift data - used by child subsurfaces
+        Vertices Vertex;   // Surface Vertices are represented by Number of Sides and Vector (type)
+        Vector3D Centroid; // computed centroid (also known as center of mass or surface balance point)
+        Vector3D lcsx;
+        Vector3D lcsy;
+        Vector3D lcsz;
+        Vector3D NewellAreaVector;
+        Vector3D NewellSurfaceNormalVector; // same as OutNormVec in vector notation
+        Vector3D OutNormVec;                // Direction cosines (outward normal vector) for surface
+        Real64 SinAzim;                     // Sine of surface azimuth angle
+        Real64 CosAzim;                     // Cosine of surface azimuth angle
+        Real64 SinTilt;                     // Sine of surface tilt angle
+        Real64 CosTilt;                     // Cosine of surface tilt angle
+        bool IsConvex;                      // true if the surface is convex.
+        bool IsDegenerate;                  // true if the surface is degenerate.
+        bool VerticesProcessed;             // true if vertices have been processed (only used for base surfaces)
+        Real64 XShift;                      // relative coordinate shift data - used by child subsurfaces
+        Real64 YShift;                      // relative coordinate shift data - used by child subsurfaces
 
         // Boundary conditions and interconnections
         bool HeatTransSurf;                                    // True if surface is a heat transfer surface (light shelf can also be IsShadowing)
@@ -896,18 +864,14 @@ namespace DataSurfaces {
              // Computed Shape Category
         ShapeCat computed_shapeCat() const;
 
-        // Computed Plane
-        Plane computed_plane() const;
-
         // Computed axis-projected 2D surface
         Surface2D computed_surface2d() const;
     };
 
     struct SurfaceWindowRefPt
     {
-        Real64 solidAng = 0.0;    // Solid angle subtended by window from daylit ref points 1 and 2
-        Real64 solidAngWtd = 0.0; // Solid angle subtended by window from ref pts weighted by glare pos factor
-        std::array<std::array<Real64, (int)WinCover::Num>, (int)Lum::Num> lums = {{{0.0, 0.0}}};
+        Real64 solidAng = 0.0;        // Solid angle subtended by window from daylit ref points 1 and 2
+        Real64 solidAngWtd = 0.0;     // Solid angle subtended by window from ref pts weighted by glare pos factor
         Real64 illumFromWinRep = 0.0; // Illuminance from window at reference point N [lux]
         Real64 lumWinRep = 0.0;       // Window luminance as viewed from reference point N [cd/m2]
     };
@@ -917,7 +881,7 @@ namespace DataSurfaces {
         // Members
         Array1D<SurfaceWindowRefPt> refPts;
 
-        Vector3<Real64> WinCenter = {0.0, 0.0, 0.0}; // X,Y,Z coordinates of window center point in building coord system
+        Vector3D WinCenter = {0.0, 0.0, 0.0}; // X,Y,Z coordinates of window center point in building coord system
 
         Real64 theta = 0.0;           // Azimuth of window normal (rad)
         Real64 phi = 0.0;             // Altitude of window normal (rad)
@@ -953,9 +917,6 @@ namespace DataSurfaces {
         std::array<Real64, (int)FWC::Num> EnclAreaReflProdMinusThisSurf = {0.0, 0.0, 0.0};
 
         BSDFWindowDescript ComplexFen; // Data for complex fenestration, see DataBSDFWindow.cc for declaration
-        bool hasShade = false;
-        bool hasBlind = false;
-        bool hasScreen = false;
     };
 
     struct SurfaceShade
@@ -1080,11 +1041,9 @@ namespace DataSurfaces {
         Real64 DividerConductance;         // Effective conductance of divider (no air films) {W/m2-K}
         Real64 DivEdgeToCenterGlCondRatio; // Ratio of divider edge of glass conductance (without air films) to
         // center of glass conductance (without air films)
-        Real64 DividerSolAbsorp;                                   // Solar absorptance of divider corrected for self-shading
-        Real64 DividerVisAbsorp;                                   // Visible absorptance of divider corrected for self-shading
-        Real64 DividerEmis;                                        // Thermal emissivity of divider
-        DataWindowEquivalentLayer::Orientation MullionOrientation; // Horizontal or Vertical; used only for windows with two glazing systems
-        //  divided by a mullion; obtained from Window5 data file.
+        Real64 DividerSolAbsorp;            // Solar absorptance of divider corrected for self-shading
+        Real64 DividerVisAbsorp;            // Visible absorptance of divider corrected for self-shading
+        Real64 DividerEmis;                 // Thermal emissivity of divider
         NfrcProductOptions NfrcProductType; // NFRC Product Type for Assembly Calculations
         Real64 OutsideRevealSolAbs;         // Solar absorptance of outside reveal
         Real64 InsideSillDepth;             // Inside sill depth (m)
@@ -1098,8 +1057,8 @@ namespace DataSurfaces {
               FrEdgeToCenterGlCondRatio(1.0), FrameSolAbsorp(0.0), FrameVisAbsorp(0.0), FrameEmis(0.9), DividerType(FrameDividerType::DividedLite),
               DividerWidth(0.0), HorDividers(0), VertDividers(0), DividerProjectionOut(0.0), DividerProjectionIn(0.0), DividerEdgeWidth(0.06355),
               DividerConductance(0.0), DivEdgeToCenterGlCondRatio(1.0), DividerSolAbsorp(0.0), DividerVisAbsorp(0.0), DividerEmis(0.9),
-              MullionOrientation(DataWindowEquivalentLayer::Orientation::Invalid), NfrcProductType(NfrcProductOptions::CurtainWall),
-              OutsideRevealSolAbs(0.0), InsideSillDepth(0.0), InsideReveal(0.0), InsideSillSolAbs(0.0), InsideRevealSolAbs(0.0)
+              NfrcProductType(NfrcProductOptions::CurtainWall), OutsideRevealSolAbs(0.0), InsideSillDepth(0.0), InsideReveal(0.0),
+              InsideSillSolAbs(0.0), InsideRevealSolAbs(0.0)
         {
         }
     };
@@ -1230,7 +1189,6 @@ namespace DataSurfaces {
         Real64 SurfFilmCoef;                       // Combined convective/radiative film coefficient if >0, else use other coefficients
         Real64 WindSpeedCoef;                      // Coefficient modifying the wind speed term (s/m)
         Real64 ZoneAirTempCoef;                    // Coefficient modifying the zone air temperature part of the equation
-        std::string ConstTempScheduleName;         // Schedule name for scheduled outside temp
         Sched::Schedule *constTempSched = nullptr; // Index for scheduled outside temp.
         bool SinusoidalConstTempCoef;              // If true then ConstTempCoef varies by sine wave
         Real64 SinusoidPeriod;                     // period of sine wave variation  (hr)
@@ -1294,7 +1252,6 @@ namespace DataSurfaces {
     struct ShadingVertexData
     {
         // Members
-        int NVert = 0;
         Array1D<Real64> XV;
         Array1D<Real64> YV;
         Array1D<Real64> ZV;
@@ -1318,7 +1275,6 @@ namespace DataSurfaces {
     {
         // Members
         std::string Name;
-        int SurfaceIdx = 0;               // surface index
         Real64 Scaler = 1.0;              // the constant multiplier constant from user input
         Sched::Schedule *sched = nullptr; // multiplier schedule
     };
@@ -1329,11 +1285,10 @@ namespace DataSurfaces {
         std::string Name;
         int SurfPtr;                       // surface pointer
         int ConstrPtr;                     // construction pointer
-        int NumOfSched;                    // number of scheduled layers
         Array1D<Sched::Schedule *> scheds; // pointer to schedules for each layer in construction
 
         // Default Constructor
-        FenestrationSolarAbsorbed() : SurfPtr(0), ConstrPtr(0), NumOfSched(0)
+        FenestrationSolarAbsorbed() : SurfPtr(0), ConstrPtr(0)
         {
         }
     };
@@ -1397,16 +1352,15 @@ namespace DataSurfaces {
     {
         // Members
         std::string Name;
-        std::string ZoneOrZoneListName;   // zone or zone list name
-        int ZoneOrZoneListPtr;            // pointer to a zone list
-        int NumOfZones;                   // number of zones in a zone list
-        int Construction;                 // pointer to construction object
-        Real64 GrossArea;                 // internal surface area, [m2]
-        bool ZoneListActive;              // flag to a list
-        std::string spaceOrSpaceListName; // Space or Space list name
-        int spaceOrSpaceListPtr;          // pointer to a Space list
-        int numOfSpaces;                  // number of Spaces in a Space list
-        bool spaceListActive;             // flag to a list
+        std::string ZoneOrZoneListName; // zone or zone list name
+        int ZoneOrZoneListPtr;          // pointer to a zone list
+        int NumOfZones;                 // number of zones in a zone list
+        int Construction;               // pointer to construction object
+        Real64 GrossArea;               // internal surface area, [m2]
+        bool ZoneListActive;            // flag to a list
+        int spaceOrSpaceListPtr;        // pointer to a Space list
+        int numOfSpaces;                // number of Spaces in a Space list
+        bool spaceListActive;           // flag to a list
 
         // Default Constructor
         IntMassObject()
@@ -1519,7 +1473,6 @@ struct SurfacesData : BaseGlobalStruct
     int AttachedShadingCount = 0;    // Total number of Shades attached to Zones
     int ShadingSurfaceFirst = 0;     // Start index of shading surfaces (Building External Shades, Fixed External Shades and Shades attached to Zone)
     int ShadingSurfaceLast = -1;     // End index of shading surfaces (Building External Shades, Fixed External Shades and Shades attached to Zone)
-    bool AspectTransform = false;    // Set to true when GeometryTransform object is used
     bool CalcSolRefl = false;        // Set to true when Solar Reflection Calculations object is used
     bool CCW = false;                // True if vertices will be entered in CounterClockWise Order
     bool WorldCoordSystem = false;   // True if vertices will be "World Coordinates". False means relative coordinates
@@ -1572,22 +1525,22 @@ struct SurfacesData : BaseGlobalStruct
     Array1D<int> SurfHighTempErrCount;
 
     // Surface solar arrays
-    Array1D<Real64> SurfAirSkyRadSplit;        // Fractional split between the air and the sky for radiation from the surface
-                                               // Fraction of sky IR coming from sky itself; 1-SurfAirSkyRadSplit comes from the atmosphere.
-    Array1D<Vector3<Real64>> SurfSunCosHourly; // Hourly values of SUNCOS (solar direction cosines)
-                                               // Autodesk: Init Zero-initialization added to avoid use uninitialized
-    Array1D<Real64> SurfSunlitArea;            // Sunlit area by surface number
-    Array1D<Real64> SurfSunlitFrac;            // Sunlit fraction by surface number
-    Array1D<Real64> SurfSkySolarInc;           // Incident diffuse solar from sky; if CalcSolRefl is true, includes reflection of sky diffuse
-                                               // and beam solar from exterior obstructions [W/m2]
-    Array1D<Real64> SurfGndSolarInc;           // Incident diffuse solar from ground; if CalcSolRefl is true,
-                                               // accounts for shadowing of ground by building and obstructions [W/m2]
-    Array1D<Real64> SurfBmToBmReflFacObs;      // Factor for incident solar from specular beam refl from obstructions (W/m2)/(W/m2)
-    Array1D<Real64> SurfBmToDiffReflFacObs;    // Factor for incident solar from diffuse beam refl from obstructions (W/m2)/(W/m2)
-    Array1D<Real64> SurfBmToDiffReflFacGnd;    // Factor for incident solar from diffuse beam refl from ground
-    Array1D<Real64> SurfSkyDiffReflFacGnd;     // sky diffuse reflection view factors from ground
-    Array1D<Real64> SurfOpaqAI;                // Time step value of factor for beam absorbed on inside of opaque surface
-    Array1D<Real64> SurfOpaqAO;                // Time step value of factor for beam absorbed on outside of opaque surface
+    Array1D<Real64> SurfAirSkyRadSplit;     // Fractional split between the air and the sky for radiation from the surface
+                                            // Fraction of sky IR coming from sky itself; 1-SurfAirSkyRadSplit comes from the atmosphere.
+    Array1D<Vector3D> SurfSunCosHourly;     // Hourly values of SUNCOS (solar direction cosines)
+                                            // Autodesk: Init Zero-initialization added to avoid use uninitialized
+    Array1D<Real64> SurfSunlitArea;         // Sunlit area by surface number
+    Array1D<Real64> SurfSunlitFrac;         // Sunlit fraction by surface number
+    Array1D<Real64> SurfSkySolarInc;        // Incident diffuse solar from sky; if CalcSolRefl is true, includes reflection of sky diffuse
+                                            // and beam solar from exterior obstructions [W/m2]
+    Array1D<Real64> SurfGndSolarInc;        // Incident diffuse solar from ground; if CalcSolRefl is true,
+                                            // accounts for shadowing of ground by building and obstructions [W/m2]
+    Array1D<Real64> SurfBmToBmReflFacObs;   // Factor for incident solar from specular beam refl from obstructions (W/m2)/(W/m2)
+    Array1D<Real64> SurfBmToDiffReflFacObs; // Factor for incident solar from diffuse beam refl from obstructions (W/m2)/(W/m2)
+    Array1D<Real64> SurfBmToDiffReflFacGnd; // Factor for incident solar from diffuse beam refl from ground
+    Array1D<Real64> SurfSkyDiffReflFacGnd;  // sky diffuse reflection view factors from ground
+    Array1D<Real64> SurfOpaqAI;             // Time step value of factor for beam absorbed on inside of opaque surface
+    Array1D<Real64> SurfOpaqAO;             // Time step value of factor for beam absorbed on outside of opaque surface
     Array1D<int> SurfPenumbraID;
 
     // Surface reflectance

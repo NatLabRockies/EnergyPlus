@@ -299,26 +299,26 @@ namespace Window {
         Real64 rfsh;         // Diffuse solar front reflectance of isolated blind
         Real64 rfshGnd;      // Ground and sky diffuse solar front reflectance of isolated blind
         Real64 rfshSky;
-        Real64 rbsh;                          // Diffuse solar back reflectance of isolated blind
-        Real64 ShadeReflFac;                  // Shade/blind solar reflection factor
-        Real64 ShadeTransVis;                 // Visible transmittance of isolated shade/blind
-        Real64 tshv = 0.0;                    // = ShadeTransVis
-        Real64 tshv2;                         // = tshv**2
-        Real64 ShadeReflVis;                  // Visible reflectance of isolated shade
-        Real64 rshv;                          // = ShadeReflVis
-        Real64 rfshv;                         // Diffuse visible front reflectance of isolated blind
-        Real64 rbshv;                         // Diffuse visible back reflectance of isolated blind
-        Real64 ShadeReflFacVis;               // Shade/blind visible reflection factor
-        int SpecDataNum = 0;                  // Spectral data set number
-        int numptDAT;                         // Number of wavelengths in a spectral data set
-        bool StormWinConst;                   // True if a construction with a storm window
-        bool Triangle;                        // True if window is triangular
-        bool Rectangle;                       // True if window is rectangular
-        Vector3<Real64> W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
-        Vector3<Real64> W2 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W3 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
-        Vector3<Real64> W23 = {0.0, 0.0, 0.0};
+        Real64 rbsh;                   // Diffuse solar back reflectance of isolated blind
+        Real64 ShadeReflFac;           // Shade/blind solar reflection factor
+        Real64 ShadeTransVis;          // Visible transmittance of isolated shade/blind
+        Real64 tshv = 0.0;             // = ShadeTransVis
+        Real64 tshv2;                  // = tshv**2
+        Real64 ShadeReflVis;           // Visible reflectance of isolated shade
+        Real64 rshv;                   // = ShadeReflVis
+        Real64 rfshv;                  // Diffuse visible front reflectance of isolated blind
+        Real64 rbshv;                  // Diffuse visible back reflectance of isolated blind
+        Real64 ShadeReflFacVis;        // Shade/blind visible reflection factor
+        int SpecDataNum = 0;           // Spectral data set number
+        int numptDAT;                  // Number of wavelengths in a spectral data set
+        bool StormWinConst;            // True if a construction with a storm window
+        bool Triangle;                 // True if window is triangular
+        bool Rectangle;                // True if window is rectangular
+        Vector3D W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
+        Vector3D W2 = {0.0, 0.0, 0.0};
+        Vector3D W3 = {0.0, 0.0, 0.0};
+        Vector3D W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
+        Vector3D W23 = {0.0, 0.0, 0.0};
 
         // Spectral data wavelengths for each glass layer in a glazing system
         std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt = {0.0};
@@ -996,7 +996,7 @@ namespace Window {
 
                 // Front incident solar, diffuse, interior shade
                 for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
-                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * solabsDiff[iGlass];
+                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * constr.AbsDiffBack(iGlass + 1);
                 }
 
                 constr.AbsDiffShade = tsolDiff * ShadeReflFac * ShadeAbs;
@@ -3306,9 +3306,7 @@ namespace Window {
         std::array<Real64, 2> hcvBG; // For between-glass shade/blind, convection coefficient from gap glass or
         //  shade/blind to gap gas on either side of shade/blind (W/m2-K)
 
-        std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface; // Coefficient in equation Aface*thetas = Bface
-        std::array<Real64, maxArraySize> Bface;                           // Coefficient in equation Aface*thetas = Bface
-        std::array<int, maxArraySize> indx;                               // Vector of row permutations in LU decomposition
+        std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition
 
         auto &s_surf = state.dataSurface;
 
@@ -3376,8 +3374,8 @@ namespace Window {
                 wm->hcin = state.dataHeatBalSurf->SurfHConvInt(SurfNum);
             }
 
-            Aface = {{0.0}};
-            Bface = {0.0};
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {}; // Coefficients in Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface = {};                           // Right-hand side of Aface*thetas = Bface
 
             // If interior or exterior shade or blind is present, get heat transfer
             // coefficient from glass and shade/blind to gap between glass and shade/blind,
@@ -5223,10 +5221,10 @@ namespace Window {
 
             // now apply normalization factors to zero incidence angle properties
             tfp = tf0 * TransTmp;
-            tfp = max(min(1.0, tfp), 0.0);
+            tfp = std::clamp(tfp, 0.0, 1.0);
 
             rfp = rf0 * (1. - ReflectTmp) + ReflectTmp;
-            rfp = max(min(0.9999 - tfp, rfp), 0.0);
+            rfp = std::clamp(rfp, 0.0, std::max(0.9999 - tfp, 0.0));
 
             rbp = rfp;
 
@@ -7904,21 +7902,6 @@ namespace Window {
         // "Solar-Thermal Window Blind Model for DOE-2," H. Simmler, U. Fischer and
         // F. Winkelmann, Lawrence Berkeley National Laboratory, Jan. 1996.
 
-        struct BlindInputs
-        {
-            Real64 slatWidth;
-            Real64 slatSeparation;
-            Real64 BmDfTrans;
-            Real64 BmDfRefFront;
-            Real64 BmDfRefBack;
-            Real64 DfDfTrans;
-            Real64 DfDfRefFront;
-            Real64 DfDfRefBack;
-            Real64 DfDfTransIR;
-            Real64 DfEmissFront;
-            Real64 DfEmissBack;
-        };
-
         // The slat input properties are:
         // c(1)    0. (unused)
         // c(2)    Slat width (m)
@@ -7937,27 +7920,6 @@ namespace Window {
         // c(13)   trans diff-diff
         // c(14)   emiss front diff
         // c(15)   emiss back diff
-
-        struct BlindOutputs
-        {
-            Real64 BmBmTransFront;
-            Real64 BmBmRefFront;
-            Real64 BmBmTransBack;
-            Real64 BmBmRefBack;
-            Real64 BmDfTransFront;
-            Real64 BmDfRefFront;
-            Real64 BmDfTransBack;
-            Real64 BmDfRefBack;
-            Real64 DfDfTransFront;
-            Real64 DfDfRefFront;
-            Real64 DfDfTransBack;
-            Real64 DfDfRefBack;
-
-            Real64 TransFrontIR;
-            Real64 TransBackIR;
-            Real64 EmissFrontIR;
-            Real64 EmissBackIR;
-        };
 
         // The calculated blind properties are:
         //      The following are solar or visible properties

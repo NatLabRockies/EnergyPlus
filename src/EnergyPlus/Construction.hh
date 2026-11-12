@@ -294,7 +294,6 @@ namespace Construction {
         Array1D<Real64> AbsDiffFrontEQL; // Diffuse layer system front absorptance for EQL window
         Array1D<Real64> AbsDiffBackEQL;  // Diffuse layer system back absorptance for EQL window
         Real64 TransDiffFrontEQL = 0.0;  // Diffuse system front transmittance for EQL window
-        Real64 TransDiffBackEQL = 0.0;   // Diffuse system back transmittance for EQL window
         // Air boundary
         bool TypeIsAirBoundary = false;                    // true for Construction:AirBoundary
         bool TypeIsAirBoundaryMixing = false;              // true for Construction:AirBoundary with SimpleMixing for air exchange

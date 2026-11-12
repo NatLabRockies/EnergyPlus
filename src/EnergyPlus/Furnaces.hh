@@ -124,7 +124,6 @@ namespace Furnaces {
         bool CoolingCoilUpstream;                                  // Indicates if cooling coil is upstream of heating coil
         HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid;     // Numeric Equivalent for Heating Coil Type
         int HeatingCoilIndex;                                      // Index to heating coil
-        HVAC::CoilType reheatCoilType = HVAC::CoilType::Invalid;   // Numeric Equivalent for Reheat Coil Type
         int ReheatingCoilIndex;                                    // Index to reheat coil
         std::string HeatingCoilName;                               // name of heating coil
         Real64 HeatingSizingRatio = 1.0;                           // Ratio of heat pump heating to cooling capacity

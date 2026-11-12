@@ -49,6 +49,7 @@
 #define Psychrometrics_hh_INCLUDED
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 
@@ -867,7 +868,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbRhovLBnd0C_error(state, Tdb, Rhovapor, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }
@@ -1204,7 +1205,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbRhov_error(state, Tdb, Rhovapor, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }
@@ -1261,7 +1262,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbWPb_error(state, TDB, W, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }

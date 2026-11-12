@@ -68,7 +68,7 @@
 !       - 1 assigned a SpaceList "1BR SpaceList": 2 in 1BR apartments
 !       - 1 assigned directed to the Space "Space2-2BR": 3 people
 
-  Version,26.2;
+  Version,27.1;
 
   Timestep,4;
 
@@ -258,18 +258,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1-1BR RoofCeiling,  !- Name
@@ -283,18 +275,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1-1BR Wall 1,       !- Name
@@ -308,18 +292,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1-1BR Wall 2,       !- Name
@@ -333,18 +309,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1-1BR Wall 3,       !- Name
@@ -358,18 +326,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    0.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space1-1BR Wall 4,       !- Name
@@ -383,18 +343,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    0.0,                     !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    0.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    0.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   Zone,
     Space2-2BR Zn,           !- Name
@@ -431,18 +383,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    30.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2-2BR RoofCeiling,  !- Name
@@ -456,18 +400,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2-2BR Wall 1,       !- Name
@@ -481,18 +417,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    30.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2-2BR Wall 2,       !- Name
@@ -506,18 +434,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2-2BR Wall 3,       !- Name
@@ -531,18 +451,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    10.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space2-2BR Wall 4,       !- Name
@@ -556,18 +468,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    10.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    10.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    10.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   Zone,
     Space3-1BR Zn,           !- Name
@@ -604,18 +508,10 @@
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    40.0,10.0,0.0,  !- X,Y,Z ==> Vertex 1 {m}
+    40.0,0.0,0.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3-1BR RoofCeiling,  !- Name
@@ -629,18 +525,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0;                     !- Vertex Z-coordinate {m}
+    30.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    40.0,0.0,3.0,  !- X,Y,Z ==> Vertex 3 {m}
+    40.0,10.0,3.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3-1BR Wall 1,       !- Name
@@ -654,18 +542,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    40.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    40.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    40.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    40.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3-1BR Wall 2,       !- Name
@@ -679,18 +559,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    40.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,0.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    40.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3-1BR Wall 3,       !- Name
@@ -704,18 +576,10 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    0.0,                     !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    30.0,0.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    30.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    30.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,0.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   BuildingSurface:Detailed,
     Space3-1BR Wall 4,       !- Name
@@ -729,35 +593,27 @@
     WindExposed,             !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    3.0,                     !- Vertex Z-coordinate {m}
-    40.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0,                     !- Vertex Z-coordinate {m}
-    30.0,                    !- Vertex X-coordinate {m}
-    10.0,                    !- Vertex Y-coordinate {m}
-    0.0;                     !- Vertex Z-coordinate {m}
+    30.0,10.0,3.0,  !- X,Y,Z ==> Vertex 1 {m}
+    40.0,10.0,3.0,  !- X,Y,Z ==> Vertex 2 {m}
+    40.0,10.0,0.0,  !- X,Y,Z ==> Vertex 3 {m}
+    30.0,10.0,0.0;  !- X,Y,Z ==> Vertex 4 {m}
 
   ZoneList,
     All Zones,               !- Name
-    Space1-1BR Zn,           !- Zone Name
-    Space2-2BR Zn,           !- Zone Name
-    Space3-1BR Zn;           !- Zone Name
+    Space1-1BR Zn,           !- Zone 1 Name
+    Space2-2BR Zn,           !- Zone 2 Name
+    Space3-1BR Zn;           !- Zone 3 Name
 
   SpaceList,
     All Spaces,              !- Name
-    Space1-1BR,              !- Space Name
-    Space2-2BR,              !- Space Name
-    Space3-1BR;              !- Space Name
+    Space1-1BR,              !- Space 1 Name
+    Space2-2BR,              !- Space 2 Name
+    Space3-1BR;              !- Space 3 Name
 
   SpaceList,
     1BR SpaceList,           !- Name
-    Space1-1BR,              !- Space Name
-    Space3-1BR;              !- Space Name
+    Space1-1BR,              !- Space 1 Name
+    Space3-1BR;              !- Space 2 Name
 
   ElectricEquipment:Definition,
     Apartment Elec Equip Definition,  !- Name
@@ -797,54 +653,54 @@
     ApartmentMidRise EQP_APT_SCH Default,  !- Name
     Fractional,              !- Schedule Type Limits Name
     No,                      !- Interpolate to Timestep
-    01:00,                   !- Time {hh:mm}
-    0.649,                   !- Value Until Time
-    02:00,                   !- Time {hh:mm}
-    0.597,                   !- Value Until Time
-    03:00,                   !- Time {hh:mm}
-    0.572,                   !- Value Until Time
-    04:00,                   !- Time {hh:mm}
-    0.559,                   !- Value Until Time
-    05:00,                   !- Time {hh:mm}
-    0.566,                   !- Value Until Time
-    06:00,                   !- Time {hh:mm}
-    0.584,                   !- Value Until Time
-    07:00,                   !- Time {hh:mm}
-    0.625,                   !- Value Until Time
-    08:00,                   !- Time {hh:mm}
-    0.681,                   !- Value Until Time
-    09:00,                   !- Time {hh:mm}
-    0.713,                   !- Value Until Time
-    10:00,                   !- Time {hh:mm}
-    0.721,                   !- Value Until Time
-    11:00,                   !- Time {hh:mm}
-    0.72,                    !- Value Until Time
-    12:00,                   !- Time {hh:mm}
-    0.712,                   !- Value Until Time
-    13:00,                   !- Time {hh:mm}
-    0.716,                   !- Value Until Time
-    14:00,                   !- Time {hh:mm}
-    0.704,                   !- Value Until Time
-    15:00,                   !- Time {hh:mm}
-    0.705,                   !- Value Until Time
-    16:00,                   !- Time {hh:mm}
-    0.718,                   !- Value Until Time
-    17:00,                   !- Time {hh:mm}
-    0.779,                   !- Value Until Time
-    18:00,                   !- Time {hh:mm}
-    0.918,                   !- Value Until Time
-    19:00,                   !- Time {hh:mm}
-    1.0,                     !- Value Until Time
-    20:00,                   !- Time {hh:mm}
-    0.983,                   !- Value Until Time
-    21:00,                   !- Time {hh:mm}
-    0.938,                   !- Value Until Time
-    22:00,                   !- Time {hh:mm}
-    0.891,                   !- Value Until Time
-    23:00,                   !- Time {hh:mm}
-    0.835,                   !- Value Until Time
-    24:00,                   !- Time {hh:mm}
-    0.748;                   !- Value Until Time
+    01:00,                   !- Time 1
+    0.649,                   !- Value Until Time 1
+    02:00,                   !- Time 2
+    0.597,                   !- Value Until Time 2
+    03:00,                   !- Time 3
+    0.572,                   !- Value Until Time 3
+    04:00,                   !- Time 4
+    0.559,                   !- Value Until Time 4
+    05:00,                   !- Time 5
+    0.566,                   !- Value Until Time 5
+    06:00,                   !- Time 6
+    0.584,                   !- Value Until Time 6
+    07:00,                   !- Time 7
+    0.625,                   !- Value Until Time 7
+    08:00,                   !- Time 8
+    0.681,                   !- Value Until Time 8
+    09:00,                   !- Time 9
+    0.713,                   !- Value Until Time 9
+    10:00,                   !- Time 10
+    0.721,                   !- Value Until Time 10
+    11:00,                   !- Time 11
+    0.72,                    !- Value Until Time 11
+    12:00,                   !- Time 12
+    0.712,                   !- Value Until Time 12
+    13:00,                   !- Time 13
+    0.716,                   !- Value Until Time 13
+    14:00,                   !- Time 14
+    0.704,                   !- Value Until Time 14
+    15:00,                   !- Time 15
+    0.705,                   !- Value Until Time 15
+    16:00,                   !- Time 16
+    0.718,                   !- Value Until Time 16
+    17:00,                   !- Time 17
+    0.779,                   !- Value Until Time 17
+    18:00,                   !- Time 18
+    0.918,                   !- Value Until Time 18
+    19:00,                   !- Time 19
+    1.0,                     !- Value Until Time 19
+    20:00,                   !- Time 20
+    0.983,                   !- Value Until Time 20
+    21:00,                   !- Time 21
+    0.938,                   !- Value Until Time 21
+    22:00,                   !- Time 22
+    0.891,                   !- Value Until Time 22
+    23:00,                   !- Time 23
+    0.835,                   !- Value Until Time 23
+    24:00,                   !- Time 24
+    0.748;                   !- Value Until Time 24
 
   Schedule:Week:Daily,
     ApartmentMidRise EQP_APT_SCH Week Rule - Jan1-Dec31,  !- Name
@@ -864,11 +720,11 @@
   Schedule:Year,
     ApartmentMidRise EQP_APT_SCH,  !- Name
     Fractional,              !- Schedule Type Limits Name
-    ApartmentMidRise EQP_APT_SCH Week Rule - Jan1-Dec31,  !- Schedule:Week Name
-    1,                       !- Start Month
-    1,                       !- Start Day
-    12,                      !- End Month
-    31;                      !- End Day
+    ApartmentMidRise EQP_APT_SCH Week Rule - Jan1-Dec31,  !- Schedule:Week Name 1
+    1,                       !- Start Month 1
+    1,                       !- Start Day 1
+    12,                      !- End Month 1
+    31;                      !- End Day 1
 
   ElectricEquipment:Definition,
     Bathroom Fan,            !- Name
@@ -881,7 +737,7 @@
     0.5;                     !- Fraction Lost
 
   ElectricEquipment:Instance,
-    Space1-1BR Bathroom Fan,  !- Name
+    Space1-1BR Bathroom Fan, !- Name
     Bathroom Fan,            !- Electric Equipment Definition Name
     Space1-1BR,              !- Zone or ZoneList or Space or SpaceList Name
     Always On Continuous,    !- Schedule Name
@@ -897,7 +753,7 @@
     bathroom_fans;           !- End-Use Subcategory
 
   ElectricEquipment:Instance,
-    Space3-1BR Bathroom Fan,  !- Name
+    Space3-1BR Bathroom Fan, !- Name
     Bathroom Fan,            !- Electric Equipment Definition Name
     Space3-1BR,              !- Zone or ZoneList or Space or SpaceList Name
     Always On Continuous,    !- Schedule Name
@@ -908,42 +764,42 @@
     cooking range schedule allday1,  !- Name
     Fractional,              !- Schedule Type Limits Name
     No,                      !- Interpolate to Timestep
-    05:00,                   !- Time {hh:mm}
-    0.0597014925373134,      !- Value Until Time
-    06:00,                   !- Time {hh:mm}
-    0.111940298507463,       !- Value Until Time
-    07:00,                   !- Time {hh:mm}
-    0.171641791044776,       !- Value Until Time
-    08:00,                   !- Time {hh:mm}
-    0.291044776119403,       !- Value Until Time
-    11:00,                   !- Time {hh:mm}
-    0.343283582089552,       !- Value Until Time
-    12:00,                   !- Time {hh:mm}
-    0.402985074626866,       !- Value Until Time
-    13:00,                   !- Time {hh:mm}
-    0.462686567164179,       !- Value Until Time
-    14:00,                   !- Time {hh:mm}
-    0.343283582089552,       !- Value Until Time
-    15:00,                   !- Time {hh:mm}
-    0.291044776119403,       !- Value Until Time
-    16:00,                   !- Time {hh:mm}
-    0.402985074626866,       !- Value Until Time
-    17:00,                   !- Time {hh:mm}
-    0.567164179104478,       !- Value Until Time
-    18:00,                   !- Time {hh:mm}
-    1.0,                     !- Value Until Time
-    19:00,                   !- Time {hh:mm}
-    0.850746268656716,       !- Value Until Time
-    20:00,                   !- Time {hh:mm}
-    0.432835820895522,       !- Value Until Time
-    21:00,                   !- Time {hh:mm}
-    0.291044776119403,       !- Value Until Time
-    22:00,                   !- Time {hh:mm}
-    0.23134328358209,        !- Value Until Time
-    23:00,                   !- Time {hh:mm}
-    0.171641791044776,       !- Value Until Time
-    24:00,                   !- Time {hh:mm}
-    0.111940298507463;       !- Value Until Time
+    05:00,                   !- Time 1
+    0.0597014925373134,      !- Value Until Time 1
+    06:00,                   !- Time 2
+    0.111940298507463,       !- Value Until Time 2
+    07:00,                   !- Time 3
+    0.171641791044776,       !- Value Until Time 3
+    08:00,                   !- Time 4
+    0.291044776119403,       !- Value Until Time 4
+    11:00,                   !- Time 5
+    0.343283582089552,       !- Value Until Time 5
+    12:00,                   !- Time 6
+    0.402985074626866,       !- Value Until Time 6
+    13:00,                   !- Time 7
+    0.462686567164179,       !- Value Until Time 7
+    14:00,                   !- Time 8
+    0.343283582089552,       !- Value Until Time 8
+    15:00,                   !- Time 9
+    0.291044776119403,       !- Value Until Time 9
+    16:00,                   !- Time 10
+    0.402985074626866,       !- Value Until Time 10
+    17:00,                   !- Time 11
+    0.567164179104478,       !- Value Until Time 11
+    18:00,                   !- Time 12
+    1.0,                     !- Value Until Time 12
+    19:00,                   !- Time 13
+    0.850746268656716,       !- Value Until Time 13
+    20:00,                   !- Time 14
+    0.432835820895522,       !- Value Until Time 14
+    21:00,                   !- Time 15
+    0.291044776119403,       !- Value Until Time 15
+    22:00,                   !- Time 16
+    0.23134328358209,        !- Value Until Time 16
+    23:00,                   !- Time 17
+    0.171641791044776,       !- Value Until Time 17
+    24:00,                   !- Time 18
+    0.111940298507463;       !- Value Until Time 18
 
   Schedule:Week:Daily,
     cooking range schedule Week Rule - Jan1-Dec31,  !- Name
@@ -963,14 +819,14 @@
   Schedule:Year,
     cooking range schedule,  !- Name
     Fractional,              !- Schedule Type Limits Name
-    cooking range schedule Week Rule - Jan1-Dec31,  !- Schedule:Week Name
-    1,                       !- Start Month
-    1,                       !- Start Day
-    12,                      !- End Month
-    31;                      !- End Day
+    cooking range schedule Week Rule - Jan1-Dec31,  !- Schedule:Week Name 1
+    1,                       !- Start Month 1
+    1,                       !- Start Day 1
+    12,                      !- End Month 1
+    31;                      !- End Day 1
 
   GasEquipment:Definition,
-    Cooking Range Definition,  !- Name
+    Cooking Range Definition,!- Name
     EquipmentLevel,          !- Design Level Calculation Method
     200.0,                   !- Design Level {W}
     ,                        !- Power per Floor Area {W/m2}
@@ -982,7 +838,7 @@
 
   GasEquipment:Instance,
     Cooking Range,           !- Name
-    Cooking Range Definition,  !- Gas Equipment Definition Name
+    Cooking Range Definition,!- Gas Equipment Definition Name
     All Spaces,              !- Zone or ZoneList or Space or SpaceList Name
     cooking range schedule,  !- Schedule Name
     1.0,                     !- Multiplier
@@ -1047,27 +903,18 @@
   Schedule:Compact,
     EQUIP-1,                 !- Name
     Fractional,              !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: WeekDays SummerDesignDay CustomDay1 CustomDay2,  !- Field
-    Until: 8:00,             !- Field
-    0.02,                    !- Field
-    Until: 9:00,             !- Field
-    0.4,                     !- Field
-    Until: 14:00,            !- Field
-    0.9,                     !- Field
-    Until: 15:00,            !- Field
-    0.8,                     !- Field
-    Until: 16:00,            !- Field
-    0.7,                     !- Field
-    Until: 18:00,            !- Field
-    0.5,                     !- Field
-    Until: 20:00,            !- Field
-    0.3,                     !- Field
-    Until: 24:00,            !- Field
-    0.02,                    !- Field
-    For: Weekends WinterDesignDay Holiday,  !- Field
-    Until: 24:00,            !- Field
-    0.2;                     !- Field
+    Through: 12/31,          !- Field 1
+    For: WeekDays SummerDesignDay CustomDay1 CustomDay2, !- Field 2
+    Until: 8:00,0.02,        !- Field 3
+    Until: 9:00,0.4,         !- Field 5
+    Until: 14:00,0.9,        !- Field 7
+    Until: 15:00,0.8,        !- Field 9
+    Until: 16:00,0.7,        !- Field 11
+    Until: 18:00,0.5,        !- Field 13
+    Until: 20:00,0.3,        !- Field 15
+    Until: 24:00,0.02,       !- Field 17
+    For: Weekends WinterDesignDay Holiday, !- Field 19
+    Until: 24:00,0.2;        !- Field 20
 
   Lights:Definition,
     Lights 60W Incandescent Definition,  !- Name
@@ -1106,34 +953,22 @@
 
   Schedule:Compact,
     LIGHTS-1,                !- Name
-    Fractional,                !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: WeekDays SummerDesignDay CustomDay1 CustomDay2,  !- Field
-    Until: 8:00,             !- Field
-    0.05,                    !- Field
-    Until: 9:00,             !- Field
-    0.9,                     !- Field
-    Until: 10:00,            !- Field
-    0.95,                    !- Field
-    Until: 11:00,            !- Field
-    1.00,                    !- Field
-    Until: 12:00,            !- Field
-    0.95,                    !- Field
-    Until: 13:00,            !- Field
-    0.8,                     !- Field
-    Until: 14:00,            !- Field
-    0.9,                     !- Field
-    Until: 18:00,            !- Field
-    1.00,                    !- Field
-    Until: 19:00,            !- Field
-    0.60,                    !- Field
-    Until: 21:00,            !- Field
-    0.40,                    !- Field
-    Until: 24:00,            !- Field
-    0.05,                    !- Field
-    For: Weekends WinterDesignDay Holiday,  !- Field
-    Until: 24:00,            !- Field
-    0.05;                    !- Field
+    Fractional,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: WeekDays SummerDesignDay CustomDay1 CustomDay2, !- Field 2
+    Until: 8:00,0.05,        !- Field 3
+    Until: 9:00,0.9,         !- Field 5
+    Until: 10:00,0.95,       !- Field 7
+    Until: 11:00,1.00,       !- Field 9
+    Until: 12:00,0.95,       !- Field 11
+    Until: 13:00,0.8,        !- Field 13
+    Until: 14:00,0.9,        !- Field 15
+    Until: 18:00,1.00,       !- Field 17
+    Until: 19:00,0.60,       !- Field 19
+    Until: 21:00,0.40,       !- Field 21
+    Until: 24:00,0.05,       !- Field 23
+    For: Weekends WinterDesignDay Holiday, !- Field 25
+    Until: 24:00,0.05;       !- Field 26
 
   People:Definition,
     People Definition,       !- Name
@@ -1186,92 +1021,67 @@
   Schedule:Compact,
     ACTIVITY_SCH,            !- Name
     Any Number,              !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    120.;                    !- Field
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,120.;       !- Field 3
 
   Schedule:Compact,
     AIR_VELO_SCH,            !- Name
     Any Number,              !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    0.2;                     !- Field
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,0.2;        !- Field 3
 
   Schedule:Compact,
     CLOTHING_SCH,            !- Name
     Any Number,              !- Schedule Type Limits Name
-    Through: 04/30,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    1.0,                     !- Field
-    Through: 09/30,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    0.5,                     !- Field
-    Through: 12/31,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    1.0;                     !- Field
+    Through: 04/30,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,1.0,        !- Field 3
+    Through: 09/30,          !- Field 5
+    For: AllDays,            !- Field 6
+    Until: 24:00,0.5,        !- Field 7
+    Through: 12/31,          !- Field 9
+    For: AllDays,            !- Field 10
+    Until: 24:00,1.0;        !- Field 11
 
   Schedule:Compact,
     WORK_EFF_SCH,            !- Name
-    Fractional,                !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: AllDays,            !- Field
-    Until: 24:00,            !- Field
-    0.0;                     !- Field
+    Fractional,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: AllDays,            !- Field 2
+    Until: 24:00,0.0;        !- Field 3
 
   Schedule:Compact,
     BLDG_OCC_SCH,            !- Name
-    Fractional,                !- Schedule Type Limits Name
-    Through: 12/31,          !- Field
-    For: SummerDesignDay,    !- Field
-    Until: 06:00,            !- Field
-    0.0,                     !- Field
-    Until: 22:00,            !- Field
-    1.0,                     !- Field
-    Until: 24:00,            !- Field
-    0.05,                    !- Field
-    For: Weekdays,           !- Field
-    Until: 06:00,            !- Field
-    0.0,                     !- Field
-    Until: 07:00,            !- Field
-    0.1,                     !- Field
-    Until: 08:00,            !- Field
-    0.2,                     !- Field
-    Until: 12:00,            !- Field
-    0.95,                    !- Field
-    Until: 13:00,            !- Field
-    0.5,                     !- Field
-    Until: 17:00,            !- Field
-    0.95,                    !- Field
-    Until: 18:00,            !- Field
-    0.7,                     !- Field
-    Until: 20:00,            !- Field
-    0.4,                     !- Field
-    Until: 22:00,            !- Field
-    0.1,                     !- Field
-    Until: 24:00,            !- Field
-    0.05,                    !- Field
-    For: Saturday,           !- Field
-    Until: 06:00,            !- Field
-    0.0,                     !- Field
-    Until: 08:00,            !- Field
-    0.1,                     !- Field
-    Until: 14:00,            !- Field
-    0.5,                     !- Field
-    Until: 17:00,            !- Field
-    0.1,                     !- Field
-    Until: 24:00,            !- Field
-    0.0,                     !- Field
-    For: AllOtherDays,       !- Field
-    Until: 24:00,            !- Field
-    0.0;                     !- Field
+    Fractional,              !- Schedule Type Limits Name
+    Through: 12/31,          !- Field 1
+    For: SummerDesignDay,    !- Field 2
+    Until: 06:00,0.0,        !- Field 3
+    Until: 22:00,1.0,        !- Field 5
+    Until: 24:00,0.05,       !- Field 7
+    For: Weekdays,           !- Field 9
+    Until: 06:00,0.0,        !- Field 10
+    Until: 07:00,0.1,        !- Field 12
+    Until: 08:00,0.2,        !- Field 14
+    Until: 12:00,0.95,       !- Field 16
+    Until: 13:00,0.5,        !- Field 18
+    Until: 17:00,0.95,       !- Field 20
+    Until: 18:00,0.7,        !- Field 22
+    Until: 20:00,0.4,        !- Field 24
+    Until: 22:00,0.1,        !- Field 26
+    Until: 24:00,0.05,       !- Field 28
+    For: Saturday,           !- Field 30
+    Until: 06:00,0.0,        !- Field 31
+    Until: 08:00,0.1,        !- Field 33
+    Until: 14:00,0.5,        !- Field 35
+    Until: 17:00,0.1,        !- Field 37
+    Until: 24:00,0.0,        !- Field 39
+    For: AllOtherDays,       !- Field 41
+    Until: 24:00,0.0;        !- Field 42
 
   Output:Table:SummaryReports,
-    AllSummary;              !- Report Name
+    AllSummary;              !- Report 1 Name
 
   Schedule:Constant,Always On Discrete,OnOff,1.0;
 
@@ -1281,14 +1091,14 @@
 
   ScheduleTypeLimits,
     Fractional,              !- Name
-    0.0,                     !- Lower Limit Value {BasedOnField A3}
-    1.0,                     !- Upper Limit Value {BasedOnField A3}
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
     Continuous;              !- Numeric Type
 
   ScheduleTypeLimits,
     OnOff,                   !- Name
-    0.0,                     !- Lower Limit Value {BasedOnField A3}
-    1.0,                     !- Upper Limit Value {BasedOnField A3}
+    0.0,                     !- Lower Limit Value
+    1.0,                     !- Upper Limit Value
     Discrete,                !- Numeric Type
     Availability;            !- Unit Type
 
@@ -1302,3 +1112,4 @@
 
   Output:SQLite,
     SimpleAndTabular;        !- Option Type
+

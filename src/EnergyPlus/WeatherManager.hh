@@ -65,6 +65,8 @@
 
 namespace EnergyPlus {
 
+class Vector3D;
+
 // Forward declarations
 struct EnergyPlusData;
 
@@ -340,7 +342,6 @@ namespace Weather {
         // Members
         std::string Name;      // DataPeriod Title
         std::string DayOfWeek; // Start Day of Week for DataPeriod
-        int NumYearsData = 1;  // Number of years for which data is present in EPW.
         int WeekDay = 0;
         int StMon = 0;
         int StDay = 0;
@@ -384,13 +385,8 @@ namespace Weather {
         int DifSolarRad = 0;     // Diffuse Radiation (wh/m2)
         int TotalSkyCover = 0;   // Total Sky Cover (tenths)
         int OpaqueSkyCover = 0;  // Opaque Sky Cover (tenths)
-        int Visibility = 0;      // Visibility (km)
-        int Ceiling = 0;         // Ceiling Height (m)
         int LiquidPrecip = 0;    // Precipitable Water (mm)
-        int WaterPrecip = 0;     // Precipitable Water (mm)
-        int AerOptDepth = 0;     // Aerosol Optical Depth
         int SnowDepth = 0;       // Snow Depth (cm)
-        int DaysLastSnow = 0;    // Number of Days since last snow
         int WeathCodes = 0;      // Weather codes invalid
         int Albedo = 0;          // Albedo
     };
@@ -420,8 +416,7 @@ namespace Weather {
         bool IsSchedule = true; // Default is using Schedule
         SkyTempModel skyTempModel = SkyTempModel::ClarkAllen;
         Sched::DayOrYearSchedule *sched = nullptr; // schedule when used
-        bool UsedForEnvrn = false;
-        bool UseWeatherFileHorizontalIR = true; // If false, horizontal IR and sky temperature are calculated with WP models
+        bool UseWeatherFileHorizontalIR = true;    // If false, horizontal IR and sky temperature are calculated with WP models
     };
 
     struct UnderwaterBoundary
@@ -577,9 +572,9 @@ namespace Weather {
                                       Real64 EqOfTime,     // Equation of Time
                                       Real64 SinSolDeclin, // Sine of Solar Declination
                                       Real64 CosSolDeclin, // Cosine of Solar Declination
-                                      Vector3<Real64> &SUNCOS);
+                                      Vector3D &SUNCOS);
 
-    void DetermineSunUpDown(EnergyPlusData &state, Vector3<Real64> &SUNCOS);
+    void DetermineSunUpDown(EnergyPlusData &state, Vector3D &SUNCOS);
 
     void OpenWeatherFile(EnergyPlusData &state, bool &ErrorsFound);
 

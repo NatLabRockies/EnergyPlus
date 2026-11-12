@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -213,6 +214,13 @@ namespace Photovoltaics {
         default: {
             ShowFatalError(state, std::format("Specified generator model type not found for PV generator = {}", GeneratorName));
         } break;
+        }
+
+        auto const cellIntegrationMode = state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode;
+        if (cellIntegrationMode == CellIntegration::SurfaceOutsideFace || cellIntegrationMode == CellIntegration::TranspiredCollector ||
+            cellIntegrationMode == CellIntegration::ExteriorVentedCavity || cellIntegrationMode == CellIntegration::PVTSolarCollector) {
+            // Surface coupling runs before the electric generator pass, so retain the current schedule state for the next coupling pass.
+            state.dataPhotovoltaic->PVarray(PVnum).SurfaceCouplingRunFlag = RunFlag;
         }
 
         ReportPV(state, PVnum);
@@ -402,11 +410,12 @@ namespace Photovoltaics {
             case CellIntegration::SurfaceOutsideFace:
             case CellIntegration::TranspiredCollector:
             case CellIntegration::ExteriorVentedCavity: {
-                dupPtr = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).SurfaceName,
-                                              state.dataPhotovoltaic->PVarray({PVnum + 1, state.dataPhotovoltaic->NumPVs}),
-                                              &PVArrayStruct::SurfaceName);
-                if (dupPtr != 0) {
-                    dupPtr += PVnum; // to correct for shortened array in find item
+                dupPtr = 0;
+                for (int iPV = PVnum + 1; iPV <= state.dataPhotovoltaic->NumPVs; ++iPV) {
+                    if (state.dataPhotovoltaic->PVarray(iPV).SurfaceName == state.dataPhotovoltaic->PVarray(PVnum).SurfaceName) {
+                        dupPtr = iPV;
+                        break;
+                    }
                 }
                 if (dupPtr != 0) {
                     auto &thisPVarray = state.dataPhotovoltaic->PVarray(dupPtr);
@@ -841,7 +850,6 @@ namespace Photovoltaics {
 
         // Using/Aliasing
         Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
-        using TranspiredCollector::SetUTSCQdotSource;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int thisZone; // working index for zones
@@ -861,23 +869,84 @@ namespace Photovoltaics {
 
         switch (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode) {
             // SurfaceSink is not multiplied...
-        case CellIntegration::SurfaceOutsideFace: {
-            state.dataHeatBalFanSys->QPVSysSource(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) =
-                -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink;
-        } break;
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            UpdatePVIntegrationSource(state, PVnum);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
+    {
+        // Recalculate PV that depends on a surface or collector temperature before the heat balance uses its current sink.
+        auto const &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            break;
+        default:
+            return;
+        }
+
+        switch (pv.PVModelType) {
+        case PVModel::Simple:
+            CalcSimplePV(state, PVnum);
+            break;
+        case PVModel::TRNSYS:
+            InitTRNSYSPV(state, PVnum);
+            CalcTRNSYSPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        case PVModel::Sandia:
+            CalcSandiaPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        default:
+            break;
+        }
+
+        UpdatePVIntegrationSource(state, PVnum);
+    }
+
+    void UpdatePVIntegrationSource(EnergyPlusData &state, int const PVnum)
+    {
+        // Publish the PV sink to its coupled thermal model and request another pass when the sink changes materially.
+        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        Real64 const previousSource = pv.SurfaceCouplingSource;
+
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+            state.dataHeatBalFanSys->QPVSysSource(pv.SurfacePtr) = -pv.SurfaceSink;
+            break;
         case CellIntegration::TranspiredCollector: {
-            SetUTSCQdotSource(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(state, pv.UTSCPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
-            SetVentedModuleQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            SetVentedModuleQdotSource(state, pv.ExtVentCavPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::PVTSolarCollector: {
-            PhotovoltaicThermalCollectors::SetPVTQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).PVTPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            PhotovoltaicThermalCollectors::SetPVTQdotSource(state, pv.PVTPtr, -1.0 * pv.SurfaceSink);
         } break;
         default:
             break;
+        }
+
+        pv.SurfaceCouplingNeedsResim = std::abs(pv.SurfaceSink - previousSource) > 0.1;
+        pv.SurfaceCouplingSource = pv.SurfaceSink;
+        if (pv.SurfaceCouplingNeedsResim) {
+            state.dataHVACGlobal->SimElecCircuitsFlag = true;
+            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace || pv.CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
+                pv.CellIntegrationMode == CellIntegration::TranspiredCollector) {
+                state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+            }
+            if (pv.CellIntegrationMode == CellIntegration::TranspiredCollector || pv.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+                state.dataHVACGlobal->SimAirLoopsFlag = true;
+                state.dataHVACGlobal->SimPlantLoopsFlag = true;
+            }
         }
     }
 
@@ -926,11 +995,11 @@ namespace Photovoltaics {
         thisPVarray.SNLPVinto.IcDiffuse =
             state.dataHeatBal->SurfQRadSWOutIncident(ThisSurf) - state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/ m2)(was kJ/hr m2)
         thisPVarray.SNLPVinto.IncidenceAngle =
-            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;         // (deg) from dataHeatBalance
-        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS(3)) / Constant::DegToRad; //(degrees),
-        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                   //(deg. C)
-        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);                // (m/s)
-        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                    // from DataEnvironment via USE
+            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;        // (deg) from dataHeatBalance
+        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS.z) / Constant::DegToRad; //(degrees),
+        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                  //(deg. C)
+        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);               // (m/s)
+        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                   // from DataEnvironment via USE
 
         if (((thisPVarray.SNLPVinto.IcBeam + thisPVarray.SNLPVinto.IcDiffuse) > DataPhotovoltaics::MinIrradiance) && (RunFlag)) {
 
@@ -1179,7 +1248,7 @@ namespace Photovoltaics {
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.TimeElapsed = TimeElapsed;
         }
 
-        if (any_gt(state.dataHeatBal->SurfQRadSWOutIncident, 0.0)) {
+        if (std::ranges::any_of(state.dataHeatBal->SurfQRadSWOutIncident, [](Real64 const v) { return v > 0.0; })) {
             //  Determine the amount of radiation incident on each PV
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation =
                 state.dataHeatBal->SurfQRadSWOutIncident(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr); //[W/m2]
@@ -1423,18 +1492,12 @@ namespace Photovoltaics {
         PA = IA * VA;
 
         // Place local variables into the reporting structure
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayCurrent = IA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoltage = VA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayEfficiency = ETA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayEfficiency = ETA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).Report.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTempK = CellTemp;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayIsc = ISCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayIsc = ISCA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink = PA;
     }

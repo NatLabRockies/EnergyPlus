@@ -74,8 +74,6 @@ namespace ChillerExhaustAbsorption {
     {
         // Members
         // Parts of Type that do not correspond with IDD definition
-        bool Available = false; // need an array of logicals--load identifiers of available equipment
-        bool ON = false;        // simulate the machine at it's operating part load ratio
         bool InCoolingMode = false;
         bool InHeatingMode = false;
         // Part of Type that directly corresponds with IDD definition
@@ -152,12 +150,8 @@ namespace ChillerExhaustAbsorption {
         Real64 HeatingEnergy = 0.0;            // heating energy
         Real64 TowerLoad = 0.0;                // load on the cooling tower/condenser (previously called QCond)
         Real64 TowerEnergy = 0.0;              // variable to track total tower load for a period (was CondEnergy)
-        Real64 ThermalEnergyUseRate = 0.0;     // instantaneous use of Exhaust for period
-        Real64 ThermalEnergy = 0.0;            // variable to track total ThermalEnergy used for a period
         Real64 CoolThermalEnergyUseRate = 0.0; // instantaneous use of Exhaust for period for cooling
-        Real64 CoolThermalEnergy = 0.0;        // variable to track total ThermalEnergy used for a period for cooling
         Real64 HeatThermalEnergyUseRate = 0.0; // instantaneous use of Exhaust for period for heating
-        Real64 HeatThermalEnergy = 0.0;        // variable to track total ThermalEnergy used for a period for heating
         Real64 ElectricPower = 0.0;            // parasitic electric power used (was PumpingPower)
         Real64 ElectricEnergy = 0.0;           // track the total electricity used for a period (was PumpingEnergy)
         Real64 CoolElectricPower = 0.0;        // parasitic electric power used  for cooling

@@ -87,7 +87,6 @@ namespace ZoneDehumidifier {
         Real64 RatedAirMassFlow = 0.0;                                        // Rated air mass flow rate through the dehumidifier [kg/s]
         Real64 MinInletAirTemp = 0.0;                                         // Minimum dry-bulb temperature for dehumidifier operation [C]
         Real64 MaxInletAirTemp = 0.0;                                         // Maximum dry-bulb temperature for dehumidifier operation [C]
-        Real64 InletAirMassFlow = 0.0;                                        // Inlet air mass flow rate for the time step being simulated [kg/s]
         Real64 OutletAirEnthalpy = 0.0;                                       // Dehumidifier outlet air enthalpy [J/kg]
         Real64 OutletAirHumRat = 0.0;                                         // Dehumidifier outlet air humidity ratio [kg/kg]
         Real64 OffCycleParasiticLoad = 0.0;                                   // Off Cycle Parasitic Load, user input [W]

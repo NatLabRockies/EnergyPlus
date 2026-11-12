@@ -9,3 +9,24 @@
     margin-bottom: 10px;
     background: transparent;
 }
+
+/* Center documentation figures and keep them from dominating wide screens. */
+figure {
+    text-align: center;
+}
+
+.rst-content figure img {
+    display: block;
+    width: auto !important;
+    height: auto !important;
+    max-width: min(100%, 7in);
+    max-height: 7in;
+    margin-inline: auto;
+}
+
+/* Center tables that are narrower than the available content width. */
+table {
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+}

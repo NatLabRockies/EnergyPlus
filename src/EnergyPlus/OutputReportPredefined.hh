@@ -395,7 +395,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDXHeatCoilSizingRatio = 0;
     int pdchDXHeatCoilHighCap = 0;
     int pdchDXHeatCoilLowCap = 0;
-    int pdchDXHeatCoilHSPFSI = 0;    // HSPF value in SI unit at AHRI std. 340/360 conditions [W/W]
     int pdchDXHeatCoilHSPFIP = 0;    // HSPF value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
     int pdchDXHeatCoilRegionNum = 0; // Region number for which HSPF is calculated
     // Standard 229 Predef outputs for DX Heating Coils
@@ -408,7 +407,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDXHeatCoilType_2023 = 0; // DX Heating coil type
     int pdchDXHeatCoilHighCap_2023 = 0;
     int pdchDXHeatCoilLowCap_2023 = 0;
-    int pdchDXHeatCoilHSPF2SI_2023 = 0;   // HSPF2 value in SI unit at AHRI std. 340/360 conditions [W/W]
     int pdchDXHeatCoilHSPF2IP_2023 = 0;   // HSPF2 value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
     int pdchDXHeatCoilRegionNum_2023 = 0; // Region number for which HSPF is calculated
     int pdchDXHeatCoilMinOADBTforCompOp_2023 = 0;
@@ -523,11 +521,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchAWHPType = 0;                    // Type
     int pdchAWHPRefCap = 0;                  // Reference Capacity[W]
     int pdchAWHPRefCOP = 0;                  // Reference COP
-    int pdchAWHPRefEff = 0;                  // Reference Efficiency [W/W]
-    int pdchAWHPRatedCap = 0;                // Rated Capacity [W]
-    int pdchAWHPRatedEff = 0;                // Rated Efficiency [W/W]
-    int pdchAWHPSEER = 0;                    // SEER
-    int pdchAWHPHSPF = 0;                    // HSPF
     int pdchAWHPMinPLR = 0;                  // Minimum part load ratio
     int pdchAWHPDesSizeRefAirTemp;           // Design Size Reference Air Temperature [C]"
     int pdchAWHPDesEnterWaterTemp;           // Entering Water Temperature [C]"
@@ -839,7 +832,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchCoilHVACType = 0;
     int pdchCoilHVACName = 0;
     int pdchCoilZoneName = 0;
-    int pdchCoilName = 0;
     int pdchCoilType = 0;
     int pdchSysSizingMethCoinc = 0;
     int pdchSysSizingMethCap = 0;
@@ -880,7 +872,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchCoilRatedTotalCap = 0;
     int pdchCoilRatedSensCap = 0;
     int pdchCoilOffRatingCapacityModifierIdealPeak = 0;
-    int pdchCoilOffRatingCapacityModifierSimPeak = 0;
     int pdchCoilRatedAirMass = 0;
     int pdchCoilRatedEntDryBulb = 0;
     int pdchCoilRatedEntWetBulb = 0;
@@ -890,10 +881,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchCoilRatedLvgWetBulb = 0;
     int pdchCoilRatedLvgHumRat = 0;
     int pdchCoilRatedLvgEnthalpy = 0;
-    int pdchCoilRatedWaterMass = 0;
-    int pdchCoilRatedEntWaterTemp = 0;
-    int pdchCoilRatedLvgWaterTemp = 0;
-    int pdchCoilRatedWaterDeltaTemp = 0;
 
     int pdchFanAssociatedWithCoilName = 0;
     int pdchFanAssociatedWithCoilType = 0;
@@ -916,7 +903,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOAWetBulbatIdealPeak = 0;
     int pdchOAVolFlowIdealPeak = 0;
     int pdchOAFlowPrcntIdealPeak = 0;
-    int pdchOABarometricPressureIdealPeak = 0;
 
     int pdchAirSysRADryBulbIdealPeak = 0;
     int pdchAirSysRAHumRatIdealPeak = 0;
@@ -926,8 +912,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchCoilUA = 0;
     int pdchZoneSensibleLoadIdealPeak = 0;
     int pdchZoneLatentLoadIdealPeak = 0;
-    int pdchCoilIdealSizCapOverSimPeak = 0;
-    int pdchCoilIdealSizCapUnderSimPeak = 0;
     int pdchReheatCoilMultiplier = 0;
     int pdchFlowCapRatioLowCapIncreaseRatio = 0;
     int pdchFlowCapRatioHiCapDecreaseRatio = 0;
@@ -953,7 +937,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     // Coil Sizing Summary (subset of Coil Selection Table)
     int pdst2CoilSummaryCoilSelection = 0;
-    int pdch2CoilName = 0;
     int pdch2CoilType = 0;
     int pdch2CoilHVACType = 0;
     int pdch2CoilHVACName = 0;
@@ -1103,7 +1086,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchTopAirSubCompName = 0;
     int pdchTopAirSubSubCompType = 0;
     int pdchTopAirSubSubCompName = 0;
-    int pdchTopAirDownSplitMixName = 0;
     int pdchTopAirMixName = 0;
 
     int pdstTopAirDemand = 0;
@@ -1147,7 +1129,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaoAvgInfil = 0;
     int pdchOaoAvgAFNInfil = 0;
     int pdchOaoAvgSimpVent = 0;
-    int pdchOaoAvgTotVent = 0;
     int pdstOAminOcc = 0;
     int pdchOaoAvgNumOcc2 = 0;
     int pdchOaoNomNumOcc2 = 0;
@@ -1156,7 +1137,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaoMinInfil = 0;
     int pdchOaoMinAFNInfil = 0;
     int pdchOaoMinSimpVent = 0;
-    int pdchOaoMinTotVent = 0;
 
     // Outdoor Air Details Report
     int pdrOutsideAirDetails = 0;
@@ -1431,8 +1411,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchS62zcdAlN = 0;
     int pdchS62zcdBox = 0;
     int pdchS62zcdVpz = 0;
-    int pdchS62zcdVps = 0;
-    int pdchS62zcdVsec = 0;
     int pdchS62zcdVdz = 0;
     int pdchS62zcdVpzmin = 0;
     int pdchS62zcdVpzminSPSize = 0;
@@ -1448,7 +1426,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdstS62sysCoolDes = 0;
     int pdchS62scdVpz = 0;
     int pdchS62scdVps = 0;
-    int pdchS62scdVsec = 0;
     int pdchS62scdVdz = 0;
     int pdchS62scdVpzmin = 0;
     int pdchS62scdVozclg = 0;
@@ -1458,8 +1435,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchS62zhdAlN = 0;
     int pdchS62zhdBox = 0;
     int pdchS62zhdVpz = 0;
-    int pdchS62zhdVps = 0;
-    int pdchS62zhdVsec = 0;
     int pdchS62zhdVdz = 0;
     int pdchS62zhdVpzmin = 0;
     int pdchS62zhdVpzminSPSize = 0;
@@ -1475,7 +1450,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdstS62sysHeatDes = 0;
     int pdchS62shdVpz = 0;
     int pdchS62shdVps = 0;
-    int pdchS62shdVsec = 0;
     int pdchS62shdVdz = 0;
     int pdchS62shdVpzmin = 0;
     int pdchS62shdVozhtg = 0;
@@ -1487,7 +1461,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchLeedGenData = 0;
 
     int pdstLeedSpaceUsageType = 0;
-    int pdchLeedSutName = 0;
     int pdchLeedSutSpArea = 0;
     int pdchLeedSutOcArea = 0;
     int pdchLeedSutUnArea = 0;
@@ -1497,14 +1470,12 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchLeedAmData = 0;
 
     int pdstLeedEneTypSum = 0;
-    int pdchLeedEtsType = 0;
     int pdchLeedEtsRtNm = 0;
     int pdchLeedEtsVirt = 0;
     int pdchLeedEtsEneUnt = 0;
     int pdchLeedEtsDemUnt = 0;
 
     int pdstLeedPerf = 0;
-    int pdchLeedPerfRot = 0;
     int pdchLeedPerfElEneUse = 0;
     int pdchLeedPerfElDem = 0;
     int pdchLeedPerfGasEneUse = 0;
@@ -1533,12 +1504,10 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchLeedPerfDisHtStDem = 0;
 
     int pdstLeedEneUseSum = 0;
-    int pdchLeedEusUnt = 0;
     int pdchLeedEusProc = 0;
     int pdchLeedEusTotal = 0;
 
     int pdstLeedEneCostSum = 0;
-    int pdchLeedEcUnt = 0;
     int pdchLeedEcsProc = 0;
     int pdchLeedEcsTotal = 0;
     Real64 LEEDelecCostTotal = 0;
@@ -1576,89 +1545,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     Real64 pdchLeedVentMinFlowPerZone = 0;
     Real64 pdchLeedVentMinVentPerArea = 0;
     Real64 pdchLeedVentMinVentPerZone = 0;
-
-    int pdrThermalResilience = 0;
-    int pdstHIHours = 0;
-    int pdchHIHourSafe = 0;
-    int pdchHIHourCaution = 0;
-    int pdchHIHourExtremeCaution = 0;
-    int pdchHIHourDanger = 0;
-    int pdchHIHourExtremeDanger = 0;
-    int pdstHIOccuHours = 0;
-    int pdchHIOccuHourSafe = 0;
-    int pdchHIOccuHourCaution = 0;
-    int pdchHIOccuHourExtremeCaution = 0;
-    int pdchHIOccuHourDanger = 0;
-    int pdchHIOccuHourExtremeDanger = 0;
-    int pdstHIOccupiedHours = 0;
-    int pdchHIOccupiedHourSafe = 0;
-    int pdchHIOccupiedHourCaution = 0;
-    int pdchHIOccupiedHourExtremeCaution = 0;
-    int pdchHIOccupiedHourDanger = 0;
-    int pdchHIOccupiedHourExtremeDanger = 0;
-    int pdstHumidexHours = 0;
-    int pdchHumidexHourLittle = 0;
-    int pdchHumidexHourSome = 0;
-    int pdchHumidexHourGreat = 0;
-    int pdchHumidexHourDanger = 0;
-    int pdchHumidexHourStroke = 0;
-    int pdstHumidexOccuHours = 0;
-    int pdchHumidexOccuHourLittle = 0;
-    int pdchHumidexOccuHourSome = 0;
-    int pdchHumidexOccuHourGreat = 0;
-    int pdchHumidexOccuHourDanger = 0;
-    int pdchHumidexOccuHourStroke = 0;
-    int pdstHumidexOccupiedHours = 0;
-    int pdchHumidexOccupiedHourLittle = 0;
-    int pdchHumidexOccupiedHourSome = 0;
-    int pdchHumidexOccupiedHourGreat = 0;
-    int pdchHumidexOccupiedHourDanger = 0;
-    int pdchHumidexOccupiedHourStroke = 0;
-
-    int pdstHeatingSETHours = 0;
-    int pdchHeatingSETHours = 0;
-    int pdchHeatingSETOccuHours = 0;
-    int pdchHeatingSETOccupiedHours = 0;
-    int pdchHeatingSETUnmetDuration = 0;
-    int pdchHeatingSETUnmetTime = 0;
-    int pdstCoolingSETHours = 0;
-    int pdchCoolingSETHours = 0;
-    int pdchCoolingSETOccuHours = 0;
-    int pdchCoolingSETOccupiedHours = 0;
-    int pdchCoolingSETUnmetDuration = 0;
-    int pdchCoolingSETUnmetTime = 0;
-
-    int pdstHourOfSafetyColdEvent = 0;
-    int pdchColdHourOfSafety = 0;
-    int pdchColdSafetyEndTime = 0;
-    int pdchColdSafeTempExceedHour = 0;
-    int pdchColdSafeTempExceedOccHour = 0;
-    int pdchColdSafeTempExceedOccupiedHour = 0;
-    int pdstHourOfSafetyHeatEvent = 0;
-    int pdchHeatHourOfSafety = 0;
-    int pdchHeatSafetyEndTime = 0;
-    int pdchHeatSafeTempExceedHour = 0;
-    int pdchHeatSafeTempExceedOccHour = 0;
-    int pdchHeatSafeTempExceedOccupiedHour = 0;
-
-    int pdstUnmetDegreeHour = 0;
-    int pdchCoolingUnmetDegreeHour = 0;
-    int pdchCoolingUnmetDegreeOccHour = 0;
-    int pdchCoolingUnmetDegreeOccupiedHour = 0;
-    int pdchHeatingUnmetDegreeHour = 0;
-    int pdchHeatingUnmetDegreeOccHour = 0;
-    int pdchHeatingUnmetDegreeOccupiedHour = 0;
-
-    int pdstDiscomfortWtExceedOccuHour = 0;
-    int pdstDiscomfortWtExceedOccupiedHour = 0;
-    int pdchVeryColdExceedOccuHour = 0;
-    int pdchCoolExceedOccuHour = 0;
-    int pdchWarmExceedOccuHour = 0;
-    int pdchVeryHotExceedOccuHour = 0;
-    int pdchVeryColdExceedOccupiedHour = 0;
-    int pdchCoolExceedOccupiedHour = 0;
-    int pdchWarmExceedOccupiedHour = 0;
-    int pdchVeryHotExceedOccupiedHour = 0;
 
     int pdrCO2Resilience = 0;
     int pdstCO2Hours = 0;
@@ -1721,14 +1607,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     Real64 TotalAllZonesAtVozDynOccForOA = 0.0;   // total time all zones at target Voz-Dyn
     Real64 TotalAnyZoneAboveVozDynOccForOA = 0.0; // total time any zone above target Voz-Dyn
     Real64 TotalAnyZoneVentUnoccForOA = 0.0;      // total time any zone has ventilation when unoccupied
-
-    Real64 TotalAnyAirLoopBelowVozDynForOA = 0.0;    // total time any air loop below target Voz-Dyn
-    Real64 TotalAllAirLoopsAtVozDynForOA = 0.0;      // total time all air loops at target Voz-Dyn
-    Real64 TotalAnyAirLoopAboveVozDynForOA = 0.0;    // total time any air loop above target Voz-Dyn
-    Real64 TotalAnyAirLoopBelowVozDynOccForOA = 0.0; // total time any air loop below target Voz-Dyn
-    Real64 TotalAllAirLoopsAtVozDynOccForOA = 0.0;   // total time all air loops at target Voz-Dyn
-    Real64 TotalAnyAirLoopAboveVozDynOccForOA = 0.0; // total time any air loop above target Voz-Dyn
-    Real64 TotalAnyAirLoopVentUnoccForOA = 0.0;      // total time any air loop has ventilation when unoccupied
 
     Array1D<OutputReportPredefined::reportNameType> reportName;
     Array1D<OutputReportPredefined::SubTableType> subTable;

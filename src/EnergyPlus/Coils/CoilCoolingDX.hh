@@ -94,7 +94,7 @@ struct CoilCoolingDX
                   HVAC::FanOp const fanOp,
                   bool singleMode,
                   Real64 LoadSHR = -1.0);
-    void setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, int airLoopNum);
+    void setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName);
     void getFixedData(int &evapInletNodeIndex,
                       int &evapOutletNodeIndex,
                       int &condInletNodeIndex,
@@ -113,7 +113,6 @@ struct CoilCoolingDX
     int getOpModeCapFTIndex(HVAC::CoilMode mode = HVAC::CoilMode::Normal);
     Real64 condMassFlowRate(EnergyPlusData &state, HVAC::CoilMode mode);
 
-    CoilCoolingDXInputSpecification original_input_specs;
     std::string name;
     HVAC::CoilType coilType = HVAC::CoilType::Invalid;
     int coilReportNum = -1;
@@ -134,7 +133,6 @@ struct CoilCoolingDX
     Real64 evaporativeCondSupplyTankConsump = 0.0;
     Real64 evapCondPumpElecPower = 0.0;
     Real64 evapCondPumpElecConsumption = 0.0;
-    int airLoopNum = 0; // Add for AFN compatibility, revisit at a later date
     int supplyFanIndex = 0;
     HVAC::FanType supplyFanType = HVAC::FanType::Invalid;
     std::string supplyFanName;
@@ -177,7 +175,6 @@ struct CoilCoolingDX
     EnergyPlus::DataHeatBalance::HeatReclaimDataBase reclaimHeat;
 
     void setToHundredPercentDOAS();
-    bool isHundredPercentDOAS = false;
 
 private:
     static bool
@@ -189,7 +186,6 @@ struct CoilCoolingDXData : BaseGlobalStruct
     std::vector<CoilCoolingDX> coilCoolingDXs;
     bool coilCoolingDXGetInputFlag = true;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
-    HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override

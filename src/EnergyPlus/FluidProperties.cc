@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <format>
@@ -582,7 +583,9 @@ namespace Fluid {
         waterRaw->CpConcs.allocate(waterRaw->NumCpConcPoints);
         waterRaw->CpConcs = 0.0;
         waterRaw->CpValues.allocate(waterRaw->NumCpConcPoints, waterRaw->NumCpTempPoints);
-        waterRaw->CpValues(1, {1, waterRaw->NumCpTempPoints}) = DefaultWaterCpData;
+        for (int j = 1; j <= waterRaw->NumCpTempPoints; ++j) {
+            waterRaw->CpValues(1, j) = DefaultWaterCpData[j - 1];
+        }
 
         waterRaw->RhoDataPresent = true;
         waterRaw->NumRhoConcPoints = 1;
@@ -592,7 +595,9 @@ namespace Fluid {
         waterRaw->RhoConcs.allocate(waterRaw->NumRhoConcPoints);
         waterRaw->RhoConcs = 0.0;
         waterRaw->RhoValues.allocate(waterRaw->NumRhoConcPoints, waterRaw->NumRhoTempPoints);
-        waterRaw->RhoValues(1, {1, waterRaw->NumRhoTempPoints}) = DefaultWaterRhoData;
+        for (int j = 1; j <= waterRaw->NumRhoTempPoints; ++j) {
+            waterRaw->RhoValues(1, j) = DefaultWaterRhoData[j - 1];
+        }
 
         waterRaw->CondDataPresent = true;
         waterRaw->NumCondConcPoints = 1;
@@ -602,7 +607,9 @@ namespace Fluid {
         waterRaw->CondConcs.allocate(waterRaw->NumCondConcPoints);
         waterRaw->CondConcs = 0.0;
         waterRaw->CondValues.allocate(waterRaw->NumCondConcPoints, waterRaw->NumCondTempPoints);
-        waterRaw->CondValues(1, {1, waterRaw->NumCondTempPoints}) = DefaultWaterCondData;
+        for (int j = 1; j <= waterRaw->NumCondTempPoints; ++j) {
+            waterRaw->CondValues(1, j) = DefaultWaterCondData[j - 1];
+        }
 
         waterRaw->ViscDataPresent = true;
         waterRaw->NumViscConcPoints = 1;
@@ -612,7 +619,9 @@ namespace Fluid {
         waterRaw->ViscConcs.allocate(waterRaw->NumViscConcPoints);
         waterRaw->ViscConcs = 0.0;
         waterRaw->ViscValues.allocate(waterRaw->NumViscConcPoints, waterRaw->NumViscTempPoints);
-        waterRaw->ViscValues(1, {1, waterRaw->NumViscTempPoints}) = DefaultWaterViscData;
+        for (int j = 1; j <= waterRaw->NumViscTempPoints; ++j) {
+            waterRaw->ViscValues(1, j) = DefaultWaterViscData[j - 1];
+        }
 
         // Water is always available
         auto *water = GetGlycol(state, "WATER");
@@ -861,7 +870,7 @@ namespace Fluid {
             tempArray.NumOfTemps = NumNumbers;
 
             tempArray.Temps.allocate(tempArray.NumOfTemps);
-            tempArray.Temps = Numbers({1, NumNumbers});
+            std::copy_n(Numbers.begin(), NumNumbers, tempArray.Temps.begin());
 
             for (int TempLoop = 2; TempLoop <= tempArray.NumOfTemps; ++TempLoop) {
                 if (tempArray.Temps(TempLoop) <= tempArray.Temps(TempLoop - 1)) {
@@ -946,43 +955,43 @@ namespace Fluid {
                 refrig->PsTemps.allocate(refrig->NumPsPoints);
                 refrig->PsValues.allocate(refrig->NumPsPoints);
                 refrig->PsTemps = tempArray.Temps;
-                refrig->PsValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->PsValues.begin());
 
             } else if (Alphas(2) == "ENTHALPY" && Alphas(3) == "FLUID") {
                 refrig->NumHPoints = tempArray.NumOfTemps;
                 refrig->HTemps.allocate(refrig->NumHPoints);
                 refrig->HfValues.allocate(refrig->NumHPoints);
                 refrig->HTemps = tempArray.Temps;
-                refrig->HfValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->HfValues.begin());
 
             } else if (Alphas(2) == "ENTHALPY" && Alphas(3) == "FLUIDGAS") {
                 refrig->NumHPoints = tempArray.NumOfTemps;
                 refrig->HfgValues.allocate(refrig->NumHPoints);
-                refrig->HfgValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->HfgValues.begin());
 
             } else if (Alphas(2) == "SPECIFICHEAT" && Alphas(3) == "FLUID") {
                 refrig->NumCpPoints = tempArray.NumOfTemps;
                 refrig->CpTemps.allocate(refrig->NumCpPoints);
                 refrig->CpfValues.allocate(refrig->NumCpPoints);
                 refrig->CpTemps = tempArray.Temps;
-                refrig->CpfValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->CpfValues.begin());
 
             } else if (Alphas(2) == "SPECIFICHEAT" && Alphas(3) == "FLUIDGAS") {
                 refrig->NumCpPoints = tempArray.NumOfTemps;
                 refrig->CpfgValues.allocate(refrig->NumCpPoints);
-                refrig->CpfgValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->CpfgValues.begin());
 
             } else if (Alphas(2) == "DENSITY" && Alphas(3) == "FLUID") {
                 refrig->NumRhoPoints = tempArray.NumOfTemps;
                 refrig->RhoTemps.allocate(refrig->NumRhoPoints);
                 refrig->RhofValues.allocate(refrig->NumRhoPoints);
                 refrig->RhoTemps = tempArray.Temps;
-                refrig->RhofValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->RhofValues.begin());
 
             } else if (Alphas(2) == "DENSITY" && Alphas(3) == "FLUIDGAS") {
                 refrig->NumRhoPoints = tempArray.NumOfTemps;
                 refrig->RhofgValues.allocate(refrig->NumRhoPoints);
-                refrig->RhofgValues = Numbers({1, NumNumbers});
+                std::copy_n(Numbers.begin(), NumNumbers, refrig->RhofgValues.begin());
 
             } else if (Alphas(3) == "FLUID") {
                 if (Alphas(2) != "ENTHALPY" && Alphas(2) != "SPECIFICHEAT" && Alphas(2) != "DENSITY") {
@@ -1219,9 +1228,13 @@ namespace Fluid {
             int pressNum = (pressFound - refrig->SupPress.begin()) + 1;
 
             if (Alphas(2) == "ENTHALPY") {
-                refrig->HshValues(pressNum, {1, refrig->NumSupTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= refrig->NumSupTempPoints; ++j) {
+                    refrig->HshValues(pressNum, j) = Numbers(j + 1);
+                }
             } else if (Alphas(2) == "DENSITY") {
-                refrig->RhoshValues(pressNum, {1, refrig->NumSupTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= refrig->NumSupTempPoints; ++j) {
+                    refrig->RhoshValues(pressNum, j) = Numbers(j + 1);
+                }
             } else {
                 ShowWarningInvalidKey(state,
                                       eoh,
@@ -1262,7 +1275,9 @@ namespace Fluid {
 
         ethylene->CpValues.allocate(ethylene->NumCpConcPoints, ethylene->NumCpTempPoints); // Specific heat data values
         for (int i = 1; i <= ethylene->NumCpConcPoints; ++i) {
-            ethylene->CpValues(i, {1, ethylene->NumCpTempPoints}) = DefaultEthGlyCpData[i - 1];
+            for (int j = 1; j <= ethylene->NumCpTempPoints; ++j) {
+                ethylene->CpValues(i, j) = DefaultEthGlyCpData[i - 1][j - 1];
+            }
         }
 
         // Density
@@ -1278,7 +1293,9 @@ namespace Fluid {
 
         ethylene->RhoValues.allocate(ethylene->NumRhoConcPoints, ethylene->NumRhoTempPoints); // Density data values
         for (int i = 1; i <= ethylene->NumRhoConcPoints; ++i) {
-            ethylene->RhoValues(i, {1, ethylene->NumRhoTempPoints}) = DefaultEthGlyRhoData[i - 1];
+            for (int j = 1; j <= ethylene->NumRhoTempPoints; ++j) {
+                ethylene->RhoValues(i, j) = DefaultEthGlyRhoData[i - 1][j - 1];
+            }
         }
 
         // Conductivity
@@ -1294,7 +1311,9 @@ namespace Fluid {
 
         ethylene->CondValues.allocate(ethylene->NumCondConcPoints, ethylene->NumCondTempPoints); // Density data values
         for (int i = 1; i <= ethylene->NumCondConcPoints; ++i) {
-            ethylene->CondValues(i, {1, ethylene->NumCondTempPoints}) = DefaultEthGlyCondData[i - 1];
+            for (int j = 1; j <= ethylene->NumCondTempPoints; ++j) {
+                ethylene->CondValues(i, j) = DefaultEthGlyCondData[i - 1][j - 1];
+            }
         }
 
         // Viscosity
@@ -1310,7 +1329,9 @@ namespace Fluid {
 
         ethylene->ViscValues.allocate(ethylene->NumViscConcPoints, ethylene->NumViscTempPoints); // Density data values
         for (int i = 1; i <= ethylene->NumViscConcPoints; ++i) {
-            ethylene->ViscValues(i, {1, ethylene->NumViscTempPoints}) = DefaultEthGlyViscData[i - 1];
+            for (int j = 1; j <= ethylene->NumViscTempPoints; ++j) {
+                ethylene->ViscValues(i, j) = DefaultEthGlyViscData[i - 1][j - 1];
+            }
         }
 
         // Propylene
@@ -1327,7 +1348,6 @@ namespace Fluid {
         propylene->NumCpTempPoints = DefaultNumGlyTemps; // Number of temperature points for specific heat
         propylene->NumCpConcPoints = DefaultNumGlyConcs; // Number of concentration points for specific heat
 
-        // No ObjexxFCL templates for assigning std::array to Array1S, Probably want to covert these Array1D and 2D to std::vector eventually anyway
         propylene->CpTemps.allocate(propylene->NumCpTempPoints); // Temperatures for specific heat of glycol
         propylene->CpTemps = DefaultGlycolTemps;
 
@@ -1336,7 +1356,9 @@ namespace Fluid {
 
         propylene->CpValues.allocate(propylene->NumCpConcPoints, propylene->NumCpTempPoints); // Specific heat data values
         for (int i = 1; i <= propylene->NumCpConcPoints; ++i) {
-            propylene->CpValues(i, {1, propylene->NumCpTempPoints}) = DefaultPropGlyCpData[i - 1];
+            for (int j = 1; j <= propylene->NumCpTempPoints; ++j) {
+                propylene->CpValues(i, j) = DefaultPropGlyCpData[i - 1][j - 1];
+            }
         }
 
         // Density
@@ -1352,7 +1374,9 @@ namespace Fluid {
 
         propylene->RhoValues.allocate(propylene->NumRhoConcPoints, propylene->NumRhoTempPoints); // Density data values
         for (int i = 1; i <= propylene->NumRhoConcPoints; ++i) {
-            propylene->RhoValues(i, {1, propylene->NumRhoTempPoints}) = DefaultPropGlyRhoData[i - 1];
+            for (int j = 1; j <= propylene->NumRhoTempPoints; ++j) {
+                propylene->RhoValues(i, j) = DefaultPropGlyRhoData[i - 1][j - 1];
+            }
         }
 
         // Conductivity
@@ -1368,7 +1392,9 @@ namespace Fluid {
 
         propylene->CondValues.allocate(propylene->NumCondConcPoints, propylene->NumCondTempPoints); // Density data values
         for (int i = 1; i <= propylene->NumCondConcPoints; ++i) {
-            propylene->CondValues(i, {1, propylene->NumCondTempPoints}) = DefaultPropGlyCondData[i - 1];
+            for (int j = 1; j <= propylene->NumCondTempPoints; ++j) {
+                propylene->CondValues(i, j) = DefaultPropGlyCondData[i - 1][j - 1];
+            }
         }
 
         // Viscosity
@@ -1384,7 +1410,9 @@ namespace Fluid {
 
         propylene->ViscValues.allocate(propylene->NumViscConcPoints, propylene->NumViscTempPoints); // Density data values
         for (int i = 1; i <= propylene->NumViscConcPoints; ++i) {
-            propylene->ViscValues(i, {1, propylene->NumViscTempPoints}) = DefaultPropGlyViscData[i - 1];
+            for (int j = 1; j <= propylene->NumViscTempPoints; ++j) {
+                propylene->ViscValues(i, j) = DefaultPropGlyViscData[i - 1][j - 1];
+            }
         }
 
         // *************** RAW GLYCOLS ***************
@@ -1601,7 +1629,9 @@ namespace Fluid {
                 auto concFound = std::find(glycolRaw->CpConcs.begin(), glycolRaw->CpConcs.end(), Numbers(1));
                 assert(concFound != glycolRaw->CpConcs.end());
                 int concNum = (concFound - glycolRaw->CpConcs.begin()) + 1;
-                glycolRaw->CpValues(concNum, {1, glycolRaw->NumCpTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= glycolRaw->NumCpTempPoints; ++j) {
+                    glycolRaw->CpValues(concNum, j) = Numbers(j + 1);
+                }
 
             } else if (Alphas(2) == "DENSITY") {
                 if ((NumNumbers - 1) != glycolRaw->NumRhoTempPoints) {
@@ -1616,7 +1646,9 @@ namespace Fluid {
                 auto concFound = std::find(glycolRaw->RhoConcs.begin(), glycolRaw->RhoConcs.end(), Numbers(1));
                 assert(concFound != glycolRaw->RhoConcs.end());
                 int concNum = (concFound - glycolRaw->RhoConcs.begin()) + 1;
-                glycolRaw->RhoValues(concNum, {1, glycolRaw->NumRhoTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= glycolRaw->NumRhoTempPoints; ++j) {
+                    glycolRaw->RhoValues(concNum, j) = Numbers(j + 1);
+                }
 
             } else if (Alphas(2) == "CONDUCTIVITY") {
                 if ((NumNumbers - 1) != glycolRaw->NumCondTempPoints) {
@@ -1631,7 +1663,9 @@ namespace Fluid {
                 auto concFound = std::find(glycolRaw->CondConcs.begin(), glycolRaw->CondConcs.end(), Numbers(1));
                 assert(concFound != glycolRaw->CondConcs.end());
                 int concNum = (concFound - glycolRaw->CondConcs.begin()) + 1;
-                glycolRaw->CondValues(concNum, {1, glycolRaw->NumCondTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= glycolRaw->NumCondTempPoints; ++j) {
+                    glycolRaw->CondValues(concNum, j) = Numbers(j + 1);
+                }
 
             } else if (Alphas(2) == "VISCOSITY") {
                 if ((NumNumbers - 1) != glycolRaw->NumViscTempPoints) {
@@ -1646,7 +1680,9 @@ namespace Fluid {
                 auto concFound = std::find(glycolRaw->ViscConcs.begin(), glycolRaw->ViscConcs.end(), Numbers(1));
                 assert(concFound != glycolRaw->ViscConcs.end());
                 int concNum = (concFound - glycolRaw->ViscConcs.begin()) + 1;
-                glycolRaw->ViscValues(concNum, {1, glycolRaw->NumViscTempPoints}) = Numbers({2, NumNumbers});
+                for (int j = 1; j <= glycolRaw->NumViscTempPoints; ++j) {
+                    glycolRaw->ViscValues(concNum, j) = Numbers(j + 1);
+                }
             }
         } // for (InData)
 
@@ -1740,7 +1776,7 @@ namespace Fluid {
 
             glycol->NumCpTempPoints = glycolRaw->NumCpTempPoints;
             glycol->CpTemps.allocate(glycol->NumCpTempPoints);
-            glycol->CpTemps({1, glycol->NumCpTempPoints}) = glycolRaw->CpTemps({1, glycolRaw->NumCpTempPoints});
+            glycol->CpTemps = glycolRaw->CpTemps;
             glycol->CpValues.allocate(glycol->NumCpTempPoints);
             InterpValuesForGlycolConc(state,
                                       glycolRaw->NumCpConcPoints,
@@ -1762,7 +1798,7 @@ namespace Fluid {
 
             glycol->NumRhoTempPoints = glycolRaw->NumRhoTempPoints;
             glycol->RhoTemps.allocate(glycol->NumRhoTempPoints);
-            glycol->RhoTemps({1, glycol->NumRhoTempPoints}) = glycolRaw->RhoTemps({1, glycolRaw->NumRhoTempPoints});
+            glycol->RhoTemps = glycolRaw->RhoTemps;
             glycol->RhoValues.allocate(glycol->NumRhoTempPoints);
             InterpValuesForGlycolConc(state,
                                       glycolRaw->NumRhoConcPoints,
@@ -1784,7 +1820,7 @@ namespace Fluid {
 
             glycol->NumCondTempPoints = glycolRaw->NumCondTempPoints;
             glycol->CondTemps.allocate(glycol->NumCondTempPoints);
-            glycol->CondTemps({1, glycol->NumCondTempPoints}) = glycolRaw->CondTemps({1, glycolRaw->NumCondTempPoints});
+            glycol->CondTemps = glycolRaw->CondTemps;
             glycol->CondValues.allocate(glycol->NumCondTempPoints);
             InterpValuesForGlycolConc(state,
                                       glycolRaw->NumCondConcPoints,
@@ -1806,7 +1842,7 @@ namespace Fluid {
 
             glycol->NumViscTempPoints = glycolRaw->NumViscTempPoints;
             glycol->ViscTemps.allocate(glycol->NumViscTempPoints);
-            glycol->ViscTemps({1, glycol->NumViscTempPoints}) = glycolRaw->ViscTemps({1, glycolRaw->NumViscTempPoints});
+            glycol->ViscTemps = glycolRaw->ViscTemps;
             glycol->ViscValues.allocate(glycol->NumViscTempPoints);
             InterpValuesForGlycolConc(state,
                                       glycolRaw->NumViscConcPoints,
@@ -1878,7 +1914,7 @@ namespace Fluid {
                                    int const NumOfConcs,               // number of concentrations (dimension of raw data)
                                    int const NumOfTemps,               // number of temperatures (dimension of raw data)
                                    const Array1D<Real64> &RawConcData, // concentrations for raw data
-                                   Array2S<Real64> const RawPropData,  // raw property data (temperature,concentration)
+                                   Array2D<Real64> const &RawPropData, // raw property data (temperature,concentration)
                                    Real64 const Concentration,         // concentration of actual fluid mix
                                    Array1D<Real64> &InterpData         // interpolated output data at proper concentration
     )
@@ -1928,13 +1964,17 @@ namespace Fluid {
                 state, std::format("{}: Glycol concentration out of range for data (too low), concentration = {:.3f}", routineName, Concentration));
             ShowContinueError(state, "Check your data or the definition of your glycols in the GlycolConcentrations input");
             ShowContinueError(state, "Property data set to data for lowest concentration entered");
-            InterpData = RawPropData(1, _);
+            for (LoopT = 1; LoopT <= NumOfTemps; ++LoopT) {
+                InterpData(LoopT) = RawPropData(1, LoopT);
+            }
         } else if (Concentration > RawConcData(NumOfConcs)) { // Concentration too high
             ShowWarningError(
                 state, std::format("{}: Glycol concentration out of range for data (too high), concentration = {:.3f}", routineName, Concentration));
             ShowContinueError(state, "Check your data or the definition of your glycols in the GlycolConcentrations input");
             ShowContinueError(state, "Property data set to data for highest concentration entered");
-            InterpData = RawPropData(NumOfConcs, _);
+            for (LoopT = 1; LoopT <= NumOfTemps; ++LoopT) {
+                InterpData(LoopT) = RawPropData(NumOfConcs, LoopT);
+            }
         } else {                  // Concentration somewhere between lowest and highest point--interpolate
             HiIndex = NumOfConcs; // Default to highest concentration
             for (LoopC = 2; LoopC <= NumOfConcs - 1; ++LoopC) {
