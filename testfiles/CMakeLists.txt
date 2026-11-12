@@ -339,6 +339,7 @@ add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions.idf EPW_FILE USA_IL_Chicag
 if (PYTHON_CLI)
     add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions-cpg.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
     add_simulation_test(IDF_FILE GSHP-GLHE-BoreholeFieldDesign.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 34 DEBUG_COST 1131)
+    set_tests_properties(integration.GSHP-GLHE-BoreholeFieldDesign PROPERTIES LABELS "slow")
 else()
     add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions-cpg.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw EXPECT_FATAL)
     add_simulation_test(IDF_FILE GSHP-GLHE-BoreholeFieldDesign.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION EXPECT_FATAL)
