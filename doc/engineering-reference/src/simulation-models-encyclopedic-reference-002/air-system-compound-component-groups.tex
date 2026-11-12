@@ -56,9 +56,57 @@ where:
 
 \(NumOfZones\) is the number of zones, or number of air loop supply air inlet nodes for all zones served by the air loop.
 
-The unitary system component is able to model supply air fan operation in two modes: cycling fan -- cycling coil (i.e., AUTO fan) and continuous fan -- cycling coil (i.e., fan ON). Fan:OnOff must be used to model AUTO fan, while Fan:OnOff or Fan:ConstantVolume can be used to model fan ON. The fan operation mode is specified using a supply air fan operating mode schedule where schedule values of 0 denote cycling fan operation and schedule values other than 0 (a 1 is usually used) denote continuous fan operation. Using this schedule, the unitary system fan may be cycled with cooling or heating coil operation or operated continuously based on time of day (e.g., cycling fan operation at night and continuous fan operation during the daytime). If the fan operating mode schedule name field is left blank in the unitary system object, the unitary system assumes cycling or AUTO fan mode operation throughout the simulation.
+The unitary system component is able to model supply air fan operation in two modes: cycling fan -- cycling coil (i.e., AUTO fan) and continuous fan -- cycling coil (i.e., fan ON). Fan:OnOff and Fan:SystemModel can model cycling fan operation, including during supplemental heating. Fan:SystemModel can also model continuous fan operation, as can the other supported fan types. Its speed control method (Discrete or Continuous) describes how fan power varies with airflow; it is distinct from the unitary system fan operating mode (cycling or continuous). A continuous-speed Fan:SystemModel can therefore use a cycling fan-mode schedule; the fan power curve is evaluated at the modeled airflow. The fan operation mode is specified using a supply air fan operating mode schedule where schedule values of 0 denote cycling fan operation and schedule values other than 0 (a 1 is usually used) denote continuous fan operation. Using this schedule, the unitary system fan may be cycled with primary cooling or heating coil operation and supplemental heating coil operation, or operated continuously based on time of day (e.g., cycling fan operation at night and continuous fan operation during the daytime). If the fan operating mode schedule name field is left blank, load based control assumes cycling or AUTO fan mode operation throughout the simulation. Setpoint based control requires continuous fan operation and defaults to that mode when the schedule name is blank.
 
 The unitary system operates based on the user-specified (or autosized) design supply air flow rate(s). The `design' supply air mass flow rate may be different for cooling, heating, and when no cooling or heating is required and the fan operates continuously based on user-specified inputs.
+
+\paragraph{Cycling airflow, part-load ratio, and runtime fraction}\label{unitary-system-cycling-airflow}
+
+For load based control with cycling fan operation, the airflow calculation includes supplemental heating. For single-speed on/off operation with no economizer airflow request, the requested fan cycling fraction is:
+
+\begin{equation}
+f_{fan,request} = \max\left(PLR_{primary}, PLR_{supplemental}\right)
+\end{equation}
+
+Here \(PLR_{primary}\) is the larger of the primary cooling and heating part-load requests, and \(PLR_{supplemental}\) is the supplemental heating part-load request. These are requested capacity fractions, not the actual coil runtime fractions. During heating, an unavailable or outdoor-temperature-locked-out DX heating coil does not contribute its retained request to fan cycling. With an economizer request, the economizer airflow fraction is also considered. These rules do not replace continuous-fan or ASHRAE single-zone VAV control, or the speed interpolation used with multi-speed equipment.
+
+For on/off operation, the average system air mass flow rate is calculated as:
+
+\begin{equation}
+\dot m_{avg} = f_{fan,request}\dot m_{on} + \left(1-f_{fan,request}\right)\dot m_{off}
+\end{equation}
+
+For a cycling fan with zero off-cycle airflow, this reduces to \(\dot m_{avg}=f_{fan,request}\dot m_{on}\). Thus supplemental-only heating cycles airflow according to the supplemental part-load request. If the primary coil operates at full load while supplemental heat supplies the remaining load, the requested fan fraction is 1.
+
+Cycling losses introduce a distinction between part-load ratio and runtime fraction. For a coil using a part-load fraction curve, its runtime fraction is calculated, subject to the coil model's limits, as:
+
+\begin{equation}
+RTF_{coil} = \min\left(1,\frac{PLR_{coil}}{PLF_{coil}(PLR_{coil})}\right)
+\end{equation}
+
+For single-speed DX operation, the coil supplies a part-load fraction correction to Fan:OnOff or the discrete-speed Fan:SystemModel. A blow-through fan is re-simulated after the primary coil to incorporate this correction. A continuous-speed Fan:SystemModel still follows the unitary system's cycling airflow request, but calculates fan power from its flow-power curve and does not use this runtime correction. For a single-speed fan operating at its design on-cycle flow with zero off-cycle airflow, the resulting average fan electric power is:
+
+\begin{equation}
+\overline{P}_{fan} = P_{fan,on}\min\left(1,\frac{f_{fan,request}}{PLF_{fan}}\right)
+\end{equation}
+
+Here \(PLF_{fan}\) is the correction available when the fan is simulated, not a maximum of coil runtime fractions. With no correction, \(PLF_{fan}=1\). The airflow fraction and the fan runtime fraction can therefore differ. Multi-speed fan power instead combines power at the operating speeds with their respective runtime fractions; continuous speed control uses the fan power-versus-flow curve.
+
+The supplemental heating coil is simulated after the fan, for both blow-through and draw-through placement: draw-through refers to the primary coils, not the supplemental heater. For load based cycling operation with zero off-cycle airflow, a supplemental Coil:Heating:Fuel with a part-load fraction curve supplies its calculated runtime fraction to an additional component pass. Fan:OnOff and discrete-speed Fan:SystemModel use one effective fan correction that accommodates the primary and supplemental runtime requirements without applying either coil's PLF twice. For single-speed operation:
+
+\begin{equation}
+RTF_{fan} = \min\left(1,\max\left(f_{fan,request},RTF_{primary},RTF_{supplemental}\right)\right)
+\end{equation}
+
+The requested airflow fraction remains a lower bound on fan runtime and is not changed by this correction. During supplemental-only operation without an outlet-temperature restriction, this gives \(RTF_{fan}=RTF_{supplemental}\); an operating primary coil at full load keeps fan runtime at 1. Components are re-simulated as needed to reconcile fan heat with the supplemental outlet-temperature limit. The shared fan PLF correction is reset before returning so it cannot affect a later system calculation. Continuous fan operation and continuous speed fan power control do not use this supplemental runtime correction. When no fuel-coil part-load fraction curve is specified, its runtime fraction equals its part-load ratio.
+
+System node airflow is a timestep-average quantity. With zero off-cycle flow, the reported air temperature describes the flowing air, not a time average that includes stagnant air during fan-off periods. For a supplemental fuel coil, the outlet temperature is obtained from the delivered heating rate and the average air mass flow:
+
+\begin{equation}
+T_{supp,out} = T_{supp,in} + \frac{\dot Q_{supp}}{\dot m_{avg}c_p}
+\end{equation}
+
+Thus reducing average airflow can increase the reported supply temperature at a given delivered heating rate. The unitary system may then reduce supplemental output to enforce its maximum supply air temperature. Neither the coil RTF nor the fan RTF alone determines supply temperature.
 
 \textbf{Cooling Operation}
 
@@ -131,7 +179,7 @@ Tolerance = 0.001 \ge \frac{{\left( {UnitarySystemCoolingLoad - {Q_{UnitarySyste
 
 where \({Q_{UnitarySystem}}\) is the unitary system delivered sensible capacity (W).
 
-If the unitary system has been specified with cycling fan/cycling coil (AUTO fan), then the unitary system's operating supply air mass flow rate is multiplied by PartLoadRatio to determine the average air mass flow rate for the system simulation time step. In this case, the air conditions at nodes downstream of the cooling coil represent the full-load (steady-state) values when the coil is operating.
+If the unitary system has been specified with cycling fan/cycling coil (AUTO fan), then for cooling-only operation with zero off-cycle airflow and no economizer airflow request, the average air mass flow rate is the cooling on-cycle air mass flow rate multiplied by the cooling PartLoadRatio. With zero off-cycle airflow, the air conditions at nodes downstream of the cooling coil represent the flowing-air values when the coil is operating. For fan cycling when dehumidification reheat or economizer operation also requests airflow, see \hyperref[unitary-system-cycling-airflow]{Cycling airflow, part-load ratio, and runtime fraction}.
 
 If the fan operates continuously (i.e., when the supply air fan operating mode schedule values are NOT equal to 0), the operating air mass flow rate through the unitary system is calculated as the average of the user-specified air flow rate when the cooling coil is ON and the user-specified air flow rate when the cooling coil is OFF (user-specified supply air volumetric flow rates converted to dry air mass flow rates).
 
@@ -404,7 +452,7 @@ where \({Q_{UnitarySystem}}\) is the unitary system delivered sensible capacity 
 
 If the unitary system's~ heating coil output at full load is insufficient to meet the entire heating load, PartLoadRatio is set equal to 1.0 (compressor and fan are not cycling) and the remaining heating load is passed to the supplemental heating coil. If the unitary system model determines that the outdoor air temperature is below the minimum outdoor air temperature for compressor operation, the compressor is turned off and the entire heating load is passed to the supplemental gas or electric heating coil. The unitary system exiting air conditions and energy consumption are calculated and reported by the individual component models (fan,~ heating coil, and supplemental gas or electric heating coil).
 
-If the unitary system has been specified with cycling fan/cycling coil (AUTO fan), then the unitary system's operating supply air mass flow rate is multiplied by PartLoadRatio to determine the average air mass flow rate for the system simulation time step. The air conditions at nodes downstream of the heating coils represent the full-load (steady-state) values when the coils are operating. If the fan operates continuously (i.e., when the supply air fan operating mode schedule values are NOT equal to 0), the operating air mass flow rate through the unitary system is calculated as the average of the user-specified air flow rate when the unitary system heating coil is ON and the user-specified air flow rate when the unitary system heating coil is OFF (user-specified supply air volumetric flow rates converted to dry air mass flow rates).
+If the unitary system has been specified with cycling fan/cycling coil (AUTO fan), the average air mass flow rate includes the supplemental heating part-load request as described in \hyperref[unitary-system-cycling-airflow]{Cycling airflow, part-load ratio, and runtime fraction}. During compressor lockout, the retained primary heating part-load request does not force continuous fan operation; supplemental-only operation cycles at the supplemental part-load request. With zero off-cycle airflow, the air conditions at nodes downstream of the heating coils describe the flowing air. If the fan operates continuously (i.e., when the supply air fan operating mode schedule values are NOT equal to 0), the operating air mass flow rate through the unitary system is calculated as the average of the user-specified air flow rate when the unitary system heating coil is ON and the user-specified air flow rate when the unitary system heating coil is OFF (user-specified supply air volumetric flow rates converted to dry air mass flow rates).
 
 \begin{equation}
 \dot{m}_{UnitarySystem} = PartLoadRatio\left( \dot{m}_{HeatCoilON} \right) + \left( 1 - PartLoadRatio \right)\left( \dot{m}_{CoilOFF} \right)

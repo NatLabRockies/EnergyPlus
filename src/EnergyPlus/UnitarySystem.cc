@@ -8113,6 +8113,8 @@ namespace UnitarySystems {
                                          this->DesignMaxOutletTemp);
 
         // will not be running supplemental heater on this CALL (simulate with supplemental heater off)
+        // Clear the previous supplemental fraction so it cannot raise airflow during the primary-coil capacity trials.
+        this->m_SuppHeatPartLoadFrac = 0.0;
         Real64 FullSensibleOutput = 0.0;
         // using furnace module logic
         // first check to see if cycling fan with economizer can meet the load
@@ -8139,8 +8141,11 @@ namespace UnitarySystems {
             this->controlUnitarySystemOutput(
                 state, AirLoopNum, FirstHVACIteration, OnOffAirFlowRatio, ZoneLoad, FullSensibleOutput, HXUnitOn, CompressorOn);
         }
+        // Zero flow with the DX coil off must not clear the heating demand before supplemental heat can start the cycling fan.
         if (state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate < HVAC::SmallMassFlow && this->m_sysType != SysType::PackagedAC &&
-            this->m_sysType != SysType::PackagedHP && this->m_sysType != SysType::PackagedWSHP) {
+            this->m_sysType != SysType::PackagedHP && this->m_sysType != SysType::PackagedWSHP &&
+            !(this->m_SuppCoilExists && state.dataUnitarySystems->HeatingLoad && this->m_FanOpMode == HVAC::FanOp::Cycling &&
+              this->m_DXHeatingCoil)) {
             state.dataUnitarySystems->CoolingLoad = false;
             state.dataUnitarySystems->HeatingLoad = false;
             state.dataUnitarySystems->MoistureLoad = 0.0;
@@ -8176,7 +8181,10 @@ namespace UnitarySystems {
 
         if (this->m_SuppCoilExists &&
             (state.dataUnitarySystems->HeatingLoad || state.dataUnitarySystems->CoolingLoad || state.dataUnitarySystems->MoistureLoad < 0.0)) {
-            if ((FullSensibleOutput < (state.dataUnitarySystems->QToHeatSetPt - HVAC::SmallLoad)) && !FirstHVACIteration) {
+            // Apply the supplemental coil's outdoor limit before its fraction can request fan airflow; retain dehumidification reheat.
+            if ((FullSensibleOutput < (state.dataUnitarySystems->QToHeatSetPt - HVAC::SmallLoad)) && !FirstHVACIteration &&
+                (state.dataEnvrn->OutDryBulbTemp <= this->m_MaxOATSuppHeat ||
+                 (state.dataUnitarySystems->MoistureLoad < 0.0 && this->m_CoolingPartLoadFrac > 0.0))) {
                 SupHeaterLoad = max(0.0, state.dataUnitarySystems->QToHeatSetPt - FullSensibleOutput);
                 this->m_SupHeaterLoad = 0.0;
                 // what does this line even do? I know we want the supplemental heater on only if there is a dehum load,
@@ -11522,6 +11530,36 @@ namespace UnitarySystems {
             localFanPartLoadRatio = this->m_EconoPartLoadRatio;
         }
         int SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum, this->m_EconoSpeedNum);
+        // Stop retained DX heating requests from running a cycling fan when the compressor is unavailable.
+        // Supplemental heat can still require airflow through the same unitary system.
+        if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && !this->m_SimASHRAEModel) {
+            if (state.dataUnitarySystems->HeatingLoad && state.dataUnitarySystems->MoistureLoad >= 0.0 && this->m_DXHeatingCoil) {
+                // Use the condenser-node temperature when valid, matching the heating-coil simulation's outdoor-temperature selection.
+                Real64 outdoorDryBulb = state.dataEnvrn->OutDryBulbTemp;
+                if (this->m_CondenserNodeNum > 0 &&
+                    state.dataLoopNodes->Node(this->m_CondenserNodeNum).Press != state.dataLoopNodes->DefaultNodeValues.Press) {
+                    outdoorDryBulb = state.dataLoopNodes->Node(this->m_CondenserNodeNum).Temp;
+                }
+                // An unavailable DX coil can retain a full-load request even though its actual runtime is zero.
+                if ((this->m_heatingCoilAvailSched != nullptr && this->m_heatingCoilAvailSched->getCurrentVal() <= 0.0) ||
+                    outdoorDryBulb < this->m_MinOATCompressorHeating ||
+                    (this->m_heatCoilType == HVAC::CoilType::HeatingDXMultiSpeed && outdoorDryBulb == this->m_MinOATCompressorHeating)) {
+                    localFanPartLoadRatio = this->m_EconoPartLoadRatio;
+                    // Use full heating airflow only during the on cycle, with zero off-cycle flow; ignore the retained DX speed.
+                    SpeedNum = 1;
+                    state.dataUnitarySystems->CompOnMassFlow = this->MaxHeatAirMassFlow;
+                    state.dataUnitarySystems->CompOnFlowRatio = this->m_HeatingFanSpeedRatio;
+                    state.dataUnitarySystems->CompOffMassFlow = 0.0;
+                    state.dataUnitarySystems->CompOffFlowRatio = 0.0;
+                    state.dataUnitarySystems->m_massFlow1 = state.dataUnitarySystems->CompOnMassFlow;
+                    state.dataUnitarySystems->m_massFlow2 = 0.0;
+                }
+            }
+            if (this->m_SuppCoilExists) {
+                // Supplemental heat still needs the shared fan while the primary DX compressor is unavailable.
+                localFanPartLoadRatio = max(localFanPartLoadRatio, this->m_SuppHeatPartLoadFrac);
+            }
+        }
         int InletNode = this->AirInNode;
 
         if (SpeedNum > 1) {
@@ -11703,77 +11741,133 @@ namespace UnitarySystems {
             this->setAverageAirFlow(state, max(CoolPLR, HeatPLR), OnOffAirFlowRatio);
         }
 
-        // Call the series of components that simulate a Unitary System
-        if (this->ATMixerExists) {
-            // There is an air terminal mixer
-            if (this->ATMixerType == HVAC::MixerType::InletSide) { // if there is an inlet side air terminal mixer
-                // set the primary air inlet mass flow rate
-                state.dataLoopNodes->Node(this->m_ATMixerPriNode).MassFlowRate = min(
-                    state.dataLoopNodes->Node(this->m_ATMixerPriNode).MassFlowRateMaxAvail, state.dataLoopNodes->Node(this->AirInNode).MassFlowRate);
-                // now calculate the the mixer outlet conditions (and the secondary air inlet flow rate)
-                // the mixer outlet flow rate has already been set above (it is the "inlet" node flow rate)
-                SingleDuct::SimATMixer(state, this->m_ATMixerName, FirstHVACIteration, this->m_ATMixerIndex);
+        auto const *systemFan = this->m_FanExists ? dynamic_cast<Fans::FanSystem const *>(state.dataFans->fans(this->m_FanIndex)) : nullptr;
+        bool const cyclingPowerModel = this->m_FanExists && (state.dataFans->fans(this->m_FanIndex)->type == HVAC::FanType::OnOff ||
+                                                             (systemFan != nullptr && systemFan->speedControl == Fans::SpeedControl::Discrete));
+        // Only on/off power models with zero off-cycle airflow can use this capacity-fraction-to-runtime correction.
+        // Leave continuous-fan, ASHRAE control, and continuous-speed fan power calculations on their existing paths.
+        bool const correctSupplementalFanRuntime = this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling &&
+                                                   this->m_FanExists && this->m_SuppCoilExists && !this->m_SimASHRAEModel &&
+                                                   this->m_suppHeatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel &&
+                                                   state.dataHeatingCoils->HeatingCoil(this->m_SuppHeatCoilIndex).PLFCurveIndex > 0 &&
+                                                   state.dataUnitarySystems->CompOffMassFlow == 0.0 && cyclingPowerModel;
+        Real64 supplementalRuntime = 0.0;
+        auto simulateFan = [&]() {
+            if (correctSupplementalFanRuntime) {
+                Real64 const requestedRuntime = state.dataUnitarySystems->m_runTimeFraction1;
+                Real64 const primaryPLF = max(0.7, state.dataHVACGlobal->OnOffFanPartLoadFraction);
+                Real64 heatingRuntime = HeatPLR;
+                Real64 coolingRuntime = CoolPLR;
+                // Actual single-speed DX RTF avoids both double correction and retained requests during compressor lockout.
+                // Other primary-coil models retain the existing request/PLF correction.
+                if (this->m_HeatCoilExists && this->m_heatCoilType == HVAC::CoilType::HeatingDXSingleSpeed) {
+                    heatingRuntime = state.dataDXCoils->DXCoil(this->m_HeatingCoilIndex).HeatingCoilRuntimeFraction;
+                } else if (this->m_DXHeatingCoil && this->m_HeatCompPartLoadRatio == 0.0) {
+                    // Multi/variable-speed DX lockout can leave HeatPLR and speed requests nonzero.
+                    heatingRuntime = 0.0;
+                } else {
+                    heatingRuntime = min(1.0, heatingRuntime / primaryPLF);
+                }
+                if (this->m_CoolCoilExists && this->m_coolCoilType == HVAC::CoilType::CoolingDXSingleSpeed) {
+                    coolingRuntime = state.dataDXCoils->DXCoil(this->m_CoolingCoilIndex).CoolingCoilRuntimeFraction;
+                } else {
+                    coolingRuntime = min(1.0, coolingRuntime / primaryPLF);
+                }
+                Real64 const primaryRuntime = max(heatingRuntime, coolingRuntime);
+                Real64 const fanRuntime = min(1.0, max({requestedRuntime, primaryRuntime, supplementalRuntime}));
+                // Supply one effective correction; do not divide a supplemental RTF by the primary PLF again.
+                state.dataHVACGlobal->OnOffFanPartLoadFraction = fanRuntime > 0.0 ? requestedRuntime / fanRuntime : 1.0;
             }
-        }
-        if (this->OAMixerExists) {
-            // the PTHP does one or the other, but why can't an OA Mixer exist with the AT Mixer?
-            // use of a blank std::string is not great here, but I'm not ready to change this API at the moment, so passing a static blank string is
-            // at least better than constructing a new string each time to call this function
-            MixedAir::SimOAMixer(state, blankStdString, this->OAMixerIndex);
-        }
-
-        if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru) {
             state.dataFans->fans(this->m_FanIndex)
                 ->simulate(state,
                            FirstHVACIteration,
                            state.dataUnitarySystems->FanSpeedRatio,
-                           _, // Pressure rise
-                           _, // Flow fraction
+                           _,
+                           _,
                            state.dataUnitarySystems->m_massFlow1,
                            state.dataUnitarySystems->m_runTimeFraction1,
                            state.dataUnitarySystems->m_massFlow2,
                            state.dataUnitarySystems->m_runTimeFraction2,
                            _);
-        }
+        };
 
-        if (this->m_CoolingCoilUpstream) {
-
-            if (this->m_CoolCoilExists) {
-                this->calcUnitaryCoolingSystem(
-                    state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
-            }
-            if (this->m_HeatCoilExists) {
-                // operate the heating coil without regard to coil outlet temperature
-                this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
-                if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
-                    Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
-                    Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
-                                                                      state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
-                    Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
-                    Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
-                    this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
-                    HeatCoilLoad = MaxHeatCoilLoad;
+        Real64 const requestedHeatCoilLoad = HeatCoilLoad;
+        Real64 const requestedSuppCoilLoad = SuppCoilLoad;
+        auto simulateComponents = [&]() {
+            // Reapply the original loads: a temperature-limited trial must not permanently lower later trial requests.
+            HeatCoilLoad = requestedHeatCoilLoad;
+            SuppCoilLoad = requestedSuppCoilLoad;
+            // Call the series of components that simulate a Unitary System
+            if (this->ATMixerExists) {
+                // There is an air terminal mixer
+                if (this->ATMixerType == HVAC::MixerType::InletSide) { // if there is an inlet side air terminal mixer
+                    // set the primary air inlet mass flow rate
+                    state.dataLoopNodes->Node(this->m_ATMixerPriNode).MassFlowRate =
+                        min(state.dataLoopNodes->Node(this->m_ATMixerPriNode).MassFlowRateMaxAvail,
+                            state.dataLoopNodes->Node(this->AirInNode).MassFlowRate);
+                    // now calculate the the mixer outlet conditions (and the secondary air inlet flow rate)
+                    // the mixer outlet flow rate has already been set above (it is the "inlet" node flow rate)
+                    SingleDuct::SimATMixer(state, this->m_ATMixerName, FirstHVACIteration, this->m_ATMixerIndex);
                 }
             }
+            if (this->OAMixerExists) {
+                // the PTHP does one or the other, but why can't an OA Mixer exist with the AT Mixer?
+                // use of a blank std::string is not great here, but I'm not ready to change this API at the moment, so passing a static blank string
+                // is at least better than constructing a new string each time to call this function
+                MixedAir::SimOAMixer(state, blankStdString, this->OAMixerIndex);
+            }
 
-            // If blow thru fan is used, the fan must be simulated after coil sets OnOffFanPartLoadFraction
-            if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru && state.dataHVACGlobal->OnOffFanPartLoadFraction < 1.0) {
-                state.dataFans->fans(this->m_FanIndex)
-                    ->simulate(state,
-                               FirstHVACIteration,
-                               state.dataUnitarySystems->FanSpeedRatio,
-                               _, // Pressure rise
-                               _, // Flow fraction
-                               state.dataUnitarySystems->m_massFlow1,
-                               state.dataUnitarySystems->m_runTimeFraction1,
-                               state.dataUnitarySystems->m_massFlow2,
-                               state.dataUnitarySystems->m_runTimeFraction2,
-                               _);
+            if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru) {
+                simulateFan();
+            }
+
+            if (this->m_CoolingCoilUpstream) {
 
                 if (this->m_CoolCoilExists) {
                     this->calcUnitaryCoolingSystem(
                         state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
                 }
+                if (this->m_HeatCoilExists) {
+                    // operate the heating coil without regard to coil outlet temperature
+                    this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
+                    if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
+                        Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
+                        Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
+                                                                          state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
+                        Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
+                        Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
+                        this->calcUnitaryHeatingSystem(
+                            state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
+                        HeatCoilLoad = MaxHeatCoilLoad;
+                    }
+                }
+
+                // If blow thru fan is used, the fan must be simulated after coil sets OnOffFanPartLoadFraction
+                if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru &&
+                    (state.dataHVACGlobal->OnOffFanPartLoadFraction < 1.0 || correctSupplementalFanRuntime)) {
+                    simulateFan();
+
+                    if (this->m_CoolCoilExists) {
+                        this->calcUnitaryCoolingSystem(
+                            state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
+                    }
+                    if (this->m_HeatCoilExists) {
+                        this->calcUnitaryHeatingSystem(
+                            state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
+                        if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
+                            Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
+                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
+                                                                              state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
+                            Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
+                            Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
+                            this->calcUnitaryHeatingSystem(
+                                state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
+                        }
+                    }
+                }
+
+            } else {
+
                 if (this->m_HeatCoilExists) {
                     this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
                     if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
@@ -11786,85 +11880,80 @@ namespace UnitarySystems {
                             state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
                     }
                 }
+                if (this->m_CoolCoilExists) {
+                    this->calcUnitaryCoolingSystem(
+                        state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
+                }
+
+                // If blow thru fan is used, the fan must be simulated after coil sets OnOffFanPartLoadFraction
+                if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru &&
+                    (state.dataHVACGlobal->OnOffFanPartLoadFraction < 1.0 || correctSupplementalFanRuntime)) {
+                    simulateFan();
+
+                    if (this->m_HeatCoilExists) {
+                        this->calcUnitaryHeatingSystem(
+                            state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
+                        if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
+                            Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
+                            Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
+                                                                              state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
+                            Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
+                            Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
+                            this->calcUnitaryHeatingSystem(
+                                state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
+                        }
+                    }
+                    if (this->m_CoolCoilExists) {
+                        this->calcUnitaryCoolingSystem(
+                            state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
+                    }
+                }
             }
 
+            if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::DrawThru) {
+                simulateFan();
+            }
+            if (this->m_SuppCoilExists) {
+                this->calcUnitarySuppHeatingSystem(state, FirstHVACIteration, SuppCoilLoad);
+                if ((state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp) && this->m_SuppHeatPartLoadFrac > 0.0 &&
+                    !this->m_SimASHRAEModel) {
+                    // EMS override will ignore this recalculation.
+                    Real64 MDotAir = state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).MassFlowRate;
+                    Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).HumRat +
+                                                                      state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum).HumRat));
+                    Real64 HCDeltaT = max(0.0, this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).Temp);
+                    Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
+                    this->calcUnitarySuppHeatingSystem(state, FirstHVACIteration, MaxHeatCoilLoad);
+                    SuppCoilLoad = MaxHeatCoilLoad;
+                }
+            }
+        };
+        if (correctSupplementalFanRuntime) {
+            // Reconcile fan heat and any supplemental outlet-temperature limit without changing requested airflow.
+            // Both placements leave the supplemental coil downstream of the fan; each pass uses the previous
+            // supplemental RTF and recomputes the primary coils before applying the next fan correction.
+            constexpr int maxIterations = 50;
+            Real64 previousFanPower = -1.0;
+            for (int iteration = 0; iteration < maxIterations; ++iteration) {
+                state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
+                simulateComponents();
+                Real64 const nextRuntime = state.dataHeatingCoils->HeatingCoil(this->m_SuppHeatCoilIndex).RTF;
+                state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
+                Real64 const requestedRuntime = state.dataUnitarySystems->m_runTimeFraction1;
+                Real64 const fanPower = state.dataFans->fans(this->m_FanIndex)->totalPower;
+                // Fan power must also settle because updated fan heat can change primary DX capacity and RTF.
+                if (std::abs(max(nextRuntime, requestedRuntime) - max(supplementalRuntime, requestedRuntime)) < 1.0e-6 &&
+                    std::abs(fanPower - previousFanPower) < 0.001) {
+                    break;
+                }
+                previousFanPower = fanPower;
+                supplementalRuntime = nextRuntime;
+                if (iteration == maxIterations - 1) {
+                    ShowWarningError(state, std::format("AirLoopHVAC:UnitarySystem=\"{}\": supplemental fan runtime did not converge.", this->Name));
+                }
+            }
         } else {
-
-            if (this->m_HeatCoilExists) {
-                this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
-                if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
-                    Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
-                    Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
-                                                                      state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
-                    Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
-                    Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
-                    this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
-                }
-            }
-            if (this->m_CoolCoilExists) {
-                this->calcUnitaryCoolingSystem(
-                    state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
-            }
-
-            // If blow thru fan is used, the fan must be simulated after coil sets OnOffFanPartLoadFraction
-            if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::BlowThru && state.dataHVACGlobal->OnOffFanPartLoadFraction < 1.0) {
-                state.dataFans->fans(this->m_FanIndex)
-                    ->simulate(state,
-                               FirstHVACIteration,
-                               state.dataUnitarySystems->FanSpeedRatio,
-                               _, // Pressure rise
-                               _, // Flow fraction
-                               state.dataUnitarySystems->m_massFlow1,
-                               state.dataUnitarySystems->m_runTimeFraction1,
-                               state.dataUnitarySystems->m_massFlow2,
-                               state.dataUnitarySystems->m_runTimeFraction2,
-                               _);
-
-                if (this->m_HeatCoilExists) {
-                    this->calcUnitaryHeatingSystem(state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, HeatCoilLoad);
-                    if (state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp && !this->m_SimASHRAEModel) {
-                        Real64 MDotAir = state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).MassFlowRate;
-                        Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).HumRat +
-                                                                          state.dataLoopNodes->Node(this->HeatCoilOutletNodeNum).HumRat));
-                        Real64 HCDeltaT = this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->HeatCoilInletNodeNum).Temp;
-                        Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
-                        this->calcUnitaryHeatingSystem(
-                            state, AirLoopNum, FirstHVACIteration, HeatPLR, HeatingCompOn, OnOffAirFlowRatio, MaxHeatCoilLoad);
-                    }
-                }
-                if (this->m_CoolCoilExists) {
-                    this->calcUnitaryCoolingSystem(
-                        state, AirLoopNum, FirstHVACIteration, CoolPLR, CoolingCompOn, OnOffAirFlowRatio, CoilCoolHeatRat, HXUnitOn);
-                }
-            }
-        }
-
-        if (this->m_FanExists && this->m_FanPlace == HVAC::FanPlace::DrawThru) {
-            state.dataFans->fans(this->m_FanIndex)
-                ->simulate(state,
-                           FirstHVACIteration,
-                           state.dataUnitarySystems->FanSpeedRatio,
-                           _, // Pressure rise
-                           _, // Flow fraction
-                           state.dataUnitarySystems->m_massFlow1,
-                           state.dataUnitarySystems->m_runTimeFraction1,
-                           state.dataUnitarySystems->m_massFlow2,
-                           state.dataUnitarySystems->m_runTimeFraction2,
-                           _);
-        }
-        if (this->m_SuppCoilExists) {
-            this->calcUnitarySuppHeatingSystem(state, FirstHVACIteration, SuppCoilLoad);
-            if ((state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum).Temp > this->DesignMaxOutletTemp) && this->m_SuppHeatPartLoadFrac > 0.0 &&
-                !this->m_SimASHRAEModel) {
-                // EMS override will ignore this recalculation.
-                Real64 MDotAir = state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).MassFlowRate;
-                Real64 CpAir = Psychrometrics::PsyCpAirFnW(0.5 * (state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).HumRat +
-                                                                  state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum).HumRat));
-                Real64 HCDeltaT = max(0.0, this->DesignMaxOutletTemp - state.dataLoopNodes->Node(this->m_SuppCoilAirInletNode).Temp);
-                Real64 MaxHeatCoilLoad = MDotAir * CpAir * HCDeltaT;
-                this->calcUnitarySuppHeatingSystem(state, FirstHVACIteration, MaxHeatCoilLoad);
-                SuppCoilLoad = MaxHeatCoilLoad;
-            }
+            simulateComponents();
         }
 
         // If there is a supply side air terminal mixer, calculate its output
@@ -16231,6 +16320,11 @@ namespace UnitarySystems {
                 if (state.dataUnitarySystems->CompOnMassFlow > 0.0) {
                     this->FanPartLoadRatio =
                         (this->m_SpeedNum > 1 && !this->m_SingleMode) ? 1.0 : AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
+                    // With zero off-cycle flow, report the airflow-derived cycling fraction instead of forcing one for a retained DX speed.
+                    if (this->m_ControlType == UnitarySysCtrlType::Load && this->m_FanOpMode == HVAC::FanOp::Cycling && this->m_SuppCoilExists &&
+                        !this->m_SimASHRAEModel && state.dataUnitarySystems->CompOffMassFlow == 0.0) {
+                        this->FanPartLoadRatio = AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
+                    }
                 }
             }
 

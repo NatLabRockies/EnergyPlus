@@ -30,11 +30,9 @@ belt also acts to raise the air stream temperature.
 Each of the five fan models is a forward type: the model inputs describe the
 fan characteristics and the conditions of the air at the fan inlet; the outputs
 are the fan electrical power consumption and the conditions of the air at the
-fan outlet. The model algorithms and data for Fan:ConstantVolume,
-Fan:VariableVolume, Fan:OnOff and Fan:ComponentModel are contained in the
-\emph{Fans.cc} and \emph{Fans.hh} files in EnergyPlus.  The source code for the
-Fan:SystemModel added for version 8.7 is contained in the \emph{HVACFan.cc} and
-\emph{HVACFan.hh} files.
+fan outlet. The model algorithms and data for Fan:SystemModel,
+Fan:ConstantVolume, Fan:VariableVolume, Fan:OnOff and Fan:ComponentModel are
+contained in the \emph{Fans.cc} and \emph{Fans.hh} files in EnergyPlus.
 
 \subsubsection{Inputs and Data}\label{inputs-and-data-000}
 
@@ -124,15 +122,17 @@ The determination of electric power consumed at a flow fraction depends on if th
 
 \emph{\textbf{Discrete Speed Control}}
 
-For the \emph{Fan:SystemModel} using discrete speed control, with the number of fan speeds set at 1, and the flow fraction is less than one, then the fan will be modeled as cycling between "off" and "on" over the timestep.  The time fraction is equal to the flow fraction so that:
+For the \emph{Fan:SystemModel} using discrete speed control, with the number of fan speeds set at 1, and the flow fraction is less than one, then the fan will be modeled as cycling between "off" and "on" over the timestep. Without a coil cycling-loss correction, the time fraction is equal to the flow fraction so that:
 
 \begin{equation}
 {RTF_{On}} = {f_{flow, cur}}
 \end{equation}
 
 \begin{equation}
-{\dot Q_{tot,elec}} = {RTF_{On}} \cdot \left( \frac{\dot m\cdot \Delta P}{{\varepsilon_{tot}}\cdot {\rho_{air}}}\right)
+{\dot Q_{tot,elec}} = {RTF_{On}} \cdot \left( \frac{\dot m_{design,max}\cdot \Delta P}{{\varepsilon_{tot}}\cdot {\rho_{air}}}\right)
 \end{equation}
+
+The mass flow inside the parentheses is the on-cycle design mass flow, not the timestep-average mass flow. If a parent system supplies a coil part-load fraction correction, the fan adjusts the cycling fraction by that correction, limited to a runtime fraction of 1. Fan:OnOff uses an analogous correction. For AirLoopHVAC:UnitarySystem, see \hyperref[unitary-system-cycling-airflow]{Cycling airflow, part-load ratio, and runtime fraction} for the distinction between requested airflow and actual fan runtime, including coordination of primary and supplemental fuel-coil cycling losses.
 
 Similarly, for two-speed and multi-speed fans, the current flow fraction will be used to find the run time fraction for each of the adjacent speed levels *x* and *x+1* that bracket the flow fraction such that
 

@@ -8326,6 +8326,586 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_ConfirmUnitarySystemSizingTest)
     }
 }
 
+// Verify supplemental PLR controls load-based cycling airflow when the DX coil is off or locked out,
+// without changing continuous-fan operation. This tests airflow requests, not coil PLF or actual fan RTF.
+TEST_F(EnergyPlusFixture, UnitarySystemModel_SupplementalHeatingCyclingFanAirFlow)
+{
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(1);
+
+    UnitarySys thisSys;
+    thisSys.AirInNode = 1;
+    thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+    thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+    thisSys.m_SuppCoilExists = true;
+    thisSys.m_DXHeatingCoil = true;
+    thisSys.MaxHeatAirMassFlow = 1.0;
+    thisSys.m_HeatingFanSpeedRatio = 1.0;
+    thisSys.m_MinOATCompressorHeating = -5.0;
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    state->dataUnitarySystems->HeatingLoad = true;
+    state->dataUnitarySystems->CompOnMassFlow = 1.0;
+    state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+    state->dataUnitarySystems->CompOffMassFlow = 0.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+    Real64 OnOffAirFlowRatio = 0.0;
+
+    // Exercise airflow inputs directly; this does not simulate actual coil RTFs or DX cycling-loss corrections.
+    // Supplemental-only operation cycles at its fraction; a full primary-coil request keeps the fan on continuously.
+    thisSys.m_SuppHeatPartLoadFrac = 0.25;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+    EXPECT_DOUBLE_EQ(4.0, OnOffAirFlowRatio);
+
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_SuppHeatPartLoadFrac = 0.0;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    // A scheduled-off DX coil must not drive the fan, even when its requested part-load ratio remains one.
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOff(*state);
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_SuppHeatPartLoadFrac = 0.25;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    // Compressor temperature lockout likewise leaves supplemental heat in control of cycling airflow.
+    state->dataEnvrn->OutDryBulbTemp = -10.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+
+    // A retained high DX speed must not force continuous flow while the compressor is locked out.
+    thisSys.m_HeatingSpeedNum = 3;
+    thisSys.m_MultiOrVarSpeedHeatCoil = true;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.25, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.25, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_SuppHeatPartLoadFrac = 0.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    // Continuous-fan mode retains its configured off-cycle airflow, independently of either coil's heating request.
+    thisSys.m_HeatingSpeedNum = 0;
+    thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
+    state->dataUnitarySystems->CompOffMassFlow = 1.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 1.0;
+    thisSys.setAverageAirFlow(*state, 0.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction2);
+}
+
+TEST_F(EnergyPlusFixture, UnitarySystemModel_CyclingFanStopsWhenDXHeatingUnavailableWithoutSupplementalCoil)
+{
+    state->init_state(*state);
+    state->dataLoopNodes->Node.allocate(1);
+
+    UnitarySys thisSys;
+    thisSys.AirInNode = 1;
+    thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+    thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+    thisSys.m_SuppCoilExists = false;
+    thisSys.m_DXHeatingCoil = true;
+    thisSys.MaxHeatAirMassFlow = 1.0;
+    thisSys.m_HeatingFanSpeedRatio = 1.0;
+    thisSys.m_MinOATCompressorHeating = -5.0;
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    state->dataUnitarySystems->HeatingLoad = true;
+    state->dataUnitarySystems->CompOnMassFlow = 1.0;
+    state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+    state->dataUnitarySystems->CompOffMassFlow = 0.0;
+    state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+    Real64 OnOffAirFlowRatio = 0.0;
+
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(1.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOff(*state);
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+
+    thisSys.m_heatingCoilAvailSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataEnvrn->OutDryBulbTemp = -10.0;
+    thisSys.setAverageAirFlow(*state, 1.0, OnOffAirFlowRatio);
+    EXPECT_DOUBLE_EQ(0.0, state->dataLoopNodes->Node(1).MassFlowRate);
+    EXPECT_DOUBLE_EQ(0.0, state->dataUnitarySystems->m_runTimeFraction1);
+}
+
+// Verify DX-only, supplemental-only, and combined heating fan PLF corrections with shared component inputs.
+// Scenario traces distinguish runtime dominance, lockout, temperature limits, and repeated-call regressions.
+TEST_F(EnergyPlusFixture, UnitarySystemModel_HeatingCyclingFanPLF)
+{
+    std::string const idf_objects = delimited_string({
+        "Fan:SystemModel,",
+        "  Supply Fan,                 !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  System Inlet,               !- Air Inlet Node Name",
+        "  Heating Inlet,              !- Air Outlet Node Name",
+        "  1.0,                        !- Design Maximum Air Flow Rate {m3/s}",
+        "  Discrete,                   !- Speed Control Method",
+        "  0.0,                        !- Electric Power Minimum Flow Rate Fraction",
+        "  300.0,                      !- Design Pressure Rise {Pa}",
+        "  0.9,                        !- Motor Efficiency",
+        "  1.0,                        !- Motor In Air Stream Fraction",
+        "  600.0,                      !- Design Electric Power Consumption {W}",
+        "  TotalEfficiencyAndPressure, !- Design Power Sizing Method",
+        "  ,                           !- Electric Power Per Unit Flow Rate {W/(m3/s)}",
+        "  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}",
+        "  0.5;                        !- Fan Total Efficiency",
+        "",
+        "Curve:Quadratic,",
+        "  Constant Modifier,          !- Name",
+        "  1.0,                        !- Coefficient1 Constant",
+        "  0.0,                        !- Coefficient2 x",
+        "  0.0,                        !- Coefficient3 x**2",
+        "  -100.0,                     !- Minimum Value of x",
+        "  100.0;                      !- Maximum Value of x",
+        "",
+        "Curve:Quadratic,",
+        "  DX PLF,                     !- Name",
+        "  1.0,                        !- Coefficient1 Constant",
+        "  0.0,                        !- Coefficient2 x",
+        "  0.0,                        !- Coefficient3 x**2",
+        "  0.0,                        !- Minimum Value of x",
+        "  1.0;                        !- Maximum Value of x",
+        "",
+        "Coil:Heating:DX:SingleSpeed,",
+        "  DX Heating Coil,            !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  10000.0,                    !- Gross Rated Heating Capacity {W}",
+        "  3.0,                        !- Gross Rated Heating COP {W/W}",
+        "  1.0,                        !- Rated Air Flow Rate {m3/s}",
+        "  ,                           !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "  ,                           !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "  Heating Inlet,              !- Air Inlet Node Name",
+        "  Supplemental Inlet,         !- Air Outlet Node Name",
+        "  Constant Modifier,          !- Heating Capacity Function of Temperature Curve Name",
+        "  Constant Modifier,          !- Heating Capacity Function of Flow Fraction Curve Name",
+        "  Constant Modifier,          !- Energy Input Ratio Function of Temperature Curve Name",
+        "  Constant Modifier,          !- Energy Input Ratio Function of Flow Fraction Curve Name",
+        "  DX PLF,                     !- Part Load Fraction Correlation Curve Name",
+        "  ,                           !- Defrost Energy Input Ratio Function of Temperature Curve Name",
+        "  -20.0,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+        "  ,                           !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
+        "  0.0,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}",
+        "  0.0,                        !- Crankcase Heater Capacity {W}",
+        "  ,                           !- Crankcase Heater Capacity Function of Temperature Curve Name",
+        "  10.0,                       !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
+        "  Resistive,                  !- Defrost Strategy",
+        "  Timed,                      !- Defrost Control",
+        "  0.0,                        !- Defrost Time Period Fraction",
+        "  0.0;                        !- Resistive Defrost Heater Capacity {W}",
+        "",
+        "Curve:Quadratic,",
+        "  Supplemental PLF,           !- Name",
+        "  0.8,                        !- Coefficient1 Constant",
+        "  0.0,                        !- Coefficient2 x",
+        "  0.0,                        !- Coefficient3 x**2",
+        "  0.0,                        !- Minimum Value of x",
+        "  1.0;                        !- Maximum Value of x",
+        "",
+        "Coil:Heating:Fuel,",
+        "  Supplemental Coil,          !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  NaturalGas,                 !- Fuel Type",
+        "  0.95,                       !- Burner Efficiency",
+        "  10000.0,                    !- Nominal Capacity {W}",
+        "  Supplemental Inlet,         !- Air Inlet Node Name",
+        "  System Outlet,              !- Air Outlet Node Name",
+        "  ,                           !- Temperature Setpoint Node Name",
+        "  0.0,                        !- On Cycle Parasitic Electric Load {W}",
+        "  Supplemental PLF,           !- Part Load Fraction Correlation Curve Name",
+        "  0.0;                        !- Off Cycle Parasitic Fuel Load {W}",
+        "",
+        "Fan:OnOff,",
+        "  OnOff Fan,                  !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  0.5,                        !- Fan Total Efficiency",
+        "  300.0,                      !- Pressure Rise {Pa}",
+        "  1.0,                        !- Maximum Flow Rate {m3/s}",
+        "  0.9,                        !- Motor Efficiency",
+        "  1.0,                        !- Motor In Airstream Fraction",
+        "  System Inlet,               !- Air Inlet Node Name",
+        "  Supplemental Inlet;         !- Air Outlet Node Name",
+        "",
+        "Fan:SystemModel,",
+        "  MultiSpeed Fan,             !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  System Inlet,               !- Air Inlet Node Name",
+        "  Supplemental Inlet,         !- Air Outlet Node Name",
+        "  1.0,                        !- Design Maximum Air Flow Rate {m3/s}",
+        "  Discrete,                   !- Speed Control Method",
+        "  0.0,                        !- Electric Power Minimum Flow Rate Fraction",
+        "  300.0,                      !- Design Pressure Rise {Pa}",
+        "  0.9,                        !- Motor Efficiency",
+        "  1.0,                        !- Motor In Air Stream Fraction",
+        "  600.0,                      !- Design Electric Power Consumption {W}",
+        "  TotalEfficiencyAndPressure, !- Design Power Sizing Method",
+        "  ,                           !- Electric Power Per Unit Flow Rate {W/(m3/s)}",
+        "  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}",
+        "  0.5,                        !- Fan Total Efficiency",
+        "  ,                           !- Electric Power Function of Flow Fraction Curve Name",
+        "  ,                           !- Night Ventilation Mode Pressure Rise {Pa}",
+        "  ,                           !- Night Ventilation Mode Flow Fraction",
+        "  ,                           !- Motor Loss Zone Name",
+        "  ,                           !- Motor Loss Radiative Fraction",
+        "  ,                           !- End-Use Subcategory",
+        "  2,                          !- Number of Speeds",
+        "  0.5,                        !- Speed 1 Flow Fraction",
+        "  0.5,                        !- Speed 1 Electric Power Fraction",
+        "  1.0,                        !- Speed 2 Flow Fraction",
+        "  1.0;                        !- Speed 2 Electric Power Fraction",
+        "",
+        "Fan:SystemModel,",
+        "  Continuous Fan,            !- Name",
+        "  ,                           !- Availability Schedule Name",
+        "  System Inlet,               !- Air Inlet Node Name",
+        "  Supplemental Inlet,         !- Air Outlet Node Name",
+        "  1.0,                        !- Design Maximum Air Flow Rate {m3/s}",
+        "  Continuous,                 !- Speed Control Method",
+        "  0.0,                        !- Electric Power Minimum Flow Rate Fraction",
+        "  300.0,                      !- Design Pressure Rise {Pa}",
+        "  0.9,                        !- Motor Efficiency",
+        "  1.0,                        !- Motor In Air Stream Fraction",
+        "  600.0,                      !- Design Electric Power Consumption {W}",
+        "  TotalEfficiencyAndPressure, !- Design Power Sizing Method",
+        "  ,                           !- Electric Power Per Unit Flow Rate {W/(m3/s)}",
+        "  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}",
+        "  0.5,                        !- Fan Total Efficiency",
+        "  Constant Modifier,          !- Electric Power Function of Flow Fraction Curve Name",
+        "  ,                           !- Night Ventilation Mode Pressure Rise {Pa}",
+        "  ,                           !- Night Ventilation Mode Flow Fraction",
+        "  ,                           !- Motor Loss Zone Name",
+        "  ,                           !- Motor Loss Radiative Fraction",
+        "  ,                           !- End-Use Subcategory",
+        "  1,                          !- Number of Speeds",
+        "  1.0,                        !- Speed 1 Flow Fraction",
+        "  1.0;                        !- Speed 1 Electric Power Fraction",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    state->dataEnvrn->OutHumRat = 0.004;
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    Fans::GetFanInput(*state);
+    bool errorsFound = false;
+    int const supplementalIndex = HeatingCoils::GetHeatingCoilIndex(*state, "Coil:Heating:Fuel", "SUPPLEMENTAL COIL", errorsFound);
+    ASSERT_FALSE(errorsFound);
+    ASSERT_GT(supplementalIndex, 0);
+    auto &supplementalCoil = state->dataHeatingCoils->HeatingCoil(supplementalIndex);
+    {
+        int coilIndex = 0;
+        DXCoils::GetDXCoilIndex(*state, "DX HEATING COIL", coilIndex, errorsFound);
+        ASSERT_FALSE(errorsFound);
+        ASSERT_GT(coilIndex, 0);
+        auto &coil = state->dataDXCoils->DXCoil(coilIndex);
+        // This standalone heating-only fixture has no parent-system input or companion cooling coil.
+        coil.FindCompanionUpStreamCoil = false;
+        int const fanIndex = Fans::GetFanIndex(*state, "SUPPLY FAN");
+        ASSERT_GT(fanIndex, 0);
+        auto *fan = state->dataFans->fans(fanIndex);
+        ASSERT_NE(nullptr, fan);
+        ASSERT_GT(coil.PLFFPLR(1), 0);
+
+        auto &inlet = state->dataLoopNodes->Node(fan->inletNodeNum);
+        inlet.Temp = 20.0;
+        inlet.HumRat = 0.008;
+        inlet.Enthalpy = Psychrometrics::PsyHFnTdbW(inlet.Temp, inlet.HumRat);
+        inlet.MassFlowRate = 1.0;
+        inlet.MassFlowRateMaxAvail = 1.0;
+        fan->simulate(*state, false);
+        Real64 const fullLoadFanPower = fan->totalPower;
+        ASSERT_NEAR(600.0, fullLoadFanPower, 0.001);
+
+        UnitarySys thisSys;
+        thisSys.AirInNode = fan->inletNodeNum;
+        thisSys.AirOutNode = coil.AirOutNode;
+        thisSys.NodeNumOfControlledZone = fan->inletNodeNum;
+        thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+        thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+        thisSys.m_FanExists = true;
+        thisSys.m_fanAvailSched = fan->availSched;
+        thisSys.m_FanPlace = HVAC::FanPlace::BlowThru;
+        thisSys.m_FanIndex = fanIndex;
+        thisSys.m_HeatCoilExists = true;
+        thisSys.m_DXHeatingCoil = true;
+        thisSys.m_HeatingCoilName = coil.Name;
+        thisSys.m_HeatingCoilIndex = coilIndex;
+        thisSys.m_heatCoilType = HVAC::CoilType::HeatingDXSingleSpeed;
+        thisSys.HeatCoilInletNodeNum = coil.AirInNode;
+        thisSys.HeatCoilOutletNodeNum = coil.AirOutNode;
+        thisSys.DesignMaxOutletTemp = 100.0;
+        thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+        ASSERT_FALSE(thisSys.m_SuppCoilExists);
+        state->dataUnitarySystems->HeatingLoad = true;
+        state->dataUnitarySystems->CompOnMassFlow = 1.0;
+        state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+        state->dataUnitarySystems->CompOffMassFlow = 0.0;
+        state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+        state->dataUnitarySystems->m_massFlow1 = 1.0;
+        state->dataUnitarySystems->m_massFlow2 = 0.0;
+
+        Real64 onOffAirFlowRatio = 1.0;
+        Real64 sensibleOutput = 0.0;
+        Real64 latentOutput = 0.0;
+        auto simulate = [&](Real64 const primaryPLR = 0.25, Real64 const supplementalLoad = 0.0) {
+            // Deliberately retain shared state between calls so transitions expose a leaked supplemental PLF.
+            thisSys.calcUnitarySystemToLoad(*state,
+                                            0,
+                                            false,
+                                            0.0,
+                                            primaryPLR,
+                                            onOffAirFlowRatio,
+                                            sensibleOutput,
+                                            latentOutput,
+                                            false,
+                                            0.0,
+                                            supplementalLoad,
+                                            HVAC::CompressorOp::On);
+        };
+
+        {
+            SCOPED_TRACE("DX-only");
+            simulate();
+            ASSERT_NEAR(0.25, coil.HeatingCoilRuntimeFraction, 0.000001);
+            ASSERT_NEAR(150.0, fan->totalPower, 0.001);
+            ASSERT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
+
+            state->dataCurveManager->curves(coil.PLFFPLR(1))->coeff[0] = 0.8;
+            simulate();
+            ASSERT_NEAR(0.3125, coil.HeatingCoilRuntimeFraction, 0.000001);
+            EXPECT_NEAR(187.5, fan->totalPower, 0.001);
+            EXPECT_NEAR(fullLoadFanPower * coil.HeatingCoilRuntimeFraction, fan->totalPower, 0.001);
+            EXPECT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
+        }
+
+        {
+            SCOPED_TRACE("Combined DX and supplemental");
+            thisSys.m_SuppCoilExists = true;
+            thisSys.m_SuppHeatCoilName = supplementalCoil.Name;
+            thisSys.m_SuppHeatCoilIndex = supplementalIndex;
+            thisSys.m_suppHeatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
+            thisSys.m_SuppCoilAirInletNode = supplementalCoil.AirInletNodeNum;
+            thisSys.SuppCoilOutletNodeNum = supplementalCoil.AirOutletNodeNum;
+            thisSys.AirOutNode = supplementalCoil.AirOutletNodeNum;
+            thisSys.m_MaxOATSuppHeat = 20.0;
+            thisSys.m_SuppHeatPartLoadFrac = 0.5;
+            // Supplemental runtime dominates even though the DX coil has the smaller PLF.
+            state->dataCurveManager->curves(coil.PLFFPLR(1))->coeff[0] = 0.7;
+            simulate(0.25, 5000.0);
+            EXPECT_NEAR(0.625, supplementalCoil.RTF, 0.000001);
+            EXPECT_NEAR(375.0, fan->totalPower, 0.001);
+            EXPECT_NEAR(0.5, state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate, 0.000001);
+            EXPECT_DOUBLE_EQ(1.0, state->dataHVACGlobal->OnOffFanPartLoadFraction);
+
+            // DX runtime dominates at part load, then requires continuous fan operation at full load.
+            thisSys.m_SuppHeatPartLoadFrac = 0.25;
+            state->dataCurveManager->curves(coil.PLFFPLR(1))->coeff[0] = 0.8;
+            simulate(0.5, 2500.0);
+            EXPECT_NEAR(0.625, coil.HeatingCoilRuntimeFraction, 0.000001);
+            EXPECT_NEAR(375.0, fan->totalPower, 0.001);
+            simulate(1.0, 2500.0);
+            EXPECT_NEAR(600.0, fan->totalPower, 0.001);
+
+            // Removing supplemental demand must not leave its correction in the following DX-only call.
+            thisSys.m_SuppHeatPartLoadFrac = 0.0;
+            simulate();
+            EXPECT_NEAR(187.5, fan->totalPower, 0.001);
+            EXPECT_NEAR(0.0, supplementalCoil.RTF, 0.000001);
+
+            // A retained full-load DX request must not dominate runtime while its compressor is locked out.
+            thisSys.m_SuppHeatPartLoadFrac = 0.25;
+            thisSys.m_MinOATCompressorHeating = -20.0;
+            thisSys.MaxHeatAirMassFlow = 1.0;
+            thisSys.m_HeatingFanSpeedRatio = 1.0;
+            state->dataEnvrn->OutDryBulbTemp = -30.0;
+            simulate(1.0, 2500.0);
+            EXPECT_NEAR(0.0, coil.HeatingCoilRuntimeFraction, 0.000001);
+            EXPECT_NEAR(187.5, fan->totalPower, 0.001);
+            EXPECT_NEAR(0.25, state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate, 0.000001);
+        }
+    }
+    {
+        SCOPED_TRACE("Supplemental-only");
+        auto &coil = supplementalCoil;
+        state->dataEnvrn->OutDryBulbTemp = -10.0;
+        // With no primary coils, both placement choices still have the fan upstream of the supplemental heater.
+        for (auto const &fanName : {"SUPPLY FAN", "ONOFF FAN", "MULTISPEED FAN", "CONTINUOUS FAN"}) {
+            for (auto const fanPlacement : {HVAC::FanPlace::BlowThru, HVAC::FanPlace::DrawThru}) {
+                SCOPED_TRACE(fanName);
+                SCOPED_TRACE(static_cast<int>(fanPlacement));
+                int const fanIndex = Fans::GetFanIndex(*state, fanName);
+                ASSERT_GT(fanIndex, 0);
+                auto *fan = state->dataFans->fans(fanIndex);
+                ASSERT_NE(nullptr, fan);
+                ASSERT_GT(coil.PLFCurveIndex, 0);
+                auto *systemFan = dynamic_cast<Fans::FanSystem *>(fan);
+                bool const continuousSpeedSystemModel =
+                  systemFan != nullptr && systemFan->speedControl == Fans::SpeedControl::Continuous;
+                // Bypass the primary coil for this scenario; the same fan now feeds the supplemental inlet directly.
+                fan->outletNodeNum = coil.AirInletNodeNum;
+
+                auto &inlet = state->dataLoopNodes->Node(fan->inletNodeNum);
+                inlet.Temp = 20.0;
+                inlet.HumRat = 0.008;
+                inlet.Enthalpy = Psychrometrics::PsyHFnTdbW(inlet.Temp, inlet.HumRat);
+                inlet.MassFlowRate = 1.0;
+                inlet.MassFlowRateMaxAvail = 1.0;
+                fan->simulate(*state, false);
+                Real64 const fullLoadFanPower = fan->totalPower;
+                ASSERT_NEAR(600.0, fullLoadFanPower, 0.001);
+                auto expectedFanPower = [&](Real64 const coilRuntime) {
+                  Real64 const runtime = continuousSpeedSystemModel ? 0.25 : max(0.25, coilRuntime);
+                  return fullLoadFanPower * runtime;
+                };
+
+                UnitarySys thisSys;
+                thisSys.AirInNode = fan->inletNodeNum;
+                thisSys.AirOutNode = coil.AirOutletNodeNum;
+                thisSys.NodeNumOfControlledZone = fan->inletNodeNum;
+                thisSys.m_ControlType = UnitarySys::UnitarySysCtrlType::Load;
+                thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+                thisSys.m_FanExists = true;
+                thisSys.m_fanAvailSched = fan->availSched;
+                thisSys.m_FanPlace = fanPlacement;
+                thisSys.m_FanIndex = fanIndex;
+                thisSys.m_SuppCoilExists = true;
+                thisSys.m_SuppHeatCoilName = coil.Name;
+                thisSys.m_SuppHeatCoilIndex = supplementalIndex;
+                thisSys.m_suppHeatCoilType = HVAC::CoilType::HeatingGasOrOtherFuel;
+                thisSys.m_SuppCoilAirInletNode = coil.AirInletNodeNum;
+                thisSys.SuppCoilOutletNodeNum = coil.AirOutletNodeNum;
+                thisSys.m_DesignSuppHeatingCapacity = coil.NominalCapacity;
+                thisSys.m_SuppHeatPartLoadFrac = 0.25;
+                thisSys.m_MaxOATSuppHeat = 0.0;
+                thisSys.DesignMaxOutletTemp = 100.0;
+                thisSys.m_sysAvailSched = Sched::GetScheduleAlwaysOn(*state);
+                state->dataUnitarySystems->HeatingLoad = true;
+                state->dataUnitarySystems->CompOnMassFlow = 1.0;
+                state->dataUnitarySystems->CompOnFlowRatio = 1.0;
+                state->dataUnitarySystems->CompOffMassFlow = 0.0;
+                state->dataUnitarySystems->CompOffFlowRatio = 0.0;
+                state->dataUnitarySystems->m_massFlow1 = 1.0;
+                state->dataUnitarySystems->m_massFlow2 = 0.0;
+
+                Real64 onOffAirFlowRatio = 1.0;
+                Real64 sensibleOutput = 0.0;
+                Real64 latentOutput = 0.0;
+                auto simulate = [&](Real64 const primaryPLR = 0.0) {
+                    thisSys.calcUnitarySystemToLoad(*state,
+                                                    0,
+                                                    false,
+                                                    0.0,
+                                                    primaryPLR,
+                                                    onOffAirFlowRatio,
+                                                    sensibleOutput,
+                                                    latentOutput,
+                                                    false,
+                                                    0.0,
+                                                    2500.0,
+                                                    HVAC::CompressorOp::Off);
+                };
+
+                state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 1.0;
+                simulate();
+                ASSERT_NEAR(2500.0, coil.HeatingCoilRate, 0.001);
+                ASSERT_NEAR(0.25, coil.RTF, 0.000001);
+                ASSERT_NEAR(fullLoadFanPower * coil.RTF, fan->totalPower, 0.001);
+
+                state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 0.8;
+                simulate();
+                ASSERT_NEAR(2500.0, coil.HeatingCoilRate, 0.001);
+                ASSERT_NEAR(0.3125, coil.RTF, 0.000001);
+                // The supplemental coil follows the fan in either placement. Its PLF requires another component pass
+                // to update fan power and downstream temperatures, while preserving the original PLR-based airflow.
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
+                EXPECT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
+                EXPECT_DOUBLE_EQ(continuousSpeedSystemModel ? 0.8 : 1.0, state->dataHVACGlobal->OnOffFanPartLoadFraction);
+                // Repeating the call must not apply the same PLF a second time.
+                simulate();
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
+
+                if (systemFan != nullptr && systemFan->speedControl == Fans::SpeedControl::Discrete && systemFan->numSpeeds > 1) {
+                    // An on-cycle flow between speeds must split the corrected RTF between both speeds.
+                    state->dataUnitarySystems->CompOnMassFlow = 0.75;
+                    state->dataUnitarySystems->m_massFlow1 = 0.75;
+                    simulate();
+                    EXPECT_NEAR(140.625, fan->totalPower, 0.001);
+                    EXPECT_NEAR(0.1875, inlet.MassFlowRate, 0.000001);
+                    state->dataUnitarySystems->CompOnMassFlow = 1.0;
+                    state->dataUnitarySystems->m_massFlow1 = 1.0;
+                }
+
+                // At this limit, the original airflow request is a larger fan-runtime requirement than the reduced coil RTF.
+                thisSys.DesignMaxOutletTemp = 25.0;
+                simulate();
+                EXPECT_LE(state->dataLoopNodes->Node(thisSys.AirOutNode).Temp, 25.0 + 0.00001);
+                EXPECT_LT(coil.HeatingCoilRate, 2500.0);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
+
+                // A looser limit keeps coil RTF above PLR and exercises fan-heat/coil-output convergence.
+                thisSys.DesignMaxOutletTemp = 29.0;
+                simulate();
+                EXPECT_NEAR(29.0, state->dataLoopNodes->Node(thisSys.AirOutNode).Temp, 0.00001);
+                EXPECT_GT(coil.RTF, 0.25);
+                EXPECT_LT(coil.HeatingCoilRate, 2500.0);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
+
+                // Removing cycling losses must restore PLR-based fan power, without a stale correction.
+                thisSys.DesignMaxOutletTemp = 100.0;
+                state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 1.0;
+                simulate();
+                EXPECT_NEAR(150.0, fan->totalPower, 0.001);
+
+                // Isolate the retained multi-speed DX request with no primary component simulated: actual compressor PLR is zero.
+                thisSys.m_DXHeatingCoil = true;
+                thisSys.m_heatCoilType = HVAC::CoilType::HeatingDXMultiSpeed;
+                thisSys.m_HeatingSpeedNum = 3;
+                thisSys.m_MinOATCompressorHeating = -5.0;
+                thisSys.MaxHeatAirMassFlow = 1.0;
+                thisSys.m_HeatingFanSpeedRatio = 1.0;
+                state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 0.8;
+                simulate(1.0);
+                EXPECT_NEAR(expectedFanPower(coil.RTF), fan->totalPower, 0.001);
+                EXPECT_NEAR(0.25, inlet.MassFlowRate, 0.000001);
+                thisSys.m_DXHeatingCoil = false;
+                thisSys.m_HeatingSpeedNum = 0;
+
+                // Continuous fan operation must remain independent of the supplemental PLF.
+                thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
+                state->dataUnitarySystems->CompOffMassFlow = 1.0;
+                state->dataUnitarySystems->CompOffFlowRatio = 1.0;
+                state->dataUnitarySystems->m_massFlow2 = 1.0;
+                state->dataCurveManager->curves(coil.PLFCurveIndex)->coeff[0] = 0.8;
+                simulate();
+                EXPECT_NEAR(600.0, fan->totalPower, 0.001);
+                EXPECT_NEAR(1.0, inlet.MassFlowRate, 0.000001);
+            }
+        }
+    }
+}
+
 TEST_F(EnergyPlusFixture, UnitarySystemModel_CalcUnitaryHeatingSystem)
 {
     state->init_state(*state);
