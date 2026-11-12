@@ -431,6 +431,24 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with F, insert the rules here
 
+              CASE('FAN:SYSTEMMODEL')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  IF (CurArgs <= 16) THEN
+                    OutArgs(1:CurArgs)=InArgs(1:CurArgs)
+                  ELSE
+                    OutArgs(1:16)=InArgs(1:16)
+                    OutArgs(17) = ''
+                    OutArgs(18) = InArgs(17)
+                    IF (CurArgs <= 18) THEN
+                      CurArgs = 18
+                    ELSE
+                      OutArgs(19:20) = ''
+                      OutArgs(21:CurArgs+2)=InArgs(19:CurArgs)
+                      CurArgs = CurArgs + 2
+                    ENDIF
+                  ENDIF
+
                 CASE('FANPERFORMANCE:NIGHTVENTILATION')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                   IF (TRIM(InArgs(4)) /= Blank) THEN

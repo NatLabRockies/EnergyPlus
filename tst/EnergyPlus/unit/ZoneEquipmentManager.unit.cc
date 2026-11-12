@@ -94,6 +94,66 @@ using namespace EnergyPlus::HeatBalanceAirManager;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::HVACManager;
 
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesComponentResults)
+{
+    state->init_state(*state);
+    state->dataHVACGlobal->NightVentOn = true;
+    state->dataAvail->ZoneComp.allocate(NumValidSysAvailZoneComponents);
+    auto &zoneComponents = state->dataAvail->ZoneComp((int)ZoneEquipType::UnitHeater);
+    zoneComponents.ZoneCompAvailMgrs.allocate(2);
+    for (auto &component : zoneComponents.ZoneCompAvailMgrs) {
+        component.NumAvailManagers = 1;
+        component.availStatus = Avail::Status::CycleOn;
+        component.availManagers.allocate(1);
+        component.availManagers(1).type = Avail::ManagerType::NightVent;
+        component.availManagers(1).Num = 1;
+    }
+    auto &firstComponent = zoneComponents.ZoneCompAvailMgrs(1);
+    auto &secondComponent = zoneComponents.ZoneCompAvailMgrs(2);
+    firstComponent.availManagers(1).availStatus = Avail::Status::CycleOn;
+    secondComponent.availManagers(1).availStatus = Avail::Status::NoAction;
+
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 2, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 0, true));
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, false));
+
+    firstComponent.availStatus = Avail::Status::ForceOff;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    firstComponent.availStatus = Avail::Status::CycleOn;
+    firstComponent.availManagers(1).availStatus = Avail::Status::NoAction;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::UnitHeater, 1, true));
+    EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
+}
+
+TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesTerminalAirLoop)
+{
+    state->dataDefineEquipment->AirDistUnit.allocate(1);
+    auto &airDistributionUnit = state->dataDefineEquipment->AirDistUnit(1);
+    airDistributionUnit.AirLoopNum = 1;
+    airDistributionUnit.OutletNodeNum = 10;
+    state->dataAirLoop->AirLoopControlInfo.allocate(2);
+    state->dataAirLoop->AirLoopControlInfo(1).NightVent = false;
+    state->dataAirLoop->AirLoopControlInfo(2).NightVent = true;
+
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+    airDistributionUnit.AirLoopNum = 2;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+
+    airDistributionUnit.AirLoopNum = 0;
+    state->dataSize->CurZoneEqNum = 1;
+    state->dataZoneEquip->ZoneEquipConfig.allocate(1);
+    auto &zoneConfig = state->dataZoneEquip->ZoneEquipConfig(1);
+    zoneConfig.NumInletNodes = 1;
+    zoneConfig.InletNode.allocate(1);
+    zoneConfig.InletNode(1) = airDistributionUnit.OutletNodeNum;
+    zoneConfig.InletNodeAirLoopNum.allocate(1);
+    zoneConfig.InletNodeAirLoopNum(1) = 2;
+    EXPECT_TRUE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+    zoneConfig.InletNodeAirLoopNum(1) = 1;
+    EXPECT_FALSE(getZoneEquipmentNightVentStatus(*state, ZoneEquipType::AirDistributionUnit, 1, false));
+}
+
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_CalcZoneMassBalanceTest)
 {
     std::string const idf_objects = delimited_string({
@@ -5908,8 +5968,10 @@ std::vector<std::string> zoneFanNightVentInputs(std::string_view fanType)
             idfObjects.emplace_back("  ,                         !- Electric Power Per Unit Flow Rate Per Unit Pressure");
             idfObjects.emplace_back("  0.6,                      !- Fan Total Efficiency");
             idfObjects.emplace_back("  Zone Fan SystemModel Power Curve, !- Electric Power Function of Flow Fraction Curve Name");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Fan Total Efficiency");
             idfObjects.emplace_back("  100.0,                    !- Night Ventilation Mode Pressure Rise {Pa}");
-            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Flow Fraction");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Motor Efficiency");
+            idfObjects.emplace_back("  ,                         !- Night Ventilation Mode Motor In Air Stream Fraction");
             idfObjects.emplace_back("  ,                         !- Motor Loss Zone Name");
             idfObjects.emplace_back("  0.0,                      !- Motor Loss Radiative Fraction");
             idfObjects.emplace_back("  General,                  !- End-Use Subcategory");

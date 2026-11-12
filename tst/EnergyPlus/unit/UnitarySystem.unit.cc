@@ -16123,8 +16123,10 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_SizingWithFans)
     ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure
     0.50,                        !- Fan Total Efficiency
     ,                        !- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Fan Total Efficiency
     ,                        !- Night Ventilation Mode Pressure Rise {Pa}
-    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Night Ventilation Mode Motor Efficiency
+    ,                        !- Night Ventilation Mode Motor In Air Stream Fraction
     ,                        !- Motor Loss Zone Name
     ,                        !- Motor Loss Radiative Fraction
     General,                 !- End-Use Subcategory
