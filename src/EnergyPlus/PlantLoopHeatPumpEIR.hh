@@ -311,6 +311,8 @@ namespace EIRPlantLoopHeatPumps {
 
         void heatRecoveryEIRModCurveCheck(EnergyPlusData &state, Real64 &eirModFTemp);
 
+        int getActiveLoadSideSetPointNodeNum() const;
+
         Real64 getLoadSideOutletSetPointTemp(EnergyPlusData &state) const;
 
         virtual void setOperatingFlowRatesASHP(EnergyPlusData &state, bool FirstHVACIteration, Real64 const currentLoad);
