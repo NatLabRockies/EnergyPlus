@@ -2876,6 +2876,9 @@ void FanSystem::calcSimpleSystemFan(
         }
 
         _localAirMassFlow[mode] = min(_localAirMassFlow[mode], maxAirMassFlowRate);
+        if (speedControl == SpeedControl::Continuous && _useFlowRatiosAndRunTimeFracs) {
+            _localAirMassFlow[mode] = min(_localAirMassFlow[mode], maxAirMassFlowRate * _localRuntimeFrac[mode]);
+        }
         if (_faultActive) {
             _localAirMassFlow[mode] = min(_localAirMassFlow[mode], _localFaultMaxAirMassFlow);
             _localPressureRise[mode] = _localFaultPressureRise;

@@ -558,12 +558,20 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
 
     Real64 expectedPower = pow(0.75, 3) * fanSystem.maxAirMassFlowRate * fanSystem.deltaPress / (fanSystem.totalEff * fanSystem.rhoAirStdInit);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
     // The 1.5 flow ratio is limited to 1.0 before averaging with the 0.5 flow ratio.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.5, 0.5, 0.5, 0.5, _);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.5, 0.5, _);
     EXPECT_NEAR(expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
+
+    state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    fanSystem.calcSimpleSystemFan(*state, _, _, 1.5, 0.5, 0.5, 0.5, _);
+    EXPECT_NEAR(1.25 * expectedPower, fanSystem.totalPower, 0.01);
+    EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.0, 0.5, 0.0, 0.5, _);
     Real64 expectedZeroFlowModePower =
