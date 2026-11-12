@@ -860,6 +860,7 @@ void GasAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
     if (errFlag) {
         ShowFatalError(state, "InitGasAbsorber: Program terminated due to previous condition(s).");
     }
+    this->CWplantLoc.comp->ModulatedFlow = true;
 
     PlantUtilities::ScanPlantLoopsForObject(
         state, this->Name, DataPlant::PlantEquipmentType::Chiller_DFAbsorption, this->HWplantLoc, errFlag, _, _, _, this->HeatReturnNodeNum, _);
