@@ -183,7 +183,9 @@ def select_tests(measured: dict[str, float], candidates: set[str], top: int) -> 
     Transition.transition_tests does not count towards `top` and is always included: it is declared after every
     other test, so even when it is not among the slowest (Debug), it would otherwise start last and run alone at the end.
     """
-    slowest = sorted((t for t in measured if t in candidates and t != TRANSITION_TEST), key=measured.get, reverse=True)[:top]
+    slowest = sorted((t for t in measured if t in candidates and t != TRANSITION_TEST), key=measured.get, reverse=True)[
+        :top
+    ]
     selected = {t: to_cost(measured[t]) for t in slowest}
     if TRANSITION_TEST in measured:
         selected[TRANSITION_TEST] = to_cost(measured[TRANSITION_TEST])
@@ -194,10 +196,22 @@ def select_tests(measured: dict[str, float], candidates: set[str], top: int) -> 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--release", type=Path, metavar="CTestCostData.txt", help="Cost data from a Release build (sets COST)")
-    parser.add_argument("--debug", type=Path, metavar="CTestCostData.txt", help="Cost data from a Debug build (sets DEBUG_COST)")
-    parser.add_argument("-n", "--top", type=int, default=30, help="Number of slowest simulation tests to give a cost to, per build type, in addition to Transition.transition_tests (default: %(default)s)")
-    parser.add_argument("--source-dir", type=Path, default=ROOT_DIR, help="EnergyPlus source directory (default: %(default)s)")
+    parser.add_argument(
+        "--release", type=Path, metavar="CTestCostData.txt", help="Cost data from a Release build (sets COST)"
+    )
+    parser.add_argument(
+        "--debug", type=Path, metavar="CTestCostData.txt", help="Cost data from a Debug build (sets DEBUG_COST)"
+    )
+    parser.add_argument(
+        "-n",
+        "--top",
+        type=int,
+        default=30,
+        help="Number of slowest simulation tests to give a cost to, per build type, in addition to Transition.transition_tests (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--source-dir", type=Path, default=ROOT_DIR, help="EnergyPlus source directory (default: %(default)s)"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Report the changes without writing files")
     args = parser.parse_args()
 
