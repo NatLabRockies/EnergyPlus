@@ -2876,6 +2876,9 @@ void FanSystem::calcSimpleSystemFan(
         }
 
         _localAirMassFlow[mode] = min(_localAirMassFlow[mode], maxAirMassFlowRate);
+        if (speedControl == SpeedControl::Continuous && _useFlowRatiosAndRunTimeFracs) {
+            _localAirMassFlow[mode] = min(_localAirMassFlow[mode], maxAirMassFlowRate * _localRuntimeFrac[mode]);
+        }
         if (_faultActive) {
             _localAirMassFlow[mode] = min(_localAirMassFlow[mode], _localFaultMaxAirMassFlow);
             _localPressureRise[mode] = _localFaultPressureRise;
@@ -2897,7 +2900,7 @@ void FanSystem::calcSimpleSystemFan(
         Real64 _totalRuntimeFrac = _localRuntimeFrac[0] + _localRuntimeFrac[1];
         // Continuous control applies the nonlinear power curve to average flow, not to each mode separately.
         _localAverageFlowFrac = (maxAirMassFlowRate > 0.0 && _totalRuntimeFrac > 0.0)
-                                    ? (_localAirMassFlow[0] + _localAirMassFlow[1]) / (maxAirMassFlowRate * _totalRuntimeFrac)
+                                    ? (_localFlowRatio[0] * _localRuntimeFrac[0] + _localFlowRatio[1] * _localRuntimeFrac[1]) / _totalRuntimeFrac
                                     : 0.0;
         _localAverageFlowFrac = min(1.0, _localAverageFlowFrac);
     }
@@ -2917,6 +2920,22 @@ void FanSystem::calcSimpleSystemFan(
         ((_localAirMassFlow[0] + _localAirMassFlow[1]) > 0.0)) {
         // fan is running
 
+        if (state.dataHVACGlobal->OnOffFanPartLoadFraction <= 0.0) {
+            state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
+        }
+        if (state.dataHVACGlobal->OnOffFanPartLoadFraction < 0.7) {
+            state.dataHVACGlobal->OnOffFanPartLoadFraction = 0.7;
+        }
+
+        if (_useFlowRatiosAndRunTimeFracs && state.dataHVACGlobal->OnOffFanPartLoadFraction < 1.0) {
+            for (int mode = 0; mode < _numModes; ++mode) {
+                if (_localAirMassFlow[mode] > 0.0) {
+                    _localRuntimeFrac[mode] =
+                        max(0.0, min(1.0, _localRuntimeFrac[mode] / state.dataHVACGlobal->OnOffFanPartLoadFraction));
+                }
+            }
+        }
+
         for (int mode = 0; mode < _numModes; ++mode) {
 
             // if no flow for this mode then continue to the next mode
@@ -2927,18 +2946,9 @@ void FanSystem::calcSimpleSystemFan(
             switch (speedControl) {
 
             case SpeedControl::Discrete: {
-                //
-                if (state.dataHVACGlobal->OnOffFanPartLoadFraction <= 0.0) {
-                    state.dataHVACGlobal->OnOffFanPartLoadFraction = 1.0;
-                }
-                if (state.dataHVACGlobal->OnOffFanPartLoadFraction < 0.7) {
-                    state.dataHVACGlobal->OnOffFanPartLoadFraction = 0.7; // a warning message is already issued from the DX coils or gas heating coil
-                }
                 if (_useFlowRatiosAndRunTimeFracs) {
                     // Use flow ratios and runtimefractions pass from parent (allows fan to cycle at a specified speed)
-                    Real64 _locRuntimeFrac = (state.dataHVACGlobal->OnOffFanPartLoadFraction >= 1.0)
-                                                 ? _localRuntimeFrac[mode]
-                                                 : max(0.0, min(1.0, _localRuntimeFrac[mode] / state.dataHVACGlobal->OnOffFanPartLoadFraction));
+                    Real64 _locRuntimeFrac = _localRuntimeFrac[mode];
                     Real64 _locFlowRatio = _localFlowRatio[mode]; // Current mode flow rate / max flow rate
                     Real64 _locLowSpeedRuntimeFrac = 0.0;
                     Real64 _locHiSpeedRuntimeFrac = 0.0;
