@@ -50,8 +50,12 @@ class RegularGridInterpolatorImplementation {
             return; // Unchanged: avoid recalculating (e.g. libtk205 sets methods before every lookup)
         }
         grid_axes[axis_index].set_interpolation_method(method);
-        interpolation_methods[axis_index] =
-            to_method(grid_axes[axis_index].get_interpolation_method());
+        // The axis may override the request (e.g. cubic is reset to linear on a one-value axis)
+        const Method effective_method = to_method(grid_axes[axis_index].get_interpolation_method());
+        if (effective_method == interpolation_methods[axis_index]) {
+            return;
+        }
+        interpolation_methods[axis_index] = effective_method;
         if (target_is_set) {
             calculate_at_target();
         }
@@ -64,8 +68,12 @@ class RegularGridInterpolatorImplementation {
             return; // Unchanged: avoid recalculating
         }
         grid_axes[axis_index].set_extrapolation_method(method);
-        extrapolation_methods[axis_index] =
-            to_method(grid_axes[axis_index].get_extrapolation_method());
+        // The axis may override the request (e.g. linear is reset to constant on a one-value axis)
+        const Method effective_method = to_method(grid_axes[axis_index].get_extrapolation_method());
+        if (effective_method == extrapolation_methods[axis_index]) {
+            return;
+        }
+        extrapolation_methods[axis_index] = effective_method;
         if (target_is_set) {
             calculate_at_target();
         }
