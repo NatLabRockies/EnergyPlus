@@ -5,13 +5,8 @@
 # IDF_FILE 1ZoneEvapCooler.idf EPW_FILE GBR_London.Gatwick.037760_IWEC.epw DESIGN_DAY_ONLY
 # This will override any attempt to run an annual simulation.  Use DESIGN_DAY_ONLY for files without annual run periods
 
-# Putting a couple files first because they are very long running and CI ends up running them while all the others are done
-# Hopefully putting them up here will get them to start sooner and better distribute CI resources over the build time
-# OK, so HospitalLowEnergy is failing every single time on debug CI, it's not helping us at all, just being a false error
-# I'm muting it on Debug builds for right now
-if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    add_simulation_test(IDF_FILE HospitalLowEnergy.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-endif ()
+# Some files have COST data so on a fresh build, they are started first to avoid a tail end
+add_simulation_test(IDF_FILE HospitalLowEnergy.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 95)
 add_simulation_test(IDF_FILE VSHeatPumpWaterToAirWithRHControl.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 
 add_simulation_test(IDF_FILE 1ZoneDataCenterCRAC_wPumpedDXCoolingCoil.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
@@ -57,8 +52,8 @@ add_simulation_test(IDF_FILE 5ZoneAirCooledWithSpacesHVAC.idf EPW_FILE USA_IL_Ch
 add_simulation_test(IDF_FILE 5ZoneAirCooledDemandLimiting.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneAirCooledDemandLimiting_FixedRateVentilation.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneAirCooledDemandLimiting_ReductionRatioVentilation.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE 5ZoneAirCooledWithCoupledInGradeSlab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE 5ZoneAirCooledWithCoupledInGradeSlab_HorizInsThickness.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE 5ZoneAirCooledWithCoupledInGradeSlab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 22)
+add_simulation_test(IDF_FILE 5ZoneAirCooledWithCoupledInGradeSlab_HorizInsThickness.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 19)
 add_simulation_test(IDF_FILE 5ZoneAirCooledWithDOASAirLoop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneAirCooledWithDOASAirLoop_ExhaustSystem.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneAirCooled_AirBoundaries.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -181,7 +176,7 @@ add_simulation_test(IDF_FILE ASHRAE901_OfficeLarge_STD2019_Denver_Chiller205_Det
 add_simulation_test(IDF_FILE AtticRoof_RadiantBarriers.idf EPW_FILE USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw)
 add_simulation_test(IDF_FILE BaseBoardElectric.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE CVRhMinHum.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE CarrollMRT-RefBldgLargeOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE CarrollMRT-RefBldgLargeOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 163)
 add_simulation_test(IDF_FILE CentralChillerHeaterSystem_Cooling_Heating.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE CentralChillerHeaterSystem_Simultaneous_Cooling_Heating.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ChangeoverBypassVAV.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
@@ -296,8 +291,8 @@ add_simulation_test(IDF_FILE EMSUserDefinedWindACAuto.idf EPW_FILE USA_IL_Chicag
 add_simulation_test(IDF_FILE EMSWindowShadeControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE EarthTubeSimpleTest.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE EarthTubeVerticalTest.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE EcoroofOrlando.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw)
-add_simulation_test(IDF_FILE EcoroofOrlando_NoSitePrec.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw)
+add_simulation_test(IDF_FILE EcoroofOrlando.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw DEBUG_COST 226)
+add_simulation_test(IDF_FILE EcoroofOrlando_NoSitePrec.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw DEBUG_COST 238)
 add_simulation_test(IDF_FILE ElectricChiller.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ElectricEIRChiller.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ElectricEIRChiller_EvapCooledCondenser.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -313,12 +308,12 @@ add_simulation_test(IDF_FILE FanCoilAutoSizeScalableSizing.idf EPW_FILE USA_IL_C
 add_simulation_test(IDF_FILE FanCoilAutoSize_ASHRAE90VariableFan.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE FanCoilAutoSize_MultiSpeedFan.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE FanCoil_HybridVent_VentSch.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE Fault_ChillerSWTSensorOffset_RefBldgLargeOfficeNew2004.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE Fault_ChillerSWTSensorOffset_RefBldgLargeOfficeNew2004.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 163)
 add_simulation_test(IDF_FILE Fault_CoilSATSensorOffset.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE Fault_CondenserSWTSensorOffset.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE Fault_FoulingAirFilter_RefBldgMediumOfficeNew2004.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE Fault_FoulingCoil.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE Fault_FoulingChillerBoiler_RefBldgLargeOfficeNew2004.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE Fault_FoulingChillerBoiler_RefBldgLargeOfficeNew2004.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 158)
 add_simulation_test(IDF_FILE Fault_FoulingCoolingTower.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE Fault_FoulingEvapCooler_StripMallZoneEvapCooler.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE Fault_HumidistatOffset_Supermarket.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
@@ -340,10 +335,11 @@ add_simulation_test(IDF_FILE FurnaceWithDXSystemRHcontrol_cyclingfan.idf EPW_FIL
 add_simulation_test(IDF_FILE FurnaceWithDXSystem_CoolingHXAssisted.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE FurnaceWithDXSystem_CoolingHXAssisted_NewDXCoil.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE GSHP-GLHE.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 20)
+add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 if (PYTHON_CLI)
     add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions-cpg.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-    add_simulation_test(IDF_FILE GSHP-GLHE-BoreholeFieldDesign.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
+    add_simulation_test(IDF_FILE GSHP-GLHE-BoreholeFieldDesign.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 34 DEBUG_COST 1131)
+    set_tests_properties(integration.GSHP-GLHE-BoreholeFieldDesign PROPERTIES LABELS "slow")
 else()
     add_simulation_test(IDF_FILE GSHP-GLHE-CalcGFunctions-cpg.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw EXPECT_FATAL)
     add_simulation_test(IDF_FILE GSHP-GLHE-BoreholeFieldDesign.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION EXPECT_FATAL)
@@ -382,7 +378,7 @@ add_simulation_test(IDF_FILE HeatPumpVRP_DCV.idf EPW_FILE USA_IL_Chicago-OHare.I
 add_simulation_test(IDF_FILE HeatPumpVSAS.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpVSAS_variableCrankcaseHeaterCapacity.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpWaterHeater.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
-add_simulation_test(IDF_FILE HeatPumpWaterHeaterStratified.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
+add_simulation_test(IDF_FILE HeatPumpWaterHeaterStratified.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw DEBUG_COST 184)
 add_simulation_test(IDF_FILE HeatPumpWaterToAir.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpWaterToAirEquationFit_WaterHeatingDesuperheater_StratifiedTank.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE HeatPumpWaterToAirEquationFit.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -395,8 +391,8 @@ add_simulation_test(IDF_FILE HeatRecoveryElectricChiller.idf EPW_FILE USA_IL_Chi
 add_simulation_test(IDF_FILE HeatRecoveryPlantLoop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatRecoveryPlantLoopAuto.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE HeatRecoverywithStorageTank.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE HospitalBaseline.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE HospitalBaselineReheatReportEMS.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE HospitalBaseline.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 50 DEBUG_COST 521)
+add_simulation_test(IDF_FILE HospitalBaselineReheatReportEMS.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 66 DEBUG_COST 607)
 add_simulation_test(IDF_FILE House-2FurnaceAC-SequentialLoad.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE House-2FurnaceAC-SequentialLoadFractions.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE House-2FurnaceAC-SequentialUniformPLR.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -414,7 +410,7 @@ add_simulation_test(IDF_FILE IndEvapCoolerRTUoffice.idf EPW_FILE USA_AZ_Phoenix-
 add_simulation_test(IDF_FILE IndirectAbsorptionChiller.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
 add_simulation_test(IDF_FILE IndoorLivingWall.idf EPW_FILE USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw)
 add_simulation_test(IDF_FILE InternalMass_wZoneList.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
-add_simulation_test(IDF_FILE Fenestration_RefBldgSmallHotelNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE Fenestration_RefBldgSmallHotelNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 21 DEBUG_COST 230)
 add_simulation_test(IDF_FILE LgOffVAV.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE LrgOff_GridStorageDemandLeveling.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE LrgOff_GridStorageEMSSmoothing.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -450,7 +446,7 @@ add_simulation_test(IDF_FILE PipeHeatTransfer_Outair.idf EPW_FILE USA_IL_Chicago
 add_simulation_test(IDF_FILE PipeHeatTransfer_Schedule.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PipeHeatTransfer_Underground.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PipeHeatTransfer_Zone.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE PipingSystem_Underground_FHX.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
+add_simulation_test(IDF_FILE PipingSystem_Underground_FHX.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw COST 16)
 add_simulation_test(IDF_FILE PipingSystem_Underground_TwoPipe.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE PipingSystem_Underground_TwoPipe_FD_GroundTemps.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
 add_simulation_test(IDF_FILE PipingSystem_Underground_TwoPipe_Xing_GroundTemps.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
@@ -479,7 +475,7 @@ add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_AirSource_and_AWHP_heating_on
 add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_AirSource_and_AWHP_cooling_only.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_Large-Office-2-AWHP-DedHR-AuxBoiler-Pri-Sec-HW.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_LargeOffice-2-AWHP-AuxBoiler-Pri-Sec-4PipeBeam.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_AirSource_Hospital_wSixPipeHeatRecovery.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE PlantLoopHeatPump_EIR_AirSource_Hospital_wSixPipeHeatRecovery.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 21 DEBUG_COST 266)
 add_simulation_test(IDF_FILE PlantPressureDrop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantPressure_PumpCurve.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PlantPressure_VFD_Scheduled.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -489,11 +485,11 @@ add_simulation_test(IDF_FILE PlenumwithRetAirHeatGain.idf EPW_FILE USA_IL_Chicag
 add_simulation_test(IDF_FILE PondGroundHeatExchanger.idf EPW_FILE USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw)
 add_simulation_test(IDF_FILE PurchAirTables.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PurchAirTables_SQL.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE PurchAirTables_wAnnual.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
+add_simulation_test(IDF_FILE PurchAirTables_wAnnual.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION DEBUG_COST 157)
 add_simulation_test(IDF_FILE PurchAirWindowBlind.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PurchAirWindowBlind_BlockBeamSolar.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PurchAirWithDaylighting.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE PurchAirWithDaylightingAndShadeControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE PurchAirWithDaylightingAndShadeControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 23)
 add_simulation_test(IDF_FILE PurchAirWithDaylightingAngleFac.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE PurchAirWithDoubleFacadeDaylighting.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 if (LINK_WITH_PYTHON)
@@ -515,7 +511,7 @@ if (LINK_WITH_PYTHON)
     add_simulation_test(IDF_FILE PythonPluginPlantLoopOverrideControl.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw)
     add_simulation_test(IDF_FILE PythonPluginPlantOperation_largeOff.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
     add_simulation_test(IDF_FILE PythonPluginReplaceTraditionalManagers_LargeOffice.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-    add_simulation_test(IDF_FILE PythonPluginSolarHeating.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
+    add_simulation_test(IDF_FILE PythonPluginSolarHeating.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 24)
     add_simulation_test(IDF_FILE PythonPluginTestMathAndKill.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw EXPECT_FATAL) # Expected to Fatal
     add_simulation_test(IDF_FILE PythonPluginThermochromicWindow.idf EPW_FILE USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw)
     add_simulation_test(IDF_FILE PythonPluginUserDefined5ZoneAirCooled.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -558,18 +554,18 @@ add_simulation_test(IDF_FILE RadLoTempHydrTermReheat.idf EPW_FILE USA_IL_Chicago
 add_simulation_test(IDF_FILE RefBldgFullServiceRestaurantNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgHospitalNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgLargeHotelNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgLargeOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgLargeOfficeNew2004_Chicago-ReturnReset.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE RefBldgLargeOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 165)
+add_simulation_test(IDF_FILE RefBldgLargeOfficeNew2004_Chicago-ReturnReset.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 161)
 add_simulation_test(IDF_FILE RefBldgMediumOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgMediumOfficeNew2004_Chicago_OutputControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgMediumOfficeNew2004_Chicago_JSON_Outputs.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgMediumOfficeNew2004_Chicago_epJSON.epJSON EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgMidriseApartmentNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgOutPatientNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgPrimarySchoolNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE RefBldgOutPatientNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 39 DEBUG_COST 480)
+add_simulation_test(IDF_FILE RefBldgPrimarySchoolNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 177)
 add_simulation_test(IDF_FILE RefBldgQuickServiceRestaurantNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgSecondarySchoolNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefBldgSmallHotelNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE RefBldgSecondarySchoolNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 26 DEBUG_COST 334)
+add_simulation_test(IDF_FILE RefBldgSmallHotelNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 20 DEBUG_COST 218)
 add_simulation_test(IDF_FILE RefBldgSmallOfficeNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgStand-aloneRetailNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefBldgStripMallNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -577,7 +573,7 @@ add_simulation_test(IDF_FILE RefBldgSuperMarketNew2004_Chicago.idf EPW_FILE USA_
 add_simulation_test(IDF_FILE RefBldgWarehouseNew2004_Chicago.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ReflectiveAdjacentBuilding.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE RefMedOffVAVAllDefVRP.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE RefrigeratedWarehouse.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE RefrigeratedWarehouse.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 35 DEBUG_COST 342)
 add_simulation_test(IDF_FILE ReliefIndEvapCoolerRTUoffice.idf EPW_FILE USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw)
 add_simulation_test(IDF_FILE ReportDaylightFactors.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ReportHeatEmission_RefFSRestaurant.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
@@ -717,7 +713,7 @@ add_simulation_test(IDF_FILE VentilatedSlab.idf EPW_FILE USA_IL_Chicago-OHare.In
 add_simulation_test(IDF_FILE VentilatedSlab_SeriesSlabs.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE VentilationSimpleTest.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE VRFMultispeedFan.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE WaterCooledChillerWithVSCondenserControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE WaterCooledChillerWithVSCondenserControl.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw DEBUG_COST 217)
 add_simulation_test(IDF_FILE WaterHeaterDHWPlantLoop.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE WaterHeaterHeatPumpStratifiedTank.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE WaterHeaterHeatPumpWrappedCondenser.idf EPW_FILE USA_FL_Miami.Intl.AP.722020_TMY3.epw)
@@ -781,36 +777,36 @@ add_simulation_test(IDF_FILE _PurchAirWindowBlind3.idf EPW_FILE USA_IL_Chicago-O
 add_simulation_test(IDF_FILE _PurchAirWindowBlind4.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE _SingleZoneTestCTFTwoDD.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE _SingleZoneTestCondFDTwoDD.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE _SmallOffice_Dulles.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE _SmallOffice_Dulles.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 15 DEBUG_COST 233)
 add_simulation_test(IDF_FILE _VAVSingleDuctConstFlowBoiler_otherfuel.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE gasAbsorptionChillerHeater.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE WCE_Diffuse_Shade.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE WCE_DoubleClear_BSDF.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE WCE_Interior_VB_-45_deg.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-add_simulation_test(IDF_FILE _5ZoneAirCooled_annual.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
-add_simulation_test(IDF_FILE _5ZoneAirCooled_LeapYear_annual.idf EPW_FILE MadeUpLeapYear.epw ANNUAL_SIMULATION)
-add_simulation_test(IDF_FILE UnitarySystem_MultiSpeedDX_EconoStaging.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
-add_simulation_test(IDF_FILE UnitarySystem_VariableSpeedDX_SZVAV.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION)
+add_simulation_test(IDF_FILE _5ZoneAirCooled_annual.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 18 DEBUG_COST 221)
+add_simulation_test(IDF_FILE _5ZoneAirCooled_LeapYear_annual.idf EPW_FILE MadeUpLeapYear.epw ANNUAL_SIMULATION COST 18 DEBUG_COST 246)
+add_simulation_test(IDF_FILE UnitarySystem_MultiSpeedDX_EconoStaging.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 37 DEBUG_COST 389)
+add_simulation_test(IDF_FILE UnitarySystem_VariableSpeedDX_SZVAV.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw ANNUAL_SIMULATION COST 35 DEBUG_COST 405)
 add_simulation_test(IDF_FILE _ResidentialBase.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw ANNUAL_SIMULATION)
 add_simulation_test(IDF_FILE _ResidentialBaseboardHardSize.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 
 
 # ASHRAE 90.1-2019 DOE commercial prototype models
-add_simulation_test(IDF_FILE ASHRAE901_ApartmentHighRise_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
+add_simulation_test(IDF_FILE ASHRAE901_ApartmentHighRise_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw COST 37 DEBUG_COST 451)
 add_simulation_test(IDF_FILE ASHRAE901_ApartmentMidRise_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
-add_simulation_test(IDF_FILE ASHRAE901_Hospital_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
+add_simulation_test(IDF_FILE ASHRAE901_Hospital_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw COST 17 DEBUG_COST 164)
 add_simulation_test(IDF_FILE ASHRAE901_HotelLarge_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
-add_simulation_test(IDF_FILE ASHRAE901_HotelSmall_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
+add_simulation_test(IDF_FILE ASHRAE901_HotelSmall_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw COST 16)
 add_simulation_test(IDF_FILE ASHRAE901_OfficeLarge_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_OfficeMedium_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_OfficeSmall_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
-add_simulation_test(IDF_FILE ASHRAE901_OutPatientHealthCare_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
+add_simulation_test(IDF_FILE ASHRAE901_OutPatientHealthCare_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw COST 32 DEBUG_COST 380)
 add_simulation_test(IDF_FILE ASHRAE901_RestaurantFastFood_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_RestaurantSitDown_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_RetailStandalone_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_RetailStripmall_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 add_simulation_test(IDF_FILE ASHRAE901_SchoolPrimary_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
-add_simulation_test(IDF_FILE ASHRAE901_SchoolSecondary_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
+add_simulation_test(IDF_FILE ASHRAE901_SchoolSecondary_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw COST 18 DEBUG_COST 188)
 add_simulation_test(IDF_FILE ASHRAE901_Warehouse_STD2019_Denver.idf EPW_FILE USA_CO_Denver-Aurora-Buckley.AFB.724695_TMY3.epw)
 
 # Additional files in subdirectories
@@ -849,7 +845,7 @@ if (BUILD_FORTRAN)
             ENERGYPLUS_FLAGS
             -x
             COST
-            2)
+            16)
     add_simulation_test(
             IDF_FILE
             HAMT_HourlyProfileReport.idf
@@ -858,214 +854,168 @@ if (BUILD_FORTRAN)
             ENERGYPLUS_FLAGS
             -x
             COST
-            2)
+            16)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneBaseboardHeat.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneConstantVolumeChillerBoiler.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneDualDuct.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneFanCoil-DOAS.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneFanCoil.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneFurnaceDX.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePTAC-DOAS.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePTAC-DOAS-TwoHX.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePTAC.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePTHP.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePackagedVAV.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZonePurchAir.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneUnitaryHeatPump.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneUnitarySystem.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneVAVFanPowered.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneVAVWaterCooled-ObjectReference.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneVAVWaterCooled.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneVRF.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             HVACTemplate-5ZoneWaterToAirHeatPumpTowerBoiler.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             LBuilding-G000.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             LBuilding-G090.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             LBuilding-G180.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             LBuilding-G270.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     # Parametric preprocessor dependent files
     add_simulation_test(
             IDF_FILE
@@ -1073,16 +1023,14 @@ if (BUILD_FORTRAN)
             EPW_FILE
             USA_FL_Miami.Intl.AP.722020_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            5)
-    add_simulation_test(IDF_FILE 1ZoneParameterAspect.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw COST 5)
-    add_simulation_test(IDF_FILE ParametricInsulation-5ZoneAirCooled.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 5)
+            -x)
+    add_simulation_test(IDF_FILE 1ZoneParameterAspect.idf EPW_FILE USA_CO_Golden-NREL.724666_TMY3.epw)
+    add_simulation_test(IDF_FILE ParametricInsulation-5ZoneAirCooled.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
     # Basement/slab dependent files
-    add_simulation_test(IDF_FILE 5ZoneAirCooledWithSlab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 10)
-    add_simulation_test(IDF_FILE LgOffVAVusingBasement.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 10)
-    add_simulation_test(IDF_FILE SingleFamilyHouse_HP_Slab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
-    add_simulation_test(IDF_FILE SingleFamilyHouse_HP_Slab_Dehumidification.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+    add_simulation_test(IDF_FILE 5ZoneAirCooledWithSlab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+    add_simulation_test(IDF_FILE LgOffVAVusingBasement.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 315 DEBUG_COST 586)
+    add_simulation_test(IDF_FILE SingleFamilyHouse_HP_Slab.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 15)
+    add_simulation_test(IDF_FILE SingleFamilyHouse_HP_Slab_Dehumidification.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw COST 15)
     add_simulation_test(IDF_FILE US+SF+CZ4A+hp+crawlspace+IECC_2006_VRF.idf EPW_FILE USA_NY_New.York-John.F.Kennedy.Intl.AP.744860_TMY3.epw)
     # Additional files in subdirectories that depend on ExpandObjects
     add_simulation_test(
@@ -1091,36 +1039,28 @@ if (BUILD_FORTRAN)
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             BasicsFiles/Exercise2A-Solution.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             BasicsFiles/Exercise2B-Solution.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
     add_simulation_test(
             IDF_FILE
             BasicsFiles/Exercise2C-Solution.idf
             EPW_FILE
             USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw
             ENERGYPLUS_FLAGS
-            -x
-            COST
-            2)
+            -x)
 
     add_test(NAME integration.5ZoneCAV_MaxTemp_JSON_Outputs.CompareOutputReports
              COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/dev/compare_output_reports.py" "${PROJECT_BINARY_DIR}/testfiles/5ZoneCAV_MaxTemp_JSON_Outputs/")
