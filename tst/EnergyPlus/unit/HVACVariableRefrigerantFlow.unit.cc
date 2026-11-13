@@ -27307,7 +27307,7 @@ TEST_F(EnergyPlusFixture, VRFTest_HeatRecoveryTemperatureLimits)
     // VRF Outdoor Unit 1: heat recovery limits (20 to 40 C) extend beyond the heating mode maximum (20 C)
     // VRF Outdoor Unit 2: heating piping correction curve (A30) blank, heat recovery limits (N29/N30) specified
     // VRF Outdoor Unit 3: piping correction curves specified, heat recovery limits blank
-    // VRF Outdoor Unit 4: heat recovery minimum (30 C) is not less than the maximum (10 C)
+    // VRF Outdoor Unit 4: heat recovery minimum (50 C) is not less than the blank maximum's 40 C default
 
     std::string const idf_objects = delimited_string({
 
@@ -27989,8 +27989,8 @@ TEST_F(EnergyPlusFixture, VRFTest_HeatRecoveryTemperatureLimits)
         "    2,                       !- Basin Heater Setpoint Temperature {C}",
         "    AlwaysOn,                 !- Basin Heater Operating Schedule Name",
         "    Electricity,             !- Fuel Type",
-        "    30,                      !- Minimum Outdoor Temperature in Heat Recovery Mode {C}",
-        "    10,                      !- Maximum Outdoor Temperature in Heat Recovery Mode {C}",
+        "    50,                      !- Minimum Outdoor Temperature in Heat Recovery Mode {C}",
+        "    ,                        !- Maximum Outdoor Temperature in Heat Recovery Mode {C}",
         "    VRF Heat Recovery Cooling Capacity Modifier,  !- Heat Recovery Cooling Capacity Modifier Curve Name",
         "    0.5,                     !- Initial Heat Recovery Cooling Capacity Fraction {W/W}",
         "    0.15,                    !- Heat Recovery Cooling Capacity Time Constant {hr}",
@@ -28549,7 +28549,10 @@ TEST_F(EnergyPlusFixture, VRFTest_HeatRecoveryTemperatureLimits)
 
     // VRF Outdoor Unit 4 has invalid heat recovery limits, so getting input ends with a fatal error
     EXPECT_THROW(GetVRFInput(*state), std::runtime_error);
+    EXPECT_TRUE(compare_err_stream_substring("has invalid heat recovery temperature limits", false, false));
     EXPECT_TRUE(compare_err_stream_substring("must be less than", false, false));
+    EXPECT_TRUE(compare_err_stream_substring("is blank. Its default is 40.00 C", false, false));
+    EXPECT_TRUE(compare_err_stream_substring("the lesser of the cooling-mode and heating-mode maximum temperatures", false, false));
 
     // heat recovery limits are no longer reset to the cooling and heating mode limits
     EXPECT_FALSE(compare_err_stream_substring("Heat Recovery Mode is greater than", false, false));

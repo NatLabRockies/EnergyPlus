@@ -2358,9 +2358,24 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
                 thisVrfSys.MaxOATHeatRecovery = rNumericArgs(30);
             }
             if ((!lNumericFieldBlanks(29) || !lNumericFieldBlanks(30)) && thisVrfSys.MinOATHeatRecovery >= thisVrfSys.MaxOATHeatRecovery) {
-                ShowSevereError(state, std::format("{} = \"{}\"", cCurrentModuleObject, thisVrfSys.Name));
+                ShowSevereError(state,
+                                std::format("{} = \"{}\" has invalid heat recovery temperature limits.", cCurrentModuleObject, thisVrfSys.Name));
+                if (lNumericFieldBlanks(29)) {
+                    ShowContinueError(state,
+                                      std::format("... {} is blank. Its default is {:.2f} C, the greater of the cooling-mode and heating-mode "
+                                                  "minimum temperatures.",
+                                                  cNumericFieldNames(29),
+                                                  thisVrfSys.MinOATHeatRecovery));
+                }
+                if (lNumericFieldBlanks(30)) {
+                    ShowContinueError(state,
+                                      std::format("... {} is blank. Its default is {:.2f} C, the lesser of the cooling-mode and heating-mode "
+                                                  "maximum temperatures.",
+                                                  cNumericFieldNames(30),
+                                                  thisVrfSys.MaxOATHeatRecovery));
+                }
                 ShowContinueError(state,
-                                  std::format("... {} ({:.2f} C) must be less than {} ({:.2f} C).",
+                                  std::format("... The resulting {} ({:.2f} C) must be less than {} ({:.2f} C).",
                                               cNumericFieldNames(29),
                                               thisVrfSys.MinOATHeatRecovery,
                                               cNumericFieldNames(30),
