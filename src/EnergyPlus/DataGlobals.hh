@@ -106,6 +106,10 @@ struct DataGlobal : BaseGlobalStruct
     int NumOfDayInEnvrn = 0;         // Number of days in the simulation for a particular environment
     bool OverrideTimestep = false;   // True if PerformancePrecision object overrides the number of time steps in each hour
     int TimeStepsInHour = 0;         // Number of time steps in each hour of the simulation
+    int SimTimeStepsInHour = 0;      // Number of time steps in each hour of the simulation
+    int SizingTimeStepsInHour = 0;   // Number of time steps in each hour of the sizing simulation
+    bool updateTSArrays = false;     // True if the model arrays based on TimeStepsInHour need to be updated
+    bool SimTSSizingTS = false;      // True if the number of time steps in each hour of the simulation is different than sizing simulation
     int NumOfZones = 0;              // Total number of Zones for simulation
     int numSpaces = 0;               // Total number of Spaces for simulation
     int numSpaceTypes = 0;           // Number of unique space types
