@@ -140,6 +140,7 @@ struct EnvironmentData : BaseGlobalStruct
     Real64 SkyTemp = 0.0;                         // Current sky temperature {C}
     Real64 SkyTempKelvin = 0.0;                   // Current sky temperature {K}
     Real64 LiquidPrecipitation = 0.0;             // Current liquid precipitation amount (rain) {m}
+    Real64 SnowDepth = 0.0;                       // Current weather-file snow depth {m}
     bool SunIsUp = false;                         // True when Sun is over horizon, False when not
     bool SunIsUpPrevTS = false;                   // True when Sun is over horizon in the previous timestep, False when not in the previous timestep
     bool PreviousSolRadPositive = false; // True when Sun is over horizon at the previous timestep, and BeamSolarRad + GndSolarRad + DifSolarRad > 0.0

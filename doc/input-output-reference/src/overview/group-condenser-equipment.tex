@@ -3830,6 +3830,10 @@ The surface heat exchanger model is to simulate hydronic surface ground heat exc
 
 The heat exchanger may be ground coupled or not. In the latter case the bottom surface is exposed to the wind but not solar gains. This type of heat exchanger is intended to be connected to the supply side of a condenser loop, and can be used with any type of plant loop. The surface heat exchanger may be specified as the only heat exchanger on the condenser loop (as shown in the first figure below) or it may be connected in parallel with other condenser loop heat exchangers (such as cooling towers, ground surface heat exchangers) as shown in the second figure below.
 
+Snow and ice mass is estimated from increases in the weather-file snow depth, using a fresh-snow density of 100 kg/m\textsuperscript{3}. Liquid precipitation is added as ice when the outdoor dry-bulb temperature is below freezing. The model limits the surface temperature to 0 C while heat is available to melt the accumulated mass, and accounts for the latent heat of fusion (335,000 J/kg) in the surface heat balance. Melt energy may come from the hydronic panel, the outdoor environment, or absorbed solar radiation. A reduction in weather-file snow depth does not remove modeled snow; mass is removed by the surface energy balance.
+
+The optional Shading Surface Name field references a \texttt{Shading:Site:Detailed} surface representing the active panel geometry. EnergyPlus uses that surface's orientation and its calculated incident solar radiation, including external shading, in the panel heat balance. Its geometric area should match the panel area specified by Surface Length and Surface Width. If the field is omitted, the panel remains an unshaded horizontal surface.
+
 \begin{figure}[hbtp] % fig 86
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/image205.png}
@@ -3884,6 +3888,10 @@ This numeric field contains the surface width in m.
 
 This alpha field expresses the lower surface exposure: Exposed or Ground.
 
+\paragraph{Field: Shading Surface Name}
+
+This optional field references a \texttt{Shading:Site:Detailed} surface that represents the panel's position and orientation and is used by EnergyPlus's native solar and shading calculations. Omit this field for an unshaded horizontal panel. The detailed geometry area should match Surface Length times Surface Width.
+
 An example of this statement in an IDF is shown below:
 
 \begin{lstlisting}
@@ -3897,7 +3905,17 @@ GroundHeatExchanger:Surface,
   0.3,                        !- Hydronic Tube Spacing {m}
   100.0,                      !- Surface Length {m}
   100.0,                      !- Surface Width {m}
-  GROUND;                     !- Lower Surface Environment
+  GROUND,                     !- Lower Surface Environment
+  Pavement Geometry;          !- Shading Surface Name
+
+Shading:Site:Detailed,
+  Pavement Geometry,          !- Name
+  ,                           !- Transmittance Schedule Name
+  4,                          !- Number of Vertices
+  0, 0, 0,                    !- Vertex 1 X,Y,Z-coordinates {m}
+  100, 0, 0,                  !- Vertex 2 X,Y,Z-coordinates {m}
+  100, 100, 0,                !- Vertex 3 X,Y,Z-coordinates {m}
+  0, 100, 0;                  !- Vertex 4 X,Y,Z-coordinates {m}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-13-000}
@@ -3927,6 +3945,14 @@ GroundHeatExchanger:Surface,
   HVAC,Sum,Ground Heat Exchanger Surface Heat Transfer Energy {[}J{]}
 \item
   HVAC,Average,Ground Heat Exchanger Source Temperature {[}C{]}
+\item
+  HVAC,Average,Ground Heat Exchanger Snow and Ice Mass {[}kg{]}
+\item
+  HVAC,Average,Ground Heat Exchanger Snow and Ice Melt Rate {[}kg/s{]}
+\item
+  HVAC,Average,Ground Heat Exchanger Snow and Ice Melt Heat Transfer Rate {[}W{]}
+\item
+  HVAC,Sum,Ground Heat Exchanger Snow and Ice Melt Energy {[}J{]}
 \end{itemize}
 
 \paragraph{Ground Heat Exchanger Heat Transfer Rate {[}W{]}}\label{ground-heat-exchanger-heat-transfer-rate-w-2}

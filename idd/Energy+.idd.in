@@ -82538,6 +82538,8 @@ GroundHeatExchanger:Surface,
         \memo Typically used in hybrid geothermal systems and included in the condenser loop.
         \memo This component may also be used as a simple solar collector.
         \memo The bottom surface may be defined as ground-coupled or exposed to wind (eg. bridge deck).
+        \memo Snow and ice accumulation are estimated from weather-file snow depth and freezing precipitation.
+        \memo An optional detailed shading surface supplies the exposed panel orientation and incident solar radiation.
    A1 , \field Name
         \required-field
         \reference-class-name validPlantEquipmentTypes
@@ -82576,11 +82578,16 @@ GroundHeatExchanger:Surface,
         \type real
         \units m
         \minimum> 0.0
-   A5 ; \field Lower Surface Environment
+   A5 , \field Lower Surface Environment
         \type choice
         \key Ground
         \key Exposed
         \default Ground
+   A6 ; \field Shading Surface Name
+        \note Optional Shading:Site:Detailed surface defining panel orientation and shading exposure.
+        \note If omitted, the panel is treated as an unshaded horizontal surface.
+        \type object-list
+        \object-list AllShadingSurfNames
 
 GroundHeatExchanger:HorizontalTrench,
         \memo This models a horizontal heat exchanger placed in a series of trenches

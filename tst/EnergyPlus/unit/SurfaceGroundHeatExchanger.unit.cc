@@ -52,6 +52,8 @@
 
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+#include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/SurfaceGroundHeatExchanger.hh>
 
 using namespace EnergyPlus;
@@ -74,4 +76,78 @@ TEST_F(EnergyPlusFixture, test_eoshiftArrayNeg)
     for (size_t i = 0; i < B.size(); i++) {
         EXPECT_EQ(B[i], target[i]);
     }
+}
+
+TEST(SurfaceGroundHeatExchanger, EstimateSnowAndFreezingRainAccumulation)
+{
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::estimateSnowIceAccumulation(0.1, 0.002, true), 12.0);
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::estimateSnowIceAccumulation(-0.1, 0.002, false), 0.0);
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::estimateSnowIceAccumulation(0.0, 0.002, false), 0.0);
+}
+
+TEST(SurfaceGroundHeatExchanger, MeltFluxIsLimitedByAvailableSnowAndIceMass)
+{
+    constexpr Real64 IceMeltEnthalpy = 335000.0;
+    constexpr Real64 TimeStepSec = 3600.0;
+
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::calculateSnowIceMeltFlux(0.0, 1.0, TimeStepSec), 0.0);
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::calculateSnowIceMeltFlux(100.0, 0.0, TimeStepSec), 0.0);
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::calculateSnowIceMeltFlux(100.0, 2.0, TimeStepSec), 100.0);
+    EXPECT_DOUBLE_EQ(SurfaceGroundHeatExchanger::calculateSnowIceMeltFlux(1000.0, 1.0, TimeStepSec), IceMeltEnthalpy / TimeStepSec);
+}
+
+TEST(SurfaceGroundHeatExchanger, SnowMeltPinsSurfaceToFreezingUntilMassIsDepleted)
+{
+    SurfaceGroundHeatExchanger::SurfaceGroundHeatExchangerData surface;
+    surface.TopRoughness = Material::SurfaceRoughness::MediumRough;
+    surface.TopThermAbs = 0.9;
+    surface.TopSolarAbs = 0.9;
+
+    Real64 surfaceTemperature = 0.0;
+    Real64 meltFlux = 0.0;
+    surface.CalcTopSurfTemp(0.0, surfaceTemperature, 20.0, 20.0, 0.0, 0.0, 1.0, false, false, 1000.0, 3600.0, meltFlux);
+    EXPECT_NEAR(surfaceTemperature, 0.0, 1.0e-8);
+    EXPECT_GT(meltFlux, 0.0);
+
+    surface.CalcTopSurfTemp(0.0, surfaceTemperature, 20.0, 20.0, 0.0, 0.0, 1.0, false, false, 0.001, 3600.0, meltFlux);
+    EXPECT_GT(surfaceTemperature, 0.0);
+    EXPECT_NEAR(meltFlux * 3600.0, 0.001 * 335000.0, 1.0e-8);
+}
+
+TEST_F(EnergyPlusFixture, SurfaceGroundHeatExchangerTracksWeatherAccumulationAndFreezingRain)
+{
+    SurfaceGroundHeatExchanger::SurfaceGroundHeatExchangerData surface;
+
+    state->dataEnvrn->SnowDepth = 0.1;
+    surface.UpdateSnowIceAccumulation(*state);
+    EXPECT_DOUBLE_EQ(surface.SnowIceMass, 10.0);
+
+    state->dataEnvrn->SnowDepth = 0.15;
+    surface.UpdateSnowIceAccumulation(*state);
+    EXPECT_DOUBLE_EQ(surface.SnowIceMass, 15.0);
+
+    state->dataEnvrn->SnowDepth = 0.05;
+    surface.UpdateSnowIceAccumulation(*state);
+    EXPECT_DOUBLE_EQ(surface.SnowIceMass, 15.0);
+
+    state->dataEnvrn->IsRain = true;
+    state->dataEnvrn->OutDryBulbTemp = -1.0;
+    state->dataEnvrn->LiquidPrecipitation = 0.002;
+    surface.UpdateSnowIceAccumulation(*state);
+    EXPECT_DOUBLE_EQ(surface.SnowIceMass, 17.0);
+}
+
+TEST_F(EnergyPlusFixture, SurfaceGroundHeatExchangerUsesShadedSurfaceSolarRadiation)
+{
+    SurfaceGroundHeatExchanger::SurfaceGroundHeatExchangerData surface;
+    state->dataHeatBal->SurfQRadSWOutIncident.allocate(1);
+    state->dataHeatBal->SurfQRadSWOutIncident(1) = 250.0;
+    surface.ShadingSurfaceNum = 1;
+    EXPECT_DOUBLE_EQ(surface.IncidentSolarRadiation(*state), 250.0);
+
+    surface.ShadingSurfaceNum = 0;
+    state->dataEnvrn->SOLCOS.z = 0.5;
+    state->dataEnvrn->BeamSolarRad = 400.0;
+    state->dataEnvrn->DifSolarRad = 100.0;
+    EXPECT_DOUBLE_EQ(surface.IncidentSolarRadiation(*state), 300.0);
 }
