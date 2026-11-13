@@ -420,7 +420,7 @@ namespace EMSManager {
         RuntimeLanguageProcessor::InitializeRuntimeLanguage(state);
 
         if ((state.dataGlobal->BeginEnvrnFlag) || (iCalledFrom == EMSCallFrom::ZoneSizing) || (iCalledFrom == EMSCallFrom::SystemSizing) ||
-            (iCalledFrom == EMSCallFrom::UserDefinedComponentModel)) {
+            (iCalledFrom == EMSCallFrom::UserDefinedComponentModel) || (iCalledFrom == EMSCallFrom::ComponentGetInput)) {
 
             // another pass at trying to setup input data.
             if (state.dataEMSMgr->FinishProcessingUserInput) {
