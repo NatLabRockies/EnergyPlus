@@ -619,4 +619,187 @@ TEST_F(ResultsFrameworkFixture, ResultsFramework_CSV_Timestamp_8601_Beginning)
     EXPECT_EQ(expected_output, outputs);
 }
 
+TEST_F(ResultsFrameworkFixture, ResultsFramework_RVIFilter_explicit_keys)
+{
+    auto &rf = state->dataResultsFramework->resultsFramework;
+    auto &dataTS = rf->freqTSData[(int)ReportFreq::TimeStep];
+    OutputProcessor::TimeStepType indexType = OutputProcessor::TimeStepType::Zone;
+    int reportId = 1;
+
+    Variable var0("SALESFLOOR INLET NODE:System Node Temperature", ReportFreq::TimeStep, indexType, reportId, Constant::Units::C);
+    dataTS.addVariable(var0);
+    rf->addReportVariable("SALESFLOOR INLET NODE", "System Node Temperature", "C", ReportFreq::TimeStep);
+    rf->setISO8601(true);
+    dataTS.newRow(2, 25, 1, 45, 2017);
+    dataTS.newRow(2, 25, 1, 60, 2017);
+    dataTS.newRow(2, 25, 24, 45, 2017);
+    dataTS.newRow(2, 25, 24, 60, 2017);
+
+    dataTS.pushVariableValue(reportId, 1.0);
+    dataTS.pushVariableValue(reportId, 2.0);
+    dataTS.pushVariableValue(reportId, 3.0);
+    dataTS.pushVariableValue(reportId, 4.0);
+
+    ++reportId;
+    Variable var1("SALESFLOOR INLET NODE:System Node Humidity Ratio", ReportFreq::TimeStep, indexType, reportId, Constant::Units::kgWater_kgDryAir);
+    dataTS.addVariable(var1);
+    rf->addReportVariable("SALESFLOOR INLET NODE", "System Node Humidity Ratio", "kgWater/kgDryAir", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 5.0);
+    dataTS.pushVariableValue(reportId, 6.0);
+    dataTS.pushVariableValue(reportId, 7.0);
+    dataTS.pushVariableValue(reportId, 8.0);
+
+    ++reportId;
+    Variable var2("SALESFLOOR OUTLET NODE:System Node Temperature", ReportFreq::TimeStep, indexType, reportId, Constant::Units::C);
+    dataTS.addVariable(var2);
+    rf->addReportVariable("SALESFLOOR OUTLET NODE", "System Node Temperature", "C", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 9.0);
+    dataTS.pushVariableValue(reportId, 10.0);
+    dataTS.pushVariableValue(reportId, 11.0);
+    dataTS.pushVariableValue(reportId, 12.0);
+
+    std::vector<std::string> const rvi_keys = {"SALESFLOOR OUTLET NODE:System Node Temperature [C](TimeStep)",
+                                               "SALESFLOOR INLET NODE:System Node Temperature [C](TimeStep)"};
+
+    auto outputs = getCSVOutputs(*state, dataTS.getJSON(), *rf, ReportFreq::TimeStep, rvi_keys);
+
+    std::map<std::string, std::vector<std::string>> expected_output = {{"2017-02-25T00:45:00", {"9.0", "1.0"}},
+                                                                       {"2017-02-25T01:00:00", {"10.0", "2.0"}},
+                                                                       {"2017-02-25T23:45:00", {"11.0", "3.0"}},
+                                                                       {"2017-02-25T24:00:00", {"12.0", "4.0"}}};
+
+    EXPECT_EQ(expected_output, outputs);
+}
+
+TEST_F(ResultsFrameworkFixture, ResultsFramework_RVIFilter_pattern_key)
+{
+    auto &rf = state->dataResultsFramework->resultsFramework;
+    auto &dataTS = rf->freqTSData[(int)ReportFreq::TimeStep];
+    OutputProcessor::TimeStepType indexType = OutputProcessor::TimeStepType::Zone;
+    int reportId = 1;
+
+    Variable var0("SALESFLOOR INLET NODE:System Node Temperature", ReportFreq::TimeStep, indexType, reportId, Constant::Units::C);
+    dataTS.addVariable(var0);
+    rf->addReportVariable("SALESFLOOR INLET NODE", "System Node Temperature", "C", ReportFreq::TimeStep);
+    rf->setBeginningOfInterval(true);
+    dataTS.newRow(2, 25, 1, 45, 2017);
+    dataTS.newRow(2, 25, 1, 60, 2017);
+    dataTS.newRow(2, 25, 24, 45, 2017);
+    dataTS.newRow(2, 25, 24, 60, 2017);
+
+    dataTS.pushVariableValue(reportId, 1.0);
+    dataTS.pushVariableValue(reportId, 2.0);
+    dataTS.pushVariableValue(reportId, 3.0);
+    dataTS.pushVariableValue(reportId, 4.0);
+
+    ++reportId;
+    Variable var1("SALESFLOOR INLET NODE:System Node Humidity Ratio", ReportFreq::TimeStep, indexType, reportId, Constant::Units::kgWater_kgDryAir);
+    dataTS.addVariable(var1);
+    rf->addReportVariable("SALESFLOOR INLET NODE", "System Node Humidity Ratio", "kgWater/kgDryAir", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 5.0);
+    dataTS.pushVariableValue(reportId, 6.0);
+    dataTS.pushVariableValue(reportId, 7.0);
+    dataTS.pushVariableValue(reportId, 8.0);
+
+    ++reportId;
+    Variable var2("SALESFLOOR OUTLET NODE:System Node Temperature", ReportFreq::TimeStep, indexType, reportId, Constant::Units::C);
+    dataTS.addVariable(var2);
+    rf->addReportVariable("SALESFLOOR OUTLET NODE", "System Node Temperature", "C", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 9.0);
+    dataTS.pushVariableValue(reportId, 10.0);
+    dataTS.pushVariableValue(reportId, 11.0);
+    dataTS.pushVariableValue(reportId, 12.0);
+
+    std::vector<std::string> const rvi_keys = {"System Node Temperature"};
+
+    auto outputs = getCSVOutputs(*state, dataTS.getJSON(), *rf, ReportFreq::TimeStep, rvi_keys);
+
+    std::map<std::string, std::vector<std::string>> expected_output = {{"02/25 00:00:00", {"1.0", "9.0"}},
+                                                                       {"02/25 00:45:00", {"2.0", "10.0"}},
+                                                                       {"02/25 01:00:00", {"3.0", "11.0"}},
+                                                                       {"02/25 23:45:00", {"4.0", "12.0"}}};
+
+    EXPECT_EQ(expected_output, outputs);
+}
+
+TEST_F(ResultsFrameworkFixture, ResultsFramework_MVIFilter_explicit_key)
+{
+    auto &rf = state->dataResultsFramework->resultsFramework;
+    auto &dataTS = rf->freqTSData[(int)ReportFreq::TimeStep];
+    OutputProcessor::TimeStepType indexType = OutputProcessor::TimeStepType::Zone;
+    int reportId = 1;
+
+    Variable var0("Electricity:Facility", ReportFreq::TimeStep, indexType, reportId, Constant::Units::J);
+    dataTS.addVariable(var0);
+    rf->addReportMeter("Electricity:Facility", "J", ReportFreq::TimeStep);
+    dataTS.newRow(2, 25, 1, 45, 2017);
+    dataTS.newRow(2, 25, 1, 60, 2017);
+    dataTS.newRow(2, 25, 24, 45, 2017);
+    dataTS.newRow(2, 25, 24, 60, 2017);
+
+    dataTS.pushVariableValue(reportId, 1.0);
+    dataTS.pushVariableValue(reportId, 2.0);
+    dataTS.pushVariableValue(reportId, 3.0);
+    dataTS.pushVariableValue(reportId, 4.0);
+
+    ++reportId;
+    Variable var1("NaturalGas:Facility", ReportFreq::TimeStep, indexType, reportId, Constant::Units::J);
+    dataTS.addVariable(var1);
+    rf->addReportMeter("NaturalGas:Facility", "J", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 5.0);
+    dataTS.pushVariableValue(reportId, 6.0);
+    dataTS.pushVariableValue(reportId, 7.0);
+    dataTS.pushVariableValue(reportId, 8.0);
+
+    std::vector<std::string> const mvi_keys = {"Electricity:Facility"};
+
+    auto outputs = getCSVOutputs(*state, dataTS.getJSON(), *rf, ReportFreq::TimeStep, mvi_keys);
+
+    std::map<std::string, std::vector<std::string>> expected_output = {
+        {"02/25 00:45:00", {"1.0"}}, {"02/25 01:00:00", {"2.0"}}, {"02/25 23:45:00", {"3.0"}}, {"02/25 24:00:00", {"4.0"}}};
+
+    EXPECT_EQ(expected_output, outputs);
+}
+
+TEST_F(ResultsFrameworkFixture, ResultsFramework_MVIFilter_pattern_key)
+{
+    auto &rf = state->dataResultsFramework->resultsFramework;
+    auto &dataTS = rf->freqTSData[(int)ReportFreq::TimeStep];
+    OutputProcessor::TimeStepType indexType = OutputProcessor::TimeStepType::Zone;
+    int reportId = 1;
+
+    Variable var0("Electricity:Facility", ReportFreq::TimeStep, indexType, reportId, Constant::Units::J);
+    dataTS.addVariable(var0);
+    rf->setISO8601(true);
+    rf->setBeginningOfInterval(true);
+    rf->addReportMeter("Electricity:Facility", "J", ReportFreq::TimeStep);
+    dataTS.newRow(2, 25, 1, 45, 2017);
+    dataTS.newRow(2, 25, 1, 60, 2017);
+    dataTS.newRow(2, 25, 24, 45, 2017);
+    dataTS.newRow(2, 25, 24, 60, 2017);
+
+    dataTS.pushVariableValue(reportId, 1.0);
+    dataTS.pushVariableValue(reportId, 2.0);
+    dataTS.pushVariableValue(reportId, 3.0);
+    dataTS.pushVariableValue(reportId, 4.0);
+
+    ++reportId;
+    Variable var1("NaturalGas:Facility", ReportFreq::TimeStep, indexType, reportId, Constant::Units::J);
+    dataTS.addVariable(var1);
+    rf->addReportMeter("NaturalGas:Facility", "J", ReportFreq::TimeStep);
+    dataTS.pushVariableValue(reportId, 5.0);
+    dataTS.pushVariableValue(reportId, 6.0);
+    dataTS.pushVariableValue(reportId, 7.0);
+    dataTS.pushVariableValue(reportId, 8.0);
+
+    std::vector<std::string> const mvi_keys = {"Electricity:Facility [J](TimeStep)"};
+
+    auto outputs = getCSVOutputs(*state, dataTS.getJSON(), *rf, ReportFreq::TimeStep, mvi_keys);
+
+    std::map<std::string, std::vector<std::string>> expected_output = {
+        {"2017-02-25T00:00:00", {"1.0"}}, {"2017-02-25T00:45:00", {"2.0"}}, {"2017-02-25T01:00:00", {"3.0"}}, {"2017-02-25T23:45:00", {"4.0"}}};
+
+    EXPECT_EQ(expected_output, outputs);
+}
+
 } // namespace EnergyPlus
