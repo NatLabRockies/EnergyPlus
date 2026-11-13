@@ -4240,13 +4240,12 @@ void InitIntSolarDistribution(EnergyPlusData &state)
                     } // End of shading flag check
 
                     // Note that FrameQRadInAbs is initially calculated in InitSolarHeatGains
+                    // System radiant gains are added in CalcWinFrameAndDividerTemps because they can change during HVAC resimulation.
                     if (state.dataSurface->SurfWinFrameArea(SurfNum) > 0.0) {
                         state.dataSurface->SurfWinFrameQRadInAbs(SurfNum) +=
                             (state.dataHeatBal->EnclSolQSWRad(solEnclosureNum) * state.dataSurface->SurfWinFrameSolAbsorp(SurfNum) +
-                             (state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad *
-                                  state.dataViewFactor->EnclRadInfo(radEnclosureNum).radThermAbsMult +
-                              state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum)) *
-                                 state.dataSurface->SurfWinFrameEmis(SurfNum)) *
+                             state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad *
+                                 state.dataViewFactor->EnclRadInfo(radEnclosureNum).radThermAbsMult * state.dataSurface->SurfWinFrameEmis(SurfNum)) *
                             (1.0 + 0.5 * state.dataSurface->SurfWinProjCorrFrIn(SurfNum)); // Window has a frame
                     }
                     if (state.dataSurface->SurfWinDividerArea(SurfNum) > 0.0) {                     // Window has dividers
@@ -4284,26 +4283,24 @@ void InitIntSolarDistribution(EnergyPlusData &state)
                         // Note that DividerQRadInAbs is initially calculated in InitSolarHeatGains
                         state.dataSurface->SurfWinDividerQRadInAbs(SurfNum) +=
                             (state.dataHeatBal->EnclSolQSWRad(solEnclosureNum) * DividerSolAbs +
-                             (state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad *
-                                  state.dataViewFactor->EnclRadInfo(radEnclosureNum).radThermAbsMult +
-                              state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum)) *
-                                 DividerThermAbs) *
+                             state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad *
+                                 state.dataViewFactor->EnclRadInfo(radEnclosureNum).radThermAbsMult * DividerThermAbs) *
                             (1.0 + state.dataSurface->SurfWinProjCorrDivIn(SurfNum));
                     }
                 } else {
                     // These calculations are repeated from InitInternalHeatGains for the Zone Component Loads Report
-                    Real64 pulseMultipler = 0.01; // the W/sqft pulse for the zone
                     if (!state.dataGlobal->doLoadComponentPulseNow) {
                         state.dataHeatBal->SurfQdotRadIntGainsInPerArea(SurfNum) =
                             state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad *
                             state.dataViewFactor->EnclRadInfo(radEnclosureNum).radThermAbsMult * state.dataHeatBalSurf->SurfAbsThermalInt(SurfNum);
                     } else {
+                        Real64 constexpr pulseMultiplier = 0.01; // the W/sqft pulse for the zone
                         // radiant value prior to adjustment for pulse for load component report
                         Real64 const curQL = state.dataViewFactor->EnclRadInfo(radEnclosureNum).radQThermalRad;
                         // for the loads component report during the special sizing run increase the radiant portion
                         // a small amount to create a "pulse" of heat that is used for the
                         // radiant value including adjustment for pulse for load component report
-                        Real64 const adjQL = curQL + state.dataViewFactor->EnclRadInfo(radEnclosureNum).FloorArea * pulseMultipler;
+                        Real64 const adjQL = curQL + state.dataViewFactor->EnclRadInfo(radEnclosureNum).FloorArea * pulseMultiplier;
                         // ITABSF is the Inside Thermal Absorptance
                         // EnclRadThermAbsMult is a multiplier for each zone/radiant enclosure
                         // SurfQdotRadIntGainsInPerArea is the thermal radiation absorbed on inside surfaces
@@ -4375,10 +4372,7 @@ void InitIntSolarDistribution(EnergyPlusData &state)
                         state.dataHeatBal->SurfWinQRadSWwinAbs(SurfNum, IGlass) += state.dataHeatBal->SurfWinInitialDifSolwinAbs(SurfNum, IGlass);
                     }
                 } else if (state.dataSurface->SurfWinWindowModelType(SurfNum) == DataSurfaces::WindowModel::EQL) {
-
-                    // ConstrNum   = Surface(SurfNum)%Construction
                     int EQLNum = thisConstruct.EQLConsPtr;
-
                     for (int Lay = 1; Lay <= state.dataWindowEquivLayer->CFS(EQLNum).NL; ++Lay) {
                         state.dataHeatBal->SurfWinQRadSWwinAbs(SurfNum, Lay) += state.dataHeatBal->SurfWinInitialDifSolwinAbs(SurfNum, Lay);
                     }
@@ -8194,6 +8188,8 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
     // CalcWindowHeatBalance is called, then, multiple times and these need to be initialized before each call to
     // CalcWindowHeatBalance.
     // Only for Surface(SurfNum).Class == DataSurfaces::SurfaceClass::Window
+    // The frame and divider absorbed radiation (SurfWinFrameQRadOutAbs etc.) is not reset here: it is set once per time step
+    // in InitSolarHeatGains and InitIntSolarDistribution and is not changed by CalcWindowHeatBalance.
     for (int surfNum : HTWindowSurfs) {
         state.dataSurface->SurfWinHeatGain(surfNum) = 0.0;
         state.dataSurface->SurfWinHeatGainRep(surfNum) = 0.0;
@@ -8204,10 +8200,6 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
         state.dataSurface->SurfWinGainFrameDividerToZoneRep(surfNum) = 0.0;
         state.dataSurface->SurfWinGainConvShadeToZoneRep(surfNum) = 0.0;
         state.dataSurface->SurfWinGainIRShadeToZoneRep(surfNum) = 0.0;
-        state.dataSurface->SurfWinFrameQRadOutAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinFrameQRadInAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinDividerQRadOutAbs(surfNum) = 0.0;
-        state.dataSurface->SurfWinDividerQRadInAbs(surfNum) = 0.0;
     }
 
     state.dataHeatBal->InsideSurfIterations = 0;
@@ -9053,6 +9045,8 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
             // CalcWindowHeatBalance is called, then, multiple times and these need to be initialized before each call to
             // CalcWindowHeatBalance.
             // Only for Surface(SurfNum).Class == DataSurfaces::SurfaceClass::Window
+            // The frame and divider absorbed radiation (SurfWinFrameQRadOutAbs etc.) is not reset here: it is set once per time
+            // step in InitSolarHeatGains and InitIntSolarDistribution and is not changed by CalcWindowHeatBalance.
             int const firstWindowSurf = thisSpace.WindowSurfaceFirst;
             int const lastWindowSurf = thisSpace.WindowSurfaceLast;
             for (int surfNum = firstWindowSurf; surfNum <= lastWindowSurf; ++surfNum) {
@@ -9065,10 +9059,6 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
                 state.dataSurface->SurfWinGainFrameDividerToZoneRep(surfNum) = 0.0;
                 state.dataSurface->SurfWinGainConvShadeToZoneRep(surfNum) = 0.0;
                 state.dataSurface->SurfWinGainIRShadeToZoneRep(surfNum) = 0.0;
-                state.dataSurface->SurfWinFrameQRadOutAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinFrameQRadInAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinDividerQRadOutAbs(surfNum) = 0.0;
-                state.dataSurface->SurfWinDividerQRadInAbs(surfNum) = 0.0;
             }
 
             // Calculate heat extract due to additional heat flux source term as the surface boundary condition
