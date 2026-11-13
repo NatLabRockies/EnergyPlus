@@ -95,19 +95,19 @@ This alpha field contains the unitary system air outlet node name.
 
 \paragraph{Field: Supply Fan Object Type}\label{field-supply-fan-object-type-000}
 
-This alpha field contains the identifying type of supply air fan specified for the unitary system. The following fan types are allowed:
+This alpha field contains the identifying type of supply air fan specified for the unitary system. The following fan types are allowed. The fan operating mode is selected separately using the \textbf{\hyperref[supply-air-fan-operating-mode-schedule-name]{Supply Air Fan Operating Mode Schedule Name}} field:
 
 \begin{itemize}
 \item
-  \hyperref[fansystemmodel]{Fan:SystemModel} supports both cycling and continuous fan operation.
+  \textbf{\hyperref[fansystemmodel]{Fan:SystemModel}} supports both cycling and continuous fan operation.
 \item
-  \hyperref[fanonoff]{Fan:OnOff} supports both cycling and continuous fan operation.
+  \textbf{\hyperref[fanonoff]{Fan:OnOff}} supports both cycling and continuous fan operation.
 \item
-  \hyperref[fanconstantvolume]{Fan:ConstantVolume} requires continuous fan operation.
+  \textbf{\hyperref[fanconstantvolume]{Fan:ConstantVolume}} requires continuous fan operation.
 \item
-  \hyperref[fanvariablevolume]{Fan:VariableVolume} supports both cycling and continuous fan operation and is used for variable air volume systems or multi- or variable-speed coils.
+  \textbf{\hyperref[fanvariablevolume]{Fan:VariableVolume}} supports both cycling and continuous fan operation and is used for variable air volume systems or multi- or variable-speed coils. Here, ``cycling'' describes the unitary system operating mode selected by the schedule; the fan can modulate airflow while operating, and this mode alone does not imply low-load fan cycling losses.
 \item
-  \hyperref[fancomponentmodel]{Fan:ComponentModel} may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
+  \textbf{\hyperref[fancomponentmodel]{Fan:ComponentModel}} may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
 \end{itemize}
 
 \paragraph{Field: Supply Fan Name}\label{field-supply-fan-name}
