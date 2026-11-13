@@ -1185,7 +1185,7 @@ namespace FanCoilUnits {
         std::string CoolingCoilType;
         Real64 rho;
         Real64 Cp;
-        int zoneHVACIndex;        // index of zoneHVAC equipment sizing specification
+        int zoneHVACIndex = 0;    // index of zoneHVAC equipment sizing specification
         std::string SizingString; // input field sizing description (e.g., Nominal Capacity)
         Real64 TempSize = 0.0;    // autosized value of coil input field
         int SizingMethod; // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing, CoolingCapacitySizing,
@@ -1371,6 +1371,7 @@ namespace FanCoilUnits {
 
                 if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxCoolAirVolFlow == DataSizing::AutoSize ||
                     state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxHeatAirVolFlow == DataSizing::AutoSize) {
+                    maxAirFlowIsAutosized = true;
                     IsAutoSize = true;
                     fanCoil.MaxAirVolFlow = DataSizing::AutoSize;
                     MaxAirVolFlowDes = max(CoolingAirVolFlowDes, HeatingAirVolFlowDes);
@@ -1925,10 +1926,18 @@ namespace FanCoilUnits {
                 // it is odd to use two coil airflows if autosizing and a single air flow for both coils when not autosizing
                 // however, this method does minimize water coil sizes instead of upsizing one of the coils to meet the maximum air flow rate
                 // if user specified autosized air flow rate then size water coil using zone sizing design cooling/heating air flow rates
-                zoneEqSizing.CoolingAirFlow = true;
-                zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
-                zoneEqSizing.HeatingAirFlow = true;
-                zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+                if (zoneHVACIndex > 0 && (state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxCoolAirVolFlow == DataSizing::AutoSize ||
+                                          state.dataSize->ZoneHVACSizing(zoneHVACIndex).MaxHeatAirVolFlow == DataSizing::AutoSize)) {
+                    zoneEqSizing.CoolingAirFlow = true;
+                    zoneEqSizing.CoolingAirVolFlow = CoolingAirVolFlowDes;
+                    zoneEqSizing.HeatingAirFlow = true;
+                    zoneEqSizing.HeatingAirVolFlow = HeatingAirVolFlowDes;
+                } else {
+                    zoneEqSizing.CoolingAirFlow = true;
+                    zoneEqSizing.CoolingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolVolFlow;
+                    zoneEqSizing.HeatingAirFlow = true;
+                    zoneEqSizing.HeatingAirVolFlow = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesHeatVolFlow;
+                }
             } else if (!maxAirFlowIsAutosized) {
                 // pass singular hard-sized fan coil unit air flow to child coil objects
                 WaterCoils::SetCoilDesFlow(state, CoolingCoilType, CoolingCoilName, fanCoil.MaxAirVolFlow, ErrorsFound);
