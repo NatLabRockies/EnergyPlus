@@ -6608,7 +6608,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilPresent)) {
                         state.dataHVACVarRefFlow->CoolingLoad(VRFCond) = true;
                     } else {
-                        if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
+                        if (!state.dataGlobal->WarmupFlag && any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
                             if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
                                 ShowWarningMessage(state,
                                                    std::format("{} \"{}\".",
@@ -6642,7 +6642,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         }
                     }
                 } else {
-                    if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
+                    if (!state.dataGlobal->WarmupFlag && any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
                         if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
                             ShowWarningMessage(state,
                                                std::format("{} \"{}\".",
