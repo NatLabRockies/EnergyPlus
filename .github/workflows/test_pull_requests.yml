@@ -252,6 +252,7 @@ jobs:
       if: always() && matrix.run_regressions && steps.branch_build.outcome != 'failure'  # always run this step as long as we actually built
       run: pip install energyplus-regressions>=2.1.4
 
+      # This will build out a ./regressions package as well as a ./regressions-plotter-{{matric.os}}.html report
     - name: Run Regressions
       if: always() && matrix.run_regressions && steps.branch_build.outcome != 'failure'  # always run this step as long as we actually built
       id: regressions
@@ -266,6 +267,15 @@ jobs:
         name: "regressions-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
         path: "${{ github.workspace }}/regressions"
 
+    - name: Upload Regressions Plotter HTML
+      uses: actions/upload-artifact@v4
+      id: upload_regression_plotter
+      if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'  # only run this if regressions were encountered "failed"
+      with:
+        name: "regressions-plotter-${{ matrix.os }}"
+        path: "${{ github.workspace }}/regression_plotter.html"
+
+    # This executes a Python script that reads regressions results and produces a JavaScript file meant to run on GitHub
     - name: Generate Regression Summary GitHub Script
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure'
       run: >
@@ -288,6 +298,7 @@ jobs:
 
     # - uses: lhotari/action-upterm@v1
 
+    # Unfortunately I can't get forked repository runs to post onto the original PR, so this is needed to alert for regressions
     - name: Fail on Regressions from Forked Repository
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
       run: |
