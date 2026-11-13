@@ -1624,4 +1624,12 @@ void ASHRAE205ChillerSpecs::getDesignCapacities(
     }
 }
 
+Real64 ASHRAE205ChillerSpecs::getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state,
+                                                    [[maybe_unused]] Real64 &minLoad,
+                                                    [[maybe_unused]] Real64 &optLoad)
+{
+    // Preserve the design capacities until dynamic limits can be calculated from the representation performance map.
+    return 0.0;
+}
+
 } // namespace EnergyPlus::ChillerElectricASHRAE205

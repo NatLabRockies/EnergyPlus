@@ -6012,6 +6012,15 @@ TEST_F(EnergyPlusFixture, GAHP_HeatingConstructionFullObjectsNoCompanion)
     EXPECT_EQ(500.0, thisHeatingPLHP->nominalAuxElecPower);
     EXPECT_EQ(20.0, thisHeatingPLHP->standbyElecPower);
 
+    state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30.0;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = 7.0;
+    Real64 minLoad = 0.0;
+    Real64 optLoad = 0.0;
+    Real64 maxLoad = thisHeatingPLHP->getDynamicMaxCapacity(*state, minLoad, optLoad);
+    EXPECT_NEAR(3000.0, maxLoad, 0.001);
+    EXPECT_NEAR(600.0, minLoad, 0.001);
+    EXPECT_NEAR(3000.0, optLoad, 0.001);
+
     // calling the factory with an invalid name or type will call ShowFatalError, which will trigger a runtime exception
     EXPECT_THROW(EIRFuelFiredHeatPump::factory(*state, DataPlant::PlantEquipmentType::HeatPumpFuelFiredHeating, "fake"), std::runtime_error);
     EXPECT_THROW(EIRFuelFiredHeatPump::factory(*state, DataPlant::PlantEquipmentType::HeatPumpFuelFiredCooling, "FUEL FIRED HP HEATING SIDE"),
