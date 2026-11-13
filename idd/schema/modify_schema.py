@@ -83,6 +83,7 @@ extension_renaming = {
     "DemandManager:Lights": "lights",
     "DemandManager:Thermostats": "thermostats",
     "DemandManager:ElectricEquipment": "equipment",
+    "ElectricEquipment:ITE:LiquidCooled": "cooling_coils",
     "DaylightingDevice:Tubular": "transition_lengths",
     "Daylighting:Controls": "control_data",
     "ZoneHVAC:Baseboard:RadiantConvective:Steam": "surface_fractions",
