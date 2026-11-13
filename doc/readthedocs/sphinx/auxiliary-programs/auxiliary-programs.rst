@@ -12498,11 +12498,12 @@ in the IDF.
 Postprocessing Program/Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A postprocessing program *ReadVarsESO.exe* is available that will read
-an ESO or MTR file and produce a file that can be read by
-Excel\ :sup:`TM`. It can use an input file or not. In batch mode it is
-run by the little batch file *RunReadESO.bat*: Further information on
-this program is provided in the `Input Output
+A postprocessing program *ReadVarsESO* is provided by the ``readvars``
+Python package installed with EnergyPlus. The ``-r`` or ``--readvars``
+EnergyPlus command-line option runs it after the simulation. It can also
+be run via compatibility wrappers as ``ReadVarsESO`` or as ``energyplus auxiliary readvars``, which uses the
+Python runtime embedded in EnergyPlus. It reads an ESO or MTR file and produces a file that can be read by
+Excel\ :sup:`TM`. Further information on this program is provided in the `Input Output
 Reference <InputOutputReference.pdf>`__ under a section heading called
 “Using ReadVarsESO”. OutputControl:Files may also used to write CSV
 output (variables and meters) directly from EnergyPlus instead of using
@@ -12639,12 +12640,12 @@ Instructions appear at the top of the batch file:
    :   %program_name% contains the name of the executable (normally EnergyPlus.exe)
    :   %input_path%   contains the path to the input file (passed in as first argument)
    :   %output_path%  contains the path where the result files should be stored
-   :   %post_proc%    contains the path to the post processing program (ReadVarsESO)
+   :   %post_proc%    contains the path to the other post processing programs
    :   %weather_path% contains the path to the weather files (used with optional argument 2)
    :   %pausing%      contains Y if pause should occur between major portions of
    :                  batch file (mostly commented out)
    :   %maxcol%       contains "250" if limited to 250 columns otherwise contains
-   :                  "nolimit" if unlimited (used when calling readVarsESO)
+   :                  "nolimit" if unlimited (used when calling ReadVarsESO)
 
 ::
 
@@ -12668,10 +12669,10 @@ Instructions appear at the top of the batch file:
    :   4. Copy %2 (weather) into In.epw
    :   5. Execute EnergyPlus
    :   6. If available Copy %1.rvi (post processor commands) into Eplusout.inp
-   :   7. Execute ReadVarsESO.exe (the Post Processing Program)
+   :   7. Execute ReadVarsESO (the Post Processing Program)
    :   8. If available Copy %1.mvi (post processor commands) into test.mvi
    :       or create appropriate input to get meter output from eplusout.mtr
-   :   9. Execute ReadVarsESO.exe (the Post Processing Program) for meter output
+   :   9. Execute ReadVarsESO (the Post Processing Program) for meter output
    :  10. Copy Eplusout.* to %1.*
    :  11. Clean up working directory.
 
@@ -12949,11 +12950,12 @@ in the IDF.
 Postprocessing Program/Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A postprocessing program *ReadVarsESO.exe* is available that will read
-an ESO or MTR file and produce a file that can be read by
-Excel\ :sup:`TM`. It can use an input file or not. In batch mode it is
-run by the little batch file *RunReadESO.bat*: Further information on
-this program is provided in the `Input Output
+A postprocessing program *ReadVarsESO* is provided by the ``readvars``
+Python package installed with EnergyPlus. The ``-r`` or ``--readvars``
+EnergyPlus command-line option runs it after the simulation. It can also
+be run via compatibility wrappers as ``ReadVarsESO`` or as ``energyplus auxiliary readvars``, which uses the
+Python runtime embedded in EnergyPlus. It reads an ESO or MTR file and produces a file that can be read by
+Excel\ :sup:`TM`. Further information on this program is provided in the `Input Output
 Reference <InputOutputReference.pdf>`__ as well as the `Output Details
 and Examples <OutputDetailsAndExamples.pdf>`__ documents.
 OutputControl:Files may also used to write CSV output (variables and
