@@ -4656,9 +4656,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
 
                 if (!lNumericBlanks(iMaxCoolAirVolFlowNumericNum)) {
                     state.dataSize->ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow = Numbers(iMaxCoolAirVolFlowNumericNum);
-                    if (state.dataSize->ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow == AutoSize) {
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
-                    }
                     if (state.dataSize->ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow <= 0.0 &&
                         state.dataSize->ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow != AutoSize) {
                         ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4692,9 +4689,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iCoolSAFMAlphaNum), Alphas(iCoolSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iCoolFlowPerFloorAreaNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input cooling supply air flow per unit conditioned area is saved in ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4721,9 +4715,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iCoolSAFMAlphaNum), Alphas(iCoolSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iCoolFlowPerFracCoolNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input fraction of cooling supply air flow rate is saved in ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4751,9 +4742,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iCoolSAFMAlphaNum), Alphas(iCoolSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iCoolFlowPerCoolCapNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input cooling supply air flow per unit cooling capacity is saved in ZoneHVACSizing(zSIndex).MaxCoolAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4775,9 +4763,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                 state.dataSize->ZoneHVACSizing(zSIndex).HeatingSAFMethod = SupplyAirFlowRate;
                 if (!lNumericBlanks(iMaxHeatAirVolFlowNumericNum)) {
                     state.dataSize->ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow = Numbers(iMaxHeatAirVolFlowNumericNum);
-                    if (state.dataSize->ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow == AutoSize) {
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
-                    }
 
                     if (state.dataSize->ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow <= 0.0 &&
                         state.dataSize->ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow != AutoSize) {
@@ -4812,9 +4797,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatSAFMAlphaNum), Alphas(iHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iHeatFlowPerFloorAreaNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input heating supply air flow per unit conditioned area is saved in ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4841,9 +4823,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatSAFMAlphaNum), Alphas(iHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iHeatFlowPerFracCoolNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input fraction of heating supply air flow rate is saved in ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4870,9 +4849,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                         ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatSAFMAlphaNum), Alphas(iHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iHeatFlowPerHeatCapNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input heating supply air flow per unit heating capacity is saved in ZoneHVACSizing(zSIndex).MaxHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4894,9 +4870,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                 state.dataSize->ZoneHVACSizing(zSIndex).NoCoolHeatSAFMethod = SupplyAirFlowRate;
                 if (!lNumericBlanks(iMaxNoCoolHeatAirVolFlowNumericNum)) {
                     state.dataSize->ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow = Numbers(iMaxNoCoolHeatAirVolFlowNumericNum);
-                    if (state.dataSize->ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow == AutoSize) {
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
-                    }
                     if (state.dataSize->ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow < 0.0 &&
                         state.dataSize->ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow != AutoSize) {
                         ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4934,10 +4907,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                                           std::format("Input for {} = {}", cAlphaFields(iNoCoolHeatSAFMAlphaNum), Alphas(iNoCoolHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iNoCoolHeatFlowPerFloorAreaNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input supply air flow per unit floor area during no cooling or heating area is saved in
-                        // ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -4967,10 +4936,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                                           std::format("Input for {} = {}", cAlphaFields(iNoCoolHeatSAFMAlphaNum), Alphas(iNoCoolHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iNoCoolHeatFlowPerFracCoolNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input fraction of cooling supply air flow rate during no cooling or heating area is saved in
-                        // ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -5000,10 +4965,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                                           std::format("Input for {} = {}", cAlphaFields(iNoCoolHeatSAFMAlphaNum), Alphas(iNoCoolHeatSAFMAlphaNum)));
                         ShowContinueError(state, std::format("Illegal {} = Autosize", cNumericFields(iNoCoolHeatFlowPerFracHeatNumericNum)));
                         ErrorsFound = true;
-                    } else {
-                        // user input fraction of heating supply air flow rate during no cooling or heating area is saved in
-                        // ZoneHVACSizing(zSIndex).MaxNoCoolHeatAirVolFlow
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
                     }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
@@ -5026,9 +4987,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                 state.dataSize->ZoneHVACSizing(zSIndex).CoolingCapMethod = CoolingDesignCapacity;
                 if (!lNumericBlanks(iCoolDesignCapacityNumericNum)) {
                     state.dataSize->ZoneHVACSizing(zSIndex).ScaledCoolingCapacity = Numbers(iCoolDesignCapacityNumericNum);
-                    if (state.dataSize->ZoneHVACSizing(zSIndex).ScaledCoolingCapacity == AutoSize) {
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
-                    }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
                     ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iCoolCAPMAlphaNum), Alphas(iCoolCAPMAlphaNum)));
@@ -5068,9 +5026,6 @@ void GetZoneHVACSizing(EnergyPlusData &state)
                 state.dataSize->ZoneHVACSizing(zSIndex).HeatingCapMethod = HeatingDesignCapacity;
                 if (!lNumericBlanks(iHeatDesignCapacityNumericNum)) {
                     state.dataSize->ZoneHVACSizing(zSIndex).ScaledHeatingCapacity = Numbers(iHeatDesignCapacityNumericNum);
-                    if (state.dataSize->ZoneHVACSizing(zSIndex).ScaledHeatingCapacity == AutoSize) {
-                        state.dataSize->ZoneHVACSizing(zSIndex).RequestAutoSize = true;
-                    }
                 } else {
                     ShowSevereError(state, std::format("{} = {}", CurrentModuleObject, state.dataSize->ZoneHVACSizing(zSIndex).Name));
                     ShowContinueError(state, std::format("Input for {} = {}", cAlphaFields(iHeatCAPMAlphaNum), Alphas(iHeatCAPMAlphaNum)));

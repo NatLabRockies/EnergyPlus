@@ -26,17 +26,40 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      - name: Locate runner Python 3.12
+        id: runner-python
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export PYENV_ROOT="${runner_home}/.pyenv"
+          python_root="$("${PYENV_ROOT}/bin/pyenv" prefix 3.12.3)"
+          python_path="${python_root}/bin/python3.12"
+          test -x "${python_path}"
+          python_version="$("${python_path}" -c 'import platform; print(platform.python_version())')"
+          echo "Python ${python_version}: ${python_path}"
+          echo "python-path=${python_path}" >> "${GITHUB_OUTPUT}"
+          echo "python-root=${python_root}" >> "${GITHUB_OUTPUT}"
+          echo "python-version=${python_version}" >> "${GITHUB_OUTPUT}"
+          echo "${python_root}/bin" >> "${GITHUB_PATH}"
+
       - name: Configure
         run: >
           cmake -S . -B build
-          -G "Unix Makefiles"
-          -DCMAKE_BUILD_TYPE=Release
+          -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
           -DBUILD_TESTING=ON
           -DBUILD_PACKAGE=OFF
+          -DBUILD_FORTRAN=ON
           -DDOCUMENTATION_BUILD=DoNotBuild
+          -DLINK_WITH_PYTHON=ON
+          -DPYTHON_CLI=ON
+          -DPython_REQUIRED_VERSION:STRING=${{ steps.runner-python.outputs.python-version }}
+          -DPython_ROOT_DIR:PATH="${{ steps.runner-python.outputs.python-root }}"
+          -DPython_EXECUTABLE:FILEPATH="${{ steps.runner-python.outputs.python-path }}"
 
       - name: Build
         run: cmake --build build -j "$(nproc)"
 
       - name: Run tests
-        run: ctest --test-dir build -j "$(nproc)"
+        run: ctest --test-dir build -j "$(nproc)" --label-exclude slow --output-on-failure

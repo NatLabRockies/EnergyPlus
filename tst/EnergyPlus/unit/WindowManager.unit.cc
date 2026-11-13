@@ -2919,6 +2919,253 @@ TEST_F(EnergyPlusFixture, WindowManager_SrdLWRTest)
     EXPECT_NEAR(-24.9342, state->dataHeatBalSurf->SurfQHeatEmiReport(surfNum2), 3);
 }
 
+TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerHeatGainWithInsideProjectionsMatchesZoneAirBalance)
+{
+    // Inside projections enlarge the convective area of a window frame and divider. The zone air heat balance counts this once:
+    // SurfHConvInt * FrameArea * (1 + ProjCorrFrIn) for the frame and SurfHConvInt * DividerArea * (1 + 2 ProjCorrDivIn) for the
+    // divider. The frame and divider heat gain reports must give the heat that the zone air receives from them.
+
+    std::string const idf_objects = delimited_string({
+        "Material,Concrete Block,MediumRough,0.1014984,0.3805070,608.7016,836.8000;",
+        "Construction,WallConstruction,Concrete Block;",
+        "WindowMaterial:SimpleGlazingSystem,WindowMaterial,2.0,0.6,0.7;",
+        "Construction,WindowConstruction,WindowMaterial;",
+        "WindowProperty:FrameAndDivider,WindowFrame,0.10,0.0,0.10,20.0,1.0,0.5,0.5,0.9,",
+        "  DividedLite,0.05,1,1,0.0,0.05,20.0,1.0,0.5,0.5,0.9;",
+        "FenestrationSurface:Detailed,Window,Window,WindowConstruction,Wall,,0.5,WindowFrame,1.0,4,",
+        "  2,0,6, 2,0,2, 8,0,2, 8,0,6;",
+        "BuildingSurface:Detailed,Wall,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  0,0,10, 0,0,0, 10,0,0, 10,0,10;",
+        "BuildingSurface:Detailed,WallEast,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  10,0,10, 10,0,0, 10,10,0, 10,10,10;",
+        "BuildingSurface:Detailed,WallNorth,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  10,10,10, 10,10,0, 0,10,0, 0,10,10;",
+        "BuildingSurface:Detailed,WallWest,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  0,10,10, 0,10,0, 0,0,0, 0,0,10;",
+        "BuildingSurface:Detailed,Floor,Floor,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,1.0,4,",
+        "  0,0,0, 0,10,0, 10,10,0, 10,0,0;",
+        "BuildingSurface:Detailed,Roof,Roof,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.0,4,",
+        "  0,10,10, 0,0,10, 10,0,10, 10,10,10;",
+        "Zone,Zone,0,6.0,6.0,0,1,1,autocalculate,autocalculate;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    createFacilityElectricPowerServiceObject(*state);
+    HeatBalanceManager::SetPreConstructionInputParameters(*state);
+
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->TimeStepZone = 1;
+    state->dataGlobal->TimeStepZoneSec = 60.0;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->BeginSimFlag = true;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataEnvrn->OutBaroPress = 100000;
+
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZTAV = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MRT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.0;
+
+    HeatBalanceManager::ManageHeatBalance(*state);
+    state->dataGlobal->BeginSimFlag = false;
+    state->dataGlobal->BeginEnvrnFlag = false;
+
+    auto &s_surf = state->dataSurface;
+    int winNum = 0;
+    for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
+        if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
+            winNum = i;
+        }
+    }
+    ASSERT_GT(winNum, 0);
+    ASSERT_GT(s_surf->SurfWinFrameArea(winNum), 0.0);
+    ASSERT_GT(s_surf->SurfWinDividerArea(winNum), 0.0);
+    EXPECT_GT(s_surf->SurfWinProjCorrFrIn(winNum), 0.9);
+    EXPECT_GT(s_surf->SurfWinProjCorrDivIn(winNum), 0.9);
+
+    // Cold outside: frame and divider are colder than the zone air
+    Real64 constexpr T_in = 22.0;
+    Real64 constexpr T_out = -10.0;
+    s_surf->SurfOutDryBulbTemp(winNum) = T_out;
+    state->dataEnvrn->SkyTemp = T_out - 10.0;
+    state->dataEnvrn->SkyTempKelvin = state->dataEnvrn->SkyTemp + Constant::Kelvin;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.002;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.002;
+    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+        thisSpaceHB.MAT = T_in;
+        thisSpaceHB.airHumRat = 0.002;
+    }
+    for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
+        state->dataHeatBalSurf->SurfOutsideTempHist(1)(i) = T_out;
+        state->dataHeatBalSurf->SurfTempIn(i) = T_in;
+        state->dataHeatBalSurf->SurfTempInTmp(i) = T_in;
+    }
+    for (int iter = 0; iter < 10; ++iter) {
+        HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
+    }
+
+    // Heat that the zone air receives by convection from its surfaces, as the zone air heat balance sums it
+    int const zoneNum = s_surf->Surface(winNum).Zone;
+    int const spaceNum = s_surf->Surface(winNum).spaceNum;
+    auto &thisSpaceHB = state->dataZoneTempPredictorCorrector->spaceHeatBalance(spaceNum);
+    auto convectionToZoneAir = [&]() {
+        auto const sums = thisSpaceHB.calcSumHAT(*state, zoneNum, spaceNum);
+        return sums.sumHATsurf - sums.sumHATref - sums.sumHA * thisSpaceHB.MAT + sums.sumIntGain;
+    };
+    Real64 const frameArea = s_surf->SurfWinFrameArea(winNum);
+    Real64 const dividerArea = s_surf->SurfWinDividerArea(winNum);
+    Real64 const withFrameAndDivider = convectionToZoneAir();
+    s_surf->SurfWinFrameArea(winNum) = 0.0;
+    Real64 const withDivider = convectionToZoneAir();
+    s_surf->SurfWinDividerArea(winNum) = 0.0;
+    Real64 const withoutFrameAndDivider = convectionToZoneAir();
+    s_surf->SurfWinFrameArea(winNum) = frameArea;
+    s_surf->SurfWinDividerArea(winNum) = dividerArea;
+    Real64 const frameToZoneAir = withFrameAndDivider - withDivider;
+    Real64 const dividerToZoneAir = withDivider - withoutFrameAndDivider;
+    EXPECT_LT(frameToZoneAir, -10.0);
+    EXPECT_LT(dividerToZoneAir, -5.0);
+
+    Real64 const frameHeatGain = s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum);
+    Real64 const dividerHeatGain = s_surf->SurfWinDividerHeatGain(winNum) - s_surf->SurfWinDividerHeatLoss(winNum);
+    EXPECT_NEAR(frameHeatGain, frameToZoneAir, 1.0e-6 * std::abs(frameToZoneAir));
+    EXPECT_NEAR(dividerHeatGain, dividerToZoneAir, 1.0e-6 * std::abs(dividerToZoneAir));
+    EXPECT_NEAR(
+        s_surf->SurfWinGainFrameDividerToZoneRep(winNum), frameToZoneAir + dividerToZoneAir, 1.0e-6 * std::abs(frameToZoneAir + dividerToZoneAir));
+}
+
+TEST_F(EnergyPlusFixture, WindowManager_InteriorShadeAndBlindDividerProjectionHeatReachesZoneAir)
+{
+    // Isolate conduction and convection so a three-resistance series circuit gives an independent heat-flow reference.
+    // For an interior shade/blind, calcSumHAT takes the signed divider report as an internal gain, rather than using h*A*T.
+    std::string const idf_objects = delimited_string({
+        "Material,Concrete Block,MediumRough,0.1014984,0.3805070,608.7016,836.8000;",
+        "Construction,WallConstruction,Concrete Block;",
+        "WindowMaterial:SimpleGlazingSystem,WindowMaterial,2.0,0.6,0.7;",
+        "Construction,WindowConstruction,WindowMaterial;",
+        "WindowProperty:FrameAndDivider,WindowFrame,0.10,0.0,0.10,20.0,1.0,0.5,0.5,0.9,",
+        "  DividedLite,0.05,1,1,0.0,0.05,20.0,1.0,0.5,0.5,0.9;",
+        "FenestrationSurface:Detailed,Window,Window,WindowConstruction,Wall,,0.5,WindowFrame,1.0,4,",
+        "  2,0,6, 2,0,2, 8,0,2, 8,0,6;",
+        "BuildingSurface:Detailed,Wall,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  0,0,10, 0,0,0, 10,0,0, 10,0,10;",
+        "BuildingSurface:Detailed,WallEast,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  10,0,10, 10,0,0, 10,10,0, 10,10,10;",
+        "BuildingSurface:Detailed,WallNorth,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  10,10,10, 10,10,0, 0,10,0, 0,10,10;",
+        "BuildingSurface:Detailed,WallWest,Wall,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.5,4,",
+        "  0,10,10, 0,10,0, 0,0,0, 0,0,10;",
+        "BuildingSurface:Detailed,Floor,Floor,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,1.0,4,",
+        "  0,0,0, 0,10,0, 10,10,0, 10,0,0;",
+        "BuildingSurface:Detailed,Roof,Roof,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.0,4,",
+        "  0,10,10, 0,0,10, 10,0,10, 10,10,10;",
+        "Zone,Zone,0,6.0,6.0,0,1,1,autocalculate,autocalculate;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    createFacilityElectricPowerServiceObject(*state);
+    HeatBalanceManager::SetPreConstructionInputParameters(*state);
+
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->TimeStepZone = 1;
+    state->dataGlobal->TimeStepZoneSec = 60.0;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->BeginSimFlag = true;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataEnvrn->OutBaroPress = 100000;
+
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZTAV = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MRT = 0.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.0;
+
+    HeatBalanceManager::ManageHeatBalance(*state);
+    state->dataGlobal->BeginSimFlag = false;
+    state->dataGlobal->BeginEnvrnFlag = false;
+
+    auto &s_surf = state->dataSurface;
+    int winNum = 0;
+    for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
+        if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
+            winNum = i;
+        }
+    }
+    ASSERT_GT(winNum, 0);
+
+    auto &surface = s_surf->Surface(winNum);
+    auto &frameDivider = s_surf->FrameDivider(surface.FrameDivider);
+    auto &space = state->dataHeatBal->space(surface.spaceNum);
+    auto &spaceHB = state->dataZoneTempPredictorCorrector->spaceHeatBalance(surface.spaceNum);
+    space.HTSurfaceFirst = space.HTSurfaceLast = winNum;
+    constexpr Real64 insideC = 22.0;
+    constexpr Real64 area = 0.5;
+    constexpr Real64 conductance = 5.0;
+    constexpr Real64 outsideH = 20.0;
+    constexpr Real64 insideH = 3.0;
+    constexpr Real64 shadeGapH = 7.0;
+    spaceHB.MAT = insideC;
+    s_surf->SurfWinFrameArea(winNum) = 0.0;
+    s_surf->SurfWinDividerArea(winNum) = area;
+    s_surf->SurfWinDividerConductance(winNum) = conductance;
+    s_surf->SurfWinDividerEmis(winNum) = 0.0;
+    frameDivider.DividerEmis = 0.0; // Suppress radiation only in this analytic unit fixture.
+    s_surf->SurfWinConvCoeffWithShade(winNum) = shadeGapH;
+    s_surf->SurfWinConvHeatFlowNatural(winNum) = 0.0;
+    state->dataHeatBalSurf->SurfHConvInt(winNum) = insideH;
+    state->dataHeatBalSurf->SurfTempInTmp(winNum) = insideC; // No glass/shade-to-air convection in the reference balance.
+
+    for (auto shade : {DataSurfaces::WinShadingType::ShadeOff, DataSurfaces::WinShadingType::IntShade, DataSurfaces::WinShadingType::IntBlind}) {
+        for (Real64 projection : {0.0, 0.5}) {
+            for (Real64 outsideC : {-10.0, 40.0}) {
+                SCOPED_TRACE(std::format("shade={}, projection={}, outside={}", static_cast<int>(shade), projection, outsideC));
+                s_surf->SurfWinShadingFlag(winNum) = shade;
+                s_surf->SurfWinProjCorrDivIn(winNum) = projection;
+                frameDivider.DividerProjectionIn = projection > 0.0 ? 0.05 : 0.0;
+                s_surf->SurfWinDividerQRadInAbs(winNum) = 0.0;
+                s_surf->SurfWinDividerQRadOutAbs(winNum) = 0.0;
+                s_surf->SurfWinHeatGain(winNum) = 0.0;
+                s_surf->SurfWinGainFrameDividerToZoneRep(winNum) = 0.0;
+                s_surf->SurfWinDividerTempIn(winNum) = insideC;
+                s_surf->SurfWinDividerTempSurfOut(winNum) = outsideC;
+                Real64 const insideK = insideC + Constant::Kelvin;
+                Real64 const outsideK = outsideC + Constant::Kelvin;
+                s_surf->SurfWinIRfromParentZone(winNum) = Constant::StefanBoltzmann * std::pow(insideK, 4);
+                Real64 const outsideIR = Constant::StefanBoltzmann * std::pow(outsideK, 4);
+                CalcWinFrameAndDividerTemps(*state, winNum, outsideK, insideK, outsideH, insideH, outsideIR, surface.Construction);
+
+                // The two sides of an inside projection enlarge the divider's inside convective area.
+                // A projected divider behind an interior shade uses the gap coefficient; the blind uses insideH.
+                Real64 const h = (shade == DataSurfaces::WinShadingType::IntShade && projection > 0.0) ? shadeGapH : insideH;
+                Real64 const expected = area * (outsideC - insideC) / (1.0 / outsideH + 1.0 / conductance + 1.0 / (h * (1.0 + 2.0 * projection)));
+                Real64 const conducted = area * conductance * (s_surf->SurfWinDividerTempSurfOut(winNum) - s_surf->SurfWinDividerTempIn(winNum));
+                EXPECT_NEAR(expected, conducted, 1.0e-9);
+                EXPECT_NEAR(expected, s_surf->SurfWinHeatGain(winNum), 1.0e-9);
+                EXPECT_NEAR(expected, s_surf->SurfWinGainFrameDividerToZoneRep(winNum), 1.0e-9);
+                EXPECT_NEAR(std::max(-expected, 0.0), s_surf->SurfWinDividerHeatLoss(winNum), 1.0e-9);
+                auto const sums = spaceHB.calcSumHAT(*state, surface.Zone, surface.spaceNum);
+                if (shade == DataSurfaces::WinShadingType::ShadeOff) {
+                    EXPECT_NEAR(std::max(expected, 0.0), s_surf->SurfWinDividerHeatGain(winNum), 1.0e-9);
+                    EXPECT_NEAR(0.0, sums.sumIntGain, 1.0e-9);
+                } else {
+                    // This signed value, including a cold divider's negative gain, is what the zone air solver consumes.
+                    EXPECT_NEAR(expected, s_surf->SurfWinDividerHeatGain(winNum), 1.0e-9);
+                    EXPECT_NEAR(expected, sums.sumIntGain, 1.0e-9);
+                }
+                EXPECT_NEAR(expected, sums.sumHATsurf - sums.sumHATref - sums.sumHA * insideC + sums.sumIntGain, 1.0e-9);
+            }
+        }
+    }
+}
+
 TEST_F(EnergyPlusFixture, WindowManager_CalcNominalWindowCondAdjRatioTest)
 {
 
@@ -7849,4 +8096,97 @@ TEST_F(EnergyPlusFixture, WindowManager_WindowGasPropertiesAtTemp_GasMixture)
         Real64 const singleGasVisc = 3.723e-6 + 4.940e-8 * T; // = 1.721661e-05
         EXPECT_NEAR(visc, singleGasVisc, 1.0e-11);
     }
+}
+
+class InteriorShadeDiffuseFixture : public EnergyPlusFixture
+{
+protected:
+    void initializeOptics()
+    {
+        std::string const idf = R"idf(
+WindowMaterial:Glazing, ASYMMETRIC, SpectralAverage, , 0.003,
+  0.5, 0.12, 0.32, 0.5, 0.12, 0.32, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Glazing, SECOND, SpectralAverage, , 0.003,
+  0.65, 0.07, 0.18, 0.65, 0.07, 0.18, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Glazing, CLEAR, SpectralAverage, , 0.003,
+  0.7, 0.1, 0.1, 0.7, 0.1, 0.1, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Gas, AIRGAP, Air, 0.012;
+WindowMaterial:Shade, REFLECTIVE, 0.1, 0.6, 0.1, 0.6, 0.9, 0, 0.001, 0.1;
+WindowMaterial:Shade, BLACK, 0.1, 0, 0.1, 0, 0.9, 0, 0.001, 0.1;
+Construction, SINGLE BARE, ASYMMETRIC;
+Construction, SINGLE SHADED, ASYMMETRIC, REFLECTIVE;
+Construction, DOUBLE BARE, ASYMMETRIC, AIRGAP, SECOND;
+Construction, DOUBLE SHADED, ASYMMETRIC, AIRGAP, SECOND, REFLECTIVE;
+Construction, CLEAR BARE, CLEAR, AIRGAP, CLEAR;
+Construction, CLEAR SHADED, CLEAR, AIRGAP, CLEAR, REFLECTIVE;
+Construction, BLACK SHADED, ASYMMETRIC, AIRGAP, SECOND, BLACK;
+)idf";
+        ASSERT_TRUE(process_idf(idf));
+        bool errors = false;
+        HeatBalanceManager::SetPreConstructionInputParameters(*state);
+        HeatBalanceManager::GetProjectControlData(*state, errors);
+        Material::GetMaterialData(*state, errors);
+        HeatBalanceManager::GetConstructData(*state, errors);
+        ASSERT_FALSE(errors);
+        Window::InitGlassOpticalCalculations(*state);
+    }
+
+    void checkSystem(int bareIndex, int shadedIndex, Real64 shadeReflectance)
+    {
+        auto const &bare = state->dataConstruction->Construct(bareIndex);
+        auto const &shaded = state->dataConstruction->Construct(shadedIndex);
+        Real64 constexpr shadeTransmittance = 0.1;
+        Real64 const denominator = 1.0 - shadeReflectance * bare.ReflectSolDiffBack;
+        Real64 const reflectedFlux = bare.TransDiff * shadeReflectance / denominator;
+        Real64 bareFrontClosure = bare.TransDiff + bare.ReflectSolDiffFront;
+        Real64 bareBackClosure = bare.TransDiff + bare.ReflectSolDiffBack;
+        Real64 frontClosure = shaded.TransDiff + shaded.ReflectSolDiffFront + shaded.AbsDiffShade;
+        Real64 backClosure = shaded.TransDiff + shaded.ReflectSolDiffBack + shaded.AbsDiffBackShade;
+        for (int pane = 1; pane <= bare.TotGlassLayers; ++pane) {
+            // The shade-reflected flux reaches the glazing from the room side.
+            EXPECT_NEAR(bare.AbsDiff(pane) + reflectedFlux * bare.AbsDiffBack(pane), shaded.AbsDiff(pane), 1e-10);
+            EXPECT_NEAR(shadeTransmittance * bare.AbsDiffBack(pane) / denominator, shaded.AbsDiffBack(pane), 1e-10);
+            bareFrontClosure += bare.AbsDiff(pane);
+            bareBackClosure += bare.AbsDiffBack(pane);
+            frontClosure += shaded.AbsDiff(pane);
+            backClosure += shaded.AbsDiffBack(pane);
+        }
+        // Existing diffuse quadrature does not normalize an energy-conserving
+        // bare glazing exactly to unity. Propagate its unrepresented remainder
+        // through each incidence rather than silently loosening closure tolerance.
+        Real64 const frontRemainder = (1.0 - bareFrontClosure) + reflectedFlux * (1.0 - bareBackClosure);
+        Real64 const backRemainder = shadeTransmittance * (1.0 - bareBackClosure) / denominator;
+        EXPECT_NEAR(1.0, frontClosure + frontRemainder, 1e-10);
+        EXPECT_NEAR(1.0, backClosure + backRemainder, 1e-10);
+        EXPECT_NEAR(bare.TransDiff * shadeTransmittance / denominator, shaded.TransDiff, 1e-10);
+        EXPECT_NEAR(bare.ReflectSolDiffFront + bare.TransDiff * reflectedFlux, shaded.ReflectSolDiffFront, 1e-10);
+    }
+};
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_AsymmetricSinglePane)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    ASSERT_GT(std::abs(state->dataConstruction->Construct(1).AbsDiff(1) - state->dataConstruction->Construct(1).AbsDiffBack(1)), 0.05);
+    checkSystem(1, 2, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_AsymmetricDoublePane)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    checkSystem(3, 4, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_SymmetricGlazingPaneSplit)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    auto const &bare = state->dataConstruction->Construct(5);
+    EXPECT_NEAR(bare.AbsDiff(1) + bare.AbsDiff(2), bare.AbsDiffBack(1) + bare.AbsDiffBack(2), 1e-10);
+    ASSERT_GT(std::abs(bare.AbsDiff(1) - bare.AbsDiffBack(1)), 0.01);
+    checkSystem(5, 6, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_NonreflectingShadeControl)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    checkSystem(3, 7, 0.0);
 }
