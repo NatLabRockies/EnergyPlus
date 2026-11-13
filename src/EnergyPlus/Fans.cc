@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
@@ -1171,19 +1172,15 @@ void GetFanInput(EnergyPlusData &state)
             auto *fanSystem = dynamic_cast<FanSystem *>(fan);
             assert(fanSystem != nullptr);
 
-            if (fanSystem->speedControl != SpeedControl::Discrete) {
-                continue;
-            }
+            SetupOutputVariable(state,
+                                "Fan Runtime Fraction",
+                                Constant::Units::None,
+                                fanSystem->runtimeFrac,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                fanSystem->Name);
 
-            if (fanSystem->numSpeeds == 1) {
-                SetupOutputVariable(state,
-                                    "Fan Runtime Fraction",
-                                    Constant::Units::None,
-                                    fanSystem->runtimeFracAtSpeed[0],
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    fanSystem->Name);
-            } else {
+            if (fanSystem->speedControl == SpeedControl::Discrete && fanSystem->numSpeeds > 1) {
                 for (int speedLoop = 0; speedLoop < fanSystem->numSpeeds; ++speedLoop) {
                     SetupOutputVariable(state,
                                         std::format("Fan Runtime Fraction Speed {}", speedLoop + 1),
@@ -2893,6 +2890,7 @@ void FanSystem::calcSimpleSystemFan(
     powerLossToAir = 0.0;
     totalPower = 0.0;
     outletAirMassFlowRate = 0.0;
+    runtimeFrac = 0.0;
     if (speedControl == SpeedControl::Discrete) {
         for (int loop = 0; loop < numSpeeds; ++loop) {
             runtimeFracAtSpeed[loop] = 0.0;
@@ -3046,6 +3044,7 @@ void FanSystem::calcSimpleSystemFan(
                     _locRuntimeFrac = 1.0;
                 }
 
+                runtimeFrac += _locRuntimeFrac;
                 Real64 _localFlowFracForPower = max(minPowerFlowFrac, _locFlowRatio);
                 Real64 _localPowerFrac = (state.dataHVACGlobal->NightVentOn)
                                              ? _locFlowRatio
@@ -3123,6 +3122,10 @@ void FanSystem::calcSimpleSystemFan(
             massFlowRateMaxAvail = 0.0;
             massFlowRateMinAvail = 0.0;
         }
+    }
+
+    if (speedControl == SpeedControl::Discrete) {
+        runtimeFrac = std::accumulate(runtimeFracAtSpeed.begin(), runtimeFracAtSpeed.end(), 0.0);
     }
 
     if (heatLossDest == HeatLossDest::Zone) {
