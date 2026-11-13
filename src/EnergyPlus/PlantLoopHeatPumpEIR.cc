@@ -2865,13 +2865,17 @@ bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
     return true;
 }
 
-Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     Real64 sourceInletTemp = state.dataLoopNodes->Node(this->sourceSideNodes.inlet).Temp;
     Real64 loadSideOutletSetpointTemp = this->getLoadSideOutletSetPointTemp(state);
     // evaluate capacity modifier curve and determine load side heat transfer
-    Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->capFuncTempCurveIndex, loadSideOutletSetpointTemp, sourceInletTemp);
-    return this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    Real64 capacityModifierFuncTemp =
+        (this->capFuncTempCurveIndex > 0) ? Curve::CurveValue(state, this->capFuncTempCurveIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void EIRPlantLoopHeatPump::report(EnergyPlusData &state)
@@ -2998,7 +3002,7 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
     // evaluate the actual current operating load side heat transfer rate
 
     // this->loadSideHeatTransfer = availableCapacity * localPartLoadRatio;
-    this->loadSideHeatTransfer = availableCapacity * localPartLoadRatio; // (localPartLoadRatio >= this->minPLR ? localPartLoadRatio : 0.0);
+    this->loadSideHeatTransfer = availableCapacity * localPartLoadRatio; // (localPartLoadRatio >= this->minimumPLR ? localPartLoadRatio : 0.0);
 
     // calculate load side outlet conditions
     Real64 const loadMCp = this->loadSideMassFlowRate * CpLoad;
@@ -3031,7 +3035,7 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
         eirModifierFuncTemp = 0.0;
     }
 
-    Real64 miniPLR_mod = this->minPLR;
+    Real64 miniPLR_mod = this->minimumPLR;
     Real64 PLFf = max(miniPLR_mod, localPartLoadRatio);
 
     Real64 eirModifierFuncPLR = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndex, PLFf);
@@ -3552,19 +3556,21 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
             }
 
             // N7 min PLR
-            auto minPLRFound = fields.find("minimum_part_load_ratio");
-            if (minPLRFound != fields.end()) {
-                thisPLHP.minPLR = minPLRFound.value().get<Real64>();
+            auto minimumPLRFound = fields.find("minimum_part_load_ratio");
+            if (minimumPLRFound != fields.end()) {
+                thisPLHP.minimumPLR = minimumPLRFound.value().get<Real64>();
             } else {
-                state.dataInputProcessing->inputProcessor->getDefaultValue(state, cCurrentModuleObject, "minimum_part_load_ratio", thisPLHP.minPLR);
+                state.dataInputProcessing->inputProcessor->getDefaultValue(
+                    state, cCurrentModuleObject, "minimum_part_load_ratio", thisPLHP.minimumPLR);
             }
 
             // N8 max PLR
             auto maxPLRFound = fields.find("maximum_part_load_ratio");
             if (maxPLRFound != fields.end()) {
-                thisPLHP.maxPLR = maxPLRFound.value().get<Real64>();
+                thisPLHP.maximumPLR = maxPLRFound.value().get<Real64>();
             } else {
-                state.dataInputProcessing->inputProcessor->getDefaultValue(state, cCurrentModuleObject, "maximum_part_load_ratio", thisPLHP.maxPLR);
+                state.dataInputProcessing->inputProcessor->getDefaultValue(
+                    state, cCurrentModuleObject, "maximum_part_load_ratio", thisPLHP.maximumPLR);
             }
 
             // A14 fuel_energy_input_ratio_defrost_adjustment_curve_name
@@ -3708,7 +3714,7 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 state.dataInputProcessing->inputProcessor->getDefaultValue(
                     state, cCurrentModuleObject, "minimum_unloading_ratio", thisPLHP.minimumUnloadingRatio);
             }
-            if (thisPLHP.minimumUnloadingRatio < thisPLHP.minPLR) {
+            if (thisPLHP.minimumUnloadingRatio < thisPLHP.minimumPLR) {
                 ShowSevereError(state, "EIR FFHP: the minimum unloading ratio cannot be lower than the minimum part load ratio.");
                 errorsFound = true;
             }
@@ -4512,7 +4518,7 @@ void EIRFuelFiredHeatPump::report(EnergyPlusData &state)
     state.dataLoopNodes->Node(this->sourceSideNodes.outlet).Temp = this->sourceSideOutletTemp;
 }
 
-Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     // Source (air) side temperature variable
     auto &thisSourceSideInletNode = state.dataLoopNodes->Node(this->sourceSideNodes.inlet);
@@ -4544,7 +4550,10 @@ Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
 
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->capFuncTempCurveIndex, waterTempforCurve, oaTempforCurve);
-    return this->referenceCapacity * capacityModifierFuncTemp;
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp;
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 currentLoad, OperatingModeControlOptionMultipleUnit modeCalcMethod)
