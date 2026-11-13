@@ -52,13 +52,16 @@
 
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+#include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/VariableSpeedCoils.hh>
 
 namespace EnergyPlus {
@@ -7499,6 +7502,336 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_CalcEffectiveSHR)
     state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).FanDelayTime = 60;
 
     EXPECT_EQ(VariableSpeedCoils::CalcEffectiveSHR(*state, DXCoilNum, SHRss, fanOp, RTF, QLatRated, QLatActual, EnteringDB, EnteringWB), 0.75);
+}
+
+class VariableSpeedCrankcaseFixture : public EnergyPlusFixture
+{
+protected:
+    void SetUp() override
+    {
+        EnergyPlusFixture::SetUp();
+        ASSERT_TRUE(process_idf(delimited_string({"Curve:Linear,Unity1D,1,0,0,2,,,Dimensionless,Dimensionless;",
+                                                  "Curve:Biquadratic,Unity2D,1,0,0,0,0,0,-50,50,-50,50,,,Temperature,Temperature,Dimensionless;",
+                                                  "Curve:Linear,HalfHeater,0.5,0,-50,50,0,1,Temperature,Dimensionless;"})));
+        state->init_state(*state);
+        state->dataHVACGlobal->TimeStepSysSec = 900.0;
+        state->dataEnvrn->OutDryBulbTemp = 5.0;
+        state->dataEnvrn->OutHumRat = 0.004;
+        state->dataEnvrn->OutWetBulbTemp = 2.0;
+        state->dataEnvrn->OutBaroPress = 101325.0;
+        state->dataVariableSpeedCoils->NumVarSpeedCoils = 2;
+        state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
+        state->dataLoopNodes->Node.allocate(4);
+        int const oneD = Curve::GetCurveIndex(*state, "UNITY1D");
+        int const twoD = Curve::GetCurveIndex(*state, "UNITY2D");
+        ASSERT_GT(oneD, 0);
+        ASSERT_GT(twoD, 0);
+        for (int index = 1; index <= 2; ++index) {
+            auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(index);
+            coil.availSched = Sched::GetScheduleAlwaysOn(*state);
+            coil.NumOfSpeeds = 2;
+            coil.CompanionUpstreamDXCoil = 0;
+            coil.coilType = index == 1 ? HVAC::CoilType::HeatingDXVariableSpeed : HVAC::CoilType::CoolingDXVariableSpeed;
+            coil.CondenserType = DataHeatBalance::RefrigCondenserType::Air;
+            coil.AirMassFlowRate = 1.0;
+            coil.DesignAirMassFlowRate = 1.0;
+            coil.InletAirDBTemp = 20.0;
+            coil.InletAirHumRat = 0.008;
+            coil.InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(20.0, 0.008);
+            coil.AirInletNodeNum = 2 * index - 1;
+            coil.AirOutletNodeNum = 2 * index;
+            coil.RatedCapHeat = 4000.0;
+            coil.RatedCapCoolTotal = 4000.0;
+            coil.CrankcaseHeaterCapacity = 200.0;
+            coil.MaxOATCrankcaseHeater = 10.0;
+            coil.MinOATCompressor = -20.0;
+            coil.MaxOATDefrost = -50.0;
+            coil.PLFFPLR = oneD;
+            coil.reportCoilFinalSizes = false;
+            for (int speed = 1; speed <= 2; ++speed) {
+                coil.EvapCondAirFlow(speed) = 1.0;
+                coil.MSRatedTotCap(speed) = 2000.0 * speed;
+                coil.MSRatedCOP(speed) = 3.0;
+                coil.MSCCapFTemp(speed) = twoD;
+                coil.MSCCapAirFFlow(speed) = oneD;
+                coil.MSEIRFTemp(speed) = twoD;
+                coil.MSEIRAirFFlow(speed) = oneD;
+            }
+        }
+    }
+
+    // Calculation and update, without the initialization that precedes them in SimVariableSpeedCoils
+    void heat(HVAC::CompressorOp operation = HVAC::CompressorOp::Off, Real64 plr = 0.0, int speed = 1)
+    {
+        VariableSpeedCoils::CalcVarSpeedCoilHeating(*state, 1, HVAC::FanOp::Continuous, 0.0, operation, plr, 1.0, 1.0, speed);
+        VariableSpeedCoils::UpdateVarSpeedCoil(*state, 1);
+    }
+
+    void cool(HVAC::CompressorOp operation = HVAC::CompressorOp::Off)
+    {
+        VariableSpeedCoils::CalcVarSpeedCoilCooling(*state, 2, HVAC::FanOp::Continuous, 0.0, 0.0, operation, 0.0, 1.0, 1.0, 1);
+        VariableSpeedCoils::UpdateVarSpeedCoil(*state, 2);
+    }
+
+    // Prepare the coils for SimVariableSpeedCoils, the driver that parent equipment calls
+    void prepareDriver()
+    {
+        state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
+        state->dataVariableSpeedCoils->MyOneTimeFlag = false;
+        state->dataVariableSpeedCoils->MySizeFlag.dimension(2, false);
+        state->dataVariableSpeedCoils->MyEnvrnFlag.dimension(2, true);
+        state->dataVariableSpeedCoils->MyPlantScanFlag.dimension(2, false);
+        state->dataHeatBal->HeatReclaimVS_Coil.allocate(2);
+        state->dataGlobal->BeginEnvrnFlag = false;
+        for (int index = 1; index <= 2; ++index) {
+            auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(index);
+            coil.FindCompanionUpStreamCoil = false;
+            for (int speed = 1; speed <= 2; ++speed) {
+                coil.MSRatedAirMassFlowRate(speed) = 1.0;
+                coil.MSRatedAirVolFlowRate(speed) = 0.8;
+            }
+            auto &inlet = state->dataLoopNodes->Node(coil.AirInletNodeNum);
+            inlet.MassFlowRate = 1.0;
+            inlet.Temp = 20.0;
+            inlet.HumRat = 0.008;
+            inlet.Enthalpy = Psychrometrics::PsyHFnTdbW(20.0, 0.008);
+        }
+    }
+
+    void simulate(int coilNum, HVAC::CompressorOp operation, Real64 plr = 0.0, int speed = 1, Real64 sensibleLoad = 1000.0)
+    {
+        VariableSpeedCoils::SimVariableSpeedCoils(*state, "", coilNum, HVAC::FanOp::Continuous, operation, plr, speed, 1.0, sensibleLoad, 0.0, 1.0);
+    }
+};
+
+TEST_F(VariableSpeedCrankcaseFixture, HeatingOffReturnPathsRetainPowerAndEnergy)
+{
+    auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    heat();
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+    coil.AirMassFlowRate = 0.0;
+    heat(HVAC::CompressorOp::On);
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+    coil.AirMassFlowRate = 1.0;
+    state->dataEnvrn->OutDryBulbTemp = -25.0;
+    heat(HVAC::CompressorOp::On);
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, CoolingOffReturnPathsRetainPowerAndEnergy)
+{
+    auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    cool();
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+    coil.AirMassFlowRate = 0.0;
+    cool(HVAC::CompressorOp::On);
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+    coil.AirMassFlowRate = 1.0;
+    state->dataEnvrn->OutDryBulbTemp = -25.0;
+    cool(HVAC::CompressorOp::On);
+    EXPECT_DOUBLE_EQ(200.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coil.CrankcaseHeaterConsumption);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, HeatingCompanionRuntimeUsesOneSharedHeater)
+{
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    heatCoil.CompanionUpstreamDXCoil = 2;
+    coolCoil.ReportCoolingCoilCrankcasePower = false;
+    coolCoil.RunFrac = 0.25;
+    heat();
+    EXPECT_DOUBLE_EQ(150.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(135000.0, heatCoil.CrankcaseHeaterConsumption);
+    coolCoil.RunFrac = 1.0;
+    heat();
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterConsumption);
+    EXPECT_FALSE(coolCoil.ReportCoolingCoilCrankcasePower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, HeatingTemperatureCurveAndThreshold)
+{
+    auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    coil.CrankcaseHeaterCapacityCurveIndex = Curve::GetCurveIndex(*state, "HALFHEATER");
+    heat();
+    EXPECT_DOUBLE_EQ(100.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(90000.0, coil.CrankcaseHeaterConsumption);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    heat();
+    EXPECT_DOUBLE_EQ(0.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coil.CrankcaseHeaterConsumption);
+    state->dataEnvrn->OutDryBulbTemp = 11.0;
+    heat();
+    EXPECT_DOUBLE_EQ(0.0, coil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, HeatingRunningAndCompanionRuntimeControls)
+{
+    auto &coil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    coil.CompanionUpstreamDXCoil = 2;
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    coolCoil.RunFrac = 0.5;
+    heat(HVAC::CompressorOp::On, 0.25);
+    EXPECT_DOUBLE_EQ(0.25, coil.RunFrac);
+    EXPECT_DOUBLE_EQ(100.0, coil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(90000.0, coil.CrankcaseHeaterConsumption);
+    coolCoil.RunFrac = 0.25;
+    heat(HVAC::CompressorOp::On, 0.75);
+    EXPECT_DOUBLE_EQ(50.0, coil.CrankcaseHeaterPower);
+    heat(HVAC::CompressorOp::On, 1.0, 2);
+    EXPECT_DOUBLE_EQ(0.0, coil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, AvailabilityOffPreservesExistingZeroReport)
+{
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    heatCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    coolCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    heat();
+    cool();
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, AvailabilityOffClearsEarlierReport)
+{
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    heat();
+    cool();
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+    heatCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    coolCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    heat();
+    cool();
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterConsumption);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterConsumption);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, DriverAvailabilityOffClearsEarlierReport)
+{
+    prepareDriver();
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    simulate(1, HVAC::CompressorOp::Off);
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, heatCoil.CrankcaseHeaterConsumption);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, coolCoil.CrankcaseHeaterConsumption);
+    heatCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    coolCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
+    simulate(1, HVAC::CompressorOp::Off);
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterConsumption);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterConsumption);
+    heatCoil.availSched = Sched::GetScheduleAlwaysOn(*state);
+    coolCoil.availSched = Sched::GetScheduleAlwaysOn(*state);
+    simulate(1, HVAC::CompressorOp::Off);
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, DriverOffPathsAndRuntime)
+{
+    prepareDriver();
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    // no load: initialization sets zero airflow
+    simulate(1, HVAC::CompressorOp::On, 1.0, 1, 0.0);
+    simulate(2, HVAC::CompressorOp::On, 1.0, 1, 0.0);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.AirMassFlowRate);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+    // heating runs at part load, then full load at speed 2, then is switched off again
+    simulate(1, HVAC::CompressorOp::On, 0.25);
+    EXPECT_DOUBLE_EQ(0.25, heatCoil.RunFrac);
+    EXPECT_DOUBLE_EQ(150.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(135000.0, heatCoil.CrankcaseHeaterConsumption);
+    simulate(1, HVAC::CompressorOp::On, 1.0, 2);
+    EXPECT_DOUBLE_EQ(1.0, heatCoil.RunFrac);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterConsumption);
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.RunFrac);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    // companion cooling runtime limits the shared heater reported by the heating coil
+    heatCoil.CompanionUpstreamDXCoil = 2;
+    coolCoil.RunFrac = 0.4;
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(120.0, heatCoil.CrankcaseHeaterPower);
+    simulate(1, HVAC::CompressorOp::On, 0.25);
+    EXPECT_DOUBLE_EQ(120.0, heatCoil.CrankcaseHeaterPower);
+    // the cooling coil is simulated and found off: its runtime fraction is reset before the heating coil reads it
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.RunFrac);
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    // low-temperature compressor lockout and the heater temperature limit
+    state->dataEnvrn->OutDryBulbTemp = -25.0;
+    simulate(1, HVAC::CompressorOp::On, 1.0);
+    simulate(2, HVAC::CompressorOp::On, 1.0);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+    state->dataEnvrn->OutDryBulbTemp = 10.0;
+    simulate(1, HVAC::CompressorOp::Off);
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+}
+
+TEST_F(VariableSpeedCrankcaseFixture, PairedCoolingCoilHasNoHeaterOfItsOwn)
+{
+    prepareDriver();
+    auto &heatCoil = state->dataVariableSpeedCoils->VarSpeedCoil(1);
+    auto &coolCoil = state->dataVariableSpeedCoils->VarSpeedCoil(2);
+    heatCoil.Name = "HEAT COIL";
+    heatCoil.VarSpeedCoilType = "Coil:Heating:DX:VariableSpeed";
+    coolCoil.Name = "COOL COIL";
+    coolCoil.VarSpeedCoilType = "Coil:Cooling:DX:VariableSpeed";
+    auto &compSets = state->dataBranchNodeConnections->CompSets;
+    compSets.allocate(2);
+    state->dataBranchNodeConnections->NumCompSets = 2;
+    for (int index = 1; index <= 2; ++index) {
+        compSets(index).ParentObjectType = Node::ConnectionObjectType::AirLoopHVACUnitaryHeatPumpAirToAir;
+        compSets(index).ParentCName = "HEAT PUMP";
+    }
+    compSets(1).ComponentObjectType = Node::ConnectionObjectType::CoilHeatingDXVariableSpeed;
+    compSets(1).CName = heatCoil.Name;
+    compSets(2).ComponentObjectType = Node::ConnectionObjectType::CoilCoolingDXVariableSpeed;
+    compSets(2).CName = coolCoil.Name;
+
+    // the upstream cooling coil is simulated before the heating coil has found it
+    simulate(2, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(200.0, coolCoil.CrankcaseHeaterPower);
+
+    // initialization of the heating coil pairs the two coils
+    heatCoil.FindCompanionUpStreamCoil = true;
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_EQ(2, heatCoil.CompanionUpstreamDXCoil);
+    EXPECT_FALSE(coolCoil.ReportCoolingCoilCrankcasePower);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+
+    // from then on only the heating coil carries the heater of the heat pump
+    simulate(2, HVAC::CompressorOp::Off);
+    simulate(1, HVAC::CompressorOp::Off);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(0.0, coolCoil.CrankcaseHeaterConsumption);
+    EXPECT_DOUBLE_EQ(200.0, heatCoil.CrankcaseHeaterPower);
+    EXPECT_DOUBLE_EQ(180000.0, heatCoil.CrankcaseHeaterConsumption);
 }
 
 } // namespace EnergyPlus
