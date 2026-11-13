@@ -230,6 +230,7 @@ IF EXIST eplusout.dfs  DEL eplusout.dfs
 IF EXIST slab.int DEL slab.int
 IF EXIST BasementGHTIn.idf DEL BasementGHTIn.idf
 IF EXIST eplusshading.csv DEL eplusshading.csv
+IF EXIST eplusshading_diffuse.csv DEL eplusshading_diffuse.csv
 
 IF EXIST eplusout.json DEL eplusout.json
 IF EXIST eplusout_detailed_zone.json DEL eplusout_detailed_zone.json
@@ -536,6 +537,7 @@ IF EXIST eplusout.edd MOVE eplusout.edd "%epout%.edd"
 IF EXIST eplusout.dfs MOVE eplusout.dfs "%epout%DFS.csv"
 IF EXIST in.epJSON MOVE in.epJSON "%epout%.epJSONout"
 IF EXIST eplusshading.csv MOVE eplusshading.csv "%epout%Shading.csv"
+IF EXIST eplusshading_diffuse.csv MOVE eplusshading_diffuse.csv "%epout%ShadingDiffuse.csv"
 IF EXIST eplusout_perflog.csv MOVE eplusout_perflog.csv "%epout%_perflog.csv" 
 
 IF EXIST eplusout.json MOVE eplusout.json "%epout%.json"
