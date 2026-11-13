@@ -2617,4 +2617,68 @@ bool ElectricEIRChillerSpecs::thermosiphonDisabled(EnergyPlusData &state)
     return true;
 }
 
+Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
+{
+    Real64 sourceInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
+    if (this->HeatRecActive && (this->QHeatRecovered + this->QCondenser) > 0.0) {
+        sourceInletTemp =
+            (this->QHeatRecovered * this->HeatRecInletTemp + this->QCondenser * this->CondInletTemp) / (this->QHeatRecovered + this->QCondenser);
+    }
+    Real64 loadSideOutletSetpointTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
+    switch (state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).LoopDemandCalcScheme) {
+    case DataPlant::LoopDemandCalcScheme::SingleSetPoint: {
+        if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) ||
+            (DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) ||
+            (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint != Node::SensedNodeFlagValue)) {
+            // there will be a valid setpoint on outlet
+            loadSideOutletSetpointTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint;
+        } else { // use plant loop overall setpoint
+            loadSideOutletSetpointTemp =
+                state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum).TempSetPoint;
+        }
+    } break;
+    case DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand: {
+        if ((this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) ||
+            (DataPlant::CompData::getPlantComponent(state, this->CWPlantLoc).CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) ||
+            (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi != Node::SensedNodeFlagValue)) {
+            // there will be a valid setpoint on outlet
+            loadSideOutletSetpointTemp = state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi;
+        } else { // use plant loop overall setpoint
+            loadSideOutletSetpointTemp =
+                state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum).TempSetPointHi;
+        }
+    } break;
+    default: {
+        assert(false);
+    } break;
+    }
+
+    // If there is a fault of Chiller SWT Sensor
+    if (this->FaultyChillerSWTFlag && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing) && (!state.dataGlobal->KickOffSimulation)) {
+        int FaultIndex = this->FaultyChillerSWTIndex;
+        Real64 EvapOutletTempSetPoint_ff = loadSideOutletSetpointTemp;
+
+        // calculate the sensor offset using fault information
+        this->FaultyChillerSWTOffset = state.dataFaultsMgr->FaultsChillerSWTSensor(FaultIndex).CalFaultOffsetAct(state);
+        // update the EvapOutletTempSetPoint
+        loadSideOutletSetpointTemp =
+            max(this->TempLowLimitEvapOut,
+                min(state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp, EvapOutletTempSetPoint_ff - this->FaultyChillerSWTOffset));
+        this->FaultyChillerSWTOffset = EvapOutletTempSetPoint_ff - loadSideOutletSetpointTemp;
+    }
+    // evaluate capacity modifier curve and determine load side heat transfer
+    Real64 capacityModifierFuncTemp =
+        (this->ChillerCapFTIndex > 0) ? Curve::CurveValue(state, this->ChillerCapFTIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
+    Real64 adjustedRefCap = this->RefCap;
+    if (this->FaultyChillerFoulingFlag && (!state.dataGlobal->WarmupFlag) && (!state.dataGlobal->DoingSizing) &&
+        (!state.dataGlobal->KickOffSimulation)) {
+        this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(this->FaultyChillerFoulingIndex).CalFoulingFactor(state);
+        adjustedRefCap *= this->FaultyChillerFoulingFactor;
+    }
+    Real64 availableLoad = adjustedRefCap * capacityModifierFuncTemp;
+    minLoad = availableLoad * this->MinPartLoadRat;
+    optLoad = availableLoad * this->OptPartLoadRat;
+    return availableLoad * this->MaxPartLoadRat;
+}
+
 } // namespace EnergyPlus::ChillerElectricEIR

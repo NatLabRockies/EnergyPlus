@@ -172,6 +172,8 @@ if(BUILD_TESTING)
               --transition-cli-dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
               "${CMAKE_CURRENT_SOURCE_DIR}/tests/"
     )
-    set_tests_properties(Transition.transition_tests PROPERTIES TIMEOUT 120)
+    # This test is declared after all integration tests but takes about a minute (Release and Debug).
+    # The COST makes ctest -j start it early instead of last, which otherwise leaves it running alone at the end.
+    set_tests_properties(Transition.transition_tests PROPERTIES TIMEOUT 120 COST 60)
   endif()
 endif()
