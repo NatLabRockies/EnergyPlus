@@ -178,8 +178,6 @@ namespace ExhaustAirSystemManager {
                 } else {
                     auto *fan = state.dataFans->fans(centralFanIndex);
 
-                    thisExhSys.availSched = fan->availSched;
-
                     Node::SetUpCompSets(state,
                                         cCurrentModuleObject,
                                         thisExhSys.Name,
@@ -229,7 +227,6 @@ namespace ExhaustAirSystemManager {
                                         thisExhSys.Name);
                 }
 
-                thisExhSys.CentralFanName = centralFanName;
                 thisExhSys.CentralFanIndex = centralFanIndex;
 
                 // sizing

@@ -67,6 +67,45 @@
 
 using namespace EnergyPlus;
 
+TEST_F(EnergyPlusFixture, InverterFunctionOfPower_MinimumAndMaximumPowerOutput)
+{
+    std::string const idf_objects = delimited_string({
+        "ElectricLoadCenter:Inverter:FunctionOfPower,",
+        "  Test Inverter,            !- Name",
+        "  ,                         !- Availability Schedule Name",
+        "  ,                         !- Zone Name",
+        "  0.0,                      !- Radiative Fraction",
+        "  Constant Efficiency,      !- Efficiency Function of Power Curve Name",
+        "  1000.0,                   !- Rated Maximum Continuous Input Power",
+        "  0.0,                      !- Minimum Efficiency",
+        "  1.0,                      !- Maximum Efficiency",
+        "  200.0,                    !- Minimum Power Output",
+        "  400.0,                    !- Maximum Power Output",
+        "  0.0;                      !- Ancillary Power Consumed In Standby",
+
+        "Curve:Linear,",
+        "  Constant Efficiency,      !- Name",
+        "  0.5,                      !- Coefficient1 Constant",
+        "  0.0,                      !- Coefficient2 x",
+        "  0.0,                      !- Minimum Value of x",
+        "  1.0;                      !- Maximum Value of x",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataHVACGlobal->TimeStepSysSec = 900.0;
+    state->init_state(*state);
+    DCtoACInverter inverter(*state, "Test Inverter");
+
+    inverter.simulate(*state, 200.0);
+    EXPECT_DOUBLE_EQ(0.0, inverter.aCPowerOut());
+
+    inverter.simulate(*state, 600.0);
+    EXPECT_DOUBLE_EQ(300.0, inverter.aCPowerOut());
+
+    inverter.simulate(*state, 1000.0);
+    EXPECT_DOUBLE_EQ(400.0, inverter.aCPowerOut());
+}
+
 TEST_F(EnergyPlusFixture, ManageElectricPowerTest_BatteryDischargeTest)
 {
     std::string const idf_objects = delimited_string({

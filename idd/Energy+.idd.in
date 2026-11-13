@@ -95931,6 +95931,8 @@ ElectricLoadCenter:Inverter:LookUpTable,
         \units W
    N4 , \field Nominal Voltage Input
         \units V
+        \note This field is retained for input compatibility but its numeric value is not used.
+        \note The model uses the efficiency values entered for nominal voltage directly.
    N5 , \field Efficiency at 10% Power and Nominal Voltage
         \minimum 0
         \maximum 1.0
@@ -96166,6 +96168,7 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \minimum> 0
         \maximum 1
         \default 0.95
+        \note This field is retained for input compatibility but is not currently used.
    N6,  \field Battery Mass
         \type real
         \minimum> 0

@@ -246,7 +246,6 @@ namespace ElectricBaseboardRadiator {
                 GlobalNames::VerifyUniqueBaseboardName(state, cCurrentModuleObject, elecBaseboardName, ErrorsFound, cCurrentModuleObject + " Name");
 
                 elecBaseboard.EquipName = elecBaseboardName;
-                elecBaseboard.Schedule = availabilityScheduleName;
                 if (availabilityScheduleName.empty()) {
                     elecBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
                 } else if ((elecBaseboard.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
@@ -570,11 +569,9 @@ namespace ElectricBaseboardRadiator {
 
         // Set the reporting variables to zero at each timestep.
         elecBaseboard.TotPower = 0.0;
-        elecBaseboard.Power = 0.0;
         elecBaseboard.ConvPower = 0.0;
         elecBaseboard.RadPower = 0.0;
         elecBaseboard.TotEnergy = 0.0;
-        elecBaseboard.Energy = 0.0;
         elecBaseboard.ConvEnergy = 0.0;
         elecBaseboard.RadEnergy = 0.0;
         elecBaseboard.ElecUseLoad = 0.0;
@@ -781,8 +778,6 @@ namespace ElectricBaseboardRadiator {
         }
 
         // Assign calculated ones
-        elecBaseboard.AirOutletTemp = AirOutletTemp;
-        elecBaseboard.Power = QBBCap;
         elecBaseboard.TotPower = LoadMet;
         elecBaseboard.RadPower = RadHeat;
         elecBaseboard.ConvPower = QBBCap - RadHeat;
@@ -975,7 +970,6 @@ namespace ElectricBaseboardRadiator {
         auto &elecBaseboard = state.dataElectBaseboardRad->ElecBaseboard(BaseboardNum);
         elecBaseboard.ElecUseLoad = elecBaseboard.ElecUseRate * TimeStepSysSec;
         elecBaseboard.TotEnergy = elecBaseboard.TotPower * TimeStepSysSec;
-        elecBaseboard.Energy = elecBaseboard.Power * TimeStepSysSec;
         elecBaseboard.ConvEnergy = elecBaseboard.ConvPower * TimeStepSysSec;
         elecBaseboard.RadEnergy = elecBaseboard.RadPower * TimeStepSysSec;
     }

@@ -113,19 +113,18 @@ struct EcoRoofManagerData : BaseGlobalStruct
     bool CalcEcoRoofMyEnvrnFlag = true;
 
     // static variables extracted from functions
-    int FirstEcoSurf = 0;             // Indicates lowest numbered surface that is an ecoroof, used to determine WHEN to updatesoilProps...
-    bool QuickConductionSurf = false; // indicator for quick conduction surface
-    Real64 LAI = 0.2;                 // Leaf area index
-    Real64 epsilonf = 0.95;           // Leaf Emisivity
-    Real64 epsilong = 0.95;           // Soil Emisivity
-    Real64 Alphag = 0.3;              // Ground Albedo
-    Real64 Alphaf = 0.2;              // Leaf Albedo (reflectivity to solar radiation)
-    Real64 e0 = 2.0;                  // Windless lower limit of exchange coefficient (from FASST docs)
-    Real64 RH = 50.0;                 // Relative humidity (%)
-    Real64 Pa = 101325.0;             // Atmospheric Pressure (PA)
-    Real64 Tg = 10.0;                 // Ground Surface temperature C ***** FROM PREVIOUS TIME STEP
-    Real64 Tf = 10.0;                 // Leaf temperature C ***** FROM PREVIOUS TIME STEP
-    Real64 Zf = 0.2;                  // Height of plants (m)
+    int FirstEcoSurf = 0;   // Indicates lowest numbered surface that is an ecoroof, used to determine WHEN to updatesoilProps...
+    Real64 LAI = 0.2;       // Leaf area index
+    Real64 epsilonf = 0.95; // Leaf Emisivity
+    Real64 epsilong = 0.95; // Soil Emisivity
+    Real64 Alphag = 0.3;    // Ground Albedo
+    Real64 Alphaf = 0.2;    // Leaf Albedo (reflectivity to solar radiation)
+    Real64 e0 = 2.0;        // Windless lower limit of exchange coefficient (from FASST docs)
+    Real64 RH = 50.0;       // Relative humidity (%)
+    Real64 Pa = 101325.0;   // Atmospheric Pressure (PA)
+    Real64 Tg = 10.0;       // Ground Surface temperature C ***** FROM PREVIOUS TIME STEP
+    Real64 Tf = 10.0;       // Leaf temperature C ***** FROM PREVIOUS TIME STEP
+    Real64 Zf = 0.2;        // Height of plants (m)
     // DJS Oct 2007 release - note I got rid of the initialization of moisture and meanrootmoisture here as these
     // values are now set at beginning of each new DD and each new warm-up loop.
     Real64 Moisture = 0.0; // m^3/m^3.The moisture content in the soil is the value provided by a user
@@ -166,7 +165,6 @@ struct EcoRoofManagerData : BaseGlobalStruct
     Real64 RelativeSoilSaturationTop =
         0.0; // Relative Soil Saturation (soil moisture-residual soil moisture)/(saturation soil moisture-residual soil moisture)
     Real64 RelativeSoilSaturationRoot = 0.0;
-    Real64 TestMoisture = 0.15; // This makes sure that the moisture cannot change by too much in each step
     int ErrIndex = 0;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
@@ -182,7 +180,6 @@ struct EcoRoofManagerData : BaseGlobalStruct
         this->EcoRoofbeginFlag = true;
         this->CalcEcoRoofMyEnvrnFlag = true;
         this->FirstEcoSurf = 0;
-        this->QuickConductionSurf = false;
         this->LAI = 0.2;
         this->epsilonf = 0.95;
         this->epsilong = 0.95;
@@ -229,7 +226,6 @@ struct EcoRoofManagerData : BaseGlobalStruct
         this->SoilConductivityAveRoot = 8.72e-6;
         this->RelativeSoilSaturationTop = 0.0;
         this->RelativeSoilSaturationRoot = 0.0;
-        this->TestMoisture = 0.15;
         this->ErrIndex = 0;
     }
 };

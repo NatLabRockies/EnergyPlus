@@ -280,7 +280,6 @@ void GetEvapInput(EnergyPlusData &state)
         thisEvapCooler.Name = state.dataIPShortCut->cAlphaArgs(1);
         thisEvapCooler.evapCoolerType = EvapCoolerType::DirectCELDEKPAD;
 
-        thisEvapCooler.Schedule = state.dataIPShortCut->cAlphaArgs(2);
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(state);
         } else if ((thisEvapCooler.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -314,8 +313,6 @@ void GetEvapInput(EnergyPlusData &state)
                           state.dataIPShortCut->cAlphaArgs(3),
                           state.dataIPShortCut->cAlphaArgs(4),
                           "Evap Air Nodes");
-
-        thisEvapCooler.EvapControlType = state.dataIPShortCut->cAlphaArgs(5);
 
         // input the numerical data
         thisEvapCooler.PadArea = state.dataIPShortCut->rNumericArgs(1);
@@ -378,7 +375,6 @@ void GetEvapInput(EnergyPlusData &state)
         thisEvapCooler.Name = state.dataIPShortCut->cAlphaArgs(1);
         thisEvapCooler.evapCoolerType = EvapCoolerType::IndirectCELDEKPAD; //'EvaporativeCooler:Indirect:CelDekPad'
 
-        thisEvapCooler.Schedule = state.dataIPShortCut->cAlphaArgs(2);
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(state);
         } else if ((thisEvapCooler.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -412,8 +408,6 @@ void GetEvapInput(EnergyPlusData &state)
                           state.dataIPShortCut->cAlphaArgs(3),
                           state.dataIPShortCut->cAlphaArgs(4),
                           "Evap Air Nodes");
-
-        thisEvapCooler.EvapControlType = state.dataIPShortCut->cAlphaArgs(5);
 
         // input the numerical data
         thisEvapCooler.IndirectPadArea = state.dataIPShortCut->rNumericArgs(1);
@@ -508,7 +502,6 @@ void GetEvapInput(EnergyPlusData &state)
         thisEvapCooler.Name = state.dataIPShortCut->cAlphaArgs(1);
         thisEvapCooler.evapCoolerType = EvapCoolerType::IndirectWETCOIL; //'EvaporativeCooler:Indirect:WetCoil'
 
-        thisEvapCooler.Schedule = state.dataIPShortCut->cAlphaArgs(2);
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(state);
         } else if ((thisEvapCooler.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -542,8 +535,6 @@ void GetEvapInput(EnergyPlusData &state)
                           state.dataIPShortCut->cAlphaArgs(3),
                           state.dataIPShortCut->cAlphaArgs(4),
                           "Evap Air Nodes");
-
-        thisEvapCooler.EvapControlType = state.dataIPShortCut->cAlphaArgs(5);
 
         // input the numerical data
         thisEvapCooler.WetCoilMaxEfficiency = state.dataIPShortCut->rNumericArgs(1);
@@ -628,7 +619,6 @@ void GetEvapInput(EnergyPlusData &state)
         thisEvapCooler.Name = state.dataIPShortCut->cAlphaArgs(1);
         thisEvapCooler.evapCoolerType = EvapCoolerType::IndirectUserEffectiveness; //'EvaporativeCooler:Indirect:UserEffectiveness'
 
-        thisEvapCooler.Schedule = state.dataIPShortCut->cAlphaArgs(2);
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(state);
         } else if ((thisEvapCooler.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -828,7 +818,6 @@ void GetEvapInput(EnergyPlusData &state)
         thisEvapCooler.Name = state.dataIPShortCut->cAlphaArgs(1);
         thisEvapCooler.evapCoolerType = EvapCoolerType::DirectUserEffectiveness;
 
-        thisEvapCooler.Schedule = state.dataIPShortCut->cAlphaArgs(2);
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
             thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(state);
         } else if ((thisEvapCooler.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
@@ -1103,16 +1092,12 @@ void InitEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     if (evapCond.SecondaryInletNode != 0) {
         auto const &thisSecInletNode = state.dataLoopNodes->Node(evapCond.SecondaryInletNode);
         evapCond.SecInletMassFlowRate = thisSecInletNode.MassFlowRate;
-        evapCond.SecInletMassFlowRateMaxAvail = thisSecInletNode.MassFlowRateMaxAvail;
-        evapCond.SecInletMassFlowRateMinAvail = thisSecInletNode.MassFlowRateMinAvail;
         evapCond.SecInletTemp = thisSecInletNode.Temp;
         evapCond.SecInletHumRat = thisSecInletNode.HumRat;
         evapCond.SecInletEnthalpy = thisSecInletNode.Enthalpy;
         evapCond.SecInletPressure = thisSecInletNode.Press;
     } else {
         evapCond.SecInletMassFlowRate = evapCond.IndirectVolFlowRate * state.dataEnvrn->OutAirDensity;
-        evapCond.SecInletMassFlowRateMaxAvail = evapCond.IndirectVolFlowRate * state.dataEnvrn->OutAirDensity;
-        evapCond.SecInletMassFlowRateMinAvail = 0.0;
         evapCond.SecInletTemp = state.dataEnvrn->OutDryBulbTemp;
         evapCond.SecInletHumRat =
             Psychrometrics::PsyWFnTdbTwbPb(state, state.dataEnvrn->OutDryBulbTemp, state.dataEnvrn->OutWetBulbTemp, state.dataEnvrn->OutBaroPress);
@@ -1733,8 +1718,6 @@ void CalcDirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 const P
 
         thisEvapCond.OutletTemp = TEDB - ((TEDB - TEWB) * SatEff);
 
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
-
         thisEvapCond.OutletHumRat = Psychrometrics::PsyWFnTdbTwbPb(state, thisEvapCond.OutletTemp, TEWB, state.dataEnvrn->OutBaroPress);
 
         thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
@@ -1758,8 +1741,6 @@ void CalcDirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 const P
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
 
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
 
@@ -1860,8 +1841,6 @@ void CalcDryIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
         //***************************************************************************
         //                  CALCULATE THE WET BULB TEMP in the primary system air USING PSYCH ROUTINES
         // There is a constant humidity ratio across the primary side but a reduction in the dry bulb temp
-        thisEvapCond.OuletWetBulbTemp =
-            Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.OutletTemp, thisEvapCond.InletHumRat, state.dataEnvrn->OutBaroPress);
         //***************************************************************************
         //   TEMP LEAVING DRY BULB IS CALCULATED FROM SATURATION EFFICIENCY AS THE
         //   DRY BULB TEMP APPROACHES THE WET BULB TEMP. WET BULB TEMP IS CONSTANT
@@ -1902,8 +1881,6 @@ void CalcDryIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
 
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
 
@@ -1991,8 +1968,6 @@ void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
         //***************************************************************************
         //                  CALCULATE THE WET BULB TEMP in the primary system air using PSYCH ROUTINES
         // There is a constant humidity ratio across the primary side but a reduction in the dry bulb temp
-        thisEvapCond.OuletWetBulbTemp =
-            Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.OutletTemp, thisEvapCond.InletHumRat, state.dataEnvrn->OutBaroPress);
         //***************************************************************************
         //                  CALCULATE other outlet properties using PSYCH ROUTINES
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
@@ -2034,8 +2009,6 @@ void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 co
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
 
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
 
@@ -2315,8 +2288,6 @@ void CalcIndirectUserEffectivenessEvapCooler(EnergyPlusData &state, int const Ev
             //***************************************************************************
             //                  CALCULATE THE WET BULB TEMP in the primary system air using PSYCH ROUTINES
             // There is a constant humidity ratio across the primary side but a reduction in the dry bulb temp
-            thisEvapCond.OuletWetBulbTemp =
-                Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.OutletTemp, thisEvapCond.InletHumRat, state.dataEnvrn->OutBaroPress);
             //***************************************************************************
             //                  CALCULATE other outlet properties using PSYCH ROUTINES
             thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
@@ -2351,7 +2322,6 @@ void CalcIndirectUserEffectivenessEvapCooler(EnergyPlusData &state, int const Ev
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
         thisEvapCond.OutletEnthalpy = thisEvapCond.InletEnthalpy;
         thisEvapCond.EvapCoolerEnergy = 0.0;
@@ -2727,8 +2697,6 @@ void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
     }
     if (thisEvapCond.EvapCoolerRDDOperatingMode != OperatingMode::None) {
         // There is a constant humidity ratio across the primary side but a reduction in the dry bulb temp
-        thisEvapCond.OuletWetBulbTemp =
-            Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.OutletTemp, thisEvapCond.InletHumRat, state.dataEnvrn->OutBaroPress);
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
         thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
         RhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->OutBaroPress, thisEvapCond.InletTemp, thisEvapCond.InletHumRat);
@@ -2740,7 +2708,6 @@ void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
                                             thisEvapCond.EvapCoolerRDDOperatingMode,
                                             thisEvapCond.SecInletMassFlowRate,
                                             InletDryBulbTempSec,
-                                            InletWetBulbTempSec,
                                             InletHumRatioSec,
                                             QHX,
                                             QHXLatent);
@@ -2763,7 +2730,6 @@ void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
             }
         } else {
             thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-            thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
             thisEvapCond.OutletEnthalpy = thisEvapCond.InletEnthalpy;
             thisEvapCond.EvapCoolerEnergy = 0.0;
             thisEvapCond.EvapCoolerPower = 0.0;
@@ -2771,21 +2737,13 @@ void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
             thisEvapCond.SecInletMassFlowRate = 0.0;
             thisEvapCond.IECOperatingStatus = 0;
             thisEvapCond.StageEff = 0.0;
-            CalcSecondaryAirOutletCondition(state,
-                                            EvapCoolNum,
-                                            thisEvapCond.EvapCoolerRDDOperatingMode,
-                                            0.0,
-                                            InletDryBulbTempSec,
-                                            InletWetBulbTempSec,
-                                            InletHumRatioSec,
-                                            QHX,
-                                            QHXLatent);
+            CalcSecondaryAirOutletCondition(
+                state, EvapCoolNum, thisEvapCond.EvapCoolerRDDOperatingMode, 0.0, InletDryBulbTempSec, InletHumRatioSec, QHX, QHXLatent);
         }
 
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
         thisEvapCond.OutletEnthalpy = thisEvapCond.InletEnthalpy;
         thisEvapCond.SecOutletTemp = thisEvapCond.SecInletTemp;
@@ -2964,7 +2922,6 @@ void CalcSecondaryAirOutletCondition(EnergyPlusData &state,
                                      OperatingMode OperatingMode,
                                      Real64 const AirMassFlowSec,
                                      Real64 const EDBTSec,
-                                     Real64 const EWBTSec,
                                      Real64 const EHumRatSec,
                                      Real64 const QHXTotal,
                                      Real64 &QHXLatent)
@@ -2999,8 +2956,6 @@ void CalcSecondaryAirOutletCondition(EnergyPlusData &state,
             CpAirSec = Psychrometrics::PsyCpAirFnW(EHumRatSec);
             thisEvapCond.SecOutletTemp = EDBTSec + QHXTotal / AirMassFlowSec / CpAirSec;
             thisEvapCond.SecOutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.SecOutletTemp, EHumRatSec);
-            thisEvapCond.SecOuletWetBulbTemp =
-                Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.SecOutletTemp, EHumRatSec, state.dataEnvrn->OutBaroPress);
         } else if ((OperatingMode == OperatingMode::WetModulated || OperatingMode == OperatingMode::WetFull)) {
             SecOutletEnthalpy = thisEvapCond.SecInletEnthalpy + QHXTotal / AirMassFlowSec;
             SecOutletAirHumRat = Psychrometrics::PsyWFnTdbH(state, EDBTSec,
@@ -3008,20 +2963,16 @@ void CalcSecondaryAirOutletCondition(EnergyPlusData &state,
             thisEvapCond.SecOutletTemp = EDBTSec;
             thisEvapCond.SecOutletHumRat = SecOutletAirHumRat;
             thisEvapCond.SecOutletEnthalpy = SecOutletEnthalpy;
-            thisEvapCond.SecOuletWetBulbTemp =
-                Psychrometrics::PsyTwbFnTdbWPb(state, thisEvapCond.SecOutletTemp, SecOutletAirHumRat, state.dataEnvrn->OutBaroPress);
             hfg = Psychrometrics::PsyHfgAirFnWTdb(EHumRatSec, EDBTSec);
             QHXLatent = min(QHXTotal, AirMassFlowSec * (SecOutletAirHumRat - EHumRatSec) * hfg);
         } else {
             // set results to into output variables
             thisEvapCond.SecOutletTemp = EDBTSec;
-            thisEvapCond.SecOuletWetBulbTemp = EWBTSec;
             thisEvapCond.SecOutletHumRat = EHumRatSec;
             thisEvapCond.SecOutletEnthalpy = thisEvapCond.SecInletEnthalpy;
         }
     } else {
         thisEvapCond.SecOutletTemp = EDBTSec;
-        thisEvapCond.SecOuletWetBulbTemp = EWBTSec;
         thisEvapCond.SecOutletHumRat = EHumRatSec;
         thisEvapCond.SecOutletEnthalpy = thisEvapCond.SecInletEnthalpy;
     }
@@ -3146,27 +3097,23 @@ void CalcDirectUserEffectivenessEvapCooler(EnergyPlusData &state, int const Evap
         PartLoad = thisEvapCond.PartLoadFract;
         if (PartLoad == 1.0) {
             thisEvapCond.OutletTemp = TEDB - ((TEDB - TEWB) * SatEff);
-            thisEvapCond.OuletWetBulbTemp = TEWB;
             thisEvapCond.OutletHumRat = Psychrometrics::PsyWFnTdbTwbPb(state, thisEvapCond.OutletTemp, TEWB, state.dataEnvrn->OutBaroPress);
             thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
         } else if ((PartLoad < 1.0) && (PartLoad > 0.0)) {
             // assume perfect control Use PLF for energy consumption
             if (thisEvapCond.DesiredOutletTemp < TEDB) {
                 thisEvapCond.OutletTemp = thisEvapCond.DesiredOutletTemp;
-                thisEvapCond.OuletWetBulbTemp = TEWB;
                 thisEvapCond.OutletHumRat = Psychrometrics::PsyWFnTdbTwbPb(state, thisEvapCond.OutletTemp, TEWB, state.dataEnvrn->OutBaroPress);
 
                 thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
             } else { // do no cooling
                 thisEvapCond.OutletTemp = TEDB;
-                thisEvapCond.OuletWetBulbTemp = TEWB;
                 thisEvapCond.OutletHumRat = Psychrometrics::PsyWFnTdbTwbPb(state, thisEvapCond.OutletTemp, TEWB, state.dataEnvrn->OutBaroPress);
                 thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
             }
         } else {
             // part load set to zero so no cooling
             thisEvapCond.OutletTemp = TEDB;
-            thisEvapCond.OuletWetBulbTemp = TEWB;
             thisEvapCond.OutletHumRat = Psychrometrics::PsyWFnTdbTwbPb(state, thisEvapCond.OutletTemp, TEWB, state.dataEnvrn->OutBaroPress);
             thisEvapCond.OutletEnthalpy = Psychrometrics::PsyHFnTdbW(thisEvapCond.OutletTemp, thisEvapCond.OutletHumRat);
         }
@@ -3209,8 +3156,6 @@ void CalcDirectUserEffectivenessEvapCooler(EnergyPlusData &state, int const Evap
     } else {
         // The evap cooler is not running and does not change conditions from inlet to outlet
         thisEvapCond.OutletTemp = thisEvapCond.InletTemp;
-
-        thisEvapCond.OuletWetBulbTemp = thisEvapCond.InletWetBulbTemp;
 
         thisEvapCond.OutletHumRat = thisEvapCond.InletHumRat;
 
@@ -3804,10 +3749,6 @@ void InitZoneEvaporativeCoolerUnit(EnergyPlusData &state,
                 zoneEvapUnit.DesignAirVolumeFlowRate = zoneEvapUnit.ActualFanVolFlowRate;
                 ShowContinueError(state, "...evaporative cooler unit design supply air flow rate will match fan flow rate and simulation continues.");
                 zoneEvapUnit.MyEnvrn = true; // re-initialize to set mass flow rate and max mass flow rate
-            }
-
-            if (zoneEvapUnit.ActualFanVolFlowRate > 0.0) {
-                zoneEvapUnit.DesignFanSpeedRatio = zoneEvapUnit.DesignAirVolumeFlowRate / zoneEvapUnit.ActualFanVolFlowRate;
             }
 
             zoneEvapUnit.MyFan = false;
