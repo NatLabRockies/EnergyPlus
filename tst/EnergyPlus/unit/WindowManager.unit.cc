@@ -7851,6 +7851,100 @@ TEST_F(EnergyPlusFixture, WindowManager_WindowGasPropertiesAtTemp_GasMixture)
     }
 }
 
+class InteriorShadeDiffuseFixture : public EnergyPlusFixture
+{
+protected:
+    void initializeOptics()
+    {
+        std::string const idf = R"idf(
+WindowMaterial:Glazing, ASYMMETRIC, SpectralAverage, , 0.003,
+  0.5, 0.12, 0.32, 0.5, 0.12, 0.32, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Glazing, SECOND, SpectralAverage, , 0.003,
+  0.65, 0.07, 0.18, 0.65, 0.07, 0.18, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Glazing, CLEAR, SpectralAverage, , 0.003,
+  0.7, 0.1, 0.1, 0.7, 0.1, 0.1, 0, 0.84, 0.84, 1.0;
+WindowMaterial:Gas, AIRGAP, Air, 0.012;
+WindowMaterial:Shade, REFLECTIVE, 0.1, 0.6, 0.1, 0.6, 0.9, 0, 0.001, 0.1;
+WindowMaterial:Shade, BLACK, 0.1, 0, 0.1, 0, 0.9, 0, 0.001, 0.1;
+Construction, SINGLE BARE, ASYMMETRIC;
+Construction, SINGLE SHADED, ASYMMETRIC, REFLECTIVE;
+Construction, DOUBLE BARE, ASYMMETRIC, AIRGAP, SECOND;
+Construction, DOUBLE SHADED, ASYMMETRIC, AIRGAP, SECOND, REFLECTIVE;
+Construction, CLEAR BARE, CLEAR, AIRGAP, CLEAR;
+Construction, CLEAR SHADED, CLEAR, AIRGAP, CLEAR, REFLECTIVE;
+Construction, BLACK SHADED, ASYMMETRIC, AIRGAP, SECOND, BLACK;
+)idf";
+        ASSERT_TRUE(process_idf(idf));
+        bool errors = false;
+        HeatBalanceManager::SetPreConstructionInputParameters(*state);
+        HeatBalanceManager::GetProjectControlData(*state, errors);
+        Material::GetMaterialData(*state, errors);
+        HeatBalanceManager::GetConstructData(*state, errors);
+        ASSERT_FALSE(errors);
+        Window::InitGlassOpticalCalculations(*state);
+    }
+
+    void checkSystem(int bareIndex, int shadedIndex, Real64 shadeReflectance)
+    {
+        auto const &bare = state->dataConstruction->Construct(bareIndex);
+        auto const &shaded = state->dataConstruction->Construct(shadedIndex);
+        Real64 constexpr shadeTransmittance = 0.1;
+        Real64 const denominator = 1.0 - shadeReflectance * bare.ReflectSolDiffBack;
+        Real64 const reflectedFlux = bare.TransDiff * shadeReflectance / denominator;
+        Real64 bareFrontClosure = bare.TransDiff + bare.ReflectSolDiffFront;
+        Real64 bareBackClosure = bare.TransDiff + bare.ReflectSolDiffBack;
+        Real64 frontClosure = shaded.TransDiff + shaded.ReflectSolDiffFront + shaded.AbsDiffShade;
+        Real64 backClosure = shaded.TransDiff + shaded.ReflectSolDiffBack + shaded.AbsDiffBackShade;
+        for (int pane = 1; pane <= bare.TotGlassLayers; ++pane) {
+            // The shade-reflected flux reaches the glazing from the room side.
+            EXPECT_NEAR(bare.AbsDiff(pane) + reflectedFlux * bare.AbsDiffBack(pane), shaded.AbsDiff(pane), 1e-10);
+            EXPECT_NEAR(shadeTransmittance * bare.AbsDiffBack(pane) / denominator, shaded.AbsDiffBack(pane), 1e-10);
+            bareFrontClosure += bare.AbsDiff(pane);
+            bareBackClosure += bare.AbsDiffBack(pane);
+            frontClosure += shaded.AbsDiff(pane);
+            backClosure += shaded.AbsDiffBack(pane);
+        }
+        // Existing diffuse quadrature does not normalize an energy-conserving
+        // bare glazing exactly to unity. Propagate its unrepresented remainder
+        // through each incidence rather than silently loosening closure tolerance.
+        Real64 const frontRemainder = (1.0 - bareFrontClosure) + reflectedFlux * (1.0 - bareBackClosure);
+        Real64 const backRemainder = shadeTransmittance * (1.0 - bareBackClosure) / denominator;
+        EXPECT_NEAR(1.0, frontClosure + frontRemainder, 1e-10);
+        EXPECT_NEAR(1.0, backClosure + backRemainder, 1e-10);
+        EXPECT_NEAR(bare.TransDiff * shadeTransmittance / denominator, shaded.TransDiff, 1e-10);
+        EXPECT_NEAR(bare.ReflectSolDiffFront + bare.TransDiff * reflectedFlux, shaded.ReflectSolDiffFront, 1e-10);
+    }
+};
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_AsymmetricSinglePane)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    ASSERT_GT(std::abs(state->dataConstruction->Construct(1).AbsDiff(1) - state->dataConstruction->Construct(1).AbsDiffBack(1)), 0.05);
+    checkSystem(1, 2, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_AsymmetricDoublePane)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    checkSystem(3, 4, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_SymmetricGlazingPaneSplit)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    auto const &bare = state->dataConstruction->Construct(5);
+    EXPECT_NEAR(bare.AbsDiff(1) + bare.AbsDiff(2), bare.AbsDiffBack(1) + bare.AbsDiffBack(2), 1e-10);
+    ASSERT_GT(std::abs(bare.AbsDiff(1) - bare.AbsDiffBack(1)), 0.01);
+    checkSystem(5, 6, 0.6);
+}
+
+TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_NonreflectingShadeControl)
+{
+    ASSERT_NO_FATAL_FAILURE(initializeOptics());
+    checkSystem(3, 7, 0.0);
+}
+
+
 TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneIsConserved)
 {
     // Window frames and dividers are not surfaces of the radiant enclosure, but their inside faces exchange long-wave
@@ -8020,7 +8114,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
         "  1,                       !- Multiplier",
         "  autocalculate,           !- Ceiling Height {m}",
         "  autocalculate;           !- Volume {m3}",
-    });
+        });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
@@ -8047,7 +8141,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
     state->dataGlobal->BeginSimFlag = false;
     state->dataGlobal->BeginEnvrnFlag = false;
 
-    auto &s_surf = state->dataSurface;
+    auto& s_surf = state->dataSurface;
     int winNum = 0;
     for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
         if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
@@ -8067,7 +8161,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.002;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.002;
-    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+    for (auto& thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
         thisSpaceHB.MAT = T_in;
         thisSpaceHB.airHumRat = 0.002;
     }
@@ -8120,7 +8214,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
                 }
             }
             return sum;
-        };
+            };
         Real64 const opaqueLWWithFrame = opaqueLW();
         Real64 const dividerArea = s_surf->SurfWinDividerArea(winNum);
         s_surf->SurfWinFrameArea(winNum) = 0.0;
@@ -8133,8 +8227,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
 }
 
 class FrameAndDividerLongWaveExchangeWithTwoWindows : public EnergyPlusFixture, public ::testing::WithParamInterface<bool>
-{
-};
+{};
 TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
 {
     // Two framed and divided windows of different widths in the same wall of a closed zone. They have the same construction,
@@ -8167,7 +8260,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
         "BuildingSurface:Detailed,Roof,Roof,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.0,4,",
         "  0,10,10, 0,0,10, 10,0,10, 10,10,10;",
         "Zone,Zone,0,6.0,6.0,0,1,1,autocalculate,autocalculate;",
-    });
+        });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
@@ -8195,7 +8288,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     state->dataGlobal->BeginSimFlag = false;
     state->dataGlobal->BeginEnvrnFlag = false;
 
-    auto &s_surf = state->dataSurface;
+    auto& s_surf = state->dataSurface;
     std::vector<int> winNums;
     for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
         if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
@@ -8218,7 +8311,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.002;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.002;
-    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+    for (auto& thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
         thisSpaceHB.MAT = T_in;
         thisSpaceHB.airHumRat = 0.002;
     }
@@ -8242,9 +8335,9 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
         for (int const winNum : winNums) {
             Real64 const irFromZone = s_surf->SurfWinIRfromParentZone(winNum);
             Real64 const frameLW = s_surf->SurfWinFrameArea(winNum) * s_surf->SurfWinFrameEmis(winNum) *
-                                   (irFromZone - sigma * pow_4(s_surf->SurfWinFrameTempIn(winNum) + Kelvin));
+                (irFromZone - sigma * pow_4(s_surf->SurfWinFrameTempIn(winNum) + Kelvin));
             Real64 const dividerLW = s_surf->SurfWinDividerArea(winNum) * s_surf->SurfWinDividerEmis(winNum) *
-                                     (irFromZone - sigma * pow_4(s_surf->SurfWinDividerTempIn(winNum) + Kelvin));
+                (irFromZone - sigma * pow_4(s_surf->SurfWinDividerTempIn(winNum) + Kelvin));
             EXPECT_GT(frameLW, 30.0);
             EXPECT_GT(dividerLW, 5.0);
             frameDividerLW += frameLW + dividerLW;
@@ -8262,7 +8355,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
                 }
             }
             return sum;
-        };
+            };
         Real64 const opaqueLWWithFrames = opaqueLW();
         std::vector<Real64> frameAreas;
         std::vector<Real64> dividerAreas;
@@ -8282,8 +8375,8 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
 }
 
 INSTANTIATE_TEST_SUITE_P(WindowManager,
-                         FrameAndDividerLongWaveExchangeWithTwoWindows,
-                         testing::Bool(),
-                         [](const testing::TestParamInfo<FrameAndDividerLongWaveExchangeWithTwoWindows::ParamType> &info) -> std::string {
-                             return info.param ? "RepresentativeSurfaces" : "IndividualSurfaces";
-                         });
+    FrameAndDividerLongWaveExchangeWithTwoWindows,
+    testing::Bool(),
+    [](const testing::TestParamInfo<FrameAndDividerLongWaveExchangeWithTwoWindows::ParamType>& info) -> std::string {
+        return info.param ? "RepresentativeSurfaces" : "IndividualSurfaces";
+    });

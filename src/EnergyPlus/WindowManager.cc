@@ -996,7 +996,7 @@ namespace Window {
 
                 // Front incident solar, diffuse, interior shade
                 for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
-                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * solabsDiff[iGlass];
+                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * constr.AbsDiffBack(iGlass + 1);
                 }
 
                 constr.AbsDiffShade = tsolDiff * ShadeReflFac * ShadeAbs;
