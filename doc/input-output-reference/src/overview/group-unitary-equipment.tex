@@ -95,7 +95,20 @@ This alpha field contains the unitary system air outlet node name.
 
 \paragraph{Field: Supply Fan Object Type}\label{field-supply-fan-object-type-000}
 
-This alpha field contains the identifying type of supply air fan specified for the unitary system. Fan type must be \textbf{\hyperref[fanonoff]{Fan:OnOff},} \textbf{\hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, or \hyperref[fancomponentmodel]{Fan:ComponentModel}}. \hyperref[fanconstantvolume]{Fan:ConstantVolume} is used when the Supply Air Fan Operating Mode Schedule values are never 0 and the fan operates continuously. \hyperref[fanonoff]{Fan:OnOff} is used when the fan cycles on and off with the cooling or heating coil (i.e.~Supply Air Fan Operating Mode Schedule values are at times 0). \hyperref[fanvariablevolume]{Fan:VariableVolume} is used for variable air volume systems or multi- or variable-speed coils. The \hyperref[fancomponentmodel]{Fan:ComponentModel} may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
+This alpha field contains the identifying type of supply air fan specified for the unitary system. The following fan types are allowed. The fan operating mode is selected separately using the \textbf{\hyperref[supply-air-fan-operating-mode-schedule-name]{Supply Air Fan Operating Mode Schedule Name}} field:
+
+\begin{itemize}
+\item
+  \textbf{\hyperref[fansystemmodel]{Fan:SystemModel}} supports both cycling and continuous fan operation.
+\item
+  \textbf{\hyperref[fanonoff]{Fan:OnOff}} supports both cycling and continuous fan operation.
+\item
+  \textbf{\hyperref[fanconstantvolume]{Fan:ConstantVolume}} requires continuous fan operation.
+\item
+  \textbf{\hyperref[fanvariablevolume]{Fan:VariableVolume}} supports both cycling and continuous fan operation and is used for variable air volume systems or multi- or variable-speed coils. Here, ``cycling'' describes the unitary system operating mode selected by the schedule; the fan can modulate airflow while operating, and this mode alone does not imply low-load fan cycling losses.
+\item
+  \textbf{\hyperref[fancomponentmodel]{Fan:ComponentModel}} may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
+\end{itemize}
 
 \paragraph{Field: Supply Fan Name}\label{field-supply-fan-name}
 
@@ -107,7 +120,20 @@ This alpha field has two choices: \textbf{BlowThrough} or \textbf{DrawThrough}. 
 
 \paragraph{Field: Supply Air Fan Operating Mode Schedule Name}\label{supply-air-fan-operating-mode-schedule-name}
 
-This alpha field specifies the name of the supply air fan operating mode schedule. The supply air fan operating mode may vary during the simulation based on time-of-day or with a change of season. Schedule values of 0 denote that the unitary system supply air fan and the heating or cooling coil cycle on and off together to meet the heating or cooling load (a.k.a. AUTO fan). Schedule values other than 0 denote that the supply fan runs continuously while the heating or cooling coil cycles to meet the load. The SingleZoneVAV control type is only active when the supply air fan runs continuously (i.e., during cycling fan operation the Control Type = Load model is used).
+This alpha field specifies the name of the supply air fan operating mode schedule. The supply air fan operating mode may vary during the simulation based on time-of-day or with a change of season. Schedule values determine the operating mode as follows:
+
+\begin{itemize}
+\item
+  \textbf{0}: Cycling fan mode. The unitary system supply air fan and the heating or cooling coil cycle on and off together to meet the heating or cooling load (a.k.a. AUTO fan).
+\item
+  \textbf{Values other than 0}: Continuous fan mode. The supply fan runs continuously while the heating or cooling coil cycles to meet the load.
+\end{itemize}
+
+If this field is blank, the fan operates in cycling mode for Control Type = Load or SingleZoneVAV, and in continuous mode for Control Type = Setpoint. For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be Fan:SystemModel, Fan:OnOff, or Fan:VariableVolume.
+
+When Control Type = SingleZoneVAV, the SingleZoneVAV algorithm is used only during continuous fan operation with compatible coils. During cycling fan operation, the system uses the load-based control model instead. Leaving this schedule blank therefore selects load-based control throughout the simulation, even when Control Type = SingleZoneVAV. Specify a schedule with nonzero values during periods when SingleZoneVAV operation is desired. Continuous fan operation does not require a fixed fan speed.
+
+For Control Type = Setpoint or Supply Fan Object Type = Fan:ConstantVolume, any specified schedule must have values greater than 0 and less than or equal to 1.
 
 \paragraph{Field: Heating Coil Object Type}\label{field-heating-coil-object-type-002}
 
@@ -116,8 +142,6 @@ This alpha field contains the identifying type of heating coil specified in the 
 \begin{itemize}
 \item
   \hyperref[coilheatingdxsinglespeed]{Coil:Heating:DX:SingleSpeed}
-\item
-  Coil:Heating:DX:TwoSpeed
 \item
   \hyperref[coilheatingdxmultispeed]{Coil:Heating:DX:MultiSpeed}
 \item
