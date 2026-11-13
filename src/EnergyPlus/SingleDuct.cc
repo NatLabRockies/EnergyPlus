@@ -456,9 +456,12 @@ void GetSysInput(EnergyPlusData &state)
         } else {
             airTerm.ConstantMinAirFracSetByUser = true;
             airTerm.DesignMinAirFrac = Numbers(2);
-            if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Fixed) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Constant) {
+                if (Numbers(2) != DataSizing::AutoSize && Numbers(2) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneMinAirFracDes = 0.0;
             }
         }
@@ -470,14 +473,21 @@ void GetSysInput(EnergyPlusData &state)
         } else {
             airTerm.FixedMinAirSetByUser = true;
             airTerm.DesignMinAirFrac = Numbers(3);
-            if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Constant) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Fixed) {
+                if (Numbers(3) != DataSizing::AutoSize && Numbers(3) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneFixedMinAir = 0.0;
             }
         }
 
         if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Scheduled) {
+            if (!lAlphaBlanks(6)) {
+                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cAlphaFields(6)));
+                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            }
         } else if (lAlphaBlanks(6)) {
             ShowSevereEmptyField(state, eoh, cAlphaFields(6));
             ErrorsFound = true;
@@ -1374,9 +1384,12 @@ void GetSysInput(EnergyPlusData &state)
         } else {
             airTerm.ConstantMinAirFracSetByUser = true;
             airTerm.ZoneMinAirFracDes = Numbers(2);
-            if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Fixed) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Constant) {
+                if (Numbers(2) != DataSizing::AutoSize && Numbers(2) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneMinAirFracDes = 0.0;
             }
         }
@@ -1388,14 +1401,21 @@ void GetSysInput(EnergyPlusData &state)
         } else {
             airTerm.FixedMinAirSetByUser = true;
             airTerm.DesignFixedMinAir = Numbers(3);
-            if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Constant) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Fixed) {
+                if (Numbers(3) != DataSizing::AutoSize && Numbers(3) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneFixedMinAir = 0.0;
             }
         }
 
         if (airTerm.ZoneMinAirFracMethod != MinFlowFraction::Scheduled) {
+            if (!lAlphaBlanks(6)) {
+                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cAlphaFields(6)));
+                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+            }
         } else if (lAlphaBlanks(6)) {
             ShowSevereEmptyField(state, eoh, cAlphaFields(6));
             ErrorsFound = true;
