@@ -1098,9 +1098,11 @@ TEST_F(EnergyPlusFixture, Battery_LiIonNmc_Simulate)
     battery.timeCheckAndUpdate(*state);
     battery.simulate(*state, powerCharge, powerDischarge, charging, discharging, socMax, socMin);
 
-    // Doesn't accept all the power, because the battery will be at capacity.
-    ASSERT_NEAR(battery.storedPower(), 3148.85, 0.1);
-    ASSERT_NEAR(battery.storedEnergy(), 2833963.14, 0.1);
+    // The battery reaches its SOC limit before accepting the full request. The cell-side power is
+    // 95% of the accepted bus-side power because the input field is blank and defaults to 0.95.
+    ASSERT_NEAR(battery.storedPower() * 0.95, 3148.85, 0.1);
+    ASSERT_NEAR(battery.storedPower(), powerCharge, 0.1);
+    ASSERT_NEAR(battery.storedEnergy(), battery.storedPower() * state->dataHVACGlobal->TimeStepSysSec, 0.1);
     ASSERT_NEAR(battery.drawnPower(), 0.0, 0.1);
     ASSERT_NEAR(battery.drawnEnergy(), 0.0, 0.1);
     ASSERT_NEAR(battery.stateOfChargeFraction(), socMax, 0.01);
@@ -1124,6 +1126,80 @@ TEST_F(EnergyPlusFixture, Battery_LiIonNmc_Simulate)
     discharging = false;
     battery.simulate(*state, powerCharge, powerDischarge, charging, discharging, socMax, socMin);
     ASSERT_NEAR(battery.stateOfChargeFraction(), 0.95, 0.1);
+}
+
+TEST_F(EnergyPlusFixture, Battery_LiIonNmc_ChargingEfficiency)
+{
+    std::string const idf_objects = delimited_string({
+        "ElectricLoadCenter:Storage:LiIonNMCBattery,",
+        "  Battery100,     !- Name",
+        "  ,               !- Availability Schedule Name",
+        "  ,               !- Zone Name",
+        "  0.0,            !- Radiative Fraction",
+        "  None,           !- Lifetime Model",
+        "  139,            !- Number of Cells in Series",
+        "  8,              !- Number of Strings in Parallel",
+        "  0.5,            !- Initial Fractional State of Charge",
+        "  1.0,            !- DC to DC Charging Efficiency",
+        "  100,            !- Battery Mass",
+        "  0.75,           !- Battery Surface Area",
+        "  ,               !- Battery Specific Heat Capacity",
+        "  ;               !- Heat Transfer Coefficient Between Battery and Ambient",
+
+        "ElectricLoadCenter:Storage:LiIonNMCBattery,",
+        "  Battery80,      !- Name",
+        "  ,               !- Availability Schedule Name",
+        "  ,               !- Zone Name",
+        "  0.0,            !- Radiative Fraction",
+        "  None,           !- Lifetime Model",
+        "  139,            !- Number of Cells in Series",
+        "  8,              !- Number of Strings in Parallel",
+        "  0.5,            !- Initial Fractional State of Charge",
+        "  0.8,            !- DC to DC Charging Efficiency",
+        "  100,            !- Battery Mass",
+        "  0.75,           !- Battery Surface Area",
+        "  ,               !- Battery Specific Heat Capacity",
+        "  ;               !- Heat Transfer Coefficient Between Battery and Ambient",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataHVACGlobal->TimeStepSys = 0.25;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
+    state->init_state(*state);
+    state->dataEnvrn->OutDryBulbTemp = 23.0;
+
+    ElectricStorage battery100{*state, "Battery100"};
+    ElectricStorage battery80{*state, "Battery80"};
+
+    // These requests both deliver 800 W to the cells: 800 W / 1.0 and 1000 W * 0.8.
+    Real64 powerCharge100 = 800.0;
+    Real64 powerDischarge100 = 0.0;
+    bool charging100 = true;
+    bool discharging100 = false;
+    battery100.simulate(*state, powerCharge100, powerDischarge100, charging100, discharging100, 0.95, 0.1);
+
+    Real64 powerCharge80 = 1000.0;
+    Real64 powerDischarge80 = 0.0;
+    bool charging80 = true;
+    bool discharging80 = false;
+    battery80.simulate(*state, powerCharge80, powerDischarge80, charging80, discharging80, 0.95, 0.1);
+
+    // The returned power and storedPower() are bus-side values used by load-center dispatch.
+    EXPECT_NEAR(800.0, powerCharge100, 0.1);
+    EXPECT_NEAR(800.0, battery100.storedPower(), 0.1);
+    EXPECT_NEAR(1000.0, powerCharge80, 0.1);
+    EXPECT_NEAR(1000.0, battery80.storedPower(), 0.1);
+
+    // The SSC battery model receives cell-side power after applying the charging efficiency.
+    EXPECT_NEAR(800.0, battery100.liIonCellChargePower(), 0.1);
+    EXPECT_NEAR(800.0, battery80.liIonCellChargePower(), 0.1);
+    EXPECT_NEAR(battery100.stateOfChargeFraction(), battery80.stateOfChargeFraction(), 1.0e-9);
+
+    // Battery80 draws 200 W more from the bus for the same cell-side power. With identical cell-side
+    // conditions, internal battery heat is identical, so the additional 200 W is the DC-to-DC thermal loss.
+    Real64 const expectedConversionLoss = battery80.storedPower() - battery80.liIonCellChargePower();
+    EXPECT_NEAR(200.0, expectedConversionLoss, 0.1);
+    EXPECT_NEAR(expectedConversionLoss, battery80.thermalLossRate() - battery100.thermalLossRate(), 0.1);
 }
 
 TEST_F(EnergyPlusFixture, Battery_checkUserEfficiencyInputTest)
