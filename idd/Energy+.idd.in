@@ -96166,6 +96166,8 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \minimum> 0
         \maximum 1
         \default 0.95
+        \note Fraction of DC bus charging power delivered to the battery cells.
+        \note The remaining power is reported as electrical storage thermal loss.
    N6,  \field Battery Mass
         \type real
         \minimum> 0
