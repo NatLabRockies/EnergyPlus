@@ -53,6 +53,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh>
 #include <EnergyPlus/GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.hh>
+#include <EnergyPlus/GroundTemperatureModeling/GradientsGTM.hh>
 #include <EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh>
 #include <EnergyPlus/GroundTemperatureModeling/KusudaAchenbachGroundTemperatureModel.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteBuildingSurfaceGroundTemperatures.hh>
@@ -97,7 +98,9 @@ BaseGroundTempsModel *GetGroundTempModelAndInit(EnergyPlusData &state, ModelType
         return SiteFCFactorMethodGroundTemps::FCFactorGTMFactory(state, name);
     case ModelType::Xing:
         return XingGroundTempsModel::XingGTMFactory(state, name);
-    default:
+    case ModelType::GradientSegments:
+        return GradientsGTM::factory(state, name).release();
+     default:
         assert(false);
         return nullptr;
     }
