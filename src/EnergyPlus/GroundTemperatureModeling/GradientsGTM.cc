@@ -7,6 +7,8 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -49,7 +51,7 @@ std::unique_ptr<BaseGroundTempsModel> GradientsGTM::factory(
     return model;
 }
 
-void GradientsGTM::parseGradientSegments(EnergyPlusData & /*state*/, nlohmann::json const &object)
+void GradientsGTM::parseGradientSegments(EnergyPlusData &state, nlohmann::json const &object)
 {
     idfSegments_.clear();
 
@@ -59,19 +61,38 @@ void GradientsGTM::parseGradientSegments(EnergyPlusData & /*state*/, nlohmann::j
     if (object.contains("blend_width")) {
         blendWidth = object["blend_width"].get<Real64>();
     }
-if (object.contains("reference_temperature")) {
-    referenceTemp = object["reference_temperature"].get<Real64>();
-}
-    if (object.contains("segments")) {
-        for (auto const &seg : object["segments"]) {
+    if (object.contains("reference_temperature")) {
+        referenceTemp = object["reference_temperature"].get<Real64>();
+    }
+
+    // Parse the flat extensible fields
+    int segNum = 1;
+    while (true) {
+        std::string upperKey = "upper_depth_" + std::to_string(segNum);
+        std::string lowerKey = "lower_depth_" + std::to_string(segNum);
+        std::string gradKey  = "gradient_" + std::to_string(segNum);
+
+        if (object.contains(upperKey)) {
             GradientSegment gs;
-            gs.upperDepth = seg.value("upper_depth", 0.0);
-            gs.lowerDepth = seg.value("lower_depth", 0.0);
-            gs.gradient   = seg.value("gradient",    0.0);
+            gs.upperDepth = object[upperKey].get<Real64>();
+            gs.lowerDepth = object[lowerKey].get<Real64>();
+            gs.gradient   = object[gradKey].get<Real64>();
             idfSegments_.push_back(gs);
+            segNum++;
+        } else {
+            break;
         }
     }
+
+    // Debug to prove it worked
+    if (idfSegments_.empty()) {
+        ShowSevereError(state, "GradientsGTM: No segments were parsed from the IDF!");
+    } else {
+        std::string msg = "GradientsGTM: Successfully parsed " + std::to_string(idfSegments_.size()) + " segment(s).";
+        ShowWarningError(state, msg);
+    }
 }
+
 void GradientsGTM::initialize(EnergyPlusData &state,
                               const std::vector<GradientSegment> &idfSegments,
                               Real64 H)
@@ -205,8 +226,40 @@ Real64 GradientsGTM::getHybridFarfieldTempAtTime(EnergyPlusData &state,
 
     Real64 gradTemp = segmentTemperatureAt(depth);
     Real64 w = blendWeight(depth);
-     return (1.0 - w) * kaTemp + w * gradTemp;
-  }
+
+    // --- START OF DEBUG BLOCK ---
+    if (state.dataGlobal && state.dataGlobal->HourOfDay == 12 && state.dataGlobal->TimeStep == 1) {
+        std::vector<Real64> depths = {1.0, 26.0, 51.0, 76.0, 101.0};
+        std::ostringstream debugMsg;
+        debugMsg << "GTM DEBUG Day:" << state.dataEnvrn->DayOfYear 
+                 << " | RefT:" << referenceTemp 
+                 << " | TransD:" << transitionDepth 
+                 << " | BlendW:" << blendWidth
+                 << " | NumSegments:" << segments_.size() << " | ";
+        
+        for (Real64 z : depths) {
+            Real64 kaT = referenceTemp;
+            if (state.dataGrndTempModelMgr) {
+                for (const auto &m : state.dataGrndTempModelMgr->groundTempModels) {
+                    if (m && m != this && m->modelType == ModelType::Kusuda) {
+                        kaT = m->getGroundTempAtTimeInSeconds(state, z, timeInSeconds);
+                        break;
+                    }
+                }
+            }
+            Real64 gradT = segmentTemperatureAt(z);
+            Real64 weight = blendWeight(z);
+            Real64 finalT = (1.0 - weight) * kaT + weight * gradT;
+            
+            debugMsg << std::fixed << std::setprecision(2) 
+                     << " " << z << "m:" << finalT << "C (K:" << kaT << ", G:" << gradT << ", W:" << std::setprecision(1) << weight << ") |";
+        }
+        ShowWarningError(state, debugMsg.str());
+    }
+    // --- END OF DEBUG BLOCK ---
+
+    return (1.0 - w) * kaTemp + w * gradTemp; 
+ }
 
 Real64 GradientsGTM::getHybridFarfieldTemp(EnergyPlusData &state,
                                            int month,
