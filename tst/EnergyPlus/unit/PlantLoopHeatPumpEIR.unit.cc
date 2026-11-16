@@ -3171,6 +3171,33 @@ TEST_F(EnergyPlusFixture, CoolingOutletSetpointWorker)
     EXPECT_NEAR(6.282, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
     PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CoolingRB;
     EXPECT_NEAR(5.436, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
+
+    // Air-to-water cooling heat pumps also use the high setpoint on dual setpoint loops
+    thisCoolingPLHP->EIRHPType = DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+    // AWHP objects use load control, so their base initialization leaves setPointNodeNum pointing at the loop setpoint node.
+    // Configure the active component-setpoint operation scheme with a distinct setpoint node to verify the helper follows it.
+    thisCoolingPLHP->setPointNodeNum = PLHPPlantLoadSideLoop.TempSetPointNodeNum;
+    PLHPPlantLoadSideComp.NumOpSchemes = 1;
+    PLHPPlantLoadSideComp.CurCompLevelOpNum = 1;
+    PLHPPlantLoadSideComp.OpScheme.allocate(1);
+    PLHPPlantLoadSideComp.OpScheme(1).OpSchemePtr = 1;
+    PLHPPlantLoadSideComp.OpScheme(1).NumEquipLists = 1;
+    PLHPPlantLoadSideComp.OpScheme(1).EquipList.allocate(1);
+    PLHPPlantLoadSideComp.OpScheme(1).EquipList(1).ListPtr = 1;
+    PLHPPlantLoadSideComp.OpScheme(1).EquipList(1).CompPtr = 1;
+    PLHPPlantLoadSideLoop.NumOpSchemes = 1;
+    PLHPPlantLoadSideLoop.OpScheme.allocate(1);
+    PLHPPlantLoadSideLoop.OpScheme(1).EquipList.allocate(1);
+    PLHPPlantLoadSideLoop.OpScheme(1).EquipList(1).Comp.allocate(1);
+    PLHPPlantLoadSideLoop.OpScheme(1).EquipList(1).Comp(1).SetPointNodeNum = thisCoolingPLHP->loadSideNodes.outlet;
+    PLHPPlantLoadSideLoop.OpScheme(1).EquipList(1).Comp(1).CtrlType = DataPlant::CtrlType::CoolingOp;
+    PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CompSetPtBased;
+    PLHPPlantLoadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
+    EXPECT_NEAR(3.141, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
+    PLHPPlantLoadSideLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand;
+    EXPECT_NEAR(6.282, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
+    PLHPPlantLoadSideComp.CurOpSchemeType = DataPlant::OpScheme::CoolingRB;
+    EXPECT_NEAR(5.436, thisCoolingPLHP->getLoadSideOutletSetPointTemp(*state), 0.001);
 }
 
 TEST_F(EnergyPlusFixture, HeatingOutletSetpointWorker)
@@ -6011,6 +6038,15 @@ TEST_F(EnergyPlusFixture, GAHP_HeatingConstructionFullObjectsNoCompanion)
 
     EXPECT_EQ(500.0, thisHeatingPLHP->nominalAuxElecPower);
     EXPECT_EQ(20.0, thisHeatingPLHP->standbyElecPower);
+
+    state->dataLoopNodes->Node(thisHeatingPLHP->sourceSideNodes.inlet).Temp = 30.0;
+    state->dataLoopNodes->Node(thisHeatingPLHP->loadSideNodes.inlet).Temp = 7.0;
+    Real64 minLoad = 0.0;
+    Real64 optLoad = 0.0;
+    Real64 maxLoad = thisHeatingPLHP->getDynamicMaxCapacity(*state, minLoad, optLoad);
+    EXPECT_NEAR(3000.0, maxLoad, 0.001);
+    EXPECT_NEAR(600.0, minLoad, 0.001);
+    EXPECT_NEAR(3000.0, optLoad, 0.001);
 
     // calling the factory with an invalid name or type will call ShowFatalError, which will trigger a runtime exception
     EXPECT_THROW(EIRFuelFiredHeatPump::factory(*state, DataPlant::PlantEquipmentType::HeatPumpFuelFiredHeating, "fake"), std::runtime_error);

@@ -47,6 +47,10 @@
 
 // EnergyPlus::CondenserLoopTowers unit tests
 
+// C++ Headers
+#include <algorithm>
+#include <cmath>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -55,9 +59,11 @@
 #include <EnergyPlus/CondenserLoopTowers.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
@@ -582,6 +588,34 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelVSCooling)
     EXPECT_NEAR(Qtower, 4800.0, 0.001);
     EXPECT_GT(vsTower.airFlowRateRatio, vsTower.MinimumVSAirFlowFrac);
     EXPECT_LT(vsTower.airFlowRateRatio, 1.0);
+
+    // Regression for a large tower whose nested outlet-temperature calculation cannot resolve a 0.001 W load residual.
+    vsTower.HighSpeedTowerUA = 193080.907216726;
+    vsTower.FreeConvTowerUA = 11611.16739283;
+    vsTower.HighSpeedAirFlowRate = 53.8172479003556;
+    vsTower.FreeConvAirFlowRate = 5.38172479003557;
+    vsTower.DesWaterMassFlowRate = 104.812925950013;
+    vsTower.DesWaterMassFlowRatePerCell = 104.812925950013;
+    vsTower.NumCell = 1;
+    vsTower.NumCellOn = 1;
+    vsTower.WaterMassFlowRate = 104.812925950013;
+    state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate = vsTower.WaterMassFlowRate;
+    state->dataLoopNodes->Node(vsTower.WaterOutletNodeNum).MassFlowRate = vsTower.WaterMassFlowRate;
+    state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).Temp = 33.1221714812097;
+    vsTower.WaterTemp = 33.1221714812097;
+    vsTower.AirTemp = 31.0216666666667;
+    vsTower.AirWetBulb = 25.4731236245493;
+    vsTower.AirPress = 99063.0;
+    vsTower.AirHumRat = 0.0187974588422463;
+    vsTower.VSMerkelAFRErrorIter = 0;
+    state->dataGlobal->WarmupFlag = false;
+    MyLoad = -1870882.23054195;
+    int const warningCount = state->dataErrTracking->TotalWarningErrors;
+    vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
+    EXPECT_EQ(warningCount, state->dataErrTracking->TotalWarningErrors);
+    EXPECT_EQ(0, vsTower.VSMerkelAFRErrorIter);
+    Real64 const loadTolerance = std::max(1.e-3, 1.e-7 * std::abs(MyLoad));
+    EXPECT_NEAR(std::abs(MyLoad), vsTower.Qactual, loadTolerance);
 }
 
 TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedSizing)
@@ -4277,7 +4311,7 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_CoolingTowersDefaultValuesTest)
     EXPECT_EQ(vSpdMerkel_tower.HeatRejectCapNomCapSizingRatio, 1.25);
 }
 
-TEST_F(EnergyPlusFixture, CondenserLoopTowers_CalculateVariableTowerOutletTemp)
+TEST_F(EnergyPlusFixture, CondenserLoopTowers_VariableTowerCapacityQuery)
 {
     std::string const idf_objects = delimited_string({
         "  CoolingTower:VariableSpeed,",
@@ -4328,9 +4362,40 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_CalculateVariableTowerOutletTemp)
     state->dataLoopNodes->Node(tower.WaterInletNodeNum).Temp = 40;
     tower.WaterTemp = 40;
 
-    // calculate outlet temperature
-    Real64 tOutlet = tower.calculateVariableTowerOutletTemp(*state, 0.25, 1.0, 14.1);
+    int const warningCount = state->dataErrTracking->TotalWarningErrors;
+    int const severeCount = state->dataErrTracking->TotalSevereErrors;
+    bool outletTempIsUsable = false;
+
+    // Capacity queries use the tower model without reporting warnings for the hypothetical operating point.
+    Real64 const tOutlet = tower.calculateVariableTowerOutletTemp(*state, 0.25, 1.0, 14.1, false, &outletTempIsUsable);
     EXPECT_NEAR(tower.WaterTemp - 22.2222, tOutlet, 0.01);
+    EXPECT_TRUE(outletTempIsUsable);
+    EXPECT_EQ(0, tower.VSErrorCountTRCalc);
+    EXPECT_EQ(warningCount, state->dataErrTracking->TotalWarningErrors);
+    EXPECT_EQ(severeCount, state->dataErrTracking->TotalSevereErrors);
+
+    // An idle tower must retain nonzero maximum available capacity so the plant manager can stage it.
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    tower.plantLoc.loopNum = 1;
+    tower.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+    tower.plantLoc.branchNum = 1;
+    tower.plantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, tower.plantLoc);
+    tower.DesWaterMassFlowRate = 10.0;
+    state->dataLoopNodes->Node(tower.WaterInletNodeNum).MassFlowRate = 0.0;
+    state->dataEnvrn->OutWetBulbTemp = 14.1;
+
+    Real64 minLoad = -1.0;
+    Real64 optLoad = -1.0;
+    Real64 const maxLoad = tower.getDynamicMaxCapacity(*state, minLoad, optLoad);
+    EXPECT_GT(maxLoad, 0.0);
+    EXPECT_EQ(0.0, minLoad);
+    EXPECT_EQ(maxLoad, optLoad);
+    EXPECT_EQ(warningCount, state->dataErrTracking->TotalWarningErrors);
+    EXPECT_EQ(severeCount, state->dataErrTracking->TotalSevereErrors);
 }
 
 TEST_F(EnergyPlusFixture, CondenserLoopTowers_checkMassFlowAndLoadTest)
