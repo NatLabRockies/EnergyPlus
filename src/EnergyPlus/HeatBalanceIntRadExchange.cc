@@ -463,6 +463,26 @@ namespace HeatBalanceIntRadExchange {
                         SumShares += shareOfWindowIR(SendZoneSurfNum);
                     }
                     if (SumShares <= 0.0) {
+                        // A degenerate view-factor matrix should not occur for a valid enclosure, but preserve conservation by distributing by area.
+                        SumShares = 0.0;
+                        auto receivesNetLWRad = [&](size_type const SendZoneSurfNum) {
+                            auto const &sendSurf = state.dataSurface->Surface(zone_info.SurfacePtr[SendZoneSurfNum]);
+                            return !state.dataConstruction->Construct(sendSurf.Construction).TypeIsWindow &&
+                                   sendSurf.HeatTransferAlgorithm != DataSurfaces::HeatTransferModel::Kiva;
+                        };
+                        for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                            if (receivesNetLWRad(SendZoneSurfNum)) {
+                                SumShares += zone_info.Area[SendZoneSurfNum];
+                            }
+                        }
+                        if (SumShares <= 0.0) {
+                            continue;
+                        }
+                        for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                            if (receivesNetLWRad(SendZoneSurfNum)) {
+                                NetLWRadToSurf(zone_info.SurfacePtr[SendZoneSurfNum]) -= FrameDividerLWGain / SumShares;
+                            }
+                        }
                         continue;
                     }
                     for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {

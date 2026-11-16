@@ -49,6 +49,7 @@
 
 // C++ Headers
 #include <iostream>
+#include <tuple>
 
 // Google Test Headers
 #include <gtest/gtest.h>
@@ -67,6 +68,7 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSurfaces.hh>
+#include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/HeatBalanceIntRadExchange.hh>
@@ -8470,9 +8472,24 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
         s_surf->SurfWinDividerArea(winNum) = dividerArea;
         EXPECT_NEAR(opaqueLWWithoutFrame - opaqueLWWithFrame, frameLW + dividerLW, 1.0e-6 * (frameLW + dividerLW));
     }
+
+    // A degenerate view-factor matrix must still conserve the stored frame/divider exchange by falling back to area weighting.
+    auto &zoneInfo = state->dataViewFactor->EnclRadInfo(1);
+    zoneInfo.ScriptF = 0.0;
+    HeatBalanceIntRadExchange::CalcInteriorRadExchange(
+        *state, state->dataHeatBalSurf->SurfTempIn, 1, state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea, _, "Test");
+    Real64 opaqueLW = 0.0;
+    for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
+        if (s_surf->Surface(i).Class != DataSurfaces::SurfaceClass::Window) {
+            opaqueLW += state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea(i) * s_surf->Surface(i).Area;
+        }
+    }
+    Real64 const frameDividerLWGain = s_surf->SurfWinFrameArea(winNum) * s_surf->SurfWinFrameNetLWInPerArea(winNum) +
+                                      s_surf->SurfWinDividerArea(winNum) * s_surf->SurfWinDividerNetLWInPerArea(winNum);
+    EXPECT_NEAR(opaqueLW, -frameDividerLWGain, 1.0e-6 * std::abs(frameDividerLWGain));
 }
 
-class FrameAndDividerLongWaveExchangeWithTwoWindows : public EnergyPlusFixture, public ::testing::WithParamInterface<bool>
+class FrameAndDividerLongWaveExchangeWithTwoWindows : public EnergyPlusFixture, public ::testing::WithParamInterface<std::tuple<bool, bool>>
 {
 };
 TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
@@ -8481,7 +8498,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     // frame and divider, orientation and height, so with representative surface calculations the enclosure holds only one of
     // them and the frames and dividers of both take its temperatures. The zone's surfaces must give up the long-wave radiation
     // gained by the frames and dividers of both windows, each with its own frame and divider area.
-    bool const useRepresentativeSurfaces = GetParam();
+    auto const [useRepresentativeSurfaces, useCarrollMethod] = GetParam();
 
     std::string const idf_objects = delimited_string({
         "Material,Concrete Block,MediumRough,0.1014984,0.3805070,608.7016,836.8000;",
@@ -8512,6 +8529,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
     state->dataSurface->UseRepresentativeSurfaceCalculations = useRepresentativeSurfaces;
+    state->dataHeatBalIntRadExchg->CarrollMethod = useCarrollMethod;
 
     createFacilityElectricPowerServiceObject(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state);
@@ -8623,7 +8641,8 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
 
 INSTANTIATE_TEST_SUITE_P(WindowManager,
                          FrameAndDividerLongWaveExchangeWithTwoWindows,
-                         testing::Bool(),
+                         testing::Combine(testing::Bool(), testing::Bool()),
                          [](const testing::TestParamInfo<FrameAndDividerLongWaveExchangeWithTwoWindows::ParamType> &info) -> std::string {
-                             return info.param ? "RepresentativeSurfaces" : "IndividualSurfaces";
+                             return std::string(std::get<0>(info.param) ? "RepresentativeSurfaces" : "IndividualSurfaces") +
+                                    (std::get<1>(info.param) ? "_Carroll" : "_ScriptF");
                          });
