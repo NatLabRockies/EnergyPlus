@@ -919,7 +919,7 @@ void SimHVAC(EnergyPlusData &state)
         }
     }
     if (state.dataGlobal->AnyPlantInModel) {
-        if (PlantUtilities::AnyPlantSplitterMixerLacksContinuity(state)) {
+        if (PlantUtilities::AnyPlantSplitterMixerLacksContinuity(state) || PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(state)) {
             // rerun systems in a "Final flow lock/last iteration" mode
             // now call for one second to last plant simulation
             state.dataHVACGlobal->SimAirLoopsFlag = false;
