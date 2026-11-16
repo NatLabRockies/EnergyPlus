@@ -61,6 +61,7 @@
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/General.hh>
+#include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -1276,4 +1277,190 @@ TEST_F(EnergyPlusFixture, Battery_checkChargeDischargeVoltageCurves)
         "   **   ~~~   ** Charged fraction = 1.00, Charging voltage = 12.410 V, Discharging voltage = 12.600 V",
     });
     EXPECT_TRUE(compare_err_stream(error_string2, true));
+}
+
+namespace {
+
+// Registers an InteriorLights electricity output variable, which creates the ELECTRICITY:FACILITY and INTERIORLIGHTS:ELECTRICITY meters
+void setupLightsElectricityMeters(EnergyPlus::EnergyPlusData &state, Real64 &lightsEnergy)
+{
+    SetupOutputVariable(state,
+                        "Lights Electricity Energy",
+                        Constant::Units::J,
+                        lightsEnergy,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Sum,
+                        "BOX LIGHTS",
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::Building,
+                        OutputProcessor::EndUseCat::InteriorLights,
+                        "General");
+}
+
+std::vector<std::string> transformerPowerInFromGridIDF(std::string_view meterName)
+{
+    return {
+        "ElectricLoadCenter:Transformer,",
+        "  Transformer 1,                          !- Name",
+        "  CONSTANT-1.0,                           !- Availability Schedule Name",
+        "  PowerInFromGrid,                        !- Transformer Usage",
+        "  ,                                       !- Zone Name",
+        "  0,                                      !- Radiative Fraction",
+        "  15000,                                  !- Rated Capacity {VA}",
+        "  3,                                      !- Phase",
+        "  Aluminum,                               !- Conductor Material",
+        "  150,                                    !- Full Load Temperature Rise {C}",
+        "  0.1,                                    !- Fraction of Eddy Current Losses",
+        "  NominalEfficiency,                      !- Performance Input Method",
+        "  ,                                       !- Rated No Load Loss {W}",
+        "  ,                                       !- Rated Load Loss {W}",
+        "  0.98,                                   !- Nameplate Efficiency",
+        "  0.35,                                   !- Per Unit Load for Nameplate Efficiency",
+        "  75,                                     !- Reference Temperature for Nameplate Efficiency {C}",
+        "  ,                                       !- Per Unit Load for Maximum Efficiency",
+        "  Yes,                                    !- Consider Transformer Loss for Utility Cost",
+        std::format("  {};                                     !- Meter Name 1", meterName),
+    };
+}
+
+std::vector<std::string> loadCenterIDF(std::string_view genOperationScheme,
+                                       std::string_view demandMeterName,
+                                       std::string_view storageOperationScheme,
+                                       std::string_view storageTrackMeterName)
+{
+    return {
+        "ElectricLoadCenter:Distribution,",
+        "  Test Load Center,                        !- Name",
+        "  ,                                        !- Generator List Name",
+        std::format("  {},                                     !- Generator Operation Scheme Type", genOperationScheme),
+        "  ,                                        !- Generator Demand Limit Scheme Purchased Electric Demand Limit {W}",
+        "  ,                                        !- Generator Track Schedule Name Scheme Schedule Name",
+        std::format("  {},                                     !- Generator Track Meter Scheme Meter Name", demandMeterName),
+        "  AlternatingCurrent,                      !- Electrical Buss Type",
+        "  ,                                        !- Inverter Name",
+        "  ,                                        !- Electrical Storage Object Name",
+        "  ,                                        !- Transformer Object Name",
+        std::format("  {},                                     !- Storage Operation Scheme", storageOperationScheme),
+        std::format("  {};                                     !- Storage Control Track Meter Name", storageTrackMeterName),
+    };
+}
+
+} // namespace
+
+TEST_F(EnergyPlusFixture, ElectricTransformer_setupMeterIndices_ValidMeter)
+{
+    ASSERT_TRUE(process_idf(delimited_string(transformerPowerInFromGridIDF("InteriorLights:Electricity"))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+    ASSERT_NE(-1, GetMeterIndex(*state, "INTERIORLIGHTS:ELECTRICITY"));
+
+    ElectricTransformer transformer(*state, "TRANSFORMER 1");
+    EXPECT_NO_THROW(transformer.setupMeterIndices(*state));
+    EXPECT_TRUE(compare_err_stream(""));
+}
+
+TEST_F(EnergyPlusFixture, ElectricTransformer_setupMeterIndices_MeterNotFound)
+{
+    // #11872: a PowerInFromGrid transformer wired to a meter that does not exist must fatal with an input error, not segfault
+    ASSERT_TRUE(process_idf(delimited_string(transformerPowerInFromGridIDF("No_Such_Meter"))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+    ASSERT_EQ(-1, GetMeterIndex(*state, "NO_SUCH_METER"));
+
+    ElectricTransformer transformer(*state, "TRANSFORMER 1");
+    EXPECT_THROW(transformer.setupMeterIndices(*state), std::runtime_error);
+    EXPECT_TRUE(compare_err_stream_substring("NO_SUCH_METER, item not found", false));
+    EXPECT_TRUE(compare_err_stream_substring("ElectricLoadCenter:Transformer = TRANSFORMER 1"));
+}
+
+TEST_F(EnergyPlusFixture, ElectricTransformer_setupMeterIndices_EmptyCustomMeter)
+{
+    // #11872 - a PowerInFromGrid transformer wired to a Meter:Custom that was never created because none of its items resolved
+    // must fatal not segfault
+    std::vector<std::string> idf_lines = transformerPowerInFromGridIDF("Empty_Custom_Meter");
+    idf_lines.insert(idf_lines.end(),
+                     {
+                         "Meter:Custom,",
+                         "  Empty_Custom_Meter,      !- Name",
+                         "  Electricity,             !- Resource Type",
+                         "  ,                        !- Key Name 1",
+                         "  Removed_EMS_Variable;    !- Output Variable or Meter Name 1",
+                     });
+    ASSERT_TRUE(process_idf(delimited_string(idf_lines)));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+
+    bool errorsFound = false;
+    OutputProcessor::GetCustomMeterInput(*state, errorsFound);
+    EXPECT_FALSE(errorsFound);
+    ASSERT_EQ(-1, GetMeterIndex(*state, "EMPTY_CUSTOM_METER"));
+    EXPECT_TRUE(compare_err_stream_substring("no items assigned", false));
+
+    ElectricTransformer transformer(*state, "TRANSFORMER 1");
+    EXPECT_THROW(transformer.setupMeterIndices(*state), std::runtime_error);
+    EXPECT_TRUE(compare_err_stream_substring("EMPTY_CUSTOM_METER, item not found"));
+}
+
+TEST_F(EnergyPlusFixture, ElectPowerLoadCenter_setupLoadCenterMeterIndices_DemandMeterNotFound)
+{
+    // #11872 - GetMeterIndex returns -1 when not found: a missing TrackMeter demand meter must fatal
+    ASSERT_TRUE(process_idf(delimited_string(loadCenterIDF("TrackMeter", "No_Such_Meter", "", ""))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+
+    ElectPowerLoadCenter loadCenter(*state, 1);
+    EXPECT_THROW(loadCenter.setupLoadCenterMeterIndices(*state), std::runtime_error);
+    EXPECT_TRUE(compare_err_stream_substring("Did not find Meter named: NO_SUCH_METER"));
+}
+
+TEST_F(EnergyPlusFixture, ElectPowerLoadCenter_setupLoadCenterMeterIndices_DemandMeterAtIndexZero)
+{
+    // #11872 - Meter indices are 0-based: a TrackMeter demand meter at index 0 is valid and must not fatal
+    ASSERT_TRUE(process_idf(delimited_string(loadCenterIDF("TrackMeter", "Electricity:Facility", "", ""))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+    ASSERT_EQ(0, GetMeterIndex(*state, "ELECTRICITY:FACILITY"));
+
+    ElectPowerLoadCenter loadCenter(*state, 1);
+    EXPECT_NO_THROW(loadCenter.setupLoadCenterMeterIndices(*state));
+    EXPECT_TRUE(compare_err_stream(""));
+}
+
+TEST_F(EnergyPlusFixture, ElectPowerLoadCenter_setupLoadCenterMeterIndices_StorageTrackMeterNotFound)
+{
+    // #11872 - GetMeterIndex returns -1 when not found: a missing storage track meter must fatal
+    ASSERT_TRUE(process_idf(delimited_string(loadCenterIDF("Baseload", "", "TrackMeterDemandStoreExcessOnSite", "No_Such_Meter"))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+
+    ElectPowerLoadCenter loadCenter(*state, 1);
+    EXPECT_THROW(loadCenter.setupLoadCenterMeterIndices(*state), std::runtime_error);
+    EXPECT_TRUE(compare_err_stream_substring("Did not find Meter named: NO_SUCH_METER"));
+}
+
+TEST_F(EnergyPlusFixture, ElectPowerLoadCenter_setupLoadCenterMeterIndices_StorageTrackMeterAtIndexZero)
+{
+    // #11872 - Meter indices are 0-based: a storage track meter at index 0 is valid and must not fatal
+    ASSERT_TRUE(process_idf(delimited_string(loadCenterIDF("Baseload", "", "TrackMeterDemandStoreExcessOnSite", "Electricity:Facility"))));
+    state->init_state(*state);
+
+    Real64 lightsEnergy = 0.0;
+    setupLightsElectricityMeters(*state, lightsEnergy);
+    ASSERT_EQ(0, GetMeterIndex(*state, "ELECTRICITY:FACILITY"));
+
+    ElectPowerLoadCenter loadCenter(*state, 1);
+    EXPECT_NO_THROW(loadCenter.setupLoadCenterMeterIndices(*state));
+    EXPECT_TRUE(compare_err_stream(""));
 }
