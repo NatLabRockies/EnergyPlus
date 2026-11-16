@@ -8191,7 +8191,6 @@ TEST_F(InteriorShadeDiffuseFixture, InteriorShadeDiffuse_NonreflectingShadeContr
     checkSystem(3, 7, 0.0);
 }
 
-
 TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneIsConserved)
 {
     // Window frames and dividers are not surfaces of the radiant enclosure, but their inside faces exchange long-wave
@@ -8361,7 +8360,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
         "  1,                       !- Multiplier",
         "  autocalculate,           !- Ceiling Height {m}",
         "  autocalculate;           !- Volume {m3}",
-        });
+    });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
@@ -8388,7 +8387,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
     state->dataGlobal->BeginSimFlag = false;
     state->dataGlobal->BeginEnvrnFlag = false;
 
-    auto& s_surf = state->dataSurface;
+    auto &s_surf = state->dataSurface;
     int winNum = 0;
     for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
         if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
@@ -8408,7 +8407,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.002;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.002;
-    for (auto& thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
         thisSpaceHB.MAT = T_in;
         thisSpaceHB.airHumRat = 0.002;
     }
@@ -8461,7 +8460,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
                 }
             }
             return sum;
-            };
+        };
         Real64 const opaqueLWWithFrame = opaqueLW();
         Real64 const dividerArea = s_surf->SurfWinDividerArea(winNum);
         s_surf->SurfWinFrameArea(winNum) = 0.0;
@@ -8474,7 +8473,8 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerLongWaveExchangeWithZoneI
 }
 
 class FrameAndDividerLongWaveExchangeWithTwoWindows : public EnergyPlusFixture, public ::testing::WithParamInterface<bool>
-{};
+{
+};
 TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
 {
     // Two framed and divided windows of different widths in the same wall of a closed zone. They have the same construction,
@@ -8507,7 +8507,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
         "BuildingSurface:Detailed,Roof,Roof,WallConstruction,Zone,,Outdoors,,NoSun,NoWind,0.0,4,",
         "  0,10,10, 0,0,10, 10,0,10, 10,10,10;",
         "Zone,Zone,0,6.0,6.0,0,1,1,autocalculate,autocalculate;",
-        });
+    });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
@@ -8535,7 +8535,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     state->dataGlobal->BeginSimFlag = false;
     state->dataGlobal->BeginEnvrnFlag = false;
 
-    auto& s_surf = state->dataSurface;
+    auto &s_surf = state->dataSurface;
     std::vector<int> winNums;
     for (int i = 1; i <= s_surf->TotSurfaces; ++i) {
         if (s_surf->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
@@ -8558,7 +8558,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = T_in;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRatAvg = 0.002;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.002;
-    for (auto& thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
+    for (auto &thisSpaceHB : state->dataZoneTempPredictorCorrector->spaceHeatBalance) {
         thisSpaceHB.MAT = T_in;
         thisSpaceHB.airHumRat = 0.002;
     }
@@ -8582,9 +8582,9 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
         for (int const winNum : winNums) {
             Real64 const irFromZone = s_surf->SurfWinIRfromParentZone(winNum);
             Real64 const frameLW = s_surf->SurfWinFrameArea(winNum) * s_surf->SurfWinFrameEmis(winNum) *
-                (irFromZone - sigma * pow_4(s_surf->SurfWinFrameTempIn(winNum) + Kelvin));
+                                   (irFromZone - sigma * pow_4(s_surf->SurfWinFrameTempIn(winNum) + Kelvin));
             Real64 const dividerLW = s_surf->SurfWinDividerArea(winNum) * s_surf->SurfWinDividerEmis(winNum) *
-                (irFromZone - sigma * pow_4(s_surf->SurfWinDividerTempIn(winNum) + Kelvin));
+                                     (irFromZone - sigma * pow_4(s_surf->SurfWinDividerTempIn(winNum) + Kelvin));
             EXPECT_GT(frameLW, 30.0);
             EXPECT_GT(dividerLW, 5.0);
             frameDividerLW += frameLW + dividerLW;
@@ -8602,7 +8602,7 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
                 }
             }
             return sum;
-            };
+        };
         Real64 const opaqueLWWithFrames = opaqueLW();
         std::vector<Real64> frameAreas;
         std::vector<Real64> dividerAreas;
@@ -8622,8 +8622,8 @@ TEST_P(FrameAndDividerLongWaveExchangeWithTwoWindows, IsConserved)
 }
 
 INSTANTIATE_TEST_SUITE_P(WindowManager,
-    FrameAndDividerLongWaveExchangeWithTwoWindows,
-    testing::Bool(),
-    [](const testing::TestParamInfo<FrameAndDividerLongWaveExchangeWithTwoWindows::ParamType>& info) -> std::string {
-        return info.param ? "RepresentativeSurfaces" : "IndividualSurfaces";
-    });
+                         FrameAndDividerLongWaveExchangeWithTwoWindows,
+                         testing::Bool(),
+                         [](const testing::TestParamInfo<FrameAndDividerLongWaveExchangeWithTwoWindows::ParamType> &info) -> std::string {
+                             return info.param ? "RepresentativeSurfaces" : "IndividualSurfaces";
+                         });
