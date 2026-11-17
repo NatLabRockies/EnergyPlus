@@ -85,7 +85,7 @@ namespace PlantUtilities {
 
     bool AnyPlantSplitterMixerLacksContinuity(EnergyPlusData &state);
 
-    bool AnyPlantWaterToAirHeatPumpFlowRequestUnmet(EnergyPlusData &state);
+    bool AnyWaterToAirHeatPumpPlantFlowRequestUnmet(EnergyPlusData &state);
 
     void CheckPlantMixerSplitterConsistency(EnergyPlusData &state,
                                             const int LoopNum,

@@ -516,11 +516,11 @@ bool AnyPlantSplitterMixerLacksContinuity(EnergyPlusData &state)
     return false;
 }
 
-bool AnyPlantWaterToAirHeatPumpFlowRequestUnmet(EnergyPlusData &state)
+bool AnyWaterToAirHeatPumpPlantFlowRequestUnmet(EnergyPlusData &state)
 {
-    // Water-to-air heat pump coils are simulated outside the plant loop. If the plant proportionally reduces the requested branch flow, the coil
-    // must be simulated again with plant flow locked so that its outlet state is based on the delivered flow. A zero-flow branch is excluded
-    // because it may be a transient allocation while the plant solver is iterating rather than a proportional reduction.
+    // Water-to-air heat pump coils are simulated outside the plant loop. If the plant reduces the requested branch flow, the coil must be
+    // simulated again with plant flow locked so that its outlet state is based on the delivered flow. This includes zero delivered flow so that
+    // the coil shuts down and resets its outlet state and reported heat transfer.
     for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
         for (DataPlant::LoopSideLocation loopSide : DataPlant::LoopSideKeys) {
             for (auto const &branch : state.dataPlnt->PlantLoop(loopNum).LoopSide(loopSide).Branch) {
@@ -540,8 +540,7 @@ bool AnyPlantWaterToAirHeatPumpFlowRequestUnmet(EnergyPlusData &state)
                         continue;
                     }
                     auto const &inletNode = state.dataLoopNodes->Node(comp.NodeNumIn);
-                    if (inletNode.MassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance &&
-                        inletNode.MassFlowRateRequest - inletNode.MassFlowRate > DataPlant::CriteriaDelta_MassFlowRate) {
+                    if (inletNode.MassFlowRateRequest - inletNode.MassFlowRate > DataPlant::CriteriaDelta_MassFlowRate) {
                         return true;
                     }
                 }

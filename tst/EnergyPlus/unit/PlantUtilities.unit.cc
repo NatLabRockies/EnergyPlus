@@ -282,11 +282,11 @@ TEST_F(EnergyPlusFixture, TestAnyPlantWaterToAirHeatPumpFlowRequestUnmet)
     // A satisfied request does not require final locked-flow passes.
     inletNode.MassFlowRateRequest = 1.0;
     inletNode.MassFlowRate = 1.0;
-    EXPECT_FALSE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+    EXPECT_FALSE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
 
     // Differences below the plant mass flow tolerance are ignored.
     inletNode.MassFlowRate = inletNode.MassFlowRateRequest - 0.5 * DataPlant::CriteriaDelta_MassFlowRate;
-    EXPECT_FALSE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+    EXPECT_FALSE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
 
     // Supported water-to-air heat pump coils that receive less flow than requested require locked-flow passes.
     inletNode.MassFlowRate = inletNode.MassFlowRateRequest - 2.0 * DataPlant::CriteriaDelta_MassFlowRate;
@@ -297,22 +297,22 @@ TEST_F(EnergyPlusFixture, TestAnyPlantWaterToAirHeatPumpFlowRequestUnmet)
                                      DataPlant::PlantEquipmentType::CoilVSWAHPHeatingEquationFit,
                                      DataPlant::PlantEquipmentType::CoilVSWAHPCoolingEquationFit}) {
         component.Type = componentType;
-        EXPECT_TRUE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+        EXPECT_TRUE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
     }
 
-    // A zero-flow branch may be a transient plant allocation and does not require a final pass.
+    // A zero-flow branch requires a final pass so that the coil shuts down and resets its outlet state and reported heat transfer.
     inletNode.MassFlowRate = 0.0;
-    EXPECT_FALSE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+    EXPECT_TRUE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
 
     // Other externally simulated plant components are outside the scope of this correction.
     inletNode.MassFlowRate = inletNode.MassFlowRateRequest - 2.0 * DataPlant::CriteriaDelta_MassFlowRate;
     component.Type = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    EXPECT_FALSE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+    EXPECT_FALSE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
 
     // Components simulated directly by the plant do not need a non-plant locked-flow pass.
     component.Type = DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit;
     component.compPtr = nullptr;
-    EXPECT_FALSE(PlantUtilities::AnyPlantWaterToAirHeatPumpFlowRequestUnmet(*state));
+    EXPECT_FALSE(PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(*state));
 }
 
 TEST_F(EnergyPlusFixture, TestPullCompInterconnectTrigger)
