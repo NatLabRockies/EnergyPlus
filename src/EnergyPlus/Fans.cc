@@ -3154,6 +3154,9 @@ void FanSystem::calcSimpleSystemFan(
     if (speedControl == SpeedControl::Discrete) {
         runtimeFrac = std::accumulate(runtimeFracAtSpeed.begin(), runtimeFracAtSpeed.end(), 0.0);
     }
+    // A parent-supplied PLF below 1.0 applied to multiple active modes can make their summed runtime exceed one;
+    // cap only the aggregate, leaving individual per-speed runtimes unchanged.
+    runtimeFrac = min(1.0, runtimeFrac);
 
     if (heatLossDest == HeatLossDest::Zone) {
         Real64 _powerLossToZone = totalPower - powerLossToAir;

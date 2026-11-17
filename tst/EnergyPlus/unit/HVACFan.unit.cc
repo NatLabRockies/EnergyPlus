@@ -247,10 +247,12 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteRuntimeFraction)
     fanSystem.numSpeeds = 2;
     fanSystem.runtimeFracAtSpeed.resize(2);
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // Both active modes are individually PLF-corrected from 0.5 to 0.625; only the aggregate runtime is capped.
     fanSystem.calcSimpleSystemFan(*state, _, 100.0, 0.5, 0.5, 1.0, 0.5, 100.0);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[0]);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[1]);
-    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
+    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
     EXPECT_DOUBLE_EQ(93.75, fanSystem.totalPower);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
 }
@@ -284,7 +286,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousRuntimeFraction)
     fanSystem.calcSimpleSystemFan(*state, 0.25, _, _, _, _, _, _);
     EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
 
-    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.0, _);
+    // Mode 2 has a parent runtime but no airflow, so it does not contribute to the reported runtime.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.6, _);
     EXPECT_DOUBLE_EQ(0.4, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(5.0, fanSystem.totalPower);
 
@@ -341,7 +344,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousCyclingRuntimeIncludesPLFCorrec
     for (Real64 plf : {0.8, 0.5, 0.0, -0.1, 1.0, 1.2}) {
         SCOPED_TRACE(plf);
         state->dataHVACGlobal->OnOffFanPartLoadFraction = plf;
-        fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.0, _);
+        // Model cycling with 0.4 active runtime and a zero-airflow off mode for the remaining 0.6.
+        fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.6, _);
         Real64 expectedRuntime = 0.4;
         if (plf > 0.0 && plf < 1.0) {
             expectedRuntime /= max(0.7, plf);
@@ -353,19 +357,25 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousCyclingRuntimeIncludesPLFCorrec
     }
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // PLF raises both active-mode runtimes from 0.2 to 0.25; their aggregate remains 0.5.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.2, 1.0, 0.2, 200.0);
     EXPECT_DOUBLE_EQ(0.5, fanSystem.runtimeFrac);
     EXPECT_NEAR(0.75 * 0.75 * 0.75 * (0.25 * 100.0 + 0.25 * 200.0), fanSystem.totalPower, 1e-12);
     EXPECT_NEAR(0.3, fanSystem.outletAirMassFlowRate, 1e-12);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // Each 0.5 mode runtime corrects to 0.625, so the 1.25 sum is capped only for runtimeFrac;
+    // power still uses both modes.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, 200.0);
-    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
+    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
     EXPECT_NEAR(0.75 * 0.75 * 0.75 * (0.625 * 100.0 + 0.625 * 200.0), fanSystem.totalPower, 1e-12);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.9, 0.0, 0.0, _);
+    // The active-mode runtime corrects from 0.9 to a capped 1.0; the zero-flow mode is excluded.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.9, 0.0, 0.1, _);
     EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(12.5, fanSystem.totalPower);
     EXPECT_DOUBLE_EQ(0.45, fanSystem.outletAirMassFlowRate);
@@ -569,7 +579,10 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // The two corrected runtimes would sum to 1.25; cap the reported aggregate without changing the power calculation.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.5, 0.5, 0.5, 0.5, _);
+    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
     EXPECT_NEAR(1.25 * expectedPower, fanSystem.totalPower, 0.01);
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
@@ -651,9 +664,11 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousLowFlowSafeguardIncludesPLFCorr
     fanSystem.inletAirEnthalpy = 40000.0;
     fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
 
+    // Two active low-flow modes are corrected to 0.25 runtime each; their aggregate remains below one.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.005, 0.2, 0.015, 0.2, 2000.0);
 
     EXPECT_DOUBLE_EQ(0.5, fanSystem.runtimeFrac);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
     EXPECT_NEAR(0.01 * (0.25 * 1000.0 + 0.25 * 2000.0) / 0.1, fanSystem.totalPower, 1e-12);
     EXPECT_NEAR(0.004, fanSystem.outletAirMassFlowRate, 1e-12);
     EXPECT_LT(fanSystem.outletAirTemp - fanSystem.inletAirTemp, 20.0);
