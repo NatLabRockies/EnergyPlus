@@ -1086,8 +1086,10 @@ TEST_F(EnergyPlusFixture, SystemFanObj_EMSActuators)
         "    ,                               !- Electric Power Per Unit Flow Rate Per Unit Pressure",
         "    ,                               !- Fan Total Efficiency",
         "    ,                               !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                               !- Night Ventilation Mode Fan Total Efficiency",
         "    ,                               !- Night Ventilation Mode Pressure Rise",
-        "    ,                               !- Night Ventilation Mode Flow Fraction",
+        "    ,                               !- Night Ventilation Mode Motor Efficiency",
+        "    ,                               !- Night Ventilation Mode Motor In Air Stream Fraction",
         "    ,                               !- Motor Loss Zone Name",
         "    ,                               !- Motor Loss Radiative Fraction",
         "    Fan Energy,                     !- End-Use Subcategory",
@@ -1219,6 +1221,23 @@ TEST_F(EnergyPlusFixture, SystemFanObj_EMSActuators)
 
         fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
         EXPECT_NEAR(160.0, fanSystem->totalPower, 0.00001);
+
+        // EMS pressure and efficiency overrides take precedence over the alternate night performance.
+        state->dataHVACGlobal->NightVentOn = true;
+        fanSystem->nightVentTotalEff = 0.25;
+        fanSystem->nightVentPressureDelta = 50.0;
+        fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+        EXPECT_NEAR(160.0, fanSystem->totalPower, 0.00001);
+
+        // Releasing those overrides restores night pressure and efficiency while EMS still sets airflow.
+        fanSystem->EMSTotalEffOverrideOn = false;
+        fanSystem->EMSPressureOverrideOn = false;
+        fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+        EXPECT_NEAR(80.0, fanSystem->totalPower, 0.00001);
+
+        fanSystem->EMSTotalEffOverrideOn = true;
+        fanSystem->EMSPressureOverrideOn = true;
+        state->dataHVACGlobal->NightVentOn = false;
 
         if (fanIndex == 1) {
             // Exercise below-first-speed cycling and power contributions from both speeds.
