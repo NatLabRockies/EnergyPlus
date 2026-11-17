@@ -357,6 +357,7 @@ int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state)
 {
     using namespace EnergyPlus;
 
+    int returnCode = EXIT_SUCCESS;
     try {
         ShowMessage(state, "Simulation Error Summary *************");
 
@@ -369,9 +370,6 @@ int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state)
         Fluid::ReportOrphanFluids(state);
         Sched::ReportOrphanSchedules(state);
 
-        if (state.dataSQLiteProcedures->sqlite) {
-            state.dataSQLiteProcedures->sqlite.reset();
-        }
         if (state.dataInputProcessing->inputProcessor) {
             state.dataInputProcessing->inputProcessor.reset();
         }
@@ -381,19 +379,22 @@ int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state)
                 ShowWarningMessage(state, "Native CSV output requested in input file, but running ReadVarsESO due to command line argument.");
                 ShowWarningMessage(state, "This will overwrite the native CSV output.");
             }
-            int status = CommandLineInterface::runReadVarsESO(state);
-            if (status != 0) {
-                return status;
-            }
+            returnCode = CommandLineInterface::runReadVarsESO(state);
         }
     } catch (const FatalError &e) {
-        return AbortEnergyPlus(state);
+        returnCode = AbortEnergyPlus(state);
     } catch (const std::exception &e) {
         ShowSevereError(state, e.what());
-        return AbortEnergyPlus(state);
+        returnCode = AbortEnergyPlus(state);
     }
 
-    return EndEnergyPlus(state);
+    if (returnCode == EXIT_SUCCESS) {
+        returnCode = EndEnergyPlus(state);
+    }
+    // EndEnergyPlus/AbortEnergyPlus write the completion record and final errors.
+    // Keep SQLite alive until those writes finish, including the failure paths.
+    state.dataSQLiteProcedures->sqlite.reset();
+    return returnCode;
 }
 
 int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath)
@@ -420,11 +421,15 @@ int RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath
     try {
         EnergyPlus::SimulationManager::ManageSimulation(state);
     } catch (const EnergyPlus::FatalError &e) {
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
 #ifdef NDEBUG
     } catch (const std::exception &e) {
         ShowSevereError(state, e.what());
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
 #endif
     }
 
@@ -476,10 +481,14 @@ int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<
     try {
         EnergyPlus::SimulationManager::ManageSimulation(state);
     } catch (const EnergyPlus::FatalError &e) {
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
     } catch (const std::exception &e) {
         ShowSevereError(state, e.what());
-        return EnergyPlus::AbortEnergyPlus(state);
+        int const returnCode = EnergyPlus::AbortEnergyPlus(state);
+        state.dataSQLiteProcedures->sqlite.reset();
+        return returnCode;
     }
     return wrapUpEnergyPlus(state);
 }

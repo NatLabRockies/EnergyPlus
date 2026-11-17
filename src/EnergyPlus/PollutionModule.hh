@@ -366,7 +366,11 @@ struct PollutionData : BaseGlobalStruct
     std::array<Pollution::ComponentProps, (int)Pollution::PollFuelComponent::Num> pollComps;
 
     // Meters, meter values, and grouped meter values
-    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = {-1};
+    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = [] {
+        std::array<int, (int)Pollution::PollFacilityMeter::Num> a{};
+        a.fill(-1);
+        return a;
+    }();
     std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals = {0.0};
     std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals = {0.0};
 

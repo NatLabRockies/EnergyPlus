@@ -718,7 +718,7 @@ void InitializeTabularMonthly(EnergyPlusData &state)
 
     for (auto &e : ort->MonthlyColumns) {
         e.varName.clear();
-        e.varNum = 0;
+        e.varNum = -1;
         e.typeOfVar = OutputProcessor::VariableType::Invalid;
         e.avgSum = OutputProcessor::StoreType::Average;
         e.stepType = OutputProcessor::TimeStepType::Zone;
@@ -932,7 +932,7 @@ void InitializeTabularMonthly(EnergyPlusData &state)
                             std::format("..i.e., Variable name={}:{} not valid for this simulation.", UniqueKeyNames(kUniqueKey), curVariMeter));
                     }
                     ort->MonthlyColumns(mColumn).varName = curVariMeter;
-                    ort->MonthlyColumns(mColumn).varNum = 0;
+                    ort->MonthlyColumns(mColumn).varNum = -1;
                     ort->MonthlyColumns(mColumn).typeOfVar = OutputProcessor::VariableType::Invalid;
                     ort->MonthlyColumns(mColumn).avgSum = OutputProcessor::StoreType::Average;
                     ort->MonthlyColumns(mColumn).stepType = OutputProcessor::TimeStepType::Zone;
@@ -971,7 +971,7 @@ bool isInvalidAggregationOrder(EnergyPlusData &state)
             // test if the aggregation types are in the correct order
             for (int kColumn = 1; kColumn <= ort->MonthlyTables(curTable).numColumns; ++kColumn) {
                 int curCol = kColumn + ort->MonthlyTables(curTable).firstColumn - 1;
-                if (ort->MonthlyColumns(curCol).varNum == 0) {
+                if (ort->MonthlyColumns(curCol).varNum == -1) {
                     break; // if no variable was ever found than stop checking
                 }
                 AggType curAggType = ort->MonthlyColumns(curCol).aggType;
@@ -1847,7 +1847,7 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
         // if no ElectricityPurchased:Facility meter is defined then no electric load center
         // was created by the user and no power generation will occur in the plant. The amount
         // purchased would be the total end use.
-        if (ort->meterNumElecPurchased == 0) {
+        if (ort->meterNumElecPurchased == -1) {
             ort->meterNumElecPurchased = GetMeterIndex(state, "ELECTRICITY:FACILITY");
         }
 
