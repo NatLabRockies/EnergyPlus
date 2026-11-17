@@ -17332,8 +17332,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_VariableVolumeAndComponentModelFan
 
     bool const zoneEquipment = true;
     UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, "UNITARY SYSTEM VAV", zoneEquipment, 0);
-    UnitarySys::factory(
-        *state, HVAC::UnitarySysType::Unitary_AnyCoilType, "UNITARY SYSTEM COMPONENT MODEL", zoneEquipment, 0);
+    UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, "UNITARY SYSTEM COMPONENT MODEL", zoneEquipment, 0);
     auto &unitarySystems = state->dataUnitarySystems->unitarySys;
     ASSERT_EQ(2u, unitarySystems.size());
     auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(1);
@@ -17351,8 +17350,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_VariableVolumeAndComponentModelFan
     for (auto &thisSys : unitarySystems) {
         bool const isComponentModel = thisSys.Name == "UNITARY SYSTEM COMPONENT MODEL";
         EXPECT_TRUE(isComponentModel || thisSys.Name == "UNITARY SYSTEM VAV");
-        HVAC::FanType const expectedFanType =
-            isComponentModel ? HVAC::FanType::ComponentModel : HVAC::FanType::VAV;
+        HVAC::FanType const expectedFanType = isComponentModel ? HVAC::FanType::ComponentModel : HVAC::FanType::VAV;
         SCOPED_TRACE(thisSys.Name);
 
         for (std::string_view const controlType : {"Load", "SingleZoneVAV", "Setpoint"}) {
@@ -17368,8 +17366,7 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_VariableVolumeAndComponentModelFan
             EXPECT_TRUE(compare_err_stream(""));
             EXPECT_ENUM_EQ(expectedFanType, thisSys.m_FanType);
             EXPECT_EQ(nullptr, thisSys.m_fanOpModeSched);
-            HVAC::FanOp const expectedFanOp =
-                controlType == "Setpoint" ? HVAC::FanOp::Continuous : HVAC::FanOp::Cycling;
+            HVAC::FanOp const expectedFanOp = controlType == "Setpoint" ? HVAC::FanOp::Continuous : HVAC::FanOp::Cycling;
             EXPECT_ENUM_EQ(expectedFanOp, thisSys.m_FanOpMode);
         }
 
