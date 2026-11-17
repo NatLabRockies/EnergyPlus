@@ -266,9 +266,6 @@ namespace Avail {
                     previousAvailStatus = zcam.availStatus;
                     // initialize the availability to "take no action"
                     zcam.availStatus = Status::NoAction;
-                    for (auto &manager : zcam.availManagers) {
-                        manager.availStatus = Status::NoAction;
-                    }
                     for (ZoneCompAvailMgrNum = 1; ZoneCompAvailMgrNum <= zcam.NumAvailManagers; ++ZoneCompAvailMgrNum) {
                         zcam.availManagers(ZoneCompAvailMgrNum).availStatus = Status::NoAction;
                     }
