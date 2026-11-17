@@ -321,18 +321,18 @@ namespace Window {
         Vector3D W23 = {0.0, 0.0, 0.0};
 
         // Spectral data wavelengths for each glass layer in a glazing system
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt{};
 
         // Following data, Spectral data for each layer for each wavelength in wlt
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> t = {0.0};     // normal transmittance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rff = {0.0};   // normal front reflectance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbb = {0.0};   // normal back reflectance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tPhi = {0.0};  // transmittance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfPhi = {0.0}; // front reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbPhi = {0.0}; // back reflectance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> t{};     // normal transmittance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rff{};   // normal front reflectance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbb{};   // normal back reflectance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tPhi{};  // transmittance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfPhi{}; // front reflectance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbPhi{}; // back reflectance at angle of incidence
 
         // Number of spectral data wavelengths for each layer; =2 if no spectra data for a layer
-        std::array<int, maxGlassLayers> numpt = {0};
+        std::array<int, maxGlassLayers> numpt{};
 
         auto &s_mat = state.dataMaterial;
         auto &s_surf = state.dataSurface;
@@ -509,7 +509,7 @@ namespace Window {
             lquasi = false;
             AllGlassIsSpectralAverage = true;
 
-            std::array<int, Window::maxGlassLayers> LayerNum = {0}; // Glass layer number
+            std::array<int, Window::maxGlassLayers> LayerNum{}; // Glass layer number
 
             // Loop over glass layers in the construction
             for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
@@ -715,9 +715,9 @@ namespace Window {
                 // In the following the argument "1" indicates that spectral average solar values
                 // should be used for layers without spectral data.
 
-                std::array<Real64, nume> stPhi = {0.0};  // Glazing system transmittance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srfPhi = {0.0}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srbPhi = {0.0}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> stPhi{};  // Glazing system transmittance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srfPhi{}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srbPhi{}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
                 // For each layer, glazing system absorptance at angle of incidence
                 std::array<std::array<Real64, nume>, maxGlassLayers> saPhi = {{0.0}};
 
@@ -925,9 +925,9 @@ namespace Window {
 
                 // For each wavelength in the solar spectrum, calculate system properties
                 // stPhi, srfPhi, srbPhi and saPhi at this angle of incidence
-                std::array<Real64, nume> stPhi = {0.0};  // Glazing system transmittance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srfPhi = {0.0}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srbPhi = {0.0}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> stPhi{};  // Glazing system transmittance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srfPhi{}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srbPhi{}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
                 // For each layer, glazing system absorptance at angle of incidence
                 std::array<std::array<Real64, nume>, maxGlassLayers> saPhi = {{0.0}};
 
@@ -1824,19 +1824,19 @@ namespace Window {
         //   srbPhi    back reflectance of system at each wavelength in swl
         //   sabsPhi   absorptance by layer at each wavelength in swl
 
-        std::array<Real64, maxGlassLayers> sabsPhi = {0.0}; // System solar absorptance in each glass layer for
+        std::array<Real64, maxGlassLayers> sabsPhi{}; // System solar absorptance in each glass layer for
         //   particular angle of incidence
 
         // transmittance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tadjPhi{};
         // front reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfadjPhi{};
         // back reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbadjPhi{};
 
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> top = {0.0};  // Transmittance matrix for subr. op
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rfop = {0.0}; // Front reflectance matrix for subr. op
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rbop = {0.0}; // Back transmittance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> top{};  // Transmittance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rfop{}; // Front reflectance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rbop{}; // Back transmittance matrix for subr. op
 
         auto const &wm = state.dataWindowManager;
         // For each glass layer find tPhi, rfPhi, and rbPhi at each wavelength
@@ -4255,8 +4255,8 @@ namespace Window {
         int imax = 0; // Temporary variable
         //   as output: decomposed matrix
 
-        assert(n <= 10);                   // vv sizing
-        std::array<Real64, 10> vv = {0.0}; // Stores the implicit scaling of each row
+        assert(n <= 10);             // vv sizing
+        std::array<Real64, 10> vv{}; // Stores the implicit scaling of each row
 
         d = 1;
         for (int i = 0; i < n; ++i) {
@@ -4416,18 +4416,18 @@ namespace Window {
         Real64 phikup;    // Numerator factor
         Real64 rhomix;    // Density of gas mixture (kg/m3)
 
-        std::array<Real64, 10> mukpdwn = {0.0}; // Denominator term
-        std::array<Real64, 10> kpdown = {0.0};  // Denominator terms
-        std::array<Real64, 10> kdpdown = {0.0};
+        std::array<Real64, 10> mukpdwn{}; // Denominator term
+        std::array<Real64, 10> kpdown{};  // Denominator terms
+        std::array<Real64, 10> kdpdown{};
         // Conductivity term accounting for additional energy moved by the diffusional transport of internal energy in polyatomic gases.
-        std::array<Real64, 10> kdblprm = {0.0};
-        std::array<Real64, 10> frct = {0.0};   // Fraction of each gas in a mixture
-        std::array<Real64, 10> kprime = {0.0}; // Monotonic thermal conductivity
+        std::array<Real64, 10> kdblprm{};
+        std::array<Real64, 10> frct{};   // Fraction of each gas in a mixture
+        std::array<Real64, 10> kprime{}; // Monotonic thermal conductivity
 
-        std::array<Real64, 10> fvis = {0.0};  // Viscosity of each gas in a mixture (g/m-s)
-        std::array<Real64, 10> fcon = {0.0};  // Conductance of each gas in a mixture (W/m2-K)
-        std::array<Real64, 10> fdens = {0.0}; // Density of each gas in a mixture (kg/m3)
-        std::array<Real64, 10> fcp = {0.0};   // Specific heat of each gas in a mixture (J/m3-K)
+        std::array<Real64, 10> fvis{};  // Viscosity of each gas in a mixture (g/m-s)
+        std::array<Real64, 10> fcon{};  // Conductance of each gas in a mixture (W/m2-K)
+        std::array<Real64, 10> fdens{}; // Density of each gas in a mixture (kg/m3)
+        std::array<Real64, 10> fcp{};   // Specific heat of each gas in a mixture (J/m3-K)
 
         // Autodesk:Logic Either assert NMix>0 or handle NMix<=0 in logic so that con and locals guar. initialized before use
         NMix = wm->gaps[iGap].numGases;
@@ -6474,7 +6474,7 @@ namespace Window {
             }
 
             std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {{0.0}}; // Coefficient in equation Aface*thetas = Bface
-            std::array<Real64, maxArraySize> Bface = {0.0};                             // Coefficient in equation Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface{};                                   // Coefficient in equation Aface*thetas = Bface
 
             // Inside convective film conductance for vertical window
             if (iter >= 1) {
@@ -8033,7 +8033,7 @@ namespace Window {
                 ++X[k][k];
             }
 
-            std::array<int, maxArraySize> indx = {0}; // Indices for LU decomposition
+            std::array<int, maxArraySize> indx{}; // Indices for LU decomposition
             // In the following, note that InvertMatrix changes X
             InvertMatrix(state, X, Xinv, indx, 4);
 

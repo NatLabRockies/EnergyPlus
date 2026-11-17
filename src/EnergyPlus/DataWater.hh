@@ -213,7 +213,7 @@ namespace DataWater {
         Real64 HorizArea; // area of surfaces in the vertical normal direction
         Real64 VdotAvail;
         Real64 VolCollected;
-        std::array<Real64, 12> VolCollectedMonthly = {0.0}; // Monthly rain water collected in mm;
+        std::array<Real64, 12> VolCollectedMonthly{}; // Monthly rain water collected in mm;
         Real64 MeanHeight;
 
         // Default Constructor
@@ -260,10 +260,10 @@ namespace DataWater {
         Real64 NomAnnualRain;
         // calculated and from elsewhere.
         Real64 CurrentRate;
-        Real64 CurrentAmount;                                      //  units of m
-        std::array<Real64, 12> MonthlyTotalPrecInWeather = {0.0};  // Monthly total rain in weather file [mm]
-        std::array<Real64, 12> MonthlyTotalPrecInSitePrec = {0.0}; // Monthly total rain in site:precipitation [mm]
-        std::array<int, 12> numRainyHoursInWeather = {0};          // Monthly number of rainy hours
+        Real64 CurrentAmount;                                //  units of m
+        std::array<Real64, 12> MonthlyTotalPrecInWeather{};  // Monthly total rain in weather file [mm]
+        std::array<Real64, 12> MonthlyTotalPrecInSitePrec{}; // Monthly total rain in site:precipitation [mm]
+        std::array<int, 12> numRainyHoursInWeather{};        // Monthly number of rainy hours
 
         // Default Constructor
         SiteRainFallDataStruct() : ModeID(RainfallMode::None), DesignAnnualRain(0.0), NomAnnualRain(0.0), CurrentRate(0.0), CurrentAmount(0.0)

@@ -383,8 +383,8 @@ namespace ZoneTempPredictorCorrector {
 
 struct ZoneTempPredictorCorrectorData : BaseGlobalStruct
 {
-    std::array<int, (int)HVAC::SetptType::Num> NumTempControls = {0};
-    std::array<int, (int)HVAC::SetptType::Num> NumComfortControls = {0};
+    std::array<int, (int)HVAC::SetptType::Num> NumTempControls{};
+    std::array<int, (int)HVAC::SetptType::Num> NumComfortControls{};
 
     // Number of zone with staged controlled objects
     int NumStageCtrZone = 0;

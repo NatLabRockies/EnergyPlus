@@ -95,7 +95,7 @@ namespace CTElectricGenerator {
         Real64 ExhaustEnergyRec = 0.0;                  // Recovered Exhaust heat  (J)
         Real64 TotalHeatEnergyRec = 0.0;                // total heat recovered (J)
         Curve::Curve *QLubeOilRecoveredCurve = nullptr; // (ELUBEGC) Curve for Recoverable Lube Oil heat Input Coef Poly Fit
-        std::array<Real64, 2> UACoef = {0.0};           // Heat Exchanger UA  Coeffs Poly Fit
+        std::array<Real64, 2> UACoef{};                 // Heat Exchanger UA  Coeffs Poly Fit
         Real64 MaxExhaustperCTPower = 0.0;              // MAX EXHAUST FLOW PER W POWER OUTPUT COEFF
         Real64 DesignHeatRecVolFlowRate = 0.0;          // m3/s, Design Water mass flow rate through heat recovery loop
         Real64 DesignHeatRecMassFlowRate = 0.0;         // kg/s, Design Water mass flow rate through heat recovery loop

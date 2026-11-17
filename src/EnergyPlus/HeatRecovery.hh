@@ -312,7 +312,7 @@ namespace HeatRecovery {
         Real64 NomProcAirFaceVel = 0.0; // nominal process air face velocity m/s
         Real64 NomElecPower = 0.0;      // nominal electric power consumption [W]
 
-        std::array<Real64, 8> B = {0}; // regeneration outlet temperature equation coefficients and limits
+        std::array<Real64, 8> B{}; // regeneration outlet temperature equation coefficients and limits
         // index 0: constant coefficient for outlet regeneration temperature equation
         // index 1: regen inlet humidity ratio coefficient for outlet regen temperature equation
         // index 2: regen inlet temp coefficient for outlet regen temperature equation
@@ -339,7 +339,7 @@ namespace HeatRecovery {
         Real64 T_MinProcAirInRelHum = 0.0;  // min allowable process inlet air relative humidity [%]
         Real64 T_MaxProcAirInRelHum = 0.0;  // max allowable process inlet air relative humidity [%]
 
-        std::array<Real64, 8> C = {0}; // regeneration outlet humidity ratio equation coefficients and limits
+        std::array<Real64, 8> C{}; // regeneration outlet humidity ratio equation coefficients and limits
         // index 0: constant coefficient for outlet regen humidity ratio equation
         // index 1: regen inlet humidity ratio coefficient for outlet regen humidity ratio eq
         // index 2: regen inlet temp coefficient for outlet regen humidity ratio equation
