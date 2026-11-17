@@ -289,6 +289,7 @@ set(SRC
     FaultsManager.hh
     FileSystem.cc
     FileSystem.hh
+    FilledArray.hh
     FluidCoolers.cc
     FluidCoolers.hh
     FluidProperties.cc
