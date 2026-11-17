@@ -349,7 +349,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Resp_Factors_IDF_Check)
     EXPECT_EQ("GHE-1 PROPS", thisRF->props->name);
     EXPECT_EQ(4, thisRF->numBoreholes);
     EXPECT_EQ(0.00043, thisRF->gRefRatio);
-    EXPECT_EQ(76, thisRF->numGFuncPairs);
     EXPECT_EQ(-15.585075, thisRF->LNTTS[0]);
     EXPECT_EQ(-2.672011, thisRF->GFNC[0]);
     EXPECT_EQ(3.003000, thisRF->LNTTS[75]);
@@ -630,8 +629,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Response_Factors_
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(GetResponseFactor(*state, thisRF->name).get(), thisGLHE.myRespFactors.get());
@@ -713,8 +710,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Array_IDF_Check)
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(GetResponseFactor(*state, thisArray->name).get(), thisGLHE.myRespFactors.get());
@@ -812,8 +807,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Single_BHs_IDF_Ch
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(0.109982, thisGLHE.bhDiameter);

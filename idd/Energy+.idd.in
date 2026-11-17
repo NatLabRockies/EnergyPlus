@@ -1896,12 +1896,14 @@ Site:GroundTemperature:Undisturbed:FiniteDifference,
        \minimum 0
        \maximum 100
        \default 30
+       \note This field is retained for input compatibility but is not currently used.
   N5,  \field Soil Moisture Content Volume Fraction at Saturation
        \type real
        \units percent
        \minimum 0
        \maximum 100
        \default 50
+       \note This field is retained for input compatibility but is not currently used.
    N6; \field Evapotranspiration Ground Cover Parameter
        \type real
        \units dimensionless
