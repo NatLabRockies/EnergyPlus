@@ -962,7 +962,6 @@ void GetFanInput(EnergyPlusData &state)
         }
 
         fan->nightVentPressureDelta = rNumericArgs(10);
-        fan->nightVentFlowFraction = rNumericArgs(11); // not used
 
         if (lAlphaFieldBlanks(8)) {
             fan->heatLossDest = HeatLossDest::Outside;

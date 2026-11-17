@@ -94585,24 +94585,36 @@ Generator:FuelCell:StackCooler,
   N6,  \field Coefficient r3
   N7,  \field Stack Coolant Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N8,  \field Stack Cooler U-Factor Times Area Value
        \units W/K
+       \note This field is retained for input compatibility but is not currently used.
   N9,  \field Fs-cogen Adjustment Factor
+       \note This field is retained for input compatibility but is not currently used.
   N10, \field Stack Cogeneration Exchanger Area
        \units m2
+       \note This field is retained for input compatibility but is not currently used.
   N11, \field Stack Cogeneration Exchanger Nominal Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N12, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient
        \units W/m2-K
+       \note This field is retained for input compatibility but is not currently used.
   N13, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient Exponent
+       \note This field is retained for input compatibility but is not currently used.
   N14, \field Stack Cooler Pump Power
        \units W
+       \note This field is retained for input compatibility but is not currently used.
   N15, \field Stack Cooler Pump Heat Loss Fraction
        \minimum 0.0
        \maximum 1.0
+       \note This field is retained for input compatibility but is not currently used.
   N16, \field Stack Air Cooler Fan Coefficient f0
+       \note This field is retained for input compatibility but is not currently used.
   N17, \field Stack Air Cooler Fan Coefficient f1
+       \note This field is retained for input compatibility but is not currently used.
   N18; \field Stack Air Cooler Fan Coefficient f2
+       \note This field is retained for input compatibility but is not currently used.
 
 Generator:MicroCHP,
       \memo Small-scale combined heat and power (micro CHP) electric generator using the model
