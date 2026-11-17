@@ -2805,8 +2805,8 @@ void FanSystem::calcSimpleSystemFan(
 )
 {
     Real64 _localFlowFrac;
-    Real64 _localTotalEff = EMSTotalEffOverrideOn ? EMSTotalEffValue
-                                               : ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) ? nightVentTotalEff : totalEff);
+    Real64 _localTotalEff =
+        EMSTotalEffOverrideOn ? EMSTotalEffValue : ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) ? nightVentTotalEff : totalEff);
     std::array<Real64, 2> _localPressureRise = {0.0, 0.0}; // [0] is operating mode 1, [1] is operating mode 2
     std::array<Real64, 2> _localAirMassFlow = {0.0, 0.0};
     std::array<Real64, 2> _localFlowRatio = {0.0, 0.0};
@@ -2820,7 +2820,8 @@ void FanSystem::calcSimpleSystemFan(
     Real64 _localMotorEff = (state.dataHVACGlobal->NightVentOn && nightVentMotorEff > 0.0) ? nightVentMotorEff : motorEff;
     Real64 _localMotorInAirFrac = (state.dataHVACGlobal->NightVentOn && nightVentMotorInAirFracSpecified) ? nightVentMotorInAirFrac : motorInAirFrac;
     auto const efficiencyAtSpeed = [&](int const speedIndex) {
-        return ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) || EMSTotalEffOverrideOn) ? _localTotalEff : totalEffAtSpeed[speedIndex];
+        return ((state.dataHVACGlobal->NightVentOn && nightVentTotalEff > 0.0) || EMSTotalEffOverrideOn) ? _localTotalEff
+                                                                                                         : totalEffAtSpeed[speedIndex];
     };
     if (state.dataHVACGlobal->NightVentOn) {
         // assume if non-zero inputs for night data then this fan is to be used with that data
