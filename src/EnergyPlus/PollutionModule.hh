@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 
 namespace EnergyPlus {
 
@@ -366,11 +367,7 @@ struct PollutionData : BaseGlobalStruct
     std::array<Pollution::ComponentProps, (int)Pollution::PollFuelComponent::Num> pollComps;
 
     // Meters, meter values, and grouped meter values
-    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = [] {
-        std::array<int, (int)Pollution::PollFacilityMeter::Num> a{};
-        a.fill(-1);
-        return a;
-    }();
+    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = filled_array{-1};
     std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals{};
     std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals{};
 

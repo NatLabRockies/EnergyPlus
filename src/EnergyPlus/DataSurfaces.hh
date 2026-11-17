@@ -65,6 +65,7 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataVectorTypes.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 #include <EnergyPlus/Geometry/Plane.hh>
 #include <EnergyPlus/Geometry/Vector2D.hh>
 #include <EnergyPlus/Material.hh>
@@ -898,14 +899,14 @@ namespace DataSurfaces {
         Real64 lightWellEff = 1.0; // Light well efficiency (multiplier on exterior window vis trans due to light well losses)
 
         // What is 10 here?
-        std::array<Real64, 10 + 1> thetaFace = {296.15}; // Face temperatures of window layers (K)
+        std::array<Real64, 10 + 1> thetaFace = filled_array{296.15}; // Face temperatures of window layers (K)
 
         // Multiplier on sunlit fraction due to shadowing of glass by
         // frame and divider outside projections
-        std::array<Real64, (int)Constant::iHoursInDay + 1> OutProjSLFracMult = {1.0};
+        std::array<Real64, (int)Constant::iHoursInDay + 1> OutProjSLFracMult = filled_array{1.0};
         // Multiplier on sunlit fraction due to shadowing of glass by
         // frame and divider inside and outside projections
-        std::array<Real64, (int)Constant::iHoursInDay + 1> InOutProjSLFracMult = {1.0};
+        std::array<Real64, (int)Constant::iHoursInDay + 1> InOutProjSLFracMult = filled_array{1.0};
 
         // for shadowing of ground by building and obstructions [W/m2]
         // Enclosure inside surface area minus this surface and its

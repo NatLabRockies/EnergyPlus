@@ -61,6 +61,7 @@
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 
 namespace EnergyPlus {
 
@@ -413,7 +414,7 @@ struct ZoneTempPredictorCorrectorData : BaseGlobalStruct
     std::array<Array1D<ZoneTempPredictorCorrector::ZoneSetptScheds>, (int)HVAC::SetptType::Num> comfortSetptScheds;
     ZoneTempPredictorCorrector::AdaptiveComfortDailySetPointSchedule AdapComfortDailySetPointSchedule;
 
-    std::array<Real64, 7> AdapComfortSetPointSummerDesDay = {-1};
+    std::array<Real64, 7> AdapComfortSetPointSummerDesDay = filled_array{-1.0};
 
     bool CalcZoneAirComfortSetPointsFirstTimeFlag = true; // Flag set to make sure you get input once
     bool MyEnvrnFlag = true;
