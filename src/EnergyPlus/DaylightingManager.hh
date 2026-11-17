@@ -606,10 +606,10 @@ struct DaylightingData : BaseGlobalStruct
         this->CalcDayltgCoeffsMapPointsMySunIsUpFlag = false;
         this->AltSteps_last = 0;
         this->AzimSteps_last = 0;
-        this->cos_Phi = {0.0};
-        this->sin_Phi = {0.0};
-        this->cos_Theta = {0.0};
-        this->sin_Theta = {0.0};
+        this->cos_Phi.fill(0.0);
+        this->sin_Phi.fill(0.0);
+        this->cos_Theta.fill(0.0);
+        this->sin_Theta.fill(0.0);
         this->FirstTimeMaps.clear();
         this->EnvrnPrint.clear();
         this->SavedMnDy.clear();
