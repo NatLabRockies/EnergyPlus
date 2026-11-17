@@ -805,7 +805,7 @@ TEST_F(EnergyPlusFixture, EconomicTariff_PushPopStack)
 
 TEST_F(EnergyPlusFixture, EconomicTariff_PopStack_Underflow)
 {
-    // #11941 - On stack underflow, popStack must reset ALL monthly values to zero.
+    // #11940 - On stack underflow, popStack must reset ALL monthly values to zero.
     // monthlyArray = {0.0} on an Array1D asserts size_ == l.size() in Debug, and only resets month 1 in Release.
     auto &s_econ = state->dataEconTariff;
     s_econ->econVar.allocate(1);
