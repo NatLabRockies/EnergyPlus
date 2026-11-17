@@ -173,19 +173,18 @@ namespace ICEngineElectricGenerator {
             }
 
             // Not sure what to do with electric nodes, so do not use optional arguments
-            iceGen.ElectricCircuitNode = Node::GetOnlySingleNode(state,
-                                                                 AlphArray(2),
-                                                                 ErrorsFound,
-                                                                 Node::ConnectionObjectType::GeneratorInternalCombustionEngine,
-                                                                 AlphArray(1),
-                                                                 Node::FluidType::Electric,
-                                                                 Node::ConnectionType::Electric,
-                                                                 Node::CompFluidStream::Primary,
-                                                                 Node::ObjectIsNotParent);
+            Node::GetOnlySingleNode(state,
+                                    AlphArray(2),
+                                    ErrorsFound,
+                                    Node::ConnectionObjectType::GeneratorInternalCombustionEngine,
+                                    AlphArray(1),
+                                    Node::FluidType::Electric,
+                                    Node::ConnectionType::Electric,
+                                    Node::CompFluidStream::Primary,
+                                    Node::ObjectIsNotParent);
 
             iceGen.MinPartLoadRat = NumArray(2);
             iceGen.MaxPartLoadRat = NumArray(3);
-            iceGen.OptPartLoadRat = NumArray(4);
 
             // Load Special IC ENGINE Generator Curve Fit Inputs
             if (s_ipsc->lAlphaFieldBlanks(3)) {
@@ -873,7 +872,6 @@ namespace ICEngineElectricGenerator {
             Real64 rho = this->HRPlantLoc.loop->glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
 
             this->DesignHeatRecMassFlowRate = rho * this->DesignHeatRecVolFlowRate;
-            this->HeatRecMdotDesign = this->DesignHeatRecMassFlowRate;
 
             PlantUtilities::InitComponentNodes(state, 0.0, this->DesignHeatRecMassFlowRate, this->HeatRecInletNodeNum, this->HeatRecOutletNodeNum);
 

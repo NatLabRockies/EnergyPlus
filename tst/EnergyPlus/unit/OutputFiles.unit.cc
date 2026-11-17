@@ -269,7 +269,6 @@ OutputControl:Files,
         EXPECT_EQ(wrl, state->files.outputControl.wrl);
         EXPECT_EQ(screen, state->files.outputControl.screen);
         EXPECT_EQ(extshd, state->files.outputControl.extshd);
-        EXPECT_EQ(tarcog, state->files.outputControl.tarcog);
 
         // state->clear_state();
         // Make explicit that we're resetting everything
@@ -303,7 +302,6 @@ OutputControl:Files,
         state->files.outputControl.wrl = false;
         state->files.outputControl.screen = false;
         state->files.outputControl.extshd = false;
-        state->files.outputControl.tarcog = false;
     }
 }
 

@@ -92,7 +92,6 @@ namespace InternalHeatGains {
         // Members
         std::string Name;
         bool ZoneListActive = false;
-        int spaceOrSpaceListPtr = 0;
         int numOfSpaces = 0;
         int spaceStartPtr = 0;
         bool spaceListActive = false;

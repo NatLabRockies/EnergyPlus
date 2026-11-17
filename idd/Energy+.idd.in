@@ -93344,6 +93344,7 @@ Generator:InternalCombustionEngine,
   N1, \field Rated Power Output
        \units W
   A2, \field Electric Circuit Node Name
+      \note This field is retained for input compatibility but is not used by the generator model.
   N2, \field Minimum Part Load Ratio
       \minimum 0.0
       \maximum 1.0
@@ -93351,6 +93352,7 @@ Generator:InternalCombustionEngine,
       \minimum> 0.0
       \maximum 1.0
   N4, \field Optimum Part Load Ratio
+      \note This field is retained for input compatibility but is not used by the generator model.
   A3, \field Shaft Power Curve Name
        \type object-list
        \object-list UnivariateFunctions
@@ -110458,7 +110460,7 @@ OutputControl:Files,
        \key No
        \default Yes
   A32, \field Output Tarcog
-       \note Not Implemented Yet
+       \note This field is retained for input compatibility but is not currently used.
        \type choice
        \key Yes
        \key No
