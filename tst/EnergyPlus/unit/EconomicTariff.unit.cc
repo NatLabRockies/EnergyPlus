@@ -803,6 +803,28 @@ TEST_F(EnergyPlusFixture, EconomicTariff_PushPopStack)
     EXPECT_EQ(dVarPt, cVarPt);
 }
 
+TEST_F(EnergyPlusFixture, EconomicTariff_PopStack_Underflow)
+{
+    // #11941 - On stack underflow, popStack must reset ALL monthly values to zero.
+    // monthlyArray = {0.0} on an Array1D asserts size_ == l.size() in Debug, and only resets month 1 in Release.
+    auto &s_econ = state->dataEconTariff;
+    s_econ->econVar.allocate(1);
+    s_econ->econVar(1).name = "TESTVAR";
+    s_econ->topOfStack = 0; // empty stack
+
+    Array1D<Real64> monthlyArray(NumMonths, 5.0);
+    int varPt = 1;
+
+    popStack(*state, monthlyArray, varPt);
+
+    EXPECT_EQ(0, varPt);
+    EXPECT_EQ(0, s_econ->topOfStack);
+    for (int iMonth = 1; iMonth <= NumMonths; ++iMonth) {
+        EXPECT_EQ(0.0, monthlyArray(iMonth)) << "Month " << iMonth;
+    }
+    compare_err_stream_substring("UtilityCost:Tariff: stack underflow in calculation of utility bills. On variable: TESTVAR");
+}
+
 TEST_F(EnergyPlusFixture, EconomicTariff_evaluateChargeSimple)
 {
     state->init_state(*state);
