@@ -2049,8 +2049,11 @@ and total cooling capacity of the Coil:Cooling:DX object.  Actuators
 called “Coil:Cooling:DX:SingleSpeed” are available with control types
 “Autosized Rated Air Flow Rate” (in m3/s), “Autosized Rated Total
 Cooling Capacity” (in W), and “Autosized Rated Sensible Heat Ratio” (in
-W/W).  These are only useful from the calling point named
-AfterComponentInputReadIn.
+W/W). Actuators called "Coil:Cooling:DX:MultiSpeed" are available with
+control types "Autosized Rated Air Flow Rate Speed n" (in m3/s), and
+"Autosized Rated Total Cooling Capacity Speed n" (in W) where n is an
+integer between 1 and 4.  These are only useful from the calling point
+named AfterComponentInputReadIn.
 
 DX Heating Coils
 ~~~~~~~~~~~~~~~~
@@ -2058,8 +2061,37 @@ DX Heating Coils
 An actuator is available for overriding the autosize value of the gross
 rated heating capacity of the Coil:Heating:DX:SingleSpeed object.  The
 actuator is called “Coil:Heating:DX:SingleSpeed” with control type
-“Autosized Rated Total Heating Capacity” (in W).  It is only useful from
-the calling point named AfterComponentInputReadIn.
+“Autosized Rated Total Heating Capacity” (in W). Actuators called
+“Coil:Heating:DX:MultiSpeed” are available with control types
+“Autosized Rated Air Flow Rate Speed n” (in m3/s) and “Autosized Rated
+Total Heating Capacity Speed n” (in W), where n is an integer between 1
+and 4. They are only useful from the calling point named
+AfterComponentInputReadIn.
+
+A sample EMS program might look like this:
+
+  EnergyManagementSystem:Actuator,
+    MSDXHeatOverride4,   !- Name
+    Sys 3 Heat Pump Air Source Heating Coil,    !- Actuated Component Unique Name
+    Coil:Heating:DX:MultiSpeed,      !- Actuated Component Type
+    Autosized Rated Total Heating Capacity Speed 4;  !- Actuated Component Control Type
+
+  EnergyManagementSystem:Actuator,
+    MSDXAirflowOverride4,   !- Name
+    Sys 3 Heat Pump Air Source Heating Coil,    !- Actuated Component Unique Name
+    Coil:Heating:DX:MultiSpeed,      !- Actuated Component Type
+    Autosized Rated Air Flow Rate Speed 4;  !- Actuated Component Control Type
+
+  EnergyManagementSystem:ProgramCallingManager,
+    MSDXHeatCoilSizing,  !- Name
+    AfterComponentInputReadIn,  !- EnergyPlus Model Calling Point
+    MSDXHeatingCoilSize;    !- Program Name 1
+
+  EnergyManagementSystem:Program,
+    MSDXHeatingCoilSize,    !- Name
+    SET MSDXHeatOverride4 = 8000.0,
+    SET MSDXAirflowOverride4 = MSDXHeatOverride4 * 0.00005;
+
 
 Actuators are available for overriding the input power and heating capacity
 frost adjustment factors of the Coil:Heating:DX objects.  Actuators called

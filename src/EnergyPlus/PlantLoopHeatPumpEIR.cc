@@ -63,9 +63,7 @@
 #include <EnergyPlus/DataPrecisionGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EMSManager.hh>
-#include <EnergyPlus/General.hh>
 #include <EnergyPlus/NodeInputManager.hh>
-#include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
@@ -157,28 +155,36 @@ void EIRPlantLoopHeatPump::simulate(
     this->report(state);
 }
 
+int EIRPlantLoopHeatPump::getActiveLoadSideSetPointNodeNum() const
+{
+    auto const &component = *this->loadSidePlantLoc.comp;
+    if (component.CurCompLevelOpNum > 0) {
+        auto const &componentOpScheme = component.OpScheme(component.CurCompLevelOpNum);
+        auto const &equipListPtr = componentOpScheme.EquipList(1);
+        return this->loadSidePlantLoc.loop->OpScheme(componentOpScheme.OpSchemePtr)
+            .EquipList(equipListPtr.ListPtr)
+            .Comp(equipListPtr.CompPtr)
+            .SetPointNodeNum;
+    }
+    return this->setPointNodeNum;
+}
+
 Real64 EIRPlantLoopHeatPump::getLoadSideOutletSetPointTemp(EnergyPlusData &state) const
 {
+    auto const &component = *this->loadSidePlantLoc.comp;
+    int const selectedSetPointNodeNum = component.CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased
+                                            ? this->getActiveLoadSideSetPointNodeNum()
+                                            : this->loadSidePlantLoc.loop->TempSetPointNodeNum;
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
-        if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
-            // there will be a valid set-point on outlet
-            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPoint;
-        } // use plant loop overall set-point
-        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint;
+        return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPoint;
     }
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
-        if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
-            // there will be a valid set-point on outlet
-            if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-                return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointHi;
-            }
-            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointLo;
-
-        } // use plant loop overall set-point
-        if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-            return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointHi;
+        bool const isCooling = this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling ||
+                               this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+        if (isCooling) {
+            return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPointHi;
         }
-        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointLo;
+        return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPointLo;
 
     } // there's no other enums for loop demand calcs, so I don't have a reasonable unit test for these
     // lines, they simply should not be able to get here.  But a fatal is here anyway just in case,

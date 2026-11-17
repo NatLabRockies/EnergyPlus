@@ -542,6 +542,7 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
     else if (this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
         // reset flow priority
         this->CWPlantLoc.comp->FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
+        this->CWPlantLoc.comp->ModulatedFlow = true;
         // check if setpoint on outlet node
         if ((state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
             (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi == Node::SensedNodeFlagValue)) {

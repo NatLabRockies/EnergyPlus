@@ -2345,45 +2345,42 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         }
 
         if (thisVrfSys.HeatRecoveryUsed) {
-            if (lAlphaFieldBlanks(29)) {
+            // Heat recovery operating limits are independent of the cooling-only and heating-only limits
+            // Equipment can often operate in heat recovery mode outside the heat pump mode limits
+            if (lNumericFieldBlanks(29)) {
                 thisVrfSys.MinOATHeatRecovery = max(thisVrfSys.MinOATCooling, thisVrfSys.MinOATHeating);
             } else {
                 thisVrfSys.MinOATHeatRecovery = rNumericArgs(29);
-                if (thisVrfSys.MinOATHeatRecovery < thisVrfSys.MinOATCooling || thisVrfSys.MinOATHeatRecovery < thisVrfSys.MinOATHeating) {
-                    ShowWarningError(state,
-                                     std::format("{} = \"{}\", {} is less than the minimum temperature in heat pump mode.",
-                                                 cCurrentModuleObject,
-                                                 thisVrfSys.Name,
-                                                 cNumericFieldNames(29)));
-                    ShowContinueError(state, std::format("...{} = {:.2f} C", cNumericFieldNames(29), thisVrfSys.MinOATHeatRecovery));
-                    ShowContinueError(state, std::format("...Minimum Outdoor Temperature in Cooling Mode = {:.2f} C", thisVrfSys.MinOATCooling));
-                    ShowContinueError(state, std::format("...Minimum Outdoor Temperature in Heating Mode = {:.2f} C", thisVrfSys.MinOATHeating));
-                    ShowContinueError(state,
-                                      "...Minimum Outdoor Temperature in Heat Recovery Mode reset to greater of cooling or heating minimum "
-                                      "temperature and simulation continues.");
-                    thisVrfSys.MinOATHeatRecovery = max(thisVrfSys.MinOATCooling, thisVrfSys.MinOATHeating);
-                    ShowContinueError(state, std::format("... adjusted {} = {:.2f} C", cNumericFieldNames(29), thisVrfSys.MinOATHeatRecovery));
-                }
             }
-            if (lAlphaFieldBlanks(30)) {
+            if (lNumericFieldBlanks(30)) {
                 thisVrfSys.MaxOATHeatRecovery = min(thisVrfSys.MaxOATCooling, thisVrfSys.MaxOATHeating);
             } else {
                 thisVrfSys.MaxOATHeatRecovery = rNumericArgs(30);
-                if (thisVrfSys.MaxOATHeatRecovery > thisVrfSys.MaxOATCooling || thisVrfSys.MaxOATHeatRecovery > thisVrfSys.MaxOATHeating) {
-                    ShowWarningError(state,
-                                     std::format("{} = \"{}\", {} is greater than the maximum temperature in heat pump mode.",
-                                                 cCurrentModuleObject,
-                                                 thisVrfSys.Name,
-                                                 cNumericFieldNames(30)));
-                    ShowContinueError(state, std::format("...{} = {:.2f} C", cNumericFieldNames(30), thisVrfSys.MaxOATHeatRecovery));
-                    ShowContinueError(state, std::format("...Maximum Outdoor Temperature in Cooling Mode = {:.2f} C", thisVrfSys.MaxOATCooling));
-                    ShowContinueError(state, std::format("...Maximum Outdoor Temperature in Heating Mode = {:.2f} C", thisVrfSys.MaxOATHeating));
+            }
+            if ((!lNumericFieldBlanks(29) || !lNumericFieldBlanks(30)) && thisVrfSys.MinOATHeatRecovery >= thisVrfSys.MaxOATHeatRecovery) {
+                ShowSevereError(state,
+                                std::format("{} = \"{}\" has invalid heat recovery temperature limits.", cCurrentModuleObject, thisVrfSys.Name));
+                if (lNumericFieldBlanks(29)) {
                     ShowContinueError(state,
-                                      "...Maximum Outdoor Temperature in Heat Recovery Mode reset to lesser of cooling or heating minimum "
-                                      "temperature and simulation continues.");
-                    thisVrfSys.MaxOATHeatRecovery = min(thisVrfSys.MaxOATCooling, thisVrfSys.MaxOATHeating);
-                    ShowContinueError(state, std::format("... adjusted {} = {:.2f} C", cNumericFieldNames(30), thisVrfSys.MaxOATHeatRecovery));
+                                      std::format("... {} is blank. Its default is {:.2f} C, the greater of the cooling-mode and heating-mode "
+                                                  "minimum temperatures.",
+                                                  cNumericFieldNames(29),
+                                                  thisVrfSys.MinOATHeatRecovery));
                 }
+                if (lNumericFieldBlanks(30)) {
+                    ShowContinueError(state,
+                                      std::format("... {} is blank. Its default is {:.2f} C, the lesser of the cooling-mode and heating-mode "
+                                                  "maximum temperatures.",
+                                                  cNumericFieldNames(30),
+                                                  thisVrfSys.MaxOATHeatRecovery));
+                }
+                ShowContinueError(state,
+                                  std::format("... The resulting {} ({:.2f} C) must be less than {} ({:.2f} C).",
+                                              cNumericFieldNames(29),
+                                              thisVrfSys.MinOATHeatRecovery,
+                                              cNumericFieldNames(30),
+                                              thisVrfSys.MaxOATHeatRecovery));
+                ErrorsFound = true;
             }
 
             thisVrfSys.HRCAPFTCool = GetCurveIndex(state, cAlphaArgs(40));
@@ -6611,7 +6608,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).CoolingCoilPresent)) {
                         state.dataHVACVarRefFlow->CoolingLoad(VRFCond) = true;
                     } else {
-                        if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
+                        if (!state.dataGlobal->WarmupFlag && any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
                             if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
                                 ShowWarningMessage(state,
                                                    std::format("{} \"{}\".",
@@ -6645,7 +6642,7 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
                         }
                     }
                 } else {
-                    if (any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
+                    if (!state.dataGlobal->WarmupFlag && any(state.dataHVACVarRefFlow->TerminalUnitList(TUListIndex).HeatingCoilAvailable)) {
                         if (state.dataHVACVarRefFlow->VRF(VRFCond).HeatingMaxTempLimitIndex == 0) {
                             ShowWarningMessage(state,
                                                std::format("{} \"{}\".",

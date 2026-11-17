@@ -850,6 +850,7 @@ void SetInitialMeterReportingAndOutputNames(EnergyPlusData &state,
                                             bool CumulativeIndicator          // true if this is a Cumulative meter reporting
 );
 
+// Returns the 0-based index into meters, or -1 if no meter has that name
 int GetMeterIndex(EnergyPlusData const &state, std::string const &MeterName);
 
 Constant::eResource GetMeterResourceType(EnergyPlusData const &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
@@ -957,7 +958,7 @@ struct OutputProcessorData : BaseGlobalStruct
     std::vector<OutputProcessor::ReqVar *> reqVars;
 
     std::vector<OutputProcessor::Meter *> meters;
-    std::map<std::string, int> meterMap;
+    std::map<std::string, int> meterMap; // uppercase meter name -> 0-based index into meters
 
     bool Rept = false;
     bool OpaqSurfWarned = false;
