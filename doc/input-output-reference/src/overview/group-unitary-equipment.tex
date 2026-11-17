@@ -105,9 +105,9 @@ This alpha field contains the identifying type of supply air fan specified for t
 \item
   \textbf{\hyperref[fanconstantvolume]{Fan:ConstantVolume}} requires continuous fan operation.
 \item
-  \textbf{\hyperref[fanvariablevolume]{Fan:VariableVolume}} supports both cycling and continuous fan operation and is used for variable air volume systems or multi- or variable-speed coils. Here, ``cycling'' describes the unitary system operating mode selected by the schedule; the fan can modulate airflow while operating, and this mode alone does not imply low-load fan cycling losses.
+  \textbf{\hyperref[fanvariablevolume]{Fan:VariableVolume}} supports both cycling and continuous fan operation and is used for variable air volume systems or multi- or variable-speed coils.
 \item
-  \textbf{\hyperref[fancomponentmodel]{Fan:ComponentModel}} may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
+  \textbf{\hyperref[fancomponentmodel]{Fan:ComponentModel}} supports both cycling and continuous fan operation and may be used in place of the ConstantVolume or VariableVolume fan types to more accurately represent fan performance.
 \end{itemize}
 
 \paragraph{Field: Supply Fan Name}\label{field-supply-fan-name}
@@ -129,7 +129,7 @@ This alpha field specifies the name of the supply air fan operating mode schedul
   \textbf{Values other than 0}: Continuous fan mode. The supply fan runs continuously while the heating or cooling coil cycles to meet the load.
 \end{itemize}
 
-If this field is blank, the fan operates in cycling mode for Control Type = Load or SingleZoneVAV, and in continuous mode for Control Type = Setpoint. For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be Fan:SystemModel, Fan:OnOff, or Fan:VariableVolume.
+If this field is blank, the fan operates in cycling mode for Control Type = Load or SingleZoneVAV, and in continuous mode for Control Type = Setpoint. For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, or Fan:ComponentModel.
 
 When Control Type = SingleZoneVAV, the SingleZoneVAV algorithm is used only during continuous fan operation with compatible coils. During cycling fan operation, the system uses the load-based control model instead. Leaving this schedule blank therefore selects load-based control throughout the simulation, even when Control Type = SingleZoneVAV. Specify a schedule with nonzero values during periods when SingleZoneVAV operation is desired. Continuous fan operation does not require a fixed fan speed.
 

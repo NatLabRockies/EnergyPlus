@@ -65349,7 +65349,7 @@ AirLoopHVAC:UnitarySystem,
        \note Enter the type of supply air fan if included in the unitary system.
        \note Fan:ConstantVolume only works with continuous fan operating mode (i.e. supply
        \note air fan operating mode schedule values greater than 0).
-       \note Fan:SystemModel, Fan:OnOff, and Fan:VariableVolume support cycling and continuous fan operating modes.
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, and Fan:ComponentModel support cycling and continuous fan operating modes.
        \note Specify a Fan:SystemModel or a Fan:VariableVolume when modeling VAV systems which used setpoint based control
        \note if the fan is included in the unitary system object.
        \note The ComponentModel fan type may be substituted for the ConstantVolume or VariableVolume
@@ -65372,7 +65372,7 @@ AirLoopHVAC:UnitarySystem,
        \note If blank, defaults to cycling for Control Type = Load or SingleZoneVAV,
        \note and continuous for Control Type = Setpoint.
        \note For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be
-       \note Fan:SystemModel, Fan:OnOff, or Fan:VariableVolume.
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, or Fan:ComponentModel.
        \note For Control Type = Setpoint or Supply Fan Object Type = Fan:ConstantVolume,
        \note any specified schedule must have values greater than 0 and less than or equal to 1.
        \note SingleZoneVAV uses load-based control during cycling fan operation.
