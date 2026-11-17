@@ -187,7 +187,6 @@ struct HeatBalanceMgrData : BaseGlobalStruct
 {
 
     bool ManageHeatBalanceGetInputFlag = true;
-    bool DoReport = false;
     bool ChangeSet = true; // Toggle for checking storm windows
     bool FirstWarmupWrite = true;
     bool WarmupConvergenceWarning = false;
@@ -242,7 +241,6 @@ struct HeatBalanceMgrData : BaseGlobalStruct
 
         ManageHeatBalanceGetInputFlag = true;
         UniqueConstructNames.clear();
-        DoReport = false;
         ChangeSet = true;
         FirstWarmupWrite = true;
         WarmupConvergenceWarning = false;

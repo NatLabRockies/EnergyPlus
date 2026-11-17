@@ -39138,6 +39138,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \default 10
    A15, \field First Fuel Type
         \type choice
+        \note This field is retained for input compatibility but is not currently used by the model.
         \key None
         \key Electricity
         \key NaturalGas
@@ -39152,8 +39153,6 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key DistrictHeatingWater
         \key DistrictHeatingSteam
         \key DistrictCooling
-        \note Select the fuel type associated with field: "System Electric Power Lookup Table" in each mode.
-        \note If this field is blank, default first fuel type = Electricity.
         \default Electricity
    A16, \field Second Fuel Type
         \type choice
@@ -78689,6 +78688,7 @@ HeatPump:WaterToWater:ParameterEstimation:Cooling,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W
@@ -78763,6 +78763,7 @@ HeatPump:WaterToWater:ParameterEstimation:Heating,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W

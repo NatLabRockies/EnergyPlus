@@ -72,9 +72,6 @@ namespace HeatPumpWaterToWaterCOOLING {
         DataPlant::PlantEquipmentType WWHPPlantTypeOfNum;
 
         Fluid::RefrigProps *refrig = nullptr;
-        bool Available;                  // need an array of logicals--load identifiers of available equipment
-        bool ON;                         // simulate the machine at it's operating part load ratio
-        Real64 COP;                      // Coefficient of Performance of the machine
         Real64 NomCap;                   // Nominal Capacity of the HeatPump
         Real64 MinPartLoadRat;           // Minimum operating Part Load Ratio
         Real64 MaxPartLoadRat;           // Maximum operating Part Load Ratio
@@ -98,7 +95,6 @@ namespace HeatPumpWaterToWaterCOOLING {
         //  that is supposed to be proportional to the theoretical power
         Real64 HighPressCutoff; // Maximum Design Pressure on the Load Side
         Real64 LowPressCutoff;  // Minimum Design Pressure on the Source Side
-        bool IsOn;
         bool MustRun;
         // loop topology variables
         PlantLocation SourcePlantLoc; // source side plant loop component location
@@ -116,7 +112,6 @@ namespace HeatPumpWaterToWaterCOOLING {
         Real64 SourceSideWaterInletTemp;  // Source Side outlet temperature °C
         Real64 LoadSideWaterOutletTemp;   // Load Side outlet temperature °C
         Real64 SourceSideWaterOutletTemp; // Source Side outlet temperature °C
-        int Running;                      // On reporting Flag
 
         Real64 LoadSideWaterMassFlowRate;
         Real64 SourceSideWaterMassFlowRate;
@@ -126,14 +121,14 @@ namespace HeatPumpWaterToWaterCOOLING {
 
         // Default Constructor
         GshpPeCoolingSpecs()
-            : WWHPPlantTypeOfNum(DataPlant::PlantEquipmentType::Invalid), Available(false), ON(false), COP(0.0), NomCap(0.0), MinPartLoadRat(0.0),
-              MaxPartLoadRat(0.0), OptPartLoadRat(0.0), LoadSideVolFlowRate(0.0), LoadSideDesignMassFlow(0.0), SourceSideVolFlowRate(0.0),
-              SourceSideDesignMassFlow(0.0), SourceSideInletNodeNum(0), SourceSideOutletNodeNum(0), LoadSideInletNodeNum(0), LoadSideOutletNodeNum(0),
-              SourceSideUACoeff(0.0), LoadSideUACoeff(0.0), CompPistonDisp(0.0), CompClearanceFactor(0.0), CompSucPressDrop(0.0), SuperheatTemp(0.0),
-              PowerLosses(0.0), LossFactor(0.0), HighPressCutoff(0.0), LowPressCutoff(0.0), IsOn(false), MustRun(false), SourcePlantLoc{},
-              LoadPlantLoc{}, CondMassFlowIndex(0), Power(0.0), Energy(0.0), QLoad(0.0), QLoadEnergy(0.0), QSource(0.0), QSourceEnergy(0.0),
-              LoadSideWaterInletTemp(0.0), SourceSideWaterInletTemp(0.0), LoadSideWaterOutletTemp(0.0), SourceSideWaterOutletTemp(0.0), Running(0),
-              LoadSideWaterMassFlowRate(0.0), SourceSideWaterMassFlowRate(0.0), plantScanFlag(true), beginEnvironFlag(true)
+            : WWHPPlantTypeOfNum(DataPlant::PlantEquipmentType::Invalid), NomCap(0.0), MinPartLoadRat(0.0), MaxPartLoadRat(0.0), OptPartLoadRat(0.0),
+              LoadSideVolFlowRate(0.0), LoadSideDesignMassFlow(0.0), SourceSideVolFlowRate(0.0), SourceSideDesignMassFlow(0.0),
+              SourceSideInletNodeNum(0), SourceSideOutletNodeNum(0), LoadSideInletNodeNum(0), LoadSideOutletNodeNum(0), SourceSideUACoeff(0.0),
+              LoadSideUACoeff(0.0), CompPistonDisp(0.0), CompClearanceFactor(0.0), CompSucPressDrop(0.0), SuperheatTemp(0.0), PowerLosses(0.0),
+              LossFactor(0.0), HighPressCutoff(0.0), LowPressCutoff(0.0), MustRun(false), SourcePlantLoc{}, LoadPlantLoc{}, CondMassFlowIndex(0),
+              Power(0.0), Energy(0.0), QLoad(0.0), QLoadEnergy(0.0), QSource(0.0), QSourceEnergy(0.0), LoadSideWaterInletTemp(0.0),
+              SourceSideWaterInletTemp(0.0), LoadSideWaterOutletTemp(0.0), SourceSideWaterOutletTemp(0.0), LoadSideWaterMassFlowRate(0.0),
+              SourceSideWaterMassFlowRate(0.0), plantScanFlag(true), beginEnvironFlag(true)
         {
         }
 
