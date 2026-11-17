@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 
 namespace EnergyPlus {
 
@@ -312,16 +313,16 @@ namespace Pollution {
     struct ComponentProps
     {
         Real64 sourceVal = 0.0;
-        std::array<Real64, (int)Pollutant::Num> pollutantVals = {0.0};
+        std::array<Real64, (int)Pollutant::Num> pollutantVals{};
     };
 
     struct CoefficientProps
     {
         bool used = false;
         Real64 sourceCoeff = 0.0;
-        std::array<Real64, (int)Pollutant::Num> pollutantCoeffs = {0.0};
+        std::array<Real64, (int)Pollutant::Num> pollutantCoeffs{};
         Sched::Schedule *sourceSched = nullptr;
-        std::array<Sched::Schedule *, (int)Pollutant::Num> pollutantScheds = {0};
+        std::array<Sched::Schedule *, (int)Pollutant::Num> pollutantScheds{};
     };
 
     void CalculatePollution(EnergyPlusData &state);
@@ -366,15 +367,11 @@ struct PollutionData : BaseGlobalStruct
     std::array<Pollution::ComponentProps, (int)Pollution::PollFuelComponent::Num> pollComps;
 
     // Meters, meter values, and grouped meter values
-    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = [] {
-        std::array<int, (int)Pollution::PollFacilityMeter::Num> a{};
-        a.fill(-1);
-        return a;
-    }();
-    std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals = {0.0};
-    std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals = {0.0};
+    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = filled_array{-1};
+    std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals{};
+    std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals{};
 
-    std::array<Real64, (int)Pollution::Pollutant::Num> pollutantVals = {0.0};
+    std::array<Real64, (int)Pollution::Pollutant::Num> pollutantVals{};
 
     std::vector<Pollution::PollFuel> pollFuelFactorList;
 
