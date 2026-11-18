@@ -475,22 +475,16 @@ TEST_F(EnergyPlusFixture, Psychrometrics_Interpolation_Sample_Test)
     // The sample data were extracted from the original psychrometric function PsyTsatFnPb every 64 Pa in the range of 64 Pa to 105,664 Pa.
     // The sample data for saturated temperature from tsat_fn_pb_tsat were compared to the results from the original psychrometric function.
     state->init_state(*state);
-    Real64 tsat_psy;
     Real64 error = 0.0;
-    int i;
-    for (i = 1; i < 1651; ++i) {
+    for (int i = 1; i < 1651; ++i) {
         int tsat_fn_pb_pressure = i * 64; // sample bin size =64 Pa; sample size =1651 (continuous)
-        tsat_psy = PsyTsatFnPb(*state, tsat_fn_pb_pressure);
+        Real64 const tsat_psy = PsyTsatFnPb(*state, tsat_fn_pb_pressure);
         error = max(abs(tsat_psy - tsat_fn_pb_y[i]), error);
     }
 
-#ifdef EP_nocache_Psychrometrics
-    // The no-cache build compares directly against the iterative calculation, which does not
-    // round to the cache grid used by the default cached build.
+    // The samples were generated with the former Psat hash cache. PsyTsatFnPb stops once its secant step is below 1e-4 C,
+    // so any change in how Psat is computed moves the result by a few 1e-6 C (3.8e-6 C with the exact formula or the table)
     EXPECT_LE(error, 5E-6);
-#else
-    EXPECT_LE(error, 1E-7);
-#endif
 }
 TEST_F(EnergyPlusFixture, Psychrometrics_CSpline_Test)
 {
