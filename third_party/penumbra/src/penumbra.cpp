@@ -53,7 +53,7 @@ bool Penumbra::is_valid_context() {
 }
 
 VendorType Penumbra::get_vendor_name() {
-  VendorType vendor_type;
+  VendorType vendor_type{VendorType::unknown};
   auto vendor_name = Context::get_vendor_name();
   if (vendor_name == "NVIDIA") {
     vendor_type = VendorType::nvidia;
@@ -66,6 +66,9 @@ VendorType Penumbra::get_vendor_name() {
     vendor_type = VendorType::vmware;
   } else if (vendor_name == "Mesa" || vendor_name == "Mesa/X.org") {
     vendor_type = VendorType::mesa;
+  } else if (vendor_name == "Apple" || vendor_name == "Apple Inc." ||
+             vendor_name == "Apple Computer, Inc.") {
+    vendor_type = VendorType::apple;
   } else {
     throw PenumbraException(
         std::format("Failed to find GPU or vendor name ({}) is not in list.", vendor_name),
