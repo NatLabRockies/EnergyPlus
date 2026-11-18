@@ -59,8 +59,8 @@ body:
     attributes:
       label: Was this issue entirely human-written?
       options:
-        - Yes
-        - No
+        - 'Yes'
+        - 'No'
     validations:
       required: true
 
