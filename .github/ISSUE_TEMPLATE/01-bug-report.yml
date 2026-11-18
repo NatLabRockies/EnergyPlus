@@ -64,11 +64,11 @@ body:
     validations:
       required: true
 
-  - type: input
+  - type: textarea
     id: authorship_disclosure
     attributes:
       label: Authorship Disclosure
-      placeholder: If you answered "No" to above question describe any assistive tools used in drafting this issue, otherwise "None".
+      description: If you answered "No" to above question describe any assistive tools used in drafting this issue, otherwise "None".
     validations:
       required: true
 
