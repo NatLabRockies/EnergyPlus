@@ -9613,7 +9613,7 @@ namespace UnitarySystems {
                     }
                     if (state.dataGlobal->DoCoilDirectSolutions && state.dataUnitarySystems->CoolingLoad &&
                         (this->m_coolCoilType == HVAC::CoilType::CoolingDXSingleSpeed ||
-                         this->m_coolCoilType == HVAC::CoilType::CoolingDX && this->m_NumOfSpeedCooling == 1)) {
+                         (this->m_coolCoilType == HVAC::CoilType::CoolingDX && this->m_NumOfSpeedCooling == 1))) {
                         CoolPLR = (ZoneLoad - SensOutputOff) / (SensOutputOn - SensOutputOff);
                         HeatPLR = 0.0;
                         this->calcUnitarySystemToLoad(state,
