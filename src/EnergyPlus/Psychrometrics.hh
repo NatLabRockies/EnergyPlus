@@ -62,6 +62,9 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PsychCacheData.hh>
+#ifdef EP_interp_PsyPsatFnTemp
+#    include <EnergyPlus/PsychPsatTable.hh>
+#endif
 
 namespace EnergyPlus {
 
@@ -70,12 +73,12 @@ struct EnergyPlusData;
 
 #ifdef EP_nocache_Psychrometrics
 #    undef EP_cache_PsyTwbFnTdbWPb
-#    undef EP_cache_PsyPsatFnTemp
+#    undef EP_interp_PsyPsatFnTemp
 #    undef EP_cache_PsyTsatFnPb
 #    undef EP_cache_PsyTsatFnHPb
 #else
 #    define EP_cache_PsyTwbFnTdbWPb
-#    define EP_cache_PsyPsatFnTemp
+#    define EP_interp_PsyPsatFnTemp
 #    define EP_cache_PsyTsatFnPb
 #    define EP_cache_PsyTsatFnHPb
 #endif
@@ -996,68 +999,30 @@ namespace Psychrometrics {
         return W;
     }
 
-#ifdef EP_cache_PsyPsatFnTemp
+#ifdef EP_interp_PsyPsatFnTemp
 
     Real64 PsyPsatFnTemp_raw(EnergyPlusData &state,
                              Real64 const T,                        // dry-bulb temperature {C}
                              std::string_view const CalledFrom = "" // routine this function was called from (error messages)
     );
 
-// we are disabling these warnings on Windows because the cache value lookups are using 64bit integers,
-// but the () and [] operator overloads for Array1D (which stores the cache) only uses 32bit lookups
-// this seems ... very bad. This problem will be fixed when we get rid of Array1D
-// at which time this warning disable should be removed.
-#    ifdef _MSC_VER
-#        pragma warning(push)
-#        pragma warning(disable : 4244)
-#    endif
-
     inline Real64 PsyPsatFnTemp(EnergyPlusData &state,
                                 Real64 const T,                        // dry-bulb temperature {C}
                                 std::string_view const CalledFrom = "" // routine this function was called from (error messages)
     )
     {
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Linda Lawrie
-        //       DATE WRITTEN   March 2013
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
-
-        // PURPOSE OF THIS FUNCTION:
-        // Provide a "cache" of results for the given argument (T) and pressure (Pascal) output result.
-
-        // METHODOLOGY EMPLOYED:
-        // Use grid shifting and masking to provide hash into the cache. Use Equivalence to
-        // make Fortran ignore "types".
-
-        // FUNCTION PARAMETER DEFINITIONS:
-        //  integer(i64), parameter :: Grid_Mask=NOT(ISHFT(1_i64, Grid_Shift)-1)
-        std::uint64_t constexpr Grid_Shift = 64 - 12 - psatprecision_bits;
-
+        // Cubic Hermite table (PsychPsatTable.hh), out of range (and NaN) goes to _raw for warnings and clamping
 #    ifdef EP_psych_stats
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::PsatFnTemp_cache)];
 #    endif
-
-        DISABLE_WARNING_PUSH
-        DISABLE_WARNING_STRICT_ALIASING
-        // cppcheck-suppress invalidPointerCast
-        Int64 Tdb_tag(*reinterpret_cast<Int64 const *>(&T) >> Grid_Shift);
-        DISABLE_WARNING_POP
-        Int64 const hash(Tdb_tag & psatcache_mask);
-        auto &cPsat(state.dataPsychCache->cached_Psat[hash]);
-
-        if (cPsat.iTdb != Tdb_tag) {
-            cPsat.iTdb = Tdb_tag;
-            Tdb_tag <<= Grid_Shift;
-            DISABLE_WARNING_PUSH
-            DISABLE_WARNING_STRICT_ALIASING
-            // cppcheck-suppress invalidPointerCast
-            Real64 Tdb_tag_r = *reinterpret_cast<Real64 const *>(&Tdb_tag);
-            DISABLE_WARNING_POP
-            cPsat.Psat = PsyPsatFnTemp_raw(state, Tdb_tag_r, CalledFrom);
+        if (T > PsatTable::T_min && T < PsatTable::T_max) {
+            Real64 const u = (T - PsatTable::T0) * PsatTable::inv_h;
+            int const j = static_cast<int>(u);
+            Real64 const t = u - j;
+            auto const &c = PsatTable::coefs[j];
+            return c[0] + (t * (c[1] + t * (c[2] + t * c[3])));
         }
-
-        return cPsat.Psat; // saturation pressure {Pascals}
+        return PsyPsatFnTemp_raw(state, T, CalledFrom);
     }
 
 #else
@@ -1070,6 +1035,16 @@ namespace Psychrometrics {
 #endif
 
 #ifdef EP_cache_PsyTsatFnHPb
+
+// we are disabling these warnings on Windows because the cache value lookups are using 64bit integers,
+// but the () and [] operator overloads for Array1D (which stores the cache) only uses 32bit lookups
+// this seems ... very bad. This problem will be fixed when we get rid of Array1D
+// at which time this warning disable should be removed.
+#    ifdef _MSC_VER
+#        pragma warning(push)
+#        pragma warning(disable : 4244)
+#    endif
+
     Real64 PsyTsatFnHPb_raw(EnergyPlusData &state,
                             Real64 const H,                        // enthalpy {J/kg}
                             Real64 const PB,                       // barometric pressure {Pascals}
@@ -1116,6 +1091,10 @@ namespace Psychrometrics {
 
         return Tsat_result;
     }
+
+#    ifdef _MSC_VER
+#        pragma warning(pop)
+#    endif
 
 #else
 
@@ -1485,6 +1464,12 @@ namespace Psychrometrics {
     }
 
 #ifdef EP_cache_PsyTsatFnPb
+
+// See PsyTsatFnHPb
+#    ifdef _MSC_VER
+#        pragma warning(push)
+#        pragma warning(disable : 4244)
+#    endif
 
     Real64 PsyTsatFnPb_raw(EnergyPlusData &state,
                            Real64 const Press,                    // barometric pressure {Pascals}

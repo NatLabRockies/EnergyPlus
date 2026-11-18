@@ -537,3 +537,36 @@ TEST_F(EnergyPlusFixture, Psychrometrics_PsyTwbFnTdbWPb_Test_Discontinuity)
     EXPECT_EQ(state->dataErrTracking->TotalSevereErrors, 0);
     EXPECT_EQ(state->dataErrTracking->TotalWarningErrors, 1); // IDF version object
 }
+
+#ifdef EP_interp_PsyPsatFnTemp
+TEST_F(EnergyPlusFixture, Psychrometrics_PsyPsatFnTemp_Table)
+{
+    state->init_state(*state);
+    state->dataGlobal->WarmupFlag = true; // no out-of-range warnings from _raw
+
+    // Table vs exact formula over the whole range, both sides of the triple point included
+    Real64 worst = 0.0;
+    for (int i = -99999; i < 200000; ++i) {
+        Real64 const T = i * 0.001;
+        Real64 const exact = PsyPsatFnTemp_raw(*state, T);
+        worst = std::max(worst, std::abs(PsyPsatFnTemp(*state, T) - exact) / exact);
+    }
+    EXPECT_LT(worst, 2.0e-7);
+
+    // Out of range: same clamped constants as _raw
+    for (Real64 const T : {-150.0, -100.0, 200.0, 250.0}) {
+        EXPECT_EQ(PsyPsatFnTemp(*state, T), PsyPsatFnTemp_raw(*state, T));
+    }
+
+    // Slope still jumps at the triple point (ice ~50.4 Pa/K, water ~44.4 Pa/K), same as _raw
+    Real64 constexpr dT = 1.0e-3;
+    auto slope = [&](auto fn, Real64 const T) { return (fn(*state, T + dT) - fn(*state, T)) / dT; };
+    auto table = [](EnergyPlusData &s, Real64 const T) { return PsyPsatFnTemp(s, T); };
+    auto raw = [](EnergyPlusData &s, Real64 const T) { return PsyPsatFnTemp_raw(s, T); };
+    Real64 const ice = slope(table, 0.0);
+    Real64 const water = slope(table, 0.02);
+    EXPECT_NEAR(ice, slope(raw, 0.0), 0.01);
+    EXPECT_NEAR(water, slope(raw, 0.02), 0.01);
+    EXPECT_GT(ice - water, 5.0);
+}
+#endif

@@ -553,6 +553,7 @@ set(SRC
     Psychrometrics.cc
     Psychrometrics.hh
     PsychCacheData.hh
+    PsychPsatTable.hh
     Pumps.cc
     Pumps.hh
     PurchasedAirManager.cc
