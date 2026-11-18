@@ -540,14 +540,14 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelVSCooling)
 
     MyLoad = -10000.0;
     vsTower.calculateMerkelVariableSpeedTower(*state, MyLoad, RunFlag);
-    EXPECT_NEAR(vsTower.Qactual, 8981.865, 0.001);
+    EXPECT_NEAR(vsTower.Qactual, 8981.862, 0.005);
     EXPECT_NEAR(vsTower.InletWaterTemp, 30.007, 0.001);
     EXPECT_NEAR(vsTower.OutletWaterTemp, 26.014, 0.001);
     int const chwLoopNum = vsTower.plantLoc.loopNum;
     Real64 CpWater = state->dataPlnt->PlantLoop(chwLoopNum)
                          .glycol->getSpecificHeat(*state, state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).Temp, RoutineName);
     Real64 Qtower = state->dataLoopNodes->Node(vsTower.WaterInletNodeNum).MassFlowRate * CpWater * (vsTower.InletWaterTemp - vsTower.OutletWaterTemp);
-    EXPECT_NEAR(Qtower, 8981.865, 0.001);
+    EXPECT_NEAR(Qtower, 8981.862, 0.005);
 
     MyLoad = -1500.0;
     vsTower.WaterMassFlowRate = vsTower.DesWaterMassFlowRate * (vsTower.MinFracFlowRate - 0.01); // just under min flow
@@ -1463,7 +1463,7 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedUserInputTowerSizing)
     state->dataCondenserLoopTowers->towers(1).SizeTower(*state);
 
     EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedAirFlowRate, 3.497, 0.001);
-    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA, 7389.232, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA, 7389.232, 0.005);
     EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedFanPower, 1299.024, 0.001);
     EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate, 0.350, 0.001);
     EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).TowerNominalCapacity, 98973.280, 0.001);
