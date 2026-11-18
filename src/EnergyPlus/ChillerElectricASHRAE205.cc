@@ -542,6 +542,7 @@ void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)
     else if (this->FlowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
         // reset flow priority
         this->CWPlantLoc.comp->FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
+        this->CWPlantLoc.comp->ModulatedFlow = true;
         // check if setpoint on outlet node
         if ((state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
             (state.dataLoopNodes->Node(this->EvapOutletNodeNum).TempSetPointHi == Node::SensedNodeFlagValue)) {
@@ -1622,6 +1623,14 @@ void ASHRAE205ChillerSpecs::getDesignCapacities(
         MaxLoad = 0.0;
         OptLoad = 0.0;
     }
+}
+
+Real64 ASHRAE205ChillerSpecs::getDynamicMaxCapacity([[maybe_unused]] EnergyPlusData &state,
+                                                    [[maybe_unused]] Real64 &minLoad,
+                                                    [[maybe_unused]] Real64 &optLoad)
+{
+    // Preserve the design capacities until dynamic limits can be calculated from the representation performance map.
+    return 0.0;
 }
 
 } // namespace EnergyPlus::ChillerElectricASHRAE205

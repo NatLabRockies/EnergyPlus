@@ -349,8 +349,8 @@ namespace Sched {
         // Members
         std::array<WeekSchedule *, 367> weekScheds = {nullptr};           // one created for each day of possible simulation
         std::array<bool, (int)DayType::Num> MaxMinByDayTypeSet = {false}; // minimum and maximum values by daytype have been stored
-        std::array<Real64, (int)DayType::Num> MinByDayType = {0.0};       // minimum values by daytype for this schedule
-        std::array<Real64, (int)DayType::Num> MaxByDayType = {0.0};       // maximum values by daytype for this schedule
+        std::array<Real64, (int)DayType::Num> MinByDayType{};             // minimum values by daytype for this schedule
+        std::array<Real64, (int)DayType::Num> MaxByDayType{};             // maximum values by daytype for this schedule
         bool UseDaylightSaving = true; // Toggles between daylight saving option to be included as "No" or "Yes" (default)
 
         ScheduleDetailed()
