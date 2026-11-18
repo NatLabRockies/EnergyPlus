@@ -11183,11 +11183,8 @@ namespace UnitarySystems {
                         state.dataUnitarySystems->CompOffFlowRatio = this->m_MSCoolingSpeedRatio[CoolSpeedNum - 1];
                         state.dataUnitarySystems->OACompOffMassFlow = this->m_CoolOutAirMassFlow;
                     }
-                } else {                                                   // cycling fan mode
-                    if (this->m_EconoSpeedNum == 0 && CoolSpeedNum == 0) { // multi-stage economizer operation
-                        state.dataUnitarySystems->CompOffMassFlow = 0.0;
-                        state.dataUnitarySystems->CompOffFlowRatio = 0.0;
-                    } else if (this->m_EconoSpeedNum > 0) { // multi-stage economizer operation
+                } else {                             // cycling fan mode
+                    if (this->m_EconoSpeedNum > 0) { // multi-stage economizer operation
                         state.dataUnitarySystems->CompOffMassFlow = this->m_CoolMassFlowRate[this->m_EconoSpeedNum - 1];
                         state.dataUnitarySystems->CompOffFlowRatio = this->m_MSCoolingSpeedRatio[this->m_EconoSpeedNum - 1];
                         state.dataUnitarySystems->OACompOffMassFlow = this->m_CoolOutAirMassFlow;
