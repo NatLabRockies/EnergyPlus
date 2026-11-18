@@ -50,7 +50,7 @@ The models must decide whether the fan is on or off. The primary on/off trigger 
 
 Generally the fan is a passive component: it accepts the mass flow on its inlet node, uses it in its calculations of energy consumption and temperature rise, and passes it to the outlet node. However the fan maximum and minimum airflow rates act as absolute limits on the airflow rate.
 
-For multi-speed fans, the parent object determines the fan speed ratio (i.e., the selected speed of the fan motor) and uses this value to determine flow rate and electric power consumption.  For a Fan:SystemModel operating with the Discrete choice for speed control, the fan model determines the faction of time spent at the discrete speeds that bound it and will produce the average flow requested by the parent object.  Then the fan electric power consumption is determined for each speed level and combined using a time-weighted average.  For a fan operating with Continuous speed control and a fan modeled with the Fan:OnOff object, the electric power is evaluated using the power ratio performance curve at the (average) flow fraction requested by the parent object.
+For multi-speed fans, the parent object determines the fan speed ratio (i.e., the selected speed of the fan motor) and uses this value to determine flow rate and electric power consumption. For a Fan:SystemModel operating with Discrete speed control, the fan model determines the fraction of time spent at the discrete speeds that bound the requested flow. Electric power is calculated for each speed and combined using a time-weighted average. With Continuous speed control, Fan:SystemModel evaluates its power curve at the average flow over the fan's operating time and weights power by the PLF-corrected runtime when the parent supplies cycling information. Both speed-control methods can model cycling. Fan:VariableVolume instead evaluates its power curve at the requested timestep-average flow, without a separate cycling-runtime correction. Fan:OnOff accounts for cycling at its operating speed, with optional speed-dependent power and efficiency curves.
 
 \subsubsection{Simulation}\label{simulation}
 
@@ -160,14 +160,24 @@ The temperature of the air stream leaving the fan is calculated as above using t
 
 \emph{\textbf{Continuous Speed Control}}
 
-For the \emph{Fan:SystemModel} using Continuous speed control the flow fraction is used to evaluate the power performance modification factor which is defined in a separate curve or table.
+For the \emph{Fan:SystemModel}, Continuous speed control represents a continuously speed-controlled fan that can cycle on and off under parent-system control. ``Continuous'' refers to speed modulation, not continuous operation over the timestep. This differs from \emph{Fan:VariableVolume}, which evaluates its power curve at the requested timestep-average flow without separately applying a parent-supplied cycling runtime or coil part load fraction (PLF).
+
+When the parent supplies operating-mode flow ratios and runtime fractions, the power curve or table is evaluated at the average flow fraction over the fan's operating time. This average uses the requested mode runtimes before PLF correction, and modes with zero airflow contribute no fan runtime. For active modes indexed by \(j\), each mode's airflow is limited to the design maximum before calculating the outlet airflow and the average:
 
 \begin{equation}
-{f_{power,cur}} =  {func_{power curve}}({f_{flow,cur}})
+{f_{flow,cur}} = \frac{\sum_j {f_{flow,j}} {RTF_{requested,j}}}{\sum_j {RTF_{requested,j}}}
+\end{equation}
+
+Each active mode's requested runtime is divided by the coil PLF and limited to the range zero to one. Nonpositive PLF values are reset to one, positive values below 0.7 are limited to 0.7, and values at or above one leave runtime unchanged, as for discrete speed control. The corrected mode runtimes weight fan power, including the low-flow temperature safeguard, and are summed without an overall cap for the reported fan runtime fraction. PLF correction changes power and reported runtime, not the limited timestep-average airflow or the average flow fraction used to evaluate the power curve. Without parent-supplied flow/runtime pairs, an available fan with nonzero airflow operates for the full timestep, and the curve is evaluated at the requested timestep-average flow fraction.
+
+For normal operation, the power curve input is bounded below by Electric Power Minimum Flow Rate Fraction, \(f_{flow,min}\). Before any low-flow temperature safeguard is applied, the power fraction and timestep-average electric power are:
+
+\begin{equation}
+{f_{power,cur}} = {func_{power curve}}\left(\max(f_{flow,min}, f_{flow,cur})\right)
 \end{equation}
 
 \begin{equation}
-{\varepsilon_{tot,cur}} = \frac {( { \dot m_{cur} \cdot \Delta P  } )}{( {f_{power,cur}} \cdot { \dot Q_{tot, design} \cdot \rho_{air}})}
+{\dot Q_{tot,elec}} = \sum_j \max\left(0,\; {f_{power,cur}} \cdot \frac{\dot m_{design,max} {RTF_{corrected,j}} {\Delta P_j}}{\varepsilon_{tot,max} \cdot \rho_{air}}\right)
 \end{equation}
 
 \emph{\textbf{Fan:OnOff Fan Model}}
