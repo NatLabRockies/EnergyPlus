@@ -68,7 +68,7 @@ body:
     id: authorship_disclosure
     attributes:
       label: Authorship Disclosure
-      description: If you answered "No" to above question describe any assistive tools used in drafting this issue, otherwise "None".
+      description: If you answered "No" to "Was this issue entirely human-written?", describe any tools used in drafting this issue. Otherwise, enter "None".
     validations:
       required: true
 
