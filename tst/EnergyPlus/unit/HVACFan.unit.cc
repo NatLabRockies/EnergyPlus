@@ -247,12 +247,13 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteRuntimeFraction)
     fanSystem.numSpeeds = 2;
     fanSystem.runtimeFracAtSpeed.resize(2);
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    // Both active modes are individually PLF-corrected from 0.5 to 0.625; only the aggregate runtime is capped.
+    // Synthetic direct-call case: the two corrected mode runtimes sum to 1.25, a combination not expected
+    // from parent control. Keep this to verify the per-speed outputs and aggregate handling.
     fanSystem.calcSimpleSystemFan(*state, _, 100.0, 0.5, 0.5, 1.0, 0.5, 100.0);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[0]);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[1]);
-    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
-    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
+    EXPECT_GT(fanSystem.runtimeFracAtSpeed[0] + fanSystem.runtimeFracAtSpeed[1], 1.0);
+    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(93.75, fanSystem.totalPower);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
 }
@@ -365,16 +366,16 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousCyclingRuntimeIncludesPLFCorrec
     EXPECT_LE(fanSystem.runtimeFrac, 1.0);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    // Each 0.5 mode runtime corrects to 0.625, so the 1.25 sum is capped only for runtimeFrac;
-    // power still uses both modes.
+    // Synthetic direct-call case: the corrected mode runtimes sum to 1.25, which parent control is not
+    // expected to produce; power still accounts for both modes.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, 200.0);
-    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
-    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
+    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_NEAR(0.75 * 0.75 * 0.75 * (0.625 * 100.0 + 0.625 * 200.0), fanSystem.totalPower, 1e-12);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    // The active-mode runtime corrects from 0.9 to a capped 1.0; the zero-flow mode is excluded.
+    // Synthetic direct-call case: a 0.9 runtime divided by PLF 0.8 would exceed 1.0; the zero-flow
+    // mode is excluded. Parent control is not expected to supply this combination.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.9, 0.0, 0.1, _);
     EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(12.5, fanSystem.totalPower);
@@ -579,10 +580,10 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    // The two corrected runtimes would sum to 1.25; cap the reported aggregate without changing the power calculation.
+    // Synthetic direct-call case: the corrected runtimes sum to 1.25, which parent control is not
+    // expected to produce; power still accounts for both modes.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.5, 0.5, 0.5, 0.5, _);
-    EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
-    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
+    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_NEAR(1.25 * expectedPower, fanSystem.totalPower, 0.01);
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
