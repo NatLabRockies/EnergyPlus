@@ -272,11 +272,11 @@ This output contains the average power in Watts lost to the process air stream f
 
 \paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction-fansysmodel}
 
-This output contains the fan runtime fraction for the timestep being reported and is capped at 1.0. For discrete control, it is the sum of the runtimes at each speed. For continuous control, when the parent supplies runtimes for one or two operating modes, the runtime fractions for modes with nonzero airflow are added; modes with zero airflow contribute nothing. During cycling operation, when the parent supplies a coil part-load fraction (PLF) below 1.0, each mode runtime with airflow is divided by the PLF and individually capped at 1.0 before summing. For discrete fans, capping this aggregate output does not change the individual Fan Runtime Fraction Speed <\#> outputs. Without parent-supplied runtimes, a running continuous-speed fan reports 1.0. The output is zero when the fan is off.
+This output contains the fan runtime fraction for the timestep being reported. For discrete control, it is the sum of the runtimes at each speed. For continuous control, when the parent supplies runtimes for one or two operating modes, the runtime fractions for modes with nonzero airflow are added; modes with zero airflow contribute nothing. During cycling operation, when the parent supplies a coil part-load fraction (PLF) below 1.0, each mode runtime with airflow is adjusted using the PLF before summing. The reported runtime fraction is expected to be less than or equal to 1.0. Without parent-supplied runtimes, a running continuous-speed fan reports 1.0. The output is zero when the fan is off.
 
 \paragraph{Fan Runtime Fraction Speed <\#> {[]}}\label{fan-runtime-fraction-speed-fansysmodel}
 
-This output contains the fraction of time that this fan operated at each speed for the timestep being reported. During cycling operation, parent-supplied PLF correction is reflected in the per-speed runtimes. The separate 1.0 cap on the overall Fan Runtime Fraction does not rescale these outputs, so their sum can exceed 1.0. Applicable only for two-speed and multi-speed fans that can be discretely varied (i.e., Speed Control Method = Discrete).
+This output contains the fraction of time that this fan operated at each speed for the timestep being reported. During cycling operation, parent-supplied PLF correction is reflected in the per-speed runtimes. The sum of the speed-specific runtime fractions is expected to be less than or equal to 1.0. Applicable only when Speed Control Method is Discrete and Number of Speeds is greater than 1.
 
 \subsection{Fan:ConstantVolume}\label{fanconstantvolume}
 
@@ -615,7 +615,7 @@ Allows you to specify a user-defined end-use subcategory, e.g., ``Central System
   HVAC,Average,Fan Heat Gain to Air {[}W{]}
 \end{itemize}
 
-Unlike continuous-speed Fan:SystemModel, which can accept parent-supplied runtime fractions, Fan:VariableVolume has no runtime input and models the fan as operating for the timestep whenever it is available and has positive airflow; it therefore does not report a separate Fan Runtime Fraction.
+Unlike continuous-speed Fan:SystemModel, which can accept parent-supplied runtime fractions, Fan:VariableVolume has no runtime input. When it is available and has positive airflow, it is modeled as operating continuously for the timestep, even if its parent coil operates for only part of that timestep; a runtime fraction output would therefore be 1.0, not the coil's runtime fraction. Fan:VariableVolume does not report a separate Fan Runtime Fraction.
 
 \paragraph{Fan Electricity Rate {[}W{]}}\label{fan-electric-power-w-2}
 
