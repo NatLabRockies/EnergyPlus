@@ -94,6 +94,7 @@ using namespace EnergyPlus::HeatBalanceAirManager;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::HVACManager;
 
+// Verify zone equipment night-vent status follows its component availability-manager results.
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesComponentResults)
 {
     state->init_state(*state);
@@ -126,6 +127,7 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesComponentResul
     EXPECT_TRUE(state->dataHVACGlobal->NightVentOn);
 }
 
+// Verify air-distribution units inherit night-vent status from their serving air loop.
 TEST_F(EnergyPlusFixture, ZoneEquipmentManager_NightVentStatusUsesTerminalAirLoop)
 {
     state->dataDefineEquipment->AirDistUnit.allocate(1);

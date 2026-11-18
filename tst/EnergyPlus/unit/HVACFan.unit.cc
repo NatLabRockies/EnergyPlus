@@ -169,6 +169,7 @@ TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
     state->dataSize->DataNonZoneNonAirloopValue = 0.0;
 }
 
+// Verify night performance overrides and motor heat calculations for continuous and discrete fans.
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
 {
     std::string const idf_objects = delimited_string({
