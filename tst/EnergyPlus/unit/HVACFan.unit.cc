@@ -124,51 +124,6 @@ TEST_F(EnergyPlusFixture, SystemFanObj_TestGetFunctions1)
     EXPECT_FALSE(fanSystem->speedControl == Fans::SpeedControl::Continuous);
 }
 
-TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
-{
-    // this unit test mimics "EnergyPlusFixture.Fans_FanSizing"
-    // the idea is to set up a fan and run its sizing routine
-    // the size is filled by the value in DataSizing::DataNonZoneNonAirloopValue
-    std::string const idf_objects = delimited_string({
-
-        "  Fan:SystemModel,",
-        "    Test Fan ,                   !- Name",
-        "    ,                            !- Availability Schedule Name",
-        "    TestFanAirInletNode,         !- Air Inlet Node Name",
-        "    TestFanOutletNode,           !- Air Outlet Node Name",
-        "    AUTOSIZE ,                   !- Design Maximum Air Flow Rate",
-        "    Discrete ,                   !- Speed Control Method",
-        "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
-        "    75.0,                        !- Design Pressure Rise",
-        "    0.9 ,                        !- Motor Efficiency",
-        "    1.0 ,                        !- Motor In Air Stream Fraction",
-        "    AUTOSIZE,                    !- Design Electric Power Consumption",
-        "    TotalEfficiencyAndPressure,  !- Design Power Sizing Method",
-        "    ,                            !- Electric Power Per Unit Flow Rate",
-        "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
-        "    0.50;                        !- Fan Total Efficiency",
-    });
-
-    ASSERT_TRUE(process_idf(idf_objects));
-
-    state->init_state(*state);
-
-    state->dataEnvrn->StdRhoAir = 1.0;
-    Fans::GetFanInput(*state);
-    state->dataSize->CurZoneEqNum = 0;
-    state->dataSize->CurSysNum = 0;
-    state->dataSize->CurOASysNum = 0;
-    state->dataSize->DataNonZoneNonAirloopValue = 1.00635;
-
-    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state->dataFans->fans(1));
-    assert(fanSystem != nullptr);
-
-    fanSystem->simulate(*state, false, _, _);          // triggers sizing call
-    Real64 locFanSizeVdot = fanSystem->maxAirFlowRate; // get function
-    EXPECT_NEAR(1.00635, locFanSizeVdot, 0.00001);
-    state->dataSize->DataNonZoneNonAirloopValue = 0.0;
-}
-
 // Verify night performance overrides and motor heat calculations for continuous and discrete fans.
 TEST_F(EnergyPlusFixture, SystemFanObj_NightVentilationPerformance)
 {
@@ -436,6 +391,51 @@ TEST_F(EnergyPlusFixture, SystemFanObj_NightVentPowerScalesWithLowFlow)
         EXPECT_DOUBLE_EQ(0.012, fanSystem.outletAirMassFlowRate);
         EXPECT_NEAR(333.333333, fanSystem.totalPower, 0.001);
     }
+}
+
+TEST_F(EnergyPlusFixture, SystemFanObj_FanSizing1)
+{
+    // this unit test mimics "EnergyPlusFixture.Fans_FanSizing"
+    // the idea is to set up a fan and run its sizing routine
+    // the size is filled by the value in DataSizing::DataNonZoneNonAirloopValue
+    std::string const idf_objects = delimited_string({
+
+        "  Fan:SystemModel,",
+        "    Test Fan ,                   !- Name",
+        "    ,                            !- Availability Schedule Name",
+        "    TestFanAirInletNode,         !- Air Inlet Node Name",
+        "    TestFanOutletNode,           !- Air Outlet Node Name",
+        "    AUTOSIZE ,                   !- Design Maximum Air Flow Rate",
+        "    Discrete ,                   !- Speed Control Method",
+        "    0.0,                         !- Electric Power Minimum Flow Rate Fraction",
+        "    75.0,                        !- Design Pressure Rise",
+        "    0.9 ,                        !- Motor Efficiency",
+        "    1.0 ,                        !- Motor In Air Stream Fraction",
+        "    AUTOSIZE,                    !- Design Electric Power Consumption",
+        "    TotalEfficiencyAndPressure,  !- Design Power Sizing Method",
+        "    ,                            !- Electric Power Per Unit Flow Rate",
+        "    ,                            !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    0.50;                        !- Fan Total Efficiency",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->init_state(*state);
+
+    state->dataEnvrn->StdRhoAir = 1.0;
+    Fans::GetFanInput(*state);
+    state->dataSize->CurZoneEqNum = 0;
+    state->dataSize->CurSysNum = 0;
+    state->dataSize->CurOASysNum = 0;
+    state->dataSize->DataNonZoneNonAirloopValue = 1.00635;
+
+    auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state->dataFans->fans(1));
+    assert(fanSystem != nullptr);
+
+    fanSystem->simulate(*state, false, _, _);          // triggers sizing call
+    Real64 locFanSizeVdot = fanSystem->maxAirFlowRate; // get function
+    EXPECT_NEAR(1.00635, locFanSizeVdot, 0.00001);
+    state->dataSize->DataNonZoneNonAirloopValue = 0.0;
 }
 
 TEST_F(EnergyPlusFixture, SystemFanObj_TwoSpeedFanPowerCalc1)
