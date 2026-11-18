@@ -53,6 +53,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 #include <EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh>
 
 namespace EnergyPlus {
@@ -66,7 +67,7 @@ namespace GroundTemp {
     struct SiteDeepGroundTemps final : BaseGroundTempsModel
     {
         int timeOfSimInMonths = 12;
-        std::array<Real64, 12> deepGroundTemps = {13.0};
+        std::array<Real64, 12> deepGroundTemps = filled_array{13.0};
 
         static SiteDeepGroundTemps *DeepGTMFactory(EnergyPlusData &state, const std::string &objectName);
 

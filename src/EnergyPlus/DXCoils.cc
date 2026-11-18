@@ -6293,7 +6293,24 @@ void GetDXCoils(EnergyPlusData &state)
                                     OutputProcessor::StoreType::Average,
                                     thisDXCoil.Name);
             }
-
+            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                for (int speed = 1; speed <= thisDXCoil.NumOfSpeeds; ++speed) {
+                    SetupEMSActuator(state,
+                                     "Coil:Cooling:DX:MultiSpeed",
+                                     thisDXCoil.Name,
+                                     std::format("Autosized Rated Total Cooling Capacity Speed {}", speed),
+                                     "[W]",
+                                     thisDXCoil.RatedTotCapEMSOverrideOn(speed),
+                                     thisDXCoil.RatedTotCapEMSOverrideValue(speed));
+                    SetupEMSActuator(state,
+                                     "Coil:Cooling:DX:MultiSpeed",
+                                     thisDXCoil.Name,
+                                     std::format("Autosized Rated Air Flow Rate Speed {}", speed),
+                                     "[m3/s]",
+                                     thisDXCoil.RatedAirVolFlowRateEMSOverrideON(speed),
+                                     thisDXCoil.RatedAirVolFlowRateEMSOverrideValue(speed));
+                }
+            }
         }
 
         else if (thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed) {
@@ -6466,6 +6483,22 @@ void GetDXCoils(EnergyPlusData &state)
                                  "[]",
                                  thisDXCoil.FrostHeatingInputPowerMultiplierEMSOverrideOn,
                                  thisDXCoil.FrostHeatingInputPowerMultiplierEMSOverrideValue);
+                for (int speed = 1; speed <= thisDXCoil.NumOfSpeeds; ++speed) {
+                    SetupEMSActuator(state,
+                                     "Coil:Heating:DX:MultiSpeed",
+                                     thisDXCoil.Name,
+                                     std::format("Autosized Rated Total Heating Capacity Speed {}", speed),
+                                     "[W]",
+                                     thisDXCoil.RatedTotCapEMSOverrideOn(speed),
+                                     thisDXCoil.RatedTotCapEMSOverrideValue(speed));
+                    SetupEMSActuator(state,
+                                     "Coil:Heating:DX:MultiSpeed",
+                                     thisDXCoil.Name,
+                                     std::format("Autosized Rated Air Flow Rate Speed {}", speed),
+                                     "[m3/s]",
+                                     thisDXCoil.RatedAirVolFlowRateEMSOverrideON(speed),
+                                     thisDXCoil.RatedAirVolFlowRateEMSOverrideValue(speed));
+                }
             }
         }
 
@@ -7613,8 +7646,12 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 }
                 CompType = HVAC::coilTypeNames[(int)thisDXCoil.coilType];
                 state.dataSize->DataIsDXCoil = true;
-                state.dataSize->DataEMSOverrideON = thisDXCoil.RatedAirVolFlowRateEMSOverrideON(Mode);
-                state.dataSize->DataEMSOverride = thisDXCoil.RatedAirVolFlowRateEMSOverrideValue(Mode);
+                int const modeOrSpeed =
+                    (thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed || thisDXCoil.coilType == HVAC::CoilType::CoolingDXMultiSpeed)
+                        ? thisDXCoil.NumOfSpeeds
+                        : Mode;
+                state.dataSize->DataEMSOverrideON = thisDXCoil.RatedAirVolFlowRateEMSOverrideON(modeOrSpeed);
+                state.dataSize->DataEMSOverride = thisDXCoil.RatedAirVolFlowRateEMSOverrideValue(modeOrSpeed);
                 if (thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed || thisDXCoil.coilType == HVAC::CoilType::HeatingVRFFluidTCtrl ||
                     thisDXCoil.coilType == HVAC::CoilType::HeatingVRF || thisDXCoil.coilType == HVAC::CoilType::HeatingDXSingleSpeed) {
                     bool errorsFound = false;
@@ -7734,8 +7771,12 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
             }
             CompType = HVAC::coilTypeNames[(int)thisDXCoil.coilType];
             state.dataSize->DataIsDXCoil = true;
-            state.dataSize->DataEMSOverrideON = thisDXCoil.RatedTotCapEMSOverrideOn(Mode);
-            state.dataSize->DataEMSOverride = thisDXCoil.RatedTotCapEMSOverrideValue(Mode);
+            int const modeOrSpeed =
+                (thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed || thisDXCoil.coilType == HVAC::CoilType::CoolingDXMultiSpeed)
+                    ? thisDXCoil.NumOfSpeeds
+                    : Mode;
+            state.dataSize->DataEMSOverrideON = thisDXCoil.RatedTotCapEMSOverrideOn(modeOrSpeed);
+            state.dataSize->DataEMSOverride = thisDXCoil.RatedTotCapEMSOverrideValue(modeOrSpeed);
             if (thisDXCoil.coilType == HVAC::CoilType::HeatingDXMultiSpeed || thisDXCoil.coilType == HVAC::CoilType::HeatingDXSingleSpeed ||
                 thisDXCoil.coilType == HVAC::CoilType::HeatingVRF || thisDXCoil.coilType == HVAC::CoilType::HeatingVRFFluidTCtrl) {
                 HeatingCapacitySizer sizerHeatingCapacity;
@@ -8431,6 +8472,8 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
             } else {
                 FieldNum = 12 + (Mode - 1) * 6;
                 SizingString = state.dataDXCoils->DXCoilNumericFields(DXCoilNum).PerfMode(1).FieldNames(FieldNum) + " [m3/s]";
+                state.dataSize->DataEMSOverrideON = thisDXCoil.RatedAirVolFlowRateEMSOverrideON(Mode);
+                state.dataSize->DataEMSOverride = thisDXCoil.RatedAirVolFlowRateEMSOverrideValue(Mode);
                 if (IsAutoSize || !HardSizeNoDesRun) {
                     // Auto-size low speed flow to fraction of the highest speed capacity
                     state.dataSize->DataConstantUsedForSizing = thisDXCoil.MSRatedAirVolFlowRate(thisDXCoil.NumOfSpeeds);
