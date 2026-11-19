@@ -499,6 +499,10 @@ class DataExchange:
         Note also that the arguments passed in here can be either strings or bytes, as this wrapper handles conversion
         as needed.
 
+        A variable is only available if it was requested for this simulation, either with an Output:Variable object
+        in the input file or with a call to `request_variable` before the run starts.  If it was not requested, this
+        function returns -1 even though the variable name and key are valid.
+
         :param state: An active EnergyPlus "state" that is returned from a call to `api.state_manager.new_state()`.
         :param variable_name: The name of the variable to retrieve, e.g. "Site Outdoor Air DryBulb Temperature", or
                               "Fan Air Mass Flow Rate"
