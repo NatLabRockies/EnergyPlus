@@ -62,6 +62,9 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
               /wd4355
               /wd4996
               /wd4503) # Disables warning messages listed above
+  # With LTO only: C4723 (potential divide by zero) gives false positives during link-time code generation, e.g. after inlining a guarded
+  # division into a unit test that passes a constant 0. It must be a compile option: /GL objects carry their own warning settings into LTCG
+  target_compile_options(project_warnings INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:/wd4723>)
 
   target_compile_definitions(project_options INTERFACE NOMINMAX) # Avoid build errors due to STL/Windows min-max conflicts
   target_compile_definitions(project_options INTERFACE WIN32_LEAN_AND_MEAN) # Excludes rarely used services and headers from compilation
