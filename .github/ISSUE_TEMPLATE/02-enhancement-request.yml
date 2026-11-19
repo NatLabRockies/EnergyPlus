@@ -28,6 +28,24 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: human_written
+    attributes:
+      label: Was this enhancement request entirely human-written?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: textarea
+    id: authorship_disclosure
+    attributes:
+      label: Authorship Disclosure
+      description: If you answered "No" to "Was this enhancement request entirely human-written?", describe any tools used in drafting this request. Otherwise, enter "None".
+    validations:
+      required: true
+
   - type: textarea
     id: implementation
     attributes:
