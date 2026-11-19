@@ -175,7 +175,7 @@ jobs:
               -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
               -DPython_ROOT_DIR:PATH="$(dirname "$Python_EXECUTABLE")" \
               -DBUILD_FORTRAN:BOOL=ON -DMINGW_GFORTRAN=${{ env.MINGW_GFORTRAN }} \
-              -DBUILD_PACKAGE:BOOL=ON -DENABLE_LTO:BOOL=ON \
+              -DBUILD_PACKAGE:BOOL=ON \
               -DENABLE_HARDENED_RUNTIME:BOOL=${{ matrix.enable_hardened_runtime }} \
               -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" \
               ../
