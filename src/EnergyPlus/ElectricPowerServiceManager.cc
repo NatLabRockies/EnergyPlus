@@ -2797,6 +2797,13 @@ void DCtoACInverter::simulate(EnergyPlusData &state, Real64 const powerIntoInver
         // now calculate Inverter based on model type
         calcEfficiency(state);
         aCPowerOut_ = efficiency_ * dCPowerIn_;
+        if (modelType_ == InverterModelType::CurveFuncOfPower) {
+            if (aCPowerOut_ < minPower_) {
+                aCPowerOut_ = 0.0;
+            } else {
+                aCPowerOut_ = min(aCPowerOut_, maxPower_);
+            }
+        }
         aCEnergyOut_ = aCPowerOut_ * (state.dataHVACGlobal->TimeStepSysSec);
 
         if (aCPowerOut_ == 0.0) {
