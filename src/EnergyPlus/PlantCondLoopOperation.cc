@@ -3022,6 +3022,16 @@ void DistributePlantLoad(EnergyPlusData &state,
         // no load to distribute
     } else {
 
+        // Maximum load each component can take for the current operating conditions. Components that model a
+        // condition-dependent capacity (e.g. plant heat pumps, cooling towers) override getDynamicMaxCapacity();
+        // all others return their static (design) MaxLoad. Evaluated once per component here so that every
+        // distribution scheme below uses a consistent value.
+        Array1D<Real64> compMaxLoad(NumCompsOnList, 0.0);
+        for (CompIndex = 1; CompIndex <= NumCompsOnList; ++CompIndex) {
+            auto &this_component = this_loopside.Branch(this_equiplist.Comp(CompIndex).BranchNumPtr).Comp(this_equiplist.Comp(CompIndex).CompNumPtr);
+            compMaxLoad(CompIndex) = this_component.Available ? this_component.getDynamicMaxCapacity(state) : this_component.MaxLoad;
+        }
+
         // OPTIMAL DISTRIBUTION SCHEME
         int numAvail = 0;
         switch (this_loop.LoadDistribution) {
@@ -3090,7 +3100,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     }
 
                     NewLoad = this_component.MyLoad;
-                    NewLoad = min(this_component.MaxLoad, std::abs(NewLoad) + DivideLoad);
+                    NewLoad = min(compMaxLoad(CompIndex), std::abs(NewLoad) + DivideLoad);
                     ChangeInLoad = NewLoad - std::abs(this_component.MyLoad);
                     this_component.MyLoad = sign(NewLoad, RemLoopDemand);
                     RemLoopDemand -= sign(ChangeInLoad, RemLoopDemand);
@@ -3114,7 +3124,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     if (!this_component.Available) {
                         continue;
                     }
-                    DivideLoad = this_component.MaxLoad - std::abs(this_component.MyLoad);
+                    DivideLoad = compMaxLoad(CompIndex) - std::abs(this_component.MyLoad);
                     ChangeInLoad = min(std::abs(RemLoopDemand), DivideLoad);
                     this_component.MyLoad += sign(ChangeInLoad, RemLoopDemand);
                     RemLoopDemand -= sign(ChangeInLoad, RemLoopDemand);
@@ -3143,8 +3153,8 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                if (this_component.MaxLoad > 0.0) { // apply known limit
-                    ChangeInLoad = min(this_component.MaxLoad, std::abs(RemLoopDemand));
+                if (compMaxLoad(CompIndex) > 0.0) { // apply known limit
+                    ChangeInLoad = min(compMaxLoad(CompIndex), std::abs(RemLoopDemand));
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
                     ChangeInLoad = std::abs(RemLoopDemand);
@@ -3210,8 +3220,8 @@ void DistributePlantLoad(EnergyPlusData &state,
                 if (!this_component.Available) {
                     continue;
                 }
-                if (this_component.MaxLoad > 0.0) {
-                    ChangeInLoad = min(this_component.MaxLoad, UniformLoad);
+                if (compMaxLoad(CompIndex) > 0.0) {
+                    ChangeInLoad = min(compMaxLoad(CompIndex), UniformLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
                     ChangeInLoad = std::abs(RemLoopDemand);
@@ -3254,7 +3264,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     if (!this_component.Available) {
                         continue;
                     }
-                    ChangeInLoad = min(this_component.MaxLoad - std::abs(this_component.MyLoad), std::abs(RemLoopDemand));
+                    ChangeInLoad = min(compMaxLoad(CompIndex) - std::abs(this_component.MyLoad), std::abs(RemLoopDemand));
                     ChangeInLoad = max(0.0, ChangeInLoad);
                     this_component.MyLoad += sign(ChangeInLoad, RemLoopDemand);
                     RemLoopDemand -= sign(ChangeInLoad, RemLoopDemand);
@@ -3288,14 +3298,14 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                PlantCapacity += this_component.MaxLoad;
+                PlantCapacity += compMaxLoad(CompIndex);
 
-                if (this_component.MaxLoad < SmallLoad) {
+                if (compMaxLoad(CompIndex) < SmallLoad) {
                     ShowWarningMessage(state,
                                        std::format("Plant component {} has zero available capacity. Check component controls.", this_component.Name));
                     MinCompPLR = 0.0;
                 } else {
-                    MinCompPLR = this_component.MinLoad / this_component.MaxLoad;
+                    MinCompPLR = this_component.MinLoad / compMaxLoad(CompIndex);
                 }
 
                 // Set LargestMinCompPLR to largest MinCompPLR
@@ -3349,9 +3359,9 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                CompLoad = PlantPLR * this_component.MaxLoad;
+                CompLoad = PlantPLR * compMaxLoad(CompIndex);
 
-                if (this_component.MaxLoad > 0.0) {
+                if (compMaxLoad(CompIndex) > 0.0) {
                     ChangeInLoad = min(std::abs(RemLoopDemand), CompLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad
@@ -3409,14 +3419,14 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                PlantCapacity += this_component.MaxLoad;
+                PlantCapacity += compMaxLoad(CompIndex);
 
-                if (this_component.MaxLoad < SmallLoad) {
+                if (compMaxLoad(CompIndex) < SmallLoad) {
                     ShowWarningMessage(state,
                                        std::format("Plant component {} has zero available capacity. Check component controls.", this_component.Name));
                     MinCompPLR = 0.0;
                 } else {
-                    MinCompPLR = this_component.MinLoad / this_component.MaxLoad;
+                    MinCompPLR = this_component.MinLoad / compMaxLoad(CompIndex);
                 }
 
                 // Set LargestMinCompPLR to largest MinCompPLR
@@ -3451,9 +3461,9 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
-                CompLoad = PlantPLR * this_component.MaxLoad;
+                CompLoad = PlantPLR * compMaxLoad(CompIndex);
 
-                if (this_component.MaxLoad > 0.0) {
+                if (compMaxLoad(CompIndex) > 0.0) {
                     ChangeInLoad = min(std::abs(RemLoopDemand), CompLoad);
                 } else {
                     // this is for some components like cooling towers don't have well defined MaxLoad

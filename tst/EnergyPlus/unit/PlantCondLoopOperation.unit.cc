@@ -53,11 +53,14 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/BranchInputManager.hh>
+#include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantCondLoopOperation.hh>
+#include <EnergyPlus/PlantLoopHeatPumpEIR.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/SetPointManager.hh>
 
@@ -291,6 +294,70 @@ TEST_F(DistributePlantLoadTest, DistributePlantLoad_Sequential)
     EXPECT_EQ(thisBranch.Comp(1).MyLoad, 40.0);
     EXPECT_EQ(thisBranch.Comp(2).MyLoad, 100.0);
     EXPECT_EQ(remainingLoopDemand, 60.0);
+}
+
+TEST_F(DistributePlantLoadTest, DistributePlantLoad_DynamicMaxCapacity)
+{
+    // Load range based dispatch should use a component's current (dynamic) capacity instead of its static MaxLoad
+    auto &thisLoop(state->dataPlnt->PlantLoop(1));
+    auto &thisBranch(thisLoop.LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1));
+    thisLoop.LoadDistribution = DataPlant::LoadingScheme::Sequential;
+
+    // CapFT = 0.8 + 0.02 * source inlet temperature
+    std::string const idf_objects = delimited_string({
+        "Curve:Biquadratic,",
+        "  CapFT,                   !- Name",
+        "  0.8,                     !- Coefficient1 Constant",
+        "  0.0,                     !- Coefficient2 x",
+        "  0.0,                     !- Coefficient3 x**2",
+        "  0.02,                    !- Coefficient4 y",
+        "  0.0,                     !- Coefficient5 y**2",
+        "  0.0,                     !- Coefficient6 x*y",
+        "  0.0,                     !- Minimum Value of x",
+        "  100.0,                   !- Maximum Value of x",
+        "  -50.0,                   !- Minimum Value of y",
+        "  50.0;                    !- Maximum Value of y",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    Curve::GetCurveInput(*state);
+
+    // node 1: loop setpoint, node 2: heat pump 1 source inlet, node 3: heat pump 2 source inlet
+    state->dataLoopNodes->Node.allocate(3);
+    state->dataLoopNodes->Node(1).TempSetPoint = 50.0;
+    state->dataLoopNodes->Node(2).Temp = 20.0; // CapFT = 1.2
+    state->dataLoopNodes->Node(3).Temp = 0.0;  // CapFT = 0.8
+    thisLoop.TempSetPointNodeNum = 1;
+    thisLoop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
+
+    // two heat pumps with a reference capacity equal to the static MaxLoad of all components (100 W)
+    EIRPlantLoopHeatPumps::EIRPlantLoopHeatPump hp1;
+    EIRPlantLoopHeatPumps::EIRPlantLoopHeatPump hp2;
+    for (auto *hp : {&hp1, &hp2}) {
+        hp->referenceCapacity = 100.0;
+        hp->capFuncTempCurveIndex = Curve::GetCurveIndex(*state, "CAPFT");
+        hp->loadSidePlantLoc.loop = &thisLoop;
+    }
+    hp1.sourceSideNodes.inlet = 2;
+    hp2.sourceSideNodes.inlet = 3;
+    hp1.loadSidePlantLoc.comp = &thisBranch.Comp(1);
+    hp2.loadSidePlantLoc.comp = &thisBranch.Comp(2);
+    thisBranch.Comp(1).compPtr = &hp1;
+    thisBranch.Comp(2).compPtr = &hp2;
+
+    DistributePlantLoadTest::ResetLoads();
+    Real64 loopDemand = 250.0;
+    Real64 remainingLoopDemand = 0.0;
+    PlantCondLoopOperation::DistributePlantLoad(*state, 1, DataPlant::LoopSideLocation::Demand, 1, 1, loopDemand, remainingLoopDemand);
+
+    EXPECT_NEAR(thisBranch.Comp(1).MyLoad, 120.0, 1e-9); // CapFT = 1.2, dispatched above its static MaxLoad
+    EXPECT_NEAR(thisBranch.Comp(2).MyLoad, 80.0, 1e-9);  // CapFT = 0.8, dispatched below its static MaxLoad
+    EXPECT_NEAR(thisBranch.Comp(3).MyLoad, 50.0, 1e-9);  // not a heat pump (static MaxLoad), picks up the remainder
+    EXPECT_DOUBLE_EQ(thisBranch.Comp(4).MyLoad, 0.0);
+    EXPECT_NEAR(remainingLoopDemand, 0.0, 1e-9);
+
+    // heat pumps go out of scope with this test
+    thisBranch.Comp(1).compPtr = nullptr;
+    thisBranch.Comp(2).compPtr = nullptr;
 }
 
 TEST_F(DistributePlantLoadTest, DistributePlantLoad_Uniform)
