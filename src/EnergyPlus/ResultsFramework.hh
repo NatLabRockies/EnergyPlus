@@ -48,6 +48,7 @@
 #ifndef ResultsSchema_hh_INCLUDED
 #define ResultsSchema_hh_INCLUDED
 
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
 
@@ -327,6 +328,9 @@ namespace ResultsFramework {
         explicit CSVWriter(std::size_t num_output_variables) : outputVariableIndices(std::vector<bool>(num_output_variables, false))
         {
         }
+        CSVWriter(std::vector<std::string> const &keyNames,
+                  std::vector<std::string> const &outputVariables,
+                  std::map<std::string, std::vector<std::string>> const &outputVariableKeyNames);
 
         void writeOutput(EnergyPlusData &state,
                          std::vector<std::string> const &outputVariables,
@@ -343,6 +347,9 @@ namespace ResultsFramework {
         ReportFreq smallestReportFreq = ReportFreq::Year;
         std::map<std::string, std::vector<std::string>> outputs;
         std::vector<bool> outputVariableIndices;
+        bool filterByKeyNames = false;
+        std::vector<std::string> keyNames;
+        std::vector<int> outputVariableIndexToKeyNameIndexMapping;
 
         static std::string &convertToMonth(std::string &datetime);
         void updateReportFreq(ReportFreq reportingFrequency);
@@ -441,6 +448,7 @@ namespace ResultsFramework {
         bool outputMsgPack = false;
         bool rewriteTimestamp = true; // Convert monthly data timestamp to month name
         std::vector<std::string> outputVariables;
+        std::map<std::string, std::vector<std::string>> outputVariableKeyNames;
 
         void writeTimeSeriesReports(JsonOutputFilePaths &jsonOutputFilePaths);
 
