@@ -8297,67 +8297,70 @@ void WaterThermalTankData::CalcWaterThermalTankStratified(EnergyPlusData &state)
             for (int i = 0; i < nTankNodes; i++) {
                 const int NodeNum = i + 1;
                 const auto &tank_node = this->Node(NodeNum);
+                // Accumulate in locals: GCC can't prove A/B don't alias Node, so with LTO it reloaded them from memory after every update
+                Real64 a = A[i];
+                Real64 b = B[i];
 
                 // Parasitic Loads and Losses to Ambient
                 if (this->HeaterOn1 || this->HeaterOn2) {
                     // Parasitic Loads
-                    B[i] += tank_node.OnCycParaLoad;
+                    b += tank_node.OnCycParaLoad;
                     // Losses to Ambient
-                    A[i] += -tank_node.OnCycLossCoeff;
-                    B[i] += tank_node.OnCycLossCoeff * this->AmbientTemp;
+                    a += -tank_node.OnCycLossCoeff;
+                    b += tank_node.OnCycLossCoeff * this->AmbientTemp;
                 } else {
                     // Parasitic Loads
-                    B[i] += tank_node.OffCycParaLoad;
+                    b += tank_node.OffCycParaLoad;
                     // Losses to Ambient
-                    A[i] += -tank_node.OffCycLossCoeff;
-                    B[i] += tank_node.OffCycLossCoeff * this->AmbientTemp;
+                    a += -tank_node.OffCycLossCoeff;
+                    b += tank_node.OffCycLossCoeff * this->AmbientTemp;
                 }
 
                 // Conduction to adjacent nodes
-                A[i] += -(tank_node.CondCoeffDn + tank_node.CondCoeffUp);
+                a += -(tank_node.CondCoeffDn + tank_node.CondCoeffUp);
                 if (NodeNum > 1) {
-                    B[i] += tank_node.CondCoeffUp * Tavg[i - 1];
+                    b += tank_node.CondCoeffUp * Tavg[i - 1];
                 }
                 if (NodeNum < nTankNodes) {
-                    B[i] += tank_node.CondCoeffDn * Tavg[i + 1];
+                    b += tank_node.CondCoeffDn * Tavg[i + 1];
                 }
 
                 // Use side plant connection
                 const Real64 use_e_mdot_cp = tank_node.UseMassFlowRate * Cp;
-                A[i] += -use_e_mdot_cp;
-                B[i] += use_e_mdot_cp * this->UseInletTemp;
+                a += -use_e_mdot_cp;
+                b += use_e_mdot_cp * this->UseInletTemp;
 
                 // Source side heat transfer rate
                 if ((this->HeatPumpNum > 0) && (HPWHCondenserConfig == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterPumped)) {
                     // Pumped Condenser Heat Pump Water Heater
                     if (tank_node.SourceMassFlowRate > 0.0) {
-                        B[i] += Qheatpump;
+                        b += Qheatpump;
                     }
                 } else {
                     // Source side plant connection (constant temperature)
                     const Real64 src_e_mdot_cp = tank_node.SourceMassFlowRate * Cp;
-                    A[i] += -src_e_mdot_cp;
-                    B[i] += src_e_mdot_cp * this->SourceInletTemp;
+                    a += -src_e_mdot_cp;
+                    b += src_e_mdot_cp * this->SourceInletTemp;
                 }
 
                 // Wrapped condenser heat pump water heater
                 if ((this->HeatPumpNum > 0) && (HPWHCondenserConfig == DataPlant::PlantEquipmentType::HeatPumpWtrHeaterWrapped)) {
-                    B[i] += Qheatpump * tank_node.HPWHWrappedCondenserHeatingFrac;
+                    b += Qheatpump * tank_node.HPWHWrappedCondenserHeatingFrac;
                 }
 
                 // Internodal flow
-                A[i] += -(tank_node.MassFlowFromUpper + tank_node.MassFlowFromLower) * Cp;
+                a += -(tank_node.MassFlowFromUpper + tank_node.MassFlowFromLower) * Cp;
                 if (NodeNum > 1) {
-                    B[i] += tank_node.MassFlowFromUpper * Cp * Tavg[i - 1];
+                    b += tank_node.MassFlowFromUpper * Cp * Tavg[i - 1];
                 }
                 if (NodeNum < nTankNodes) {
-                    B[i] += tank_node.MassFlowFromLower * Cp * Tavg[i + 1];
+                    b += tank_node.MassFlowFromLower * Cp * Tavg[i + 1];
                 }
 
                 // Divide by mass and specific heat
                 // m * cp * dT/dt = q_net  =>  dT/dt = a * T + b
-                A[i] /= tank_node.Mass * Cp;
-                B[i] /= tank_node.Mass * Cp;
+                A[i] = a / (tank_node.Mass * Cp);
+                B[i] = b / (tank_node.Mass * Cp);
 
             } // end for each node
 

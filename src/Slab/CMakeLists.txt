@@ -25,6 +25,14 @@ if(NOT CMAKE_Fortran_COMPILER MATCHES "ifort")
   target_compile_options(SlabOptions INTERFACE -finit-local-zero)
 endif()
 
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+  # gfortran's induction variable optimization picks a poor strategy for the CalcSolutionAndUpdate loop nest, which
+  # reads a dozen 3D arrays. With LTO, Slab was 25-30% slower (aarch64, GCC 16; 4-9% with GCC 13) instead of 5-7% faster.
+  # -fno-ivopts restores the LTO gain on aarch64 and x86_64 (GCC 13 and 16), is neutral without LTO, and output is identical.
+  # It must be set at compile time: with LTO, each function keeps the optimization options it was compiled with.
+  set_source_files_properties(3DSlabHT.f90 PROPERTIES COMPILE_OPTIONS -fno-ivopts)
+endif()
+
 set(CMAKE_SKIP_RPATH ${FORTRAN_SKIP_RPATH})
 set(SKIP_BUILD_RPATH true)
 

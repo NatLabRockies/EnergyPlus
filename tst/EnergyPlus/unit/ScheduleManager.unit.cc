@@ -308,7 +308,7 @@ TEST_F(EnergyPlusFixture, ScheduleAverageHoursPerWeek_test)
     state->init_state(*state);
 
     auto *onSched = Sched::GetSchedule(*state, "ONSCHED");
-    EXPECT_EQ(168., onSched->getAverageWeeklyHoursFullLoad(*state, 1, false));
+    EXPECT_DOUBLE_EQ(168., onSched->getAverageWeeklyHoursFullLoad(*state, 1, false));
 
     auto *offSched = Sched::GetSchedule(*state, "OFFSCHED");
     EXPECT_EQ(0., offSched->getAverageWeeklyHoursFullLoad(*state, 1, false));
@@ -317,10 +317,10 @@ TEST_F(EnergyPlusFixture, ScheduleAverageHoursPerWeek_test)
     EXPECT_NEAR(14.3, janOnSched->getAverageWeeklyHoursFullLoad(*state, 1, false), 0.1);
 
     auto *halfOnSched = Sched::GetSchedule(*state, "HALFONSCHED");
-    EXPECT_EQ(84., halfOnSched->getAverageWeeklyHoursFullLoad(*state, 1, false));
+    EXPECT_DOUBLE_EQ(84., halfOnSched->getAverageWeeklyHoursFullLoad(*state, 1, false));
 
     auto *halfOnSched2 = Sched::GetSchedule(*state, "HALFONSCHED2");
-    EXPECT_EQ(84., halfOnSched2->getAverageWeeklyHoursFullLoad(*state, 1, false));
+    EXPECT_DOUBLE_EQ(84., halfOnSched2->getAverageWeeklyHoursFullLoad(*state, 1, false));
 }
 
 TEST_F(EnergyPlusFixture, ScheduleHoursGT1perc_test)
