@@ -47,6 +47,11 @@
 
 // EnergyPlus::Fans Unit Tests
 
+#include <array>
+#include <string>
+#include <string_view>
+#include <vector>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -247,9 +252,12 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteRuntimeFraction)
     fanSystem.numSpeeds = 2;
     fanSystem.runtimeFracAtSpeed.resize(2);
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // Synthetic direct-call case: the two corrected mode runtimes sum to 1.25, a combination not expected
+    // from parent control. Keep this to verify the per-speed outputs and aggregate handling.
     fanSystem.calcSimpleSystemFan(*state, _, 100.0, 0.5, 0.5, 1.0, 0.5, 100.0);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[0]);
     EXPECT_DOUBLE_EQ(0.625, fanSystem.runtimeFracAtSpeed[1]);
+    EXPECT_GT(fanSystem.runtimeFracAtSpeed[0] + fanSystem.runtimeFracAtSpeed[1], 1.0);
     EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(93.75, fanSystem.totalPower);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
@@ -284,7 +292,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousRuntimeFraction)
     fanSystem.calcSimpleSystemFan(*state, 0.25, _, _, _, _, _, _);
     EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
 
-    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.0, _);
+    // Mode 2 has a parent runtime but no airflow, so it does not contribute to the reported runtime.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.6, _);
     EXPECT_DOUBLE_EQ(0.4, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(5.0, fanSystem.totalPower);
 
@@ -341,7 +350,8 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousCyclingRuntimeIncludesPLFCorrec
     for (Real64 plf : {0.8, 0.5, 0.0, -0.1, 1.0, 1.2}) {
         SCOPED_TRACE(plf);
         state->dataHVACGlobal->OnOffFanPartLoadFraction = plf;
-        fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.0, _);
+        // Model cycling with 0.4 active runtime and a zero-airflow off mode for the remaining 0.6.
+        fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.4, 0.0, 0.6, _);
         Real64 expectedRuntime = 0.4;
         if (plf > 0.0 && plf < 1.0) {
             expectedRuntime /= max(0.7, plf);
@@ -353,19 +363,25 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousCyclingRuntimeIncludesPLFCorrec
     }
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // PLF raises both active-mode runtimes from 0.2 to 0.25; their aggregate remains 0.5.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.2, 1.0, 0.2, 200.0);
     EXPECT_DOUBLE_EQ(0.5, fanSystem.runtimeFrac);
     EXPECT_NEAR(0.75 * 0.75 * 0.75 * (0.25 * 100.0 + 0.25 * 200.0), fanSystem.totalPower, 1e-12);
     EXPECT_NEAR(0.3, fanSystem.outletAirMassFlowRate, 1e-12);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // Synthetic direct-call case: the corrected mode runtimes sum to 1.25, which parent control is not
+    // expected to produce; power still accounts for both modes.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.5, 1.0, 0.5, 200.0);
     EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_NEAR(0.75 * 0.75 * 0.75 * (0.625 * 100.0 + 0.625 * 200.0), fanSystem.totalPower, 1e-12);
     EXPECT_DOUBLE_EQ(0.75, fanSystem.outletAirMassFlowRate);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
-    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.9, 0.0, 0.0, _);
+    // Synthetic direct-call case: a 0.9 runtime divided by PLF 0.8 would exceed 1.0; the zero-flow
+    // mode is excluded. Parent control is not expected to supply this combination.
+    fanSystem.calcSimpleSystemFan(*state, _, _, 0.5, 0.9, 0.0, 0.1, _);
     EXPECT_DOUBLE_EQ(1.0, fanSystem.runtimeFrac);
     EXPECT_DOUBLE_EQ(12.5, fanSystem.totalPower);
     EXPECT_DOUBLE_EQ(0.45, fanSystem.outletAirMassFlowRate);
@@ -569,7 +585,10 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousPowerCurveUsesAverageFlow)
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
     state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+    // Synthetic direct-call case: the corrected runtimes sum to 1.25, which parent control is not
+    // expected to produce; power still accounts for both modes.
     fanSystem.calcSimpleSystemFan(*state, _, _, 1.5, 0.5, 0.5, 0.5, _);
+    EXPECT_DOUBLE_EQ(1.25, fanSystem.runtimeFrac);
     EXPECT_NEAR(1.25 * expectedPower, fanSystem.totalPower, 0.01);
     EXPECT_NEAR(0.75 * fanSystem.maxAirMassFlowRate, fanSystem.outletAirMassFlowRate, 1e-12);
 
@@ -651,9 +670,11 @@ TEST_F(EnergyPlusFixture, SystemFanObj_ContinuousLowFlowSafeguardIncludesPLFCorr
     fanSystem.inletAirEnthalpy = 40000.0;
     fanSystem.powerModFuncFlowFracCurveNum = powerCurve->Num;
 
+    // Two active low-flow modes are corrected to 0.25 runtime each; their aggregate remains below one.
     fanSystem.calcSimpleSystemFan(*state, _, _, 0.005, 0.2, 0.015, 0.2, 2000.0);
 
     EXPECT_DOUBLE_EQ(0.5, fanSystem.runtimeFrac);
+    EXPECT_LE(fanSystem.runtimeFrac, 1.0);
     EXPECT_NEAR(0.01 * (0.25 * 1000.0 + 0.25 * 2000.0) / 0.1, fanSystem.totalPower, 1e-12);
     EXPECT_NEAR(0.004, fanSystem.outletAirMassFlowRate, 1e-12);
     EXPECT_LT(fanSystem.outletAirTemp - fanSystem.inletAirTemp, 20.0);
@@ -1294,6 +1315,199 @@ TEST_F(EnergyPlusFixture, SystemFanObj_DiscreteMode_EMSPressureRiseResetTest)
     // negative fan pressure rise results in zero fan power
     locExpectPower = 0.0;
     EXPECT_DOUBLE_EQ(locFanElecPower, locExpectPower); // expects zero fan power
+}
+
+// Verify all four Fan:SystemModel EMS actuators for one-speed discrete, multi-speed discrete, and continuous fans.
+TEST_F(EnergyPlusFixture, SystemFanObj_EMSActuators)
+{
+    std::vector<std::string> idf_lines = {
+        // The first fan exercises the one-speed discrete calculation path.
+        "  Fan:SystemModel,",
+        "    One-Speed Discrete Fan,         !- Name",
+        "    ,                               !- Availability Schedule Name",
+        "    OneSpeedInletNode,              !- Air Inlet Node Name",
+        "    OneSpeedOutletNode,             !- Air Outlet Node Name",
+        "    AUTOSIZE,                       !- Design Maximum Air Flow Rate",
+        "    Discrete,                       !- Speed Control Method",
+        "    0.0,                            !- Electric Power Minimum Flow Rate Fraction",
+        "    100.0,                          !- Design Pressure Rise",
+        "    0.9,                            !- Motor Efficiency",
+        "    1.0,                            !- Motor In Air Stream Fraction",
+        "    100.0,                          !- Design Electric Power Consumption",
+        "    ,                               !- Design Power Sizing Method",
+        "    ,                               !- Electric Power Per Unit Flow Rate",
+        "    ,                               !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                               !- Fan Total Efficiency",
+        "    ;                               !- Electric Power Function of Flow Fraction Curve Name",
+
+        // The second fan exercises per-speed efficiency calculations.
+        "  Fan:SystemModel,",
+        "    Multi-Speed Discrete Fan,       !- Name",
+        "    ,                               !- Availability Schedule Name",
+        "    MultiSpeedInletNode,            !- Air Inlet Node Name",
+        "    MultiSpeedOutletNode,           !- Air Outlet Node Name",
+        "    AUTOSIZE,                       !- Design Maximum Air Flow Rate",
+        "    Discrete,                       !- Speed Control Method",
+        "    0.0,                            !- Electric Power Minimum Flow Rate Fraction",
+        "    100.0,                          !- Design Pressure Rise",
+        "    0.9,                            !- Motor Efficiency",
+        "    1.0,                            !- Motor In Air Stream Fraction",
+        "    100.0,                          !- Design Electric Power Consumption",
+        "    ,                               !- Design Power Sizing Method",
+        "    ,                               !- Electric Power Per Unit Flow Rate",
+        "    ,                               !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                               !- Fan Total Efficiency",
+        "    ,                               !- Electric Power Function of Flow Fraction Curve Name",
+        "    ,                               !- Night Ventilation Mode Pressure Rise",
+        "    ,                               !- Night Ventilation Mode Flow Fraction",
+        "    ,                               !- Motor Loss Zone Name",
+        "    ,                               !- Motor Loss Radiative Fraction",
+        "    Fan Energy,                     !- End-Use Subcategory",
+        "    2,                              !- Number of Speeds",
+        "    0.5,                            !- Speed 1 Flow Fraction",
+        "    0.5,                            !- Speed 1 Electric Power Fraction",
+        "    1.0,                            !- Speed 2 Flow Fraction",
+        "    1.0;                            !- Speed 2 Electric Power Fraction",
+
+        // The third fan exercises the continuous-speed power-curve calculation.
+        "  Fan:SystemModel,",
+        "    Continuous Fan,                 !- Name",
+        "    ,                               !- Availability Schedule Name",
+        "    ContinuousInletNode,            !- Air Inlet Node Name",
+        "    ContinuousOutletNode,           !- Air Outlet Node Name",
+        "    AUTOSIZE,                       !- Design Maximum Air Flow Rate",
+        "    Continuous,                     !- Speed Control Method",
+        "    0.0,                            !- Electric Power Minimum Flow Rate Fraction",
+        "    100.0,                          !- Design Pressure Rise",
+        "    0.9,                            !- Motor Efficiency",
+        "    1.0,                            !- Motor In Air Stream Fraction",
+        "    100.0,                          !- Design Electric Power Consumption",
+        "    ,                               !- Design Power Sizing Method",
+        "    ,                               !- Electric Power Per Unit Flow Rate",
+        "    ,                               !- Electric Power Per Unit Flow Rate Per Unit Pressure",
+        "    ,                               !- Fan Total Efficiency",
+        "    Flat Fan Power Curve;           !- Electric Power Function of Flow Fraction Curve Name",
+
+        // A linear power curve makes the continuous-mode half-flow result explicit.
+        "  Curve:Cubic,",
+        "    Flat Fan Power Curve,",
+        "    0.0,                            !- Coefficient1 Constant",
+        "    1.0,                            !- Coefficient2 x",
+        "    0.0,                            !- Coefficient3 x**2",
+        "    0.0,                            !- Coefficient4 x**3",
+        "    0.0,                            !- Minimum Value of x",
+        "    1.0,                            !- Maximum Value of x",
+        "    0.0,                            !- Minimum Curve Output",
+        "    1.0,                            !- Maximum Curve Output",
+        "    Dimensionless,",
+        "    Dimensionless;",
+    };
+
+    // Generate the same four EMS actuator mappings for each fan configuration.
+    std::array<std::string_view, 3> const fanNames = {"One-Speed Discrete Fan", "Multi-Speed Discrete Fan", "Continuous Fan"};
+    std::array<std::string_view, 3> const actuatorPrefixes = {"OneSpeed", "MultiSpeed", "Continuous"};
+    std::array<std::string_view, 4> const actuatorSuffixes = {"MassFlow", "Pressure", "Efficiency", "AutosizedFlow"};
+    std::array<std::string_view, 4> const controlTypes = {
+        "Fan Air Mass Flow Rate", "Fan Pressure Rise", "Fan Total Efficiency", "Fan Autosized Air Flow Rate"};
+    std::array<std::string_view, 4> const actuatorValues = {"0.4", "200.0", "0.5", "0.8"};
+
+    auto appendActuatorField = [&idf_lines](std::string_view value, std::string_view fieldName, char delimiter) {
+        std::string line = "    ";
+        line.append(value);
+        if (value.size() < 30) {
+            line.append(30 - value.size(), ' ');
+        }
+        line += delimiter;
+        line += " !- ";
+        line.append(fieldName);
+        idf_lines.emplace_back(line);
+    };
+
+    for (std::size_t fanIndex = 0; fanIndex < fanNames.size(); ++fanIndex) {
+        for (std::size_t actuatorIndex = 0; actuatorIndex < actuatorSuffixes.size(); ++actuatorIndex) {
+            idf_lines.emplace_back("  EnergyManagementSystem:Actuator,");
+            appendActuatorField(std::string(actuatorPrefixes[fanIndex]) + std::string(actuatorSuffixes[actuatorIndex]), "Name", ',');
+            appendActuatorField(fanNames[fanIndex], "Actuated Component Unique Name", ',');
+            appendActuatorField("Fan", "Actuated Component Type", ',');
+            appendActuatorField(controlTypes[actuatorIndex], "Actuated Component Control Type", ';');
+        }
+    }
+
+    // Assign the same test values to all three fans in one EMS program.
+    idf_lines.emplace_back("  EnergyManagementSystem:Program,");
+    idf_lines.emplace_back("    SetFanActuators,");
+    for (std::size_t fanIndex = 0; fanIndex < fanNames.size(); ++fanIndex) {
+        for (std::size_t actuatorIndex = 0; actuatorIndex < actuatorSuffixes.size(); ++actuatorIndex) {
+            std::string assignment = "    SET ";
+            assignment += actuatorPrefixes[fanIndex];
+            assignment += actuatorSuffixes[actuatorIndex];
+            assignment += " = ";
+            assignment += actuatorValues[actuatorIndex];
+            bool const isLastAssignment = fanIndex + 1 == fanNames.size() && actuatorIndex + 1 == actuatorSuffixes.size();
+            assignment += isLastAssignment ? ";" : ",";
+            idf_lines.emplace_back(assignment);
+        }
+    }
+    idf_lines.emplace_back("  EnergyManagementSystem:ProgramCallingManager,");
+    idf_lines.emplace_back("    FanActuatorManager,");
+    idf_lines.emplace_back("    BeginTimestepBeforePredictor,");
+    idf_lines.emplace_back("    SetFanActuators;");
+
+    // Parse all three fan configurations and prepare sizing before running EMS.
+    ASSERT_TRUE(process_idf(delimited_string(idf_lines)));
+    state->init_state(*state);
+
+    EMSManager::CheckIfAnyEMS(*state);
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+    Fans::GetFanInput(*state);
+    state->dataSize->CurZoneEqNum = 0;
+    state->dataSize->CurSysNum = 0;
+    state->dataSize->CurOASysNum = 0;
+    state->dataEnvrn->StdRhoAir = 1.0;
+
+    // Run EMS before fan initialization so each autosized-flow command is used during sizing.
+    bool anyRan(false);
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::SetupSimulation, anyRan, ObjexxFCL::Optional_int_const());
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, anyRan, ObjexxFCL::Optional_int_const());
+    ASSERT_TRUE(anyRan);
+
+    // Verify each actuator assignment and simulated power for every fan configuration.
+    for (std::size_t fanIndex = 0; fanIndex < fanNames.size(); ++fanIndex) {
+        int const fanNum = static_cast<int>(fanIndex + 1);
+        auto *fanSystem = dynamic_cast<Fans::FanSystem *>(state->dataFans->fans(fanNum));
+        ASSERT_NE(nullptr, fanSystem);
+        SCOPED_TRACE(fanSystem->Name);
+
+        fanSystem->init(*state);
+        EXPECT_DOUBLE_EQ(0.8, fanSystem->maxAirFlowRate);
+        EXPECT_TRUE(fanSystem->EMSMaxMassFlowOverrideOn);
+        EXPECT_DOUBLE_EQ(0.4, fanSystem->EMSAirMassFlowValue);
+        EXPECT_TRUE(fanSystem->EMSPressureOverrideOn);
+        EXPECT_DOUBLE_EQ(200.0, fanSystem->EMSPressureValue);
+        EXPECT_TRUE(fanSystem->EMSTotalEffOverrideOn);
+        EXPECT_DOUBLE_EQ(0.5, fanSystem->EMSTotalEffValue);
+        EXPECT_TRUE(fanSystem->EMSMaxAirFlowRateOverrideOn);
+        EXPECT_DOUBLE_EQ(0.8, fanSystem->EMSMaxAirFlowRateValue);
+
+        fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+        EXPECT_NEAR(160.0, fanSystem->totalPower, 0.00001);
+
+        if (fanIndex == 1) {
+            // Exercise below-first-speed cycling and power contributions from both speeds.
+            fanSystem->EMSAirMassFlowValue = 0.6;
+            fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+            EXPECT_NEAR(240.0, fanSystem->totalPower, 0.00001);
+
+            fanSystem->EMSAirMassFlowValue = 0.2;
+            fanSystem->calcSimpleSystemFan(*state, _, _, _, _, _, _, _);
+            EXPECT_NEAR(80.0, fanSystem->totalPower, 0.00001);
+
+            // Use the parent-provided flow ratios and runtimes instead of EMS flow.
+            fanSystem->EMSMaxMassFlowOverrideOn = false;
+            fanSystem->calcSimpleSystemFan(*state, _, _, 0.75, 0.4, 0.25, 0.6, _);
+            EXPECT_NEAR(144.0, fanSystem->totalPower, 0.00001);
+        }
+    }
 }
 
 TEST_F(EnergyPlusFixture, ZoneExhaustFan_InputTest)

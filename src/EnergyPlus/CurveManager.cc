@@ -2711,7 +2711,7 @@ namespace Curve {
 
     double BtwxtManager::getGridValue(int gridIndex, int outputIndex, const std::vector<double> &target)
     {
-        return grids[gridIndex](target)[outputIndex];
+        return grids[gridIndex](target, outputIndex);
     }
 
     double BtwxtManager::normalizeGridValues(int gridIndex, int outputIndex, const std::vector<double> &target, const double scalar)

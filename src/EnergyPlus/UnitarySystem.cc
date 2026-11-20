@@ -4437,11 +4437,13 @@ namespace UnitarySystems {
                 this->m_FanOpMode = HVAC::FanOp::Continuous;
             } else {
                 this->m_FanOpMode = HVAC::FanOp::Cycling;
-                if (this->m_FanType != HVAC::FanType::OnOff && this->m_FanType != HVAC::FanType::SystemModel && this->m_FanExists) {
+                if (this->m_FanType != HVAC::FanType::OnOff && this->m_FanType != HVAC::FanType::SystemModel &&
+                    this->m_FanType != HVAC::FanType::VAV && this->m_FanType != HVAC::FanType::ComponentModel && this->m_FanExists) {
                     ShowSevereEmptyField(state,
                                          eoh,
                                          "Fan Operating Mode Schedule Name",
-                                         "Fan type must be Fan:OnOff or Fan:SystemModel when Supply Air Fan Operating Mode Schedule Name is blank.");
+                                         "Fan type must be Fan:OnOff, Fan:SystemModel, Fan:VariableVolume, or Fan:ComponentModel when Supply Air Fan "
+                                         "Operating Mode Schedule Name is blank.");
                     errorsFound = true;
                 }
             }

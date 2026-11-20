@@ -123,6 +123,8 @@ namespace ChillerElectricASHRAE205 {
         void getDesignCapacities(
             EnergyPlusData &state, const PlantLocation &calledFromLocation, Real64 &MaxLoad, Real64 &MinLoad, Real64 &OptLoad) override;
 
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad) override;
+
         void initialize(EnergyPlusData &state, bool RunFlag, Real64 MyLoad) override;
 
         void size(EnergyPlusData &state) override;

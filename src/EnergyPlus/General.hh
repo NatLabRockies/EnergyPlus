@@ -78,8 +78,8 @@ namespace General {
     {
         RootAlgo algo = RootAlgo::RegulaFalsi;
         int counts = 0;
-        std::array<int, (int)RootAlgo::Num> algoCounts = {0};
-        std::array<int, (int)RootAlgo::Num> algoIters = {0};
+        std::array<int, (int)RootAlgo::Num> algoCounts{};
+        std::array<int, (int)RootAlgo::Num> algoIters{};
     };
 
     // A second version that does not require a payload -- use lambdas

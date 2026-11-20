@@ -334,9 +334,9 @@ void GetPollutionFactorInput(EnergyPlusData &state)
     if (pm->PollutionReportSetup) { // only do this if reporting on the pollution
         // Need to go through all of the Fuel Types and make sure a Fuel Factor was found for each type of energy being simulated
         // Check for Electricity
-        if (!pm->pollCoeffs[(int)PollFuel::Electricity].used && ((pm->facilityMeterNums[(int)PollFacilityMeter::Electricity] > 0) ||
-                                                                 (pm->facilityMeterNums[(int)PollFacilityMeter::ElectricityProduced] > 0) ||
-                                                                 (pm->facilityMeterNums[(int)PollFacilityMeter::CoolPurchased] > 0))) {
+        if (!pm->pollCoeffs[(int)PollFuel::Electricity].used && ((pm->facilityMeterNums[(int)PollFacilityMeter::Electricity] >= 0) ||
+                                                                 (pm->facilityMeterNums[(int)PollFacilityMeter::ElectricityProduced] >= 0) ||
+                                                                 (pm->facilityMeterNums[(int)PollFacilityMeter::CoolPurchased] >= 0))) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for ELECTRICITY", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
@@ -344,55 +344,55 @@ void GetPollutionFactorInput(EnergyPlusData &state)
 
         // Check for Natural Gas
         if (!pm->pollCoeffs[(int)PollFuel::NaturalGas].used &&
-            ((pm->facilityMeterNums[(int)PollFacilityMeter::NaturalGas] > 0) || (pm->facilityMeterNums[(int)PollFacilityMeter::HeatPurchased] > 0) ||
-             (pm->facilityMeterNums[(int)PollFacilityMeter::Steam] > 0))) {
+            ((pm->facilityMeterNums[(int)PollFacilityMeter::NaturalGas] >= 0) ||
+             (pm->facilityMeterNums[(int)PollFacilityMeter::HeatPurchased] >= 0) || (pm->facilityMeterNums[(int)PollFacilityMeter::Steam] >= 0))) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for NATURAL GAS", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for FuelOilNo2 (Residual Oil)
-        if (!pm->pollCoeffs[(int)PollFuel::FuelOil2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil2] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::FuelOil2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil2] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #2", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for FuelOilNo1 (Distillate Oil)
-        if (!pm->pollCoeffs[(int)PollFuel::FuelOil1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil1] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::FuelOil1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil1] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #1", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Coal
-        if (!pm->pollCoeffs[(int)PollFuel::Coal].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Coal] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::Coal].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Coal] >= 0)) {
             ShowSevereError(state, std::format("{} Not Found or Fuel not specified For Pollution Calculation for COAL", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Gasoline
-        if (!pm->pollCoeffs[(int)PollFuel::Gasoline].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Gasoline] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::Gasoline].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Gasoline] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for GASOLINE", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Propane
-        if (!pm->pollCoeffs[(int)PollFuel::Propane].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Propane] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::Propane].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Propane] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for PROPANE", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Diesel
-        if (!pm->pollCoeffs[(int)PollFuel::Diesel].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Diesel] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::Diesel].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Diesel] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for DIESEL", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for OtherFuel1
-        if (!pm->pollCoeffs[(int)PollFuel::OtherFuel1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel1] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::OtherFuel1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel1] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL1", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for OtherFuel2
-        if (!pm->pollCoeffs[(int)PollFuel::OtherFuel2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel2] > 0)) {
+        if (!pm->pollCoeffs[(int)PollFuel::OtherFuel2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel2] >= 0)) {
             ShowSevereError(state,
                             std::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL2", ipsc->cCurrentModuleObject));
             ErrorsFound = true;

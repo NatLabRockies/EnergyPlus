@@ -622,7 +622,7 @@ namespace Material {
         //  up to 5 gases in a mixture [Window gas only].  It is defined as parameter (GasCoefs)
         int numGases = 0; // Number of gases in a window gas mixture
 
-        std::array<Real64, maxMixGases> gasFracts = {0.0};
+        std::array<Real64, maxMixGases> gasFracts{};
         std::array<Gas, maxMixGases> gases = {Gas()};
 
         GapVentType gapVentType = GapVentType::Sealed; // Gap Ven type for equivalent Layer window model

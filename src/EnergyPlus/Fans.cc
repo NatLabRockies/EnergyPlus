@@ -2792,7 +2792,7 @@ void FanSystem::calcSimpleSystemFan(
 )
 {
     Real64 _localFlowFrac;
-    Real64 _localTotalEff;
+    Real64 _localTotalEff = EMSTotalEffOverrideOn ? EMSTotalEffValue : totalEff;
     std::array<Real64, 2> _localPressureRise = {0.0, 0.0}; // [0] is operating mode 1, [1] is operating mode 2
     std::array<Real64, 2> _localAirMassFlow = {0.0, 0.0};
     std::array<Real64, 2> _localFlowRatio = {0.0, 0.0};
@@ -2867,9 +2867,6 @@ void FanSystem::calcSimpleSystemFan(
         // EMS override MassFlow, DeltaPress, and FanEff
         if (EMSPressureOverrideOn) {
             _localPressureRise[mode] = EMSPressureValue;
-        }
-        if (EMSTotalEffOverrideOn) {
-            _localTotalEff = EMSTotalEffValue;
         }
         if (EMSMaxMassFlowOverrideOn) {
             _localAirMassFlow[mode] = EMSAirMassFlowValue;
@@ -2953,7 +2950,6 @@ void FanSystem::calcSimpleSystemFan(
                     Real64 _locLowSpeedRuntimeFrac = 0.0;
                     Real64 _locHiSpeedRuntimeFrac = 0.0;
                     if (numSpeeds == 1) { // CV or OnOff
-                        _localTotalEff = totalEff;
                         _locHiSpeedRuntimeFrac = _locRuntimeFrac * _locFlowRatio;
                         runtimeFracAtSpeed[0] += _locHiSpeedRuntimeFrac;
                         totalPower +=
@@ -2988,15 +2984,18 @@ void FanSystem::calcSimpleSystemFan(
                             runtimeFracAtSpeed[_hiSideSpeed] += _locHiSpeedRuntimeFrac;
                         }
                         if (_lowSideSpeed != -1 && _hiSideSpeed != -1) {
+                            Real64 _lowSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_lowSideSpeed];
+                            Real64 _hiSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_hiSideSpeed];
                             totalPower += max(0.0,
                                               _locLowSpeedRuntimeFrac * massFlowAtSpeed[_lowSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_lowSideSpeed] * rhoAirStdInit) +
+                                                      (_lowSpeedTotalEff * rhoAirStdInit) +
                                                   _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                      (_hiSpeedTotalEff * rhoAirStdInit));
                         } else if (_lowSideSpeed == -1 && _hiSideSpeed == 0) {
+                            Real64 _hiSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_hiSideSpeed];
                             totalPower += max(0.0,
                                               _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                  (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                  (_hiSpeedTotalEff * rhoAirStdInit));
                         }
                     }
                 } else {
@@ -3008,7 +3007,6 @@ void FanSystem::calcSimpleSystemFan(
                                                  : max(0.0, min(1.0, _localFlowFrac / state.dataHVACGlobal->OnOffFanPartLoadFraction));
 
                     if (numSpeeds == 1) { // CV or OnOff
-                        _localTotalEff = totalEff;
                         _locHiSpeedRuntimeFrac = _locRuntimeFrac;
                         runtimeFracAtSpeed[0] += _locHiSpeedRuntimeFrac;
                         totalPower +=
@@ -3041,23 +3039,24 @@ void FanSystem::calcSimpleSystemFan(
                             runtimeFracAtSpeed[_hiSideSpeed] += _locHiSpeedRuntimeFrac;
                         }
                         if (_lowSideSpeed != -1 && _hiSideSpeed != -1) {
+                            Real64 _lowSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_lowSideSpeed];
+                            Real64 _hiSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_hiSideSpeed];
                             totalPower += max(0.0,
                                               _locLowSpeedRuntimeFrac * massFlowAtSpeed[_lowSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_lowSideSpeed] * rhoAirStdInit) +
+                                                      (_lowSpeedTotalEff * rhoAirStdInit) +
                                                   _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                      (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                      (_hiSpeedTotalEff * rhoAirStdInit));
                         } else if (_lowSideSpeed == -1 && _hiSideSpeed == 0) {
+                            Real64 _hiSpeedTotalEff = EMSTotalEffOverrideOn ? _localTotalEff : totalEffAtSpeed[_hiSideSpeed];
                             totalPower += max(0.0,
                                               _locHiSpeedRuntimeFrac * massFlowAtSpeed[_hiSideSpeed] * _localPressureRise[mode] /
-                                                  (totalEffAtSpeed[_hiSideSpeed] * rhoAirStdInit));
+                                                  (_hiSpeedTotalEff * rhoAirStdInit));
                         }
                     }
                 }
-                _localTotalEff = totalEff;
             } break;
 
             case SpeedControl::Continuous: {
-                _localTotalEff = totalEff;
                 Real64 _locFlowRatio(0.0);
                 Real64 _locRuntimeFrac(0.0);
                 if (_useFlowRatiosAndRunTimeFracs) {
