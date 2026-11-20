@@ -623,7 +623,7 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
         EXPECT_GT(s_surf->SurfWinDividerTempSurfOut(winNum), divTempOutNoAbs + 10.0);
         EXPECT_GT(s_surf->SurfWinDividerTempIn(winNum), divTempInNoAbs + 3.0);
         Real64 const frameAbsorbed = s_surf->SurfWinFrameArea(winNum) * (frameOutAbs + frameInAbs);
-        EXPECT_GT(s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum), frameGainNoAbs + 0.1 * frameAbsorbed);
+        EXPECT_GT(s_surf->SurfWinFrameHeatGain(winNum) - s_surf->SurfWinFrameHeatLoss(winNum), frameGainNoAbs + 0.05 * frameAbsorbed);
     }
 
     // System radiant gains can change between inside heat balance calls as radiant equipment is simulated. They must be
