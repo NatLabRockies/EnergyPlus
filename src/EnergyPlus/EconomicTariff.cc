@@ -3118,15 +3118,15 @@ void popStack(EnergyPlusData &state, Array1D<Real64> &monthlyArray, int &variabl
     if (s_econ->topOfStack >= 1) {
         variablePointer = stack(s_econ->topOfStack).varPt;
         monthlyArray = stack(s_econ->topOfStack).values;
+        --s_econ->topOfStack;
     } else {
         ShowWarningError(state,
                          std::format("UtilityCost:Tariff: stack underflow in calculation of utility bills. On variable: {}",
                                      s_econ->econVar(variablePointer).name));
         variablePointer = 0;
-        monthlyArray = {0.0};
+        monthlyArray = 0.0;
         s_econ->topOfStack = 0;
     }
-    --s_econ->topOfStack;
 }
 
 void evaluateChargeSimple(EnergyPlusData &state, int const usingVariable)

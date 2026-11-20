@@ -1014,6 +1014,25 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     EXPECT_TRUE(generatorController->electProdRate > 1.15 * generatorController->thermProdRate) << "Power to Heat Ratio appears too low";
     EXPECT_DOUBLE_EQ(exhaustHX.qHX, generatorController->thermProdRate);
     EXPECT_DOUBLE_EQ(generatorController->thermProdRate * 15 * 60, generatorController->thermalProd);
+
+    // The exhaust node enthalpy is based on the actual gas constituents, not moist-air psychrometrics.
+    auto &exhaustNode = state->dataLoopNodes->Node(thisFC->ExhaustHX.ExhaustOutNode);
+    thisFC->AuxilHeat.GasLibID = FuelCellElectricGenerator::GasID::Invalid;
+    thisFC->AuxilHeat.ConstitMolalFract = 0.0;
+    thisFC->AuxilHeat.GasLibID(1) = FuelCellElectricGenerator::GasID::Nitrogen;
+    thisFC->AuxilHeat.GasLibID(2) = FuelCellElectricGenerator::GasID::CarbonDioxide;
+    thisFC->AuxilHeat.GasLibID(3) = FuelCellElectricGenerator::GasID::Water;
+    thisFC->AuxilHeat.ConstitMolalFract(1) = 0.4;
+    thisFC->AuxilHeat.ConstitMolalFract(2) = 0.4;
+    thisFC->AuxilHeat.ConstitMolalFract(3) = 0.2;
+    thisFC->AuxilHeat.NdotAuxMix = 0.001;
+    thisFC->ExhaustHX.CondensateRate = 0.0;
+    thisFC->ExhaustHX.THXexh = 100.0;
+    thisFC->UpdateFuelCellGeneratorRecords(*state);
+
+    EXPECT_NEAR(0.028808, exhaustNode.MassFlowRate, 1.0e-8);
+    EXPECT_NEAR(429539.5, exhaustNode.Enthalpy, 0.1);
+    EXPECT_NEAR(0.12510414, exhaustNode.HumRat, 1.0e-8);
 }
 
 // This was marked with DISABLE_ and skipped for a long time.  I enabled it, and messed with it, but

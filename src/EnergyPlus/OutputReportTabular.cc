@@ -12918,9 +12918,9 @@ void WriteResilienceBinsTable(EnergyPlusData &state,
                               const std::array<Real64, columnNum> DataHeatBalance::ZoneResilience::*memberPtr,
                               Real64 const unitConvMultiplier)
 {
-    std::array<Real64, columnNum> columnMax = {0.0};
-    std::array<Real64, columnNum> columnMin = {0.0};
-    std::array<Real64, columnNum> columnSum = {0.0};
+    std::array<Real64, columnNum> columnMax{};
+    std::array<Real64, columnNum> columnMin{};
+    std::array<Real64, columnNum> columnSum{};
     for (int j = 0; j < columnNum; j++) {
         columnMin[j] = (state.dataHeatBal->Resilience(1).*memberPtr)[j] * unitConvMultiplier;
     }
@@ -12961,9 +12961,9 @@ void WriteResilienceBinsTableNonPreDefUseZoneData(EnergyPlusData &state,
         WriteSubtitle(state, tableName);
     }
 
-    std::array<Real64, columnNum> columnMax = {0.0};
-    std::array<Real64, columnNum> columnMin = {0.0};
-    std::array<Real64, columnNum> columnSum = {0.0};
+    std::array<Real64, columnNum> columnMax{};
+    std::array<Real64, columnNum> columnMin{};
+    std::array<Real64, columnNum> columnSum{};
 
     for (int j = 0; j < columnNum; j++) {
         columnMin.at(j) = (state.dataHeatBal->Resilience(1).*memberPtr).at(j) * unitConvMultiplier;

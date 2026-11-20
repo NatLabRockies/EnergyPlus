@@ -118,8 +118,8 @@ namespace ChillerAbsorption {
         Real64 OptPartLoadRat = 0.0;                                 // (BLAST BEST) optimal operating frac full load
         Real64 TempDesCondIn = 0.0;                                  // C - (BLAST ADJTC(1)The design secondary loop fluid
         // temperature at the Absorber condenser side inlet
-        std::array<Real64, 3> SteamLoadCoef = {0.0};                // (BLAST RPWRC() ) coeff of full load poly. fit
-        std::array<Real64, 3> PumpPowerCoef = {0.0};                // coeff of pumping power poly. fit
+        std::array<Real64, 3> SteamLoadCoef{};                      // (BLAST RPWRC() ) coeff of full load poly. fit
+        std::array<Real64, 3> PumpPowerCoef{};                      // coeff of pumping power poly. fit
         Real64 TempLowLimitEvapOut = 0.0;                           // C - low temperature shut off
         int ErrCount2 = 0;                                          // error counter
         Node::FluidType GenHeatSourceType = Node::FluidType::Blank; // Generator heat source type

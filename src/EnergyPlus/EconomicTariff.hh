@@ -340,7 +340,7 @@ namespace EconomicTariff {
         int firstNative;
         int lastNative;
         // native variables (based on energy and demands from the simulation)
-        std::array<int, (int)Native::Num> natives = {0};
+        std::array<int, (int)Native::Num> natives{};
         // arrays for holding gathered values
         Array1D<std::array<Real64, (int)Period::Num>> gatherEnergy;
         Array1D<std::array<Real64, (int)Period::Num>> gatherDemand;
