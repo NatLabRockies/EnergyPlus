@@ -948,16 +948,17 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     auto exhaustHX = thisFC->ExhaustHX;
     EXPECT_EQ(exhaustHX.Name, thisFC->NameExhaustHX);
 
-    EXPECT_EQ("NODE 10", exhaustHX.WaterInNodeName);
     EXPECT_GT(exhaustHX.WaterInNode, 0);
+    EXPECT_EQ("NODE 10", state->dataLoopNodes->NodeID(exhaustHX.WaterInNode));
 
-    EXPECT_EQ("NODE 11", exhaustHX.WaterOutNodeName);
     EXPECT_GT(exhaustHX.WaterOutNode, 0);
+    EXPECT_EQ("NODE 11", state->dataLoopNodes->NodeID(exhaustHX.WaterOutNode));
 
     EXPECT_EQ(0.0004, exhaustHX.WaterVolumeFlowMax);
 
-    EXPECT_EQ("GENERATOR FUEL CELL EXHAUST GAS TO WATER HEAT EXCHANGER 1 EXHAUST OUTLET AIR NODE", exhaustHX.ExhaustOutNodeName);
     EXPECT_GT(exhaustHX.ExhaustOutNode, 0);
+    EXPECT_EQ("GENERATOR FUEL CELL EXHAUST GAS TO WATER HEAT EXCHANGER 1 EXHAUST OUTLET AIR NODE",
+              state->dataLoopNodes->NodeID(exhaustHX.ExhaustOutNode));
 
     EXPECT_ENUM_EQ(DataGenerators::ExhaustGasHX::Condensing, thisFC->ExhaustHX.HXmodelMode);
 

@@ -830,8 +830,6 @@ namespace FuelCellElectricGenerator {
 
                 fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCExhaust;
                 fuelCell.ExhaustHX.Name = AlphArray(1);
-                fuelCell.ExhaustHX.WaterInNodeName = AlphArray(2);
-                fuelCell.ExhaustHX.WaterOutNodeName = AlphArray(3);
                 // find node ids for water path
                 fuelCell.ExhaustHX.WaterInNode = Node::GetOnlySingleNode(state,
                                                                          AlphArray(2),
@@ -853,7 +851,6 @@ namespace FuelCellElectricGenerator {
                                                                           Node::ObjectIsNotParent);
                 Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
 
-                fuelCell.ExhaustHX.ExhaustOutNodeName = AlphArray(4);
                 fuelCell.ExhaustHX.ExhaustOutNode =
                     Node::GetOnlySingleNode(state,
                                             AlphArray(4),
@@ -1046,9 +1043,6 @@ namespace FuelCellElectricGenerator {
                     auto &fuelCell = state.dataFuelCellElectGen->FuelCell(fuelCellNum);
                     fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCStackCooler;
                     fuelCell.StackCooler.Name = AlphArray(1);
-                    fuelCell.StackCooler.WaterInNodeName = AlphArray(2);
-
-                    fuelCell.StackCooler.WaterOutNodeName = AlphArray(3);
 
                     fuelCell.StackCooler.WaterInNode = Node::GetOnlySingleNode(state,
                                                                                AlphArray(2),
@@ -1076,18 +1070,6 @@ namespace FuelCellElectricGenerator {
                     fuelCell.StackCooler.r1 = NumArray(4);
                     fuelCell.StackCooler.r2 = NumArray(5);
                     fuelCell.StackCooler.r3 = NumArray(6);
-                    fuelCell.StackCooler.MdotStackCoolant = NumArray(7);
-                    fuelCell.StackCooler.UAs_cool = NumArray(8);
-                    fuelCell.StackCooler.Fs_cogen = NumArray(9);
-                    fuelCell.StackCooler.As_cogen = NumArray(10);
-                    fuelCell.StackCooler.MdotCogenNom = NumArray(11);
-                    fuelCell.StackCooler.hCogenNom = NumArray(12);
-                    fuelCell.StackCooler.ns = NumArray(13);
-                    fuelCell.StackCooler.PstackPumpEl = NumArray(14);
-                    fuelCell.StackCooler.PmpPowerLossFactor = NumArray(15);
-                    fuelCell.StackCooler.f0 = NumArray(16);
-                    fuelCell.StackCooler.f1 = NumArray(17);
-                    fuelCell.StackCooler.f1 = NumArray(18);
 
                     fuelCell.StackCooler.StackCoolerPresent = true;
 
@@ -3359,7 +3341,6 @@ namespace FuelCellElectricGenerator {
             this->AuxilHeat.NdotAuxMix = 0.0;
             this->AuxilHeat.QskinLoss = 0.0;
             this->AuxilHeat.QairIntake = 0.0;
-            this->ExhaustHX.NdotHXleaving = 0.0;
             this->ExhaustHX.WaterOutletTemp = 0.0;
             this->ExhaustHX.WaterOutletEnthalpy = 0.0;
             this->ElecStorage.LastTimeStepStateOfCharge = this->ElecStorage.StartingEnergyStored;
@@ -3539,18 +3520,10 @@ namespace FuelCellElectricGenerator {
 
         this->Report.ACPowerGen = this->ACPowerGen;                                         // electrical power produced [W]
         this->Report.ACEnergyGen = this->ACPowerGen * state.dataHVACGlobal->TimeStepSysSec; // energy produced (J)
-        this->Report.QdotExhaust = 0.0;                                                     // reporting: exhaust gas heat recovered (W)
-        this->Report.TotalHeatEnergyRec = 0.0;                                              // reporting: total heat recovered (J)
-        this->Report.ExhaustEnergyRec = 0.0;                                                // reporting: exhaust gas heat recovered (J)
 
         this->Report.HeatRecInletTemp = 0.0;  // reporting: Heat Recovery Loop Inlet Temperature (C)
         this->Report.HeatRecOutletTemp = 0.0; // reporting: Heat Recovery Loop Outlet Temperature (C)
         this->Report.HeatRecMdot = 0.0;       // reporting: Heat Recovery Loop Mass flow rate (kg/s)
-
-        this->Report.ElectEfficiency = 0.0;
-        this->Report.ThermalEfficiency = 0.0;
-        this->Report.OverallEfficiency = 0.0;
-        this->Report.ExergyEfficiency = 0.0;
 
         this->Report.TairInlet = this->AirSup.TairIntoBlower;                                       // State point 1
         this->Report.TairIntoFCPM = this->AirSup.TairIntoFCPM;                                      // State point 4
@@ -3580,8 +3553,6 @@ namespace FuelCellElectricGenerator {
 
         this->Report.FuelEnergyUseRateHHV = this->FCPM.NdotFuel * state.dataGenerator->FuelSupply(this->FuelSupNum).HHV *
                                             state.dataGenerator->FuelSupply(this->FuelSupNum).KmolPerSecToKgPerSec;
-
-        this->Report.FuelRateMdot = 0.0; // (Kg/s)
 
         this->Report.TwaterInlet = this->WaterSup.TwaterIntoCompress;
         this->Report.TwaterIntoFCPM = this->WaterSup.TwaterIntoFCPM;

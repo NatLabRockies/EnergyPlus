@@ -557,8 +557,6 @@ namespace HVACMultiSpeedHeatPump {
                 ErrorsFound = true;
             }
 
-            thisMSHP.AirInletNodeName = Alphas(3);
-            thisMSHP.AirOutletNodeName = Alphas(4);
             thisMSHP.AirInletNodeNum = GetOnlySingleNode(state,
                                                          Alphas(3),
                                                          ErrorsFound,
@@ -1141,7 +1139,6 @@ namespace HVACMultiSpeedHeatPump {
                     // Get the Supplemental Heating Coil Outlet Node
                     errFlag = false;
                     SuppHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", thisMSHP.SuppHeatCoilName, errFlag);
-                    thisMSHP.SuppCoilAirOutletNode = SuppHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -1201,7 +1198,6 @@ namespace HVACMultiSpeedHeatPump {
                     // Get the Supplemental Heating Coil Outlet Node
                     errFlag = false;
                     SuppHeatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisMSHP.SuppHeatCoilNum, thisMSHP.SuppHeatCoilName, errFlag);
-                    thisMSHP.SuppCoilAirOutletNode = SuppHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", state.dataHVACMultiSpdHP->CurrentModuleObject, thisMSHP.Name));
                         ErrorsFound = true;
@@ -2627,7 +2623,6 @@ namespace HVACMultiSpeedHeatPump {
             state.dataLoopNodes->Node(InNode).MassFlowRate = 0.0;
             state.dataLoopNodes->Node(OutNode).MassFlowRateMaxAvail = 0.0;
         }
-        MSHeatPump(MSHeatPumpNum).LoadMet = 0.0;
         SetAverageAirFlow(state, MSHeatPumpNum, PartLoadFrac, OnOffAirFlowRatio);
 
         // Init maximum available Heat Recovery flow rate
@@ -4001,8 +3996,6 @@ namespace HVACMultiSpeedHeatPump {
                                                                                   state.dataLoopNodes->Node(MSHeatPump.NodeNumOfControlledZone).Temp,
                                                                                   MinHumRat);
         LoadMet = SensibleOutput - MSHeatPump.LoadLoss;
-
-        MSHeatPump.LoadMet = LoadMet;
     }
 
     void UpdateMSHeatPump(EnergyPlusData &state, int const MSHeatPumpNum) // Engine driven heat pump number

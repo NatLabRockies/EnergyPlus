@@ -164,12 +164,10 @@ namespace FaultsManager {
     {
         // Members
         int ControllerTypeEnum;
-        int ControllerID;           // Point to a controller associated with the fault
-        std::string ControllerType; // Controller type
         std::string ControllerName; // Controller name
 
         // Default Constructor
-        FaultPropertiesEconomizer() : ControllerTypeEnum(0), ControllerID(0)
+        FaultPropertiesEconomizer() : ControllerTypeEnum(0)
         {
         }
 
@@ -210,9 +208,7 @@ namespace FaultsManager {
     struct FaultPropertiesFoulingCoil : public FaultProperties // Class for FaultModel:Fouling:Coil
     {
         // Members
-        std::string FouledCoilName;                   // The fouled coil name
-        DataPlant::PlantEquipmentType FouledCoilType; // Type of coil that's fouled
-        int FouledCoilNum;             // The "FouledUARated" implies having to use the Coil's UA, which could be autosized, so have to use this index
+        std::string FouledCoilName;    // The fouled coil name
         FouledCoil FoulingInputMethod; // Coil fouling input method
         Real64 UAFouled;               // Fouling coil UA under rating conditions
         Real64 Rfw;                    // Water side fouling factor
@@ -221,9 +217,7 @@ namespace FaultsManager {
         Real64 Aratio;                 // Inside to outside surface area ratio
 
         // Default Constructor
-        FaultPropertiesFoulingCoil()
-            : FouledCoilType(DataPlant::PlantEquipmentType::Invalid), FouledCoilNum(0), FoulingInputMethod(FouledCoil::Invalid), UAFouled(0.0),
-              Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
+        FaultPropertiesFoulingCoil() : FoulingInputMethod(FouledCoil::Invalid), UAFouled(0.0), Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
         {
         }
 
@@ -241,7 +235,6 @@ namespace FaultsManager {
     struct FaultPropertiesAirFilter : public FaultProperties // Class for FaultModel:Fouling:AirFilter, derived from FaultProperties
     {
         // Members
-        std::string fanName; // The name of the fan corresponding to the fouled air filter
         int fanNum = 0;
         HVAC::FanType fanType = HVAC::FanType::Invalid; // The type of the fan corresponding to the fouled air filter
         int fanCurveNum = 0;                            // The index to the curve
@@ -337,7 +330,6 @@ namespace FaultsManager {
     struct FaultPropertiesBoilerFouling : public FaultPropertiesFouling // Class for FaultModel:Fouling:Boiler
     {
         // Members
-        std::string BoilerType; // Boiler type
         std::string BoilerName; // Boiler name
 
         // Default Constructor

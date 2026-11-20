@@ -258,12 +258,9 @@ namespace FuelCellElectricGenerator {
     struct FCExhaustHXDataStruct
     {
         std::string Name;                         // name of this exhaust gas heat recovery
-        std::string WaterInNodeName;              // HR Water Inlet Node
         int WaterInNode;                          // HR Water Outlet Node ID
-        std::string WaterOutNodeName;             // HR water outlet Node name
         int WaterOutNode;                         // HR Water outlet Node ID
         Real64 WaterVolumeFlowMax;                // HR water flow rate max avail
-        std::string ExhaustOutNodeName;           // air node for exhaust flow
         int ExhaustOutNode;                       // Exhaust Air node ID
         DataGenerators::ExhaustGasHX HXmodelMode; // Heat Exchanger Calculation Method
         Real64 HXEffect;                          // Heat Exchanger Effectiveness (method 1)
@@ -292,9 +289,6 @@ namespace FuelCellElectricGenerator {
         Real64 WaterInletTemp;
         Real64 WaterVaporFractExh; // water vapor fraction in exhaust gas stream.
         Real64 CondensateRate;     // water condensation rate.
-        Array1D<Real64> ConstitMolalFract;
-        Array1D<GasID> GasLibID; // lookup ID in Gas Phase ThermoChemistry Structure Array
-        Real64 NdotHXleaving;
         Real64 WaterOutletTemp;
         Real64 WaterOutletEnthalpy;
 
@@ -304,8 +298,7 @@ namespace FuelCellElectricGenerator {
               HXEffect(0.0), hxs0(0.0), hxs1(0.0), hxs2(0.0), hxs3(0.0), hxs4(0.0), h0gas(0.0), NdotGasRef(0.0), nCoeff(0.0), AreaGas(0.0),
               h0Water(0.0), NdotWaterRef(0.0), mCoeff(0.0), AreaWater(0.0), Fadjust(0.0), l1Coeff(0.0), l2Coeff(0.0), CondensationThresholdTemp(0.0),
               qHX(0.0), THXexh(0.0), WaterMassFlowRateDesign(0.0), WaterMassFlowRate(0.0), WaterInletTemp(0.0), WaterVaporFractExh(0.0),
-              CondensateRate(0.0), ConstitMolalFract(14, 0.0), GasLibID(14, GasID::Invalid), NdotHXleaving(0.0), WaterOutletTemp(0.0),
-              WaterOutletEnthalpy(0.0)
+              CondensateRate(0.0), WaterOutletTemp(0.0), WaterOutletEnthalpy(0.0)
         {
         }
     };
@@ -361,14 +354,10 @@ namespace FuelCellElectricGenerator {
         // Members
         Real64 ACPowerGen;           // reporting: power (W)
         Real64 ACEnergyGen;          // reporting: energy (J)
-        Real64 QdotExhaust;          // reporting: exhaust gas heat recovered (W)
-        Real64 TotalHeatEnergyRec;   // reporting: total heat recovered (J)
-        Real64 ExhaustEnergyRec;     // reporting: exhaust gas heat recovered (J)
         Real64 FuelEnergyLHV;        // reporting: Fuel Energy used in Lower Heating Value(J)
         Real64 FuelEnergyUseRateLHV; // reporting: Fuel Energy used in Lower Heating Value(W)
         Real64 FuelEnergyHHV;        // reporting: Fuel Energy used in Lower Heating Value(J)
         Real64 FuelEnergyUseRateHHV; // reporting: Fuel Energy used in Lower Heating Value(W)
-        Real64 FuelRateMdot;         // (Kg/s)
         Real64 HeatRecInletTemp;     // reporting: Heat Recovery Loop Inlet Temperature (C)
         Real64 HeatRecOutletTemp;    // reporting: Heat Recovery Loop Outlet Temperature (C)
         Real64 HeatRecMdot;          // reporting: Heat Recovery Loop Mass flow rate (kg/s)
@@ -427,66 +416,44 @@ namespace FuelCellElectricGenerator {
         Real64 SkinLossEnergy;       // heat loss to surround zone [J]
         Real64 SkinLossConvect;      // convective heat loss to zone [W]
         Real64 SkinLossRadiat;       // radiative heat loss to zone [W}
-        Real64 ElectEfficiency;
-        Real64 ThermalEfficiency;
-        Real64 OverallEfficiency;
-        Real64 ExergyEfficiency;
-        int NumCycles;       // Number of start-stop cycles
-        Real64 FCPMSkinLoss; // Power module skin losses [W]
+        int NumCycles;               // Number of start-stop cycles
+        Real64 FCPMSkinLoss;         // Power module skin losses [W]
 
         // Default Constructor
         FCReportDataStruct()
-            : ACPowerGen(0.0), ACEnergyGen(0.0), QdotExhaust(0.0), TotalHeatEnergyRec(0.0), ExhaustEnergyRec(0.0), FuelEnergyLHV(0.0),
-              FuelEnergyUseRateLHV(0.0), FuelEnergyHHV(0.0), FuelEnergyUseRateHHV(0.0), FuelRateMdot(0.0), HeatRecInletTemp(0.0),
-              HeatRecOutletTemp(0.0), HeatRecMdot(0.0), TairInlet(0.0), TairIntoFCPM(0.0), NdotAir(0.0), TotAirInEnthalpy(0.0), BlowerPower(0.0),
-              BlowerEnergy(0.0), BlowerSkinLoss(0.0), TfuelInlet(0.0), TfuelIntoFCPM(0.0), NdotFuel(0.0), TotFuelInEnthalpy(0.0),
+            : ACPowerGen(0.0), ACEnergyGen(0.0), FuelEnergyLHV(0.0), FuelEnergyUseRateLHV(0.0), FuelEnergyHHV(0.0), FuelEnergyUseRateHHV(0.0),
+              HeatRecInletTemp(0.0), HeatRecOutletTemp(0.0), HeatRecMdot(0.0), TairInlet(0.0), TairIntoFCPM(0.0), NdotAir(0.0), TotAirInEnthalpy(0.0),
+              BlowerPower(0.0), BlowerEnergy(0.0), BlowerSkinLoss(0.0), TfuelInlet(0.0), TfuelIntoFCPM(0.0), NdotFuel(0.0), TotFuelInEnthalpy(0.0),
               FuelCompressPower(0.0), FuelCompressEnergy(0.0), FuelCompressSkinLoss(0.0), TwaterInlet(0.0), TwaterIntoFCPM(0.0), NdotWater(0.0),
               WaterPumpPower(0.0), WaterPumpEnergy(0.0), WaterIntoFCPMEnthalpy(0.0), TprodGas(0.0), EnthalProdGas(0.0), NdotProdGas(0.0),
               NdotProdAr(0.0), NdotProdCO2(0.0), NdotProdH2O(0.0), NdotProdN2(0.0), NdotProdO2(0.0), qHX(0.0), HXenergy(0.0), THXexh(0.0),
               WaterVaporFractExh(0.0), CondensateRate(0.0), SeqSubstIterations(0), RegulaFalsiIterations(0), ACancillariesPower(0.0),
               ACancillariesEnergy(0.0), PCUlosses(0.0), DCPowerGen(0.0), DCPowerEff(0.0), ElectEnergyinStorage(0.0), StoredPower(0.0),
               StoredEnergy(0.0), DrawnPower(0.0), DrawnEnergy(0.0), SkinLossPower(0.0), SkinLossEnergy(0.0), SkinLossConvect(0.0),
-              SkinLossRadiat(0.0), ElectEfficiency(0.0), ThermalEfficiency(0.0), OverallEfficiency(0.0), ExergyEfficiency(0.0), NumCycles(0),
-              FCPMSkinLoss(0.0)
+              SkinLossRadiat(0.0), NumCycles(0), FCPMSkinLoss(0.0)
         {
         }
     };
 
     struct FCStackCoolerDataStruct
     {
-        std::string Name;             // name of this stack cooler module
-        std::string WaterInNodeName;  // HR Water Inlet Node
-        int WaterInNode;              // HR Water Outlet Node ID
-        std::string WaterOutNodeName; // HR water outlet Node name
-        int WaterOutNode;             // HR Water outlet Node ID
-        Real64 TstackNom;             // nominal fuel cell stack temperature
-        Real64 TstackActual;          // actual fuel cell stack temperature
-        Real64 r0;                    // stack cooling power coefficient r0
-        Real64 r1;                    // stack cooling power coefficient r1
-        Real64 r2;                    // stack cooling power coefficient r2
-        Real64 r3;                    // stack cooling power coefficient r3
-        Real64 MdotStackCoolant;      // stack coolant flow rate kg/s
-        Real64 UAs_cool;              // stack heat transfer coef
-        Real64 Fs_cogen;
-        Real64 As_cogen;
-        Real64 MdotCogenNom;
-        Real64 hCogenNom;
-        Real64 ns;
-        Real64 PstackPumpEl;
-        Real64 PmpPowerLossFactor;
-        Real64 f0;
-        Real64 f1;
-        Real64 f2;
+        std::string Name;    // name of this stack cooler module
+        int WaterInNode;     // HR Water Outlet Node ID
+        int WaterOutNode;    // HR Water outlet Node ID
+        Real64 TstackNom;    // nominal fuel cell stack temperature
+        Real64 TstackActual; // actual fuel cell stack temperature
+        Real64 r0;           // stack cooling power coefficient r0
+        Real64 r1;           // stack cooling power coefficient r1
+        Real64 r2;           // stack cooling power coefficient r2
+        Real64 r3;           // stack cooling power coefficient r3
         // calculated and from elsewhere
         bool StackCoolerPresent; // control modeling
         Real64 qs_cool;
-        Real64 qs_air;
 
         // Default Constructor
         FCStackCoolerDataStruct()
-            : WaterInNode(0), WaterOutNode(0), TstackNom(0.0), TstackActual(0.0), r0(0.0), r1(0.0), r2(0.0), r3(0.0), MdotStackCoolant(0.0),
-              UAs_cool(0.0), Fs_cogen(0.0), As_cogen(0.0), MdotCogenNom(0.0), hCogenNom(0.0), ns(0.0), PstackPumpEl(0.0), PmpPowerLossFactor(0.0),
-              f0(0.0), f1(0.0), f2(0.0), StackCoolerPresent(false), qs_cool(0.0), qs_air(0.0)
+            : WaterInNode(0), WaterOutNode(0), TstackNom(0.0), TstackActual(0.0), r0(0.0), r1(0.0), r2(0.0), r3(0.0), StackCoolerPresent(false),
+              qs_cool(0.0)
         {
         }
     };
@@ -518,10 +485,9 @@ namespace FuelCellElectricGenerator {
         PlantLocation CWPlantLoc;            // cooling water plant loop component index
         FCReportDataStruct Report;           // data for reporting as E+ output variables
         // calculated whole-system level variables
-        Real64 ACPowerGen; // Net output from SOFC unit
-        Real64 QconvZone;  // convective heat lost to surrounding zone
-        Real64 QradZone;   // radiative heat lost to surrounding zone
-        int DynamicsControlID;
+        Real64 ACPowerGen;  // Net output from SOFC unit
+        Real64 QconvZone;   // convective heat lost to surrounding zone
+        Real64 QradZone;    // radiative heat lost to surrounding zone
         Real64 TimeElapsed; // used to track when timestep has changed
         bool MyEnvrnFlag_Init;
         bool MyWarmupFlag_Init;
@@ -535,8 +501,8 @@ namespace FuelCellElectricGenerator {
         // Default Constructor
         FCDataStruct()
             : Type(DataPlant::PlantEquipmentType::Invalid), FuelSupNum(0), CWPlantLoc{}, ACPowerGen(0.0), QconvZone(0.0), QradZone(0.0),
-              DynamicsControlID(0), TimeElapsed(0.0), MyEnvrnFlag_Init(true), MyWarmupFlag_Init(false), MyPlantScanFlag_Init(true),
-              SolverErr_Type1_Iter(0), SolverErr_Type1_IterIndex(0), SolverErr_Type2_Iter(0), SolverErr_Type2_IterIndex(0)
+              TimeElapsed(0.0), MyEnvrnFlag_Init(true), MyWarmupFlag_Init(false), MyPlantScanFlag_Init(true), SolverErr_Type1_Iter(0),
+              SolverErr_Type1_IterIndex(0), SolverErr_Type2_Iter(0), SolverErr_Type2_IterIndex(0)
         {
         }
 

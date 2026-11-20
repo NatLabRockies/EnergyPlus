@@ -253,7 +253,6 @@ namespace Fluid {
     {
         // Members
         std::string Name; // Name of the glycol
-        int Num = 0;
 
         std::string CpTempArrayName;
         bool CpDataPresent = false; // Flag set when specific heat data is available

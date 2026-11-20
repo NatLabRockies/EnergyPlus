@@ -18572,7 +18572,6 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_SupplementalHtgCoilTest)
     EXPECT_NEAR(6731.2, VRFTU1.TotalCoolingRate, 0.1);
     EXPECT_NEAR(-5997.6, VRFTU1.TerminalUnitSensibleRate, 0.1);
     EXPECT_EQ(0.0, TU1_dx_htg_coil.TotalHeatingEnergyRate);
-    EXPECT_EQ(0.0, VRFTU1.SuppHeatingCoilLoad);
     EXPECT_EQ(0.0, TU1_supp_htg_coil.HeatingCoilRate);
 
     // TU2 test; run terminal unit 2
@@ -18594,7 +18593,6 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_SupplementalHtgCoilTest)
     EXPECT_EQ(0.0, VRFTU2.TotalCoolingRate);
     EXPECT_NEAR(2500.0, VRFTU2.TerminalUnitSensibleRate, 0.1);
     EXPECT_EQ(0.0, TU2_dx_htg_coil.TotalHeatingEnergyRate);
-    EXPECT_NEAR(4585.6, VRFTU2.SuppHeatingCoilLoad, 0.1);
     EXPECT_NEAR(4585.6, TU2_supp_htg_coil.HeatingCoilRate, 0.1);
 }
 
@@ -20707,7 +20705,6 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_offSupplementalHtgCoilTest)
     EXPECT_NEAR(6731.2, VRFTU1.TotalCoolingRate, 0.1);
     EXPECT_NEAR(-5997.6, VRFTU1.TerminalUnitSensibleRate, 0.1);
     EXPECT_EQ(0.0, TU1_dx_htg_coil.TotalHeatingEnergyRate);
-    EXPECT_EQ(0.0, VRFTU1.SuppHeatingCoilLoad);
     EXPECT_EQ(0.0, TU1_supp_htg_coil.HeatingCoilRate);
 
     // TU2 test; run terminal unit 2
@@ -20734,10 +20731,8 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_offSupplementalHtgCoilTest)
     EXPECT_EQ(0.0, TU2_dx_htg_coil.TotalHeatingEnergyRate);
     EXPECT_NEAR(27.1, TU2_fan->totalPower + TU2_supp_htg_coil.HeatingCoilRate, 0.1);
     EXPECT_NEAR(0.0, TU2_supp_htg_coil.HeatingCoilRate, 0.1);
-    EXPECT_NEAR(4585.6, VRFTU2.SuppHeatingCoilLoad, 0.1);
-    EXPECT_NEAR(VRFTU2.SuppHeatingCoilLoad,
-                state->dataZoneEnergyDemand->ZoneSysEnergyDemand(zone_num_TU2).RemainingOutputRequired - VRFTU2.TerminalUnitSensibleRate,
-                0.1);
+    EXPECT_NEAR(
+        4585.6, state->dataZoneEnergyDemand->ZoneSysEnergyDemand(zone_num_TU2).RemainingOutputRequired - VRFTU2.TerminalUnitSensibleRate, 0.1);
 }
 
 TEST_F(EnergyPlusFixture, VRF_MixedTypes)
