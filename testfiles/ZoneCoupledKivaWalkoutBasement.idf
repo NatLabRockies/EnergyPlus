@@ -858,6 +858,7 @@
     Main Floor Thermostat,   !- Name
     Main Floor,              !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Always21 Dual SP Control;!- Control 1 Name
 

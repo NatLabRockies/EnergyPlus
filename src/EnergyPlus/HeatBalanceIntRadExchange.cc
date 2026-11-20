@@ -50,6 +50,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <numeric>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -410,6 +411,86 @@ namespace HeatBalanceIntRadExchange {
                                                      SurfaceTempInKto4th[RecZoneSurfNum]); // [ lSR ] == ( SendZoneSurfNum+1, RecZoneSurfNum+1 )
                         }
                         netLWRadToRecSurf += netLWRadToRecSurf_acc;
+                    }
+                }
+            }
+
+            if (state.dataHeatBal->TotFrameDivider > 0) {
+                // Window frames and dividers are not surfaces of the enclosure, but their inside faces exchange long-wave radiation with
+                // the zone at the window's incident IR (see Window::CalcWinFrameAndDividerTemps). Take their net gain from the opaque
+                // surfaces of the enclosure, in proportion to each surface's share of the long-wave radiation the window receives, so
+                // that the exchange conserves energy.
+                for (size_type WinZoneSurfNum = 0; WinZoneSurfNum < s_zone_Surfaces; ++WinZoneSurfNum) {
+                    int const WinSurfNum = zone_info.SurfacePtr[WinZoneSurfNum];
+                    Real64 FrameArea = state.dataSurface->SurfWinFrameArea(WinSurfNum);
+                    Real64 DividerArea = state.dataSurface->SurfWinDividerArea(WinSurfNum);
+                    if (FrameArea <= 0.0 && DividerArea <= 0.0) {
+                        continue;
+                    }
+                    // With representative surface calculations the enclosure holds only the representative window of a group; the frames
+                    // and dividers of all windows in the group have its temperatures and hence its net gain per unit area
+                    auto const &winSurf = state.dataSurface->Surface(WinSurfNum);
+                    if (winSurf.ConstituentSurfaceNums.size() > 1) {
+                        FrameArea = 0.0;
+                        DividerArea = 0.0;
+                        for (int constSurfNum : winSurf.ConstituentSurfaceNums) {
+                            FrameArea += state.dataSurface->SurfWinFrameArea(constSurfNum);
+                            DividerArea += state.dataSurface->SurfWinDividerArea(constSurfNum);
+                        }
+                    }
+                    Real64 const FrameDividerLWGain = FrameArea * state.dataSurface->SurfWinFrameNetLWInPerArea(WinSurfNum) +
+                                                      DividerArea * state.dataSurface->SurfWinDividerNetLWInPerArea(WinSurfNum); // W
+                    if (FrameDividerLWGain == 0.0) {
+                        continue;
+                    }
+                    // Weight of each surface whose heat balance uses NetLWRadToSurf (not windows, not Kiva foundation surfaces)
+                    auto shareOfWindowIR = [&](size_type const SendZoneSurfNum) -> Real64 {
+                        if (SendZoneSurfNum == WinZoneSurfNum) {
+                            return 0.0;
+                        }
+                        auto const &sendSurf = state.dataSurface->Surface(zone_info.SurfacePtr[SendZoneSurfNum]);
+                        if (state.dataConstruction->Construct(sendSurf.Construction).TypeIsWindow ||
+                            sendSurf.HeatTransferAlgorithm == DataSurfaces::HeatTransferModel::Kiva) {
+                            return 0.0;
+                        }
+                        if (state.dataHeatBalIntRadExchg->CarrollMethod) {
+                            return zone_info.Fp[SendZoneSurfNum] * zone_info.Area[SendZoneSurfNum];
+                        }
+                        return zone_ScriptF[WinZoneSurfNum * s_zone_Surfaces + SendZoneSurfNum];
+                    };
+                    Real64 SumShares = 0.0;
+                    for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                        SumShares += shareOfWindowIR(SendZoneSurfNum);
+                    }
+                    if (SumShares <= 0.0) {
+                        // A degenerate view-factor matrix should not occur for a valid enclosure, but preserve conservation by distributing by area.
+                        SumShares = 0.0;
+                        auto receivesNetLWRad = [&](size_type const SendZoneSurfNum) {
+                            auto const &sendSurf = state.dataSurface->Surface(zone_info.SurfacePtr[SendZoneSurfNum]);
+                            return !state.dataConstruction->Construct(sendSurf.Construction).TypeIsWindow &&
+                                   sendSurf.HeatTransferAlgorithm != DataSurfaces::HeatTransferModel::Kiva;
+                        };
+                        for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                            if (receivesNetLWRad(SendZoneSurfNum)) {
+                                SumShares += zone_info.Area[SendZoneSurfNum];
+                            }
+                        }
+                        if (SumShares <= 0.0) {
+                            continue;
+                        }
+                        for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                            if (receivesNetLWRad(SendZoneSurfNum)) {
+                                NetLWRadToSurf(zone_info.SurfacePtr[SendZoneSurfNum]) -= FrameDividerLWGain / SumShares;
+                            }
+                        }
+                        continue;
+                    }
+                    for (size_type SendZoneSurfNum = 0; SendZoneSurfNum < s_zone_Surfaces; ++SendZoneSurfNum) {
+                        Real64 const Share = shareOfWindowIR(SendZoneSurfNum);
+                        if (Share > 0.0) {
+                            NetLWRadToSurf(zone_info.SurfacePtr[SendZoneSurfNum]) -=
+                                FrameDividerLWGain * Share / (SumShares * zone_info.Area[SendZoneSurfNum]);
+                        }
                     }
                 }
             }
@@ -1241,14 +1322,9 @@ namespace HeatBalanceIntRadExchange {
                     }
                     if (spaceListNum > 0) {
                         for (int sListSpaceNum : state.dataHeatBal->spaceList(spaceListNum).spaces) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == sListSpaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [sListSpaceNum](int enclSpaceNum) { return enclSpaceNum == sListSpaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;
@@ -1257,14 +1333,9 @@ namespace HeatBalanceIntRadExchange {
                     } else if (zoneListNum > 0) {
                         for (int zListZoneNum : state.dataHeatBal->ZoneList(zoneListNum).Zone) {
                             for (int spaceNum : state.dataHeatBal->Zone(zListZoneNum).spaceIndexes) {
-                                // Search for matching spaces
-                                bool thisSpaceFound = false;
-                                for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                    if (enclSpaceNum == spaceNum) {
-                                        thisSpaceFound = true;
-                                        break;
-                                    }
-                                }
+                                bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                                  thisEnclosure.spaceNums.end(),
+                                                                  [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                                 if (!thisSpaceFound) {
                                     anySpaceNotFound = true;
                                     break;
@@ -1276,14 +1347,9 @@ namespace HeatBalanceIntRadExchange {
                         }
                     } else if (inputZoneNum > 0) {
                         for (int spaceNum : state.dataHeatBal->Zone(inputZoneNum).spaceIndexes) {
-                            // Search for matching spaces
-                            bool thisSpaceFound = false;
-                            for (int enclSpaceNum : thisEnclosure.spaceNums) {
-                                if (enclSpaceNum == spaceNum) {
-                                    thisSpaceFound = true;
-                                    break;
-                                }
-                            }
+                            bool thisSpaceFound = std::any_of(thisEnclosure.spaceNums.begin(),
+                                                              thisEnclosure.spaceNums.end(),
+                                                              [spaceNum](int enclSpaceNum) { return enclSpaceNum == spaceNum; });
                             if (!thisSpaceFound) {
                                 anySpaceNotFound = true;
                                 break;

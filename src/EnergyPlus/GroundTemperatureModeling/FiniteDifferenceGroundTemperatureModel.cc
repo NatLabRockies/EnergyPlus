@@ -108,10 +108,6 @@ namespace GroundTemp {
                 thisModel->baseConductivity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_thermal_conductivity");
                 thisModel->baseDensity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_density");
                 thisModel->baseSpecificHeat = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_specific_heat");
-                thisModel->waterContent =
-                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_moisture_content_volume_fraction") / 100.0;
-                thisModel->saturatedWaterContent =
-                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_moisture_content_volume_fraction_at_saturation") / 100.0;
                 thisModel->evapotransCoeff =
                     inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "evapotranspiration_ground_cover_parameter");
 
@@ -280,7 +276,7 @@ namespace GroundTemp {
                     airDensity_num += state.dataEnvrn->OutAirDensity;
                     relHum_num += state.dataEnvrn->OutRelHumValue;
                     windSpeed_num += state.dataEnvrn->WindSpeed;
-                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
+                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
 
                     state.dataGlobal->BeginHourFlag = false;
                     state.dataGlobal->BeginDayFlag = false;
@@ -416,9 +412,6 @@ namespace GroundTemp {
 
             // Set base properties
             thisCell.props.conductivity = baseConductivity;
-            thisCell.props.density = baseDensity;
-            thisCell.props.specificHeat = baseSpecificHeat;
-            thisCell.props.diffusivity = baseConductivity / (baseDensity * baseSpecificHeat);
         }
     }
 
@@ -793,9 +786,6 @@ namespace GroundTemp {
             thisCell.volume = thisCell.thickness * thisCell.conductionArea;
         }
 
-        // Initialize freezing calculation variables
-        evaluateSoilRhoCpInit();
-
         // Initialize the groundTemps array
         groundTemps.dimension({1, state.dataWeather->NumDaysInYear}, {1, totalNumCells}, 0.0);
 
@@ -1068,39 +1058,6 @@ namespace GroundTemp {
 
         // TODO: The calculated rhoCP_soil is commented on this line and never used.  Curious.
         thisCell.props.rhoCp = baseDensity * baseSpecificHeat; // rhoCP_soil;
-
-        thisCell.props.specificHeat = thisCell.props.rhoCp / thisCell.props.density;
-    }
-
-    void FiniteDiffGroundTempsModel::evaluateSoilRhoCpInit()
-    {
-        // SUBROUTINE INFORMATION:
-        //       AUTHOR         Edwin Lee
-        //       DATE WRITTEN   Summer 2011
-
-        // PURPOSE OF THIS SUBROUTINE:
-        // Evaluates the soil properties
-
-        // These vary by domain now, so we must be careful to retrieve them every time
-        const Real64 Theta_liq = waterContent;
-        const Real64 Theta_sat = saturatedWaterContent;
-
-        // Assumption
-        const Real64 Theta_ice = Theta_liq;
-
-        //'Cp (freezing) calculations
-        constexpr Real64 rho_ice = 917.0;                 //'Kg / m3
-        constexpr Real64 rho_liq = 1000.0;                //'kg / m3
-        rhoCp_soil_liq_1 = 1225000.0 / (1.0 - Theta_sat); // J/m3K
-        // from( " An improved model for predicting soil thermal conductivity from water content at room temperature, Fig 4" )
-        constexpr Real64 CP_liq = 4180.0;    //'J / KgK
-        constexpr Real64 CP_ice = 2066.0;    //'J / KgK
-        constexpr Real64 Lat_fus = 334000.0; //'J / Kg
-        constexpr Real64 Cp_transient = Lat_fus / 0.4 + (0.5 * CP_ice - (CP_liq + CP_ice) / 2.0 * 0.1) / 0.4;
-        // from( " Numerical and experimental investigation of melting and freezing processes in phase change material storage" )
-        rhoCP_soil_liq = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + rho_liq * CP_liq * Theta_liq;
-        rhoCP_soil_transient = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + ((rho_liq + rho_ice) / 2.0) * Cp_transient * Theta_ice;
-        rhoCP_soil_ice = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + rho_ice * CP_ice * Theta_ice; //'!J / m3K
     }
 
     //******************************************************************************

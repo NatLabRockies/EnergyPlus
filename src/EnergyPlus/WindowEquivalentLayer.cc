@@ -3684,6 +3684,8 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
     SL_RAD = W / max(SL_WR, 0.0000001);
     SL_THETA = 2.0 * std::asin(0.5 * SL_WR);
 
+    // Keep the no-correction branch available until CORR becomes a caller-controlled option.
+    // cppcheck-suppress knownConditionTrueFalse
     if (CORR > 0) { // CORRECT FOR SLAT CURVATURE BY SETTING CORR = 1
 
         //  DETERMINE BOUNDS FOR CURVATURE CORRECTION AND APPLY CORRECTION TO BEAM-BEAM TRANSMITTANCE

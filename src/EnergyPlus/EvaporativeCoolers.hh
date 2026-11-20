@@ -105,30 +105,25 @@ namespace EvaporativeCoolers {
         DirectCELDEKPAD,
         IndirectCELDEKPAD,
         IndirectWETCOIL,
-        IndirectRDDSpecial,
-        DirectResearchSpecial,
+        IndirectUserEffectiveness,
+        DirectUserEffectiveness,
         Num
     };
 
     struct EvapConditions
     {
-        std::string Name; // Name of the EvapCooler
-        int EquipIndex;
+        std::string Name;                      // Name of the EvapCooler
         EvapCoolerType evapCoolerType;         // Type of the EvapCooler
-        std::string EvapControlType;           // Type of Control for the EvapCooler
-        std::string Schedule;                  // HeatingCoil Operation Schedule
         Sched::Schedule *availSched = nullptr; // Pointer to the correct schedule
         Real64 VolFlowRate;                    // Volume Flow Rate in Evap Cooler needed for calculating SatEff
         Real64 DesVolFlowRate;                 // Design volume flow rate (autosize or user input) - this is only used to compute design pump power
         Real64 OutletTemp;
-        Real64 OuletWetBulbTemp;
         Real64 OutletHumRat;
         Real64 OutletEnthalpy;
         Real64 OutletPressure;
         Real64 OutletMassFlowRate;         // MassFlow through the EvapCooler being Simulated [kg/Sec]
         Real64 OutletMassFlowRateMaxAvail; // [kg/Sec]
         Real64 OutletMassFlowRateMinAvail; // [kg/Sec]
-        bool InitFlag;
         int InletNode;
         int OutletNode;
         int SecondaryInletNode;   // This is usually OA node feeding into the purge/secondary side
@@ -143,15 +138,11 @@ namespace EvaporativeCoolers {
         Real64 InletEnthalpy;
         Real64 InletPressure;
         Real64 SecInletMassFlowRate; // Secondary inlet is for indirect coolers
-        Real64 SecInletMassFlowRateMaxAvail;
-        Real64 SecInletMassFlowRateMinAvail;
         Real64 SecInletTemp;
-        Real64 SecInletWetBulbTemp;
         Real64 SecInletHumRat;
         Real64 SecInletEnthalpy;
         Real64 SecInletPressure;
         Real64 SecOutletTemp;         // secondary air outlet node drybulb temperature
-        Real64 SecOuletWetBulbTemp;   // secondarr air outlet node wetbulb temperature
         Real64 SecOutletHumRat;       // secondarr air outlet node humidity ratio
         Real64 SecOutletEnthalpy;     // secondarr air outlet node enthalpy
         Real64 SecOutletMassFlowRate; // Mass Flow through the secondary air side [kg/Sec]
@@ -194,7 +185,7 @@ namespace EvaporativeCoolers {
         Real64 DryCoilMaxEfficiency;                    // Cooler Drybulb Design Effectiveness
         Real64 IndirectFanPower;                        // Secondary Fan Design Power
         Real64 FanSizingSpecificPower;                  // secondary fan sizing specific power in W/(m3/s)
-        Real64 RecircPumpSizingFactor;                  // water pump power sizing factor W/(m3/s) air
+        Real64 RecircPumpPowerPerUnitFlowRate;          // water pump power sizing factor W/(m3/s) air
         Real64 IndirectVolFlowScalingFactor;            // secondary air flow sizing Factor
         Curve::Curve *WetbulbEffecCurve = nullptr;      // wetbulb effectiveness modifier curve name as a function of flow fraction
         Curve::Curve *DrybulbEffecCurve = nullptr;      // drybulb effectiveness modifier curve name as a function of flow fraction
@@ -213,24 +204,22 @@ namespace EvaporativeCoolers {
 
         // Default Constructor
         EvapConditions()
-            : EquipIndex(0), evapCoolerType(EvapCoolerType::Invalid), VolFlowRate(0.0), DesVolFlowRate(0.0), OutletTemp(0.0), OuletWetBulbTemp(0.0),
-              OutletHumRat(0.0), OutletEnthalpy(0.0), OutletPressure(0.0), OutletMassFlowRate(0.0), OutletMassFlowRateMaxAvail(0.0),
-              OutletMassFlowRateMinAvail(0.0), InitFlag(false), InletNode(0), OutletNode(0), SecondaryInletNode(0), SecondaryOutletNode(0),
-              TertiaryInletNode(0), InletMassFlowRate(0.0), InletMassFlowRateMaxAvail(0.0), InletMassFlowRateMinAvail(0.0), InletTemp(0.0),
-              InletWetBulbTemp(0.0), InletHumRat(0.0), InletEnthalpy(0.0), InletPressure(0.0), SecInletMassFlowRate(0.0),
-              SecInletMassFlowRateMaxAvail(0.0), SecInletMassFlowRateMinAvail(0.0), SecInletTemp(0.0), SecInletWetBulbTemp(0.0), SecInletHumRat(0.0),
-              SecInletEnthalpy(0.0), SecInletPressure(0.0), SecOutletTemp(0.0), SecOuletWetBulbTemp(0.0), SecOutletHumRat(0.0),
-              SecOutletEnthalpy(0.0), SecOutletMassFlowRate(0.0), PadDepth(0.0), PadArea(0.0), RecircPumpPower(0.0), IndirectRecircPumpPower(0.0),
-              IndirectPadDepth(0.0), IndirectPadArea(0.0), IndirectVolFlowRate(0.0), IndirectFanEff(0.0), IndirectFanDeltaPress(0.0),
-              IndirectHXEffectiveness(0.0), DirectEffectiveness(0.0), WetCoilMaxEfficiency(0.0), WetCoilFlowRatio(0.0), EvapCoolerEnergy(0.0),
-              EvapCoolerPower(0.0), EvapWaterSupplyMode(WaterSupply::Invalid), EvapWaterSupTankID(0), EvapWaterTankDemandARRID(0), DriftFraction(0.0),
-              BlowDownRatio(0.0), EvapWaterConsumpRate(0.0), EvapWaterConsump(0.0), EvapWaterStarvMakupRate(0.0), EvapWaterStarvMakup(0.0),
-              SatEff(0.0), StageEff(0.0), DPBoundFactor(0.0), EvapControlNodeNum(0), DesiredOutletTemp(0.0), PartLoadFract(0.0), DewPointBoundFlag(0),
-              MinOATDBEvapCooler(0.0), MaxOATDBEvapCooler(0.0), EvapCoolerOperationControlFlag(false), MaxOATWBEvapCooler(0.0),
-              DryCoilMaxEfficiency(0.0), IndirectFanPower(0.0), FanSizingSpecificPower(0.0), RecircPumpSizingFactor(0.0),
-              IndirectVolFlowScalingFactor(0.0), IECOperatingStatus(0), IterationLimit(0), IterationFailed(0),
-              EvapCoolerRDDOperatingMode(OperatingMode::Invalid), FaultyEvapCoolerFoulingFlag(false), FaultyEvapCoolerFoulingIndex(0),
-              FaultyEvapCoolerFoulingFactor(1.0), MySizeFlag(true)
+            : evapCoolerType(EvapCoolerType::Invalid), VolFlowRate(0.0), DesVolFlowRate(0.0), OutletTemp(0.0), OutletHumRat(0.0), OutletEnthalpy(0.0),
+              OutletPressure(0.0), OutletMassFlowRate(0.0), OutletMassFlowRateMaxAvail(0.0), OutletMassFlowRateMinAvail(0.0), InletNode(0),
+              OutletNode(0), SecondaryInletNode(0), SecondaryOutletNode(0), TertiaryInletNode(0), InletMassFlowRate(0.0),
+              InletMassFlowRateMaxAvail(0.0), InletMassFlowRateMinAvail(0.0), InletTemp(0.0), InletWetBulbTemp(0.0), InletHumRat(0.0),
+              InletEnthalpy(0.0), InletPressure(0.0), SecInletMassFlowRate(0.0), SecInletTemp(0.0), SecInletHumRat(0.0), SecInletEnthalpy(0.0),
+              SecInletPressure(0.0), SecOutletTemp(0.0), SecOutletHumRat(0.0), SecOutletEnthalpy(0.0), SecOutletMassFlowRate(0.0), PadDepth(0.0),
+              PadArea(0.0), RecircPumpPower(0.0), IndirectRecircPumpPower(0.0), IndirectPadDepth(0.0), IndirectPadArea(0.0), IndirectVolFlowRate(0.0),
+              IndirectFanEff(0.0), IndirectFanDeltaPress(0.0), IndirectHXEffectiveness(0.0), DirectEffectiveness(0.0), WetCoilMaxEfficiency(0.0),
+              WetCoilFlowRatio(0.0), EvapCoolerEnergy(0.0), EvapCoolerPower(0.0), EvapWaterSupplyMode(WaterSupply::Invalid), EvapWaterSupTankID(0),
+              EvapWaterTankDemandARRID(0), DriftFraction(0.0), BlowDownRatio(0.0), EvapWaterConsumpRate(0.0), EvapWaterConsump(0.0),
+              EvapWaterStarvMakupRate(0.0), EvapWaterStarvMakup(0.0), SatEff(0.0), StageEff(0.0), DPBoundFactor(0.0), EvapControlNodeNum(0),
+              DesiredOutletTemp(0.0), PartLoadFract(0.0), DewPointBoundFlag(0), MinOATDBEvapCooler(0.0), MaxOATDBEvapCooler(0.0),
+              EvapCoolerOperationControlFlag(false), MaxOATWBEvapCooler(0.0), DryCoilMaxEfficiency(0.0), IndirectFanPower(0.0),
+              FanSizingSpecificPower(0.0), RecircPumpPowerPerUnitFlowRate(0.0), IndirectVolFlowScalingFactor(0.0), IECOperatingStatus(0),
+              IterationLimit(0), IterationFailed(0), EvapCoolerRDDOperatingMode(OperatingMode::Invalid), FaultyEvapCoolerFoulingFlag(false),
+              FaultyEvapCoolerFoulingIndex(0), FaultyEvapCoolerFoulingFactor(1.0), MySizeFlag(true)
         {
         }
     };
@@ -256,7 +245,6 @@ namespace EvaporativeCoolers {
         HVAC::FanOp fanOp = HVAC::FanOp::Invalid;
         Real64 DesignAirVolumeFlowRate;
         Real64 DesignAirMassFlowRate;
-        Real64 DesignFanSpeedRatio;
         Real64 FanSpeedRatio;
         HVAC::FanPlace fanPlace;
         ControlType ControlSchemeType;
@@ -275,17 +263,6 @@ namespace EvaporativeCoolers {
         EvapCoolerType EvapCooler_2_Type_Num;
         int EvapCooler_2_Index;
         bool EvapCooler_2_AvailStatus;
-        Real64 OAInletRho;                    // fills internal variable, current inlet air density [kg/m3]
-        Real64 OAInletCp;                     // fills internal variable, current inlet air specific heat [J/kg-c]
-        Real64 OAInletTemp;                   // fills internal variable, current inlet air temperature [C]
-        Real64 OAInletHumRat;                 // fills internal variable, current inlet air humidity ratio [kg/kg]
-        Real64 OAInletMassFlowRate;           // fills internal variable, current inlet air mass flow rate [kg/s]
-        Real64 UnitOutletTemp;                // filled by actuator, component outlet temperature [C]
-        Real64 UnitOutletHumRat;              // filled by actuator, component outlet humidity ratio [kg/kg]
-        Real64 UnitOutletMassFlowRate;        // filled by actuator, component outlet mass flow rate [kg/s]
-        Real64 UnitReliefTemp;                // filled by actuator, component outlet temperature [C]
-        Real64 UnitReliefHumRat;              // filled by actuator, component outlet humidity ratio [kg/kg]
-        Real64 UnitReliefMassFlowRate;        // filled by actuator, component outlet mass flow rate [kg/s]
         Real64 UnitTotalCoolingRate;          // unit output to zone, total cooling rate [W]
         Real64 UnitTotalCoolingEnergy;        // unit output to zone, total cooling energy [J]
         Real64 UnitSensibleCoolingRate;       // unit output to zone, sensible cooling rate [W]
@@ -312,14 +289,12 @@ namespace EvaporativeCoolers {
         ZoneEvapCoolerUnitStruct()
             : ZoneNodeNum(0), UnitIsAvailable(false), OAInletNodeNum(0), UnitOutletNodeNum(0), UnitReliefNodeNum(0), fanType(HVAC::FanType::Invalid),
               FanIndex(0), ActualFanVolFlowRate(0.0), FanInletNodeNum(0), FanOutletNodeNum(0), DesignAirVolumeFlowRate(0.0),
-              DesignAirMassFlowRate(0.0), DesignFanSpeedRatio(0.0), FanSpeedRatio(0.0), fanPlace(HVAC::FanPlace::Invalid),
-              ControlSchemeType(ControlType::Invalid), TimeElapsed(0.0), ThrottlingRange(0.0), IsOnThisTimestep(false), WasOnLastTimestep(false),
-              ThresholdCoolingLoad(0.0), EvapCooler_1_Type_Num(EvapCoolerType::Invalid), EvapCooler_1_Index(0), EvapCooler_1_AvailStatus(false),
-              EvapCooler_2_Type_Num(EvapCoolerType::Invalid), EvapCooler_2_Index(0), EvapCooler_2_AvailStatus(false), OAInletRho(0.0), OAInletCp(0.0),
-              OAInletTemp(0.0), OAInletHumRat(0.0), OAInletMassFlowRate(0.0), UnitOutletTemp(0.0), UnitOutletHumRat(0.0), UnitOutletMassFlowRate(0.0),
-              UnitReliefTemp(0.0), UnitReliefHumRat(0.0), UnitReliefMassFlowRate(0.0), UnitTotalCoolingRate(0.0), UnitTotalCoolingEnergy(0.0),
-              UnitSensibleCoolingRate(0.0), UnitSensibleCoolingEnergy(0.0), UnitLatentHeatingRate(0.0), UnitLatentHeatingEnergy(0.0),
-              UnitLatentCoolingRate(0.0), UnitLatentCoolingEnergy(0.0), UnitFanSpeedRatio(0.0), UnitPartLoadRatio(0.0),
+              DesignAirMassFlowRate(0.0), FanSpeedRatio(0.0), fanPlace(HVAC::FanPlace::Invalid), ControlSchemeType(ControlType::Invalid),
+              TimeElapsed(0.0), ThrottlingRange(0.0), IsOnThisTimestep(false), WasOnLastTimestep(false), ThresholdCoolingLoad(0.0),
+              EvapCooler_1_Type_Num(EvapCoolerType::Invalid), EvapCooler_1_Index(0), EvapCooler_1_AvailStatus(false),
+              EvapCooler_2_Type_Num(EvapCoolerType::Invalid), EvapCooler_2_Index(0), EvapCooler_2_AvailStatus(false), UnitTotalCoolingRate(0.0),
+              UnitTotalCoolingEnergy(0.0), UnitSensibleCoolingRate(0.0), UnitSensibleCoolingEnergy(0.0), UnitLatentHeatingRate(0.0),
+              UnitLatentHeatingEnergy(0.0), UnitLatentCoolingRate(0.0), UnitLatentCoolingEnergy(0.0), UnitFanSpeedRatio(0.0), UnitPartLoadRatio(0.0),
               UnitVSControlMaxIterErrorIndex(0), UnitVSControlLimitsErrorIndex(0), UnitLoadControlMaxIterErrorIndex(0),
               UnitLoadControlLimitsErrorIndex(0), ZonePtr(0), HVACSizingIndex(0), ShutOffRelativeHumidity(100.0), MySize(true), MyEnvrn(true),
               MyFan(true), MyZoneEq(true)
@@ -341,28 +316,27 @@ namespace EvaporativeCoolers {
 
     void CalcWetIndirectEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 PartLoadRatio);
 
-    void CalcResearchSpecialPartLoad(EnergyPlusData &state, int EvapCoolNum);
+    void CalcUserEffectivenessPartLoad(EnergyPlusData &state, int EvapCoolNum);
 
-    void CalcIndirectResearchSpecialEvapCoolerAdvanced(EnergyPlusData &state,
-                                                       int EvapCoolNum,
-                                                       Real64 InletDryBulbTempSec,
-                                                       Real64 InletWetBulbTempSec,
-                                                       Real64 InletDewPointTempSec,
-                                                       Real64 InletHumRatioSec);
+    void CalcIndirectUserEffectivenessEvapCoolerAdvanced(EnergyPlusData &state,
+                                                         int EvapCoolNum,
+                                                         Real64 InletDryBulbTempSec,
+                                                         Real64 InletWetBulbTempSec,
+                                                         Real64 InletDewPointTempSec,
+                                                         Real64 InletHumRatioSec);
 
-    OperatingMode IndirectResearchSpecialEvapCoolerOperatingMode(EnergyPlusData &state,
-                                                                 int EvapCoolNum,
-                                                                 Real64 InletDryBulbTempSec,
-                                                                 Real64 InletWetBulbTempSec,
-                                                                 Real64 TdbOutSysWetMin,
-                                                                 Real64 TdbOutSysDryMin);
+    OperatingMode IndirectUserEffectivenessEvapCoolerOperatingMode(EnergyPlusData &state,
+                                                                   int EvapCoolNum,
+                                                                   Real64 InletDryBulbTempSec,
+                                                                   Real64 InletWetBulbTempSec,
+                                                                   Real64 TdbOutSysWetMin,
+                                                                   Real64 TdbOutSysDryMin);
 
     void CalcSecondaryAirOutletCondition(EnergyPlusData &state,
                                          int EvapCoolNum,
                                          OperatingMode OperatingMode,
                                          Real64 AirMassFlowSec,
                                          Real64 EDBTSec,
-                                         Real64 EWBTSec,
                                          Real64 EHumRatSec,
                                          Real64 QHXTotal,
                                          Real64 &QHXLatent);
@@ -381,9 +355,9 @@ namespace EvaporativeCoolers {
                               Real64 FlowRatio          // secondary air flow fraction
     );
 
-    void CalcIndirectResearchSpecialEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
+    void CalcIndirectUserEffectivenessEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
 
-    void CalcDirectResearchSpecialEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
+    void CalcDirectUserEffectivenessEvapCooler(EnergyPlusData &state, int EvapCoolNum, Real64 FanPLR = 1.0);
 
     void UpdateEvapCooler(EnergyPlusData &state, int EvapCoolNum);
 

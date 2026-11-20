@@ -2222,9 +2222,9 @@ namespace Weather {
         }
 
         if (state.dataEnvrn->IsSnow) {
-            state.dataEnvrn->GndReflectance = max(min(state.dataEnvrn->GndReflectance * state.dataWeather->SnowGndRefModifier, 1.0), 0.0);
+            state.dataEnvrn->GndReflectance = std::clamp(state.dataEnvrn->GndReflectance * state.dataWeather->SnowGndRefModifier, 0.0, 1.0);
             state.dataEnvrn->GndReflectanceForDayltg =
-                max(min(state.dataEnvrn->GndReflectanceForDayltg * state.dataWeather->SnowGndRefModifierForDayltg, 1.0), 0.0);
+                std::clamp(state.dataEnvrn->GndReflectanceForDayltg * state.dataWeather->SnowGndRefModifierForDayltg, 0.0, 1.0);
         }
 
         state.dataEnvrn->GndSolarRad =
@@ -3866,7 +3866,7 @@ namespace Weather {
                         CurTime = double(hour) + state.dataEnvrn->TS1TimeOffset;
                     }
 
-                    Vector3<Real64> SUNCOS; // Sun direction cosines
+                    Vector3D SUNCOS; // Sun direction cosines
                     CalculateSunDirectionCosines(
                         state, CurTime, designDay.EquationOfTime, designDay.SinSolarDeclinAngle, designDay.CosSolarDeclinAngle, SUNCOS);
                     Real64 CosZenith = SUNCOS.z; // Cosine of Zenith Angle of Sun
@@ -3979,6 +3979,8 @@ namespace Weather {
             switch (state.dataWeather->WPSkyTemperature(envCurr.WP_Type1).skyTempModel) {
             case SkyTempModel::ScheduleValue: {
                 std::vector<Real64> const &dayVals = state.dataWeather->WPSkyTemperature(envCurr.WP_Type1).sched->getDayVals(state);
+                // The array elements are assigned below; cppcheck does not recognize mutation through this ObjexxFCL alias.
+                // cppcheck-suppress constVariableReference
                 auto &desDayModsEnv = state.dataWeather->desDayMods(EnvrnNum);
                 for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
                     for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
@@ -4236,7 +4238,7 @@ namespace Weather {
                                       Real64 const EqOfTime,     // Equation of Time
                                       Real64 const SinSolDeclin, // Sine of Solar Declination
                                       Real64 const CosSolDeclin, // Cosine of Solar Declination
-                                      Vector3<Real64> &SUNCOS)
+                                      Vector3D &SUNCOS)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4250,8 +4252,6 @@ namespace Weather {
 
         // REFERENCES:
         // "NECAP Engineering Manual", 1974, p.3-117
-
-        EP_SIZE_CHECK(SUNCOS, 3); // NOLINT(misc-static-assert)
 
         // COMPUTE THE HOUR ANGLE
         Real64 H = (15.0 * (12.0 - (TimeValue + EqOfTime)) + (state.dataEnvrn->TimeZoneMeridian - state.dataEnvrn->Longitude)) * Constant::DegToRad;
@@ -4270,7 +4270,7 @@ namespace Weather {
         }
     }
 
-    void DetermineSunUpDown(EnergyPlusData &state, Vector3<Real64> &SunCOS)
+    void DetermineSunUpDown(EnergyPlusData &state, Vector3D &SunCOS)
     {
 
         // SUBROUTINE INFORMATION:
@@ -7021,7 +7021,8 @@ namespace Weather {
               "dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}");
         print(state.files.eio, "{}", " Site:GroundReflectance:Snow");
         for (int i = 1; i <= 12; ++i) {
-            print(state.files.eio, ", {:5.2F}", max(min(state.dataWeather->GroundReflectances(i) * state.dataWeather->SnowGndRefModifier, 1.0), 0.0));
+            print(
+                state.files.eio, ", {:5.2F}", std::clamp(state.dataWeather->GroundReflectances(i) * state.dataWeather->SnowGndRefModifier, 0.0, 1.0));
         }
         print(state.files.eio, "\n");
         print(state.files.eio,
@@ -7034,7 +7035,7 @@ namespace Weather {
         for (nObjs = 1; nObjs <= 12; ++nObjs) {
             print(state.files.eio,
                   ", {:5.2F}",
-                  max(min(state.dataWeather->GroundReflectances(nObjs) * state.dataWeather->SnowGndRefModifierForDayltg, 1.0), 0.0));
+                  std::clamp(state.dataWeather->GroundReflectances(nObjs) * state.dataWeather->SnowGndRefModifierForDayltg, 0.0, 1.0));
         }
         print(state.files.eio, "\n");
     }

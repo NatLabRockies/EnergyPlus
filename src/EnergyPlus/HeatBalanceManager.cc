@@ -2173,7 +2173,6 @@ namespace HeatBalanceManager {
             Surf.hasIncSolMultiplier = true;
             auto &SurfIncSolMult = state.dataSurface->SurfIncSolMultiplier(SurfNum);
             SurfIncSolMult.Name = state.dataIPShortCut->cAlphaArgs(1);
-            SurfIncSolMult.SurfaceIdx = SurfNum;
             SurfIncSolMult.Scaler = state.dataIPShortCut->rNumericArgs(1);
 
             if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
@@ -4815,9 +4814,6 @@ namespace HeatBalanceManager {
                     state.dataSurface->FrameDivider(FrDivNum).FrameEmis = FrameEmis;
                     state.dataSurface->FrameDivider(FrDivNum).FrameEdgeWidth = 0.06355; // 2.5 in
 
-                    state.dataSurface->FrameDivider(FrDivNum).MullionOrientation = static_cast<DataWindowEquivalentLayer::Orientation>(
-                        getEnumValue(DataWindowEquivalentLayer::orientationNamesUC, MullionOrientation));
-
                     if (Util::SameString(DividerType(IGlSys), "DividedLite")) {
                         state.dataSurface->FrameDivider(FrDivNum).DividerType = DataSurfaces::FrameDividerType::DividedLite;
                     } else if (Util::SameString(DividerType(IGlSys), "Suspended")) {
@@ -5422,8 +5418,6 @@ namespace HeatBalanceManager {
                     if (!allocated(state.dataSurface->FenLayAbsSSG(Loop).scheds)) {
                         state.dataSurface->FenLayAbsSSG(Loop).scheds.allocate(NumOfScheduledLayers);
                     }
-
-                    state.dataSurface->FenLayAbsSSG(Loop).NumOfSched = NumOfScheduledLayers;
 
                     for (int i = 1; i <= NumOfScheduledLayers; ++i) {
                         if ((state.dataSurface->FenLayAbsSSG(Loop).scheds(i) = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(i + 3))) ==

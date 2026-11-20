@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -282,7 +283,6 @@ namespace IceThermalStorage {
     {
 
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag) {
-            this->ResetXForITSFlag = true;
             this->MyEnvrnFlag = false;
         }
 
@@ -771,9 +771,6 @@ namespace IceThermalStorage {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            ++state.dataIceThermalStorage->TotalNumIceStorage;
-            state.dataIceThermalStorage->SimpleIceStorage(iceNum).MapNum = state.dataIceThermalStorage->TotalNumIceStorage;
-
             // ITS name
             state.dataIceThermalStorage->SimpleIceStorage(iceNum).Name = state.dataIPShortCut->cAlphaArgs(1);
 
@@ -893,9 +890,6 @@ namespace IceThermalStorage {
 
             ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
 
-            ++state.dataIceThermalStorage->TotalNumIceStorage;
-
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).MapNum = state.dataIceThermalStorage->TotalNumIceStorage;
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).Name = state.dataIPShortCut->cAlphaArgs(1); // Detailed ice storage name
 
             // Get and verify availability schedule
@@ -955,7 +949,6 @@ namespace IceThermalStorage {
                               "Chilled Water Nodes");
 
             // Obtain the Charging and Discharging Curve types and names
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveName = state.dataIPShortCut->cAlphaArgs(6);
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveNum =
                 Curve::GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(6));
             if (state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveNum <= 0) {
@@ -1006,7 +999,6 @@ namespace IceThermalStorage {
                                                  state.dataIceThermalStorage->DetailedIceStorage(iceNum).Name,              // Object Name
                                                  state.dataIPShortCut->cAlphaFieldNames(6));                                // Field Name
 
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveName = state.dataIPShortCut->cAlphaArgs(8);
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveNum = Curve::GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(8));
             if (state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveNum <= 0) {
                 ShowSevereError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(8), state.dataIPShortCut->cAlphaArgs(8)));
@@ -1643,7 +1635,8 @@ namespace IceThermalStorage {
 
         // At the first call of ITS model, MyLoad is 0. After that proper MyLoad will be provided by E+.
         // Therefore, Umin is decided between input U and ITS REAL(r64) capacity.
-        Real64 Umin = min(max((-(1.0 - EpsLimitForDisCharge) * QiceMin * TimeInterval / this->ITSNomCap), (-this->XCurIceFrac + EpsLimitForX)), 0.0);
+        Real64 Umin = std::clamp(
+            (-(1.0 - EpsLimitForDisCharge) * QiceMin * TimeInterval / this->ITSNomCap), std::min(-this->XCurIceFrac + EpsLimitForX, 0.0), 0.0);
 
         // Calculate CoolingRate with Uact to provide E+.
         Real64 Uact = Umin;
@@ -1740,7 +1733,8 @@ namespace IceThermalStorage {
         // Set Umin
         // Calculate Umax based on real ITS Max Capacity and remained XCurIceFrac.
         // Umax should be equal or larger than 0.02 for realistic purpose by Dion.
-        Real64 Umax = max(min(((1.0 - EpsLimitForCharge) * QiceMax * TimeInterval / this->ITSNomCap), (1.0 - this->XCurIceFrac - EpsLimitForX)), 0.0);
+        Real64 Umax = std::clamp(
+            ((1.0 - EpsLimitForCharge) * QiceMax * TimeInterval / this->ITSNomCap), 0.0, std::max(1.0 - this->XCurIceFrac - EpsLimitForX, 0.0));
 
         // Cannot charge more than the fraction that is left uncharged
         Umax = min(Umax, (1.0 - this->IceFracRemain) / state.dataHVACGlobal->TimeStepSys);

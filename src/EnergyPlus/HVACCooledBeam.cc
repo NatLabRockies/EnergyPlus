@@ -226,7 +226,6 @@ namespace HVACCooledBeam {
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
         int CtrlZone;            // controlled zome do loop index
         int SupAirIn;            // controlled zone supply air inlet index
-        bool AirNodeFound = false;
         int ADUNum;
 
         auto &CoolBeam = state.dataHVACCooledBeam->CoolBeam;
@@ -273,7 +272,6 @@ namespace HVACCooledBeam {
 
             CoolBeam(CBNum).Name = Alphas(1);
             CoolBeam(CBNum).UnitType = CurrentModuleObject;
-            CoolBeam(CBNum).UnitType_Num = 1;
             CoolBeam(CBNum).CBTypeString = Alphas(3);
             if (Util::SameString(CoolBeam(CBNum).CBTypeString, "Passive")) {
                 CoolBeam(CBNum).CBType = CooledBeamType::Passive;
@@ -435,7 +433,7 @@ namespace HVACCooledBeam {
                 }
             }
             // one assumes if there isn't one assigned, it's an error?
-            AirNodeFound = false;
+            bool AirNodeFound = false;
             if (CoolBeam(CBNum).ADUNum == 0) {
                 ShowSevereError(
                     state,
@@ -975,7 +973,6 @@ namespace HVACCooledBeam {
         } else {
             coolBeam.SupAirHeatingRate = QSup;
         }
-        coolBeam.CoolWaterMassFlow = state.dataLoopNodes->Node(ControlNode).MassFlowRate;
         coolBeam.TWOut = TWOut;
         coolBeam.EnthWaterOut = state.dataLoopNodes->Node(ControlNode).Enthalpy + coolBeam.BeamCoolingRate;
         //  Node(ControlNode)%MassFlowRate = CWFlow

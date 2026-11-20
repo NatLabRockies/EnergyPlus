@@ -551,22 +551,25 @@ Real64 GLHEBase::interpGFunc(Real64 const x_val) const
 
     auto const &x = this->myRespFactors->LNTTS;
     auto const &y = this->myRespFactors->GFNC;
-    auto const &upper_it = std::upper_bound(x.begin(), x.end(), x_val);
+    // Using raw pointers to avoid too much overhead due to safe iterators in Debug mode (`_GLIBCXX_DEBUG`)
+    auto const *x_begin = x.data();
+    auto const *x_end = x_begin + x.size();
+    auto const *upper_it = std::upper_bound(x_begin, x_end, x_val);
 
     unsigned int l_idx = 0;
     unsigned int u_idx = 0;
 
-    if (upper_it == x.begin()) {
+    if (upper_it == x_begin) {
         // Linear extrapolation beyond the lower bound
         l_idx = 0;
         u_idx = 1;
-    } else if (upper_it == x.end()) {
+    } else if (upper_it == x_end) {
         // Linear extrapolation beyond the upper bound
         u_idx = x.size() - 1;
         l_idx = u_idx - 1;
     } else {
         // In the middle of the range
-        u_idx = std::distance(x.begin(), upper_it);
+        u_idx = static_cast<unsigned int>(upper_it - x_begin);
         l_idx = u_idx - 1;
     }
 

@@ -60,6 +60,8 @@
 
 namespace EnergyPlus {
 
+class Vector3D;
+
 // Forward declarations
 namespace Curve {
     struct Curve;
@@ -620,7 +622,7 @@ namespace Material {
         //  up to 5 gases in a mixture [Window gas only].  It is defined as parameter (GasCoefs)
         int numGases = 0; // Number of gases in a window gas mixture
 
-        std::array<Real64, maxMixGases> gasFracts = {0.0};
+        std::array<Real64, maxMixGases> gasFracts{};
         std::array<Gas, maxMixGases> gases = {Gas()};
 
         GapVentType gapVentType = GapVentType::Sealed; // Gap Ven type for equivalent Layer window model
@@ -910,7 +912,7 @@ namespace Material {
     void GetWindowGlassSpectralData(EnergyPlusData &state, bool &errorsFound);
 
     // Angles must be in radians
-    void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3<Real64> const &solcos, Real64 &phi, Real64 &theta);
+    void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3D const &solcos, Real64 &phi, Real64 &theta);
     void NormalizePhiTheta(Real64 &phi, Real64 &theta);
     void GetPhiThetaIndices(Real64 phi, Real64 theta, Real64 dPhi, Real64 dTheta, int &iPhi1, int &iPhi2, int &iTheta1, int &iTheta2);
 

@@ -173,6 +173,7 @@ TEST_F(EnergyPlusFixture, SysAvailManager_OptimumStart)
         "   LIST_ZONES Thermostat,  !- Name",
         "   LIST_ZONES,             !- Zone or ZoneList Name",
         "   Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "   ,                              !- Temperature Difference Between Cutout And Setpoint",
         "   ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "   Zone DualSPSched; !- Control 1 Name",
 

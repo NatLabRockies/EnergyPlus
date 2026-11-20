@@ -2222,6 +2222,7 @@
     PSI FOYER CONTROLS,      !- Name
     PSI FOYER,               !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     PSI FOYER SETPOINTS;     !- Control 1 Name
 
@@ -2299,6 +2300,7 @@
     DORM ROOMS AND COMMON AREAS CONTROLS,  !- Name
     DORM ROOMS AND COMMON AREAS,  !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DORM ROOMS AND COMMON AREAS SETPOINTS;  !- Control 1 Name
 
@@ -2376,6 +2378,7 @@
     LEFT FORK CONTROLS,      !- Name
     LEFT FORK,               !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     LEFT FORK SETPOINTS;     !- Control 1 Name
 
@@ -2453,6 +2456,7 @@
     MIDDLE FORK CONTROLS,    !- Name
     MIDDLE FORK,             !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MIDDLE FORK SETPOINTS;   !- Control 1 Name
 
@@ -2530,6 +2534,7 @@
     RIGHT FORK CONTROLS,     !- Name
     RIGHT FORK,              !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     RIGHT FORK SETPOINTS;    !- Control 1 Name
 

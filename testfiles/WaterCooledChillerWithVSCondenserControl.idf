@@ -16816,6 +16816,7 @@
     blocks-3644_office_1_Core Thermostat,  !- Name
     blocks-3644_office_1_Core,  !- Zone or ZoneList Name
     blocks-3644_office_1_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 5;  !- Control 1 Name
 
@@ -16823,6 +16824,7 @@
     blocks-3644_office_1_East Perimeter Thermostat,  !- Name
     blocks-3644_office_1_East Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_1_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 3;  !- Control 1 Name
 
@@ -16830,6 +16832,7 @@
     blocks-3644_office_1_North Perimeter Thermostat,  !- Name
     blocks-3644_office_1_North Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_1_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 2;  !- Control 1 Name
 
@@ -16837,6 +16840,7 @@
     blocks-3644_office_1_South Perimeter Thermostat,  !- Name
     blocks-3644_office_1_South Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_1_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 4;  !- Control 1 Name
 
@@ -16844,6 +16848,7 @@
     blocks-3644_office_1_West Perimeter Thermostat,  !- Name
     blocks-3644_office_1_West Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_1_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 1;  !- Control 1 Name
 
@@ -16851,6 +16856,7 @@
     blocks-3644_office_2_Core Thermostat,  !- Name
     blocks-3644_office_2_Core,  !- Zone or ZoneList Name
     blocks-3644_office_2_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 10;  !- Control 1 Name
 
@@ -16858,6 +16864,7 @@
     blocks-3644_office_2_East Perimeter Thermostat,  !- Name
     blocks-3644_office_2_East Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_2_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 8;  !- Control 1 Name
 
@@ -16865,6 +16872,7 @@
     blocks-3644_office_2_North Perimeter Thermostat,  !- Name
     blocks-3644_office_2_North Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_2_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 7;  !- Control 1 Name
 
@@ -16872,6 +16880,7 @@
     blocks-3644_office_2_South Perimeter Thermostat,  !- Name
     blocks-3644_office_2_South Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_2_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 9;  !- Control 1 Name
 
@@ -16879,6 +16888,7 @@
     blocks-3644_office_2_West Perimeter Thermostat,  !- Name
     blocks-3644_office_2_West Perimeter,  !- Zone or ZoneList Name
     blocks-3644_office_2_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 6;  !- Control 1 Name
 
@@ -16886,6 +16896,7 @@
     blocks-3645_office_1_Core Thermostat,  !- Name
     blocks-3645_office_1_Core,  !- Zone or ZoneList Name
     blocks-3645_office_1_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 15;  !- Control 1 Name
 
@@ -16893,6 +16904,7 @@
     blocks-3645_office_1_East Perimeter Thermostat,  !- Name
     blocks-3645_office_1_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_1_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 13;  !- Control 1 Name
 
@@ -16900,6 +16912,7 @@
     blocks-3645_office_1_North Perimeter Thermostat,  !- Name
     blocks-3645_office_1_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_1_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 12;  !- Control 1 Name
 
@@ -16907,6 +16920,7 @@
     blocks-3645_office_1_South Perimeter Thermostat,  !- Name
     blocks-3645_office_1_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_1_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 14;  !- Control 1 Name
 
@@ -16914,6 +16928,7 @@
     blocks-3645_office_1_West Perimeter Thermostat,  !- Name
     blocks-3645_office_1_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_1_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 11;  !- Control 1 Name
 
@@ -16921,6 +16936,7 @@
     blocks-3645_office_2_Core Thermostat,  !- Name
     blocks-3645_office_2_Core,  !- Zone or ZoneList Name
     blocks-3645_office_2_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 20;  !- Control 1 Name
 
@@ -16928,6 +16944,7 @@
     blocks-3645_office_2_East Perimeter Thermostat,  !- Name
     blocks-3645_office_2_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_2_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 18;  !- Control 1 Name
 
@@ -16935,6 +16952,7 @@
     blocks-3645_office_2_North Perimeter Thermostat,  !- Name
     blocks-3645_office_2_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_2_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 17;  !- Control 1 Name
 
@@ -16942,6 +16960,7 @@
     blocks-3645_office_2_South Perimeter Thermostat,  !- Name
     blocks-3645_office_2_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_2_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 19;  !- Control 1 Name
 
@@ -16949,6 +16968,7 @@
     blocks-3645_office_2_West Perimeter Thermostat,  !- Name
     blocks-3645_office_2_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_2_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 16;  !- Control 1 Name
 
@@ -16956,6 +16976,7 @@
     blocks-3645_office_3_Core Thermostat,  !- Name
     blocks-3645_office_3_Core,  !- Zone or ZoneList Name
     blocks-3645_office_3_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 25;  !- Control 1 Name
 
@@ -16963,6 +16984,7 @@
     blocks-3645_office_3_East Perimeter Thermostat,  !- Name
     blocks-3645_office_3_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_3_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 23;  !- Control 1 Name
 
@@ -16970,6 +16992,7 @@
     blocks-3645_office_3_North Perimeter Thermostat,  !- Name
     blocks-3645_office_3_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_3_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 22;  !- Control 1 Name
 
@@ -16977,6 +17000,7 @@
     blocks-3645_office_3_South Perimeter Thermostat,  !- Name
     blocks-3645_office_3_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_3_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 24;  !- Control 1 Name
 
@@ -16984,6 +17008,7 @@
     blocks-3645_office_3_West Perimeter Thermostat,  !- Name
     blocks-3645_office_3_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_3_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 21;  !- Control 1 Name
 
@@ -16991,6 +17016,7 @@
     blocks-3645_office_4_Core Thermostat,  !- Name
     blocks-3645_office_4_Core,  !- Zone or ZoneList Name
     blocks-3645_office_4_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 30;  !- Control 1 Name
 
@@ -16998,6 +17024,7 @@
     blocks-3645_office_4_East Perimeter Thermostat,  !- Name
     blocks-3645_office_4_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_4_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 28;  !- Control 1 Name
 
@@ -17005,6 +17032,7 @@
     blocks-3645_office_4_North Perimeter Thermostat,  !- Name
     blocks-3645_office_4_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_4_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 27;  !- Control 1 Name
 
@@ -17012,6 +17040,7 @@
     blocks-3645_office_4_South Perimeter Thermostat,  !- Name
     blocks-3645_office_4_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_4_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 29;  !- Control 1 Name
 
@@ -17019,6 +17048,7 @@
     blocks-3645_office_4_West Perimeter Thermostat,  !- Name
     blocks-3645_office_4_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_4_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 26;  !- Control 1 Name
 
@@ -17026,6 +17056,7 @@
     blocks-3645_office_5_Core Thermostat,  !- Name
     blocks-3645_office_5_Core,  !- Zone or ZoneList Name
     blocks-3645_office_5_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 35;  !- Control 1 Name
 
@@ -17033,6 +17064,7 @@
     blocks-3645_office_5_East Perimeter Thermostat,  !- Name
     blocks-3645_office_5_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_5_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 33;  !- Control 1 Name
 
@@ -17040,6 +17072,7 @@
     blocks-3645_office_5_North Perimeter Thermostat,  !- Name
     blocks-3645_office_5_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_5_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 32;  !- Control 1 Name
 
@@ -17047,6 +17080,7 @@
     blocks-3645_office_5_South Perimeter Thermostat,  !- Name
     blocks-3645_office_5_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_5_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 34;  !- Control 1 Name
 
@@ -17054,6 +17088,7 @@
     blocks-3645_office_5_West Perimeter Thermostat,  !- Name
     blocks-3645_office_5_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_5_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 31;  !- Control 1 Name
 
@@ -17061,6 +17096,7 @@
     blocks-3645_office_6_Core Thermostat,  !- Name
     blocks-3645_office_6_Core,  !- Zone or ZoneList Name
     blocks-3645_office_6_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 40;  !- Control 1 Name
 
@@ -17068,6 +17104,7 @@
     blocks-3645_office_6_East Perimeter Thermostat,  !- Name
     blocks-3645_office_6_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_6_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 38;  !- Control 1 Name
 
@@ -17075,6 +17112,7 @@
     blocks-3645_office_6_North Perimeter Thermostat,  !- Name
     blocks-3645_office_6_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_6_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 37;  !- Control 1 Name
 
@@ -17082,6 +17120,7 @@
     blocks-3645_office_6_South Perimeter Thermostat,  !- Name
     blocks-3645_office_6_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_6_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 39;  !- Control 1 Name
 
@@ -17089,6 +17128,7 @@
     blocks-3645_office_6_West Perimeter Thermostat,  !- Name
     blocks-3645_office_6_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_6_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 36;  !- Control 1 Name
 
@@ -17096,6 +17136,7 @@
     blocks-3645_office_7_Core Thermostat,  !- Name
     blocks-3645_office_7_Core,  !- Zone or ZoneList Name
     blocks-3645_office_7_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 45;  !- Control 1 Name
 
@@ -17103,6 +17144,7 @@
     blocks-3645_office_7_East Perimeter Thermostat,  !- Name
     blocks-3645_office_7_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_7_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 43;  !- Control 1 Name
 
@@ -17110,6 +17152,7 @@
     blocks-3645_office_7_North Perimeter Thermostat,  !- Name
     blocks-3645_office_7_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_7_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 42;  !- Control 1 Name
 
@@ -17117,6 +17160,7 @@
     blocks-3645_office_7_South Perimeter Thermostat,  !- Name
     blocks-3645_office_7_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_7_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 44;  !- Control 1 Name
 
@@ -17124,6 +17168,7 @@
     blocks-3645_office_7_West Perimeter Thermostat,  !- Name
     blocks-3645_office_7_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_7_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 41;  !- Control 1 Name
 
@@ -17131,6 +17176,7 @@
     blocks-3645_office_8_Core Thermostat,  !- Name
     blocks-3645_office_8_Core,  !- Zone or ZoneList Name
     blocks-3645_office_8_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 50;  !- Control 1 Name
 
@@ -17138,6 +17184,7 @@
     blocks-3645_office_8_East Perimeter Thermostat,  !- Name
     blocks-3645_office_8_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_8_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 48;  !- Control 1 Name
 
@@ -17145,6 +17192,7 @@
     blocks-3645_office_8_North Perimeter Thermostat,  !- Name
     blocks-3645_office_8_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_8_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 47;  !- Control 1 Name
 
@@ -17152,6 +17200,7 @@
     blocks-3645_office_8_South Perimeter Thermostat,  !- Name
     blocks-3645_office_8_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_8_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 49;  !- Control 1 Name
 
@@ -17159,6 +17208,7 @@
     blocks-3645_office_8_West Perimeter Thermostat,  !- Name
     blocks-3645_office_8_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_8_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 46;  !- Control 1 Name
 
@@ -17166,6 +17216,7 @@
     blocks-3645_office_9_Core Thermostat,  !- Name
     blocks-3645_office_9_Core,  !- Zone or ZoneList Name
     blocks-3645_office_9_Core Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 55;  !- Control 1 Name
 
@@ -17173,6 +17224,7 @@
     blocks-3645_office_9_East Perimeter Thermostat,  !- Name
     blocks-3645_office_9_East Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_9_East Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 53;  !- Control 1 Name
 
@@ -17180,6 +17232,7 @@
     blocks-3645_office_9_North Perimeter Thermostat,  !- Name
     blocks-3645_office_9_North Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_9_North Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 52;  !- Control 1 Name
 
@@ -17187,6 +17240,7 @@
     blocks-3645_office_9_South Perimeter Thermostat,  !- Name
     blocks-3645_office_9_South Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_9_South Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 54;  !- Control 1 Name
 
@@ -17194,6 +17248,7 @@
     blocks-3645_office_9_West Perimeter Thermostat,  !- Name
     blocks-3645_office_9_West Perimeter,  !- Zone or ZoneList Name
     blocks-3645_office_9_West Perimeter Thermostat Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Thermostat Setpoint Dual Setpoint 51;  !- Control 1 Name
 

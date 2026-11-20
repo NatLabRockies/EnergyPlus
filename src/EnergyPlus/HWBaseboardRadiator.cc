@@ -267,8 +267,7 @@ namespace HWBaseboardRadiator {
         // Update Nums in state and make local convenience copies
         int NumHWBaseboards = state.dataHWBaseboardRad->NumHWBaseboards =
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCMO_BBRadiator_Water);
-        int NumHWBaseboardDesignObjs = state.dataHWBaseboardRad->NumHWBaseboardDesignObjs =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCMO_BBRadiator_Water_Design);
+        int NumHWBaseboardDesignObjs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCMO_BBRadiator_Water_Design);
 
         // Count total number of baseboard units
 
@@ -1406,7 +1405,6 @@ namespace HWBaseboardRadiator {
         auto &thisHWBB = state.dataHWBaseboardRad->HWBaseboard(BaseboardNum);
 
         if (state.dataGlobal->BeginEnvrnFlag && state.dataHWBaseboardRad->MyEnvrnFlag2) {
-            state.dataHWBaseboardRad->Iter = 0;
             state.dataHWBaseboardRad->MyEnvrnFlag2 = false;
         }
         if (!state.dataGlobal->BeginEnvrnFlag) {

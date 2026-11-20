@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -920,12 +921,14 @@ namespace DualDuct {
                 this->ZoneMinAirFrac = this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
                 // The last item is to take care of the Min Avail Flow Rates
                 if ((thisHotInNode.MassFlowRate > 0.0) && (schedValue > 0.0)) {
-                    thisHotInNode.MassFlowRateMinAvail = this->dd_airterminalHotAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac;
+                    thisHotInNode.MassFlowRateMinAvail =
+                        min(this->dd_airterminalHotAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac, thisHotInNode.MassFlowRateMaxAvail);
                 } else {
                     thisHotInNode.MassFlowRateMinAvail = 0.0;
                 }
                 if ((thisColdInNode.MassFlowRate > 0.0) && (schedValue > 0.0)) {
-                    thisColdInNode.MassFlowRateMinAvail = this->dd_airterminalColdAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac;
+                    thisColdInNode.MassFlowRateMinAvail =
+                        min(this->dd_airterminalColdAirInlet.AirMassFlowRateMax * this->ZoneMinAirFrac, thisColdInNode.MassFlowRateMaxAvail);
                 } else {
                     thisColdInNode.MassFlowRateMinAvail = 0.0;
                 }
@@ -979,15 +982,15 @@ namespace DualDuct {
 
             this->dd_airterminalHotAirInlet.AirMassFlowRateMaxAvail =
                 min(state.dataLoopNodes->Node(OutNode).MassFlowRateMax, state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
-            this->dd_airterminalHotAirInlet.AirMassFlowRateMinAvail =
-                min(max(state.dataLoopNodes->Node(OutNode).MassFlowRateMin, state.dataLoopNodes->Node(HotInNode).MassFlowRateMinAvail),
-                    state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
+            this->dd_airterminalHotAirInlet.AirMassFlowRateMinAvail = std::clamp(state.dataLoopNodes->Node(OutNode).MassFlowRateMin,
+                                                                                 state.dataLoopNodes->Node(HotInNode).MassFlowRateMinAvail,
+                                                                                 state.dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail);
 
             this->dd_airterminalColdAirInlet.AirMassFlowRateMaxAvail =
                 min(state.dataLoopNodes->Node(OutNode).MassFlowRateMax, state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
-            this->dd_airterminalColdAirInlet.AirMassFlowRateMinAvail =
-                min(max(state.dataLoopNodes->Node(OutNode).MassFlowRateMin, state.dataLoopNodes->Node(ColdInNode).MassFlowRateMinAvail),
-                    state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
+            this->dd_airterminalColdAirInlet.AirMassFlowRateMinAvail = std::clamp(state.dataLoopNodes->Node(OutNode).MassFlowRateMin,
+                                                                                  state.dataLoopNodes->Node(ColdInNode).MassFlowRateMinAvail,
+                                                                                  state.dataLoopNodes->Node(ColdInNode).MassFlowRateMaxAvail);
 
             // Do the following initializations (every time step): This should be the info from
             // the previous components outlets or the node data in this section.

@@ -623,6 +623,62 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestResetActuators)
     EXPECT_EQ(1, apiErrorFlag((void *)this->state));
 }
 
+TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_CallbackRequestsHVACIterationsOnlyWhenItActuates)
+{
+    // at InsideHVACSystemIterationLoop, ManageEMS reports that a program ran (which requests additional air loop iterations)
+    // only when a registered callback wrote or reset an actuator; a read-only callback must not change results (#8164)
+    this->preRequestActuator("a", "b", "c", ActuatorType::REAL);
+    this->setupActuatorsOnceAllAreRequested();
+    int hActuator = getActuatorHandle((void *)this->state, "a", "b", "c");
+    EXPECT_GT(hActuator, -1);
+
+    enum class Action
+    {
+        Read,
+        Set,
+        Reset
+    };
+    Action action = Action::Read;
+    int numCalls = 0;
+    PluginManagement::registerNewCallback(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, [&](void *s) {
+        ++numCalls;
+        getActuatorValue(s, hActuator);
+        if (action == Action::Set) {
+            setActuatorValue(s, hActuator, 1.0);
+        } else if (action == Action::Reset) {
+            resetActuator(s, hActuator);
+        }
+    });
+    state->dataGlobal->AnyEnergyManagementSystemInModel = true;
+
+    bool anyRan = true;
+    EMSManager::ManageEMS(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(1, numCalls);
+    EXPECT_FALSE(anyRan);
+
+    action = Action::Set;
+    EMSManager::ManageEMS(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(2, numCalls);
+    EXPECT_TRUE(anyRan);
+
+    action = Action::Reset;
+    EMSManager::ManageEMS(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(3, numCalls);
+    EXPECT_TRUE(anyRan);
+
+    // the actuator write from the previous call must not carry over
+    action = Action::Read;
+    EMSManager::ManageEMS(*this->state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan);
+    EXPECT_EQ(4, numCalls);
+    EXPECT_FALSE(anyRan);
+
+    // other calling points are unaffected: a callback that ran is still reported as having run
+    PluginManagement::registerNewCallback(*this->state, EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, [&](void *) { ++numCalls; });
+    EMSManager::ManageEMS(*this->state, EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, anyRan);
+    EXPECT_EQ(5, numCalls);
+    EXPECT_TRUE(anyRan);
+}
+
 TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestAccessingInternalVariables)
 {
     // we can't really test that the actuator is being recalculated by E+ again, but we can make sure the call works anyway

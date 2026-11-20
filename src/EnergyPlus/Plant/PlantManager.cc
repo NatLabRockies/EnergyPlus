@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <utility>
 #include <vector>
 
 // ObjexxFCL Headers
@@ -2429,7 +2430,9 @@ void InitializeLoops(EnergyPlusData &state, bool const FirstHVACIteration) // tr
             // step 3, revise calling order
             // have now called each plant component model at least once with InitLoopEquip = .TRUE.
             // this means the calls to InterConnectTwoPlantLoopSides have now been made. Revise once because
-            // RevisePlantCallingOrder internally converges all demand-before-supply and inter-loop constraints.
+            // RevisePlantCallingOrder internally guarantees demand-before-supply for every loop and resolves
+            // inter-loop constraints where possible; a cyclic dependency between loops can make full resolution
+            // impossible, in which case RevisePlantCallingOrder issues a warning.
             if (passNum == 1) {
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     std::vector<std::string> initialCallingOrder;
@@ -3648,10 +3651,44 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     // Setup the order that plant loop sides are to be called while preserving demand-before-supply for each loop.
 
     // METHODOLOGY EMPLOYED:
-    // Repeatedly rearrange loop sides for interconnected components, then restore demand-before-supply for
-    // every loop. A repair can disturb an interconnection that was already ordered, so continue until a full
-    // revision leaves the calling order unchanged. Limit the number of revisions to the number of half loops
-    // so inconsistent cyclic dependencies cannot iterate indefinitely.
+    // The dependency graph is a map of required calling order: each loop side is a node, and an arrow from A to B
+    // means A must be called before B.
+    // This graph is built once up front and used to check each order; the topological sort is only a fallback.
+    // An interconnection is a call-order dependency created by equipment connected to two loops. For example, a
+    // water-cooled chiller connects chilled-water and condenser-water loops; the chilled-water supply side places
+    // a demand on the condenser-water loop, so it must be called before the condenser-water demand side.
+
+    // The steps below walk through the repair, fallback, and warning cases, with a small example for each. In the
+    // examples, D means demand side and S means supply side.
+
+    // 1. Rearrange loop sides to satisfy interconnection ordering, restoring demand-before-supply for each loop
+    //    after every pass.
+    //    In other words, each loop's demand side remains ahead of its supply side while the connected equipment's
+    //    ordering needs are worked out.
+
+    //    Example: Starting with A-D, B-D, A-S, B-S and requiring A-S before B-D, move B-D after A-S to get
+    //    A-D, A-S, B-D, B-S.
+
+    // 2. If these repairs repeat an order or reach their revision limit without satisfying all constraints, run
+    //    a stable topological sort on the existing dependency graph to find a valid order if one exists.
+    //    This is Kahn's algorithm: repeatedly place a side whose required predecessors have already been placed,
+    //    then make its successors eligible. When several sides are ready, prefer the one earliest in the current
+    //    order.
+    //    The repair loop allows up to TotNumHalfLoops full sweeps, with each sweep visiting every half-loop.
+    //    A repeated order only means these step-by-step repairs are stuck; it does not by itself mean that no
+    //    valid calling order exists. The graph-based attempt checks whether all requirements can be met together.
+
+    //    Example: with C-D, C-S, A-D, A-S, B-D, B-S and requirements A-D -> B-D -> C-D (plus each
+    //    loop's D -> S), a repair can satisfy one requirement while undoing an earlier move, eventually revisiting
+    //    an order it has already tried. This is a cycle in the sequence of attempted orders, not in the
+    //    requirements: A-D -> B-D -> C-D is one-way, so the fallback can produce A-D, A-S, B-D, C-D, C-S, B-S.
+
+    // 3. If the graph has a genuine cycle and no valid order exists, keep demand-before-supply intact and warn
+    //    that some inter-loop ordering constraints cannot be honored.
+
+    //    Example: A-D -> A-S -> B-D -> B-S -> A-D. Following these requirements leads back to A-D, which would
+    //    have to be called before itself. No sequence can satisfy this, so the function warns and preserves each
+    //    loop's demand-before-supply order.
 
     // Using/Aliasing
     using PlantUtilities::ShiftPlantLoopSideCallingOrder;
@@ -3663,9 +3700,162 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     bool thisLoopPutsDemandOnAnother;
     int ConnctNum;
 
-    for (int revision = 1; revision <= state.dataPlnt->TotNumHalfLoops; ++revision) {
-        Array1D<PlantCallingOrderInfoStruct> previousCallingOrder(state.dataPlnt->PlantCallingOrderInfo);
+    if (state.dataPlnt->TotNumHalfLoops <= 0) {
+        return;
+    }
 
+    auto nodeIndex = [&state](int const loopNum, DataPlant::LoopSideLocation const loopSide) {
+        if (loopNum < 1 || loopNum > state.dataPlnt->TotNumLoops) {
+            return -1;
+        }
+        if (loopSide == LoopSideLocation::Demand) {
+            return 2 * (loopNum - 1);
+        }
+        if (loopSide == LoopSideLocation::Supply) {
+            return 2 * (loopNum - 1) + 1;
+        }
+        return -1;
+    };
+
+    // Treat each half-loop as a graph node (demand is even, supply is odd). An edge A -> B means A must be
+    // called before B: every loop adds demand -> supply, and each connection adds the direction described by
+    // LoopDemandsOnRemote. Reciprocal Connected records describe the same edge, so suppress duplicates when
+    // calculating in-degrees later.
+    std::vector<std::vector<int>> dependencyEdges(state.dataPlnt->TotNumHalfLoops);
+    auto addDependency = [&dependencyEdges](int const beforeNode, int const afterNode) {
+        if (beforeNode < 0 || afterNode < 0 || beforeNode >= static_cast<int>(dependencyEdges.size()) ||
+            afterNode >= static_cast<int>(dependencyEdges.size())) {
+            return;
+        }
+        auto &edges = dependencyEdges[beforeNode];
+        if (std::find(edges.begin(), edges.end(), afterNode) == edges.end()) {
+            edges.push_back(afterNode);
+        }
+    };
+
+    for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
+        addDependency(nodeIndex(loopNum, LoopSideLocation::Demand), nodeIndex(loopNum, LoopSideLocation::Supply));
+        for (auto const loopSide : {LoopSideLocation::Demand, LoopSideLocation::Supply}) {
+            auto const &connectedLoopSide = state.dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
+            if (!allocated(connectedLoopSide.Connected)) {
+                continue;
+            }
+            int const thisNode = nodeIndex(loopNum, loopSide);
+            for (int connectionNum = 1; connectionNum <= isize(connectedLoopSide.Connected); ++connectionNum) {
+                auto const &connection = connectedLoopSide.Connected(connectionNum);
+                int const remoteNode = nodeIndex(connection.LoopNum, connection.LoopSideNum);
+                if (connection.LoopDemandsOnRemote) {
+                    addDependency(thisNode, remoteNode);
+                } else {
+                    addDependency(remoteNode, thisNode);
+                }
+            }
+        }
+    }
+
+    auto snapshotCallingOrder = [&state]() {
+        std::vector<std::pair<int, DataPlant::LoopSideLocation>> snapshot;
+        snapshot.reserve(state.dataPlnt->TotNumHalfLoops);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            snapshot.emplace_back(entry.LoopIndex, entry.LoopSide);
+        }
+        return snapshot;
+    };
+
+    auto callingOrderSatisfiesAllConstraints = [&state, &dependencyEdges, &nodeIndex]() {
+        std::vector<int> callingPosition(dependencyEdges.size(), -1);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            int const node = nodeIndex(entry.LoopIndex, entry.LoopSide);
+            if (node < 0 || node >= static_cast<int>(callingPosition.size()) || callingPosition[node] != -1) {
+                return false;
+            }
+            callingPosition[node] = callingIndex;
+        }
+        if (std::find(callingPosition.begin(), callingPosition.end(), -1) != callingPosition.end()) {
+            return false;
+        }
+        for (int beforeNode = 0; beforeNode < static_cast<int>(dependencyEdges.size()); ++beforeNode) {
+            for (int const afterNode : dependencyEdges[beforeNode]) {
+                if (callingPosition[beforeNode] >= callingPosition[afterNode]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    // The in-place repair sweep can oscillate even when the dependency graph is acyclic. Preserve the current
+    // ordering as the stable tie-breaker while constructing a valid topological order for that case. Do not modify
+    // PlantCallingOrderInfo unless a complete ordering is found, so a genuine cycle retains the heuristic's final
+    // demand-before-supply order.
+    auto applyStableTopologicalOrder = [&state, &dependencyEdges, &nodeIndex]() {
+        std::vector<int> inDegree(dependencyEdges.size(), 0);
+        for (auto const &edges : dependencyEdges) {
+            for (int const afterNode : edges) {
+                ++inDegree[afterNode];
+            }
+        }
+
+        // Keep the current order as the tie-breaker, and reject an invalid or duplicate half-loop before sorting.
+        std::vector<int> currentOrder;
+        currentOrder.reserve(state.dataPlnt->TotNumHalfLoops);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            int const node = nodeIndex(entry.LoopIndex, entry.LoopSide);
+            if (node < 0 || std::find(currentOrder.begin(), currentOrder.end(), node) != currentOrder.end()) {
+                return false;
+            }
+            currentOrder.push_back(node);
+        }
+
+        std::vector<bool> emitted(dependencyEdges.size(), false);
+        std::vector<int> topologicalOrder;
+        topologicalOrder.reserve(dependencyEdges.size());
+        // Kahn's algorithm: repeatedly emit the earliest currently-ready half-loop from the existing order.
+        // This preserves the old order as a tie-breaker while satisfying every dependency edge.
+        while (topologicalOrder.size() < dependencyEdges.size()) {
+            int selectedNode = -1;
+            for (int const node : currentOrder) {
+                if (!emitted[node] && inDegree[node] == 0) {
+                    selectedNode = node;
+                    break;
+                }
+            }
+            if (selectedNode < 0) {
+                // No remaining node is ready, so the un-emitted dependency graph contains a directed cycle.
+                return false;
+            }
+            emitted[selectedNode] = true;
+            topologicalOrder.push_back(selectedNode);
+            for (int const afterNode : dependencyEdges[selectedNode]) {
+                --inDegree[afterNode];
+            }
+        }
+
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            int const node = topologicalOrder[callingIndex - 1];
+            auto &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            entry.LoopIndex = node / 2 + 1;
+            entry.LoopSide = (node % 2 == 0) ? LoopSideLocation::Demand : LoopSideLocation::Supply;
+        }
+        return true;
+    };
+
+    // Track every calling order seen so a cycle in the state space (not just an immediate fixed point) can be
+    // detected and stopped early instead of always running the full number-of-half-loops revision limit.
+    // Each entry is one complete order, represented as (loop index, loop side) pairs in calling sequence.
+    std::vector<std::vector<std::pair<int, DataPlant::LoopSideLocation>>> callingOrderHistory;
+    callingOrderHistory.push_back(snapshotCallingOrder());
+
+    bool converged = false;
+    int revisionsPerformed = 0;
+    for (int revision = 1; revision <= state.dataPlnt->TotNumHalfLoops; ++revision) {
+        revisionsPerformed = revision;
+
+        // Repair interconnections against the current order. A move made for one connection can invalidate
+        // another, so repeat this sweep until the full constraint check succeeds or the order stops progressing.
         for (int HalfLoopNum = 1; HalfLoopNum <= state.dataPlnt->TotNumHalfLoops; ++HalfLoopNum) {
 
             int LoopNum = state.dataPlnt->PlantCallingOrderInfo(HalfLoopNum).LoopIndex;
@@ -3716,6 +3906,8 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
             }
         }
 
+        // Reassert each loop's demand-before-supply invariant after the interconnection moves; these moves can
+        // in turn disturb inter-loop ordering, which is why all graph constraints are checked afterward.
         for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
             int demandIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Demand);
             int supplyIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Supply);
@@ -3724,18 +3916,37 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
             }
         }
 
-        bool callingOrderChanged = false;
-        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
-            auto const &previousEntry = previousCallingOrder(callingIndex);
-            auto const &currentEntry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
-            if (previousEntry.LoopIndex != currentEntry.LoopIndex || previousEntry.LoopSide != currentEntry.LoopSide) {
-                callingOrderChanged = true;
-                break;
-            }
-        }
-        if (!callingOrderChanged) {
+        if (callingOrderSatisfiesAllConstraints()) {
+            converged = true;
             break;
         }
+
+        // Reaching this check means the current order failed the full constraint check. A repeated permutation
+        // means this repair heuristic is oscillating, not necessarily that the dependency graph has a cycle. Stop
+        // the sweep here; the topological fallback below distinguishes those cases.
+        auto currentSnapshot = snapshotCallingOrder();
+        if (std::find(callingOrderHistory.begin(), callingOrderHistory.end(), currentSnapshot) != callingOrderHistory.end()) {
+            break;
+        }
+        callingOrderHistory.push_back(std::move(currentSnapshot));
+    }
+
+    if (!converged) {
+        converged = applyStableTopologicalOrder();
+    }
+
+    if (!converged) {
+        // A complete topological ordering does not exist, so at least two loop-side ordering requirements conflict.
+        // Demand-before-supply is still guaranteed for every loop, but the inter-loop calling order cannot reflect
+        // every interconnection.
+        ShowWarningError(state,
+                         std::format("RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side "));
+        ShowContinueError(
+            state,
+            std::format("requirements after revision {}; a cyclic dependency exists between two or more interconnected loops ", revisionsPerformed));
+        ShowContinueError(state,
+                          std::format("(e.g., reciprocal heat recovery equipment). Demand-before-supply ordering is preserved for every loop, "));
+        ShowContinueError(state, std::format("but some inter-loop calling order constraints may not be honored."));
     }
 }
 

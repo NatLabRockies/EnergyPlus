@@ -247,7 +247,6 @@ namespace EcoRoofManager {
             state.dataEcoRoofMgr->Tf = state.dataEcoRoofMgr->Tfold;
 
             if (thisConstruct.CTFCross[0] > 0.01) {
-                state.dataEcoRoofMgr->QuickConductionSurf = true;
                 int spaceNum = state.dataSurface->Surface(SurfNum).spaceNum;
                 F1temp = thisConstruct.CTFCross[0] / (thisConstruct.CTFInside[0] + state.dataHeatBalSurf->SurfHConvInt(SurfNum));
                 Qsoilpart1 =
@@ -1044,7 +1043,6 @@ namespace EcoRoofManager {
             }
 
             // Using the parameters above, distribute the Root Layer moisture
-            state.dataEcoRoofMgr->TestMoisture = MeanRootMoisture;
             MeanRootMoisture +=
                 (state.dataEcoRoofMgr->TimeStepZoneSec / state.dataEcoRoofMgr->RootDepth) *
                 ((state.dataEcoRoofMgr->SoilConductivityAveTop *
@@ -1202,7 +1200,7 @@ namespace EcoRoofManager {
         // So, it is better to assume that the roof is flat until multiple surfaces can be handled.  Then, the next line can
         // use state.dataHeatBal->SurfCosIncAng(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, SurfNum) instead of
         // SOLCOS(3).
-        RS = max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad +
+        RS = max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad +
              state.dataSolarShading->SurfAnisoSkyMult(SurfNum) * state.dataEnvrn->DifSolarRad;
         Real64 f1inv = min(1.0, (0.004 * RS + 0.005) / (0.81 * (0.004 * RS + 1.0)));
         f1 = 1.0 / f1inv;

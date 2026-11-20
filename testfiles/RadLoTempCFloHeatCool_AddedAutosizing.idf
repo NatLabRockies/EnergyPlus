@@ -1948,6 +1948,7 @@
     Thermostat,              !- Name
     All Zones,               !- Zone or ZoneList Name
     Always Dual Setpoint,    !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetpointControl;     !- Control 1 Name
 

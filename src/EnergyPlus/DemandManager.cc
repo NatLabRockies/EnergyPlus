@@ -123,7 +123,6 @@ void ManageDemand(EnergyPlusData &state)
                     state.dataDemandManager->DemandManagerList(ListNum).PeakDemand = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).ScheduledLimit = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).DemandLimit = 0.0;
-                    state.dataDemandManager->DemandManagerList(ListNum).AvoidedDemand = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).OverLimit = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).OverLimitDuration = 0.0;
                 } // ListNum
@@ -434,8 +433,6 @@ void GetDemandManagerListInput(EnergyPlusData &state)
                                                     s_ipsc->cAlphaArgs(MgrNum * 2 + 5)));
                         ErrorsFound = true;
                     }
-
-                    // Check that each is not already referenced using %DemandManagerList field
 
                 } // MgrNum
             }

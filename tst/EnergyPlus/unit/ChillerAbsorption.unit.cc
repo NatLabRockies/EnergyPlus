@@ -1368,6 +1368,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "    Zone 1 Thermostat,       !- Name",
         "    West Zone,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -1872,7 +1873,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Autosize)
         "  5,                       !- Chilled Water Outlet Temperature Lower Limit {C}",
         "  AbsorberHWInletNode,     !- Generator Inlet Node Name",
         "  AbsorberHWOutletNode,    !- Generator Outlet Node Name",
-        "  ConstantFlow,            !- Chiller Flow Mode",
+        "  LeavingSetpointModulated, !- Chiller Flow Mode",
         "  HotWater,                !- Generator Heat Source Type",
         "  Autosize,                !- Design Generator Fluid Flow Rate {m3/s}",
         "  2.0,                     !- Degree of Subcooling in Steam Generator",
@@ -1933,7 +1934,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Autosize)
 
     EXPECT_DOUBLE_EQ(5.0, thisChiller.TempLowLimitEvapOut);
 
-    EXPECT_ENUM_EQ(thisChiller.FlowMode, DataPlant::FlowMode::Constant);
+    EXPECT_ENUM_EQ(thisChiller.FlowMode, DataPlant::FlowMode::LeavingSetpointModulated);
     EXPECT_TRUE(thisChiller.GenInputOutputNodesUsed);
     EXPECT_GT(thisChiller.GeneratorInletNodeNum, 0);
     EXPECT_GT(thisChiller.GeneratorOutletNodeNum, 0);
@@ -2058,7 +2059,9 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Autosize)
     bool RunFlag(true);
     Real64 MyLoad(-20000.0);
 
+    state->dataLoopNodes->Node(thisChiller.EvapOutletNodeNum).TempSetPoint = chwLoopSizing.ExitTemp;
     thisChiller.initialize(*state, RunFlag, MyLoad);
+    EXPECT_TRUE(chwLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1).ModulatedFlow);
     thisChiller.sizeChiller(*state);
 
     EXPECT_NE(thisChiller.NomCap, DataSizing::AutoSize);

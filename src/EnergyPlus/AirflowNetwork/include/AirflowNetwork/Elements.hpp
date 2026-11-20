@@ -981,13 +981,11 @@ namespace AirflowNetwork {
         Real64 LamDynCoef;        // Laminar dynamic loss coefficient
         Real64 LamFriCoef;        // Laminar friction loss coefficient
         Real64 InitLamCoef;       // Coefficient of linear initialization
-        Real64 RelRough;          // e/D: relative roughness,
-        Real64 A1;                // 1.14 - 0.868589*ln(e/D),
 
         // Default Constructor
         Duct()
             : L(0.0), hydraulicDiameter(0.0), A(0.0), roughness(0.0), TurDynCoef(0.0), UThermConduct(0.0), UMoisture(0.0), InsideConvCoeff(0.0),
-              OutsideConvCoeff(0.0), LamDynCoef(0.0), LamFriCoef(0.0), InitLamCoef(0.0), RelRough(0.0), A1(0.0)
+              OutsideConvCoeff(0.0), LamDynCoef(0.0), LamFriCoef(0.0), InitLamCoef(0.0)
         {
         }
 

@@ -2109,6 +2109,7 @@
     South zone1,             !- Name
     ZSF1,                    !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -2116,6 +2117,7 @@
     North zone1,             !- Name
     ZNF1,                    !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -2123,6 +2125,7 @@
     South zone2,             !- Name
     ZSF2,                    !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 
@@ -2130,6 +2133,7 @@
     North zone2,             !- Name
     ZNF2,                    !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     DualSetPoint;            !- Control 1 Name
 

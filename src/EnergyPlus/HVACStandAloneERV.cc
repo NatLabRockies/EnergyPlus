@@ -262,8 +262,7 @@ void GetStandAloneERV(EnergyPlusData &state)
             state, Alphas(3), CurrentModuleObject, cAlphaFields(3), state.dataHVACStandAloneERV->HeatExchangerUniqueNames, ErrorsFound);
         standAloneERV.HeatExchangerName = Alphas(3);
         bool errFlag = false;
-        standAloneERV.hxType =
-            HeatRecovery::GetHeatExchangerObjectTypeNum(state, standAloneERV.HeatExchangerName, standAloneERV.HeatExchangerIndex, errFlag);
+        HeatRecovery::GetHeatExchangerObjectTypeNum(state, standAloneERV.HeatExchangerName, standAloneERV.HeatExchangerIndex, errFlag);
         if (errFlag) {
             ShowContinueError(state, std::format("... occurs in {} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ErrorsFound = true;
@@ -275,8 +274,6 @@ void GetStandAloneERV(EnergyPlusData &state)
             ShowContinueError(state, std::format("... occurs in {} \"{}\"", CurrentModuleObject, standAloneERV.Name));
             ErrorsFound = true;
         }
-        standAloneERV.DesignHXVolFlowRate = HXSupAirFlowRate;
-
         standAloneERV.SupplyAirFanName = Alphas(4);
         GlobalNames::IntraObjUniquenessCheck(
             state, Alphas(4), CurrentModuleObject, cAlphaFields(4), state.dataHVACStandAloneERV->SupplyAirFanUniqueNames, ErrorsFound);
@@ -883,8 +880,6 @@ void GetStandAloneERV(EnergyPlusData &state)
         thisOAController.economizerOASched = Sched::GetSchedule(state, Alphas(5));
 
         if (WhichERV != 0) {
-            state.dataHVACStandAloneERV->StandAloneERV(WhichERV).economizerOASched = Sched::GetSchedule(state, Alphas(5));
-
             // Compare the ERV SA fan flow rates to modified air flow rate.
             if (HighRHOARatio > 1.0 && state.dataHVACStandAloneERV->StandAloneERV(WhichERV).SupplyAirVolFlow != DataSizing::AutoSize &&
                 state.dataHVACStandAloneERV->StandAloneERV(WhichERV).DesignSAFanVolFlowRate != DataSizing::AutoSize) {

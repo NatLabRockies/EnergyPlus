@@ -129,6 +129,7 @@ set(test_src
     Fans.unit.cc
     FaultsManager.unit.cc
     FileSystem.unit.cc
+    FilledArray.unit.cc
     FiniteDifferenceGroundTemperatureModel.unit.cc
     FluidCoolers.unit.cc
     FluidProperties.unit.cc
@@ -137,6 +138,10 @@ set(test_src
     Furnaces.unit.cc
     General.unit.cc
     GeneralRoutines.unit.cc
+    Geometry/GeometryFixture.hh
+    Geometry/Plane.unit.cc
+    Geometry/Vector2D.unit.cc
+    Geometry/Vector3D.unit.cc
     GroundHeatExchangers/Base.unit.cc
     GroundHeatExchangers/BoreholeArray.unit.cc
     GroundHeatExchangers/BoreholeSingle.unit.cc

@@ -224,25 +224,12 @@ namespace DataZoneEquipment {
         // Members
         std::string TypeOf; // The 'keyWord' identifying  component type
         std::string Name;   // Component name
-        int EquipIndex;     // Component Index for routines
-        bool ON;            // When true, the designated component or operation scheme is available
         int InletNodeNum;
         int OutletNodeNum;
         int NumMeteredVars;
         Array1D<OutputProcessor::MeterData> MeteredVar; // Index of energy output report data
-        int EnergyTransComp;                            // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
-        int ZoneEqToPlantPtr;                           // 0=No plant loop connection, >=0 index to ZoneEqToPlant array
-        int OpMode;
-        Real64 Capacity;
-        Real64 Efficiency;
-        Real64 TotPlantSupplyElec;
-        Real64 TotPlantSupplyGas;
-        Real64 TotPlantSupplyPurch;
-
         // Default Constructor
-        SubSubEquipmentData()
-            : EquipIndex(0), ON(true), InletNodeNum(0), OutletNodeNum(0), NumMeteredVars(0), EnergyTransComp(0), ZoneEqToPlantPtr(0), OpMode(0),
-              Capacity(0.0), Efficiency(0.0), TotPlantSupplyElec(0.0), TotPlantSupplyGas(0.0), TotPlantSupplyPurch(0.0)
+        SubSubEquipmentData() : InletNodeNum(0), OutletNodeNum(0), NumMeteredVars(0)
         {
         }
     };
@@ -250,31 +237,16 @@ namespace DataZoneEquipment {
     struct SubEquipmentData // data for an individual component
     {
         // Members
-        bool Parent; // When true, the designated component is made up of sub-components
         int NumSubSubEquip;
         std::string TypeOf; // The 'keyWord' identifying  component type
         std::string Name;   // Component name
-        int EquipIndex;     // Component Index for routines
-        bool ON;            // When true, the designated component or operation scheme is available
         int InletNodeNum;
         int OutletNodeNum;
         int NumMeteredVars;
         Array1D<OutputProcessor::MeterData> MeteredVar; // Index of energy output report data
         Array1D<SubSubEquipmentData> SubSubEquipData;   // Component list
-        int EnergyTransComp;                            // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
-        int ZoneEqToPlantPtr;                           // 0=No plant loop connection, >0 index to ZoneEqToPlant array
-        int OpMode;
-        Real64 Capacity;
-        Real64 Efficiency;
-        Real64 TotPlantSupplyElec;
-        Real64 TotPlantSupplyGas;
-        Real64 TotPlantSupplyPurch;
-
         // Default Constructor
-        SubEquipmentData()
-            : Parent(false), NumSubSubEquip(0), EquipIndex(0), ON(true), InletNodeNum(0), OutletNodeNum(0), NumMeteredVars(0), EnergyTransComp(0),
-              ZoneEqToPlantPtr(0), OpMode(0), Capacity(0.0), Efficiency(0.0), TotPlantSupplyElec(0.0), TotPlantSupplyGas(0.0),
-              TotPlantSupplyPurch(0.0)
+        SubEquipmentData() : NumSubSubEquip(0), InletNodeNum(0), OutletNodeNum(0), NumMeteredVars(0)
         {
         }
     };
@@ -354,7 +326,6 @@ namespace DataZoneEquipment {
         bool InWallActiveElement;       // Convection adapation, true if zone has in-wall HVAC
         bool InCeilingActiveElement;    // Convection adapation,
         // true when zone has in-ceiling HVAC
-        bool ZoneHasAirLoopWithOASys; // true if zone is served by one or more airloops with an outdoor air system
         int ZoneAirDistributionIndex; // index to DesignSpecification:ZoneAirDistribution object
         int ZoneDesignSpecOAIndex;    // index to DesignSpecification:OutdoorAir object
         Real64 AirLoopDesSupply;      // air lood design supply air flow rate [kg/s]
@@ -364,8 +335,8 @@ namespace DataZoneEquipment {
             : ZoneName("Uncontrolled Zone"), EquipListIndex(0), ZoneNode(0), NumInletNodes(0), NumExhaustNodes(0), NumReturnNodes(0),
               NumReturnFlowBasisNodes(0), FlowError(false), ZonalSystemOnly(false), IsControlled(false), ZoneExh(0.0), ZoneExhBalanced(0.0),
               PlenumMassFlow(0.0), ExcessZoneExh(0.0), TotAvailAirLoopOA(0.0), TotInletAirMassFlowRate(0.0), TotExhaustAirMassFlowRate(0.0),
-              InFloorActiveElement(false), InWallActiveElement(false), InCeilingActiveElement(false), ZoneHasAirLoopWithOASys(false),
-              ZoneAirDistributionIndex(0), ZoneDesignSpecOAIndex(0), AirLoopDesSupply(0.0)
+              InFloorActiveElement(false), InWallActiveElement(false), InCeilingActiveElement(false), ZoneAirDistributionIndex(0),
+              ZoneDesignSpecOAIndex(0), AirLoopDesSupply(0.0)
         {
         }
 
@@ -384,7 +355,6 @@ namespace DataZoneEquipment {
     struct EquipmentData // data for an individual component
     {
         // Members
-        bool Parent; // When true, the designated component is made up of sub-components
         int NumSubEquip;
         std::string TypeOf; // The 'keyWord' identifying  component type
         std::string Name;   // Component name
@@ -396,17 +366,8 @@ namespace DataZoneEquipment {
         int NumMeteredVars;
         Array1D<OutputProcessor::MeterData> MeteredVar; // Index of energy output report data
         Array1D<SubEquipmentData> SubEquipData;         // Component list
-        int EnergyTransComp;                            // 1=EnergyTransfer, 0=No EnergyTransfer  Flag needed for reporting
-        int ZoneEqToPlantPtr;                           // 0=No plant loop connection, >0 index to ZoneEqToPlant array
-        Real64 TotPlantSupplyElec;
-        Real64 TotPlantSupplyGas;
-        Real64 TotPlantSupplyPurch;
-        int OpMode;
-
         // Default Constructor
-        EquipmentData()
-            : Parent(false), NumSubEquip(0), ON(true), NumInlets(0), NumOutlets(0), NumMeteredVars(0), EnergyTransComp(0), ZoneEqToPlantPtr(0),
-              TotPlantSupplyElec(0.0), TotPlantSupplyGas(0.0), TotPlantSupplyPurch(0.0), OpMode(0)
+        EquipmentData() : NumSubEquip(0), ON(true), NumInlets(0), NumOutlets(0), NumMeteredVars(0)
         {
         }
     };
@@ -502,18 +463,6 @@ namespace DataZoneEquipment {
 
         void setInletFlows(EnergyPlusData &state);
     };
-    struct ControlList
-    {
-        // Members
-        std::string Name;
-        int NumOfControls;
-
-        // Default Constructor
-        ControlList() : NumOfControls(0)
-        {
-        }
-    };
-
     struct SupplyAir
     {
         // Members

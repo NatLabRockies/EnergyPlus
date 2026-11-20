@@ -54,7 +54,6 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/EnergyPlus.hh>
@@ -267,7 +266,6 @@ namespace RoomAir {
         // user variables
         Array1D_string SurfName;  // user defined name
         Array1D<Real64> DeltaTai; // (Tai - MAT ) offset from mean air temp
-        int NumSurfs = 0;         // number of surfaces in this pattern
         // calculated and from elsewhere
         Array1D_int SurfID; // index in HB surface structure array
     };
@@ -335,7 +333,6 @@ namespace RoomAir {
         bool IsUsed = false;                     // .TRUE. if user-defined patterns used in zone
         std::string Name;                        // Name
         std::string ZoneName;                    // Zone name in building
-        int ZoneID = 0;                          // Index of Zone in Heat Balance
         Sched::Schedule *availSched = nullptr;   // availability schedule
         Sched::Schedule *patternSched = nullptr; // pattern selecting schedule
         // calculated and from elsewhere
@@ -358,7 +355,6 @@ namespace RoomAir {
         // Members
         // user variables
         int AFNSimuID = 0;     // point to this linkage in AirflowNetworkLinkSimu structure
-        int AFNDataID = 0;     // point to this linkage in AirflowNetworkLinkageData structure
         Real64 MdotIn = 0.0;   // mass flow rate of air into control volume(neg means leaving control volume) (kg / s)
         Real64 TempIn = 0.0;   // drybulb temperature of air into control volume
         Real64 HumRatIn = 0.0; // humidity ratio of air into control volume
@@ -399,7 +395,6 @@ namespace RoomAir {
         bool HasSurfacesAssigned = false;      // True if this node has surfaces assigned
         Array1D<bool> SurfMask;                // Sized to num of surfs in Zone, true if surface is associated with this node
         std::string NodeIntGainsListName;      // name of node's internal gains list
-        bool HasIntGainsAssigned = false;      // True if this node has internal gain assigned
         int NumIntGains = 0;                   // Number of matching internal gain objects for all spaces in the zone
         Array1D<int> intGainsDeviceSpaces;     // index pointers to space struct
         Array1D<int> IntGainsDeviceIndices;    // index pointers to internal gains struct
@@ -446,8 +441,6 @@ namespace RoomAir {
         Real64 NonAirSystemResponse = 0.0;     // sum of convective system load
         Real64 SysDepZoneLoadsLagged = 0.0;    // sum of system lagged load
         Real64 SysDepZoneLoadsLaggedOld = 0.0; // sum of system lagged load
-        Real64 AirCap = 0.0;                   // Air storage term for energy balalce at each node
-        Real64 AirHumRat = 0.0;                // Air storage term for moisture balalce at each node
         // latent moisture balance terms for node
         Real64 SumIntLatentGain = 0.0; // rate of heat gain form internal latent gains(after fraction)
         Real64 SumHmAW = 0.0;          // sum of AREA*Moist CONVECTION COEFF*INSIDE Humidity Ratio
@@ -464,9 +457,6 @@ namespace RoomAir {
         // user variables
         bool IsUsed = false;            // true. if RoomAirflowNetwork model used in zone
         std::string Name;               // Name
-        std::string ZoneName;           // Zone name in building
-        int ZoneID = 0;                 // Index of Zone in Heat Balance
-        int ActualZoneID = 0;           // Index of controlled zones in ZoneCOnfigure
         int ControlAirNodeID = 0;       // index of roomair node that is HVAC control sensor location
         int NumOfAirNodes = 0;          // Number of air nodes
         Array1D<AFNAirNodeNested> Node; // Node struct
@@ -609,7 +599,6 @@ struct RoomAirModelData : BaseGlobalStruct
     int NumTwoGradientInterp = 0;    // count of two gradient interp patterns in input
     int NumNonDimensionalHeight = 0; // count of ND height profile patterns in input
     int NumSurfaceMapping = 0;       // count of generic surface map patterns in input
-    bool UserDefinedUsed = false;    // true if user-defined model used anywhere
     // End User-defined patterns
 
     // RoomAirflowNetwork
@@ -754,7 +743,6 @@ struct RoomAirModelData : BaseGlobalStruct
         NumTwoGradientInterp = 0;    // count of two gradient interp patterns in input
         NumNonDimensionalHeight = 0; // count of ND height profile patterns in input
         NumSurfaceMapping = 0;       // count of generic surface map patterns in input
-        UserDefinedUsed = false;     // true if user-defined model used anywhere
         // End User-defined patterns
 
         // RoomAirflowNetwork

@@ -464,7 +464,7 @@ TEST_F(EnergyPlusFixture, HybridModel_correctZoneAirTempsTest)
     state->dataEnvrn->OutBaroPress = 99500;
 
     thisZoneHB.correctHumRat(*state, 1);
-    EXPECT_NEAR(4, state->dataHeatBal->Zone(1).NumOccHM, 0.1);
+    EXPECT_NEAR(4.4, state->dataHeatBal->Zone(1).NumOccHM, 0.1);
 }
 
 TEST_F(EnergyPlusFixture, HybridModel_CorrectZoneContaminantsTest)

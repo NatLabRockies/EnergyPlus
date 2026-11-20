@@ -29,7 +29,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../shared/lib_util.h"
 #include "../shared/lib_weatherfile.h"
-#include "../shared/lib_pv_shade_loss_mpp.h"
 #include "../shared/lib_resilience.h"
 
 extern var_info vtab_standard_financial[];
@@ -131,8 +130,7 @@ public:
 
 	// beam and diffuse loss factors (0: full loss, 1: no loss )
 	bool fbeam(size_t hour_of_year, double minute, double solalt, double solazi);
-	// shading database instantiated once outside of shading factor calculator
-	bool fbeam_shade_db(ShadeDB8_mpp * p_shadedb, size_t hour, double minute, double solalt, double solazi, double gpoa = 0.0, double dpoa = 0.0, double pv_cell_temp = 0.0, int mods_per_str = 0, double str_vmp_stc = 0.0, double mppt_lo = 0.0, double mppt_hi = 0.0);
+	// NOTE: EnergyPlus: fbeam_shade_db removed. Only used by pvsamv1 (not built), it pulled the 3 MB shading database (lib_pv_shade_loss_mpp) into the link
 	double fdiff();
 
 	double beam_shade_factor();

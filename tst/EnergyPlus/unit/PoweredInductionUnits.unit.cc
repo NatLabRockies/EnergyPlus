@@ -293,7 +293,7 @@ TEST_F(EnergyPlusFixture, ParallelPIUTest1)
     state->dataHVACGlobal->TurnFansOn = true;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_EQ(SecMaxMassFlow, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
-    EXPECT_EQ(0.2, state->dataPowerInductionUnits->PIU(SysNum).PriDamperPosition);
+    EXPECT_DOUBLE_EQ(0.2, state->dataPowerInductionUnits->PIU(SysNum).PriDamperPosition);
 
     // Seventh test - Heating load TurnFansOn is true, yes primary flow - expecting secondary flow
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = state->dataPowerInductionUnits->PIU(SysNum).MaxPriAirMassFlow;
@@ -304,7 +304,7 @@ TEST_F(EnergyPlusFixture, ParallelPIUTest1)
     state->dataHVACGlobal->TurnFansOn = true;
     PoweredInductionUnits::CalcParallelPIU(*state, SysNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
     EXPECT_EQ(SecMaxMassFlow, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
-    EXPECT_EQ(0.2, state->dataPowerInductionUnits->PIU(SysNum).PriDamperPosition);
+    EXPECT_DOUBLE_EQ(0.2, state->dataPowerInductionUnits->PIU(SysNum).PriDamperPosition);
 
     // Eighth test - Cooling load TurnFansOn is true, yes primary flow - expecting secondary flow
     state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = state->dataPowerInductionUnits->PIU(SysNum).MaxPriAirMassFlow;
@@ -1219,15 +1219,9 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
         "  Zone1 Thermostat,                       !- Name",
         "  Zone1,                                  !- Zone or ZoneList Name",
         "  Zone1 Thermostat Schedule,              !- Control Type Schedule Name",
+        "  ,                                       !- Temperature Difference Between Cutout And Setpoint {deltaC}",
         "  ThermostatSetpoint:DualSetpoint,        !- Control 1 Object Type",
-        "  Thermostat Setpoint Dual Setpoint 2,    !- Control 1 Name",
-        "  ,                                       !- Control 2 Object Type",
-        "  ,                                       !- Control 2 Name",
-        "  ,                                       !- Control 3 Object Type",
-        "  ,                                       !- Control 3 Name",
-        "  ,                                       !- Control 4 Object Type",
-        "  ,                                       !- Control 4 Name",
-        "  0;                                      !- Temperature Difference Between Cutout And Setpoint {deltaC}",
+        "  Thermostat Setpoint Dual Setpoint 2;    !- Control 1 Name",
 
         "Schedule:Compact,",
         "  Zone1 Thermostat Schedule,              !- Name",

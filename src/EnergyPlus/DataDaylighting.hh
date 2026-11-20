@@ -167,7 +167,7 @@ namespace Dayltg {
     struct DaylRefPt
     {
         int num = 0;
-        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        Vector3D absCoords = {0.0, 0.0, 0.0};
         bool inBounds = true;
         Real64 fracZoneDaylit = 0.0;
         Real64 illumSetPoint = 0.0;
@@ -231,7 +231,7 @@ namespace Dayltg {
 
     struct DaylMapPt
     {
-        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        Vector3D absCoords = {0.0, 0.0, 0.0};
         bool inBounds = true;
         std::array<Real64, (int)Lum::Num> lums = {0.0, 0.0, 0.0};
         std::array<Real64, (int)Lum::Num> lumsHr = {0.0, 0.0, 0.0};
@@ -273,9 +273,9 @@ namespace Dayltg {
 
     struct RefPointData
     {
-        std::string Name;                         // Map name
-        int ZoneNum = 0;                          // Pointer to zone being referenced
-        Vector3<Real64> coords = {0.0, 0.0, 0.0}; // x coordinate
+        std::string Name;                  // Map name
+        int ZoneNum = 0;                   // Pointer to zone being referenced
+        Vector3D coords = {0.0, 0.0, 0.0}; // x coordinate
         int indexToFracAndIllum = 0;
     };
 

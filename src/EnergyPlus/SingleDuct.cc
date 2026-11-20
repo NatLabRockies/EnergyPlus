@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -456,8 +457,11 @@ void GetSysInput(EnergyPlusData &state)
             airTerm.ConstantMinAirFracSetByUser = true;
             airTerm.DesignMinAirFrac = Numbers(2);
             if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Fixed) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                if (Numbers(2) != DataSizing::AutoSize && Numbers(2) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneMinAirFracDes = 0.0;
             }
         }
@@ -470,8 +474,11 @@ void GetSysInput(EnergyPlusData &state)
             airTerm.FixedMinAirSetByUser = true;
             airTerm.DesignMinAirFrac = Numbers(3);
             if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Constant) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                if (Numbers(3) != DataSizing::AutoSize && Numbers(3) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneFixedMinAir = 0.0;
             }
         }
@@ -1374,8 +1381,11 @@ void GetSysInput(EnergyPlusData &state)
             airTerm.ConstantMinAirFracSetByUser = true;
             airTerm.ZoneMinAirFracDes = Numbers(2);
             if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Fixed) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                if (Numbers(2) != DataSizing::AutoSize && Numbers(2) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(2)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneMinAirFracDes = 0.0;
             }
         }
@@ -1388,8 +1398,11 @@ void GetSysInput(EnergyPlusData &state)
             airTerm.FixedMinAirSetByUser = true;
             airTerm.DesignFixedMinAir = Numbers(3);
             if (airTerm.ZoneMinAirFracMethod == MinFlowFraction::Constant) {
-                ShowWarningError(state, std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
-                ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                if (Numbers(3) != DataSizing::AutoSize && Numbers(3) != 0.0) {
+                    ShowWarningError(state,
+                                     std::format("Since {} = {}, input for {} will be ignored.", cAlphaFields(5), Alphas(5), cNumericFields(3)));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", airTerm.sysType, airTerm.SysName));
+                }
                 airTerm.ZoneFixedMinAir = 0.0;
             }
         }
@@ -2232,7 +2245,9 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
     if (this->ZoneMinAirFracMethod == MinFlowFraction::Scheduled) {
         this->ZoneMinAirFracDes = this->zoneMinAirFracSched->getCurrentVal();
         // now reset inlet node min avail
-        state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail = this->AirMassFlowRateMax * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
+        state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail =
+            min(this->AirMassFlowRateMax * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac,
+                state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail);
     }
 
     if (FirstHVACIteration) {
@@ -2264,12 +2279,14 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
             }
         } else {
             state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = 0.0;
+            state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail = 0.0;
         }
 
         if ((state.dataLoopNodes->Node(InletNode).MassFlowRate > 0.0) && (this->availSched->getCurrentVal() > 0.0)) {
             if (!(state.afn->distribution_simulated && state.afn->AirflowNetworkFanActivated)) {
                 state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail =
-                    this->AirMassFlowRateMax * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
+                    min(this->AirMassFlowRateMax * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac,
+                        state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail);
             }
         } else {
             state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail = 0.0;
@@ -2327,9 +2344,12 @@ void SingleDuctAirTerminal::InitSys(EnergyPlusData &state, bool const FirstHVACI
     // Do a check and make sure that the max and min available(control) flow is
     //  between the physical max and min while operating.
     this->sd_airterminalInlet.AirMassFlowRateMaxAvail = min(this->AirMassFlowRateMax, state.dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail);
+    // The air-loop flow resolver can impose a minimum above the terminal's physical maximum. Preserve that shared-node request for
+    // subsequent loop negotiation, but normalize the local bounds before calling std::clamp.
+    Real64 const airMassFlowRateMinAvail =
+        min(state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail, this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
     this->sd_airterminalInlet.AirMassFlowRateMinAvail =
-        min(max(state.dataLoopNodes->Node(OutletNode).MassFlowRateMin, state.dataLoopNodes->Node(InletNode).MassFlowRateMinAvail),
-            this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
+        std::clamp(state.dataLoopNodes->Node(OutletNode).MassFlowRateMin, airMassFlowRateMinAvail, this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
 
     // Do the following initializations (every time step): This should be the info from
     // the previous components outlets or the node data in this section.

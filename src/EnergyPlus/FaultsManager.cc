@@ -746,7 +746,6 @@ namespace FaultsManager {
             faultsBoilerFouling.FoulingFactor = rNumericArgs(1);
 
             // Boiler type
-            faultsBoilerFouling.BoilerType = cAlphaArgs(4);
             if (lAlphaFieldBlanks(4)) {
                 ShowSevereError(
                     state,
@@ -1491,8 +1490,6 @@ namespace FaultsManager {
                 state.dataFaultsMgr->ErrorsFound = true;
             }
 
-            faultsAirFilter.fanName = cAlphaArgs(3);
-
             // Check whether the specified fan exists in the fan list
             if ((faultsAirFilter.fanNum = Fans::GetFanIndex(state, cAlphaArgs(3))) == 0) {
                 ShowSevereItemNotFound(state, eoh, cAlphaFieldNames(3), cAlphaArgs(3));
@@ -1729,9 +1726,6 @@ namespace FaultsManager {
                         state.dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingFlag = true;
                         state.dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingIndex = jFault_FoulingCoil;
 
-                        faultsFoulCoil.FouledCoilType = state.dataWaterCoils->WaterCoil(CoilNum).WaterCoilType;
-                        faultsFoulCoil.FouledCoilNum = CoilNum;
-
                         SetupOutputVariable(state,
                                             "Coil Fouling Factor",
                                             Constant::Units::K_W,
@@ -1855,7 +1849,6 @@ namespace FaultsManager {
                     state.dataFaultsMgr->ErrorsFound = true;
                 }
 
-                fault.ControllerType = cAlphaArgs(4);
                 // check controller type
                 if (lAlphaFieldBlanks(4)) {
                     ShowSevereError(

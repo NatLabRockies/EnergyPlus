@@ -92,8 +92,6 @@ namespace HVACMultiSpeedHeatPump {
         Sched::Schedule *availSched = nullptr;     // availability schedule
         int AirInletNodeNum;                       // Node number of the heat pump air inlet
         int AirOutletNodeNum;                      // Node number of the heat pump air inlet
-        std::string AirInletNodeName;              // Node name of the heat pump air inlet
-        std::string AirOutletNodeName;             // Node name of the heat pump air outlet
         int ControlZoneNum;                        // Controlling zone or thermostat location
         int ZoneSequenceCoolingNum;                // Index to cooling sequence/priority for this zone
         int ZoneSequenceHeatingNum;                // Index to heating sequence/priority for this zone
@@ -149,7 +147,6 @@ namespace HVACMultiSpeedHeatPump {
         ModeOfOperation LastMode;                                  // MSHP operation mode
         ModeOfOperation HeatCoolMode;                              // System operating mode (0 = floating, 1 = cooling, 2 = heating)
         int AirLoopNumber;                                         // Air loop served by the engine driven heat pump system
-        int NumControlledZones;                                    // Number of controlled zones for this system
         int ZoneInletNode;                                         // Zone inlet node number in the controlled zone
         Real64 CompPartLoadRatio;                                  // Compressor part load ratio
         Real64 FanPartLoadRatio;                                   // Fan part load ratio
@@ -160,7 +157,6 @@ namespace HVACMultiSpeedHeatPump {
         Real64 LatCoolEnergyRate;                                  // Latent cooling enertgy rate
         Real64 LatHeatEnergyRate;                                  // Latent heating enertgy rate
         Real64 ElecPower;                                          // Electric power (fan + supplemental electric coil)
-        Real64 LoadMet;                                            // met system load
         Real64 HeatRecoveryRate;                                   // Heat recovery rate [W]
         Real64 HeatRecoveryInletTemp;                              // Inlet temperature for heat recovery rate [C]
         Real64 HeatRecoveryOutletTemp;                             // Outlet temperature for heat recovery rate [C]
@@ -170,9 +166,6 @@ namespace HVACMultiSpeedHeatPump {
         int ErrIndexVar;                                           // Error index at high speed
         Real64 LoadLoss;                                           // Air distribution system loss
         int SuppCoilAirInletNode;                                  // air inlet node number of supplemental heating coil
-        int SuppCoilAirOutletNode;                                 // air outlet node number of supplemental heating coil
-        int SuppHeatCoilType_Num;                                  // Numeric Equivalent for Supplemental Heat Coil Type
-        int SuppHeatCoilIndex;                                     // Index to supplemental heater
         int SuppCoilControlNode;                                   // control node for simple water and steam heating coil
         Real64 MaxSuppCoilFluidFlow;                               // water or steam mass flow rate for supplemental heating coil [kg/s]
         int SuppCoilOutletNode;                                    // outlet node for hot water and steam supplemental heating coil
@@ -222,17 +215,16 @@ namespace HVACMultiSpeedHeatPump {
               DesignHeatRecFlowRate(0.0), HeatRecActive(false), HeatRecInletNodeNum(0), HeatRecOutletNodeNum(0), MaxHeatRecOutletTemp(0.0),
               DesignHeatRecMassFlowRate(0.0), HRPlantLoc{}, AuxElecPower(0.0), IdleVolumeAirRate(0.0), IdleMassFlowRate(0.0), IdleSpeedRatio(0.0),
               NumOfSpeedCooling(0), NumOfSpeedHeating(0), CheckFanFlow(true), LastMode(ModeOfOperation::Invalid),
-              HeatCoolMode(ModeOfOperation::Invalid), AirLoopNumber(0), NumControlledZones(0), ZoneInletNode(0), CompPartLoadRatio(0.0),
-              FanPartLoadRatio(0.0), TotCoolEnergyRate(0.0), TotHeatEnergyRate(0.0), SensCoolEnergyRate(0.0), SensHeatEnergyRate(0.0),
-              LatCoolEnergyRate(0.0), LatHeatEnergyRate(0.0), ElecPower(0.0), LoadMet(0.0), HeatRecoveryRate(0.0), HeatRecoveryInletTemp(0.0),
-              HeatRecoveryOutletTemp(0.0), HeatRecoveryMassFlowRate(0.0), AirFlowControl(AirflowControl::Invalid), ErrIndexCyc(0), ErrIndexVar(0),
-              LoadLoss(0.0), SuppCoilAirInletNode(0), SuppCoilAirOutletNode(0), SuppHeatCoilType_Num(0), SuppHeatCoilIndex(0), SuppCoilControlNode(0),
-              MaxSuppCoilFluidFlow(0.0), SuppCoilOutletNode(0), CoilAirInletNode(0), CoilControlNode(0), MaxCoilFluidFlow(0.0), CoilOutletNode(0),
-              HotWaterCoilControlNode(0), plantLoc{}, SuppPlantLoc{}, HotWaterPlantLoc{}, HotWaterCoilMaxIterIndex(0), HotWaterCoilMaxIterIndex2(0),
-              StageNum(0), Staged(false), CoolCountAvail(0), CoolIndexAvail(0), HeatCountAvail(0), HeatIndexAvail(0), FirstPass(true),
-              MinOATCompressorCooling(0.0), MinOATCompressorHeating(0.0), MyEnvrnFlag(true), MySizeFlag(true), MyCheckFlag(true),
-              MyFlowFracFlag(true), MyPlantScantFlag(true), MyStagedFlag(true), EMSOverrideCoilSpeedNumOn(false), EMSOverrideCoilSpeedNumValue(0.0),
-              CoilSpeedErrIndexHeating(0), CoilSpeedErrIndexCooling(0)
+              HeatCoolMode(ModeOfOperation::Invalid), AirLoopNumber(0), ZoneInletNode(0), CompPartLoadRatio(0.0), FanPartLoadRatio(0.0),
+              TotCoolEnergyRate(0.0), TotHeatEnergyRate(0.0), SensCoolEnergyRate(0.0), SensHeatEnergyRate(0.0), LatCoolEnergyRate(0.0),
+              LatHeatEnergyRate(0.0), ElecPower(0.0), HeatRecoveryRate(0.0), HeatRecoveryInletTemp(0.0), HeatRecoveryOutletTemp(0.0),
+              HeatRecoveryMassFlowRate(0.0), AirFlowControl(AirflowControl::Invalid), ErrIndexCyc(0), ErrIndexVar(0), LoadLoss(0.0),
+              SuppCoilAirInletNode(0), SuppCoilControlNode(0), MaxSuppCoilFluidFlow(0.0), SuppCoilOutletNode(0), CoilAirInletNode(0),
+              CoilControlNode(0), MaxCoilFluidFlow(0.0), CoilOutletNode(0), HotWaterCoilControlNode(0), plantLoc{}, SuppPlantLoc{},
+              HotWaterPlantLoc{}, HotWaterCoilMaxIterIndex(0), HotWaterCoilMaxIterIndex2(0), StageNum(0), Staged(false), CoolCountAvail(0),
+              CoolIndexAvail(0), HeatCountAvail(0), HeatIndexAvail(0), FirstPass(true), MinOATCompressorCooling(0.0), MinOATCompressorHeating(0.0),
+              MyEnvrnFlag(true), MySizeFlag(true), MyCheckFlag(true), MyFlowFracFlag(true), MyPlantScantFlag(true), MyStagedFlag(true),
+              EMSOverrideCoilSpeedNumOn(false), EMSOverrideCoilSpeedNumValue(0.0), CoilSpeedErrIndexHeating(0), CoilSpeedErrIndexCooling(0)
         {
         }
     };
@@ -392,7 +384,6 @@ struct HVACMultiSpeedHeatPumpData : BaseGlobalStruct
     Real64 CompOffFlowRatio = 0.0;   // fan flow ratio when coil off
     Real64 FanSpeedRatio = 0.0;      // fan speed ratio passed to on/off fan object
     Real64 SupHeaterLoad = 0.0;      // load to be met by supplemental heater [W]
-    Real64 SaveLoadResidual = 0.0;   // Saved load residual used to check convergence
     Real64 SaveCompressorPLR = 0.0;  // holds compressor PLR from active DX coil
     Array1D_bool CheckEquipName;
 
@@ -429,7 +420,6 @@ struct HVACMultiSpeedHeatPumpData : BaseGlobalStruct
         this->CompOffFlowRatio = 0.0;
         this->FanSpeedRatio = 0.0;
         this->SupHeaterLoad = 0.0;
-        this->SaveLoadResidual = 0.0;
         this->SaveCompressorPLR = 0.0;
         this->CheckEquipName.clear();
         this->MSHeatPump.clear();

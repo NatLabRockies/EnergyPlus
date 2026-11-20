@@ -183,6 +183,8 @@ namespace ZoneEquipmentManager {
 
     void SimZoneEquipment(EnergyPlusData &state, bool FirstHVACIteration, bool &SimAir);
 
+    bool getZoneEquipmentNightVentStatus(EnergyPlusData &state, DataZoneEquipment::ZoneEquipType zoneEquipType, int zoneCompNum, bool validSAMComp);
+
     void SetZoneEquipSimOrder(EnergyPlusData &state, int ControlledZoneNum);
 
     void InitSystemOutputRequired(EnergyPlusData &state, int ZoneNum, bool FirstHVACIteration, bool ResetSimOrder = false);

@@ -53,6 +53,7 @@
 #include <EnergyPlus/DataVectorTypes.hh>
 #include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector2D.hh>
 #include <EnergyPlus/HeatBalanceKivaManager.hh>
 #include <EnergyPlus/Vectors.hh>
 
@@ -360,7 +361,7 @@ namespace SurfaceGeometry {
 
     bool isAlmostEqual3dPt(DataVectorTypes::Vector v1, DataVectorTypes::Vector v2);
 
-    bool isAlmostEqual2dPt(DataVectorTypes::Vector_2d v1, DataVectorTypes::Vector_2d v2);
+    bool isAlmostEqual2dPt(Vector2D v1, Vector2D v2);
 
     int findIndexOfVertex(DataVectorTypes::Vector vertexToFind, std::vector<DataVectorTypes::Vector> const &listOfVertices);
 

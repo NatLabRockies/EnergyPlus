@@ -1930,6 +1930,7 @@
     Floor 1 Cafe Thermostat, !- Name
     Floor 1 Cafe,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Cafe DualSPSched;!- Control 1 Name
 
@@ -2878,6 +2879,7 @@
     Floor 1 Clean Thermostat,!- Name
     Floor 1 Clean,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Clean DualSPSched;  !- Control 1 Name
 
@@ -3499,6 +3501,7 @@
     Floor 1 Conference Thermostat,  !- Name
     Floor 1 Conference,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Conference DualSPSched;  !- Control 1 Name
 
@@ -4078,6 +4081,7 @@
     Floor 1 Dining Thermostat,  !- Name
     Floor 1 Dining,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Dining DualSPSched;  !- Control 1 Name
 
@@ -4682,6 +4686,7 @@
     Floor 1 Elevator Thermostat,  !- Name
     Floor 1 Elevator,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Elevator DualSPSched;  !- Control 1 Name
 
@@ -5221,6 +5226,7 @@
     Floor 1 Exam Thermostat, !- Name
     Floor 1 Exam,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Exam DualSPSched;!- Control 1 Name
 
@@ -5773,6 +5779,7 @@
     Floor 1 Food Storage Thermostat,  !- Name
     Floor 1 Food Storage,    !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Food Storage DualSPSched;  !- Control 1 Name
 
@@ -6453,6 +6460,7 @@
     Floor 1 Gas Storage Thermostat,  !- Name
     Floor 1 Gas Storage,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Gas Storage DualSPSched;  !- Control 1 Name
 
@@ -6993,6 +7001,7 @@
     Floor 1 Imaging Thermostat,  !- Name
     Floor 1 Imaging,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Imaging DualSPSched;  !- Control 1 Name
 
@@ -7545,6 +7554,7 @@
     Floor 1 Kitchen Thermostat,  !- Name
     Floor 1 Kitchen,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Kitchen DualSPSched;  !- Control 1 Name
 
@@ -8119,6 +8129,7 @@
     Floor 1 Lab 1 Thermostat,!- Name
     Floor 1 Lab 1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Lab 1 DualSPSched;  !- Control 1 Name
 
@@ -8686,6 +8697,7 @@
     Floor 1 Lab 2 Thermostat,!- Name
     Floor 1 Lab 2,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Lab 2 DualSPSched;  !- Control 1 Name
 
@@ -9294,6 +9306,7 @@
     Floor 1 Laundry Thermostat,  !- Name
     Floor 1 Laundry,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Laundry DualSPSched;  !- Control 1 Name
 
@@ -9924,6 +9937,7 @@
     Floor 1 Lobby Thermostat,!- Name
     Floor 1 Lobby,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Lobby DualSPSched;  !- Control 1 Name
 
@@ -10419,6 +10433,7 @@
     Floor 1 Lounge Thermostat,  !- Name
     Floor 1 Lounge,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Lounge DualSPSched;  !- Control 1 Name
 
@@ -10936,6 +10951,7 @@
     Floor 1 Mech 1 Thermostat,  !- Name
     Floor 1 Mech 1,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Mech 1 DualSPSched;  !- Control 1 Name
 
@@ -11502,6 +11518,7 @@
     Floor 1 Mech 2 Thermostat,  !- Name
     Floor 1 Mech 2,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Mech 2 DualSPSched;  !- Control 1 Name
 
@@ -12081,6 +12098,7 @@
     Floor 1 Office 1 Thermostat,  !- Name
     Floor 1 Office 1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 1 DualSPSched;  !- Control 1 Name
 
@@ -12660,6 +12678,7 @@
     Floor 1 Office 2 Thermostat,  !- Name
     Floor 1 Office 2,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 2 DualSPSched;  !- Control 1 Name
 
@@ -13256,6 +13275,7 @@
     Floor 1 Office 3 Thermostat,  !- Name
     Floor 1 Office 3,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 3 DualSPSched;  !- Control 1 Name
 
@@ -13835,6 +13855,7 @@
     Floor 1 Office 3 Perimeter 1 Thermostat,  !- Name
     Floor 1 Office 3 Perimeter 1,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 3 Perimeter 1 DualSPSched;  !- Control 1 Name
 
@@ -14414,6 +14435,7 @@
     Floor 1 Office 3 Perimeter 2 Thermostat,  !- Name
     Floor 1 Office 3 Perimeter 2,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 3 Perimeter 2 DualSPSched;  !- Control 1 Name
 
@@ -15033,6 +15055,7 @@
     Floor 1 Office 3 Perimeter 3 Thermostat,  !- Name
     Floor 1 Office 3 Perimeter 3,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Office 3 Perimeter 3 DualSPSched;  !- Control 1 Name
 
@@ -15572,6 +15595,7 @@
     Floor 1 Patient Thermostat,  !- Name
     Floor 1 Patient,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Patient DualSPSched;  !- Control 1 Name
 
@@ -16067,6 +16091,7 @@
     Floor 1 Pharmacy Thermostat,  !- Name
     Floor 1 Pharmacy,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Pharmacy DualSPSched;  !- Control 1 Name
 
@@ -16562,6 +16587,7 @@
     Floor 1 Physical Therapy Thermostat,  !- Name
     Floor 1 Physical Therapy,!- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Physical Therapy DualSPSched;  !- Control 1 Name
 
@@ -17079,6 +17105,7 @@
     Floor 1 Receiving Thermostat,  !- Name
     Floor 1 Receiving,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Receiving DualSPSched;  !- Control 1 Name
 
@@ -17658,6 +17685,7 @@
     Floor 1 Reception Thermostat,  !- Name
     Floor 1 Reception,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Reception DualSPSched;  !- Control 1 Name
 
@@ -18125,6 +18153,7 @@
     Floor 1 Soil Thermostat, !- Name
     Floor 1 Soil,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Soil DualSPSched;!- Control 1 Name
 
@@ -18600,6 +18629,7 @@
     Floor 1 Storage Thermostat,  !- Name
     Floor 1 Storage,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Storage DualSPSched;  !- Control 1 Name
 
@@ -19095,6 +19125,7 @@
     Floor 1 Waiting Thermostat,  !- Name
     Floor 1 Waiting,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 1 Waiting DualSPSched;  !- Control 1 Name
 
@@ -19674,6 +19705,7 @@
     Floor 2 Chapel Thermostat,  !- Name
     Floor 2 Chapel,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Chapel DualSPSched;  !- Control 1 Name
 
@@ -20169,6 +20201,7 @@
     Floor 2 Clean 1 Thermostat,  !- Name
     Floor 2 Clean 1,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Clean 1 DualSPSched;  !- Control 1 Name
 
@@ -20664,6 +20697,7 @@
     Floor 2 Clean 2 Thermostat,  !- Name
     Floor 2 Clean 2,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Clean 2 DualSPSched;  !- Control 1 Name
 
@@ -21223,6 +21257,7 @@
     Floor 2 Corridor Thermostat,  !- Name
     Floor 2 Corridor,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Corridor DualSPSched;  !- Control 1 Name
 
@@ -21827,6 +21862,7 @@
     Floor 2 Elevator Thermostat,  !- Name
     Floor 2 Elevator,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Elevator DualSPSched;  !- Control 1 Name
 
@@ -22406,6 +22442,7 @@
     Floor 2 Exam 1 Thermostat,  !- Name
     Floor 2 Exam 1,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Exam 1 DualSPSched;  !- Control 1 Name
 
@@ -22901,6 +22938,7 @@
     Floor 2 Exam 2 Thermostat,  !- Name
     Floor 2 Exam 2,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Exam 2 DualSPSched;  !- Control 1 Name
 
@@ -23396,6 +23434,7 @@
     Floor 2 Exam 3 Thermostat,  !- Name
     Floor 2 Exam 3,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Exam 3 DualSPSched;  !- Control 1 Name
 
@@ -23908,6 +23947,7 @@
     Floor 2 Exam 4 Thermostat,  !- Name
     Floor 2 Exam 4,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Exam 4 DualSPSched;  !- Control 1 Name
 
@@ -24472,6 +24512,7 @@
     Floor 2 Gift Shop Thermostat,  !- Name
     Floor 2 Gift Shop,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Gift Shop DualSPSched;  !- Control 1 Name
 
@@ -24995,6 +25036,7 @@
     Floor 2 Imaging 1 Thermostat,  !- Name
     Floor 2 Imaging 1,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Imaging 1 DualSPSched;  !- Control 1 Name
 
@@ -25604,6 +25646,7 @@
     Floor 2 Imaging 2 Thermostat,  !- Name
     Floor 2 Imaging 2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Imaging 2 DualSPSched;  !- Control 1 Name
 
@@ -26186,6 +26229,7 @@
     Floor 2 Imaging 3 Thermostat,  !- Name
     Floor 2 Imaging 3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Imaging 3 DualSPSched;  !- Control 1 Name
 
@@ -26709,6 +26753,7 @@
     Floor 2 Lab 1 Thermostat,!- Name
     Floor 2 Lab 1,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Lab 1 DualSPSched;  !- Control 1 Name
 
@@ -27255,6 +27300,7 @@
     Floor 2 Lab 2 Thermostat,!- Name
     Floor 2 Lab 2,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Lab 2 DualSPSched;  !- Control 1 Name
 
@@ -27750,6 +27796,7 @@
     Floor 2 Lockers Thermostat,  !- Name
     Floor 2 Lockers,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Lockers DualSPSched;  !- Control 1 Name
 
@@ -28262,6 +28309,7 @@
     Floor 2 Lounge 1 Thermostat,  !- Name
     Floor 2 Lounge 1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Lounge 1 DualSPSched;  !- Control 1 Name
 
@@ -28881,6 +28929,7 @@
     Floor 2 Lounge 2 Thermostat,  !- Name
     Floor 2 Lounge 2,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Lounge 2 DualSPSched;  !- Control 1 Name
 
@@ -29404,6 +29453,7 @@
     Floor 2 Nurse Station 1 Thermostat,  !- Name
     Floor 2 Nurse Station 1, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Nurse Station 1 DualSPSched;  !- Control 1 Name
 
@@ -30028,6 +30078,7 @@
     Floor 2 Nurse Station 2 Thermostat,  !- Name
     Floor 2 Nurse Station 2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Nurse Station 2 DualSPSched;  !- Control 1 Name
 
@@ -30523,6 +30574,7 @@
     Floor 2 Office 1 Thermostat,  !- Name
     Floor 2 Office 1,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Office 1 DualSPSched;  !- Control 1 Name
 
@@ -31102,6 +31154,7 @@
     Floor 2 Office 2 Thermostat,  !- Name
     Floor 2 Office 2,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Office 2 DualSPSched;  !- Control 1 Name
 
@@ -31597,6 +31650,7 @@
     Floor 2 Office 3 Thermostat,  !- Name
     Floor 2 Office 3,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Office 3 DualSPSched;  !- Control 1 Name
 
@@ -32216,6 +32270,7 @@
     Floor 2 Office 4 Thermostat,  !- Name
     Floor 2 Office 4,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Office 4 DualSPSched;  !- Control 1 Name
 
@@ -32847,6 +32902,7 @@
     Floor 2 Operating Thermostat,  !- Name
     Floor 2 Operating,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Operating DualSPSched;  !- Control 1 Name
 
@@ -33349,6 +33405,7 @@
     Floor 2 PACU Thermostat, !- Name
     Floor 2 PACU,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 PACU DualSPSched;!- Control 1 Name
 
@@ -33888,6 +33945,7 @@
     Floor 2 Patient 1 Thermostat,  !- Name
     Floor 2 Patient 1,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Patient 1 DualSPSched;  !- Control 1 Name
 
@@ -34383,6 +34441,7 @@
     Floor 2 Patient 2 Thermostat,  !- Name
     Floor 2 Patient 2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Patient 2 DualSPSched;  !- Control 1 Name
 
@@ -34906,6 +34965,7 @@
     Floor 2 Procedure 1 Thermostat,  !- Name
     Floor 2 Procedure 1,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Procedure 1 DualSPSched;  !- Control 1 Name
 
@@ -35429,6 +35489,7 @@
     Floor 2 Procedure 2 Thermostat,  !- Name
     Floor 2 Procedure 2,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Procedure 2 DualSPSched;  !- Control 1 Name
 
@@ -36033,6 +36094,7 @@
     Floor 2 Reception Thermostat,  !- Name
     Floor 2 Reception,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Reception DualSPSched;  !- Control 1 Name
 
@@ -36572,6 +36634,7 @@
     Floor 2 Restroom 1 Thermostat,  !- Name
     Floor 2 Restroom 1,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Restroom 1 DualSPSched;  !- Control 1 Name
 
@@ -37153,6 +37216,7 @@
     Floor 2 Restroom 2 Thermostat,  !- Name
     Floor 2 Restroom 2,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Restroom 2 DualSPSched;  !- Control 1 Name
 
@@ -37637,6 +37701,7 @@
     Floor 2 Soil 1 Thermostat,  !- Name
     Floor 2 Soil 1,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Soil 1 DualSPSched;  !- Control 1 Name
 
@@ -38121,6 +38186,7 @@
     Floor 2 Soil 2 Thermostat,  !- Name
     Floor 2 Soil 2,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Soil 2 DualSPSched;  !- Control 1 Name
 
@@ -38653,6 +38719,7 @@
     Floor 2 Sterilizing Thermostat,  !- Name
     Floor 2 Sterilizing,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Sterilizing DualSPSched;  !- Control 1 Name
 
@@ -39128,6 +39195,7 @@
     Floor 2 Storage 1 Thermostat,  !- Name
     Floor 2 Storage 1,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Storage 1 DualSPSched;  !- Control 1 Name
 
@@ -39586,6 +39654,7 @@
     Floor 2 Storage 2 Thermostat,  !- Name
     Floor 2 Storage 2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Storage 2 DualSPSched;  !- Control 1 Name
 
@@ -40109,6 +40178,7 @@
     Floor 2 Trauma Thermostat,  !- Name
     Floor 2 Trauma,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Trauma DualSPSched;  !- Control 1 Name
 
@@ -40673,6 +40743,7 @@
     Floor 2 Triage Thermostat,  !- Name
     Floor 2 Triage,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Triage DualSPSched;  !- Control 1 Name
 
@@ -41290,6 +41361,7 @@
     Floor 2 Waiting Thermostat,  !- Name
     Floor 2 Waiting,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 2 Waiting DualSPSched;  !- Control 1 Name
 
@@ -41785,6 +41857,7 @@
     Floor 3 Clean Thermostat,!- Name
     Floor 3 Clean,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Clean DualSPSched;  !- Control 1 Name
 
@@ -42419,6 +42492,7 @@
     Floor 3 Elevator Thermostat,  !- Name
     Floor 3 Elevator,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Elevator DualSPSched;  !- Control 1 Name
 
@@ -42914,6 +42988,7 @@
     Floor 3 Exam Thermostat, !- Name
     Floor 3 Exam,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Exam DualSPSched;!- Control 1 Name
 
@@ -43496,6 +43571,7 @@
     Floor 3 ICU Thermostat,  !- Name
     Floor 3 ICU,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 ICU DualSPSched; !- Control 1 Name
 
@@ -44109,6 +44185,7 @@
     Floor 3 Nurse Station 1 Thermostat,  !- Name
     Floor 3 Nurse Station 1, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Nurse Station 1 DualSPSched;  !- Control 1 Name
 
@@ -44731,6 +44808,7 @@
     Floor 3 Nurse Station 2 Thermostat,  !- Name
     Floor 3 Nurse Station 2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Nurse Station 2 DualSPSched;  !- Control 1 Name
 
@@ -45270,6 +45348,7 @@
     Floor 3 Nursery Thermostat,  !- Name
     Floor 3 Nursery,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Nursery DualSPSched;  !- Control 1 Name
 
@@ -45849,6 +45928,7 @@
     Floor 3 Office Thermostat,  !- Name
     Floor 3 Office,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Office DualSPSched;  !- Control 1 Name
 
@@ -46416,6 +46496,7 @@
     Floor 3 Operating Thermostat,  !- Name
     Floor 3 Operating,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Operating DualSPSched;  !- Control 1 Name
 
@@ -46907,6 +46988,7 @@
     Floor 3 Patient 1 Thermostat,  !- Name
     Floor 3 Patient 1,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient 1 DualSPSched;  !- Control 1 Name
 
@@ -47461,6 +47543,7 @@
     Floor 3 Patient 2 Thermostat,  !- Name
     Floor 3 Patient 2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient 2 DualSPSched;  !- Control 1 Name
 
@@ -48032,6 +48115,7 @@
     Floor 3 Patient 3 Thermostat,  !- Name
     Floor 3 Patient 3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient 3 DualSPSched;  !- Control 1 Name
 
@@ -48611,6 +48695,7 @@
     Floor 3 Patient 4 Thermostat,  !- Name
     Floor 3 Patient 4,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient 4 DualSPSched;  !- Control 1 Name
 
@@ -49168,6 +49253,7 @@
     Floor 3 Patient Corridor 1 Thermostat,  !- Name
     Floor 3 Patient Corridor 1,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient Corridor 1 DualSPSched;  !- Control 1 Name
 
@@ -49725,6 +49811,7 @@
     Floor 3 Patient Corridor 2 Thermostat,  !- Name
     Floor 3 Patient Corridor 2,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Patient Corridor 2 DualSPSched;  !- Control 1 Name
 
@@ -50292,6 +50379,7 @@
     Floor 3 Procedure Thermostat,  !- Name
     Floor 3 Procedure,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Procedure DualSPSched;  !- Control 1 Name
 
@@ -50759,6 +50847,7 @@
     Floor 3 Soil Thermostat, !- Name
     Floor 3 Soil,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Soil DualSPSched;!- Control 1 Name
 
@@ -51278,6 +51367,7 @@
     Floor 3 Supply Thermostat,  !- Name
     Floor 3 Supply,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Supply DualSPSched;  !- Control 1 Name
 
@@ -51817,6 +51907,7 @@
     Floor 3 Triage Thermostat,  !- Name
     Floor 3 Triage,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Triage DualSPSched;  !- Control 1 Name
 
@@ -52419,6 +52510,7 @@
     Floor 3 Waiting Thermostat,  !- Name
     Floor 3 Waiting,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 3 Waiting DualSPSched;  !- Control 1 Name
 
@@ -52914,6 +53006,7 @@
     Floor 4-6 Clean Thermostat,  !- Name
     Floor 4-6 Clean,         !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Clean DualSPSched;  !- Control 1 Name
 
@@ -53548,6 +53641,7 @@
     Floor 4-6 Elevator Thermostat,  !- Name
     Floor 4-6 Elevator,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Elevator DualSPSched;  !- Control 1 Name
 
@@ -54155,6 +54249,7 @@
     Floor 4-6 Nurse Station Thermostat,  !- Name
     Floor 4-6 Nurse Station, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Nurse Station DualSPSched;  !- Control 1 Name
 
@@ -54734,6 +54829,7 @@
     Floor 4-6 Office Thermostat,  !- Name
     Floor 4-6 Office,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Office DualSPSched;  !- Control 1 Name
 
@@ -55313,6 +55409,7 @@
     Floor 4-6 Patient 1 Thermostat,  !- Name
     Floor 4-6 Patient 1,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient 1 DualSPSched;  !- Control 1 Name
 
@@ -55867,6 +55964,7 @@
     Floor 4-6 Patient 2 Thermostat,  !- Name
     Floor 4-6 Patient 2,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient 2 DualSPSched;  !- Control 1 Name
 
@@ -56421,6 +56519,7 @@
     Floor 4-6 Patient 3 Thermostat,  !- Name
     Floor 4-6 Patient 3,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient 3 DualSPSched;  !- Control 1 Name
 
@@ -57000,6 +57099,7 @@
     Floor 4-6 Patient 4 Thermostat,  !- Name
     Floor 4-6 Patient 4,     !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient 4 DualSPSched;  !- Control 1 Name
 
@@ -57557,6 +57657,7 @@
     Floor 4-6 Patient Corridor 1 Thermostat,  !- Name
     Floor 4-6 Patient Corridor 1,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient Corridor 1 DualSPSched;  !- Control 1 Name
 
@@ -58114,6 +58215,7 @@
     Floor 4-6 Patient Corridor 2 Thermostat,  !- Name
     Floor 4-6 Patient Corridor 2,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Patient Corridor 2 DualSPSched;  !- Control 1 Name
 
@@ -58581,6 +58683,7 @@
     Floor 4-6 Soil Thermostat,  !- Name
     Floor 4-6 Soil,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Soil DualSPSched;  !- Control 1 Name
 
@@ -59100,6 +59203,7 @@
     Floor 4-6 Supply Thermostat,  !- Name
     Floor 4-6 Supply,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 4-6 Supply DualSPSched;  !- Control 1 Name
 
@@ -59595,6 +59699,7 @@
     Floor 7 Clean Thermostat,!- Name
     Floor 7 Clean,           !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Clean DualSPSched;  !- Control 1 Name
 
@@ -60229,6 +60334,7 @@
     Floor 7 Elevator Thermostat,  !- Name
     Floor 7 Elevator,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Elevator DualSPSched;  !- Control 1 Name
 
@@ -60836,6 +60942,7 @@
     Floor 7 Nurse Station Thermostat,  !- Name
     Floor 7 Nurse Station,   !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Nurse Station DualSPSched;  !- Control 1 Name
 
@@ -61415,6 +61522,7 @@
     Floor 7 Office Thermostat,  !- Name
     Floor 7 Office,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Office DualSPSched;  !- Control 1 Name
 
@@ -61994,6 +62102,7 @@
     Floor 7 Patient 1 Thermostat,  !- Name
     Floor 7 Patient 1,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient 1 DualSPSched;  !- Control 1 Name
 
@@ -62548,6 +62657,7 @@
     Floor 7 Patient 2 Thermostat,  !- Name
     Floor 7 Patient 2,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient 2 DualSPSched;  !- Control 1 Name
 
@@ -63102,6 +63212,7 @@
     Floor 7 Patient 3 Thermostat,  !- Name
     Floor 7 Patient 3,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient 3 DualSPSched;  !- Control 1 Name
 
@@ -63681,6 +63792,7 @@
     Floor 7 Patient 4 Thermostat,  !- Name
     Floor 7 Patient 4,       !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient 4 DualSPSched;  !- Control 1 Name
 
@@ -64238,6 +64350,7 @@
     Floor 7 Patient Corridor 1 Thermostat,  !- Name
     Floor 7 Patient Corridor 1,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient Corridor 1 DualSPSched;  !- Control 1 Name
 
@@ -64795,6 +64908,7 @@
     Floor 7 Patient Corridor 2 Thermostat,  !- Name
     Floor 7 Patient Corridor 2,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Patient Corridor 2 DualSPSched;  !- Control 1 Name
 
@@ -65262,6 +65376,7 @@
     Floor 7 Soil Thermostat, !- Name
     Floor 7 Soil,            !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Soil DualSPSched;!- Control 1 Name
 
@@ -65781,6 +65896,7 @@
     Floor 7 Supply Thermostat,  !- Name
     Floor 7 Supply,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Floor 7 Supply DualSPSched;  !- Control 1 Name
 
@@ -66276,6 +66392,7 @@
     MOB Floor 1 Core Thermostat,  !- Name
     MOB Floor 1 Core,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 1 Core DualSPSched;  !- Control 1 Name
 
@@ -66855,6 +66972,7 @@
     MOB Floor 1 Perimeter 1 Thermostat,  !- Name
     MOB Floor 1 Perimeter 1, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 1 Perimeter 1 DualSPSched;  !- Control 1 Name
 
@@ -67459,6 +67577,7 @@
     MOB Floor 1 Perimeter 2 Thermostat,  !- Name
     MOB Floor 1 Perimeter 2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 1 Perimeter 2 DualSPSched;  !- Control 1 Name
 
@@ -68038,6 +68157,7 @@
     MOB Floor 1 Perimeter 3 Thermostat,  !- Name
     MOB Floor 1 Perimeter 3, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 1 Perimeter 3 DualSPSched;  !- Control 1 Name
 
@@ -68533,6 +68653,7 @@
     MOB Floor 2-4 Core Thermostat,  !- Name
     MOB Floor 2-4 Core,      !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 2-4 Core DualSPSched;  !- Control 1 Name
 
@@ -69112,6 +69233,7 @@
     MOB Floor 2-4 Perimeter 1 Thermostat,  !- Name
     MOB Floor 2-4 Perimeter 1,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 2-4 Perimeter 1 DualSPSched;  !- Control 1 Name
 
@@ -69716,6 +69838,7 @@
     MOB Floor 2-4 Perimeter 2 Thermostat,  !- Name
     MOB Floor 2-4 Perimeter 2,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 2-4 Perimeter 2 DualSPSched;  !- Control 1 Name
 
@@ -70295,6 +70418,7 @@
     MOB Floor 2-4 Perimeter 3 Thermostat,  !- Name
     MOB Floor 2-4 Perimeter 3,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 2-4 Perimeter 3 DualSPSched;  !- Control 1 Name
 
@@ -70874,6 +70998,7 @@
     MOB Floor 2-4 Perimeter 4 Thermostat,  !- Name
     MOB Floor 2-4 Perimeter 4,  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 2-4 Perimeter 4 DualSPSched;  !- Control 1 Name
 
@@ -71369,6 +71494,7 @@
     MOB Floor 5 Core Thermostat,  !- Name
     MOB Floor 5 Core,        !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 5 Core DualSPSched;  !- Control 1 Name
 
@@ -71948,6 +72074,7 @@
     MOB Floor 5 Perimeter 1 Thermostat,  !- Name
     MOB Floor 5 Perimeter 1, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 5 Perimeter 1 DualSPSched;  !- Control 1 Name
 
@@ -72552,6 +72679,7 @@
     MOB Floor 5 Perimeter 2 Thermostat,  !- Name
     MOB Floor 5 Perimeter 2, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 5 Perimeter 2 DualSPSched;  !- Control 1 Name
 
@@ -73131,6 +73259,7 @@
     MOB Floor 5 Perimeter 3 Thermostat,  !- Name
     MOB Floor 5 Perimeter 3, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 5 Perimeter 3 DualSPSched;  !- Control 1 Name
 
@@ -73732,6 +73861,7 @@
     MOB Floor 5 Perimeter 4 Thermostat,  !- Name
     MOB Floor 5 Perimeter 4, !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MOB Floor 5 Perimeter 4 DualSPSched;  !- Control 1 Name
 

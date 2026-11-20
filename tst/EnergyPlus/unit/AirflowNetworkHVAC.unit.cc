@@ -5362,6 +5362,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
         "    Zone 1 Thermostat,       !- Name",
         "    West Zone,               !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -5369,6 +5370,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
         "    Zone 2 Thermostat,       !- Name",
         "    EAST ZONE,               !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -5447,6 +5449,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultiAirLoopTest)
         "    Zone 3 Thermostat,       !- Name",
         "    NORTH ZONE,               !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -7920,6 +7923,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuplicatedNodeNameTest)
         "    Zone Thermostat,         !- Name",
         "    OCCUPIED ZONE,           !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -10757,6 +10761,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SenLatLoadsConservation_Test)
 //         "    Zone 1 Thermostat,       !- Name",
 //         "    West Zone,               !- Zone or ZoneList Name",
 //         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+//         "    ,                        !- Temperature Difference Between Cutout And Setpoint",
 //         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
 //         "    Setpoints;               !- Control 1 Name",
 //
@@ -10764,6 +10769,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SenLatLoadsConservation_Test)
 //         "    Zone 2 Thermostat,       !- Name",
 //         "    EAST ZONE,               !- Zone or ZoneList Name",
 //         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+//         "    ,                        !- Temperature Difference Between Cutout And Setpoint",
 //         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
 //         "    Setpoints;               !- Control 1 Name",
 //
@@ -11259,13 +11265,11 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestNoZoneEqpSupportZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirVolFlow = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignSAFanVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignEAFanVolFlowRate = 0.005;
-    state->dataHVACStandAloneERV->StandAloneERV(1).DesignHXVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanName = state->dataFans->fans(1)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanIndex = 1;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = state->dataFans->fans(2)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
     state->dataHVACStandAloneERV->StandAloneERV(1).HeatExchangerName = "ERV Heat Exchanger";
 
     // Check validation and expected errors
@@ -11452,13 +11456,11 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirVolFlow = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignSAFanVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignEAFanVolFlowRate = 0.005;
-    state->dataHVACStandAloneERV->StandAloneERV(1).DesignHXVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanName = state->dataFans->fans(1)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanIndex = 1;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = state->dataFans->fans(2)->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
     state->dataHVACStandAloneERV->StandAloneERV(1).HeatExchangerName = "ERV Heat Exchanger";
 
     // Check validation and expected warning
@@ -11630,13 +11632,11 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestZoneEqpSupportUnbalancedZoneERV)
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirVolFlow = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignSAFanVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).DesignEAFanVolFlowRate = 0.005;
-    state->dataHVACStandAloneERV->StandAloneERV(1).DesignHXVolFlowRate = 0.005;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanName = fan1->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirFanIndex = 1;
     state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 2;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanName = fan2->Name;
     state->dataHVACStandAloneERV->StandAloneERV(1).ExhaustAirFanIndex = 2;
-    state->dataHVACStandAloneERV->StandAloneERV(1).hxType = HVAC::HXType::AirToAir_SensAndLatent;
     state->dataHVACStandAloneERV->StandAloneERV(1).HeatExchangerName = "ERV Heat Exchanger";
 
     // Check validation and expected errors
@@ -14376,6 +14376,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestIntraZoneLinkageZoneIndex)
         "    NORTH_ZONE Thermostat,   !- Name",
         "    NORTH_ZONE,              !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -16555,6 +16556,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
         "    Zone Thermostat,         !- Name",
         "    LIVING ZONE,             !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Setpoints;               !- Control 1 Name",
 
@@ -19470,6 +19472,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_ZoneOrderTest)
         "    Zone Thermostat_unit1,   !- Name",
         "    living_unit1,            !- Zone or ZoneList Name",
         "    zone_control_type,       !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    thermostat_living Dual SP Control;  !- Control 1 Name",
 
@@ -21119,6 +21122,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_MultizoneWithoutDistributionAndFan)
         "    Zone Thermostat_unit1,                                   !- Name",
         "    living_unit1,                                            !- Zone or ZoneList Name",
         "    zone_control_type,                                       !- Control Type Schedule Name",
+        "    ,                                                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,                         !- Control 1 Object Type",
         "    thermostat_living Dual SP Control;                       !- Control 1 Name",
         "  AirflowNetwork:MultiZone:Zone,",

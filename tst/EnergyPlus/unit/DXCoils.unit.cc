@@ -66,6 +66,7 @@
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataWater.hh>
+#include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/NodeInputManager.hh>
@@ -344,7 +345,7 @@ TEST_F(EnergyPlusFixture, DXCoils_Test1)
     // EXPECT_FALSE( has_cerr_output() ); // old warning no longer reported
 }
 
-TEST_F(EnergyPlusFixture, DXCoils_Test2)
+TEST_F(EnergyPlusFixture, DXCoils_ZeroSizedHeatingCoilContinuesAfterSevereError)
 {
     int DXCoilNum;
 
@@ -423,6 +424,20 @@ TEST_F(EnergyPlusFixture, DXCoils_Test2)
     EXPECT_DOUBLE_EQ(0.0, state->dataDXCoils->DXCoil(2).RatedTotCap(1));
 
     EXPECT_TRUE(has_eio_output());
+
+    // A zero-sized coil is a severe sizing problem, but it can occur legitimately when a system has no design load.
+    // InitDXCoil must retain the diagnostic without throwing an immediate fatal error.
+    auto &heatingCoil = state->dataDXCoils->DXCoil(DXCoilNum);
+    state->dataGlobal->SysSizingCalc = false;
+    heatingCoil.FindCompanionUpStreamCoil = false;
+    heatingCoil.AirInNode = 1;
+    heatingCoil.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatingCoil.Name, heatingCoil.coilType);
+    state->dataLoopNodes->Node.allocate(1);
+    has_err_output(true);
+
+    EXPECT_NO_THROW(InitDXCoil(*state, DXCoilNum));
+    EXPECT_TRUE(compare_err_stream_substring("has zero rated total capacity", false));
+    EXPECT_TRUE(compare_err_stream_substring("has zero rated air flow rate"));
 
     // EXPECT_TRUE( compare_eio_stream( delimited_string( {
     // 	"! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value",
@@ -4603,6 +4618,11 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
 
     std::string const idf_objects = delimited_string({
 
+        " Output:EnergyManagementSystem,",
+        "   Verbose,                               !- Actuator Availability Dictionary Reporting",
+        "   Verbose,                               !- Internal Variable Availability Dictionary Reporting",
+        "   ErrorsOnly;                            !- EMS Runtime Language Debug Output Level",
+
         " Coil:Cooling:DX:MultiSpeed,",
         "   ashp clg coil,                          !- Name",
         "   ,                                       !- Availability Schedule Name",
@@ -4980,6 +5000,24 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
 
     // get input
     GetDXCoils(*state);
+
+    auto const &actuatorMap = state->dataRuntimeLang->EMSActuatorAvailableMap;
+    for (int speed = 1; speed <= 2; ++speed) {
+        std::string const speedString = std::to_string(speed);
+        EXPECT_NE(actuatorMap.end(),
+                  actuatorMap.find(
+                      std::make_tuple("COIL:COOLING:DX:MULTISPEED", "ASHP CLG COIL", "AUTOSIZED RATED TOTAL COOLING CAPACITY SPEED " + speedString)));
+        EXPECT_NE(
+            actuatorMap.end(),
+            actuatorMap.find(std::make_tuple("COIL:COOLING:DX:MULTISPEED", "ASHP CLG COIL", "AUTOSIZED RATED AIR FLOW RATE SPEED " + speedString)));
+        EXPECT_NE(actuatorMap.end(),
+                  actuatorMap.find(
+                      std::make_tuple("COIL:HEATING:DX:MULTISPEED", "ASHP HTG COIL", "AUTOSIZED RATED TOTAL HEATING CAPACITY SPEED " + speedString)));
+        EXPECT_NE(
+            actuatorMap.end(),
+            actuatorMap.find(std::make_tuple("COIL:HEATING:DX:MULTISPEED", "ASHP HTG COIL", "AUTOSIZED RATED AIR FLOW RATE SPEED " + speedString)));
+    }
+
     // check multi-speed DX cooling coil
     EXPECT_EQ("ASHP CLG COIL", state->dataDXCoils->DXCoil(1).Name);
     EXPECT_ENUM_EQ(HVAC::CoilType::CoolingDXMultiSpeed, state->dataDXCoils->DXCoil(1).coilType);
@@ -5062,6 +5100,39 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
  DX Heating Coil AHRI 2023 Standard Rating Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, 34697.2, 20948.1, 5.76, 4
 )EIO";
     EXPECT_TRUE(compare_eio_stream(htg_coil_eio_output, true));
+
+    auto &coolingCoil = state->dataDXCoils->DXCoil(1);
+    auto &heatingCoil = state->dataDXCoils->DXCoil(2);
+    for (int speed = 1; speed <= 2; ++speed) {
+        coolingCoil.MSRatedAirVolFlowRate(speed) = AutoSize;
+        coolingCoil.MSRatedTotCap(speed) = AutoSize;
+        coolingCoil.RatedAirVolFlowRateEMSOverrideON(speed) = true;
+        coolingCoil.RatedAirVolFlowRateEMSOverrideValue(speed) = 0.6 * speed;
+        coolingCoil.RatedTotCapEMSOverrideOn(speed) = true;
+        coolingCoil.RatedTotCapEMSOverrideValue(speed) = 12000.0 * speed;
+
+        heatingCoil.MSRatedAirVolFlowRate(speed) = AutoSize;
+        heatingCoil.MSRatedTotCap(speed) = AutoSize;
+        heatingCoil.RatedAirVolFlowRateEMSOverrideON(speed) = true;
+        heatingCoil.RatedAirVolFlowRateEMSOverrideValue(speed) = 0.65 * speed;
+        heatingCoil.RatedTotCapEMSOverrideOn(speed) = true;
+        heatingCoil.RatedTotCapEMSOverrideValue(speed) = 13000.0 * speed;
+    }
+
+    SizeDXCoil(*state, 1);
+    EXPECT_DOUBLE_EQ(0.6, coolingCoil.MSRatedAirVolFlowRate(1));
+    EXPECT_DOUBLE_EQ(1.2, coolingCoil.MSRatedAirVolFlowRate(2));
+    EXPECT_DOUBLE_EQ(12000.0, coolingCoil.MSRatedTotCap(1));
+    EXPECT_DOUBLE_EQ(24000.0, coolingCoil.MSRatedTotCap(2));
+    EXPECT_DOUBLE_EQ(1.2, coolingCoil.RatedAirVolFlowRate(1));
+    EXPECT_DOUBLE_EQ(24000.0, coolingCoil.RatedTotCap(1));
+
+    SizeDXCoil(*state, 2);
+    EXPECT_DOUBLE_EQ(0.65, heatingCoil.MSRatedAirVolFlowRate(1));
+    EXPECT_DOUBLE_EQ(1.3, heatingCoil.MSRatedAirVolFlowRate(2));
+    EXPECT_DOUBLE_EQ(13000.0, heatingCoil.MSRatedTotCap(1));
+    EXPECT_DOUBLE_EQ(26000.0, heatingCoil.MSRatedTotCap(2));
+    EXPECT_DOUBLE_EQ(1.3, heatingCoil.RatedAirVolFlowRate(1));
 }
 
 TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCoilPartialAutoSizeOutput)

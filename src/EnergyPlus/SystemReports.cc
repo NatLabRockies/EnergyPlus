@@ -126,8 +126,6 @@ void InitEnergyReports(EnergyPlusData &state)
     // Once all compsets have been established (second iteration) find all components
     // subcomponents, etc.
 
-    int constexpr EnergyTransfer(1);
-
     if (!state.dataSysRpts->VentReportStructureCreated) {
         return;
     }
@@ -328,7 +326,6 @@ void InitEnergyReports(EnergyPlusData &state)
                     auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(ListNum);
                     for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumMeteredVars; ++VarNum) {
                         if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
-                            thisZoneEquipList.EquipData(AirDistUnitNum).EnergyTransComp = EnergyTransfer;
                             const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
                             const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
                             int Idx = 0;
@@ -341,7 +338,6 @@ void InitEnergyReports(EnergyPlusData &state)
                             if (MatchFound) {
                                 UpdateZoneCompPtrArray(state, Idx, ListNum, AirDistUnitNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                             }
-                            thisZoneEquipList.EquipData(AirDistUnitNum).ZoneEqToPlantPtr = Idx;
                             break;
                         }
                     }
@@ -350,7 +346,6 @@ void InitEnergyReports(EnergyPlusData &state)
                              ++VarNum) {
                             if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).resource ==
                                 Constant::eResource::EnergyTransfer) {
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).EnergyTransComp = EnergyTransfer;
                                 const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
                                 const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
                                 int Idx = 0;
@@ -364,7 +359,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                     UpdateZoneSubCompPtrArray(
                                         state, Idx, ListNum, AirDistUnitNum, SubEquipNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                                 }
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).ZoneEqToPlantPtr = Idx;
                                 break;
                             }
                         }
@@ -380,10 +374,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                         .SubSubEquipData(SubSubEquipNum)
                                         .MeteredVar(VarNum)
                                         .resource == Constant::eResource::EnergyTransfer) {
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .EnergyTransComp = EnergyTransfer;
                                     const std::string &CompType =
                                         thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).SubSubEquipData(SubSubEquipNum).TypeOf;
                                     const std::string &CompName =
@@ -407,10 +397,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                                                      MatchBranch,
                                                                      MatchComp);
                                     }
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .ZoneEqToPlantPtr = Idx;
                                     break;
                                 }
                             }
@@ -2385,7 +2371,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 thisEquipData.InletNodeNums.allocate(NumInlets);
                 thisEquipData.NumInlets = NumInlets;
                 thisEquipData.InletNodeNums = InletNodeNumbers;
-                thisEquipData.Parent = IsParent;
                 NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
                 thisEquipData.NumMeteredVars = NumVariables;
                 if (NumVariables > 0) {
@@ -3240,9 +3225,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         DEHUMIDIFIER_DESICCANT_SYSTEM,
         DUCT,
         EVAPORATIVECOOLER_DIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_WETCOIL,
         FAN_COMPONENTMODEL,
         FAN_SYSTEMMODEL,
@@ -3335,9 +3320,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         {"DEHUMIDIFIER:DESICCANT:SYSTEM", DEHUMIDIFIER_DESICCANT_SYSTEM},
         {"DUCT", DUCT},
         {"EVAPORATIVECOOLER:DIRECT:CELDEKPAD", EVAPORATIVECOOLER_DIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:CELDEKPAD", EVAPORATIVECOOLER_INDIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:WETCOIL", EVAPORATIVECOOLER_INDIRECT_WETCOIL},
         {"FAN:COMPONENTMODEL", FAN_COMPONENTMODEL},
         {"FAN:SYSTEMMODEL", FAN_SYSTEMMODEL},
@@ -3554,8 +3539,8 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case EVAPORATIVECOOLER_DIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_WETCOIL:
-    case EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL:
-    case EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL:
+    case EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS:
+    case EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS:
         if (CompLoadFlag) {
             thisSysLoadRepVars.EvapCLNG += std::abs(CompLoad);
         }
@@ -4805,11 +4790,10 @@ void reportAirLoopToplogy(EnergyPlusData &state)
         for (int BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
             auto &pasBranch = pas.Branch(BranchNum);
             if (pas.Splitter.Exists) {
-                for (int outNum : pas.Splitter.BranchNumOut) {
-                    if (outNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Splitter.BranchNumOut.begin(), pas.Splitter.BranchNumOut.end(), [BranchNum](int outNum) {
+                        return outNum == BranchNum;
+                    })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
                 }
             }
             for (int CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
@@ -4839,11 +4823,8 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                 }
             }
             if (pas.Mixer.Exists) {
-                for (int inNum : pas.Mixer.BranchNumIn) {
-                    if (inNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Mixer.BranchNumIn.begin(), pas.Mixer.BranchNumIn.end(), [BranchNum](int inNum) { return inNum == BranchNum; })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
                 }
             }
         }

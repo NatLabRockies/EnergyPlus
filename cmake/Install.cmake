@@ -199,6 +199,12 @@ else()
       "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}${SYSTEM_VERSION}-${TARGET_ARCH}-${CMAKE_BUILD_TYPE}")
 endif()
 
+if(ENABLE_NATIVE_OPTIMIZATION)
+  # Binaries built with -march=native / -ffast-math are not portable: make it obvious so such a package never gets distributed
+  set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-Native-NonPortable")
+  message(AUTHOR_WARNING "ENABLE_NATIVE_OPTIMIZATION is ON: the package is NOT portable and must not be distributed")
+endif()
+
 message("Installer name is set to '${CPACK_PACKAGE_FILE_NAME}'")
 
 # Installation directory on the target system (common to all CPack Genrators)

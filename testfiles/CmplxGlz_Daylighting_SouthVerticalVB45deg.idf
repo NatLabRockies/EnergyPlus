@@ -86112,6 +86112,7 @@
     COMFENZone Thermostat,   !- Name
     COMFENZone,              !- Zone or ZoneList Name
     Zone-Control-Type-Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     COMFENZone DualSPSched;  !- Control 1 Name
 

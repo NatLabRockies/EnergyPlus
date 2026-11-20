@@ -1791,7 +1791,7 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
     Real64 curLoad = 0.0;
     state->dataGlobal->BeginSimFlag = true;
     state->dataGlobal->BeginEnvrnFlag = true;
-    state->dataEnvrn->SOLCOS(3) = 1.0;
+    state->dataEnvrn->SOLCOS.z = 1.0;
     thisCircuit->simulate(*state, myLocation, true, curLoad, true);
 
     // we can also try to call from the Domain side

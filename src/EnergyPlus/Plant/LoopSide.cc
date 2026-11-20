@@ -1356,7 +1356,7 @@ namespace DataPlant {
                 FirstNodeOnBranch = this_single_branch.NodeNumIn;
                 BranchMinAvail = state.dataLoopNodes->Node(LastNodeOnBranch).MassFlowRateMinAvail;
                 BranchMaxAvail = state.dataLoopNodes->Node(LastNodeOnBranch).MassFlowRateMaxAvail;
-                state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = min(max(ThisLoopSideFlow, BranchMinAvail), BranchMaxAvail);
+                state.dataLoopNodes->Node(FirstNodeOnBranch).MassFlowRate = std::clamp(ThisLoopSideFlow, BranchMinAvail, BranchMaxAvail);
                 // now with flow locked, this single branch will just ran at the specified flow rate, so we are done
                 return;
             }

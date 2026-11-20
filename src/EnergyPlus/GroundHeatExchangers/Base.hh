@@ -62,9 +62,7 @@ namespace GroundHeatExchangers {
 
     struct GLHEBase : PlantComponent
     {
-        bool available = false; // load identifier of available equipment
-        bool on = false;        // simulate the machine at it's operating part load ratio
-        std::string name;       // user identifier
+        std::string name; // user identifier
         PlantLocation plantLoc;
         int inletNodeNum = 0;  // Node number on the inlet side of the plant
         int outletNodeNum = 0; // Node number on the outlet side of the plant

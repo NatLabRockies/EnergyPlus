@@ -95,9 +95,6 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
                                                   Node::CompFluidStream::Primary,
                                                   Node::ObjectIsNotParent);
 
-    this->available = true;
-    this->on = true;
-
     Node::TestCompSet(state, this->moduleName, this->name, inletNodeName, outletNodeName, "Condenser Water Nodes");
 
     // load data

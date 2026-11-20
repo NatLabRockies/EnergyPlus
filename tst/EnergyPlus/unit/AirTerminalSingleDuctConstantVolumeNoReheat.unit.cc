@@ -623,6 +623,17 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_OASpecification)
     // check AT air mass flow rates
     EXPECT_EQ(expectedMassFlow, state->dataSingleDuct->sd_airterminal(SysNum).sd_airterminalInlet.AirMassFlowRate);
     EXPECT_EQ(expectedMassFlow, state->dataSingleDuct->sd_airterminal(SysNum).sd_airterminalOutlet.AirMassFlowRate);
+
+    // The air loop may request a minimum flow above the terminal's physical maximum while resolving a flow mismatch. The terminal's local
+    // availability bounds must remain valid without changing the shared-node request used by the next air-loop iteration.
+    auto &airTerminal = state->dataSingleDuct->sd_airterminal(SysNum);
+    state->dataLoopNodes->Node(InletNode).MassFlowRate = 3.2;
+    state->dataLoopNodes->Node(InletNode).MassFlowRateMinAvail = 3.2;
+    state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = 3.2;
+    airTerminal.InitSys(*state, FirstHVACIteration);
+    EXPECT_EQ(3.2, state->dataLoopNodes->Node(InletNode).MassFlowRateMinAvail);
+    EXPECT_EQ(MassFlowRateMaxAvail, airTerminal.sd_airterminalInlet.AirMassFlowRateMinAvail);
+    EXPECT_EQ(MassFlowRateMaxAvail, airTerminal.sd_airterminalInlet.AirMassFlowRateMaxAvail);
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_EMSOverrideAirFlow)

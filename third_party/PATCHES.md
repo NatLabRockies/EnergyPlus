@@ -41,34 +41,13 @@ Our vendored copy has `vendor/btwxt` and `vendor/valijson` removed; its `vendor/
 
 ## SSC (SAM Simulation Core)
 
-The SSC library is brought in as a git subtree from https://github.com/NREL/ssc. Generally we bring in a release tag instead of their `develop` branch. Then I have commented out many parts of SSC in the CMakeLists.txt and a few other files that are not used in EnergyPlus to minimize the size of the binary.
+SSC (https://github.com/NREL/ssc) was brought in as a git subtree, last pulled at upstream `5e3099203a` (2021-03). It has since been trimmed down to what EnergyPlus actually uses: the `pvwattsv5_1ts` compute module (`PVWatts.cc`) and `lib_battery` (`ElectricPowerServiceManager`).
 
-The first step to updating SSC is to add that repo as a remote in your local clone of EnergyPlus.
+- Only the `ssc` and `shared` directories are kept, and only the files that are compiled or included (determined with `g++ -MM` on the compile commands). `ssc/vbapi.*` is kept because it is compiled on MSVC.
+- `ssc/common.{h,cpp}`: removed `shading_factor_calculator::fbeam_shade_db` (only used by `pvsamv1`), which pulled the 3 MB shading database (`lib_pv_shade_loss_mpp`, `DB8_vmpp_impp_uint8_bin.h`) and `lib_miniz` into the link.
+- `ssc/sscapi.{h,cpp}`: removed `json_to_ssc_data` / `ssc_data_to_json`, the only users of jsoncpp, which is no longer bundled.
+- `shared/lib_shared_inverter.{h,cpp}`: removed the `OND_INVERTER` branches (`ond_inverter` is now an opaque type), so `lib_ondinv` and `splinter`, with its bundled Eigen 3.2.8 that clashed with `third_party/eigen` (ODR), are no longer built. The header keeps the includes and `using namespace std;` that `lib_ondinv.h` used to leak, so overload resolution in its includers is unchanged.
+- `ssc/ssc_equations.h`: equations for compute modules that aren't compiled are commented out (an empty `{}` entry avoids a compiler error if none are left).
+- Plus build fixes for newer compilers (GCC 13/15, Clang 17), the battery state fix (#10543) and the NaN fix for #11244: see `git log -- third_party/ssc`.
 
-```
-git remote add ssc git@github.com:NREL/ssc.git
-git fetch ssc
-```
-
-Currently the most recent release of SSC merged into EnergyPlus is `2020.11.29.r0.ssc.250`. You can see the changes made to the base SSC library that we'll need to update after the merge by doing
-
-```
-git fetch ssc 2020.11.29.r0.ssc.250
-git diff 2020.11.29.r0.ssc.250 HEAD:/third_party/ssc
-```
-
-The primary changes within `third_party/ssc` are as follows:
-
-- `CMakeLists.txt` comment out libraries that aren't used (nlopt, lpsolve, solarpilot tcs)
-- `shared/CMakeLists.` comment out header files that aren't used in the compute modules you're using. My approach was to comment them all out and look at the headers imported in `cmod_pvwatts5.cpp` and follow those imports backwards adding them back in as needed. It won't compile unless you get this right.
--  `ssc/CMakeLists.txt` Comment out all the cmod files you aren't using. Comment out unused dependencies.
--  `ssc/ssc_equations.h` Comment out equations for compute modules you aren't compiling anymore. If there aren't any left, add an empty item to the list `{}` so you avoid a compiler error. 
-
-Updating SSC will likely create some merge conflicts here that will need to be resolved. 
-
-To update SSC to a new release
-
-```
-git fetch ssc
-git subtree pull --prefix=third_party/ssc --squash ssc new_release_tag
-```
+Code removals are marked with `// NOTE: EnergyPlus:` comments. Because of the trimming, `git subtree pull` would now conflict on every upstream file we deleted: to update SSC, re-vendor a release tag and re-apply the above.

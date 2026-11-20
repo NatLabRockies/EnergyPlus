@@ -1588,6 +1588,7 @@
     Lshaped zone-Thermostat, !- Name
     Lshaped zone,            !- Zone or ZoneList Name
     Lshaped zone-Control Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     Lshaped zone-Cooling Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -1597,6 +1598,7 @@
     LshapedZoneBase-Thermostat,  !- Name
     LshapedZoneBase,         !- Zone or ZoneList Name
     LshapedZoneBase-Control Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     LshapedZoneBase-Cooling Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type

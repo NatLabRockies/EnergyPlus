@@ -572,7 +572,6 @@ namespace Fluid {
             waterRaw->Name = "WATER";
 
             df->glycolsRaw.push_back(waterRaw);
-            waterRaw->Num = df->glycolsRaw.isize();
         }
 
         waterRaw->CpDataPresent = true;
@@ -832,7 +831,6 @@ namespace Fluid {
                     auto *glycolRaw = new GlycolRawProps;
                     glycolRaw->Name = Alphas(1);
                     df->glycolsRaw.push_back(glycolRaw);
-                    glycolRaw->Num = df->glycolsRaw.isize();
                 }
             } else {
                 ShowSevereError(state, std::format("{}: {}=\"{}\", invalid type", routineName, CurrentModuleObject, Alphas(1)));
@@ -1259,7 +1257,6 @@ namespace Fluid {
             ethylene = new GlycolRawProps;
             ethylene->Name = "ETHYLENEGLYCOL";
             df->glycolsRaw.push_back(ethylene);
-            ethylene->Num = df->glycolsRaw.isize();
         }
 
         // Specific Heat
@@ -1340,7 +1337,6 @@ namespace Fluid {
             propylene = new GlycolRawProps;
             propylene->Name = "PROPYLENEGLYCOL";
             df->glycolsRaw.push_back(propylene);
-            propylene->Num = df->glycolsRaw.isize();
         }
 
         // Specific Heat

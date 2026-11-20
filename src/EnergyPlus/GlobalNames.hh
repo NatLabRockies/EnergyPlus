@@ -122,13 +122,6 @@ namespace GlobalNames {
 struct GlobalNamesData : BaseGlobalStruct
 {
 
-    int NumChillers = 0;
-    int NumBoilers = 0;
-    int NumBaseboards = 0;
-    int NumCoils = 0;
-    int CurMaxChillers = 0;
-    int CurMaxCoils = 0;
-    int numAirDistUnits = 0;
     std::unordered_map<std::string, std::string> ChillerNames;
     std::unordered_map<std::string, std::string> BoilerNames;
     std::unordered_map<std::string, std::string> BaseboardNames;
@@ -145,13 +138,6 @@ struct GlobalNamesData : BaseGlobalStruct
 
     void clear_state() override
     {
-        this->NumChillers = 0;
-        this->NumBoilers = 0;
-        this->NumBaseboards = 0;
-        this->NumCoils = 0;
-        this->CurMaxChillers = 0;
-        this->CurMaxCoils = 0;
-        this->numAirDistUnits = 0;
         this->ChillerNames.clear();
         this->BoilerNames.clear();
         this->BaseboardNames.clear();

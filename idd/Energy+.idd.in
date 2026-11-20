@@ -171,12 +171,16 @@
 !                   routines using blanks for alpha fields (note -- blanks
 !                   may not be allowable for some alpha fields).
 !
-!  \obsolete        This object has been replaced though is kept (and is read)
+!  \obsolete        This object will be removed in a future version, possibly
+!                   with a replacement object identified. It is still read
 !                   in the current version. Please refer to documentation as
 !                   to the dispersal of the object. If this object is
 !                   encountered in an IDF, the InputProcessor will post an
 !                   appropriate message to the error file.
-!                   usage:  \obsolete New=>[New object name]
+!                   usage, if a replacement is available:
+!                       \obsolete New=>[New object name]
+!                   usage, if no replacement is available:
+!                       \obsolete New=>deleted
 !
 !  \extensible:<#>  This object is dynamically extensible -- meaning the input
 !                   object may be extended beyond the number of fields shown in
@@ -1892,12 +1896,14 @@ Site:GroundTemperature:Undisturbed:FiniteDifference,
        \minimum 0
        \maximum 100
        \default 30
+       \note This field is retained for input compatibility but is not currently used.
   N5,  \field Soil Moisture Content Volume Fraction at Saturation
        \type real
        \units percent
        \minimum 0
        \maximum 100
        \default 50
+       \note This field is retained for input compatibility but is not currently used.
    N6; \field Evapotranspiration Ground Cover Parameter
        \type real
        \units dimensionless
@@ -24998,6 +25004,7 @@ Daylighting:Controls,
        \type choice
        \key SplitFlux
        \key DElight
+       \note DElight is deprecated and will be removed in a future version.
        \default SplitFlux
   A4,  \field Availability Schedule Name
        \type object-list
@@ -25215,6 +25222,7 @@ Daylighting:ReferencePoint,
 Daylighting:DELight:ComplexFenestration,
        \min-fields 5
        \memo Used for DElight Complex Fenestration of all types
+       \obsolete New=>deleted
   A1,  \field Name
        \required-field
        \note Only used for user reference
@@ -25806,8 +25814,9 @@ ZoneVentilation:WindandStackOpenArea,
        \note  "Cw" in the wind-driven equation and the maximum value is 1.0.
        \note When the input is Autocalculate, the program calculates Cw based on an angle between
        \note wind direction and effective angle
-       \note Cw = 0.55 at angle = 0, and Cw = 0.3 at angle=180
-       \note Linear interpolation is used to calculate Cw based on the above two values.
+       \note Cw = 0.55 at angle = 0 and Cw = 0.3 at angle = 45, with the same linear slope
+       \note continued to Cw = 0.05 at angle = 90. Cw = 0 for angles greater than 90
+       \note (wind from the other side of the opening).
        \units dimensionless
        \autocalculatable
        \type real
@@ -36831,6 +36840,13 @@ ZoneControl:Thermostat,
        \required-field
        \type object-list
        \object-list ScheduleNames
+  N1 , \field Temperature Difference Between Cutout And Setpoint
+       \note This optional choice field provides a temperature difference between cut-out temperature and
+       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
+       \units deltaC
+       \type real
+       \minimum 0.0
+       \default 0.0
   A4 , \field Control 1 Object Type
        \required-field
        \type choice
@@ -36872,18 +36888,11 @@ ZoneControl:Thermostat,
        \key ThermostatSetpoint:SingleCooling
        \key ThermostatSetpoint:SingleHeatingOrCooling
        \key ThermostatSetpoint:DualSetpoint
-  A11, \field Control 4 Name
+  A11; \field Control 4 Name
        \note Control names are names of individual control objects (e.g. ThermostatSetpoint:SingleHeating)
        \note Schedule values in these objects list actual setpoint temperatures for the control types
        \type object-list
        \object-list ControlTypeNames
-  N1 ; \field Temperature Difference Between Cutout And Setpoint
-       \note This optional choice field provides a temperature difference between cut-out temperature and
-       \note setpoint. The difference is used to adjust to heating or cooling setpoint based on control types.
-       \units deltaC
-       \type real
-       \minimum 0.0
-       \default 0.0
 
 ZoneControl:Thermostat:OperativeTemperature,
        \memo This object can be used with the ZoneList option on a thermostat or with one
@@ -39004,10 +39013,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \required-field
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A12, \field First Evaporative Cooler Object Name
         \required-field
         \type object-list
@@ -39017,10 +39026,10 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \note second cooler must be immediately downstream of first cooler, if present
         \type choice
         \key EvaporativeCooler:Direct:CelDekPad
-        \key EvaporativeCooler:Direct:ResearchSpecial
+        \key EvaporativeCooler:Direct:UserEffectiveness
         \key EvaporativeCooler:Indirect:CelDekPad
         \key EvaporativeCooler:Indirect:WetCoil
-        \key EvaporativeCooler:Indirect:ResearchSpecial
+        \key EvaporativeCooler:Indirect:UserEffectiveness
    A14, \field Second Evaporative Cooler Name
         \note optional, used for direct/indirect configurations
         \type object-list
@@ -39129,6 +39138,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \default 10
    A15, \field First Fuel Type
         \type choice
+        \note This field is retained for input compatibility but is not currently used by the model.
         \key None
         \key Electricity
         \key NaturalGas
@@ -39143,8 +39153,6 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key DistrictHeatingWater
         \key DistrictHeatingSteam
         \key DistrictCooling
-        \note Select the fuel type associated with field: "System Electric Power Lookup Table" in each mode.
-        \note If this field is blank, default first fuel type = Electricity.
         \default Electricity
    A16, \field Second Fuel Type
         \type choice
@@ -52716,7 +52724,9 @@ Fan:SystemModel,
        \units Pa
        \ip-units inH2O
   N11, \field Night Ventilation Mode Flow Fraction
-       \note Fraction of Design Maximum Air Flow Rate to use when in night mode using AvailabilityManager:NightVentilation
+       \note This field currently has no effect on Fan:SystemModel operation.
+       \note Set night-ventilation airflow with the Night Venting Flow Fraction field of
+       \note AvailabilityManager:NightVentilation.
        \type real
        \minimum 0.0
        \maximum 1.0
@@ -53019,10 +53029,28 @@ Fan:ZoneExhaust,
        \note If field is used, the exhaust fan will not run if the zone temperature is lower than this limit
        \type object-list
        \object-list ScheduleNames
-  A9 ; \field Balanced Exhaust Fraction Schedule Name
+  A9 , \field Balanced Exhaust Fraction Schedule Name
        \note Used to control fan's impact on flow at the return air node. Enter the portion of the exhaust that is balanced by simple airflows.
        \type object-list
        \object-list ScheduleNames
+  A10, \field Motor Loss Location
+       \note Enter the location of fan motor heat rejection. Input for Motor in Airstream Fraction = 1 will direct all motor heat losses to the airstream.
+       \type choice
+       \key Zone
+       \key Outside
+       \default Outside
+  N4 , \field Motor in Airstream Fraction
+       \note Fraction of motor heat applied to fan exhaust air stream.
+       \note A Motor in Airstream Fraction < 1 will direct remaining fan heat losses to the Motor Loss Location choice.
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 1.0
+  A11; \field Motor Loss Zone Name
+       \type object-list
+       \object-list ZoneNames
+       \note Only used when Motor Loss Location = Zone.
+       \note Zone Name must be a valid zone otherwise remaining motor heat losses is rejected outdoors using 1 - Motor in Airstream Fraction.
 
 FanPerformance:NightVentilation,
        \memo Specifies an alternate set of performance parameters for a fan. These alternate
@@ -53046,16 +53074,12 @@ FanPerformance:NightVentilation,
        \units Pa
        \ip-units inH2O
        \required-field
-  N3 , \field Maximum Flow Rate
-       \units m3/s
-       \minimum 0.0
-       \autosizable
-  N4 , \field Motor Efficiency
+  N3 , \field Motor Efficiency
        \type real
        \required-field
        \minimum> 0
        \maximum 1.0
-  N5 ; \field Motor in Airstream Fraction
+  N4 ; \field Motor in Airstream Fraction
        \type real
        \default 1.0
        \minimum 0.0
@@ -64005,7 +64029,7 @@ EvaporativeCooler:Indirect:WetCoil,
        \type node
        \note Enter the name of an outdoor air node
 
-EvaporativeCooler:Indirect:ResearchSpecial,
+EvaporativeCooler:Indirect:UserEffectiveness,
        \memo Indirect evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or wetted coil), recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
@@ -64063,7 +64087,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note rates and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)
@@ -64189,7 +64213,7 @@ EvaporativeCooler:Indirect:ResearchSpecial,
        \note limits then specify very high maximum drybulb temperature limit value (e.g. 99.0 C).
 
 
-EvaporativeCooler:Direct:ResearchSpecial,
+EvaporativeCooler:Direct:UserEffectiveness,
        \memo Direct evaporative cooler with user-specified effectiveness (can represent rigid pad
        \memo or similar media), and recirculating water pump, and secondary air fan. This model is
        \memo controlled to meet the primary air outlet temperature setpoint.
@@ -64233,7 +64257,7 @@ EvaporativeCooler:Direct:ResearchSpecial,
        \note and cooler design effectiveness
        \autosizable
        \default autosize
-  N4 , \field Water Pump Power Sizing Factor
+  N4 , \field Design Water Pump Power Per Unit Flow Rate
        \type real
        \units W/(m3/s)
        \ip-units W/(gal/min)
@@ -65326,8 +65350,7 @@ AirLoopHVAC:UnitarySystem,
        \note Enter the type of supply air fan if included in the unitary system.
        \note Fan:ConstantVolume only works with continuous fan operating mode (i.e. supply
        \note air fan operating mode schedule values greater than 0).
-       \note Specify a Fan:SystemModel or a Fan:OnOff object when the Supply Air Fan Operating Mode Schedule Name
-       \note input field above is left blank.
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, and Fan:ComponentModel support cycling and continuous fan operating modes.
        \note Specify a Fan:SystemModel or a Fan:VariableVolume when modeling VAV systems which used setpoint based control
        \note if the fan is included in the unitary system object.
        \note The ComponentModel fan type may be substituted for the ConstantVolume or VariableVolume
@@ -65346,16 +65369,15 @@ AirLoopHVAC:UnitarySystem,
   A11, \field Supply Air Fan Operating Mode Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note A fan operating mode schedule value of 0 indicates cycling fan mode (supply air
-       \note fan cycles on and off in tandem with the cooling or heating coil).
-       \note Any other schedule value indicates continuous fan mode (supply air fan operates
-       \note continuously regardless of cooling or heating coil operation). Provide a schedule
-       \note with non-zero values when high humidity control is specified.
-       \note Leaving this schedule name blank will default to constant fan mode for the
-       \note entire simulation period.
-       \note This field is not used when set point based control is used where a set point
-       \note controls the coil.
-       \note SingleZoneVAV control type is only active when constant fan operating mode is active.
+       \note A schedule value of 0 selects cycling fan operation; any other value selects continuous fan operation.
+       \note If blank, defaults to cycling for Control Type = Load or SingleZoneVAV,
+       \note and continuous for Control Type = Setpoint.
+       \note For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, or Fan:ComponentModel.
+       \note For Control Type = Setpoint or Supply Fan Object Type = Fan:ConstantVolume,
+       \note any specified schedule must have values greater than 0 and less than or equal to 1.
+       \note SingleZoneVAV uses load-based control during cycling fan operation.
+       \note Use nonzero schedule values when high humidity control is specified.
   A12, \field Heating Coil Object Type
        \type choice
        \key Coil:Heating:DX:SingleSpeed
@@ -73749,7 +73771,8 @@ Pump:VariableSpeed,
   N9 , \field Coefficient 4 of the Part Load Performance Curve
        \default 0.0
   N10, \field Design Minimum Flow Rate
-        \note When autosized the scaling factor is the input field Design Minimum Flow Rate Fraction
+        \note When autosized, this is the Design Maximum Flow Rate multiplied by the
+        \note Design Minimum Flow Rate Fraction.
         \units m3/s
         \autosizable
         \default autosize
@@ -73842,7 +73865,8 @@ Pump:VariableSpeed,
         \minimum> 0
   N15,  \field Design Minimum Flow Rate Fraction
         \type real
-        \note Used to size Design Minimum Flow Rate
+        \note Used to autosize the Design Minimum Flow Rate as a fraction of the
+        \note Design Maximum Flow Rate.
         \default 0.0
         \minimum 0
         \maximum 1.0
@@ -78662,6 +78686,7 @@ HeatPump:WaterToWater:ParameterEstimation:Cooling,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W
@@ -78736,6 +78761,7 @@ HeatPump:WaterToWater:ParameterEstimation:Heating,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W
@@ -88977,6 +89003,8 @@ AvailabilityManager:NightVentilation,
        \default 1.
        \note the fraction (could be > 1) of the design system Flow Rate at which
        \note night ventilation will be done
+       \note This fraction is applied to primary air loop flow requests. For zone equipment,
+       \note the availability manager controls availability but does not scale component flow.
   A5 ; \field Control Zone Name
        \type object-list
        \object-list ZoneNames
@@ -93314,6 +93342,7 @@ Generator:InternalCombustionEngine,
   N1, \field Rated Power Output
        \units W
   A2, \field Electric Circuit Node Name
+      \note This field is retained for input compatibility but is not used by the generator model.
   N2, \field Minimum Part Load Ratio
       \minimum 0.0
       \maximum 1.0
@@ -93321,6 +93350,7 @@ Generator:InternalCombustionEngine,
       \minimum> 0.0
       \maximum 1.0
   N4, \field Optimum Part Load Ratio
+      \note This field is retained for input compatibility but is not used by the generator model.
   A3, \field Shaft Power Curve Name
        \type object-list
        \object-list UnivariateFunctions
@@ -94558,24 +94588,36 @@ Generator:FuelCell:StackCooler,
   N6,  \field Coefficient r3
   N7,  \field Stack Coolant Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N8,  \field Stack Cooler U-Factor Times Area Value
        \units W/K
+       \note This field is retained for input compatibility but is not currently used.
   N9,  \field Fs-cogen Adjustment Factor
+       \note This field is retained for input compatibility but is not currently used.
   N10, \field Stack Cogeneration Exchanger Area
        \units m2
+       \note This field is retained for input compatibility but is not currently used.
   N11, \field Stack Cogeneration Exchanger Nominal Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N12, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient
        \units W/m2-K
+       \note This field is retained for input compatibility but is not currently used.
   N13, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient Exponent
+       \note This field is retained for input compatibility but is not currently used.
   N14, \field Stack Cooler Pump Power
        \units W
+       \note This field is retained for input compatibility but is not currently used.
   N15, \field Stack Cooler Pump Heat Loss Fraction
        \minimum 0.0
        \maximum 1.0
+       \note This field is retained for input compatibility but is not currently used.
   N16, \field Stack Air Cooler Fan Coefficient f0
+       \note This field is retained for input compatibility but is not currently used.
   N17, \field Stack Air Cooler Fan Coefficient f1
+       \note This field is retained for input compatibility but is not currently used.
   N18; \field Stack Air Cooler Fan Coefficient f2
+       \note This field is retained for input compatibility but is not currently used.
 
 Generator:MicroCHP,
       \memo Small-scale combined heat and power (micro CHP) electric generator using the model
@@ -95874,10 +95916,15 @@ ElectricLoadCenter:Inverter:FunctionOfPower,
         \maximum 1.0
    N5 , \field Minimum Power Output
         \units W
+        \minimum 0
+        \default 0
    N6 , \field Maximum Power Output
         \units W
+        \required-field
+        \minimum> 0
    N7 ; \field Ancillary Power Consumed In Standby
         \units W
+        \default 0
 
 ElectricLoadCenter:Inverter:LookUpTable,
         \memo   California Energy Commission tests and publishes data on inverters
@@ -95904,6 +95951,8 @@ ElectricLoadCenter:Inverter:LookUpTable,
         \units W
    N4 , \field Nominal Voltage Input
         \units V
+        \note This field is retained for input compatibility but its numeric value is not used.
+        \note The model uses the efficiency values entered for nominal voltage directly.
    N5 , \field Efficiency at 10% Power and Nominal Voltage
         \minimum 0
         \maximum 1.0
@@ -96139,6 +96188,7 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \minimum> 0
         \maximum 1
         \default 0.95
+        \note This field is retained for input compatibility but is not currently used.
    N6,  \field Battery Mass
         \type real
         \minimum> 0
@@ -109331,9 +109381,10 @@ Output:Table:Annual,
        \begin-extensible
        \type external-list
        \external-list autoRDDvariableMeter
-       \note contain the name of a variable (see Output:Variable and eplusout.rdd), meter (see Output:Meter
-       \note and eplusout.mdd), or EMS Internal Variable Name or IDF Object Field name. This value is shown
-       \note using the aggregation method specified.
+       \note Contains the name of an output variable (see Output:Variable and eplusout.rdd), meter
+       \note (see Output:Meter and eplusout.mdd), or schedule. To include an EMS value, define it with
+       \note an EnergyManagementSystem:OutputVariable object. EMS internal variables and arbitrary IDF
+       \note object fields cannot be referenced directly. The value is shown using the specified aggregation method.
    A5, \field Aggregation Type for Variable or Meter 1
        \type choice
        \key SumOrAverage
@@ -109359,8 +109410,9 @@ Output:Table:Annual,
        \note Maximum and Minimum find the maximum and minimum value for the month and report it
        \note   along with the time that it first occurred. When Maximum or Minimum are selected a
        \note   column is automatically shown in the output report for the time that it occurred.
-       \note   When Maximum or Minimum are used with an average variable the value is divided
-       \note   by the length of the timestep.
+       \note   When Maximum or Minimum are used with a summed variable, the value is divided
+       \note   by the timestep length in seconds so that the reported result is a rate.
+       \note   Average variables are compared and reported without timestep conversion.
        \note ValueWhenMaxMin looks at the previous variable in the report that sets a maximum or minimum
        \note   and displays the value of the current variable at that same timestep.
        \note   Order of the variables in the report is important when using ValueWhenMaxMin.
@@ -109399,14 +109451,14 @@ Output:Table:Annual,
        \note   the report is important when using this Aggregation Type.
        \note MaximumDuringHoursShown - Reports the maximum value and the time that the maximum value
        \note   occurred but only during the hours reported with the previous "hours-" Aggregation Type.
-       \note   When the Maximum option is used with an average variable the value is divided
-       \note   by the length of the timestep. Order of the variables in the report is important
-       \note   when using this Aggregation Type.
+       \note   When this option is used with a summed variable, the value is divided by the timestep
+       \note   length in seconds so that the reported result is a rate. Average variables are reported
+       \note   without timestep conversion. Order of the variables in the report is important.
        \note MinimumDuringHoursShown - Reports the minimum value and the time that the minimum value
        \note   occurred but only during the hours reported with the previous "hours-" Aggregation Type.
-       \note   When the Minimum option is used with an average variable the value is divided
-       \note   by the length of the timestep. Order of the variables in the report is important
-       \note   when using this Aggregation Type.
+       \note   When this option is used with a summed variable, the value is divided by the timestep
+       \note   length in seconds so that the reported result is a rate. Average variables are reported
+       \note   without timestep conversion. Order of the variables in the report is important.
    N1, \field Digits After Decimal 1
        \type integer
        \default 2
@@ -110411,7 +110463,7 @@ OutputControl:Files,
        \key No
        \default Yes
   A32, \field Output Tarcog
-       \note Not Implemented Yet
+       \note This field is retained for input compatibility but is not currently used.
        \type choice
        \key Yes
        \key No

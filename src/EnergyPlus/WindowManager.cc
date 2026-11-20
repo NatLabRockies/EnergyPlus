@@ -299,40 +299,40 @@ namespace Window {
         Real64 rfsh;         // Diffuse solar front reflectance of isolated blind
         Real64 rfshGnd;      // Ground and sky diffuse solar front reflectance of isolated blind
         Real64 rfshSky;
-        Real64 rbsh;                          // Diffuse solar back reflectance of isolated blind
-        Real64 ShadeReflFac;                  // Shade/blind solar reflection factor
-        Real64 ShadeTransVis;                 // Visible transmittance of isolated shade/blind
-        Real64 tshv = 0.0;                    // = ShadeTransVis
-        Real64 tshv2;                         // = tshv**2
-        Real64 ShadeReflVis;                  // Visible reflectance of isolated shade
-        Real64 rshv;                          // = ShadeReflVis
-        Real64 rfshv;                         // Diffuse visible front reflectance of isolated blind
-        Real64 rbshv;                         // Diffuse visible back reflectance of isolated blind
-        Real64 ShadeReflFacVis;               // Shade/blind visible reflection factor
-        int SpecDataNum = 0;                  // Spectral data set number
-        int numptDAT;                         // Number of wavelengths in a spectral data set
-        bool StormWinConst;                   // True if a construction with a storm window
-        bool Triangle;                        // True if window is triangular
-        bool Rectangle;                       // True if window is rectangular
-        Vector3<Real64> W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
-        Vector3<Real64> W2 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W3 = {0.0, 0.0, 0.0};
-        Vector3<Real64> W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
-        Vector3<Real64> W23 = {0.0, 0.0, 0.0};
+        Real64 rbsh;                   // Diffuse solar back reflectance of isolated blind
+        Real64 ShadeReflFac;           // Shade/blind solar reflection factor
+        Real64 ShadeTransVis;          // Visible transmittance of isolated shade/blind
+        Real64 tshv = 0.0;             // = ShadeTransVis
+        Real64 tshv2;                  // = tshv**2
+        Real64 ShadeReflVis;           // Visible reflectance of isolated shade
+        Real64 rshv;                   // = ShadeReflVis
+        Real64 rfshv;                  // Diffuse visible front reflectance of isolated blind
+        Real64 rbshv;                  // Diffuse visible back reflectance of isolated blind
+        Real64 ShadeReflFacVis;        // Shade/blind visible reflection factor
+        int SpecDataNum = 0;           // Spectral data set number
+        int numptDAT;                  // Number of wavelengths in a spectral data set
+        bool StormWinConst;            // True if a construction with a storm window
+        bool Triangle;                 // True if window is triangular
+        bool Rectangle;                // True if window is rectangular
+        Vector3D W1 = {0.0, 0.0, 0.0}; // Window vertices (m)
+        Vector3D W2 = {0.0, 0.0, 0.0};
+        Vector3D W3 = {0.0, 0.0, 0.0};
+        Vector3D W21 = {0.0, 0.0, 0.0}; // W1-W2, W3-W2, resp. (m)
+        Vector3D W23 = {0.0, 0.0, 0.0};
 
         // Spectral data wavelengths for each glass layer in a glazing system
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> wlt{};
 
         // Following data, Spectral data for each layer for each wavelength in wlt
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> t = {0.0};     // normal transmittance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rff = {0.0};   // normal front reflectance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbb = {0.0};   // normal back reflectance
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tPhi = {0.0};  // transmittance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfPhi = {0.0}; // front reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbPhi = {0.0}; // back reflectance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> t{};     // normal transmittance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rff{};   // normal front reflectance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbb{};   // normal back reflectance
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tPhi{};  // transmittance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfPhi{}; // front reflectance at angle of incidence
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbPhi{}; // back reflectance at angle of incidence
 
         // Number of spectral data wavelengths for each layer; =2 if no spectra data for a layer
-        std::array<int, maxGlassLayers> numpt = {0};
+        std::array<int, maxGlassLayers> numpt{};
 
         auto &s_mat = state.dataMaterial;
         auto &s_surf = state.dataSurface;
@@ -509,7 +509,7 @@ namespace Window {
             lquasi = false;
             AllGlassIsSpectralAverage = true;
 
-            std::array<int, Window::maxGlassLayers> LayerNum = {0}; // Glass layer number
+            std::array<int, Window::maxGlassLayers> LayerNum{}; // Glass layer number
 
             // Loop over glass layers in the construction
             for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
@@ -715,11 +715,11 @@ namespace Window {
                 // In the following the argument "1" indicates that spectral average solar values
                 // should be used for layers without spectral data.
 
-                std::array<Real64, nume> stPhi = {0.0};  // Glazing system transmittance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srfPhi = {0.0}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srbPhi = {0.0}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> stPhi{};  // Glazing system transmittance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srfPhi{}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srbPhi{}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
                 // For each layer, glazing system absorptance at angle of incidence
-                std::array<std::array<Real64, nume>, maxGlassLayers> saPhi = {{0.0}};
+                std::array<std::array<Real64, nume>, maxGlassLayers> saPhi{};
 
                 SystemSpectralPropertiesAtPhi(state, 1, NGlass, 0.0, 2.54, numpt, wlt, tPhi, rfPhi, rbPhi, stPhi, srfPhi, srbPhi, saPhi);
 
@@ -800,7 +800,7 @@ namespace Window {
             //------------------------------------------------------------------------------------------
 
             lquasi = false;
-            LayerNum = {0}; // Glass layer number
+            LayerNum.fill(0); // Glass layer number
 
             // Loop over glass layers in the construction.
             for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
@@ -925,11 +925,11 @@ namespace Window {
 
                 // For each wavelength in the solar spectrum, calculate system properties
                 // stPhi, srfPhi, srbPhi and saPhi at this angle of incidence
-                std::array<Real64, nume> stPhi = {0.0};  // Glazing system transmittance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srfPhi = {0.0}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
-                std::array<Real64, nume> srbPhi = {0.0}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> stPhi{};  // Glazing system transmittance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srfPhi{}; // Glazing system front reflectance at angle of incidence for each wavelength in wle
+                std::array<Real64, nume> srbPhi{}; // Glazing system back reflectance at angle of incidence for each wavelength in wle
                 // For each layer, glazing system absorptance at angle of incidence
-                std::array<std::array<Real64, nume>, maxGlassLayers> saPhi = {{0.0}};
+                std::array<std::array<Real64, nume>, maxGlassLayers> saPhi{};
 
                 SystemSpectralPropertiesAtPhi(state, 1, NGlass, 0.0, 2.54, numpt, wlt, tPhi, rfPhi, rbPhi, stPhi, srfPhi, srbPhi, saPhi);
 
@@ -996,7 +996,7 @@ namespace Window {
 
                 // Front incident solar, diffuse, interior shade
                 for (int iGlass = 0; iGlass < NGlass; ++iGlass) {
-                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * solabsDiff[iGlass];
+                    constr.AbsDiff(iGlass + 1) += tsolDiff * ShadeRefl * ShadeReflFac * constr.AbsDiffBack(iGlass + 1);
                 }
 
                 constr.AbsDiffShade = tsolDiff * ShadeReflFac * ShadeAbs;
@@ -1824,19 +1824,19 @@ namespace Window {
         //   srbPhi    back reflectance of system at each wavelength in swl
         //   sabsPhi   absorptance by layer at each wavelength in swl
 
-        std::array<Real64, maxGlassLayers> sabsPhi = {0.0}; // System solar absorptance in each glass layer for
+        std::array<Real64, maxGlassLayers> sabsPhi{}; // System solar absorptance in each glass layer for
         //   particular angle of incidence
 
         // transmittance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> tadjPhi{};
         // front reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rfadjPhi{};
         // back reflectance at angle of incidence
-        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbadjPhi = {0.0};
+        std::array<std::array<Real64, maxSpectralDataElements>, maxGlassLayers> rbadjPhi{};
 
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> top = {0.0};  // Transmittance matrix for subr. op
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rfop = {0.0}; // Front reflectance matrix for subr. op
-        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rbop = {0.0}; // Back transmittance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> top{};  // Transmittance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rfop{}; // Front reflectance matrix for subr. op
+        std::array<std::array<Real64, maxGlassLayers>, maxGlassLayers> rbop{}; // Back transmittance matrix for subr. op
 
         auto const &wm = state.dataWindowManager;
         // For each glass layer find tPhi, rfPhi, and rbPhi at each wavelength
@@ -2505,8 +2505,8 @@ namespace Window {
                 wm->A67 = wm->emis[5] * Constant::StefanBoltzmann * wm->A67P;
             }
 
-            wm->thetas = {0.0};
-            wm->thetasPrev = {0.0};
+            wm->thetas.fill(0.0);
+            wm->thetasPrev.fill(0.0);
 
             // Calculate window face temperatures
 
@@ -3306,16 +3306,14 @@ namespace Window {
         std::array<Real64, 2> hcvBG; // For between-glass shade/blind, convection coefficient from gap glass or
         //  shade/blind to gap gas on either side of shade/blind (W/m2-K)
 
-        std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface; // Coefficient in equation Aface*thetas = Bface
-        std::array<Real64, maxArraySize> Bface;                           // Coefficient in equation Aface*thetas = Bface
-        std::array<int, maxArraySize> indx;                               // Vector of row permutations in LU decomposition
+        std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition
 
         auto &s_surf = state.dataSurface;
 
         wm->nglfacep = wm->nglface;
         WinShadingType ShadeFlag = s_surf->SurfWinShadingFlag(SurfNum);
         ZoneNum = s_surf->Surface(SurfNum).Zone;
-        AbsRadShadeFace = {0.0};
+        AbsRadShadeFace.fill(0.0);
 
         if (ANY_SHADE_SCREEN(ShadeFlag) || ANY_BLIND(ShadeFlag)) {
             wm->nglfacep = wm->nglface + 2;
@@ -3376,8 +3374,8 @@ namespace Window {
                 wm->hcin = state.dataHeatBalSurf->SurfHConvInt(SurfNum);
             }
 
-            Aface = {{0.0}};
-            Bface = {0.0};
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {}; // Coefficients in Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface = {};                           // Right-hand side of Aface*thetas = Bface
 
             // If interior or exterior shade or blind is present, get heat transfer
             // coefficient from glass and shade/blind to gap between glass and shade/blind,
@@ -4257,8 +4255,8 @@ namespace Window {
         int imax = 0; // Temporary variable
         //   as output: decomposed matrix
 
-        assert(n <= 10);                   // vv sizing
-        std::array<Real64, 10> vv = {0.0}; // Stores the implicit scaling of each row
+        assert(n <= 10);             // vv sizing
+        std::array<Real64, 10> vv{}; // Stores the implicit scaling of each row
 
         d = 1;
         for (int i = 0; i < n; ++i) {
@@ -4418,18 +4416,18 @@ namespace Window {
         Real64 phikup;    // Numerator factor
         Real64 rhomix;    // Density of gas mixture (kg/m3)
 
-        std::array<Real64, 10> mukpdwn = {0.0}; // Denominator term
-        std::array<Real64, 10> kpdown = {0.0};  // Denominator terms
-        std::array<Real64, 10> kdpdown = {0.0};
+        std::array<Real64, 10> mukpdwn{}; // Denominator term
+        std::array<Real64, 10> kpdown{};  // Denominator terms
+        std::array<Real64, 10> kdpdown{};
         // Conductivity term accounting for additional energy moved by the diffusional transport of internal energy in polyatomic gases.
-        std::array<Real64, 10> kdblprm = {0.0};
-        std::array<Real64, 10> frct = {0.0};   // Fraction of each gas in a mixture
-        std::array<Real64, 10> kprime = {0.0}; // Monotonic thermal conductivity
+        std::array<Real64, 10> kdblprm{};
+        std::array<Real64, 10> frct{};   // Fraction of each gas in a mixture
+        std::array<Real64, 10> kprime{}; // Monotonic thermal conductivity
 
-        std::array<Real64, 10> fvis = {0.0};  // Viscosity of each gas in a mixture (g/m-s)
-        std::array<Real64, 10> fcon = {0.0};  // Conductance of each gas in a mixture (W/m2-K)
-        std::array<Real64, 10> fdens = {0.0}; // Density of each gas in a mixture (kg/m3)
-        std::array<Real64, 10> fcp = {0.0};   // Specific heat of each gas in a mixture (J/m3-K)
+        std::array<Real64, 10> fvis{};  // Viscosity of each gas in a mixture (g/m-s)
+        std::array<Real64, 10> fcon{};  // Conductance of each gas in a mixture (W/m2-K)
+        std::array<Real64, 10> fdens{}; // Density of each gas in a mixture (kg/m3)
+        std::array<Real64, 10> fcp{};   // Specific heat of each gas in a mixture (J/m3-K)
 
         // Autodesk:Logic Either assert NMix>0 or handle NMix<=0 in logic so that con and locals guar. initialized before use
         NMix = wm->gaps[iGap].numGases;
@@ -5223,10 +5221,10 @@ namespace Window {
 
             // now apply normalization factors to zero incidence angle properties
             tfp = tf0 * TransTmp;
-            tfp = max(min(1.0, tfp), 0.0);
+            tfp = std::clamp(tfp, 0.0, 1.0);
 
             rfp = rf0 * (1. - ReflectTmp) + ReflectTmp;
-            rfp = max(min(0.9999 - tfp, rfp), 0.0);
+            rfp = std::clamp(rfp, 0.0, std::max(0.9999 - tfp, 0.0));
 
             rbp = rfp;
 
@@ -5636,6 +5634,8 @@ namespace Window {
         s_surf->SurfWinFrameHeatLoss(SurfNum) = 0.0;
         s_surf->SurfWinDividerHeatGain(SurfNum) = 0.0;
         s_surf->SurfWinDividerHeatLoss(SurfNum) = 0.0;
+        s_surf->SurfWinFrameNetLWInPerArea(SurfNum) = 0.0;
+        s_surf->SurfWinDividerNetLWInPerArea(SurfNum) = 0.0;
 
         if (s_surf->SurfWinFrameArea(SurfNum) > 0.0) {
             // Window has a frame. Note that if a shade, screen or blind is present it covers only the glazed part of the
@@ -5672,12 +5672,18 @@ namespace Window {
             Efac = FrameCon / (HInRad + FrameCon + HInConvFr);
             s_surf->SurfWinFrameTempIn(SurfNum) = (Dfac + Efac * Afac) / (1.0 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinFrameTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
+            // Net long-wave radiation from the zone absorbed by the frame face and the room side of its inside projection. Frames are
+            // not surfaces of the radiant enclosure; HeatBalanceIntRadExchange::CalcInteriorRadExchange takes this gain from the
+            // zone's surfaces.
+            s_surf->SurfWinFrameNetLWInPerArea(SurfNum) = s_surf->SurfWinFrameEmis(SurfNum) * (1.0 + 0.5 * ProjCorrFrIn) *
+                                                          (s_surf->SurfWinIRfromParentZone(SurfNum) -
+                                                           Constant::StefanBoltzmann * pow_4(s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin));
             // Heat gain to zone from frame
 
             // FrameHeatTransfer = s_surf->SurfWinFrameArea(SurfNum) * FrameCon *
             //                     (s_surf->SurfWinFrameTempSurfOut(SurfNum) - s_surf->SurfWinFrameTempIn(SurfNum));
-            FrameHeatGain = s_surf->SurfWinFrameArea(SurfNum) * (1.0 + s_surf->SurfWinProjCorrFrIn(SurfNum)) *
-                            (HInConvFr * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin - tin));
+            // HInConvFr already includes the inside projection (1 + ProjCorrFrIn), as in the zone air heat balance
+            FrameHeatGain = s_surf->SurfWinFrameArea(SurfNum) * HInConvFr * (s_surf->SurfWinFrameTempIn(SurfNum) + Constant::Kelvin - tin);
 
             if (FrameHeatGain > 0.0) {
                 s_surf->SurfWinFrameHeatGain(SurfNum) = FrameHeatGain;
@@ -5740,11 +5746,16 @@ namespace Window {
             Efac = DivCon / (HInRad + DivCon + HInConvDiv);
             s_surf->SurfWinDividerTempIn(SurfNum) = (Dfac + Efac * Afac) / (1 - Efac * Bfac) - Constant::Kelvin;
             s_surf->SurfWinDividerTempSurfOut(SurfNum) = Afac + Bfac * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin) - Constant::Kelvin;
+            // Net long-wave radiation from the zone absorbed by the divider (see frame above)
+            s_surf->SurfWinDividerNetLWInPerArea(SurfNum) =
+                DivEmisIn * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum)) *
+                (s_surf->SurfWinIRfromParentZone(SurfNum) -
+                 Constant::StefanBoltzmann * pow_4(s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin));
             // Contribution of divider to window heat gain
             // ProjCorrWinHeatGain = 1.0 + 2.0 * s_surf->SurfWinProjCorrDivIn(SurfNum);
 
-            DividerHeatGain = s_surf->SurfWinDividerArea(SurfNum) * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum)) *
-                              (HInConvDiv * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin - tin));
+            // HInConvDiv already includes the inside projection (1 + 2 ProjCorrDivIn), as in the zone air heat balance
+            DividerHeatGain = s_surf->SurfWinDividerArea(SurfNum) * HInConvDiv * (s_surf->SurfWinDividerTempIn(SurfNum) + Constant::Kelvin - tin);
             // DividerHeatTransfer = s_surf->SurfWinDividerArea(SurfNum) * DivCon *
             //                      (s_surf->SurfWinDividerTempSurfOut(SurfNum) - s_surf->SurfWinDividerTempIn(SurfNum));
 
@@ -6230,7 +6241,7 @@ namespace Window {
             wm->A67 = wm->emis[5] * Constant::StefanBoltzmann * wm->A67P;
         }
 
-        wm->thetas = {0.0};
+        wm->thetas.fill(0.0);
 
         WindowTempsForNominalCond(state, ConstrNum, hgap, 1.0);
 
@@ -6462,8 +6473,8 @@ namespace Window {
                 //! fw 3/4/03 if ( iter >= 1 ) hr(i) = 0.5*(hrprev(i)+hr(i))
             }
 
-            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {{0.0}}; // Coefficient in equation Aface*thetas = Bface
-            std::array<Real64, maxArraySize> Bface = {0.0};                             // Coefficient in equation Aface*thetas = Bface
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface{}; // Coefficient in equation Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface{};                           // Coefficient in equation Aface*thetas = Bface
 
             // Inside convective film conductance for vertical window
             if (iter >= 1) {
@@ -7202,7 +7213,7 @@ namespace Window {
 
                     auto &btar = matBlind->TARs[iSlatAng];
 
-                    st_lay = {0.0};
+                    st_lay.fill(0.0);
                     bld_el = Material::dSlatAng * iSlatAng; // 0 <= bld_el <= 180 deg
 
                     BlindOpticsDiffuse(state, matBlind->Num, ISolVis, bld_pr, bld_el, st_lay);
@@ -7664,7 +7675,7 @@ namespace Window {
             ++X[k][k];
         }
 
-        indx = {0};
+        indx.fill(0);
         InvertMatrix(state, X, Xinv, indx, 4); // Autodesk:Note X modified by this call
 
         //---------Calculate diffuse short-wave properties for the front side of the blind
@@ -7791,7 +7802,7 @@ namespace Window {
                 ++X[k][k];
             }
 
-            indx = {0};
+            indx.fill(0);
             InvertMatrix(state, X, Xinv, indx, 4); // Autodesk:Note X modified by this call
 
             //---------Calculate diffuse IR properties for the FRONT side of the blind
@@ -7960,7 +7971,7 @@ namespace Window {
         auto &s_mat = state.dataMaterial;
         auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(s_mat->materials(BlindNum));
 
-        p = {0.0};
+        p.fill(0.0);
 
         //     Elevation of radiation source; source is assumed to be in a plane that
         //     (1) contains the slat outward normal and (2) is perpendicular to plane of the blinds.
@@ -8022,7 +8033,7 @@ namespace Window {
                 ++X[k][k];
             }
 
-            std::array<int, maxArraySize> indx = {0}; // Indices for LU decomposition
+            std::array<int, maxArraySize> indx{}; // Indices for LU decomposition
             // In the following, note that InvertMatrix changes X
             InvertMatrix(state, X, Xinv, indx, 4);
 
@@ -8189,16 +8200,16 @@ namespace Window {
 
         int d;
 
-        y = {{0.0}};
+        y = {};
         for (int i = 0; i < n; ++i) {
             y[i][i] = 1.0;
         }
-        indx = {0};
+        indx.fill(0);
 
         LUdecomposition(state, a, n, indx, d);
 
         for (int j = 0; j < n; ++j) {
-            tmp = {0.0};
+            tmp.fill(0.0);
             tmp[j] = 1;
             LUsolution(state, a, n, indx, tmp);
             for (int i = 0; i < n; ++i) {

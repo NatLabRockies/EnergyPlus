@@ -224,7 +224,6 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Plane)
 TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D)
 {
     {
-        using Vector2D = Surface2D::Vector2D;
         SurfaceData s;
         s.Vertex.dimension(4);
         s.Vertex = {Vector(0, 0, 0), Vector(1, 0, 0), Vector(1, 1, 0), Vector(0, 1, 0)};
@@ -246,7 +245,6 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D)
 
 TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D_bigVertices)
 {
-    using Vector2D = Surface2D::Vector2D;
     state->dataSurface->TotSurfaces = 1;
     constexpr int surfNum = 1;
     int nVertices = 22;
@@ -311,7 +309,6 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D_bigVertices)
 
 TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D_bigVertices2)
 {
-    using Vector2D = Surface2D::Vector2D;
     state->dataSurface->TotSurfaces = 1;
     constexpr int surfNum = 1;
     int nVertices = 24;
