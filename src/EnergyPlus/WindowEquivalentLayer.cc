@@ -3671,10 +3671,8 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
     Real64 YD;
     Real64 YE;
     Real64 YF(0);
-    int CORR;
 
     DE = 0.0; // INITIALIZE DE
-    CORR = 1; // TODO: make this a parameter if no-correction path is needed
 
     // limit slat angle to +/- 90 deg
     PHI = max(-Constant::DegToRad * 90.0, min(Constant::DegToRad * 90.0, PHIx));
@@ -3684,13 +3682,82 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
     SL_RAD = W / max(SL_WR, 0.0000001);
     SL_THETA = 2.0 * std::asin(0.5 * SL_WR);
 
-    // Keep the no-correction branch available until CORR becomes a caller-controlled option.
-    // cppcheck-suppress knownConditionTrueFalse
-    if (CORR > 0) { // CORRECT FOR SLAT CURVATURE BY SETTING CORR = 1
+    //  DETERMINE BOUNDS FOR CURVATURE CORRECTION AND APPLY CORRECTION TO BEAM-BEAM TRANSMITTANCE
+    if (std::abs(PHI + OMEGA) < SL_THETA / 2.0) {
+        //  CALCULATE BEAM TRANSMISSION
+        XA = SL_RAD * std::sin(-SL_THETA / 2.0); // Glass-side end coordinate
+        YA = SL_RAD * std::cos(-SL_THETA / 2.0);
+        XB = -XA; // Indoor-side end coordinate
+        YB = YA;
+        YC = SL_RAD * std::cos(PHI + OMEGA); // Tangent to slat in irradiance direction
+        XC = std::sqrt(pow_2(SL_RAD) - pow_2(YC));
+        Slope = -XC / YC;
+        if (std::abs(Slope) < state.dataWindowEquivalentLayer->SMALL_ERROR) {
+            XD = 0.0;
+            YD = YA;
+            XE = 0.0;
+            YE = YD;
+            // Bug XF, YF not set but used below (XE, YE are set but NOT used)
+        } else {
+            if ((PHI + OMEGA) < 0.0) {
+                XC = -XC;
+                Slope = -Slope;
+                XD = (YB - Slope * XB) / (-1.0 / Slope - Slope);
+                XF = (YA - Slope * XA) / (-1.0 / Slope - Slope);
+                XE = XA + 2.0 * std::abs(XA - XF);
+            } else {
+                XD = (YA - Slope * XA) / (-1.0 / Slope - Slope);
+                XF = (YB - Slope * XB) / (-1.0 / Slope - Slope);
+                XE = XB - 2.0 * std::abs(XB - XF);
+            }
+            YD = -XD / Slope;
+            YE = -XE / Slope;
+            YF = -XF / Slope;
+        }
 
-        //  DETERMINE BOUNDS FOR CURVATURE CORRECTION AND APPLY CORRECTION TO BEAM-BEAM TRANSMITTANCE
-        if (std::abs(PHI + OMEGA) < SL_THETA / 2.0) {
-            //  CALCULATE BEAM TRANSMISSION
+        T_CORR_D = std::sqrt(pow_2(XC - XD) + pow_2(YC - YD)); // Slat thickness perpendicular to light direction
+        T_CORR_F = std::sqrt(pow_2(XC - XF) + pow_2(YC - YF));
+
+        TAU_BB = 1.0 - T_CORR_D / (S * std::cos(OMEGA));
+
+    } else {
+        // DO NOT APPLY CURVATURE CORRECTION TO BEAM-BEAM TRANSMITTANCE
+        if (std::abs(OMEGA + PHI) < 0.0001) {
+            DE = S * 1000000.0;
+        } else {
+            DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
+        }
+        //  CHECK TO SEE IF THERE IS DIRECT BEAM TRANSMISSION
+        if ((DE / W) > (1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR)) { // YES
+            TAU_BB = max(0.0, (DE - W) / DE);
+        } else { // NO
+            TAU_BB = 0.0;
+        }
+    }
+
+    // CHECK TO SEE IF CURVATURE CORRECTION INCLUDES DOUBLE BLOCKAGE
+    // (TAU_BB < 0.0 AND SET TAU_BB = 0.0)
+    if (TAU_BB < 0.0) { // YES, THERE IS DOUBLE BLOCKAGE
+
+        TAU_BB = 0.0;
+
+        // DO NOT APPLY CURVATURE CORRECTION TO RHO_BD, TAU_BD IF TAU_BB < 0.0
+        if (std::abs(OMEGA + PHI) < 0.0001) {
+            DE = S * 1000000.0;
+        } else {
+            DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
+        }
+        if ((DE / W) > (1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR)) { // YES
+            VB_SOL4(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
+
+        } else { // NO
+            VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
+        }
+
+    } else { // NO, THERE IS NO DOUBLE BLOCKAGE
+
+        if (std::abs(PHI + OMEGA) < (SL_THETA / 2.0)) { // YES, APPLY CURVATURE CORRECTION
+
             XA = SL_RAD * std::sin(-SL_THETA / 2.0); // Glass-side end coordinate
             YA = SL_RAD * std::cos(-SL_THETA / 2.0);
             XB = -XA; // Indoor-side end coordinate
@@ -3720,140 +3787,40 @@ void VB_SOL46_CURVE(EnergyPlusData const &state,
                 YE = -XE / Slope;
                 YF = -XF / Slope;
             }
-
             T_CORR_D = std::sqrt(pow_2(XC - XD) + pow_2(YC - YD)); // Slat thickness perpendicular to light direction
             T_CORR_F = std::sqrt(pow_2(XC - XF) + pow_2(YC - YF));
 
-            TAU_BB = 1.0 - T_CORR_D / (S * std::cos(OMEGA));
+            if ((PHI + OMEGA) >= 0.0) { // Slat is lit from above
+                DE = XC - XA;
+                VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
+                Real64 const S_cos_OMEGA_inv(1.0 / (S * std::cos(OMEGA)));
+                RHO_BD *= T_CORR_D * S_cos_OMEGA_inv;
+                TAU_BD *= T_CORR_D * S_cos_OMEGA_inv;
+            } else { // Slat is lit from below
+                DE = XC - XA;
+                VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
+                Real64 const S_cos_OMEGA_inv(1.0 / (S * std::cos(OMEGA)));
+                RHO_TEMP = RHO_BD * T_CORR_F * S_cos_OMEGA_inv;
+                TAU_TEMP = TAU_BD * T_CORR_F * S_cos_OMEGA_inv;
+                DE = std::abs(XB - XF);
+                VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
+                RHO_BD = RHO_BD * (T_CORR_D - T_CORR_F) * S_cos_OMEGA_inv + RHO_TEMP;
+                TAU_BD = TAU_BD * (T_CORR_D - T_CORR_F) * S_cos_OMEGA_inv + TAU_TEMP;
+            }
 
-        } else {
-            // DO NOT APPLY CURVATURE CORRECTION TO BEAM-BEAM TRANSMITTANCE
+        } else { // NO, DO NOT APPLY CURVATURE CORRECTION
             if (std::abs(OMEGA + PHI) < 0.0001) {
                 DE = S * 1000000.0;
             } else {
                 DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
             }
-            //  CHECK TO SEE IF THERE IS DIRECT BEAM TRANSMISSION
-            if ((DE / W) > (1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR)) { // YES
-                TAU_BB = max(0.0, (DE - W) / DE);
-            } else { // NO
-                TAU_BB = 0.0;
-            }
-        }
-
-        // CHECK TO SEE IF CURVATURE CORRECTION INCLUDES DOUBLE BLOCKAGE
-        // (TAU_BB < 0.0 AND SET TAU_BB = 0.0)
-        if (TAU_BB < 0.0) { // YES, THERE IS DOUBLE BLOCKAGE
-
-            TAU_BB = 0.0;
-
-            // DO NOT APPLY CURVATURE CORRECTION TO RHO_BD, TAU_BD IF TAU_BB < 0.0
-            if (std::abs(OMEGA + PHI) < 0.0001) {
-                DE = S * 1000000.0;
-            } else {
-                DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
-            }
-            if ((DE / W) > (1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR)) { // YES
+            if (DE / W > 1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR) { // YES
                 VB_SOL4(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
 
             } else { // NO
                 VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
             }
-
-        } else { // NO, THERE IS NO DOUBLE BLOCKAGE
-
-            if (std::abs(PHI + OMEGA) < (SL_THETA / 2.0)) { // YES, APPLY CURVATURE CORRECTION
-
-                XA = SL_RAD * std::sin(-SL_THETA / 2.0); // Glass-side end coordinate
-                YA = SL_RAD * std::cos(-SL_THETA / 2.0);
-                XB = -XA; // Indoor-side end coordinate
-                YB = YA;
-                YC = SL_RAD * std::cos(PHI + OMEGA); // Tangent to slat in irradiance direction
-                XC = std::sqrt(pow_2(SL_RAD) - pow_2(YC));
-                Slope = -XC / YC;
-                if (std::abs(Slope) < state.dataWindowEquivalentLayer->SMALL_ERROR) {
-                    XD = 0.0;
-                    YD = YA;
-                    XE = 0.0;
-                    YE = YD;
-                    // Bug XF, YF not set but used below (XE, YE are set but NOT used)
-                } else {
-                    if ((PHI + OMEGA) < 0.0) {
-                        XC = -XC;
-                        Slope = -Slope;
-                        XD = (YB - Slope * XB) / (-1.0 / Slope - Slope);
-                        XF = (YA - Slope * XA) / (-1.0 / Slope - Slope);
-                        XE = XA + 2.0 * std::abs(XA - XF);
-                    } else {
-                        XD = (YA - Slope * XA) / (-1.0 / Slope - Slope);
-                        XF = (YB - Slope * XB) / (-1.0 / Slope - Slope);
-                        XE = XB - 2.0 * std::abs(XB - XF);
-                    }
-                    YD = -XD / Slope;
-                    YE = -XE / Slope;
-                    YF = -XF / Slope;
-                }
-                T_CORR_D = std::sqrt(pow_2(XC - XD) + pow_2(YC - YD)); // Slat thickness perpendicular to light direction
-                T_CORR_F = std::sqrt(pow_2(XC - XF) + pow_2(YC - YF));
-
-                if ((PHI + OMEGA) >= 0.0) { // Slat is lit from above
-                    DE = XC - XA;
-                    VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-                    Real64 const S_cos_OMEGA_inv(1.0 / (S * std::cos(OMEGA)));
-                    RHO_BD *= T_CORR_D * S_cos_OMEGA_inv;
-                    TAU_BD *= T_CORR_D * S_cos_OMEGA_inv;
-                } else { // Slat is lit from below
-                    DE = XC - XA;
-                    VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-                    Real64 const S_cos_OMEGA_inv(1.0 / (S * std::cos(OMEGA)));
-                    RHO_TEMP = RHO_BD * T_CORR_F * S_cos_OMEGA_inv;
-                    TAU_TEMP = TAU_BD * T_CORR_F * S_cos_OMEGA_inv;
-                    DE = std::abs(XB - XF);
-                    VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-                    RHO_BD = RHO_BD * (T_CORR_D - T_CORR_F) * S_cos_OMEGA_inv + RHO_TEMP;
-                    TAU_BD = TAU_BD * (T_CORR_D - T_CORR_F) * S_cos_OMEGA_inv + TAU_TEMP;
-                }
-
-            } else { // NO, DO NOT APPLY CURVATURE CORRECTION
-                if (std::abs(OMEGA + PHI) < 0.0001) {
-                    DE = S * 1000000.0;
-                } else {
-                    DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
-                }
-                if (DE / W > 1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR) { // YES
-                    VB_SOL4(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-
-                } else { // NO
-                    VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-                }
-            }
         }
-
-    } else { // DO NOT CORRECT FOR SLAT CURVATURE
-
-        //  CHECK TO SEE IF BEAM IS ALIGNED WITH SLATS
-        if (std::abs(PHI + OMEGA) < state.dataWindowEquivalentLayer->SMALL_ERROR) { // YES!
-            RHO_BD = 0.0;
-            TAU_BB = 1.0;
-            TAU_BD = 0.0;
-
-        } else { // BEAM NOT ALIGNED WITH SLATS
-            RHO_BD = 0.0;
-            TAU_BB = 0.0;
-            TAU_BD = 0.0;
-            DE = S * std::abs(std::cos(OMEGA) / std::sin(OMEGA + PHI));
-            //  CHECK TO SEE IF THERE IS DIRECT BEAM TRANSMISSION
-            if ((DE / W) > (1.0 - state.dataWindowEquivalentLayer->SMALL_ERROR)) { // YES
-                TAU_BB = (DE - W) / DE;
-                if (TAU_BB < 0.0) {
-                    TAU_BB = 0.0;
-                }
-                VB_SOL4(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-            } else { // NO
-                TAU_BB = 0.0;
-                VB_SOL6(state, S, W, OMEGA, DE, PHI, RHODFS_SLAT, RHOUFS_SLAT, TAU_SLAT, RHO_BD, TAU_BD);
-            } //  END CHECK FOR DIRECT BEAM TRANSMISSION
-        } // END CHECK TO SEE IF BEAM ALIGNED WITH SLATS
     }
 }
 
