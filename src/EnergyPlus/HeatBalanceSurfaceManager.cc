@@ -155,6 +155,37 @@ static Real64 sumSurfQRadFromHVACComponents(DataHeatBalFanSys::SurfQRadFromHVACD
            surfaceRadiantSources.ElecBaseboard + surfaceRadiantSources.CoolingPanel;
 }
 
+static Real64 surfQRadHVACReceivingArea(EnergyPlusData &state, int const surfNum)
+{
+    auto const &surface = state.dataSurface->Surface(surfNum);
+    Real64 receivingArea = surface.Area;
+    if (surface.Class == DataSurfaces::SurfaceClass::Window) {
+        receivingArea += state.dataSurface->SurfWinFrameArea(surfNum) * (1.0 + 0.5 * state.dataSurface->SurfWinProjCorrFrIn(surfNum));
+        if (state.dataSurface->SurfWinStormWinFlag(surfNum) < 1) {
+            receivingArea += state.dataSurface->SurfWinDividerArea(surfNum) * (1.0 + state.dataSurface->SurfWinProjCorrDivIn(surfNum));
+        }
+    }
+    return receivingArea;
+}
+
+static Real64 calcSurfQRadHVACInPerArea(EnergyPlusData &state, int const surfNum)
+{
+    Real64 radiantFlux = sumSurfQRadFromHVACComponents(state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum));
+    auto const &surface = state.dataSurface->Surface(surfNum);
+    if (surface.Class != DataSurfaces::SurfaceClass::Window) {
+        return radiantFlux;
+    }
+
+    // Radiant HVAC equipment divides its assigned surface power by Surface.Area. For windows this is the glazing area,
+    // while the same incident flux also reaches frames and dividers. Normalize the flux over the complete effective receiving
+    // area so adding those elements to the window heat balance does not create radiant power beyond the equipment output.
+    Real64 const receivingArea = surfQRadHVACReceivingArea(state, surfNum);
+    if (receivingArea > 0.0) {
+        radiantFlux *= surface.Area / receivingArea;
+    }
+    return radiantFlux;
+}
+
 void ManageSurfaceHeatBalance(EnergyPlusData &state)
 {
 
@@ -5469,8 +5500,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     // In that case, all of the system-on flags above are false, but the last surface heat balance still contains the trial source.
     bool radiantSourceChanged = false;
     for (int surfNum : state.dataSurface->allGetsRadiantHeatSurfaceList) {
-        auto const &thisSurfQRadFromHVAC = state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum);
-        Real64 const radiantSource = sumSurfQRadFromHVACComponents(thisSurfQRadFromHVAC);
+        Real64 const radiantSource = calcSurfQRadHVACInPerArea(state, surfNum);
         if (radiantSource != state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum)) {
             radiantSourceChanged = true;
             break;
@@ -6951,7 +6981,8 @@ void ReportSurfaceHeatBalance(EnergyPlusData &state)
                 state.dataHeatBalSurf->SurfQRadIntGainsInRep(surfNum) =
                     state.dataHeatBalSurf->SurfQdotRadIntGainsInRep(surfNum) * state.dataGlobal->TimeStepZoneSec;
 
-                state.dataHeatBalSurf->SurfQdotRadHVACInRep(surfNum) = state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) * surface.Area;
+                state.dataHeatBalSurf->SurfQdotRadHVACInRep(surfNum) =
+                    state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) * surfQRadHVACReceivingArea(state, surfNum);
                 state.dataHeatBalSurf->SurfQRadHVACInRep(surfNum) =
                     state.dataHeatBalSurf->SurfQdotRadHVACInRep(surfNum) * state.dataGlobal->TimeStepZoneSec;
 
@@ -9590,8 +9621,7 @@ void CalcHeatBalanceInsideSurf2CTFOnly(EnergyPlusData &state,
 void sumSurfQdotRadHVAC(EnergyPlusData &state)
 {
     for (int surfNum : state.dataSurface->allGetsRadiantHeatSurfaceList) {
-        auto const &thisSurfQRadFromHVAC = state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum);
-        state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) = sumSurfQRadFromHVACComponents(thisSurfQRadFromHVAC);
+        state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) = calcSurfQRadHVACInPerArea(state, surfNum);
     }
 }
 

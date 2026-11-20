@@ -600,6 +600,14 @@ The current radiant HVAC heat flux is also absorbed by the room-side frame. The 
 S_{2,HVAC}^{fr} = q^{\prime\prime}_{HVAC}{\varepsilon_2}\left( {1 + \frac{1}{2}{\eta_2}} \right).
 \end{equation}
 
+Radiant HVAC equipment assigns a fixed radiant power to a target surface. For a window, EnergyPlus normalizes that power over the complete effective receiving area before applying the heat flux to the glazing, frame, and divider:
+
+\begin{equation}
+q^{\prime\prime}_{HVAC} = \frac{Q_{HVAC,surf}}{A_g + A_f\left(1 + \frac{1}{2}\eta_2\right) + A_d\left(1 + \eta_{d,2}\right)},
+\end{equation}
+
+where \emph{A\(_g\)} is the glazing area, \emph{A\(_d\)} is the divider face area, and \emph{\(\eta_{d,2}\)} is the room-side divider projection area ratio defined below. The divider term is omitted when a storm window is active because the divider heat balance is not calculated. This normalization preserves the radiant power assigned by the equipment when frame and divider gains are included.
+
 Solar radiation, interior short-wave radiation, and IR from ordinary internal gains are evaluated once per zone timestep. Radiant HVAC systems can change output while the HVAC and inside surface heat balances are being iterated. Therefore \emph{q\(^{\prime\prime}_{HVAC}\)} is evaluated and added to the frame heat balance each time the inside surface heat balance is recalculated rather than being accumulated in the timestep-static absorbed-radiation term.
 
 Solving Equations~\ref{eq:horEquation} and~\ref{eq:hirEquation} simultaneously gives:

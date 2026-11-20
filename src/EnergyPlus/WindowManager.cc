@@ -5726,20 +5726,22 @@ namespace Window {
             HOutConvDiv = HOutConv;
             // Solar and interior short-wave and radiant internal gains absorbed by the divider (see frame above).
             Real64 DividerQRadOutAbs = s_surf->SurfWinDividerQRadOutAbs(SurfNum);
-            Real64 DividerThermAbs = DivEmisIn;
-            if (ShadeFlag == WinShadingType::IntShade) {
-                int const ConstrNumSh = s_surf->SurfWinActiveShadedConstruction(SurfNum);
-                auto const &constructionSh = state.dataConstruction->Construct(ConstrNumSh);
-                int const MatNumSh = constructionSh.LayerPoint(constructionSh.TotLayers);
-                auto const *matSh = dynamic_cast<Material::MaterialFen const *>(s_mat->materials(MatNumSh));
-                assert(matSh != nullptr);
-                DividerThermAbs *= matSh->TransThermal;
-            } else if (ShadeFlag == WinShadingType::IntBlind) {
-                DividerThermAbs *= s_surf->surfShades(SurfNum).blind.TAR.IR.Bk.Tra;
-            }
             Real64 DividerQRadInAbs = s_surf->SurfWinDividerQRadInAbs(SurfNum);
-            DividerQRadInAbs +=
-                state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum) * DividerThermAbs * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum));
+            Real64 const QRadHVACInPerArea = state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(SurfNum);
+            if (QRadHVACInPerArea != 0.0) {
+                Real64 DividerThermAbs = DivEmisIn;
+                if (ShadeFlag == WinShadingType::IntShade) {
+                    int const ConstrNumSh = s_surf->SurfWinActiveShadedConstruction(SurfNum);
+                    auto const &constructionSh = state.dataConstruction->Construct(ConstrNumSh);
+                    int const MatNumSh = constructionSh.LayerPoint(constructionSh.TotLayers);
+                    auto const *matSh = dynamic_cast<Material::MaterialFen const *>(s_mat->materials(MatNumSh));
+                    assert(matSh != nullptr);
+                    DividerThermAbs *= matSh->TransThermal;
+                } else if (ShadeFlag == WinShadingType::IntBlind) {
+                    DividerThermAbs *= s_surf->surfShades(SurfNum).blind.TAR.IR.Bk.Tra;
+                }
+                DividerQRadInAbs += QRadHVACInPerArea * DividerThermAbs * (1.0 + s_surf->SurfWinProjCorrDivIn(SurfNum));
+            }
             auto const &frdiv = s_surf->FrameDivider(FrDivNum);
             if (frdiv.DividerProjectionOut > 0.0) {
                 HOutRad *= (1.0 + 2.0 * s_surf->SurfWinProjCorrDivOut(SurfNum));

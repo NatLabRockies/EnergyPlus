@@ -644,6 +644,14 @@ TEST_F(EnergyPlusFixture, WindowManager_FrameAndDividerAbsorbedRadiationIsUsed)
     HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
     HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf(*state);
 
+    Real64 const hvacReceivingArea = s_surf->Surface(winNum).Area + s_surf->SurfWinFrameArea(winNum) + s_surf->SurfWinDividerArea(winNum);
+    Real64 const expectedHVACFlux = surfQRadFromHVAC.HTRadSys * s_surf->Surface(winNum).Area / hvacReceivingArea;
+    EXPECT_NEAR(expectedHVACFlux, state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(winNum), 1.0e-12);
+    EXPECT_NEAR(surfQRadFromHVAC.HTRadSys * s_surf->Surface(winNum).Area,
+                state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(winNum) * hvacReceivingArea,
+                1.0e-12);
+    HeatBalanceSurfaceManager::ReportSurfaceHeatBalance(*state);
+    EXPECT_NEAR(surfQRadFromHVAC.HTRadSys * s_surf->Surface(winNum).Area, state->dataHeatBalSurf->SurfQdotRadHVACInRep(winNum), 1.0e-12);
     EXPECT_DOUBLE_EQ(0.0, s_surf->SurfWinFrameQRadInAbs(winNum));
     EXPECT_DOUBLE_EQ(0.0, s_surf->SurfWinDividerQRadInAbs(winNum));
     EXPECT_GT(s_surf->SurfWinFrameTempIn(winNum), frameTempInNoHVAC + 1.0);
