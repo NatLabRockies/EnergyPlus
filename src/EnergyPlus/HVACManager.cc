@@ -63,6 +63,7 @@
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataAirSystems.hh>
 #include <EnergyPlus/DataConvergParams.hh>
+#include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -107,6 +108,7 @@
 #include <EnergyPlus/WaterManager.hh>
 #include <EnergyPlus/ZoneContaminantPredictorCorrector.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
+#include <EnergyPlus/ZonePlenum.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 namespace EnergyPlus::HVACManager {
@@ -3037,6 +3039,20 @@ void CheckAirLoopFlowBalance(EnergyPlusData &state)
                                                   thisAirLoopFlow.SysRetFlow / state.dataEnvrn->StdRhoAir,
                                                   thisAirLoopFlow.OAFlow / state.dataEnvrn->StdRhoAir));
                     ShowContinueError(state, std::format("  Imbalance={:.5f}", unbalancedExhaustDelta / state.dataEnvrn->StdRhoAir));
+                    // Simple duct leakage from ADUs whose zone has no return plenum is not part of SysRetFlow, so it shows up as imbalance
+                    Real64 unrecoveredLeakFlow = 0.0;
+                    for (auto const &airDistUnit : state.dataDefineEquipment->AirDistUnit) {
+                        if (airDistUnit.AirLoopNum == AirLoopNum && !ZonePlenum::zoneReturnFeedsPlenum(state, airDistUnit.ZoneEqNum)) {
+                            unrecoveredLeakFlow += airDistUnit.MassFlowRateUpStrLk + airDistUnit.MassFlowRateDnStrLk;
+                        }
+                    }
+                    if (unrecoveredLeakFlow > HVAC::SmallMassFlow) {
+                        ShowContinueError(state,
+                                          std::format("  Simple duct leakage from air distribution units without a return plenum = {:.5f} m3/s at "
+                                                      "standard density. This leaked air is not part of the return flow and must be replaced by "
+                                                      "outdoor air.",
+                                                      unrecoveredLeakFlow / state.dataEnvrn->StdRhoAir));
+                    }
                     ShowContinueError(state, "  This error will only be reported once per system.");
                     thisAirLoopFlow.FlowError = true;
                 }
