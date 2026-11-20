@@ -92,6 +92,7 @@
 #include <EnergyPlus/ICEngineElectricGenerator.hh>
 #include <EnergyPlus/IceThermalStorage.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/LiquidCooledITEPlantComponents.hh>
 #include <EnergyPlus/MicroCHPElectricGenerator.hh>
 #include <EnergyPlus/MicroturbineElectricGenerator.hh>
 #include <EnergyPlus/NodeInputManager.hh>
@@ -1209,6 +1210,11 @@ void GetPlantInput(EnergyPlusData &state)
                         this_comp.compPtr = EIRPlantLoopHeatPumps::EIRFuelFiredHeatPump::factory(
                             state, PlantEquipmentType::HeatPumpFuelFiredCooling, CompNames(CompNum));
                         this_comp.CurOpSchemeType = OpScheme::Invalid;
+                        break;
+                    }
+                    case PlantEquipmentType::CoilCoolingITEColdPlate: {
+                        this_comp.compPtr = LiquidCooledITEPlantComponents::CoilCoolingITEColdPlateData::factory(state, CompNames(CompNum));
+                        this_comp.CurOpSchemeType = OpScheme::Demand;
                         break;
                     }
                     case PlantEquipmentType::HeatPumpAirToWater: {
@@ -3108,7 +3114,8 @@ void CheckPlantOnAbort(EnergyPlusData &state)
                         case DataPlant::PlantEquipmentType::CoilWaterSimpleHeating:
                         case DataPlant::PlantEquipmentType::CoilSteamAirHeating:
                         case DataPlant::PlantEquipmentType::SolarCollectorFlatPlate:
-                        case DataPlant::PlantEquipmentType::PlantLoadProfile: {
+                        case DataPlant::PlantEquipmentType::PlantLoadProfile:
+                        case DataPlant::PlantEquipmentType::CoilCoolingITEColdPlate: {
                             ShouldBeACTIVE = true;
                         } break;
                         default: {
@@ -4721,6 +4728,11 @@ void SetupBranchControlTypes(EnergyPlusData &state)
                             this_component.FlowPriority = DataPlant::LoopFlowStatus::NeedyIfLoopOn;
                             this_component.HowLoadServed = DataPlant::HowMet::ByNominalCap;
                         }
+                    } break;
+                    case DataPlant::PlantEquipmentType::CoilCoolingITEColdPlate: {
+                        this_component.FlowCtrl = DataBranchAirLoopPlant::ControlType::Active;
+                        this_component.FlowPriority = DataPlant::LoopFlowStatus::NeedyAndTurnsLoopOn;
+                        this_component.HowLoadServed = DataPlant::HowMet::NoneDemand;
                     } break;
                     case DataPlant::PlantEquipmentType::Chiller_ElectricASHRAE205: {
                         this_component.FlowCtrl = DataBranchAirLoopPlant::ControlType::Active;

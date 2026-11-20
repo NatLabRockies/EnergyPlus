@@ -201,6 +201,7 @@
 #include <EnergyPlus/InputProcessing/InputValidation.hh>
 #include <EnergyPlus/IntegratedHeatPump.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
+#include <EnergyPlus/LiquidCooledITEPlantComponents.hh>
 #include <EnergyPlus/LowTempRadiantSystem.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/MatrixDataManager.hh>
