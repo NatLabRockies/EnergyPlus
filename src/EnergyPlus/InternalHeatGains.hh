@@ -228,6 +228,10 @@ namespace InternalHeatGains {
 
     void CalcZoneITEq(EnergyPlusData &state);
 
+    void CalcZoneITEqLiquidCooled(EnergyPlusData &state);
+
+    Real64 GetITEColdPlateDesignLoadPerPlate(EnergyPlusData &state, std::string const &coilName);
+
     void ReportInternalHeatGains(EnergyPlusData &state);
 
     Real64 GetDesignLightingLevelForZone(EnergyPlusData &state, int const WhichZone); // name of zone

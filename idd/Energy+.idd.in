@@ -24653,6 +24653,172 @@ ElectricEquipment:ITE:AirCooled:Definition,
        \type object-list
        \object-list ScheduleNames
 
+ElectricEquipment:ITE:LiquidCooled,
+       \extensible:4 Duplicate the four fields Cooling Coil Object Type through Cooling Coil Load Fraction Schedule Name
+       \memo Represents liquid-cooled data center IT equipment racks.
+       \memo Calculates power consumption and rejects heat to ITE cooling coils.
+       \min-fields 16
+  A1 , \field Name
+       \required-field
+       \type alpha
+  A2 , \field Zone or Space Name
+       \note ZoneList and SpaceList names are not allowed.
+       \note If a Zone with more than one Space is named, the Design Power Input is apportioned to each
+       \note Space by floor area.
+       \required-field
+       \type object-list
+       \object-list ZoneNames
+       \object-list SpaceNames
+       \note Zone or Space the IT equipment is located in.
+       \note Spillover air heat will be rejected to this space's heat balance.
+  A3 , \field Availability Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note Availability schedule name for this equipment. Schedule value > 0 means the equipment is on.
+       \note If this field is blank, the equipment is always available.
+  A4 , \field Compute Load Schedule Name
+       \required-field
+       \type object-list
+       \object-list ScheduleNames
+       \note Defines the transient compute loading schedule.
+       \note This 0-1 factor is applied to the Design Power Input as part of the total rack power calculation.
+       \note Schedule values must be between 0.0 and 1.0.
+  N1 , \field Design Power Input
+       \required-field
+       \type real
+       \units W
+       \minimum 0
+       \ip-units W
+       \note Max power consumption of a single IT equipment rack.
+  N2 , \field Multiplier
+       \type real
+       \default 1.0
+       \minimum 1.0
+       \note Scales power and heat to represent multiple identical racks.
+  N3 , \field Design Fan Power Input Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0.0
+       \note Retained for auxiliary server fans contributing to air load.
+  A5 , \field IT Equipment Power Modifier Curve Name
+       \type object-list
+       \object-list BivariateFunctions
+       \note Modifies power based on loading (x) and zone air temperature (y).
+       \note This curve (table) should equal 1.0 at design conditions.
+       \note If this field is left blank, the curve is assumed to always equal 1.0.
+  N4 , \field Liquid Heat Capture Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0.8
+       \note The fraction of the total ITE heat generation (CPU + Fan) that is removed by the liquid cooling
+       \note loop at design conditions. The remaining fraction is transferred to the zone air.
+  A6 , \field Liquid Heat Capture Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note If provided, this schedule multiplies the Liquid Heat Capture Fraction field. This allows the
+       \note capture effectiveness to vary dynamically during the simulation.
+  A7 , \field CPU End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default ITE-CPU
+  A8 , \field Fan End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
+       \type alpha
+       \retaincase
+       \default ITE-Fans
+  A9 , \field Cooling Coil 1 Object Type
+       \begin-extensible
+       \type choice
+       \key Coil:Cooling:ITE:ColdPlate
+       \key Coil:Cooling:ITE:UserDefined
+       \note The type of the first cooling component handling physical heat transfer.
+       \note At least one cooling coil must be specified. This list is extensible; there is no limit
+       \note on the number of cooling coils a rack may reference.
+  A10, \field Cooling Coil 1 Name
+       \type object-list
+       \object-list CoilCoolingITENames
+       \note The specific name of the first cooling component handling physical heat transfer.
+       \note A given coil (its object type and name together) may be referenced by only one ElectricEquipment:ITE:LiquidCooled
+       \note object; referencing the same coil from more than one rack is an input error.
+  N5 , \field Cooling Coil 1 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \note A static fraction (0.0 to 1.0) of the total IT liquid load directed to this coil.
+       \note If this field is used, the Schedule Name field below should be left blank.
+       \note If this is the only cooling coil on this object and neither this field nor the
+       \note schedule below is specified, this coil is assumed to receive the entire liquid load (fraction =
+       \note 1.0). If more than one cooling coil is specified, one of this field or the schedule below
+       \note must be specified for every coil.
+       \note The static Load Fractions of all coils must not sum to more than 1.0 (an input error);
+       \note any remainder below 1.0 is added to the zone air as a convective gain.
+  A11, \field Cooling Coil 1 Load Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note Schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this coil.
+       \note If this field is used, the static Load Fraction field above should be left blank.
+       \note If the Load Fractions of all coils sum to more than 1.0 at a time step, they are
+       \note normalized to sum to 1.0. A recurring warning is issued when the excess is greater than
+       \note the numerical tolerance.
+  A12, \field Cooling Coil 2 Object Type
+       \type choice
+       \key Coil:Cooling:ITE:ColdPlate
+       \key Coil:Cooling:ITE:UserDefined
+       \note The type of the second cooling component, if applicable (e.g., a secondary RDHx).
+  A13, \field Cooling Coil 2 Name
+       \type object-list
+       \object-list CoilCoolingITENames
+       \note See the note on Cooling Coil 1 Name: a given coil may be referenced by only one
+       \note ElectricEquipment:ITE:LiquidCooled object.
+  N6 , \field Cooling Coil 2 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \note See the note on Cooling Coil 1 Load Fraction for the default (sole coil) and
+       \note required (multiple coils) behavior of this field.
+  A14, \field Cooling Coil 2 Load Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+  A15, \field Cooling Coil 3 Object Type
+       \type choice
+       \key Coil:Cooling:ITE:ColdPlate
+       \key Coil:Cooling:ITE:UserDefined
+  A16, \field Cooling Coil 3 Name
+       \type object-list
+       \object-list CoilCoolingITENames
+       \note See the note on Cooling Coil 1 Name: a given coil may be referenced by only one
+       \note ElectricEquipment:ITE:LiquidCooled object.
+  N7 , \field Cooling Coil 3 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \note See the note on Cooling Coil 1 Load Fraction for the default (sole coil) and
+       \note required (multiple coils) behavior of this field.
+  A17, \field Cooling Coil 3 Load Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+  A18, \field Cooling Coil 4 Object Type
+       \type choice
+       \key Coil:Cooling:ITE:ColdPlate
+       \key Coil:Cooling:ITE:UserDefined
+  A19, \field Cooling Coil 4 Name
+       \type object-list
+       \object-list CoilCoolingITENames
+       \note See the note on Cooling Coil 1 Name: a given coil may be referenced by only one
+       \note ElectricEquipment:ITE:LiquidCooled object.
+  N8 , \field Cooling Coil 4 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \note See the note on Cooling Coil 1 Load Fraction for the default (sole coil) and
+       \note required (multiple coils) behavior of this field.
+  A20; \field Cooling Coil 4 Load Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+
 ZoneBaseboard:OutdoorTemperatureControlled,
        \memo Specifies outside temperature-controlled electric baseboard heating.
        \memo If a ZoneList, SpaceList, or a Zone comprised of more than one Space is specified
