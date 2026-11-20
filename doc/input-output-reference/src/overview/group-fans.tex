@@ -235,17 +235,11 @@ Fan:SystemModel,
   HVAC,Average,Fan Air Mass Flow Rate {[}kg/s{]}
 \item
   HVAC,Average,Fan Heat Gain to Air {[}W{]}
-\end{itemize}
-
-There are additional variables for fans that can be discretely varied.
-For single-speed fans:
-
-\begin{itemize}
 \item
   HVAC,Average,Fan Runtime Fraction {[]}
 \end{itemize}
 
-For two-speed and multi-speed fans:
+There are additional variables for two-speed and multi-speed fans that can be discretely varied:
 
 \begin{itemize}
 \item
@@ -274,7 +268,7 @@ This output contains the average power in Watts lost to the process air stream f
 
 \paragraph{Fan Runtime Fraction {[]}}\label{fan-runtime-fraction-fansysmodel}
 
-This output contains the fraction of time that this fan operated for the timestep being reported. Applicable only for single-speed fans that can be discretely varied (i.e., Speed Control Method = Discrete).
+This output contains the fraction of time that this fan operated at any speed for the timestep being reported. It is available for both discrete and continuous speed control. For discrete speed control, it is the sum of the runtime fractions at each speed. For continuous speed control, it is 1.0 when the fan runs throughout the timestep, even at reduced airflow, and less than 1.0 when the parent system cycles the fan. It is zero when the fan is off.
 
 \paragraph{Fan Runtime Fraction Speed <\#> {[]}}\label{fan-runtime-fraction-speed-fansysmodel}
 

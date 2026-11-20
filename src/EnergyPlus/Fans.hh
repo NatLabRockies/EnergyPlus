@@ -437,6 +437,7 @@ namespace Fans {
         // calculation variables
         std::vector<Real64> totalEffAtSpeed;
         std::vector<Real64> runtimeFracAtSpeed;
+        Real64 runtimeFrac = 0.0;
 
         Real64 designPointFEI = 0.0; // Fan Energy Index for the fan at the design operating point
 
