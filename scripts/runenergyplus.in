@@ -69,6 +69,17 @@ if $auto_eplus_dir; then
   SetEnergyPlusDir
 fi
 
+# Resolve the installation directory before changing to the input file's
+# directory. This also handles invocation through the installer-created symlink.
+READVARS_ROOT="$ENERGYPLUS_DIR"
+if $auto_eplus_dir; then
+  READVARS_SCRIPT="$0"
+  if [ -n "`readlink "$0"`" ]; then
+    READVARS_SCRIPT=`readlink "$0"`
+  fi
+  READVARS_ROOT=$(cd "$(dirname "$READVARS_SCRIPT")"; pwd)
+fi
+
 #echo
 #echo "1: " $1
 #echo "Large suffix: " ${1%%/*} " Small suffix: " ${1%/*}
@@ -121,8 +132,6 @@ PRG_N=energyplus
 PRG_X=ExpandObjects
 # Name of EPMacro executable
 PRG_M=EPMacro
-# Name of ReadVarsESO executable
-PRG_R=ReadVarsESO
 # Name of hvac-diagram executable
 PRG_H=HVAC-Diagram
 # Name of Basement executable
@@ -590,7 +599,7 @@ fi
 if [ -f "${INP_P}/${ARG1}.mvi" ]; then
   #  link to the mvi
   ln -s "${INP_P}/${ARG1}.mvi" eplusmtr.inp
-else
+elif [ -f eplusout.mtr ]; then
   echo eplusout.mtr >eplusmtr.inp
   echo eplusmtr.csv >>eplusmtr.inp
 fi
@@ -599,12 +608,9 @@ fi
 #if %maxcol%==250     SET rvset=
 #if %maxcol%==nolimit SET rvset=unlimited
 
-if $auto_eplus_dir; then
-  "$ENERGYPLUS_DIR/bin/$PRG_R" eplusout.inp unlimited
-  "$ENERGYPLUS_DIR/bin/$PRG_R" eplusmtr.inp unlimited
-else
-  "$ENERGYPLUS_DIR/PostProcess/$PRG_R" eplusout.inp unlimited
-  "$ENERGYPLUS_DIR/PostProcess/$PRG_R" eplusmtr.inp unlimited
+"$READVARS_ROOT/energyplus" auxiliary readvars eplusout.inp unlimited || RETVAL=1
+if [ -f eplusmtr.inp ]; then
+  "$READVARS_ROOT/energyplus" auxiliary readvars eplusmtr.inp unlimited || RETVAL=1
 fi
 
 if [ -f eplusout.bnd ]; then

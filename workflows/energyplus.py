@@ -427,64 +427,66 @@ class EPlusRunManager(object):
                     os.remove(txt_run_path)
 
             # run ReadVarsESO to convert the timestep based output files to CSV files
-            if platform.system() == "Windows":
-                readvarseso_binary = os.path.join(energyplus_root_folder, "PostProcess", "ReadVarsESO.exe")
-            else:
-                readvarseso_binary = os.path.join(energyplus_root_folder, "PostProcess", "ReadVarsESO")
-            if os.path.exists(readvarseso_binary):
-
-                command_line_args = [readvarseso_binary]
+            readvarseso_command = [energyplus_binary, "auxiliary", "readvars"]
+            if os.path.exists(energyplus_binary):
                 rvi_path = os.path.join(run_directory, file_name_no_ext + ".rvi")
                 temp_rvi_path = os.path.join(output_directory, "temp.rvi")
                 eplusout_rvi_path = os.path.join(output_directory, "eplusout.rvi")
-                if os.path.exists(rvi_path):
-                    shutil.copy(rvi_path, eplusout_rvi_path)
-                    command_line_args.append("eplusout.rvi")
-                else:
-                    with open(temp_rvi_path, "w") as f:
-                        f.write("eplusout.eso \n")
-                        f.write("eplusout.csv \n")
-                    command_line_args.append("temp.rvi")
-                command_line_args.append("unlimited")  # no number of column limit
+                if os.path.exists(rvi_path) or os.path.exists(eplusouteso_path):
+                    command_line_args = readvarseso_command.copy()
+                    if os.path.exists(rvi_path):
+                        shutil.copy(rvi_path, eplusout_rvi_path)
+                        command_line_args.append("eplusout.rvi")
+                    else:
+                        with open(temp_rvi_path, "w") as f:
+                            f.write("eplusout.eso \n")
+                            f.write("eplusout.csv \n")
+                        command_line_args.append("temp.rvi")
+                    command_line_args.append("unlimited")  # no number of column limit
 
-                try:
-                    for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
-                        workflow_instance.callback(message)
-                except subprocess.CalledProcessError:
-                    workflow_instance.callback("ReadVarsESO FAILED on ESO file")
-                    return EPLaunchWorkflowResponse1(
-                        success=False, message="ReadVarsESO failed for ESO file: %s!" % full_file_path, column_data={}
-                    )
-                eplusout_csv_path = os.path.join(output_directory, "eplusout.csv")
-                if os.path.exists(eplusout_csv_path):
-                    os.replace(eplusout_csv_path, vari_csv_path)
+                    try:
+                        for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
+                            workflow_instance.callback(message)
+                    except subprocess.CalledProcessError:
+                        workflow_instance.callback("ReadVarsESO FAILED on ESO file")
+                        return EPLaunchWorkflowResponse1(
+                            success=False,
+                            message="ReadVarsESO failed for ESO file: %s!" % full_file_path,
+                            column_data={},
+                        )
+                    eplusout_csv_path = os.path.join(output_directory, "eplusout.csv")
+                    if os.path.exists(eplusout_csv_path):
+                        os.replace(eplusout_csv_path, vari_csv_path)
 
-                command_line_args = [readvarseso_binary]
                 mvi_path = os.path.join(run_directory, file_name_no_ext + ".mvi")
                 temp_mvi_path = os.path.join(output_directory, "temp.mvi")
                 eplusout_mvi_path = os.path.join(output_directory, "eplusout.mvi")
-                if os.path.exists(mvi_path):
-                    shutil.copy(mvi_path, eplusout_mvi_path)
-                    command_line_args.append("eplusout.mvi")
-                else:
-                    with open(temp_mvi_path, "w+") as f:
-                        f.write("eplusout.mtr \n")
-                        f.write("eplusmtr.csv \n")
-                    command_line_args.append("temp.mvi")
-                command_line_args.append("unlimited")  # no number of column limit
+                if os.path.exists(mvi_path) or os.path.exists(eplusoutmtr_path):
+                    command_line_args = readvarseso_command.copy()
+                    if os.path.exists(mvi_path):
+                        shutil.copy(mvi_path, eplusout_mvi_path)
+                        command_line_args.append("eplusout.mvi")
+                    else:
+                        with open(temp_mvi_path, "w+") as f:
+                            f.write("eplusout.mtr \n")
+                            f.write("eplusmtr.csv \n")
+                        command_line_args.append("temp.mvi")
+                    command_line_args.append("unlimited")  # no number of column limit
 
-                try:
-                    for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
-                        workflow_instance.callback(message)
-                except subprocess.CalledProcessError:
-                    workflow_instance.callback("ReadVarsESO FAILED on MTR file")
-                    return EPLaunchWorkflowResponse1(
-                        success=False, message="ReadVarsESO failed for MTR file: %s!" % full_file_path, column_data={}
-                    )
-                mtr_csv_path = os.path.join(output_directory, file_name_no_ext + "Meter.csv")
-                eplusmtr_csv_path = os.path.join(output_directory, "eplusmtr.csv")
-                if os.path.exists(eplusmtr_csv_path):
-                    os.replace(eplusmtr_csv_path, mtr_csv_path)
+                    try:
+                        for message in workflow_instance.execute_for_callback(command_line_args, output_directory):
+                            workflow_instance.callback(message)
+                    except subprocess.CalledProcessError:
+                        workflow_instance.callback("ReadVarsESO FAILED on MTR file")
+                        return EPLaunchWorkflowResponse1(
+                            success=False,
+                            message="ReadVarsESO failed for MTR file: %s!" % full_file_path,
+                            column_data={},
+                        )
+                    mtr_csv_path = os.path.join(output_directory, file_name_no_ext + "Meter.csv")
+                    eplusmtr_csv_path = os.path.join(output_directory, "eplusmtr.csv")
+                    if os.path.exists(eplusmtr_csv_path):
+                        os.replace(eplusmtr_csv_path, mtr_csv_path)
 
                 readvars_audit_path = os.path.join(output_directory, "readvars.audit")
                 rv_audit_path = os.path.join(output_directory, file_name_no_ext + ".rvaudit")

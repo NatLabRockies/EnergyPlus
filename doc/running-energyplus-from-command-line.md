@@ -38,6 +38,8 @@ This will give the following display of options:
 
 EnergyPlus can be run by specifying a number of options followed by the path to the input file (`input-file`). The file itself is usually in IDF (Input Data File) format, but it may also be in IMF (Input Macro File) format to be run with EPMacro using the `--epmacro` option.
 
+The `-r`/`--readvars` option runs ReadVarsESO from the `readvars` Python package installed with EnergyPlus. ReadVarsESO runs after the simulation and converts the ESO and MTR output files to CSV. It can also be run via compatibility wrappers as `ReadVarsESO` or as `energyplus auxiliary readvars [ReadVarsESO arguments]` using the Python runtime embedded in EnergyPlus.
+
 Each option has a short form (a single-character preceded by a single dash, e.g., "-h") and a long form (a more descriptive string of characters preceded by double dashes, e.g., "--help").
 
 The options generally fall into four categories:
