@@ -535,7 +535,6 @@ class DataExchange:
         :param meter_name: The name of the variable to retrieve, e.g. "Electricity:Facility", or "Fans:Electricity"
         :return: An integer ID for this meter, or -1 if one could not be found.
         """
-        meter_name = meter_name.upper()
         if isinstance(meter_name, str):
             meter_name = meter_name.encode("utf-8")
         elif not isinstance(meter_name, bytes):
@@ -543,6 +542,7 @@ class DataExchange:
                 "`get_meter_handle` expects `meter_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(meter_name)
             )
+        meter_name = meter_name.upper()
         return self.api.getMeterHandle(state, meter_name)
 
     def get_actuator_handle(
