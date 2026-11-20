@@ -72,6 +72,7 @@ def isInt(s):
 
 
 extension_renaming = {
+    "Site:GroundTemperature:Undisturbed:GradientSegments": "segments",
     "LifeCycleCost:UseAdjustment": "multipliers",
     "LifeCycleCost:UsePriceEscalation": "escalations",
     "ElectricLoadCenter:Transformer": "meters",

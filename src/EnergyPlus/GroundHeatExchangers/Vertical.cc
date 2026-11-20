@@ -64,6 +64,8 @@
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/WeatherManager.hh>
+#include <EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh>
+#include <EnergyPlus/GroundTemperatureModeling/GradientsGTM.hh>
 
 namespace EnergyPlus::GroundHeatExchangers {
 GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::json const &j)
@@ -403,6 +405,12 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Initialize ground temperature model and get pointer reference
     this->groundTempModel =
         GroundTemp::GetGroundTempModelAndInit(state, modelType, Util::makeUPPER(j["undisturbed_ground_temperature_model_name"].get<std::string>()));
+
+    // Pass borehole depth to GradientsGTM if applicable
+    auto *gradModel = dynamic_cast<GroundTemp::GradientsGTM*>(this->groundTempModel);
+    if (gradModel) {
+        gradModel->setBoreholeDepth(state, this->bhLength);
+    }
 
     OutputReportPredefined::PreDefTableEntry(state,
                                              state.dataOutRptPredefined->pdchGLHEType,
