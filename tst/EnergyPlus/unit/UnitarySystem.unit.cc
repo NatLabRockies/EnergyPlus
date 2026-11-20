@@ -8409,6 +8409,7 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_SupplementalHeatingCyclingFanAirFlo
     EXPECT_DOUBLE_EQ(1.0, state->dataUnitarySystems->m_runTimeFraction2);
 }
 
+// A cycling unit without an internal supplemental coil must stop its fan when DX heating is unavailable or locked out.
 TEST_F(EnergyPlusFixture, UnitarySystemModel_CyclingFanStopsWhenDXHeatingUnavailableWithoutSupplementalCoil)
 {
     state->init_state(*state);
