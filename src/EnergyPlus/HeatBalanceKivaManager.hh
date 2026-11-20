@@ -162,6 +162,11 @@ namespace HeatBalanceKivaManager {
         std::map<int, Kiva::Aggregator> surfaceMap;
         Real64 timestep;
 
+        // Last zone timestep advanced; initialization resets this for each environment.
+        int lastCalculationDay = -1;
+        int lastCalculationHour = -1;
+        int lastCalculationTimeStep = -1;
+
         struct Settings
         {
             Settings();

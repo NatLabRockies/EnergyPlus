@@ -59,6 +59,8 @@
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
+#include <EnergyPlus/DataSurfaces.hh>
+#include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/DataZoneControls.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/HeatBalanceKivaManager.hh>
@@ -66,6 +68,8 @@
 #include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SurfaceGeometry.hh>
+#include <EnergyPlus/ThermalComfort.hh>
 #include <EnergyPlus/WeatherManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
@@ -846,6 +850,193 @@ TEST_F(EnergyPlusFixture, HeatBalanceKiva_setMessageCallback)
     });
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+class KivaResimulationFixture : public EnergyPlusFixture
+{
+protected:
+    struct History
+    {
+        std::vector<double> oldTemperatures;
+        std::vector<double> newTemperatures;
+    };
+
+    void prepare(HeatBalanceKivaManager::KivaManager::Settings::TSType stepType)
+    {
+        state->dataGlobal->NumOfZones = 1;
+        state->dataGlobal->TimeStepsInHour = 4;
+        state->dataGlobal->DayOfSim = 1;
+        state->dataGlobal->HourOfDay = 1;
+        state->dataGlobal->TimeStep = 1;
+        state->dataGlobal->WarmupFlag = false;
+        state->dataEnvrn->DayOfYear = 1;
+        state->dataEnvrn->OutDryBulbTemp = 0.0;
+        state->dataEnvrn->SkyTempKelvin = 273.15;
+        state->dataHeatBal->AnyKiva = true;
+        state->dataHeatBal->Zone.allocate(1);
+        state->dataHeatBal->Zone(1).zoneRadEnclosureFirst = 1;
+        state->dataHeatBal->Zone(1).zoneRadEnclosureLast = 0;
+        state->dataSurface->Surface.allocate(2);
+        state->dataSurface->Surface(1).RadEnclIndex = 1;
+        state->dataSurface->Surface(1).Area = 1.0;
+        state->dataSurface->Surface(2).Area = 1.0;
+        state->dataViewFactor->EnclRadInfo.allocate(1);
+        state->dataViewFactor->EnclRadInfo(1).SurfacePtr.allocate(2);
+        state->dataViewFactor->EnclRadInfo(1).SurfacePtr(1) = 1;
+        state->dataViewFactor->EnclRadInfo(1).SurfacePtr(2) = 2;
+        state->dataThermalComforts->FirstTimeSurfaceWeightedFlag = false;
+        state->dataHeatBalSurf->SurfTempInTmp.dimension(2, 20.0);
+        state->dataHeatBalSurf->SurfAbsThermalInt.dimension(2, 0.9);
+        state->dataHeatBalSurf->SurfTempIn.dimension(2, 20.0);
+        state->dataHeatBalSurf->SurfTempInsOld.dimension(2, 20.0);
+        state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea.dimension(2, 0.0);
+        state->dataHeatBalSurf->SurfOpaqQRadSWInAbs.dimension(2, 0.0);
+        state->dataHeatBalSurf->SurfQdotRadHVACInPerArea.dimension(2, 0.0);
+        state->dataHeatBal->SurfQdotRadIntGainsInPerArea.dimension(2, 0.0);
+        state->dataHeatBal->SurfTempEffBulkAir.dimension(2, 20.0);
+
+        auto &manager = state->dataSurfaceGeometry->kivaManager;
+        manager.settings.timestepType = stepType;
+        manager.timestep = stepType == HeatBalanceKivaManager::KivaManager::Settings::HOURLY ? 3600.0 : 900.0;
+        manager.surfaceConvMap[1].in = [](double, double, double, double, double) { return 3.0; };
+        manager.surfaceConvMap[1].out = [](double, double, double, double, double) { return 10.0; };
+        manager.surfaceConvMap[1].f = [](double, double, double, double) { return 0.0; };
+        Kiva::Foundation foundation;
+        foundation.reductionStrategy = Kiva::Foundation::RS_AP;
+        foundation.numericalScheme = Kiva::Foundation::NS_ADI;
+        foundation.deepGroundDepth = 3.0;
+        foundation.mesh.minCellDim = 0.25;
+        Kiva::Layer layer;
+        layer.thickness = 0.1;
+        layer.material = Kiva::Material(1.95, 2400.0, 900.0);
+        foundation.slab.layers.push_back(layer);
+        foundation.wall.layers.push_back(layer);
+        foundation.wall.heightAboveGrade = 0.1;
+        foundation.wall.depthBelowSlab = 0.2;
+        foundation.polygon.outer() = {{-3.0, -3.0}, {-3.0, 3.0}, {3.0, 3.0}, {3.0, -3.0}};
+        manager.kivaInstances.emplace_back(*state, foundation, 1, std::vector<int>{}, 1, 20.0, 1.0, 0, &manager);
+        auto &ground = *manager.kivaInstances[0].instance.ground;
+        std::fill(ground.TOld.begin(), ground.TOld.end(), 283.15);
+        std::fill(ground.TNew.begin(), ground.TNew.end(), 283.15);
+        manager.kivaInstances[0].instance.bcs = std::make_shared<Kiva::BoundaryConditions>();
+        manager.kivaInstances[0].instance.bcs->deepGroundTemperature = 283.15;
+        manager.kivaWeather.annualAverageDrybulbTemp = 10.0;
+        manager.kivaWeather.intervalsPerHour = 1;
+        manager.kivaWeather.dryBulb.assign(8760, 10.0);
+        manager.kivaWeather.windSpeed.assign(8760, 0.0);
+        manager.kivaWeather.skyEmissivity.assign(8760, 1.0);
+    }
+
+    History history()
+    {
+        auto const &ground = *state->dataSurfaceGeometry->kivaManager.kivaInstances[0].instance.ground;
+        return {ground.TOld, ground.TNew};
+    }
+
+    double difference(History const &a, History const &b)
+    {
+        double maximum = 0.0;
+        EXPECT_EQ(a.oldTemperatures.size(), b.oldTemperatures.size());
+        for (std::size_t i = 0; i < a.oldTemperatures.size(); ++i) {
+            maximum = std::max(maximum, std::abs(a.oldTemperatures[i] - b.oldTemperatures[i]));
+            maximum = std::max(maximum, std::abs(a.newTemperatures[i] - b.newTemperatures[i]));
+        }
+        return maximum;
+    }
+
+    void balance(bool partial = false)
+    {
+        // Empty surface lists isolate the real Kiva advancement in the surface-balance entry point.
+        if (partial) {
+            HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf2(*state, {}, {}, {}, {}, 1);
+        } else {
+            HeatBalanceSurfaceManager::CalcHeatBalanceInsideSurf2(*state, {}, {}, {}, {});
+        }
+    }
+};
+
+TEST_F(KivaResimulationFixture, RepeatedFullBalanceRetainsGroundHistory)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::HOURLY);
+    auto initial = history();
+    ASSERT_NO_THROW(balance());
+    auto first = history();
+    ASSERT_GT(difference(initial, first), 1e-8);
+    ASSERT_NO_THROW(balance());
+    EXPECT_DOUBLE_EQ(0.0, difference(first, history()));
+}
+
+TEST_F(KivaResimulationFixture, RepeatedPartialBalanceRetainsGroundHistory)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::HOURLY);
+    ASSERT_NO_THROW(balance());
+    auto first = history();
+    ASSERT_NO_THROW(balance(true));
+    EXPECT_DOUBLE_EQ(0.0, difference(first, history()));
+}
+
+TEST_F(KivaResimulationFixture, ZoneTimestepAdvancesAtNextStepOnly)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::TIMESTEP);
+    balance();
+    auto first = history();
+    state->dataGlobal->TimeStep = 2;
+    balance(true);
+    auto second = history();
+    EXPECT_GT(difference(first, second), 1e-8);
+    balance();
+    EXPECT_DOUBLE_EQ(0.0, difference(second, history()));
+    state->dataGlobal->HourOfDay = 2;
+    state->dataGlobal->TimeStep = 1;
+    balance();
+    auto nextHour = history();
+    EXPECT_GT(difference(second, nextHour), 1e-8);
+    state->dataGlobal->DayOfSim = 2;
+    balance();
+    EXPECT_GT(difference(nextHour, history()), 1e-8);
+}
+
+TEST_F(KivaResimulationFixture, HourlySkipsLaterZoneTimesteps)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::HOURLY);
+    balance();
+    auto first = history();
+    state->dataGlobal->TimeStep = 2;
+    balance(true);
+    EXPECT_DOUBLE_EQ(0.0, difference(first, history()));
+    state->dataGlobal->TimeStep = 4;
+    balance();
+    EXPECT_DOUBLE_EQ(0.0, difference(first, history()));
+    state->dataGlobal->HourOfDay = 2;
+    state->dataGlobal->TimeStep = 1;
+    balance();
+    EXPECT_GT(difference(first, history()), 1e-8);
+}
+
+TEST_F(KivaResimulationFixture, WarmupDoesNotConsumeFirstRealStep)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::HOURLY);
+    auto initial = history();
+    state->dataGlobal->WarmupFlag = true;
+    balance();
+    EXPECT_DOUBLE_EQ(0.0, difference(initial, history()));
+    state->dataGlobal->WarmupFlag = false;
+    balance();
+    EXPECT_GT(difference(initial, history()), 1e-8);
+}
+
+TEST_F(KivaResimulationFixture, NewEnvironmentAtSameTimestampAdvances)
+{
+    prepare(HeatBalanceKivaManager::KivaManager::Settings::HOURLY);
+    balance();
+    auto &manager = state->dataSurfaceGeometry->kivaManager;
+    ASSERT_NO_THROW(manager.initKivaInstances(*state));
+    auto initialized = history();
+    balance();
+    auto first = history();
+    EXPECT_GT(difference(initialized, first), 1e-8);
+    balance(true);
+    EXPECT_DOUBLE_EQ(0.0, difference(first, history()));
 }
 
 } // namespace EnergyPlus

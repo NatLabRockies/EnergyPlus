@@ -1840,7 +1840,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
 void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
 {
     demandMeterPtr_ = EnergyPlus::GetMeterIndex(state, demandMeterName_);
-    if ((demandMeterPtr_ == 0) && (genOperationScheme_ == GeneratorOpScheme::TrackMeter)) { // throw error
+    if ((demandMeterPtr_ == -1) && (genOperationScheme_ == GeneratorOpScheme::TrackMeter)) { // throw error
         ShowFatalError(
             state,
             std::format("ElectPowerLoadCenter::setupLoadCenterMeterIndices  Did not find Meter named: {} in ElectricLoadCenter:Distribution named {}",
@@ -1850,7 +1850,7 @@ void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
 
     if (storageScheme_ == StorageOpScheme::MeterDemandStoreExcessOnSite) {
         trackStorageOpMeterIndex_ = EnergyPlus::GetMeterIndex(state, trackSorageOpMeterName_);
-        if (trackStorageOpMeterIndex_ == 0) { //
+        if (trackStorageOpMeterIndex_ == -1) {
             ShowFatalError(
                 state,
                 std::format(
@@ -4934,21 +4934,33 @@ void ElectricTransformer::manageTransformers(EnergyPlusData &state, Real64 const
 
 void ElectricTransformer::setupMeterIndices(EnergyPlusData &state)
 {
+    static constexpr std::string_view routineName = "ElectricTransformer::setupMeterIndices";
+
     if (usageMode_ == TransformerUse::PowerInFromGrid) {
+        ErrorObjectHeader const eoh{routineName, "ElectricLoadCenter:Transformer", name_};
+        bool errorsFound = false;
         for (std::size_t meterNum = 0; meterNum < wiredMeterNames_.size(); ++meterNum) {
 
             wiredMeterPtrs_[meterNum] = GetMeterIndex(state, wiredMeterNames_[meterNum]);
+            if (wiredMeterPtrs_[meterNum] == -1) {
+                ShowSevereItemNotFound(state, eoh, std::format("Meter Name {}", meterNum + 1), wiredMeterNames_[meterNum]);
+                errorsFound = true;
+                continue;
+            }
 
             // Check whether the meter is an electricity meter
             // Index function is used here because some resource types are not Electricity but strings containing
             // Electricity such as ElectricityPurchased and ElectricityProduced.
             // It is not proper to have this check in GetInput routine because the meter index may have not been defined
-            auto *meter = state.dataOutputProcessor->meters[wiredMeterPtrs_[meterNum]];
+            auto const *meter = state.dataOutputProcessor->meters[wiredMeterPtrs_[meterNum]];
             if (meter->resource != Constant::eResource::Electricity && meter->resource != Constant::eResource::ElectricityPurchased &&
                 meter->resource != Constant::eResource::ElectricitySurplusSold && meter->resource != Constant::eResource::ElectricityProduced &&
                 meter->resource != Constant::eResource::ElectricityNet) {
                 ShowFatalError(state, std::format("Non-electricity meter used for {}", name_));
             }
+        }
+        if (errorsFound) {
+            ShowFatalError(state, std::format("{}: Preceding errors cause termination.", routineName));
         }
     }
 }
