@@ -79,12 +79,12 @@ enum class PsychrometricFunction : int
 
 #ifdef EP_nocache_Psychrometrics
 #    undef EP_cache_PsyTwbFnTdbWPb
-#    undef EP_cache_PsyPsatFnTemp
+#    undef EP_interp_PsyPsatFnTemp
 #    undef EP_cache_PsyTsatFnPb
 #    undef EP_cache_PsyTsatFnHPb
 #else
 #    define EP_cache_PsyTwbFnTdbWPb
-#    define EP_cache_PsyPsatFnTemp
+#    define EP_interp_PsyPsatFnTemp
 #    define EP_cache_PsyTsatFnPb
 #    define EP_cache_PsyTsatFnHPb
 #endif
@@ -92,11 +92,6 @@ enum class PsychrometricFunction : int
 #ifdef EP_cache_PsyTwbFnTdbWPb
 constexpr int twbcache_size = 1024 * 1024;
 constexpr int twbprecision_bits = 20;
-#endif
-#ifdef EP_cache_PsyPsatFnTemp
-constexpr int psatcache_size = 1024 * 1024;
-constexpr int psatprecision_bits = 24; // 28  //24  //32
-constexpr Int64 psatcache_mask = psatcache_size - 1;
 #endif
 #ifdef EP_cache_PsyTsatFnPb
 constexpr int tsatcache_size = 1024 * 1024;
@@ -131,19 +126,6 @@ struct cached_tsat_h_pb
     }
 };
 #endif
-#ifdef EP_cache_PsyPsatFnTemp
-struct cached_psat_t
-{
-    // Members
-    Int64 iTdb;
-    Real64 Psat;
-
-    // Default Constructor
-    cached_psat_t() : iTdb(-1000), Psat(0.0)
-    {
-    }
-};
-#endif
 #ifdef EP_cache_PsyTsatFnPb
 struct cached_tsat_pb
 {
@@ -164,9 +146,6 @@ struct PsychrometricCacheData : BaseGlobalStruct
 
 #ifdef EP_cache_PsyTwbFnTdbWPb
     std::array<cached_twb_t, twbcache_size> cached_Twb;
-#endif
-#ifdef EP_cache_PsyPsatFnTemp
-    std::array<cached_psat_t, psatcache_size> cached_Psat;
 #endif
 #ifdef EP_cache_PsyTsatFnPb
     std::array<cached_tsat_h_pb, tsatcache_size> cached_Tsat;
