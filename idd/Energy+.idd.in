@@ -95899,10 +95899,15 @@ ElectricLoadCenter:Inverter:FunctionOfPower,
         \maximum 1.0
    N5 , \field Minimum Power Output
         \units W
+        \minimum 0
+        \default 0
    N6 , \field Maximum Power Output
         \units W
+        \required-field
+        \minimum> 0
    N7 ; \field Ancillary Power Consumed In Standby
         \units W
+        \default 0
 
 ElectricLoadCenter:Inverter:LookUpTable,
         \memo   California Energy Commission tests and publishes data on inverters
