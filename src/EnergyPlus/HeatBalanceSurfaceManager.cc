@@ -5463,12 +5463,25 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
 
+    // A radiant source can be non-zero during an HVAC trial calculation and resolve to zero after plant flow constraints are applied.
+    // In that case, all of the system-on flags above are false, but the last surface heat balance still contains the trial source.
+    bool radiantSourceChanged = false;
+    for (int surfNum : state.dataSurface->allGetsRadiantHeatSurfaceList) {
+        auto const &thisSurfQRadFromHVAC = state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum);
+        Real64 const radiantSource = thisSurfQRadFromHVAC.HTRadSys + thisSurfQRadFromHVAC.HWBaseboard + thisSurfQRadFromHVAC.SteamBaseboard +
+                                     thisSurfQRadFromHVAC.ElecBaseboard + thisSurfQRadFromHVAC.CoolingPanel;
+        if (radiantSource != state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum)) {
+            radiantSourceChanged = true;
+            break;
+        }
+    }
+
     // Surface-coupled PV may have changed its heat sink since the last surface heat balance; consume that request here.
     bool const PVSurfaceHeatBalanceResim = state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag;
     state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
 
     if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
-        PVSurfaceHeatBalanceResim) {
+        radiantSourceChanged || PVSurfaceHeatBalanceResim) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);
