@@ -969,6 +969,18 @@ namespace HeatBalanceManager {
             if (!state.dataIPShortCut->lAlphaFieldBlanks(3)) {
                 state.dataHeatBal->doSpaceHeatBalanceSimulation = static_cast<bool>(getYesNoValue(AlphaName(3)));
             }
+            if (NumAlpha > 3 && !state.dataIPShortCut->lAlphaFieldBlanks(4)) {
+                std::string const coupling = Util::makeUPPER(AlphaName(4));
+                if (coupling == "IMPLICIT") {
+                    state.dataHeatBal->surfaceAirImplicitCoupling = true;
+                } else if (coupling != "LAGGED") {
+                    ShowWarningError(state,
+                                     std::format("{}: Invalid input of {} = {}. The default choice is assigned = Lagged",
+                                                 state.dataHeatBalMgr->CurrentModuleObject,
+                                                 state.dataIPShortCut->cAlphaFieldNames(4),
+                                                 AlphaName(4)));
+                }
+            }
         } else {
             state.dataHeatBal->ZoneAirSolutionAlgo = DataHeatBalance::SolutionAlgo::ThirdOrder;
             AlphaName(1) = "ThirdOrderBackwardDifference";
@@ -988,6 +1000,11 @@ namespace HeatBalanceManager {
               AlphaName(1),
               state.dataHeatBal->doSpaceHeatBalanceSizing ? "Yes" : "No",
               state.dataHeatBal->doSpaceHeatBalanceSimulation ? "Yes" : "No");
+        if (state.dataHeatBal->surfaceAirImplicitCoupling) {
+            // Reported only when enabled, so files that keep the default see no change in the eio file
+            print(state.files.eio, "! <Zone Air Surface Coupling>, Method {{Lagged | Implicit}}\n");
+            print(state.files.eio, " Zone Air Surface Coupling, Implicit\n");
+        }
 
         // A new object is added by L. Gu, 06/10
         state.dataHeatBalMgr->CurrentModuleObject = "ZoneAirContaminantBalance";

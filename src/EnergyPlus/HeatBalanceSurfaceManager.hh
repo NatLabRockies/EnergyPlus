@@ -137,6 +137,14 @@ namespace HeatBalanceSurfaceManager {
 
     void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state);
 
+    // Sensitivity dTsi/dTair of an inside surface temperature to its zone air temperature, used when
+    // ZoneAirHeatBalanceAlgorithm "Surface Air Coupling" = Implicit. Zero for surfaces that are not eligible.
+    Real64 surfaceAirSensitivity(EnergyPlusData &state, int SurfNum);
+
+    // Move eligible inside surface temperatures from the air temperature they were solved with to the
+    // zone air temperature at the end of the timestep (Surface Air Coupling = Implicit).
+    void UpdateImplicitSurfaceAirCoupling(EnergyPlusData &state);
+
     void UpdateThermalHistories(EnergyPlusData &state);
 
     void CalculateZoneMRT(EnergyPlusData &state,

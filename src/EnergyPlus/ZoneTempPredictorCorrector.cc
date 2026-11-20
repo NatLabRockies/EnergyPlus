@@ -4249,7 +4249,11 @@ void ZoneSpaceHeatBalanceData::pushZoneTimestepHistory(EnergyPlusData &state, in
         this->XMAT[iHistory] = this->XMAT[iHistory - 1];
         this->WPrevZoneTS[iHistory] = this->WPrevZoneTS[iHistory - 1];
     }
-    this->XMAT[0] = this->ZTAV; // using average for whole zone time step.
+    // using average for whole zone time step. With implicit surface-air coupling, use the end-of-step value: XMAT feeds
+    // the backward-difference history (and the rollback start for shortened system steps), which needs point values.
+    // After a subdivided step the average lags the end value, and without the damping that the lagged coupling adds
+    // (a large SumHA), that lag passes almost fully into the next full step.
+    this->XMAT[0] = state.dataHeatBal->surfaceAirImplicitCoupling ? this->ZT : this->ZTAV;
     this->XMPT = this->ZT;
     this->WPrevZoneTS[0] = this->airHumRatAvg; // using average for whole zone time step.
     this->airHumRat = this->airHumRatTemp;
@@ -5424,7 +5428,18 @@ SumHATOutput SpaceHeatBalanceData::calcSumHAT(EnergyPlusData &state, int const z
         } // End of check if window
 
         HA += state.dataHeatBalSurf->SurfHConvInt(SurfNum) * Area;
-        results.sumHATsurf += state.dataHeatBalSurf->SurfHConvInt(SurfNum) * Area * state.dataHeatBalSurf->SurfTempInTmp(SurfNum);
+        Real64 const surfAirSens =
+            state.dataHeatBal->surfaceAirImplicitCoupling ? HeatBalanceSurfaceManager::surfaceAirSensitivity(state, SurfNum) : 0.0;
+        if (surfAirSens > 0.0) {
+            // Implicit surface-air coupling: Tsi(Tair) = Tsi* + S * (Tair - Tref), Tsi* solved with Tref. The part of the
+            // convection that follows the zone air moves into SumHA, so the predictor, the HVAC load and the corrector
+            // all see the surface respond to the new air temperature.
+            Real64 const hA = state.dataHeatBalSurf->SurfHConvInt(SurfNum) * Area;
+            results.sumHATsurf += hA * (state.dataHeatBalSurf->SurfTempInTmp(SurfNum) - surfAirSens * state.dataHeatBalSurfMgr->RefAirTemp(SurfNum));
+            HA -= hA * surfAirSens;
+        } else {
+            results.sumHATsurf += state.dataHeatBalSurf->SurfHConvInt(SurfNum) * Area * state.dataHeatBalSurf->SurfTempInTmp(SurfNum);
+        }
 
         // determine reference air temperature for this surface
         switch (state.dataSurface->SurfTAirRef(SurfNum)) {

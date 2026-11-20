@@ -798,12 +798,21 @@ ZoneAirHeatBalanceAlgorithm,
        \key No
        \key Yes
        \default No
-  A3 ; \field Do Space Heat Balance for Simulation
+  A3 , \field Do Space Heat Balance for Simulation
        \note If yes, space heat balance will be calculated and reported during simulation.
        \type choice
        \key No
        \key Yes
        \default No
+  A4 ; \field Surface Air Coupling
+       \note Lagged: inside surface heat balances use the zone air temperature of the previous timestep (legacy).
+       \note Implicit: the zone air heat balance includes the linearized response of eligible inside surface
+       \note temperatures (CTF, opaque, mean air reference) to the zone air temperature, and those surface
+       \note temperatures are corrected to the new zone air temperature at the end of the timestep.
+       \type choice
+       \key Lagged
+       \key Implicit
+       \default Lagged
 
 ZoneAirContaminantBalance,
        \memo Determines which contaminant concentration will be simulates.
