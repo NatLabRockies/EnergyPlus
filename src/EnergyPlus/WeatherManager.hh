@@ -722,6 +722,7 @@ namespace Weather {
         Real64 Albedo = 0.0;
         Real64 WaterPrecip = 0.0; // What is the difference between WaterPrecip and LiquidPrecip?
         Real64 LiquidPrecip = 0.0;
+        Real64 SnowDepth = 0.0; // Snow depth (cm)
         Real64 TotalSkyCover = 0.0;
         Real64 OpaqueSkyCover = 0.0;
     };

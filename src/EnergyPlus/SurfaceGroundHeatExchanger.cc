@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -77,6 +78,12 @@
 namespace EnergyPlus {
 
 namespace SurfaceGroundHeatExchanger {
+
+    namespace {
+    constexpr Real64 FreshSnowDensity = 100.0; // kg/m3
+    constexpr Real64 WaterDensity = 1000.0;    // kg/m3
+    constexpr Real64 IceMeltEnthalpy = 335000.0; // J/kg
+    }
 
     // Module containing the routines dealing with surface/panel ground heat exchangers
 
@@ -333,6 +340,22 @@ namespace SurfaceGroundHeatExchanger {
                 ErrorsFound = true;
             }
 
+            if (NumAlphas >= 6 && !state.dataIPShortCut->cAlphaArgs(6).empty()) {
+                auto &surfaceGHE = state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item);
+                surfaceGHE.ShadingSurfaceName = state.dataIPShortCut->cAlphaArgs(6);
+                surfaceGHE.ShadingSurfaceNum = Util::FindItemInList(surfaceGHE.ShadingSurfaceName, state.dataSurface->Surface);
+                if (surfaceGHE.ShadingSurfaceNum == 0) {
+                    ShowSevereError(state,
+                                    std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(6), surfaceGHE.ShadingSurfaceName));
+                    ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ErrorsFound = true;
+                } else if (!state.dataSurface->Surface(surfaceGHE.ShadingSurfaceNum).IsShadowing) {
+                    ShowSevereError(state, std::format("{} must reference a shading surface.", cCurrentModuleObject));
+                    ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ErrorsFound = true;
+                }
+            }
+
         } // end of input loop
 
         // final error check
@@ -425,6 +448,34 @@ namespace SurfaceGroundHeatExchanger {
                                 state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).SourceTemp,
                                 OutputProcessor::TimeStepType::System,
                                 OutputProcessor::StoreType::Average,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).Name);
+            SetupOutputVariable(state,
+                                "Ground Heat Exchanger Snow and Ice Mass",
+                                Constant::Units::kg,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).SnowIceMassOutput,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).Name);
+            SetupOutputVariable(state,
+                                "Ground Heat Exchanger Snow and Ice Melt Rate",
+                                Constant::Units::kg_s,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).SnowIceMeltRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).Name);
+            SetupOutputVariable(state,
+                                "Ground Heat Exchanger Snow and Ice Melt Heat Transfer Rate",
+                                Constant::Units::W,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).SnowIceMeltEnergyRate,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).Name);
+            SetupOutputVariable(state,
+                                "Ground Heat Exchanger Snow and Ice Melt Energy",
+                                Constant::Units::J,
+                                state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).SnowIceMeltEnergy,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
                                 state.dataSurfaceGroundHeatExchangers->SurfaceGHE(Item).Name);
         }
 
@@ -525,10 +576,15 @@ namespace SurfaceGroundHeatExchanger {
             this->LastQSrc = 0.0;
             this->LastSysTimeElapsed = 0.0;
             this->LastTimeStepSys = 0.0;
+            this->SnowIceMass = 0.0;
+            this->PreviousSnowIceMass = 0.0;
+            this->PreviousSnowDepth = 0.0;
+            this->SnowIceMassOutput = 0.0;
+            this->SnowIceMeltRate = 0.0;
+            this->SnowIceMeltEnergyRate = 0.0;
+            this->SnowIceMeltEnergy = 0.0;
+            this->SnowStateInitialized = false;
             // initialize past weather variables
-            state.dataSurfaceGroundHeatExchangers->PastBeamSolarRad = state.dataEnvrn->BeamSolarRad;
-            state.dataSurfaceGroundHeatExchangers->PastSolarDirCosVert = state.dataEnvrn->SOLCOS.z;
-            state.dataSurfaceGroundHeatExchangers->PastDifSolarRad = state.dataEnvrn->DifSolarRad;
             state.dataSurfaceGroundHeatExchangers->PastGroundTemp = state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::Shallow];
             state.dataSurfaceGroundHeatExchangers->PastIsRain = state.dataEnvrn->IsRain;
             state.dataSurfaceGroundHeatExchangers->PastIsSnow = state.dataEnvrn->IsSnow;
@@ -536,6 +592,7 @@ namespace SurfaceGroundHeatExchanger {
             state.dataSurfaceGroundHeatExchangers->PastOutWetBulbTemp = OutWetBulbTempAt(state, SurfaceHXHeight);
             state.dataSurfaceGroundHeatExchangers->PastSkyTemp = state.dataEnvrn->SkyTemp;
             state.dataSurfaceGroundHeatExchangers->PastWindSpeed = DataEnvironment::WindSpeedAt(state, SurfaceHXHeight);
+            this->PastSolarRad = this->IncidentSolarRadiation(state);
             this->MyEnvrnFlag = false;
         }
 
@@ -618,9 +675,12 @@ namespace SurfaceGroundHeatExchanger {
         Real64 OldFluxTop;     // top surface flux - value used during iteration
         Real64 OldFluxBtm;     // bottom surface flux - value used during iteration
         Real64 OldSourceFlux;  // previous value of source flux - used during iteration
+        Real64 PastMeltFlux = 0.0;
+        Real64 CurrentMeltFlux = 0.0;
 
         // check if we are in very first call for this zone time step
         if (FirstHVACIteration && !state.dataHVACGlobal->ShortenTimeStepSys && this->firstTimeThrough) {
+            this->UpdateSnowIceAccumulation(state);
             // variables used with current environmental conditions
             auto &FluxTop = state.dataSurfaceGroundHeatExchangers->FluxTop; // top surface flux
             auto &FluxBtm = state.dataSurfaceGroundHeatExchangers->FluxBtm; // bottom surface flux
@@ -652,12 +712,13 @@ namespace SurfaceGroundHeatExchanger {
                                 state.dataSurfaceGroundHeatExchangers->PastOutDryBulbTemp,
                                 state.dataSurfaceGroundHeatExchangers->PastOutWetBulbTemp,
                                 state.dataSurfaceGroundHeatExchangers->PastSkyTemp,
-                                state.dataSurfaceGroundHeatExchangers->PastBeamSolarRad,
-                                state.dataSurfaceGroundHeatExchangers->PastDifSolarRad,
-                                state.dataSurfaceGroundHeatExchangers->PastSolarDirCosVert,
+                                this->PastSolarRad,
                                 state.dataSurfaceGroundHeatExchangers->PastWindSpeed,
                                 state.dataSurfaceGroundHeatExchangers->PastIsRain,
-                                state.dataSurfaceGroundHeatExchangers->PastIsSnow);
+                                state.dataSurfaceGroundHeatExchangers->PastIsSnow,
+                                this->PreviousSnowIceMass,
+                                state.dataGlobal->TimeStepZoneSec,
+                                PastMeltFlux);
                 // under relax
                 PastTempTop = PastTempTop * (1.0 - RelaxT) + RelaxT * TempT;
 
@@ -722,9 +783,6 @@ namespace SurfaceGroundHeatExchanger {
             this->LastTimeStepSys = 0.0;
 
             // get current env. conditions
-            state.dataSurfaceGroundHeatExchangers->PastBeamSolarRad = state.dataEnvrn->BeamSolarRad;
-            state.dataSurfaceGroundHeatExchangers->PastSolarDirCosVert = state.dataEnvrn->SOLCOS.z;
-            state.dataSurfaceGroundHeatExchangers->PastDifSolarRad = state.dataEnvrn->DifSolarRad;
             state.dataSurfaceGroundHeatExchangers->PastGroundTemp = state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::Shallow];
             state.dataSurfaceGroundHeatExchangers->PastIsRain = state.dataEnvrn->IsRain;
             state.dataSurfaceGroundHeatExchangers->PastIsSnow = state.dataEnvrn->IsSnow;
@@ -732,6 +790,7 @@ namespace SurfaceGroundHeatExchanger {
             state.dataSurfaceGroundHeatExchangers->PastOutWetBulbTemp = OutWetBulbTempAt(state, SurfaceHXHeight);
             state.dataSurfaceGroundHeatExchangers->PastSkyTemp = state.dataEnvrn->SkyTemp;
             state.dataSurfaceGroundHeatExchangers->PastWindSpeed = DataEnvironment::WindSpeedAt(state, SurfaceHXHeight);
+            this->PastSolarRad = this->IncidentSolarRadiation(state);
 
             TempBtm = this->TbtmHistory[1];
             TempTop = this->TtopHistory[1];
@@ -755,12 +814,13 @@ namespace SurfaceGroundHeatExchanger {
                                     state.dataSurfaceGroundHeatExchangers->PastOutDryBulbTemp,
                                     state.dataSurfaceGroundHeatExchangers->PastOutWetBulbTemp,
                                     state.dataSurfaceGroundHeatExchangers->PastSkyTemp,
-                                    state.dataSurfaceGroundHeatExchangers->PastBeamSolarRad,
-                                    state.dataSurfaceGroundHeatExchangers->PastDifSolarRad,
-                                    state.dataSurfaceGroundHeatExchangers->PastSolarDirCosVert,
+                                    this->PastSolarRad,
                                     state.dataSurfaceGroundHeatExchangers->PastWindSpeed,
                                     state.dataSurfaceGroundHeatExchangers->PastIsRain,
-                                    state.dataSurfaceGroundHeatExchangers->PastIsSnow);
+                                    state.dataSurfaceGroundHeatExchangers->PastIsSnow,
+                                    this->SnowIceMass,
+                                    state.dataGlobal->TimeStepZoneSec,
+                                    CurrentMeltFlux);
                     // under-relax
                     TempTop = TempTop * (1.0 - RelaxT) + RelaxT * TempT;
                     // update bottom coefficients
@@ -819,6 +879,8 @@ namespace SurfaceGroundHeatExchanger {
                     break;
                 }
             } // end surface heat balance iteration
+
+            this->UpdateSnowIceMelt(state, CurrentMeltFlux);
 
         } else if (!FirstHVACIteration) { // end source flux iteration
             // For the rest of the system time steps ...
@@ -1191,17 +1253,18 @@ namespace SurfaceGroundHeatExchanger {
         return CalcHXEffectTerm;
     }
 
-    void SurfaceGroundHeatExchangerData::CalcTopSurfTemp(Real64 const FluxTop,             // top surface flux
-                                                         Real64 &TempTop,                  // top surface temperature
-                                                         Real64 const ThisDryBulb,         // dry bulb temperature
-                                                         Real64 const ThisWetBulb,         // wet bulb temperature
-                                                         Real64 const ThisSkyTemp,         // sky temperature
-                                                         Real64 const ThisBeamSolarRad,    // beam solar radiation
-                                                         Real64 const ThisDifSolarRad,     // diffuse solar radiation
-                                                         Real64 const ThisSolarDirCosVert, // vertical component of solar normal
-                                                         Real64 const ThisWindSpeed,       // wind speed
-                                                         bool const ThisIsRain,            // rain flag
-                                                         bool const ThisIsSnow             // snow flag
+    void SurfaceGroundHeatExchangerData::CalcTopSurfTemp(Real64 const FluxTop,     // top surface flux
+                                                         Real64 &TempTop,          // top surface temperature
+                                                         Real64 const ThisDryBulb, // dry bulb temperature
+                                                         Real64 const ThisWetBulb, // wet bulb temperature
+                                                         Real64 const ThisSkyTemp, // sky temperature
+                                                         Real64 const ThisSolarRad, // incident solar radiation
+                                                         Real64 const ThisWindSpeed, // wind speed
+                                                         bool const ThisIsRain,     // rain flag
+                                                         bool const ThisIsSnow,     // snow flag
+                                                         Real64 const SnowIceMassPerArea, // snow and ice mass per unit area
+                                                         Real64 const TimeStepSec,  // simulation time step in seconds
+                                                         Real64 &MeltFlux           // latent heat flux used for melting
     )
     {
 
@@ -1250,11 +1313,70 @@ namespace SurfaceGroundHeatExchanger {
             RadCoef = 0.0;
         }
 
-        // total absorbed solar - no ground solar
-        QSolAbsorbed = this->TopSolarAbs * (max(ThisSolarDirCosVert, 0.0) * ThisBeamSolarRad + ThisDifSolarRad);
+        QSolAbsorbed = this->TopSolarAbs * ThisSolarRad;
 
-        // solve for temperature
-        TempTop = (FluxTop + ConvCoef * ExternalTemp + RadCoef * ThisSkyTemp + QSolAbsorbed) / (ConvCoef + RadCoef);
+        Real64 const NetHeatFluxAtFreezing = FluxTop + ConvCoef * ExternalTemp + RadCoef * ThisSkyTemp + QSolAbsorbed;
+        MeltFlux = calculateSnowIceMeltFlux(NetHeatFluxAtFreezing, SnowIceMassPerArea, TimeStepSec);
+        TempTop = (NetHeatFluxAtFreezing - MeltFlux) / (ConvCoef + RadCoef);
+    }
+
+    void SurfaceGroundHeatExchangerData::UpdateSnowIceAccumulation(EnergyPlusData &state)
+    {
+        Real64 const currentSnowDepth = std::max(0.0, state.dataEnvrn->SnowDepth);
+        bool const freezingRain = state.dataEnvrn->IsRain && state.dataEnvrn->OutDryBulbTemp < 0.0;
+        Real64 const liquidPrecipitation = std::max(0.0, state.dataEnvrn->LiquidPrecipitation);
+
+        this->PreviousSnowIceMass = this->SnowIceMass;
+        if (this->SnowStateInitialized) {
+            this->SnowIceMass += estimateSnowIceAccumulation(currentSnowDepth - this->PreviousSnowDepth, liquidPrecipitation, freezingRain);
+        } else {
+            this->SnowIceMass = estimateSnowIceAccumulation(currentSnowDepth, liquidPrecipitation, freezingRain);
+            this->SnowStateInitialized = true;
+        }
+        this->PreviousSnowDepth = currentSnowDepth;
+        this->SnowIceMeltRate = 0.0;
+        this->SnowIceMeltEnergyRate = 0.0;
+        this->SnowIceMeltEnergy = 0.0;
+    }
+
+    void SurfaceGroundHeatExchangerData::UpdateSnowIceMelt(EnergyPlusData &state, Real64 const MeltFlux)
+    {
+        Real64 const timeStepSec = state.dataGlobal->TimeStepZoneSec;
+        Real64 const meltedMassPerArea = std::min(this->SnowIceMass, std::max(0.0, MeltFlux) * timeStepSec / IceMeltEnthalpy);
+        this->SnowIceMass = std::max(0.0, this->SnowIceMass - meltedMassPerArea);
+        this->SnowIceMassOutput = this->SnowIceMass * this->SurfaceArea;
+        this->SnowIceMeltEnergy = meltedMassPerArea * this->SurfaceArea * IceMeltEnthalpy;
+        if (timeStepSec > 0.0) {
+            this->SnowIceMeltRate = meltedMassPerArea * this->SurfaceArea / timeStepSec;
+            this->SnowIceMeltEnergyRate = this->SnowIceMeltEnergy / timeStepSec;
+        } else {
+            this->SnowIceMeltRate = 0.0;
+            this->SnowIceMeltEnergyRate = 0.0;
+        }
+    }
+
+    Real64 SurfaceGroundHeatExchangerData::IncidentSolarRadiation(EnergyPlusData &state) const
+    {
+        if (this->ShadingSurfaceNum > 0 && allocated(state.dataHeatBal->SurfQRadSWOutIncident) &&
+            this->ShadingSurfaceNum <= state.dataHeatBal->SurfQRadSWOutIncident.size()) {
+            return std::max(0.0, state.dataHeatBal->SurfQRadSWOutIncident(this->ShadingSurfaceNum));
+        }
+        return std::max(0.0, state.dataEnvrn->SOLCOS.z) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
+    }
+
+    Real64 estimateSnowIceAccumulation(Real64 const SnowDepthIncrease, Real64 const LiquidPrecipitation, bool const FreezingRain)
+    {
+        Real64 const snowMass = std::max(0.0, SnowDepthIncrease) * FreshSnowDensity;
+        Real64 const freezingRainMass = FreezingRain ? std::max(0.0, LiquidPrecipitation) * WaterDensity : 0.0;
+        return snowMass + freezingRainMass;
+    }
+
+    Real64 calculateSnowIceMeltFlux(Real64 const NetHeatFluxAtFreezing, Real64 const SnowIceMass, Real64 const TimeStepSec)
+    {
+        if (SnowIceMass <= 0.0 || TimeStepSec <= 0.0 || NetHeatFluxAtFreezing <= 0.0) {
+            return 0.0;
+        }
+        return std::min(NetHeatFluxAtFreezing, SnowIceMass * IceMeltEnthalpy / TimeStepSec);
     }
 
     void SurfaceGroundHeatExchangerData::CalcBottomSurfTemp(Real64 const FluxBtm,       // bottom surface flux
