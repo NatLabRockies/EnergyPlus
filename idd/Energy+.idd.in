@@ -52717,15 +52717,27 @@ Fan:SystemModel,
        \note This field is required if Speed Control Method is set to Continuous or if the Number of Speeds is greater than 1 and Speed Electric Power Fraction fields are not used.
        \type object-list
        \object-list UnivariateFunctions
-  N10, \field Night Ventilation Mode Pressure Rise
+  N10, \field Night Ventilation Mode Fan Total Efficiency
+       \note Fan total efficiency to use when in night mode using AvailabilityManager:NightVentilation
+       \note If left blank, the calculated normal-mode fan efficiency is used, including per-speed efficiencies for multispeed Discrete fans.
+       \type real
+       \minimum> 0.0
+       \maximum 1.0
+  N11, \field Night Ventilation Mode Pressure Rise
        \note Total system fan pressure rise at the fan when in night mode using AvailabilityManager:NightVentilation
        \type real
        \units Pa
        \ip-units inH2O
-  N11, \field Night Ventilation Mode Flow Fraction
-       \note This field currently has no effect on Fan:SystemModel operation.
-       \note Set night-ventilation airflow with the Night Venting Flow Fraction field of
-       \note AvailabilityManager:NightVentilation.
+  N12, \field Night Ventilation Mode Motor Efficiency
+       \note Fan motor efficiency to use when in night mode using AvailabilityManager:NightVentilation
+       \note If left blank the Motor Efficiency field above is used.
+       \type real
+       \minimum> 0.0
+       \maximum 1.0
+  N13, \field Night Ventilation Mode Motor In Air Stream Fraction
+       \note Fraction of motor heat entering the air stream to use when in night mode using AvailabilityManager:NightVentilation
+       \note If left blank the Motor In Air Stream Fraction field above is used.
+       \note 0.0 means fan motor outside of air stream, 1.0 means motor inside of air stream
        \type real
        \minimum 0.0
        \maximum 1.0
@@ -52733,7 +52745,7 @@ Fan:SystemModel,
         \note optional, if used fan motor heat losses that not added to air stream are transferred to zone as internal gains
         \type object-list
         \object-list ZoneNames
-  N12, \field Motor Loss Radiative Fraction
+  N14, \field Motor Loss Radiative Fraction
         \note optional. If zone identified in previous field then this determines
         \note the split between convection and radiation for the fan motor's skin losses
         \type real
@@ -52744,43 +52756,43 @@ Fan:SystemModel,
        \type alpha
        \retaincase
        \default General
-  N13, \field Number of Speeds
+  N15, \field Number of Speeds
        \note number of different speed levels available when Speed Control Method is set to Discrete
        \note Speed need to be arranged in increasing order in remaining field sets.
        \note If set to 1, or omitted, and Speed Control Method is Discrete then constant fan speed is the design maximum.
        \type integer
        \default 1
-  N14, \field Speed 1 Flow Fraction
+  N16, \field Speed 1 Flow Fraction
        \begin-extensible
        \type real
        \minimum 0.0
        \maximum 1.0
-  N15, \field Speed 1 Electric Power Fraction
+  N17, \field Speed 1 Electric Power Fraction
        \note if left blank then use Electric Power Function of Flow Fraction Curve
        \type real
        \minimum 0.0
        \maximum 1.0
-  N16, \field Speed 2 Flow Fraction
+  N18, \field Speed 2 Flow Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  N17, \field Speed 2 Electric Power Fraction
+  N19, \field Speed 2 Electric Power Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  N18, \field Speed 3 Flow Fraction
+  N20, \field Speed 3 Flow Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  N19, \field Speed 3 Electric Power Fraction
+  N21, \field Speed 3 Electric Power Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  N20, \field Speed n Flow Fraction
+  N22, \field Speed n Flow Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
-  N21; \field Speed n Electric Power Fraction
+  N23; \field Speed n Electric Power Fraction
        \type real
        \minimum 0.0
        \maximum 1.0
