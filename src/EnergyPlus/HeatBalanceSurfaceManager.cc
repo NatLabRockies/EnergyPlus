@@ -147,6 +147,14 @@ namespace EnergyPlus::HeatBalanceSurfaceManager {
 // OTHER NOTES:
 // This module was created from IBLAST subroutines
 
+static Real64 sumSurfQRadFromHVACComponents(DataHeatBalFanSys::SurfQRadFromHVACData const &surfaceRadiantSources)
+{
+    // Sum all HVAC radiant heat flux contributions applied directly to a surface [W/m2].
+    // Keep this aggregation synchronized with SurfQRadFromHVACData when new radiant source types are added.
+    return surfaceRadiantSources.HTRadSys + surfaceRadiantSources.HWBaseboard + surfaceRadiantSources.SteamBaseboard +
+           surfaceRadiantSources.ElecBaseboard + surfaceRadiantSources.CoolingPanel;
+}
+
 void ManageSurfaceHeatBalance(EnergyPlusData &state)
 {
 
@@ -5468,8 +5476,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     bool radiantSourceChanged = false;
     for (int surfNum : state.dataSurface->allGetsRadiantHeatSurfaceList) {
         auto const &thisSurfQRadFromHVAC = state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum);
-        Real64 const radiantSource = thisSurfQRadFromHVAC.HTRadSys + thisSurfQRadFromHVAC.HWBaseboard + thisSurfQRadFromHVAC.SteamBaseboard +
-                                     thisSurfQRadFromHVAC.ElecBaseboard + thisSurfQRadFromHVAC.CoolingPanel;
+        Real64 const radiantSource = sumSurfQRadFromHVACComponents(thisSurfQRadFromHVAC);
         if (radiantSource != state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum)) {
             radiantSourceChanged = true;
             break;
@@ -9594,9 +9601,7 @@ void sumSurfQdotRadHVAC(EnergyPlusData &state)
 {
     for (int surfNum : state.dataSurface->allGetsRadiantHeatSurfaceList) {
         auto const &thisSurfQRadFromHVAC = state.dataHeatBalFanSys->surfQRadFromHVAC(surfNum);
-        state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) = thisSurfQRadFromHVAC.HTRadSys + thisSurfQRadFromHVAC.HWBaseboard +
-                                                                   thisSurfQRadFromHVAC.SteamBaseboard + thisSurfQRadFromHVAC.ElecBaseboard +
-                                                                   thisSurfQRadFromHVAC.CoolingPanel;
+        state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(surfNum) = sumSurfQRadFromHVACComponents(thisSurfQRadFromHVAC);
     }
 }
 
