@@ -138,6 +138,7 @@ IF EXIST eplusout.dfs DEL eplusout.dfs
 IF EXIST slab.int DEL slab.int
 IF EXIST BasementGHTIn.idf DEL BasementGHTIn.idf
 IF EXIST eplusshading.csv DEL eplusshading.csv
+IF EXIST eplusshading_diffuse.csv DEL eplusshading_diffuse.csv
 :if %pausing%==Y pause
 
 :  2. Clean up target directory
@@ -390,6 +391,7 @@ IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe
  IF EXIST eplusout.edd MOVE eplusout.edd "%output_path%%~1.edd"
  IF EXIST eplusout.dfs MOVE eplusout.dfs "%output_path%%~1DFS.csv"
  IF EXIST eplusshading.csv MOVE eplusshading.csv "%output_path%%~1Shading.csv"
+ IF EXIST eplusshading_diffuse.csv MOVE eplusshading_diffuse.csv "%output_path%%~1ShadingDiffuse.csv"
  IF EXIST eplusout_perflog.csv MOVE eplusout_perflog.csv "%output_path%%~1_perflog.csv" 
 
  :  if exist *.mat (
