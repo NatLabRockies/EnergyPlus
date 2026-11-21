@@ -51,6 +51,7 @@
 #include <array>
 #include <fstream>
 #include <map>
+#include <sstream>
 
 #include <gtest/gtest.h>
 
@@ -525,6 +526,10 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_ImportDiffuseShading)
     // Diffuse sky shading computed by an external tool, and written to the companion "_diffuse.csv" file of
     // the Schedule:File:Shading file, is used in place of the sky patch sweep of SkyDifSolarShading. This is
     // the model of SolarShadingTest_FigureSolarBeamAtTimestep, which calculates its own diffuse shading.
+    //
+    // Three cases are covered: the example file of Resources, which holds the single data row of a model whose
+    // diffuse shading does not vary over the run; a file whose values differ per surface, so that a surface or
+    // a column read out of order shows up; and a file holding one data row per timestep of a day.
     std::string const idf_objects = delimited_string({
         "  Building,",
         "    DemoFDT,                 !- Name",
@@ -898,13 +903,66 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_ImportDiffuseShading)
 
     fs::path const shadingFilePath = fs::temp_directory_path() / "SolarShadingTest_ImportDiffuseShading.csv";
     fs::path const diffuseFilePath = fs::temp_directory_path() / "SolarShadingTest_ImportDiffuseShading_diffuse.csv";
-    state->dataSched->ShadingSunlitFracFilePath = shadingFilePath;
 
     auto const &surfaceList = state->dataSurface->AllExtSolAndShadingSurfaceList;
     ASSERT_FALSE(surfaceList.empty());
 
     int const windowSurfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
     ASSERT_GT(windowSurfNum, 0);
+
+    // The example file of Resources is read first, so that the reader is exercised against a file in exactly
+    // the format ReportDiffuseShading writes: a quoted four column header for every surface, a label where a
+    // timestamp would stand, and one data row which applies to the whole run. It was produced by this model.
+    //
+    // Only the companion name is derived from the path of the Schedule:File:Shading file, so the shading file
+    // of the pair is not read here and does not have to be present; a model would hold both.
+    fs::path const exampleShadingPath = configured_source_directory() / "tst/EnergyPlus/unit/Resources/shading_import_example.csv";
+    fs::path const exampleDiffusePath = configured_source_directory() / "tst/EnergyPlus/unit/Resources/shading_import_example_diffuse.csv";
+    ASSERT_TRUE(FileSystem::fileExists(exampleDiffusePath)) << FileSystem::toString(exampleDiffusePath);
+    state->dataSched->ShadingSunlitFracFilePath = exampleShadingPath;
+
+    // The file is the contract, so its values are read here rather than repeated as literals. A file written
+    // for a different model would not hold four values for each surface of this one, which this also checks.
+    std::map<int, std::array<Real64, 4>> fromExample;
+    {
+        std::ifstream file(exampleDiffusePath);
+        ASSERT_TRUE(file.is_open());
+
+        std::string record;
+        ASSERT_TRUE(std::getline(file, record)); // The header row
+        ASSERT_TRUE(std::getline(file, record)); // The single data row
+
+        std::istringstream fields(record);
+        std::string label;
+        ASSERT_TRUE(std::getline(fields, label, ',')); // Where a timestamp would stand
+
+        for (int const SurfNum : surfaceList) {
+            std::array<Real64, 4> values = {};
+            for (Real64 &value : values) {
+                std::string field;
+                ASSERT_TRUE(std::getline(fields, field, ',')) << state->dataSurface->Surface(SurfNum).Name;
+                value = std::stod(field);
+            }
+            fromExample[SurfNum] = values;
+        }
+
+        std::string extra;
+        EXPECT_FALSE(std::getline(fields, extra, ',')) << "the example file holds more columns than the model has surfaces";
+        EXPECT_FALSE(std::getline(file, record)) << "the example file is meant to hold a single data row";
+    }
+
+    state->dataSolarShading->CalcSkyDifShading = true;
+    SolarShading::InitSolarCalculations(*state);
+    SolarShading::SkyDifSolarShading(*state);
+    state->dataSolarShading->CalcSkyDifShading = false;
+
+    EXPECT_EQ(1, state->dataSolarShading->importedDiffuseShadingRows);
+    for (int const SurfNum : surfaceList) {
+        std::string const &name = state->dataSurface->Surface(SurfNum).Name;
+        EXPECT_NEAR(fromExample[SurfNum][0], state->dataSolarShading->SurfDifShdgRatioIsoSky(SurfNum), 1e-8) << name;
+        EXPECT_NEAR(fromExample[SurfNum][1], state->dataSolarShading->SurfDifShdgRatioHoriz(SurfNum), 1e-8) << name;
+        EXPECT_NEAR(fromExample[SurfNum][2], state->dataSurface->Surface(SurfNum).ViewFactorSkyIR, 1e-8) << name;
+    }
 
     auto writeHeader = [&](std::ofstream &file) {
         file << "Surface Name";
@@ -918,6 +976,11 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_ImportDiffuseShading)
 
     // A file holding a single data row applies to the whole run. Each surface is given values of its own, so
     // that a surface or a column read out of order would show up.
+    state->dataSolarShading->importedDiffuseShading.clear();
+    state->dataSolarShading->importedDiffuseShadingRows = 0;
+    state->dataSolarShading->importedDiffuseShadingChecked = false;
+    state->dataSched->ShadingSunlitFracFilePath = shadingFilePath;
+
     std::map<int, std::array<Real64, 4>> expected;
     {
         std::ofstream file(diffuseFilePath);

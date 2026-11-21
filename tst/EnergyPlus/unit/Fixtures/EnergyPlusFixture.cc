@@ -135,6 +135,7 @@ void EnergyPlusFixture::TearDown()
     state->files.mtr.del();
     state->files.bnd.del();
     state->files.shade.del();
+    state->files.shadeDiffuse.del();
 
     state->clear_state();
     delete this->state;
