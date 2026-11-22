@@ -54,45 +54,55 @@ std::unique_ptr<BaseGroundTempsModel> GradientsGTM::factory(
 void GradientsGTM::parseGradientSegments(EnergyPlusData &state, nlohmann::json const &object)
 {
     idfSegments_.clear();
+    int expectedSegments = object.value("number_of_segments", 0);
 
-    if (object.contains("transition_depth")) {
-        transitionDepth = object["transition_depth"].get<Real64>();
-    }
-    if (object.contains("blend_width")) {
-        blendWidth = object["blend_width"].get<Real64>();
-    }
-    if (object.contains("reference_temperature")) {
-        referenceTemp = object["reference_temperature"].get<Real64>();
-    }
+    if (object.contains("transition_depth")) transitionDepth = object["transition_depth"].get<Real64>();
+    if (object.contains("blend_width")) blendWidth = object["blend_width"].get<Real64>();
+    if (object.contains("reference_temperature")) referenceTemp = object["reference_temperature"].get<Real64>();
 
-    // Parse the flat extensible fields
-    int segNum = 1;
-    while (true) {
-        std::string upperKey = "upper_depth_" + std::to_string(segNum);
-        std::string lowerKey = "lower_depth_" + std::to_string(segNum);
-        std::string gradKey  = "gradient_" + std::to_string(segNum);
-
-        if (object.contains(upperKey)) {
+    // 1. Nested segments array
+    if (object.contains("segments") && object["segments"].is_array()) {
+        for (auto const &seg : object["segments"]) {
             GradientSegment gs;
-            gs.upperDepth = object[upperKey].get<Real64>();
-            gs.lowerDepth = object[lowerKey].get<Real64>();
-            gs.gradient   = object[gradKey].get<Real64>();
+            gs.upperDepth = seg.value("upper_depth", -999.0); // Force error if missing
+            gs.lowerDepth = seg.value("lower_depth", -999.0);
+            gs.gradient   = seg.value("gradient",    -999.0);
             idfSegments_.push_back(gs);
-            segNum++;
-        } else {
-            break;
+        }
+    } 
+    // 2. Flat fields fallback
+    else {
+        int segNum = 1;
+        while (true) {
+            std::string upperKey = "upper_depth_" + std::to_string(segNum);
+            if (object.contains(upperKey)) {
+                GradientSegment gs;
+                gs.upperDepth = object.value(upperKey, -999.0);
+                gs.lowerDepth = object.value("lower_depth_" + std::to_string(segNum), -999.0);
+                gs.gradient   = object.value("gradient_" + std::to_string(segNum), -999.0);
+                idfSegments_.push_back(gs);
+                segNum++;
+            } else {
+                break;
+            }
         }
     }
 
-    // Debug to prove it worked
+    // 3. Hardening checks
     if (idfSegments_.empty()) {
         ShowSevereError(state, "GradientsGTM: No segments were parsed from the IDF!");
-    } else {
-        std::string msg = "GradientsGTM: Successfully parsed " + std::to_string(idfSegments_.size()) + " segment(s).";
-        ShowWarningError(state, msg);
+    } else if (expectedSegments > 0 && expectedSegments != static_cast<int>(idfSegments_.size())) {
+        // FIXED LINE HERE: Using standard string concatenation instead of format()
+        ShowSevereError(state, "GradientsGTM: Declared Number of Segments (" + std::to_string(expectedSegments) + ") does not match parsed count (" + std::to_string(idfSegments_.size()) + ").");
+    }
+    
+    for (const auto &seg : idfSegments_) {
+        if (seg.upperDepth == -999.0 || seg.lowerDepth == -999.0 || seg.gradient == -999.0) {
+            ShowSevereError(state, "GradientsGTM: Missing required fields (upper_depth, lower_depth, or gradient) in segment.");
+            break;
+        }
     }
 }
-
 void GradientsGTM::initialize(EnergyPlusData &state,
                               const std::vector<GradientSegment> &idfSegments,
                               Real64 H)
@@ -229,7 +239,7 @@ Real64 GradientsGTM::getHybridFarfieldTempAtTime(EnergyPlusData &state,
 
     // --- START OF DEBUG BLOCK ---
     if (state.dataGlobal && state.dataGlobal->HourOfDay == 12 && state.dataGlobal->TimeStep == 1) {
-        std::vector<Real64> depths = {1.0, 26.0, 51.0, 76.0, 101.0};
+        std::vector<Real64> depths = {1.0, 12.5, 15.0, 17.5, 26.0, 51.0, 76.0, 101.0};
         std::ostringstream debugMsg;
         debugMsg << "GTM DEBUG Day:" << state.dataEnvrn->DayOfYear 
                  << " | RefT:" << referenceTemp 
