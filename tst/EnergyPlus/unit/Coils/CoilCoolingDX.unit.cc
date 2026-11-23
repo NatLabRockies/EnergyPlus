@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -77,6 +77,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXInput)
     auto const &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     EXPECT_EQ("COOLINGCOIL", thisCoil.name);
     EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance->name);
+    EXPECT_EQ("Coil:Cooling:DX", thisCoil.reclaimHeat.SourceType);
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
@@ -96,7 +97,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
                                                 "    Coil Mode 1,",
                                                 "    5000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 1 Speed 1,Coil Mode 1 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -123,7 +124,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)
                                                 "    Coil Mode 2,",
                                                 "    5000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 2 Speed 1,Coil Mode 2 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -232,7 +233,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
                                                 "    Coil Mode 1,",
                                                 "    10000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 1 Speed 1,Coil Mode 1 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -259,7 +260,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
                                                 "    Coil Mode 2,",
                                                 "    10000,   !- Rated Gross Total Cooling Capacity {W}",
                                                 "    0.25,   !- Rated Evaporator Air Flow Rate {m3/s}",
-                                                "    ,,,,,,,,",
+                                                "    ,,,,,,,,,",
                                                 "    2,Coil Mode 2 Speed 1,Coil Mode 2 Speed 2;",
 
                                                 "  Coil:Cooling:DX:CurveFit:Speed,",
@@ -637,7 +638,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
 //     Real64 MultiSpeedElecPower6 = Coil.ElecCoolingPower;
 //
 //     Real64 ratedVolFlowRate = state->dataHVACGlobal->MSHPMassFlowRateHigh / ratedRhoAir;
-//     std::string volFlowRateStr = format("{:.4R}", ratedVolFlowRate);
+//     std::string volFlowRateStr = std::format("{:.4f}", ratedVolFlowRate);
 //
 //     std::string idf_objects = delimited_string({
 //         "  Coil:Cooling:DX,",
@@ -1055,7 +1056,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformanceHitsSaturation)
 //     Real64 MultiSpeedElecPower6 = Coil.ElecCoolingPower;
 //
 //     Real64 ratedVolFlowRate = state->dataHVACGlobal->MSHPMassFlowRateHigh / ratedRhoAir;
-//     std::string volFlowRateStr = format("{:.4R}", ratedVolFlowRate);
+//     std::string volFlowRateStr = std::format("{:.4f}", ratedVolFlowRate);
 //
 //     std::string idf_objects = delimited_string({
 //         "  Coil:Cooling:DX,",
@@ -1714,6 +1715,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    ,                        !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",
@@ -1846,7 +1848,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDX_LowerSpeedFlowSizingTest)
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).NumOACoolCoils = 0;
     state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).supFanNum = -1;
-    state->dataAirSystemsData->PrimaryAirSystems(state->dataSize->CurSysNum).retFanNum = -1;
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->SysSizInput.allocate(1);
     state->dataSize->SysSizInput(1).AirLoopNum = state->dataSize->CurSysNum;

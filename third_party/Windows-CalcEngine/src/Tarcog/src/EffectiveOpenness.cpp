@@ -36,13 +36,13 @@ namespace EffectiveLayers
                                    double height,
                                    double thickness,
                                    const ShadeOpenness & openness,
-                                   Coefficients coefficients) :
+                                   Coefficients t_coefficients) :
         m_Width(width),
         m_Height(height),
         m_Thickness(thickness),
         m_ShadeOpenness(
           openness.Ah * width * height, openness.Dl, openness.Dr, openness.Dtop, openness.Dbot),
-        coefficients{coefficients}
+        coefficients{t_coefficients}
     {}
 
     Coefficients::Coefficients(double c1, double c2, double c3, double c4) :
@@ -58,8 +58,8 @@ namespace EffectiveLayers
                                          const ShadeOpenness & openness,
                                          double slatAngle,
                                          double slatWidth,
-                                         Coefficients coefficients) :
-        EffectiveLayer(width, height, thickness, openness, coefficients),
+                                         Coefficients t_coefficients) :
+        EffectiveLayer(width, height, thickness, openness, t_coefficients),
         m_SlatAngleRad(slatAngle * 2.0 * ConstantsData::WCE_PI / 360.0),
         m_SlatWidth(slatWidth)
     {}

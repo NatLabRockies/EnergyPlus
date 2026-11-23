@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,6 +49,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
@@ -193,7 +194,7 @@ void SolveRoot(const EnergyPlusData &state,
     Real64 Y1 = f(X1); // f at X1
     // check initial values
     if (Y0 * Y1 > 0) {
-        Flag = -2;
+        Flag = SOLVEROOT_ERROR_INIT;
         XRes = X0;
         return;
     }
@@ -209,35 +210,36 @@ void SolveRoot(const EnergyPlusData &state,
             break;
         }
         // new estimation
-        switch (state.dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod) {
-        case HVACSystemRootSolverAlgorithm::RegulaFalsi: {
+        switch (state.dataRootFinder->rootAlgo) {
+        case RootAlgo::RegulaFalsi: {
             XTemp = (Y0 * X1 - Y1 * X0) / DY;
             break;
         }
-        case HVACSystemRootSolverAlgorithm::Bisection: {
+        case RootAlgo::Bisection: {
             XTemp = (X1 + X0) / 2.0;
             break;
         }
-        case HVACSystemRootSolverAlgorithm::RegulaFalsiThenBisection: {
-            if (NIte > state.dataRootFinder->HVACSystemRootFinding.NumOfIter) {
+        case RootAlgo::RegulaFalsiThenBisection: {
+            if (NIte > state.dataRootFinder->NumOfIter) {
                 XTemp = (X1 + X0) / 2.0;
             } else {
                 XTemp = (Y0 * X1 - Y1 * X0) / DY;
             }
             break;
         }
-        case HVACSystemRootSolverAlgorithm::BisectionThenRegulaFalsi: {
-            if (NIte <= state.dataRootFinder->HVACSystemRootFinding.NumOfIter) {
+        case RootAlgo::BisectionThenRegulaFalsi: {
+            if (NIte <= state.dataRootFinder->NumOfIter) {
                 XTemp = (X1 + X0) / 2.0;
             } else {
                 XTemp = (Y0 * X1 - Y1 * X0) / DY;
             }
             break;
         }
-        case HVACSystemRootSolverAlgorithm::Alternation: {
-            if (AltIte > state.dataRootFinder->HVACSystemRootFinding.NumOfIter) {
+        case RootAlgo::Alternation: {
+            if (AltIte > state.dataRootFinder->NumOfIter) {
                 XTemp = (X1 + X0) / 2.0;
-                if (AltIte >= 2 * state.dataRootFinder->HVACSystemRootFinding.NumOfIter) {
+
+                if (AltIte >= 2 * state.dataRootFinder->NumOfIter) {
                     AltIte = 0;
                 }
             } else {
@@ -245,7 +247,7 @@ void SolveRoot(const EnergyPlusData &state,
             }
             break;
         }
-        case HVACSystemRootSolverAlgorithm::ShortBisectionThenRegulaFalsi: {
+        case RootAlgo::ShortBisectionThenRegulaFalsi: {
             if (NIte < 3) {
                 XTemp = (X1 + X0) / 2.0;
             } else {
@@ -269,6 +271,15 @@ void SolveRoot(const EnergyPlusData &state,
             XRes = XTemp;
             return;
         };
+
+#ifdef GET_OUT
+        if (NIte > 20) {
+            assert(false);
+            Flag = NIte;
+            XRes = XTemp;
+            return;
+        }
+#endif // GET_OUT
 
         // OK, so we didn't converge, lets check max iterations to see if we should break early
         if (NIte > MaxIte) {
@@ -297,8 +308,68 @@ void SolveRoot(const EnergyPlusData &state,
     } // Cont
 
     // if we make it here we haven't converged, so just set the flag and leave
-    Flag = -1;
+    Flag = SOLVEROOT_ERROR_ITER;
     XRes = XTemp;
+}
+
+// A second version that does not require a payload -- use lambdas
+Real64 SolveRoot2(const EnergyPlusData &state,
+                  Real64 Eps, // required absolute accuracy
+                  int maxIters,
+                  int &SolFla,
+                  const std::function<Real64(Real64)> &f,
+                  Real64 X_0, // 1st bound of interval that contains the solution
+                  Real64 X_1, // 2nd bound of interval that contains the solution
+                  SolveRootStats &stats)
+{
+    // SUBROUTINE INFORMATION:
+    //       AUTHOR         Amir Roth
+    //       DATE WRITTEN   Nov. 2025
+
+    // PURPOSE OF THIS SUBROUTINE:
+    // This is a wrapper to SolveRoot that iterates over all root finding algorithms to find the best one.
+
+    Real64 XRes;
+
+    // Save and restore "global" root finding algorithm
+    RootAlgo algoTemp = state.dataRootFinder->rootAlgo;
+    state.dataRootFinder->rootAlgo = stats.algo;
+
+    SolveRoot(state, Eps, maxIters, SolFla, XRes, f, X_0, X_1);
+
+    state.dataRootFinder->rootAlgo = algoTemp;
+
+    if (SolFla > 0) {
+        stats.counts++;
+        stats.algoCounts[(int)stats.algo]++;
+        stats.algoIters[(int)stats.algo] += SolFla;
+
+        constexpr int TRIALS_PER_COUNT = 5;
+
+        // Trial period, cycle thru algorithms
+        if (stats.counts < TRIALS_PER_COUNT * (int)RootAlgo::Num) {
+            stats.algo = static_cast<RootAlgo>((int)stats.algo + 1);
+            if (stats.algo == RootAlgo::Num) {
+                stats.algo = RootAlgo::RegulaFalsi;
+            }
+
+            // Choose base algorithm, i.e., fewest total iterations
+        } else if (stats.counts == TRIALS_PER_COUNT * (int)RootAlgo::Num) {
+            int minIters = maxIters * TRIALS_PER_COUNT;
+            stats.algo = RootAlgo::Invalid;
+            for (int i = 0; i < (int)RootAlgo::Num; ++i) {
+                if (stats.algoIters[i] < minIters) {
+                    stats.algo = static_cast<RootAlgo>(i);
+                    minIters = stats.algoIters[i];
+                }
+            }
+
+            // Have chosen an algorithm, stats.algo should be it
+        } else {
+        }
+    }
+
+    return XRes;
 }
 
 void MovingAvg(Array1D<Real64> &DataIn, int const NumItemsInAvg)
@@ -352,7 +423,7 @@ void ProcessDateString(EnergyPlusData &state,
             PDay = 0;
             DateType = Weather::DateType::MonthDay;
         } else if (FstNum < 0 || FstNum > 366) {
-            ShowSevereError(state, format("Invalid Julian date Entered={}", String));
+            ShowSevereError(state, std::format("Invalid Julian date Entered={}", String));
             ErrorsFound = true;
         } else {
             InvOrdinalDay(FstNum, PMonth, PDay, 0);
@@ -451,7 +522,7 @@ void DetermineDateTokens(EnergyPlusData &state,
 
     strip(CurrentString);
     if (CurrentString == BlankString) {
-        ShowSevereError(state, format("Invalid date field={}", String));
+        ShowSevereError(state, std::format("Invalid date field={}", String));
         ErrorsFound = true;
     } else {
         int Loop = 0;
@@ -473,7 +544,7 @@ void DetermineDateTokens(EnergyPlusData &state,
             strip(CurrentString);
         }
         if (not_blank(CurrentString)) {
-            ShowSevereError(state, format("Invalid date field={}", String));
+            ShowSevereError(state, std::format("Invalid date field={}", String));
             ErrorsFound = true;
         } else if (Loop == 2) {
             // Field must be Day Month or Month Day (if both numeric, mon / day)
@@ -483,7 +554,7 @@ void DetermineDateTokens(EnergyPlusData &state,
                 // Month day, but first field is not numeric, 2nd must be
                 NumField2 = int(Util::ProcessNumber(Fields(2), errFlag));
                 if (errFlag) {
-                    ShowSevereError(state, format("Invalid date field={}", String));
+                    ShowSevereError(state, std::format("Invalid date field={}", String));
                     InternalError = true;
                 } else {
                     TokenDay = NumField2;
@@ -561,7 +632,7 @@ void DetermineDateTokens(EnergyPlusData &state,
                             }
                         }
                     } else { // error....
-                        ShowSevereError(state, format("First date field not numeric, field={}", String));
+                        ShowSevereError(state, std::format("First date field not numeric, field={}", String));
                     }
                 }
             } else { // mm/dd/yyyy or yyyy/mm/dd
@@ -586,7 +657,7 @@ void DetermineDateTokens(EnergyPlusData &state,
             }
         } else {
             // Not enough or too many fields
-            ShowSevereError(state, format("Invalid date field={}", String));
+            ShowSevereError(state, std::format("Invalid date field={}", String));
             ErrorsFound = true;
         }
     }
@@ -625,7 +696,7 @@ void ValidateMonthDay(EnergyPlusData &state,
         }
     }
     if (InternalError) {
-        ShowSevereError(state, format("Invalid Month Day date format={}", String));
+        ShowSevereError(state, std::format("Invalid Month Day date format={}", String));
         ErrorsFound = true;
     } else {
         ErrorsFound = false;
@@ -683,10 +754,10 @@ void InvOrdinalDay(int const Number, int &PMonth, int &PDay, int const LeapYr)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int WMonth;
-    int LeapAddPrev;
+    int LeapAddPrev = 0;
     int LeapAddCur;
 
-    if (Number < 0 || Number > 366) {
+    if (Number < 1 || Number > 365 + LeapYr) {
         return;
     }
     for (WMonth = 1; WMonth <= 12; ++WMonth) {
@@ -705,7 +776,7 @@ void InvOrdinalDay(int const Number, int &PMonth, int &PDay, int const LeapYr)
         }
     }
     PMonth = WMonth;
-    PDay = Number - (EndOfMonth[WMonth - 1] + LeapAddCur);
+    PDay = Number - (EndOfMonth[WMonth - 1] + LeapAddPrev);
 }
 
 bool BetweenDateHoursLeftInclusive(
@@ -758,7 +829,7 @@ bool BetweenDates(int const TestDate,  // Date to test
     return BetweenDates;
 }
 
-std::string CreateSysTimeIntervalString(EnergyPlusData &state)
+std::string CreateSysTimeIntervalString(EnergyPlusData const &state)
 {
 
     // FUNCTION INFORMATION:
@@ -804,10 +875,10 @@ std::string CreateSysTimeIntervalString(EnergyPlusData &state)
         ++ActualTimeHrS;
         ActualTimeMinS = 0;
     }
-    const std::string TimeStmpS = format("{:02}:{:02}", ActualTimeHrS, ActualTimeMinS);
+    const std::string TimeStmpS = std::format("{:02}:{:02}", ActualTimeHrS, ActualTimeMinS);
     Real64 minutes = ((ActualTimeE - static_cast<int>(ActualTimeE)) * FracToMin);
 
-    std::string TimeStmpE = format("{:02}:{:2.0F}", static_cast<int>(ActualTimeE), minutes);
+    std::string TimeStmpE = std::format("{:02}:{:2.0F}", static_cast<int>(ActualTimeE), minutes);
 
     if (TimeStmpE[3] == ' ') {
         TimeStmpE[3] = '0';
@@ -908,7 +979,7 @@ void Iterate(Real64 &ResultX,  // ResultX is the final Iteration result passed b
     Y1 = Y0;
 }
 
-int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int const NumItems)
+int FindNumberInList(int const WhichNumber, Array1D_int const &ListOfItems)
 {
 
     // FUNCTION INFORMATION:
@@ -919,10 +990,7 @@ int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int c
     // This function looks up a number(integer) in a similar list of
     // items and returns the index of the item in the list, if found.
 
-    // Argument array dimensioning
-    ListOfItems.dim(_);
-
-    for (int Count = 1; Count <= NumItems; ++Count) {
+    for (int Count = 1, NumItems = ListOfItems.isize(); Count <= NumItems; ++Count) {
         if (WhichNumber == ListOfItems(Count)) {
             return Count;
         }
@@ -932,10 +1000,10 @@ int FindNumberInList(int const WhichNumber, Array1A_int const ListOfItems, int c
 }
 
 void DecodeMonDayHrMin(int const Item, // word containing encoded month, day, hour, minute
-                       int &Month,     // month in integer format (1-12)
-                       int &Day,       // day in integer format (1-31)
-                       int &Hour,      // hour in integer format (1-24)
-                       int &Minute     // minute in integer format (0:59)
+                       int &Month,     // month in integer std::format(1-12)
+                       int &Day,       // day in integer std::format(1-31)
+                       int &Hour,      // hour in integer std::format(1-24)
+                       int &Minute     // minute in integer std::format(0:59)
 )
 {
 
@@ -969,10 +1037,10 @@ void DecodeMonDayHrMin(int const Item, // word containing encoded month, day, ho
 }
 
 void EncodeMonDayHrMin(int &Item,       // word containing encoded month, day, hour, minute
-                       int const Month, // month in integer format (1:12)
-                       int const Day,   // day in integer format (1:31)
-                       int const Hour,  // hour in integer format (1:24)
-                       int const Minute // minute in integer format (0:59)
+                       int const Month, // month in integer std::format(1:12)
+                       int const Day,   // day in integer std::format(1:31)
+                       int const Hour,  // hour in integer std::format(1:24)
+                       int const Minute // minute in integer std::format(0:59)
 )
 {
 
@@ -1017,7 +1085,7 @@ std::string CreateTimeString(Real64 const Time) // Time in seconds
 
     // TimeStamp written with formatting
     // "hh:mm:ss.s"
-    return fmt::format("{:02d}:{:02d}:{:04.1f}", Hours, Minutes, Seconds);
+    return std::format("{:02d}:{:02d}:{:04.1f}", Hours, Minutes, Seconds);
 }
 
 void ParseTime(Real64 const Time, // Time value in seconds
@@ -1155,16 +1223,16 @@ void ScanForReports(EnergyPlusData &state,
                     state.dataGlobal->ShowDecayCurvesInEIO = true;
                     break;
                 default: // including empty
-                    ShowWarningError(state, format("{}: No {} supplied.", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(1)));
+                    ShowWarningError(state, std::format("{}: No {} supplied.", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(1)));
                     ShowContinueError(state,
                                       R"( Legal values are: "Lines", "Vertices", "Details", "DetailsWithVertices", "CostInfo", "ViewFactorIinfo".)");
                 }
             } catch (int e) {
                 ShowWarningError(state,
-                                 format("{}: Invalid {}=\"{}\" supplied.",
-                                        cCurrentModuleObject,
-                                        state.dataIPShortCut->cAlphaFieldNames(1),
-                                        state.dataIPShortCut->cAlphaArgs(1)));
+                                 std::format("{}: Invalid {}=\"{}\" supplied.",
+                                             cCurrentModuleObject,
+                                             state.dataIPShortCut->cAlphaFieldNames(1),
+                                             state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state,
                                   R"( Legal values are: "Lines", "Vertices", "Details", "DetailsWithVertices", "CostInfo", "ViewFactorIinfo".)");
             }
@@ -1425,23 +1493,24 @@ void CheckCreatedZoneItemName(EnergyPlusData &state,
     ResultName = ZoneName + ' ' + ItemName;
     bool TooLong = false;
     if (ItemLength > Constant::MaxNameLength) {
-        ShowWarningError(state, fmt::format("{}{} Combination of ZoneList and Object Name generate a name too long.", calledFrom, CurrentObject));
-        ShowContinueError(state, format("Object Name=\"{}\".", ItemName));
-        ShowContinueError(state, format("ZoneList/Zone Name=\"{}\".", ZoneName));
+        ShowWarningError(state, std::format("{}{} Combination of ZoneList and Object Name generate a name too long.", calledFrom, CurrentObject));
+        ShowContinueError(state, std::format("Object Name=\"{}\".", ItemName));
+        ShowContinueError(state, std::format("ZoneList/Zone Name=\"{}\".", ZoneName));
+        ShowContinueError(
+            state, std::format("Item length=[{}] > Maximum Length=[{}]. You may need to shorten the names.", ItemLength, Constant::MaxNameLength));
         ShowContinueError(state,
-                          format("Item length=[{}] > Maximum Length=[{}]. You may need to shorten the names.", ItemLength, Constant::MaxNameLength));
-        ShowContinueError(state,
-                          format("Shortening the Object Name by [{}] characters will assure uniqueness for this ZoneList.",
-                                 MaxZoneNameLength + 1 + ItemNameLength - Constant::MaxNameLength));
-        ShowContinueError(state, format("name that will be used (may be needed in reporting)=\"{}\".", ResultName));
+                          std::format("Shortening the Object Name by [{}] characters will assure uniqueness for this ZoneList.",
+                                      MaxZoneNameLength + 1 + ItemNameLength - Constant::MaxNameLength));
+        ShowContinueError(state, std::format("name that will be used (may be needed in reporting)=\"{}\".", ResultName));
         TooLong = true;
     }
 
     int FoundItem = Util::FindItemInList(ResultName, ItemNames, NumItems);
 
     if (FoundItem != 0) {
-        ShowSevereError(state, fmt::format("{}{}=\"{}\", Duplicate Generated name encountered.", calledFrom, CurrentObject, ItemName));
-        ShowContinueError(state, format("name=\"{}\" has already been generated or entered as {} item=[{}].", ResultName, CurrentObject, FoundItem));
+        ShowSevereError(state, std::format("{}{}=\"{}\", Duplicate Generated name encountered.", calledFrom, CurrentObject, ItemName));
+        ShowContinueError(state,
+                          std::format("name=\"{}\" has already been generated or entered as {} item=[{}].", ResultName, CurrentObject, FoundItem));
         if (TooLong) {
             ShowContinueError(state, "Duplicate name likely caused by the previous \"too long\" warning.");
         }

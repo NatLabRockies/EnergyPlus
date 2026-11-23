@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -91,6 +91,19 @@ namespace HybridEvapCoolingModel {
         Num
     };
 
+    enum class ObjectiveFunctionType
+    {
+        Invalid = -1,
+        ElectricityUse,
+        SecondFuelUse,
+        ThirdFuelUse,
+        WaterUse,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)ObjectiveFunctionType::Num> objectiveFunctionNamesUC = {
+        "ELECTRICITY USE", "SECOND FUEL USE", "THIRD FUEL USE", "WATER USE"};
+
     class CModeSolutionSpace
     {
     public:
@@ -122,12 +135,16 @@ namespace HybridEvapCoolingModel {
         Real64 Max_OAF;
         Real64 Minimum_Outdoor_Air_Temperature;
         Real64 Maximum_Outdoor_Air_Temperature;
+        bool Minimum_Outdoor_Air_Temperature_Blank;
+        bool Maximum_Outdoor_Air_Temperature_Blank;
         Real64 Minimum_Outdoor_Air_Humidity_Ratio;
         Real64 Maximum_Outdoor_Air_Humidity_Ratio;
         Real64 Minimum_Outdoor_Air_Relative_Humidity;
         Real64 Maximum_Outdoor_Air_Relative_Humidity;
         Real64 Minimum_Return_Air_Temperature;
         Real64 Maximum_Return_Air_Temperature;
+        bool Minimum_Return_Air_Temperature_Blank;
+        bool Maximum_Return_Air_Temperature_Blank;
         Real64 Minimum_Return_Air_Humidity_Ratio;
         Real64 Maximum_Return_Air_Humidity_Ratio;
         Real64 Minimum_Return_Air_Relative_Humidity;
@@ -146,21 +163,21 @@ namespace HybridEvapCoolingModel {
                        Array1D_string Alphas,
                        Array1D_string cAlphaFields,
                        Array1D<Real64> Numbers,
-                       Array1D_string cNumericFields,
                        Array1D<bool> lAlphaBlanks,
+                       Array1D<bool> lNumericBlanks,
                        std::string cCurrentModuleObject);
         void InitializeCurve(int curveType, int CurveID);
         Real64 CalculateCurveVal(EnergyPlusData &state, Real64 Tosa, Real64 Wosa, Real64 Tra, Real64 Wra, Real64 Msa, Real64 OSAF, int curveType);
-        bool InitializeOSAFConstraints(Real64 minOSAF, Real64 maxOSAF);
-        bool InitializeMsaRatioConstraints(Real64 minMsa, Real64 maxMsa);
-        bool InitializeOutdoorAirTemperatureConstraints(Real64 min, Real64 max);
-        bool InitializeOutdoorAirHumidityRatioConstraints(Real64 min, Real64 max);
-        bool InitializeOutdoorAirRelativeHumidityConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirTemperatureConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirHumidityRatioConstraints(Real64 min, Real64 max);
-        bool InitializeReturnAirRelativeHumidityConstraints(Real64 min, Real64 max);
+        void InitializeOSAFConstraints(Real64 minOSAF, Real64 maxOSAF);
+        void InitializeMsaRatioConstraints(Real64 minMsa, Real64 maxMsa);
+        void InitializeOutdoorAirTemperatureConstraints(Real64 min, Real64 max, bool minBlank, bool maxBlank);
+        void InitializeOutdoorAirHumidityRatioConstraints(Real64 min, Real64 max);
+        void InitializeOutdoorAirRelativeHumidityConstraints(Real64 min, Real64 max);
+        void InitializeReturnAirTemperatureConstraints(Real64 min, Real64 max, bool minBlank, bool maxBlank);
+        void InitializeReturnAirHumidityRatioConstraints(Real64 min, Real64 max);
+        void InitializeReturnAirRelativeHumidityConstraints(Real64 min, Real64 max);
         void GenerateSolutionSpace();
-        bool MeetsOAEnvConstraints(Real64 Tosa, Real64 Wosa, Real64 RHos);
+        bool MeetsConstraints(Real64 Tosa, Real64 Wosa, Real64 RHosa, Real64 Tra, Real64 Wra, Real64 RHra);
 
     private:
     };
@@ -234,20 +251,18 @@ namespace HybridEvapCoolingModel {
         int ZoneNum; // stores the current zone associated with the system, this is currently not used but is expected to be used in the next set of
                      // functionality additions.
         Sched::Schedule *availSched = nullptr; // Pointer to the correct schedule
-        int ZoneNodeNum;                       // index of zone air node in node structure
         std::string AvailManagerListName;      // Name of an availability manager list object
         Avail::Status availStatus = Avail::Status::NoAction;
 
-        Real64 SystemMaximumSupplyAirFlowRate;           // taken from IDF N1, the system max supply flow rate in m3/s.
         bool FanHeatGain;                                // .TRUE. = fan heat gain is accounted for in the lookup tables
         std::string FanHeatGainLocation;                 // Fan heat gain location
         Real64 FanHeatInAirFrac;                         // the fraction of fan heat in air stream to calculate fan heat gain if not in lookup tables
         Real64 ScalingFactor;                            // taken from IDF N3, linear scaling factor.
         Real64 ScaledSystemMaximumSupplyAirMassFlowRate; // the scaled system max supply mass flow rate in m3/s.
-        Real64 ScaledSystemMaximumSupplyAirVolumeFlowRate;     // the scaled system max supply volume flow rate in m3/s.
-        Constant::eFuel firstFuel = Constant::eFuel::Invalid;  // First fuel type, currently electricity is only option
-        Constant::eFuel secondFuel = Constant::eFuel::Invalid; // Second fuel type
-        Constant::eFuel thirdFuel = Constant::eFuel::Invalid;  // Third fuel type
+        Real64 ScaledSystemMaximumSupplyAirVolumeFlowRate;                               // the scaled system max supply volume flow rate in m3/s.
+        Constant::eFuel secondFuel = Constant::eFuel::Invalid;                           // Second fuel type
+        Constant::eFuel thirdFuel = Constant::eFuel::Invalid;                            // Third fuel type
+        ObjectiveFunctionType ObjectiveFunction = ObjectiveFunctionType::ElectricityUse; // Objective function to minimize
 
         int UnitOn;                          // feels like it should be a bool but its an output and I couldn't get it to work as a bool
         Real64 UnitTotalCoolingRate;         // unit output to zone, total cooling rate [W]
@@ -283,7 +298,6 @@ namespace HybridEvapCoolingModel {
         Real64 WaterConsumptionRate;         //
         Real64 WaterConsumption;             //
         Real64 QSensZoneOut;                 // W
-        Real64 QLatentZoneOut;               // W
         Real64 QLatentZoneOutMass;           // kg/s
         Real64 ExternalStaticPressure;       //
         Real64 RequestedHumidificationMass;
@@ -292,8 +306,7 @@ namespace HybridEvapCoolingModel {
         Real64 RequestedDeHumidificationMass;
         Real64 RequestedDeHumidificationLoad;
         Real64 RequestedDeHumidificationEnergy;
-        Real64 RequestedLoadToHeatingSetpoint;
-        Real64 RequestedLoadToCoolingSetpoint;
+        Real64 RequestedSensibleLoadToSetpoint;
         Sched::Schedule *TsaMinSched = nullptr;
         Sched::Schedule *TsaMaxSched = nullptr;
         Sched::Schedule *RHsaMinSched = nullptr;
@@ -312,7 +325,6 @@ namespace HybridEvapCoolingModel {
         Real64 InletMassFlowRate;       // Inlet is primary process air node at inlet to cooler
         Real64 InletVolumetricFlowRate; // Inlet is primary process air node at inlet to cooler
         Real64 InletTemp;
-        Real64 InletWetBulbTemp;
         Real64 InletHumRat;
         Real64 InletEnthalpy;
         Real64 InletPressure;
@@ -322,14 +334,12 @@ namespace HybridEvapCoolingModel {
         Real64 PowerLossToAir;
         Real64 FanHeatTemp;
         Real64 OutletTemp;
-        Real64 OutletWetBulbTemp;
         Real64 OutletHumRat;
         Real64 OutletEnthalpy;
         Real64 OutletPressure;
         Real64 OutletRH;
         Real64 SecInletMassFlowRate; // Inlet is primary process air node at inlet to cooler
         Real64 SecInletTemp;
-        Real64 SecInletWetBulbTemp;
         Real64 SecInletHumRat;
         Real64 SecInletEnthalpy;
         Real64 SecInletPressure;
@@ -337,16 +347,13 @@ namespace HybridEvapCoolingModel {
         Real64 SecOutletVolumetricFlowRate;
         Real64 SecOutletMassFlowRate; // Inlet is primary process air node at inlet to cooler
         Real64 SecOutletTemp;
-        Real64 SecOutletWetBulbTemp;
         Real64 SecOutletHumRat;
         Real64 SecOutletEnthalpy;
-        Real64 SecOutletPressure;
         Real64 SecOutletRH;
         Real64 Wsa;
         Real64 SupplyVentilationAir;
         Real64 SupplyVentilationVolume;
 
-        bool OutdoorAir;
         Real64 MinOA_Msa;
         int OARequirementsPtr; // Index to DesignSpecification:OutdoorAir object
 
@@ -358,9 +365,6 @@ namespace HybridEvapCoolingModel {
         bool DehumidificationRequested;
         bool HumidificationRequested;
         // non-initializer
-        std::vector<int> Tsa_curve_pointer;
-        std::vector<int> HRsa_curve_pointer;
-        std::vector<int> Psa_curve_pointer;
         std::vector<CMode> OperatingModes;
         std::vector<CSetting> CurrentOperatingSettings;
 
@@ -371,7 +375,7 @@ namespace HybridEvapCoolingModel {
         // methods
         int CurrentPrimaryMode();
         Real64 CurrentPrimaryRuntimeFraction();
-        Real64 CalculatePartRuntimeFraction(Real64 MinOA_Msa,
+        Real64 CalculatePartRuntimeFraction(Real64 t_MinOA_Msa,
                                             Real64 Mvent,
                                             Real64 RequestedCoolingLoad,
                                             Real64 RequestedHeatingLoad,
@@ -383,8 +387,8 @@ namespace HybridEvapCoolingModel {
                        Array1D_string Alphas,
                        Array1D_string cAlphaFields,
                        Array1D<Real64> Numbers,
-                       Array1D_string cNumericFields,
                        Array1D<bool> lAlphaBlanks,
+                       Array1D<bool> lNumericBlanks,
                        std::string cCurrentModuleObject);
         void doStep(EnergyPlusData &state,
                     Real64 RequestedLoad,
@@ -411,17 +415,9 @@ namespace HybridEvapCoolingModel {
         bool WarnOnceFlag;
 
         int count_EnvironmentConditionsNotMet;
-        int count_EnvironmentConditionsMetOnce;
         int count_SAHR_OC_MetOnce;
         int count_SAT_OC_MetOnce;
-        int count_DidWeMeetLoad;
         int count_DidWeNotMeetLoad;
-
-        bool optimal_EnvCondMet;
-        bool RunningPeakCapacity_EnvCondMet;
-
-        std::vector<Real64> PolygonXs;
-        std::vector<Real64> PolygonYs;
     };
 } // namespace HybridEvapCoolingModel
 } // namespace EnergyPlus

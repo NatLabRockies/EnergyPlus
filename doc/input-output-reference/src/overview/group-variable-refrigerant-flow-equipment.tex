@@ -116,7 +116,7 @@ This alpha field defines the cooling energy input ratio modifier (function of pa
 
 \paragraph{Field: Cooling Combination Ratio Correction Factor Curve Name}\label{field-cooling-combination-ratio-correction-factor-curve-name}
 
-This alpha field defines the cooling combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor terminal unit cooling capacity divided by this heat pump's gross rated total cooling capacity. The curve is a linear, quadratic or cubic equation and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x {[}CR{]} in the curve object must be ≥1). The output of this curve provides a multiplier (\textgreater{}1) which is applied to this heat pump's Gross Rated Total Cooling Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1 (i.e., the total indoor terminal unit capacity is less than this heat pump's rated total capacity), capacity is directly proportional to part-load ratio and this curve will not be used.
+This alpha field defines the cooling combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor terminal unit cooling capacity divided by this heat pump's gross rated total cooling capacity. The curve is a linear, quadratic or cubic equation and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x {[}CR{]} in the curve object must be \(\ge 1\)). The output of this curve provides a multiplier (\textgreater{}1) which is applied to this heat pump's Gross Rated Total Cooling Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1 (i.e., the total indoor terminal unit capacity is less than this heat pump's rated total capacity), capacity is directly proportional to part-load ratio and this curve will not be used.
 
 \paragraph{Field: Cooling Part-Load Fraction Correlation Curve Name}\label{field-cooling-part-load-fraction-correlation-curve-name}
 
@@ -181,7 +181,7 @@ This alpha field defines the heating energy input ratio modifier (function of pa
 
 \paragraph{Field: Heating Combination Ratio Correction Factor Curve Name}\label{field-heating-combination-ratio-correction-factor-curve-name}
 
-This alpha field defines the heating combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor heating capacity divided by the rated heat pump heating capacity. The curve is either quadratic or cubic and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x in the curve object must be ≥1). The output of this curve provides a multiplier (\textgreater{}1) which is applied to the Nominal Heat Pump Heating Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1, capacity is directly proportional to part-load ratio and this curve will not be used. If this field is left blank, the Cooling Combination Ratio Correction factor will be used.
+This alpha field defines the heating combination ratio (CR) correction factor curve name for combination ratios greater than or equal to 1. The combination ratio is defined as the total rated indoor heating capacity divided by the rated heat pump heating capacity. The curve is either quadratic or cubic and uses the minimum value of x in the curve object to determine the maximum part-load ratio which is linearly proportional to capacity (i.e., the minimum value of x in the curve object must be \(\ge 1\)). The output of this curve provides a multiplier (\textgreater{}1) which is applied to the Nominal Heat Pump Heating Capacity. Between a combination ratio of 1 and the curve's minimum value of x, the multiplier is linearly interpolated. For combination ratio's less than 1, capacity is directly proportional to part-load ratio and this curve will not be used. If this field is left blank, the Cooling Combination Ratio Correction factor will be used.
 
 \paragraph{Field: Heating Part-Load Fraction Correlation Curve Name}\label{field-heating-part-load-fraction-correlation-curve-name}
 
@@ -201,7 +201,7 @@ This choice field determines the logic used to simulate the ``master'' thermosta
 
 \paragraph{Field: Thermostat Priority Schedule Name}\label{field-thermostat-priority-schedule-name-000}
 
-This alpha field identifies the schedule used when the previous field is set to Scheduled. Schedule values of 0 denote heating mode while values of 1 denote cooling mode. Any other values will force the system off.
+This alpha field identifies the schedule used when the previous field is set to Scheduled. Schedule values of 0 denote cooling mode while values of 1 denote heating mode. Any other values will force the system off.
 
 \paragraph{Field: Zone Terminal Unit List Name}\label{field-zone-terminal-unit-list-name}
 
@@ -307,7 +307,7 @@ Tcond\,inlet = \,\left( {Twb,o} \right)\,\, + \,\,\left( {1 - EvapCondEffectiven
 
 where
 
-\emph{T\(_{cond\\ inlet}\)} = the temperature of the air entering the condenser coil ($^\circ$C)
+\emph{T\(_{cond inlet}\)} = the temperature of the air entering the condenser coil ($^\circ$C)
 
 \emph{T\(_{wb,o}\)} = the wet-bulb temperature of the outdoor air ($^\circ$C)
 
@@ -351,11 +351,11 @@ This alpha field determines the type of fuel that this variable refrigerant flow
 
 \paragraph{Field: Minimum Condenser Inlet Node Temperature in Heat Recovery Mode}\label{field-minimum-condenser-inlet-node-temperature-in-heat-recovery-mode-000}
 
-This numeric field defines the minimum source inlet temperature allowed for heat recovery operation. For air-cooled equipment outdoor dry-bulb temperature is used. For water-cooled equipment inlet water temperature is used. Below this temperature, heat recovery is disabled. This input must be greater than the larger of the minimum condenser inlet node temperature in cooling or heating mode. If this field is left blank, the default value is the higher of the Minimum Condenser Inlet Node Temperature in Cooling Mode or Minimum Condenser Inlet Node Temperature in Heating Mode inputs. This system may still operate in cooling or heating only mode when source inlet temperatures are below the minimum condenser inlet node temperature in heat recovery mode. This input is only used when Heat Pump Waste Heat Recovery is selected as Yes.
+This numeric field defines the minimum source inlet temperature allowed for heat recovery operation. For air-cooled equipment outdoor dry-bulb temperature is used. For water-cooled equipment inlet water temperature is used. Below this temperature, heat recovery is disabled. This input is independent of the cooling and heating mode limits and may be lower than either of them. If this field is left blank, the default value is the higher of the Minimum Condenser Inlet Node Temperature in Cooling Mode or Minimum Condenser Inlet Node Temperature in Heating Mode inputs. This system may still operate in cooling or heating only mode when source inlet temperatures are below the minimum condenser inlet node temperature in heat recovery mode. This input is only used when Heat Pump Waste Heat Recovery is selected as Yes.
 
 \paragraph{Field: Maximum Condenser Inlet Node Temperature in Heat Recovery Mode}\label{field-maximum-condenser-inlet-node-temperature-in-heat-recovery-mode-000}
 
-This numeric field defines the maximum source inlet temperature allowed for heat recovery operation. For air-cooled equipment outdoor dry-bulb temperature is used. For water-cooled equipment inlet water temperature is used. Above this temperature, heat recovery is disabled. This input must be less than the smaller of the maximum condenser inlet node temperature in cooling or heating mode. If this field is left blank, the default value is the lower of the Maximum Condenser Inlet Node Temperature in Cooling Mode or Maximum Condenser Inlet Node Temperature in Heating Mode inputs. This system may still operate in cooling or heating only mode when source inlet temperatures are above the maximum condenser inlet node temperature in heat recovery mode. This input is only used when Heat Pump Waste Heat Recovery is selected as Yes.
+This numeric field defines the maximum source inlet temperature allowed for heat recovery operation. For air-cooled equipment outdoor dry-bulb temperature is used. For water-cooled equipment inlet water temperature is used. Above this temperature, heat recovery is disabled. This input is independent of the cooling and heating mode limits and may be higher than either of them. The minimum condenser inlet node temperature in heat recovery mode must be less than this value. If this field is left blank, the default value is the lower of the Maximum Condenser Inlet Node Temperature in Cooling Mode or Maximum Condenser Inlet Node Temperature in Heating Mode inputs. This system may still operate in cooling or heating only mode when source inlet temperatures are above the maximum condenser inlet node temperature in heat recovery mode. This input is only used when Heat Pump Waste Heat Recovery is selected as Yes.
 
 \paragraph{Field: Heat Recovery Cooling Capacity Modifier Curve Name}\label{field-heat-recovery-cooling-capacity-modifier-curve-name}
 

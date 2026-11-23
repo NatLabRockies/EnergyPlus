@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,11 +49,12 @@
 #define PipeHeatTransfer_hh_INCLUDED
 
 // C++ Headers
+#include <array>
+#include <cassert>
 #include <memory>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array4D.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -92,6 +93,11 @@ namespace PipeHeatTransfer {
         Tentative
     };
 
+    constexpr int NumPipeSections = 20;                   // Number of nodes along the pipe length
+    constexpr int NumberOfDepthNodes = 8;                 // Number of nodes in the cartesian grid-Should be an even # for now
+    constexpr int NumWidthNodes = NumberOfDepthNodes / 2; // Number of soil grid points in the width direction (pipe is at the last one)
+    constexpr int NumTimeIndices = TimeIndex::Tentative;  // Previous, Current, Tentative
+
     constexpr Real64 InnerDeltaTime(60.0); // one minute time step in seconds
 
     struct PipeHTData : public PlantComponent
@@ -103,7 +109,6 @@ namespace PipeHeatTransfer {
         // Input data
         std::string Name;
         std::string Construction;                // construction object name
-        std::string Environment;                 // keyword:  'Schedule', 'OutdoorAir', 'Zone'
         Sched::Schedule *envrSched = nullptr;    // temperature schedule for environmental temp
         Sched::Schedule *envrVelSched = nullptr; // temperature schedule for environmental temp
         std::string EnvrAirNode;                 // outside air node providing environmental temp
@@ -168,7 +173,6 @@ namespace PipeHeatTransfer {
         Real64 FourierDS;                         // soil Fourier number based on grid spacing
         Real64 SoilDiffusivity;                   // soil thermal diffusivity [m2/s]
         Real64 SoilDiffusivityPerDay;             // soil thermal diffusivity [m2/day]
-        Array4D<Real64> T;                        // soil temperature array
         bool BeginSimInit;                        // begin sim and begin environment flag
         bool BeginSimEnvrn;                       // begin sim and begin environment flag
         bool FirstHVACupdateFlag;
@@ -210,6 +214,17 @@ namespace PipeHeatTransfer {
         {
         }
 
+        // Soil temperature at 1-based (width, depth, length) grid node and TimeIndex
+        Real64 T(int const WidthIndex, int const DepthIndex, int const LengthIndex, int const timeIndex) const
+        {
+            return TGrid[TIndex(WidthIndex, DepthIndex, LengthIndex, timeIndex)];
+        }
+
+        Real64 &T(int const WidthIndex, int const DepthIndex, int const LengthIndex, int const timeIndex)
+        {
+            return TGrid[TIndex(WidthIndex, DepthIndex, LengthIndex, timeIndex)];
+        }
+
         static PlantComponent *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType objectType, std::string const &objectName);
 
         void simulate([[maybe_unused]] EnergyPlusData &state,
@@ -237,9 +252,9 @@ namespace PipeHeatTransfer {
         Real64 OutsidePipeHeatTransCoef(EnergyPlusData &state);
 
         Real64 CalcPipeHeatTransCoef(EnergyPlusData &state,
-                                     Real64 Temperature,  // Temperature of water entering the surface, in C
-                                     Real64 MassFlowRate, // Mass flow rate, in kg/s
-                                     Real64 Diameter      // Pipe diameter, m
+                                     Real64 Temperature,    // Temperature of water entering the surface, in C
+                                     Real64 t_MassFlowRate, // Mass flow rate, in kg/s
+                                     Real64 Diameter        // Pipe diameter, m
         );
 
         void ReportPipesHeatTransfer(EnergyPlusData &state); // Index for the surface under consideration
@@ -250,11 +265,30 @@ namespace PipeHeatTransfer {
                                       std::string const &PipeType,         // module object of pipe (error messages)
                                       std::string const &ConstructionName, // construction name of pipe (error messages)
                                       std::string_view FieldName,          // fieldname of pipe (error messages)
-                                      int ConstructionNum,                 // pointer into construction data
+                                      int t_ConstructionNum,               // pointer into construction data
                                       bool &ErrorsFound                    // set to true if errors found here
         );
 
         static void CalcZonePipesHeatGain(EnergyPlusData &state);
+
+    private:
+        // soil temperature array, indexed (width, depth, length, TimeIndex), see T()
+        std::array<Real64, NumWidthNodes * NumberOfDepthNodes * NumPipeSections * NumTimeIndices> TGrid{};
+
+        // Linear index into TGrid, row-major with TimeIndex fastest
+        // TODO: this (width, depth, length, time) order is the Fortran column-major order carried over from Array4D, and is the reverse of how
+        // the loops traverse the grid (time, length, depth, width innermost). Storing it as [time][length][depth][width] would make the inner
+        // loops contiguous and keep each time level in one block (e.g. Current -> Previous becomes a single block copy).
+        static std::size_t TIndex(int const WidthIndex, int const DepthIndex, int const LengthIndex, int const timeIndex)
+        {
+            assert((1 <= WidthIndex) && (WidthIndex <= NumWidthNodes));
+            assert((1 <= DepthIndex) && (DepthIndex <= NumberOfDepthNodes));
+            assert((1 <= LengthIndex) && (LengthIndex <= NumPipeSections));
+            assert((1 <= timeIndex) && (timeIndex <= NumTimeIndices));
+            return static_cast<std::size_t>((((WidthIndex - 1) * NumberOfDepthNodes + (DepthIndex - 1)) * NumPipeSections + (LengthIndex - 1)) *
+                                                NumTimeIndices +
+                                            (timeIndex - 1));
+        }
     };
 
     void GetPipesHeatTransfer(EnergyPlusData &state);

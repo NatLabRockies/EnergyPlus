@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -50,7 +50,10 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
+// Fixture Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+
+// EnergyPlus Headers
 #include <EnergyPlus/ConfiguredFunctions.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -133,7 +136,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_CorrectInputs)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -203,7 +206,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -273,7 +276,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabLocation)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -343,7 +346,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabMaterialName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -413,7 +416,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsSelection)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -483,7 +486,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsMaterialNa
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -553,7 +556,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsExtentsSel
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -623,7 +626,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_PerimeterInsulationWi
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -693,7 +696,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsSelection)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -763,7 +766,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsMaterialNam
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -833,7 +836,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -904,7 +907,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadTimeStepSelection)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -975,7 +978,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_CorrectInputs)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1045,7 +1048,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1115,7 +1118,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsSelect
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1185,7 +1188,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsMateri
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1255,7 +1258,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsExtent
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1325,7 +1328,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadBasementDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1395,7 +1398,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadFloorOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1465,7 +1468,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsSelecti
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1535,7 +1538,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1606,7 +1609,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadTimestepSelect
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1762,7 +1765,7 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
 
     // Other necessary inputs
     bool errorsFound = false;
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     // first call the factory, it will call GetInput
@@ -1788,7 +1791,7 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
     Real64 curLoad = 0.0;
     state->dataGlobal->BeginSimFlag = true;
     state->dataGlobal->BeginEnvrnFlag = true;
-    state->dataEnvrn->SOLCOS(3) = 1.0;
+    state->dataEnvrn->SOLCOS.z = 1.0;
     thisCircuit->simulate(*state, myLocation, true, curLoad, true);
 
     // we can also try to call from the Domain side
@@ -1914,9 +1917,9 @@ TEST_F(EnergyPlusFixture, PipingSystem_Check_Correct_Pipe_Diameters)
     EXPECT_TRUE(ErrorsFound);
 
     std::string error_string = delimited_string({
-        R"(   ** Severe  ** ReadPipeCircuitInputs:PipingSystem:Underground:PipeCircuit="MY PIPE CIRCUIT", invalid Pipe Outer Diameter="1.200E-002", Condition: Outer diameter must be greater than inner diameter.)",
+        R"(   ** Severe  ** ReadPipeCircuitInputs:PipingSystem:Underground:PipeCircuit="MY PIPE CIRCUIT", invalid Pipe Outer Diameter="0.012", Condition: Outer diameter must be greater than inner diameter.)",
         R"(   ** Severe  ** ReadPipeCircuitInputs: GroundHeatExchanger:HorizontalTrench="GHX HORIZONTAL TRENCH" has invalid pipe diameters.)",
-        R"(   **   ~~~   ** Outer diameter [1.100E-002] must be greater than inner diameter [1.500E-002].)",
+        R"(   **   ~~~   ** Outer diameter [0.011] must be greater than inner diameter [0.015].)",
     });
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
@@ -2052,7 +2055,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -2180,7 +2183,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth_Test2)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -2317,7 +2320,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_FiniteDifference)
     state->dataSurface->Surface(1).Area = 100;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);

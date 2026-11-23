@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -83,13 +84,24 @@ namespace DataPlant {
         int const BranchOutletNodeNum = this->NodeNumOut;
         Real64 OverallFlowRequest = 0.0;
 
-        if (this->controlType != DataBranchAirLoopPlant::ControlType::SeriesActive) {
-            OverallFlowRequest = state.dataLoopNodes->Node(BranchInletNodeNum).MassFlowRateRequest;
-        } else { // is series active, so take largest request of all the component inlet nodes
+        if (this->controlType == DataBranchAirLoopPlant::ControlType::SeriesActive) {
+            // Take largest request of all the component inlet nodes
             for (int CompCounter = 1; CompCounter <= this->TotalComponents; ++CompCounter) {
                 int const CompInletNode = this->Comp(CompCounter).NodeNumIn;
                 OverallFlowRequest = max(OverallFlowRequest, state.dataLoopNodes->Node(CompInletNode).MassFlowRateRequest);
             }
+        } else if (this->controlType == DataBranchAirLoopPlant::ControlType::Active) {
+            // Take the request of the actual active component
+            int ActiveCompInletNode = BranchInletNodeNum;
+            for (int CompCounter = 1; CompCounter <= this->TotalComponents; ++CompCounter) {
+                if (this->Comp(CompCounter).FlowCtrl == DataBranchAirLoopPlant::ControlType::Active) {
+                    ActiveCompInletNode = this->Comp(CompCounter).NodeNumIn;
+                    break;
+                }
+            }
+            OverallFlowRequest = state.dataLoopNodes->Node(ActiveCompInletNode).MassFlowRateRequest;
+        } else { // Passive/Bypass
+            OverallFlowRequest = state.dataLoopNodes->Node(BranchInletNodeNum).MassFlowRateRequest;
         }
 
         //~ Now use a worker to bound the value to outlet min/max avail

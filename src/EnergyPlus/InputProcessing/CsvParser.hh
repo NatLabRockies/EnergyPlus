@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -94,7 +94,6 @@ private:
     size_t csv_size = 0;
     char delimiter = ',';
     int rows_to_skip = 0;
-    char s[129] = {};
     std::vector<std::pair<std::string, bool>> errors_;   // the boolean is for continuing lines
     std::vector<std::pair<std::string, bool>> warnings_; // the boolean is for continuing lines
 

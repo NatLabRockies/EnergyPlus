@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -184,10 +185,6 @@ namespace ThermalChimney {
 
             ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
 
-            if (Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) {
-                continue;
-            }
-
             // First Alpha is Thermal Chimney Name
             state.dataThermalChimneys->ThermalChimneySys(Loop).Name = state.dataIPShortCut->cAlphaArgs(1);
 
@@ -195,16 +192,17 @@ namespace ThermalChimney {
             state.dataThermalChimneys->ThermalChimneySys(Loop).RealZonePtr =
                 Util::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataHeatBal->Zone);
             if (state.dataThermalChimneys->ThermalChimneySys(Loop).RealZonePtr == 0) {
-                ShowSevereError(state, format("{}=\"{} invalid Zone", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{} invalid Zone", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(
-                    state, format("invalid - not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
+                    state,
+                    std::format("invalid - not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
                 ErrorsFound = true;
             } else if (!state.dataHeatBal->Zone(state.dataThermalChimneys->ThermalChimneySys(Loop).RealZonePtr).HasWindow) {
-                ShowSevereError(state, format("{}=\"{} invalid Zone", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{} invalid Zone", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  format("...invalid - no window(s) in {}=\"{}\".",
-                                         state.dataIPShortCut->cAlphaFieldNames(2),
-                                         state.dataIPShortCut->cAlphaArgs(2)));
+                                  std::format("...invalid - no window(s) in {}=\"{}\".",
+                                              state.dataIPShortCut->cAlphaFieldNames(2),
+                                              state.dataIPShortCut->cAlphaArgs(2)));
                 ShowContinueError(state, "...thermal chimney zones must have window(s).");
                 ErrorsFound = true;
             }
@@ -221,22 +219,22 @@ namespace ThermalChimney {
             state.dataThermalChimneys->ThermalChimneySys(Loop).AbsorberWallWidth = state.dataIPShortCut->rNumericArgs(1);
             if (state.dataThermalChimneys->ThermalChimneySys(Loop).AbsorberWallWidth < 0.0) {
                 ShowSevereError(state,
-                                format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2R}].",
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       state.dataIPShortCut->cNumericFieldNames(1),
-                                       state.dataIPShortCut->rNumericArgs(1)));
+                                std::format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2f}].",
+                                            cCurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            state.dataIPShortCut->cNumericFieldNames(1),
+                                            state.dataIPShortCut->rNumericArgs(1)));
                 ErrorsFound = true;
             }
 
             state.dataThermalChimneys->ThermalChimneySys(Loop).AirOutletCrossArea = state.dataIPShortCut->rNumericArgs(2);
             if (state.dataThermalChimneys->ThermalChimneySys(Loop).AirOutletCrossArea < 0.0) {
                 ShowSevereError(state,
-                                format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2R}].",
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       state.dataIPShortCut->cNumericFieldNames(2),
-                                       state.dataIPShortCut->rNumericArgs(2)));
+                                std::format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2f}].",
+                                            cCurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            state.dataIPShortCut->cNumericFieldNames(2),
+                                            state.dataIPShortCut->rNumericArgs(2)));
                 ErrorsFound = true;
             }
 
@@ -244,11 +242,11 @@ namespace ThermalChimney {
             if ((state.dataThermalChimneys->ThermalChimneySys(Loop).DischargeCoeff <= 0.0) ||
                 (state.dataThermalChimneys->ThermalChimneySys(Loop).DischargeCoeff > 1.0)) {
                 ShowSevereError(state,
-                                format("{}=\"{} invalid {} must be > 0 and <=1.0, entered value=[{:.2R}].",
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       state.dataIPShortCut->cNumericFieldNames(3),
-                                       state.dataIPShortCut->rNumericArgs(3)));
+                                std::format("{}=\"{} invalid {} must be > 0 and <=1.0, entered value=[{:.2f}].",
+                                            cCurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            state.dataIPShortCut->cNumericFieldNames(3),
+                                            state.dataIPShortCut->rNumericArgs(3)));
                 ErrorsFound = true;
             }
 
@@ -290,55 +288,55 @@ namespace ThermalChimney {
                 //!! Error trap for zones that do not exist or zones not in the zone the thermal chimney is in
                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) == 0) {
                     ShowSevereError(state,
-                                    format("{}=\"{} invalid {}=\"{}\" not found.",
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cAlphaFieldNames(TCZoneNum + 3),
-                                           state.dataIPShortCut->cAlphaArgs(TCZoneNum + 3)));
+                                    std::format("{}=\"{} invalid {}=\"{}\" not found.",
+                                                cCurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                state.dataIPShortCut->cAlphaFieldNames(TCZoneNum + 3),
+                                                state.dataIPShortCut->cAlphaArgs(TCZoneNum + 3)));
                     ErrorsFound = true;
                 } else if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                            state.dataThermalChimneys->ThermalChimneySys(Loop).RealZonePtr) {
                     ShowSevereError(state,
-                                    format("{}=\"{} invalid reference {}=\"{}",
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                           state.dataIPShortCut->cAlphaArgs(2)));
+                                    std::format("{}=\"{} invalid reference {}=\"{}",
+                                                cCurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                state.dataIPShortCut->cAlphaFieldNames(2),
+                                                state.dataIPShortCut->cAlphaArgs(2)));
                     ShowContinueError(state,
-                                      format("...must not have same zone as reference= {}=\"{}\".",
-                                             state.dataIPShortCut->cAlphaFieldNames(TCZoneNum + 3),
-                                             state.dataIPShortCut->cAlphaArgs(TCZoneNum + 3)));
+                                      std::format("...must not have same zone as reference= {}=\"{}\".",
+                                                  state.dataIPShortCut->cAlphaFieldNames(TCZoneNum + 3),
+                                                  state.dataIPShortCut->cAlphaArgs(TCZoneNum + 3)));
                     ErrorsFound = true;
                 }
 
                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).DistanceThermChimInlet(TCZoneNum) < 0.0) {
                     ShowSevereError(state,
-                                    format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2R}].",
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 1),
-                                           state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 1)));
+                                    std::format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2f}].",
+                                                cCurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 1),
+                                                state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 1)));
                     ErrorsFound = true;
                 }
 
                 if ((state.dataThermalChimneys->ThermalChimneySys(Loop).RatioThermChimAirFlow(TCZoneNum) <= 0.0) ||
                     (state.dataThermalChimneys->ThermalChimneySys(Loop).RatioThermChimAirFlow(TCZoneNum) > 1.0)) {
                     ShowSevereError(state,
-                                    format("{}=\"{} invalid {} must be > 0 and <=1.0, entered value=[{:.2R}].",
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 2),
-                                           state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 2)));
+                                    std::format("{}=\"{} invalid {} must be > 0 and <=1.0, entered value=[{:.2f}].",
+                                                cCurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 2),
+                                                state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 2)));
                     ErrorsFound = true;
                 }
 
                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).EachAirInletCrossArea(TCZoneNum) < 0.0) {
                     ShowSevereError(state,
-                                    format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2R}].",
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 3),
-                                           state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 3)));
+                                    std::format("{}=\"{} invalid {} must be >= 0, entered value=[{:.2f}].",
+                                                cCurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                state.dataIPShortCut->cNumericFieldNames(3 * TCZoneNum + 3),
+                                                state.dataIPShortCut->rNumericArgs(3 * TCZoneNum + 3)));
                     ErrorsFound = true;
                 }
 
@@ -349,10 +347,10 @@ namespace ThermalChimney {
             // Error trap if the sum of fractions is not equal to 1.0
             if (std::abs(AllRatiosSummed - 1.0) > FlowFractionTolerance) {
                 ShowSevereError(state,
-                                format("{}=\"{} invalid sum of fractions, must be =1.0, entered value (summed from entries)=[{:.4R}].",
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       AllRatiosSummed));
+                                std::format("{}=\"{} invalid sum of fractions, must be =1.0, entered value (summed from entries)=[{:.4f}].",
+                                            cCurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            AllRatiosSummed));
                 ErrorsFound = true;
             }
 
@@ -585,20 +583,22 @@ namespace ThermalChimney {
                              ++TCZoneNum1) {
                             if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                 state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum1)) {
-                                ShowSevereError(state,
-                                                format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
-                                                       "objects associated with it",
-                                                       state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                ShowSevereError(
+                                    state,
+                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
+                                                "objects associated with it",
+                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                 ErrorsFound = true;
                             }
                         }
                         for (TCZoneNum1 = 1; TCZoneNum1 <= TCZoneNum - 1; ++TCZoneNum1) {
                             if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                 state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum1)) {
-                                ShowSevereError(state,
-                                                format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
-                                                       "objects associated with it",
-                                                       state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                ShowSevereError(
+                                    state,
+                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
+                                                "objects associated with it",
+                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                 ErrorsFound = true;
                             }
                         }
@@ -606,10 +606,11 @@ namespace ThermalChimney {
                         for (TCZoneNum1 = 1; TCZoneNum1 <= TCZoneNum - 1; ++TCZoneNum1) {
                             if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                 state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum1)) {
-                                ShowSevereError(state,
-                                                format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
-                                                       "objects associated with it",
-                                                       state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                ShowSevereError(
+                                    state,
+                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two ZoneThermalChimney "
+                                                "objects associated with it",
+                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                 ErrorsFound = true;
                             }
                         }
@@ -631,9 +632,9 @@ namespace ThermalChimney {
                                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                     state.dataThermalChimneys->ThermalChimneySys(Loop1).ZonePtr(TCZoneNum1)) {
                                     ShowSevereError(state,
-                                                    format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
-                                                           "ZoneThermalChimney objects associated with it",
-                                                           state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
+                                                                "ZoneThermalChimney objects associated with it",
+                                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                     ErrorsFound = true;
                                 }
                             }
@@ -645,9 +646,9 @@ namespace ThermalChimney {
                                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                     state.dataThermalChimneys->ThermalChimneySys(Loop1).ZonePtr(TCZoneNum1)) {
                                     ShowSevereError(state,
-                                                    format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
-                                                           "ZoneThermalChimney objects associated with it",
-                                                           state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
+                                                                "ZoneThermalChimney objects associated with it",
+                                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                     ErrorsFound = true;
                                 }
                             }
@@ -660,9 +661,9 @@ namespace ThermalChimney {
                                 if (state.dataThermalChimneys->ThermalChimneySys(Loop).ZonePtr(TCZoneNum) ==
                                     state.dataThermalChimneys->ThermalChimneySys(Loop1).ZonePtr(TCZoneNum1)) {
                                     ShowSevereError(state,
-                                                    format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
-                                                           "ZoneThermalChimney objects associated with it",
-                                                           state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
+                                                    std::format("Only one ZoneThermalChimney object allowed per zone but zone {} has two "
+                                                                "ZoneThermalChimney objects associated with it",
+                                                                state.dataThermalChimneys->ThermalChimneySys(Loop).ZoneName(TCZoneNum)));
                                     ErrorsFound = true;
                                 }
                             }
@@ -674,7 +675,7 @@ namespace ThermalChimney {
         } // IF (TotThermalChimney > 1) THEN
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{} Errors found in input.  Preceding condition(s) cause termination.", cCurrentModuleObject));
+            ShowFatalError(state, std::format("{} Errors found in input.  Preceding condition(s) cause termination.", cCurrentModuleObject));
         }
     }
 
@@ -693,10 +694,10 @@ namespace ThermalChimney {
         int constexpr NTC(15); // Number of subregions in thermal chimney air channel for FINITE DIFFERENCE
 
         // To be obtained from other modules and subroutines
-        Real64 SurfTempAbsorberWall;     // Absorber wall surface temperature (K)
-        Real64 SurfTempGlassCover;       // Glass cover surface temperature (K)
-        Real64 ConvTransCoeffWallFluid;  // Absorber wall convection transfer coefficient
-        Real64 ConvTransCoeffGlassFluid; // Glass cover convection transfer coefficient
+        Real64 SurfTempAbsorberWall = 0.0;     // Absorber wall surface temperature (K)
+        Real64 SurfTempGlassCover = 0.0;       // Glass cover surface temperature (K)
+        Real64 ConvTransCoeffWallFluid = 0.0;  // Absorber wall convection transfer coefficient
+        Real64 ConvTransCoeffGlassFluid = 0.0; // Glass cover convection transfer coefficient
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         // Real local variables
@@ -707,8 +708,8 @@ namespace ThermalChimney {
         Real64 RoomAirTemp;
         Real64 AirSpecHeatThermalChim; // (J/kg*C) or (J/kg*K)
         Real64 AbsorberWallWidthTC;
-        Real64 TCVolumeAirFlowRate; // (m^3/s)
-        Real64 TCMassAirFlowRate;   // (kg/s)
+        Real64 TCVolumeAirFlowRate;     // (m^3/s)
+        Real64 TCMassAirFlowRate = 0.0; // (kg/s)
         Real64 DischargeCoeffTC;
         Real64 AirOutletCrossAreaTC;
         Real64 AirInletCrossArea;
@@ -724,8 +725,8 @@ namespace ThermalChimney {
         Real64 Process3; // Temporary Variable Used in the Middle of the Calculation
         // unused1208  REAL(r64)   :: Process4                            ! Temporary Variable Used in the Middle of the Calculation
         Real64 AirDensityThermalChim; // (kg/m^3)
-        Real64 AirDensity;            // (kg/m^3)
-        Real64 CpAir;
+        Real64 AirDensity = 0.0;      // (kg/m^3)
+        Real64 CpAir = 0.0;
         Real64 TemporaryWallSurfTemp;
 
         Real64 DeltaL; // OverallThermalChimLength / NTC
@@ -848,7 +849,7 @@ namespace ThermalChimney {
                     if (std::abs(TempTCMassAirFlowRate(IterationLoop) - TempTCMassAirFlowRate(IterationLoop - 1)) < ThermChimTolerance) {
                         ThermChimTolerance = std::abs(TempTCMassAirFlowRate(IterationLoop) - TempTCMassAirFlowRate(IterationLoop - 1));
                         TCMassAirFlowRate = TempTCMassAirFlowRate(IterationLoop);
-                        TCVolumeAirFlowRate = TempTCVolumeAirFlowRate(IterationLoop);
+                        // TCVolumeAirFlowRate = TempTCVolumeAirFlowRate(IterationLoop);
                     }
 
                 } // IF (IterationLoop == 1) THEN
@@ -1054,12 +1055,11 @@ namespace ThermalChimney {
         } // ... end of zone loads report variable update loop.
     }
 
-    void GaussElimination(Array2A<Real64> EquaCoef, Array1D<Real64> &EquaConst, Array1D<Real64> &ThermChimSubTemp, int const NTC)
+    void GaussElimination(Array2D<Real64> &EquaCoef, Array1D<Real64> &EquaConst, Array1D<Real64> &ThermChimSubTemp, int const NTC)
     {
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine solves linear algebraic equations using Gauss Elimination Method.
 
-        EquaCoef.dim(NTC, NTC);
         EP_SIZE_CHECK(EquaConst, NTC);
         EP_SIZE_CHECK(ThermChimSubTemp, NTC);
 
@@ -1084,17 +1084,25 @@ namespace ThermalChimney {
             }
 
             if (pivot != ThermChimLoop1) {
-                tempor({ThermChimLoop1, NTC}) = EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1);
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    tempor(i) = EquaCoef(i, ThermChimLoop1);
+                }
                 tempb = EquaConst(ThermChimLoop1);
-                EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1) = EquaCoef({ThermChimLoop1, NTC}, pivot);
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    EquaCoef(i, ThermChimLoop1) = EquaCoef(i, pivot);
+                }
                 EquaConst(ThermChimLoop1) = EquaConst(pivot);
-                EquaCoef({ThermChimLoop1, NTC}, pivot) = tempor({ThermChimLoop1, NTC});
+                for (int i = ThermChimLoop1; i <= NTC; ++i) {
+                    EquaCoef(i, pivot) = tempor(i);
+                }
                 EquaConst(pivot) = tempb;
             }
 
             for (ThermChimLoop2 = ThermChimLoop1 + 1; ThermChimLoop2 <= NTC; ++ThermChimLoop2) {
                 TCcoefficient = -EquaCoef(ThermChimLoop1, ThermChimLoop2) / EquaCoef(ThermChimLoop1, ThermChimLoop1);
-                EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop2) += TCcoefficient * EquaCoef({ThermChimLoop1, NTC}, ThermChimLoop1);
+                for (int row = ThermChimLoop1; row <= NTC; ++row) {
+                    EquaCoef(row, ThermChimLoop2) += TCcoefficient * EquaCoef(row, ThermChimLoop1);
+                }
                 EquaConst(ThermChimLoop2) += TCcoefficient * EquaConst(ThermChimLoop1);
             }
         }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -850,13 +850,14 @@ void SetInitialMeterReportingAndOutputNames(EnergyPlusData &state,
                                             bool CumulativeIndicator          // true if this is a Cumulative meter reporting
 );
 
+// Returns the 0-based index into meters, or -1 if no meter has that name
 int GetMeterIndex(EnergyPlusData const &state, std::string const &MeterName);
 
 Constant::eResource GetMeterResourceType(EnergyPlusData const &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
 
 Real64 GetCurrentMeterValue(EnergyPlusData const &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
 
-Real64 GetInstantMeterValue(EnergyPlusData &state,
+Real64 GetInstantMeterValue(EnergyPlusData const &state,
                             int MeterNumber,                           // Which Meter Number (from GetMeterIndex)
                             OutputProcessor::TimeStepType TimeStepType // Whether this is zone of HVAC
 );
@@ -897,7 +898,7 @@ void GetVariableKeys(EnergyPlusData &state,
                      Array1D_int &keyVarNums // Array index for
 );
 
-bool ReportingThisVariable(EnergyPlusData &state, std::string const &RepVarName);
+bool ReportingThisVariable(EnergyPlusData const &state, std::string const &RepVarName);
 
 void InitPollutionMeterReporting(EnergyPlusData &state, OutputProcessor::ReportFreq freq);
 
@@ -957,9 +958,8 @@ struct OutputProcessorData : BaseGlobalStruct
     std::vector<OutputProcessor::ReqVar *> reqVars;
 
     std::vector<OutputProcessor::Meter *> meters;
-    std::map<std::string, int> meterMap;
+    std::map<std::string, int> meterMap; // uppercase meter name -> 0-based index into meters
 
-    char stamp[OutputProcessor::N_WriteTimeStampFormatData];
     bool Rept = false;
     bool OpaqSurfWarned = false;
 

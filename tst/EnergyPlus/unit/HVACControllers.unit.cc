@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -152,6 +152,118 @@ TEST_F(EnergyPlusFixture, HVACControllers_ResetHumidityRatioCtrlVarType)
     EXPECT_EQ(state->dataHVACControllers->ControllerProps(1).Offset, DataSizing::AutoSize);
 }
 
+TEST_F(EnergyPlusFixture, HVACControllers_ZeroAirFlowInvalidatesMaxActive)
+{
+    // Setup a single simple controller and node to reproduce warm-restart stale MaxActive condition
+    state->dataHVACControllers->ControllerProps.allocate(1);
+    state->dataHVACControllers->RootFinders.allocate(1);
+
+    int controlNum = 1;
+    auto &controller = state->dataHVACControllers->ControllerProps(controlNum);
+
+    // Configure controller as reverse-acting water-coil controller
+    controller.SensedNode = 1;
+    state->dataLoopNodes->Node.allocate(2);
+
+    controller.Action = HVACControllers::ControllerAction::Reverse;
+    controller.MaxAvailActuated = 0.1525258825;
+
+    // Case A: non-zero air flow -> a preserved MaxActive should be accepted as converged
+    state->dataLoopNodes->Node(controller.SensedNode).MassFlowRate = 0.3244666712; // non-zero flow
+    controller.Mode = HVACControllers::ControllerMode::MaxActive;
+    controller.ActuatedValue = controller.MaxAvailActuated; // equals max avail
+    controller.SensedValue = 15.0;
+    controller.SetPointValue = 10.0; // For Reverse action, SetPoint <= Sensed implies max-constrained
+
+    bool isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    // With flow present and matching MaxActive condition, controller may be considered converged
+    EXPECT_TRUE(isConverged);
+
+    // Case B: warm-restart preserved MaxActive but air flow drops to zero -> must be rejected
+    state->dataLoopNodes->Node(controller.SensedNode).MassFlowRate = 0.0; // flow now zero after air loop recalculation
+    // Start with isConverged true to ensure function can flip it to false
+    isConverged = true;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_FALSE(isConverged);
+
+    // Case C: controller correctly transitions to Off with zero actuation and should be converged
+    controller.Mode = HVACControllers::ControllerMode::Off;
+    controller.ActuatedValue = 0.0;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // Case D: repeated checks with zero flow and Off mode remain converged
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // --- Additional coverage for other modes in CheckSimpleController ---
+    // Ensure sensed node has non-zero flow for these checks
+    state->dataLoopNodes->Node(controller.SensedNode).MassFlowRate = 0.5;
+
+    // Inactive: actuated equals MinAvailActuated -> converged
+    controller.Mode = HVACControllers::ControllerMode::Inactive;
+    controller.MinAvailActuated = 0.0;
+    controller.ActuatedValue = controller.MinAvailActuated;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // MinActive: actuated equals MinAvailActuated and SetPoint<=Sensed (Normal action) -> converged
+    controller.Mode = HVACControllers::ControllerMode::MinActive;
+    controller.Action = HVACControllers::ControllerAction::NormalAction;
+    controller.MinAvailActuated = 0.0;
+    controller.ActuatedValue = controller.MinAvailActuated;
+    controller.SetPointValue = 10.0;
+    controller.SensedValue = 15.0;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // MaxActive: actuated equals MaxAvailActuated and SetPoint>=Sensed (Normal action) -> converged
+    controller.Mode = HVACControllers::ControllerMode::MaxActive;
+    controller.Action = HVACControllers::ControllerAction::NormalAction;
+    controller.MaxAvailActuated = 0.1525258825;
+    controller.ActuatedValue = controller.MaxAvailActuated;
+    controller.SetPointValue = 20.0;
+    controller.SensedValue = 15.0;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // Active unconstrained: actuated between min and max, small DeltaSensed -> RootFinder convergence -> converged
+    controller.Mode = HVACControllers::ControllerMode::Active;
+    controller.MinAvailActuated = 0.0;
+    controller.MaxAvailActuated = 0.1525258825;
+    controller.ActuatedValue = 0.05; // between min and max
+    controller.DeltaSensed = 0.0;    // zero delta -> root finder will consider converged
+    // Ensure root finder tolerances default are small but nonzero (DataRootFinder default ATolY=1e-3)
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // Active min-constrained: actuated equals min and CheckMinActiveController returns true -> converged
+    controller.Mode = HVACControllers::ControllerMode::Active;
+    controller.ActuatedValue = controller.MinAvailActuated;
+    controller.Action = HVACControllers::ControllerAction::Reverse; // Reverse: SetPoint>=Sensed -> min-constrained
+    controller.SetPointValue = 20.0;
+    controller.SensedValue = 15.0;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+
+    // Active max-constrained: actuated equals max and CheckMaxActiveController returns true -> converged
+    controller.ActuatedValue = controller.MaxAvailActuated;
+    controller.Action = HVACControllers::ControllerAction::NormalAction; // Normal: SetPoint>=Sensed -> max-constrained
+    controller.SetPointValue = 20.0;
+    controller.SensedValue = 15.0;
+    isConverged = false;
+    HVACControllers::CheckSimpleController(*state, controlNum, isConverged);
+    EXPECT_TRUE(isConverged);
+}
+
 TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
 {
     std::string const idf_objects = delimited_string({
@@ -225,7 +337,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
     // before controllers are simulated, AirLoopControllerIndex = 0
     ASSERT_EQ(0, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirLoop->PriAirSysAvailMgr.allocate(1);
@@ -421,7 +532,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnPrimaryLoopCheckTest)
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "CHILLED WATER COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterCooling);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
@@ -444,7 +554,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnPrimaryLoopCheckTest)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::WaterCoil_Cooling;
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWater); //"Coil:Cooling:Water";
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWater]}; //"Coil:Cooling:Water";
     std::string CompName = "CHILLED WATER COIL";
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_Cooling;
 
@@ -515,7 +625,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "OA PREHEAT HW COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterSimpleHeating);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
 
     state->dataAirLoop->NumOASystems = 1;
@@ -526,7 +635,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     state->dataAirLoop->OutsideAirSys(1).ControllerName(1) = "OA CONTROLLER 1";
     state->dataAirLoop->OutsideAirSys(1).NumComponents = 2;
     state->dataAirLoop->OutsideAirSys(1).ComponentType.allocate(2);
-    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater);
+    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater];
     state->dataAirLoop->OutsideAirSys(1).ComponentType(2) = "OutdoorAir:Mixer";
     state->dataAirLoop->OutsideAirSys(1).ComponentName.allocate(2);
     state->dataAirLoop->OutsideAirSys(1).ComponentName(1) = state->dataWaterCoils->WaterCoil(1).Name;
@@ -550,7 +659,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "AirLoopHVAC:OutdoorAirSystem";
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_HeatingWater);
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::HeatingWater]};
     std::string CompName = state->dataWaterCoils->WaterCoil(1).Name;
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_SimpleHeat;
 
@@ -648,7 +757,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "DETAILED PRE COOLING COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
 
     state->dataAirLoop->NumOASystems = 1;
@@ -659,7 +767,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     state->dataAirLoop->OutsideAirSys(1).ControllerName(1) = "OA CONTROLLER 1";
     state->dataAirLoop->OutsideAirSys(1).NumComponents = 2;
     state->dataAirLoop->OutsideAirSys(1).ComponentType.allocate(2);
-    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::cAllCoilTypes(HVAC::CoilWater_CoolingHXAssisted);
+    state->dataAirLoop->OutsideAirSys(1).ComponentType(1) = HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterHXAssisted];
     state->dataAirLoop->OutsideAirSys(1).ComponentType(2) = "OutdoorAir:Mixer";
     state->dataAirLoop->OutsideAirSys(1).ComponentName.allocate(2);
     state->dataAirLoop->OutsideAirSys(1).ComponentName(1) = "HXAssisting Cooling Coil";
@@ -683,7 +791,7 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "AirLoopHVAC:OutdoorAirSystem";
 
     bool WaterCoilOnAirLoop = true;
-    std::string CompType = HVAC::cAllCoilTypes(HVAC::Coil_CoolingWaterDetailed);
+    std::string CompType = std::string{HVAC::coilTypeNames[(int)HVAC::CoilType::CoolingWaterDetailed]};
     std::string CompName = state->dataWaterCoils->WaterCoil(1).Name;
     SimAirServingZones::CompType CoilTypeNum = SimAirServingZones::CompType::WaterCoil_DetailedCool;
 
@@ -939,7 +1047,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     // before controllers are simulated, AirLoopControllerIndex = 0
     ASSERT_EQ(0, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirLoop->PriAirSysAvailMgr.allocate(1);

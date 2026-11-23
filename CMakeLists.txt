@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
+cmake_minimum_required(VERSION 3.25...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
 
 # Use ccache if available, has to be before "project()"
 find_program(CCACHE_PROGRAM NAMES ccache sccache)
@@ -13,12 +13,13 @@ endif()
 
 project(EnergyPlus)
 
-# Raise an error if attempting to compile on macOS older than 10.15 - it does not work
+# Raise an error if attempting to compile on macOS older than 13.3 - it does not work
+# 10.15 minimum for std::filesystem, 13.3 minimum for std::format with floating-point (to_chars)
 if (APPLE)
   if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET not set. Please set CMAKE_OSX_DEPLOYMENT_TARGET to 10.15 or greater and try again.")
-  elseif (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "10.15")
-    message(FATAL_ERROR "The minimum required version for macOS is 10.15, however CMAKE_OSX_DEPLOYMENT_TARGET is set to ${CMAKE_OSX_DEPLOYMENT_TARGET}.")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET not set. Please set CMAKE_OSX_DEPLOYMENT_TARGET to 13.3 or greater and try again.")
+  elseif (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "13.3")
+    message(FATAL_ERROR "The minimum required version for macOS is 13.3, however CMAKE_OSX_DEPLOYMENT_TARGET is set to ${CMAKE_OSX_DEPLOYMENT_TARGET}.")
   endif()
 endif()
 
@@ -27,27 +28,42 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
+# Project-wide default C++ language level (individual third-party targets may lower/raise as needed)
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard to build EnergyPlus with (Official: 20)")
+set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS 20 23 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# We don't use C++20 modules: disable CMake's dependency scanning to avoid a separate
+# "Scanning ... for CXX dependencies" step (and compiler invocation) for every TU
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_17)
+target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-add_library(cpp_pch_files INTERFACE)
 option(ENABLE_PCH "Enable Precompiled Headers" ON)
-if(ENABLE_PCH)
-  # This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's change
-  #
-  # consider breaking this out per project as necessary
-  target_precompile_headers(
-    cpp_pch_files
-    INTERFACE
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobalConstants.hh"
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobals.hh"
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/Data/EnergyPlusData.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array.functions.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array1D.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/nlohmann/json.hpp"
-    )
+# List of headers to precompile: each project will build its own PCH, which is a good idea if any #define's change
+set(EP_CXX_PCH_HEADERS
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobalConstants.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobals.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Data/EnergyPlusData.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array.functions.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array1D.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/nlohmann/nlohmann/json.hpp>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Formatters.hh>")
+set(EP_TEST_CXX_PCH_HEADERS
+    ${EP_CXX_PCH_HEADERS}
+    "$<$<COMPILE_LANGUAGE:CXX>:<gtest/gtest.h>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/tst/EnergyPlus/unit/Fixtures/EnergyPlusFixture.hh>")
+
+if(ENABLE_PCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Without this, Clang embeds a timestamp in the generated .pch, so its content hash differs
+  # on every build even when sources/headers are unchanged. ccache hashes that .pch content for
+  # both the direct-mode manifest and the preprocessor-mode result key, so every TU using
+  # -include-pch becomes a guaranteed cache miss. See ccache manual, "Precompiled Headers".
+  target_compile_options(project_options INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xclang -fno-pch-timestamp>")
 endif()
 
 option(ENABLE_UNITY "Enable Unity Build" OFF)
@@ -56,7 +72,12 @@ add_library(project_fp_options INTERFACE)
 
 add_library(project_warnings INTERFACE)
 
+# Useful for checking once in a while if a third-party library is generating scary warnings, but too noisy for normal development
+option(ENABLE_WARNINGS_IN_THIRD_PARTY "Enable warnings in third-party libraries" OFF)
+mark_as_advanced(ENABLE_WARNINGS_IN_THIRD_PARTY)
+
 add_library(turn_off_warnings INTERFACE)
+add_library(warnings_as_not_error INTERFACE) # -Wno-error
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
@@ -96,34 +117,16 @@ option(USE_GLYCOL_CACHING "Use glycol cashing routines" ON)
 option(USE_PSYCH_STATS "Compute psychrometric stats" OFF)
 option(USE_PSYCH_ERRORS "Report psychrometric errors " ON)
 
+if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode" AND OPENGL_FOUND)
+  set(OPENGL_FOUND FALSE)
+  message(STATUS "Disabling OpenGL for Xcode-generated builds to avoid Cocoa window creation during build/test execution")
+endif()
+
 mark_as_advanced(BUILD_OBJEXXFCL_TESTING)
 
 #######################################################################
 
-# TODO: remove at next release
-# Temporary workaround to default the correct DOCUMENTATION_BUILD value if BUILD_DOCS existed in the cache or is passed via the command line
-# This warning will be triggered only once if it's from the Cache since I'm unsetting it
-# (such as when using the GUI or running `cmake .` instead of passing all command line arguments)
-if(DEFINED BUILD_DOCS)
-  if(NOT DEFINED DOCUMENTATION_BUILD)
-    if(BUILD_DOCS)
-      message(AUTHOR_WARNING "BUILD_DOCS (=ON) was deprecated in favor of the 'DOCUMENTATION_BUILD' choice, which was defaulted to 'BuildWithAll'")
-      set(DOCUMENTATION_BUILD
-          "BuildWithAll"
-          CACHE STRING "Build LaTeX-pdf documentation")
-    else()
-      message(AUTHOR_WARNING "BUILD_DOCS (=OFF) was deprecated in favor of the 'DOCUMENTATION_BUILD' choice, which was defaulted to 'DoNotBuild")
-    endif()
-  else()
-    message(AUTHOR_WARNING "DOCUMENTATION_BUILD is already defined and has value '${DOCUMENTATION_BUILD}', ignoring BUILD_DOCS")
-  endif()
-  unset(BUILD_DOCS CACHE)
-endif()
-# END TODO
-
-set(DocumentationBuildValues
-    "DoNotBuild;BuildWithAll;BuildOnlyWithPackage"
-    CACHE INTERNAL "List of possible values for the LaTeX-pdf documentation")
+set(DocumentationBuildValues "DoNotBuild;BuildWithAll;BuildOnlyWithPackage")
 set(DOCUMENTATION_BUILD
     "DoNotBuild"
     CACHE STRING "Build LaTeX-pdf documentation")
@@ -133,17 +136,6 @@ if(NOT DOCUMENTATION_BUILD IN_LIST DocumentationBuildValues)
   message(FATAL_ERROR "DOCUMENTATION_BUILD must be one of ${DocumentationBuildValues}")
 endif()
 
-# Local only variables for ease of use in if blocks
-set(BUILD_DOCS OFF)
-set(BUILD_DOCS_ONLY_WITH_PACKAGE OFF)
-
-if(DOCUMENTATION_BUILD STREQUAL "BuildWithAll")
-  set(BUILD_DOCS ON)
-  set(BUILD_DOCS_ONLY_WITH_PACKAGE OFF)
-elseif(DOCUMENTATION_BUILD STREQUAL "BuildOnlyWithPackage")
-  set(BUILD_DOCS ON)
-  set(BUILD_DOCS_ONLY_WITH_PACKAGE ON)
-endif()
 #######################################################################
 
 option(LINK_WITH_PYTHON "Link with Python Library for Python Plugin Builds" OFF)
@@ -159,7 +151,7 @@ if(APPLE AND BUILD_PACKAGE)
   # Otherwise, the register_install_codesign_target isn't added until you reconfigure cmake...
   include(cmake/CodeSigning.cmake)
 
-  # Defines CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
+  # Defines CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
   setup_macos_codesigning_variables()
 endif()
 
@@ -283,46 +275,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Products")
 include(cmake/ProjectMacros.cmake)
 include(cmake/CompilerFlags.cmake)
 
-add_subdirectory(third_party)
+add_subdirectory(third_party SYSTEM)
 
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/src)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/fmt-8.0.1/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/btwxt/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/re2)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/doj)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/nlohmann)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/fast_float)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/valijson)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/)
-target_include_directories(project_options SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/SQLite/)
-target_include_directories(project_options SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/third_party/Expat" "${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/CLI/)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/eigen/)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Chromogenics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Common/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Gases/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/MultiLayerOptics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/SingleLayerOptics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/SpectralAveraging/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Tarcog/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Viewer/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/ssc)
-set(SAM_SKIP_TOOLS ON FORCE)
-set(SAM_SKIP_TESTS ON FORCE)
-set(SAMAPI_EXPORT OFF FORCE)
-if(OPENGL_FOUND)
-  target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/penumbra/include)
-endif()
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/kiva/src)
-target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
-target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.61.0/")
-
-if(OPENGL_FOUND)
-  set(BUILD_PENUMBRA_TESTING
-      OFF
-      CACHE BOOL "")
-endif()
 
 # E+ required libraries
 add_subdirectory(idd)
@@ -430,10 +385,8 @@ if(BUILD_PACKAGE)
   include(${PROJECT_SOURCE_DIR}/cmake/Install.cmake)
 endif()
 
-if(BUILD_DOCS)
-  set(DOCS_TESTING
-      ${BUILD_TESTING}
-      CACHE INTERNAL "" FORCE)
+if(NOT DOCUMENTATION_BUILD STREQUAL "DoNotBuild")
+  set(DOCS_TESTING ${BUILD_TESTING})
   add_subdirectory(doc)
 endif()
 
@@ -504,13 +457,5 @@ mark_as_advanced(ENABLE_SANITIZER_THREAD)
 mark_as_advanced(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR)
 mark_as_advanced(X11_xcb_xkb_INCLUDE_PATH)
 mark_as_advanced(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR)
-mark_as_advanced(JSONCPP_USE_SECURE_MEMORY)
-mark_as_advanced(JSONCPP_WITH_CMAKE_PACKAGE)
-mark_as_advanced(JSONCPP_WITH_PKGCONFIG_SUPPORT)
-mark_as_advanced(JSONCPP_WITH_POST_BUILD_UNITTE)
-mark_as_advanced(JSONCPP_WITH_STRICT_ISO)
-mark_as_advanced(JSONCPP_WITH_TESTS)
-mark_as_advanced(JSONCPP_WITH_WARNING_AS_ERROR)
 mark_as_advanced(CMAKE_CXX_COMPILER_LAUNCHER)
 mark_as_advanced(CMAKE_C_COMPILER_LAUNCHER)
-mark_as_advanced(DEBUG_LIBNAME_SUFFIX)

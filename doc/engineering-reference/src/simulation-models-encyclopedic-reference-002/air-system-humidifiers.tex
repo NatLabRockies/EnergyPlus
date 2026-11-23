@@ -46,14 +46,14 @@ Equation~\ref{eq:AirHumidifierControllerWaterAdditionRate} is the moisture balan
 The inputs to the component model are the air inlet conditions and mass flow rate and the water addition rate set by the controller. The outputs are the air outlet conditions. First the desired water addition rate is checked against component capacity.
 
 \begin{equation}
-{\dot m_{w,add,needed,{\rm{max}}}} = Min({\dot m_{w,add}},Ca{p_{nom}})
+{\dot m_{w,add,needed,{\mathrm{max}}}} = Min({\dot m_{w,add}},Ca{p_{nom}})
 \end{equation}
 
 where \(Ca{p_{nom}}\) is the humidifier nominal capacity (kg/s), a user input.
 
-If \({\dot m_{w,add,needed,{\rm{max}}}}\) is zero, the outlet conditions are set to the inlet conditions and the water addition rate is set to zero. If the humidifier is scheduled on the component power consumption is set to the standby power consumption: \({W_{hum}} = {W_{stby}}\). Otherwise \({W_{hum}}\) = 0.
+If \({\dot m_{w,add,needed,{\mathrm{max}}}}\) is zero, the outlet conditions are set to the inlet conditions and the water addition rate is set to zero. If the humidifier is scheduled on the component power consumption is set to the standby power consumption: \({W_{hum}} = {W_{stby}}\). Otherwise \({W_{hum}}\) = 0.
 
-If \({\dot m_{w,add,needed,{\rm{max}}}}\) \textgreater{} 0, then the moisture and enthalpy balance equations are:
+If \({\dot m_{w,add,needed,{\mathrm{max}}}}\) \textgreater{} 0, then the moisture and enthalpy balance equations are:
 
 \begin{equation}
 {\dot m_a} \cdot {w_{in}} + {\dot m_w} = {\dot m_a} \cdot {w_{out}}
@@ -65,7 +65,7 @@ If \({\dot m_{w,add,needed,{\rm{max}}}}\) \textgreater{} 0, then the moisture an
 
 where:
 
-\({\dot m_w}\) is set equal to \({\dot m_{w,add,needed,{\rm{max}}}}\) and then the above equations are solved for \({w_{out}}\) and \({h_{out}}\)
+\({\dot m_w}\) is set equal to \({\dot m_{w,add,needed,{\mathrm{max}}}}\) and then the above equations are solved for \({w_{out}}\) and \({h_{out}}\)
 
 \({\dot m_a}\) is the air mass flow rate (kg/s)
 
@@ -107,7 +107,7 @@ where:
 
 \(PsyWFnTdbRhPb\) is an EnergyPlus psychrometric function.
 
-IF \({w_{out}} \le {w_{out,sat}}\), then the outlet condition is below the saturation curve and the desired moisture addition rate can be met. \({\dot m_{w,add}}\) is set to \({\dot m_{w,add,needed,{\rm{max}}}}\) and the calculation of outlet conditions is done. But if \({w_{out}} > {w_{out,sat}}\) then it is assumed that this condition will be detected and the steam addition rate throttled back to bring the outlet conditions back to the saturation condition. We need to find the point where the line drawn between state 1 (inlet) and state 2 (our desired outlet) crosses the saturation curve. This will be the new outlet condition. Rather than iterate to obtain this point, we find it approximately by solving for the point where 2 lines cross: the first drawn from state 1 to state 2, the second from \({T_1}\), \({w_{1,sat}}\) to \({T_2}\), \({w_{2,sat}}\); where:
+IF \({w_{out}} \le {w_{out,sat}}\), then the outlet condition is below the saturation curve and the desired moisture addition rate can be met. \({\dot m_{w,add}}\) is set to \({\dot m_{w,add,needed,{\mathrm{max}}}}\) and the calculation of outlet conditions is done. But if \({w_{out}} > {w_{out,sat}}\) then it is assumed that this condition will be detected and the steam addition rate throttled back to bring the outlet conditions back to the saturation condition. We need to find the point where the line drawn between state 1 (inlet) and state 2 (our desired outlet) crosses the saturation curve. This will be the new outlet condition. Rather than iterate to obtain this point, we find it approximately by solving for the point where 2 lines cross: the first drawn from state 1 to state 2, the second from \({T_1}\), \({w_{1,sat}}\) to \({T_2}\), \({w_{2,sat}}\); where:
 
 \({T_1}\) is the inlet temperature (\(^{\circ}\)C)
 
@@ -184,11 +184,11 @@ Q_{NG} = \dot{Q}_{NG}\frac{\eta_{rated}}{\eta_{actual}}
 \end{equation}
 
 \begin{equation}
-\eta_{actual} = \eta_{rated} \times \rm{EffModCurveValue}\left(PLR\right)
+\eta_{actual} = \eta_{rated} \times \mathrm{EffModCurveValue}\left(PLR\right)
 \end{equation}
 
 \begin{equation}
-\rm{PLR} = \frac{\dot{Q}_{NG}}{Q_{NG,nom}}
+\mathrm{PLR} = \frac{\dot{Q}_{NG}}{Q_{NG,nom}}
 \end{equation}
 
 where:
@@ -214,11 +214,11 @@ Q_{NG} = \frac{\dot{m}_w \left(h_{fg}+c_{p,w}\left(100-T_{w,inlet}\right)\right)
 \end{equation}
 
 \begin{equation}
-\rm{PLR} = \frac{\dot{Q}_{NG}}{Q_{NG,nom}}
+\mathrm{PLR} = \frac{\dot{Q}_{NG}}{Q_{NG,nom}}
 \end{equation}
 
 \begin{equation}
-\eta_{actual} = \eta_{rated} \times \rm{EffModCurveValue}\left(PLR\right)
+\eta_{actual} = \eta_{rated} \times \mathrm{EffModCurveValue}\left(PLR\right)
 \end{equation}
 
 \begin{equation}

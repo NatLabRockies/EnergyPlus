@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -155,6 +155,9 @@ def make_build_dir_and_build(cmake_build_dir: str, verbose: bool, bitness: Bitne
     is_windows = platform.system() == "Windows"
     if is_windows:
         command_line.extend(["-G", msvc_version.generator_name(), "-A", bitness.value])
+        toolset = msvc_version.toolset_name()
+        if toolset:
+            command_line.extend(["-T", toolset])
 
     try:
         my_check_call(verbose, command_line, cwd=cmake_build_dir, env=my_env)

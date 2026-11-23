@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -194,8 +194,8 @@ namespace EcoRoofManager {
         auto const &thisConstruct = state.dataConstruction->Construct(ConstrNum);
         auto const *thisMaterial = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
         RoughSurf = thisMaterial->Roughness;
-        Real64 AbsThermSurf = thisMaterial->AbsorpThermal; // Thermal absorptance of the exterior surface
-        Real64 HMovInsul = 0.0;                            // "Convection" coefficient of movable insulation
+        Real64 AbsThermSurf = thisMaterial->AbsorpThermalOut; // Thermal absorptance of the exterior surface
+        Real64 HMovInsul = 0.0;                               // "Convection" coefficient of movable insulation
 
         if (state.dataSurface->Surface(SurfNum).ExtWind) {
             Convect::InitExtConvCoeff(state,
@@ -247,7 +247,6 @@ namespace EcoRoofManager {
             state.dataEcoRoofMgr->Tf = state.dataEcoRoofMgr->Tfold;
 
             if (thisConstruct.CTFCross[0] > 0.01) {
-                state.dataEcoRoofMgr->QuickConductionSurf = true;
                 int spaceNum = state.dataSurface->Surface(SurfNum).spaceNum;
                 F1temp = thisConstruct.CTFCross[0] / (thisConstruct.CTFInside[0] + state.dataHeatBalSurf->SurfHConvInt(SurfNum));
                 Qsoilpart1 =
@@ -528,7 +527,7 @@ namespace EcoRoofManager {
             ShowSevereError(state,
                             "initEcoRoofFirstTime: EcoRoof simulation but HeatBalanceAlgorithm is not ConductionTransferFunction(CTF). EcoRoof model "
                             "currently works only with CTF heat balance solution algorithm.");
-            ShowContinueError(state, format("Occurs for surface named {}", state.dataSurface->Surface(SurfNum).Name));
+            ShowContinueError(state, std::format("Occurs for surface named {}", state.dataSurface->Surface(SurfNum).Name));
             ShowContinueError(state, "Check input syntax for HeatBalanceAlgorithm, SurfaceProperty:HeatTransferAlgorithm,");
             ShowContinueError(state, "SurfaceProperty:HeatTransferAlgorithm:MultipleSurface, and SurfaceProperty:HeatTransferAlgorithm:SurfaceList ");
             ShowContinueError(state, "to verify that the solution method is set to CTF for the surface that is an EcoRoof.");
@@ -538,11 +537,11 @@ namespace EcoRoofManager {
         // ONLY READ ECOROOF PROPERTIES IN THE FIRST TIME
         thisEcoRoof->Zf = matER->HeightOfPlants;               // Plant height (m)
         thisEcoRoof->LAI = matER->LAI;                         // Leaf Area Index
-        thisEcoRoof->Alphag = 1.0 - matER->AbsorpSolar;        // albedo rather than absorptivity
+        thisEcoRoof->Alphag = 1.0 - matER->AbsorpSolarOut;     // albedo rather than absorptivity
         thisEcoRoof->Alphaf = matER->Lreflectivity;            // Leaf Reflectivity
         thisEcoRoof->epsilonf = matER->LEmissitivity;          // Leaf Emissivity
         thisEcoRoof->StomatalResistanceMin = matER->RStomata;  // Leaf min stomatal resistance
-        thisEcoRoof->epsilong = matER->AbsorpThermal;          // Soil Emissivity
+        thisEcoRoof->epsilong = matER->AbsorpThermalOut;       // Soil Emissivity
         thisEcoRoof->MoistureMax = matER->Porosity;            // Max moisture content in soil
         thisEcoRoof->MoistureResidual = matER->MinMoisture;    // Min moisture content in soil
         thisEcoRoof->Moisture = matER->InitMoisture;           // Initial moisture content in soil
@@ -696,7 +695,7 @@ namespace EcoRoofManager {
         if (state.dataGlobal->BeginEnvrnFlag || state.dataGlobal->WarmupFlag) {
             state.dataEcoRoofMgr->Moisture = matER->InitMoisture;                    // Initial moisture content in soil
             state.dataEcoRoofMgr->MeanRootMoisture = state.dataEcoRoofMgr->Moisture; // Start the root zone moisture at the same value as the surface.
-            state.dataEcoRoofMgr->Alphag = 1.0 - matER->AbsorpSolar;                 // albedo rather than absorptivity
+            state.dataEcoRoofMgr->Alphag = 1.0 - matER->AbsorpSolarOut;              // albedo rather than absorptivity
         }
 
         if (state.dataGlobal->BeginEnvrnFlag && state.dataEcoRoofMgr->CalcEcoRoofMyEnvrnFlag) {
@@ -802,7 +801,7 @@ namespace EcoRoofManager {
             // SET dry values that NEVER CHANGE
             state.dataEcoRoofMgr->DryCond = matER->Conductivity;
             state.dataEcoRoofMgr->DryDens = matER->Density;
-            state.dataEcoRoofMgr->DryAbsorp = matER->AbsorpSolar;
+            state.dataEcoRoofMgr->DryAbsorp = matER->AbsorpSolarOut;
             state.dataEcoRoofMgr->DrySpecHeat = matER->SpecHeat;
 
             // DETERMINE RELATIVE THICKNESS OF TWO LAYERS OF SOIL (also unchanging)
@@ -826,19 +825,21 @@ namespace EcoRoofManager {
                     if (ceil(60 * index1 / state.dataGlobal->MinutesInTimeStep) <= 60) {
                         ShowContinueError(
                             state,
-                            format("...Entered Timesteps per hour=[{}], Change to some value greater than or equal to [{}] for assured stability.",
-                                   state.dataGlobal->TimeStepsInHour,
-                                   60 * index1 / state.dataGlobal->MinutesInTimeStep));
+                            std::format(
+                                "...Entered Timesteps per hour=[{}], Change to some value greater than or equal to [{}] for assured stability.",
+                                state.dataGlobal->TimeStepsInHour,
+                                60 * index1 / state.dataGlobal->MinutesInTimeStep));
                         ShowContinueError(state, "...Note that EnergyPlus has a maximum of 60 timesteps per hour");
                         ShowContinueError(state,
                                           "...The program will continue, but if the simulation fails due to too low/high temperatures, instability "
                                           "here could be the reason.");
                     } else {
-                        ShowContinueError(state,
-                                          format("...Entered Timesteps per hour=[{}], however the required frequency for stability [{}] is over the "
-                                                 "EnergyPlus maximum of 60.",
-                                                 state.dataGlobal->TimeStepsInHour,
-                                                 60 * index1 / state.dataGlobal->MinutesInTimeStep));
+                        ShowContinueError(
+                            state,
+                            std::format("...Entered Timesteps per hour=[{}], however the required frequency for stability [{}] is over the "
+                                        "EnergyPlus maximum of 60.",
+                                        state.dataGlobal->TimeStepsInHour,
+                                        60 * index1 / state.dataGlobal->MinutesInTimeStep));
                         ShowContinueError(state, "...Consider using the simple moisture diffusion calculation method for this application");
                         ShowContinueError(state,
                                           "...The program will continue, but if the simulation fails due to too low/high temperatures, instability "
@@ -987,8 +988,8 @@ namespace EcoRoofManager {
             if (state.dataEcoRoofMgr->RelativeSoilSaturationTop < 0.0001) {
                 if (state.dataEcoRoofMgr->ErrIndex == 0) {
                     ShowWarningMessage(state,
-                                       format("EcoRoof: UpdateSoilProps: Relative Soil Saturation Top Moisture <= 0.0001, Value=[{:.5R}].",
-                                              state.dataEcoRoofMgr->RelativeSoilSaturationTop));
+                                       std::format("EcoRoof: UpdateSoilProps: Relative Soil Saturation Top Moisture <= 0.0001, Value=[{:#G}].",
+                                                   state.dataEcoRoofMgr->RelativeSoilSaturationTop));
                     ShowContinueError(state, "Value is set to 0.0001 and simulation continues.");
                     ShowContinueError(state, "You may wish to increase the number of timesteps to attempt to alleviate the problem.");
                 }
@@ -1042,7 +1043,6 @@ namespace EcoRoofManager {
             }
 
             // Using the parameters above, distribute the Root Layer moisture
-            state.dataEcoRoofMgr->TestMoisture = MeanRootMoisture;
             MeanRootMoisture +=
                 (state.dataEcoRoofMgr->TimeStepZoneSec / state.dataEcoRoofMgr->RootDepth) *
                 ((state.dataEcoRoofMgr->SoilConductivityAveTop *
@@ -1200,7 +1200,7 @@ namespace EcoRoofManager {
         // So, it is better to assume that the roof is flat until multiple surfaces can be handled.  Then, the next line can
         // use state.dataHeatBal->SurfCosIncAng(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, SurfNum) instead of
         // SOLCOS(3).
-        RS = max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad +
+        RS = max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad +
              state.dataSolarShading->SurfAnisoSkyMult(SurfNum) * state.dataEnvrn->DifSolarRad;
         Real64 f1inv = min(1.0, (0.004 * RS + 0.005) / (0.81 * (0.004 * RS + 1.0)));
         f1 = 1.0 / f1inv;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -48,6 +48,9 @@
 // C++ Headers
 #include <algorithm>
 #include <cassert>
+#include <format>
+#include <utility>
+#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -80,7 +83,6 @@
 #include <EnergyPlus/FluidCoolers.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/FuelCellElectricGenerator.hh>
-#include <EnergyPlus/GroundHeatExchangers/Slinky.hh>
 #include <EnergyPlus/GroundHeatExchangers/Vertical.hh>
 #include <EnergyPlus/HVACInterfaceManager.hh>
 #include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
@@ -144,7 +146,6 @@ namespace EnergyPlus::PlantManager {
 // Using/Aliasing
 using namespace DataPlant;
 using namespace DataBranchAirLoopPlant;
-using namespace DataLoopNode;
 
 void ManagePlantLoops(EnergyPlusData &state,
                       bool const FirstHVACIteration,
@@ -294,7 +295,7 @@ void GetPlantLoopData(EnergyPlusData &state)
     // Using/Aliasing
     using SetPointManager::IsNodeOnSetPtManager;
     HVAC::CtrlVarType localTempSetPt = HVAC::CtrlVarType::Temp;
-    using NodeInputManager::GetOnlySingleNode;
+    using Node::GetOnlySingleNode;
     using namespace BranchInputManager;
     using DataSizing::AutoSize;
 
@@ -347,12 +348,12 @@ void GetPlantLoopData(EnergyPlusData &state)
         ErrorObjectHeader eoh;
         eoh.routineName = routineName;
 
-        DataLoopNode::ConnectionObjectType objType;
+        Node::ConnectionObjectType objType;
         if (LoopNum <= state.dataHVACGlobal->NumPlantLoops) {
             PlantLoopNum = LoopNum;
             this_loop.TypeOfLoop = LoopType::Plant;
             CurrentModuleObject = "PlantLoop";
-            objType = DataLoopNode::ConnectionObjectType::PlantLoop;
+            objType = Node::ConnectionObjectType::PlantLoop;
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      CurrentModuleObject,
                                                                      PlantLoopNum,
@@ -372,7 +373,7 @@ void GetPlantLoopData(EnergyPlusData &state)
             CondLoopNum = LoopNum - state.dataHVACGlobal->NumPlantLoops;
             this_loop.TypeOfLoop = LoopType::Condenser;
             CurrentModuleObject = "CondenserLoop";
-            objType = DataLoopNode::ConnectionObjectType::CondenserLoop;
+            objType = Node::ConnectionObjectType::CondenserLoop;
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      CurrentModuleObject,
                                                                      CondLoopNum,
@@ -389,7 +390,6 @@ void GetPlantLoopData(EnergyPlusData &state)
             eoh.objectName = Alpha(1);
         }
 
-        Util::IsNameEmpty(state, Alpha(1), CurrentModuleObject, ErrorsFound);
         this_loop.Name = Alpha(1); // Load the Plant Loop Name
 
         if (Util::SameString(Alpha(2), "STEAM")) {
@@ -401,20 +401,20 @@ void GetPlantLoopData(EnergyPlusData &state)
             // use a single index, and because the index was pre-set
             // the FluidName was never consulted.  That's not a very
             // robust way of doing things.
-            this_loop.FluidType = DataLoopNode::NodeFluidType::Steam;
+            this_loop.FluidType = Node::FluidType::Steam;
             this_loop.FluidName = Alpha(2);
             this_loop.FluidIndex = 1;
             this_loop.glycol = Fluid::GetWater(state);
             this_loop.steam = Fluid::GetSteam(state);
 
         } else if (Util::SameString(Alpha(2), "WATER")) {
-            this_loop.FluidType = DataLoopNode::NodeFluidType::Water;
+            this_loop.FluidType = Node::FluidType::Water;
             this_loop.FluidName = Alpha(2);
             this_loop.FluidIndex = 1;
             this_loop.glycol = Fluid::GetWater(state);
 
         } else if (Util::SameString(Alpha(2), "USERDEFINEDFLUIDTYPE")) {
-            this_loop.FluidType = DataLoopNode::NodeFluidType::Water;
+            this_loop.FluidType = Node::FluidType::Water;
             this_loop.FluidName = Alpha(3);
             // check for valid fluid name
             this_loop.glycol = Fluid::GetGlycol(state, Alpha(3));
@@ -428,7 +428,7 @@ void GetPlantLoopData(EnergyPlusData &state)
         } else {
             ShowWarningInvalidKey(state, eoh, state.dataIPShortCut->cAlphaFieldNames(2), Alpha(2), "Water");
 
-            this_loop.FluidType = DataLoopNode::NodeFluidType::Water;
+            this_loop.FluidType = Node::FluidType::Water;
             this_loop.FluidName = "WATER";
             this_loop.FluidIndex = 1;
             this_loop.glycol = Fluid::GetWater(state);
@@ -478,36 +478,36 @@ void GetPlantLoopData(EnergyPlusData &state)
                                                        objType,
                                                        Alpha(1),
                                                        this_loop.FluidType,
-                                                       DataLoopNode::ConnectionType::Inlet,
-                                                       NodeInputManager::CompFluidStream::Primary,
-                                                       ObjectIsParent);
+                                                       Node::ConnectionType::Inlet,
+                                                       Node::CompFluidStream::Primary,
+                                                       Node::ObjectIsParent);
         this_supply_side.NodeNumOut = GetOnlySingleNode(state,
                                                         Alpha(7),
                                                         ErrorsFound,
                                                         objType,
                                                         Alpha(1),
                                                         this_loop.FluidType,
-                                                        DataLoopNode::ConnectionType::Outlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        ObjectIsParent);
+                                                        Node::ConnectionType::Outlet,
+                                                        Node::CompFluidStream::Primary,
+                                                        Node::ObjectIsParent);
         this_demand_side.NodeNumIn = GetOnlySingleNode(state,
                                                        Alpha(10),
                                                        ErrorsFound,
                                                        objType,
                                                        Alpha(1),
                                                        this_loop.FluidType,
-                                                       DataLoopNode::ConnectionType::Inlet,
-                                                       NodeInputManager::CompFluidStream::Primary,
-                                                       ObjectIsParent);
+                                                       Node::ConnectionType::Inlet,
+                                                       Node::CompFluidStream::Primary,
+                                                       Node::ObjectIsParent);
         this_demand_side.NodeNumOut = GetOnlySingleNode(state,
                                                         Alpha(11),
                                                         ErrorsFound,
                                                         objType,
                                                         Alpha(1),
                                                         this_loop.FluidType,
-                                                        DataLoopNode::ConnectionType::Outlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        ObjectIsParent);
+                                                        Node::ConnectionType::Outlet,
+                                                        Node::CompFluidStream::Primary,
+                                                        Node::ObjectIsParent);
 
         this_demand_side.InletNodeSetPt = IsNodeOnSetPtManager(state, this_demand_side.NodeNumIn, localTempSetPt);
         this_demand_side.OutletNodeSetPt = IsNodeOnSetPtManager(state, this_demand_side.NodeNumOut, localTempSetPt);
@@ -519,9 +519,9 @@ void GetPlantLoopData(EnergyPlusData &state)
                                                           objType,
                                                           Alpha(1),
                                                           this_loop.FluidType,
-                                                          DataLoopNode::ConnectionType::Sensor,
-                                                          NodeInputManager::CompFluidStream::Primary,
-                                                          ObjectIsParent);
+                                                          Node::ConnectionType::Sensor,
+                                                          Node::CompFluidStream::Primary,
+                                                          Node::ObjectIsParent);
 
         // Load the load distribution scheme.
         std::string LoadingScheme = Alpha(14);
@@ -548,7 +548,7 @@ void GetPlantLoopData(EnergyPlusData &state)
             if (Util::SameString(Alpha(16), "SingleSetpoint")) {
                 this_loop.LoopDemandCalcScheme = DataPlant::LoopDemandCalcScheme::SingleSetPoint;
             } else if (Util::SameString(Alpha(16), "DualSetpointDeadband")) {
-                if (this_loop.FluidType == DataLoopNode::NodeFluidType::Steam) {
+                if (this_loop.FluidType == Node::FluidType::Steam) {
                     ShowWarningError(state, std::string{RoutineName} + CurrentModuleObject + "=\"" + Alpha(1) + "\", Invalid choice.");
                     ShowContinueError(state,
                                       state.dataIPShortCut->cAlphaFieldNames(16) + "=\"" + Alpha(16) + "\" not valid for " +
@@ -649,11 +649,12 @@ void GetPlantLoopData(EnergyPlusData &state)
                     ShowContinueError(
                         state, "Invalid " + state.dataIPShortCut->cAlphaFieldNames(PressSimAlphaIndex) + "=\"" + Alpha(PressSimAlphaIndex) + "\".");
                     ShowContinueError(state, "Currently only options are: ");
-                    ShowContinueError(state, "  - " + format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::NoPressure)]));
                     ShowContinueError(state,
-                                      "  - " + format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::PumpPowerCorrection)]));
+                                      "  - " + std::format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::NoPressure)]));
+                    ShowContinueError(
+                        state, "  - " + std::format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::PumpPowerCorrection)]));
                     ShowContinueError(state,
-                                      "  - " + format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::FlowCorrection)]));
+                                      "  - " + std::format("{}", PressureSimTypeNamesUC[static_cast<int>(DataPlant::PressSimType::FlowCorrection)]));
                     ErrorsFound = true;
                 }
             }
@@ -777,10 +778,6 @@ void GetPlantInput(EnergyPlusData &state)
     // the routine the module level derived type Loop should be fully allocated
     // and fully populated.
 
-    // Using/Aliasing
-    using namespace NodeInputManager;
-    using namespace BranchInputManager;
-
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int LoopNum; // DO loop counter for loops
     int HalfLoopNum;
@@ -846,17 +843,17 @@ void GetPlantInput(EnergyPlusData &state)
             }
 
             // Get the branch list and size the Branch portion of the Loop derived type
-            loopSide.TotalBranches = NumBranchesInBranchList(state, loopSide.BranchList);
+            loopSide.TotalBranches = BranchInputManager::NumBranchesInBranchList(state, loopSide.BranchList);
             BranchNames.allocate(loopSide.TotalBranches);
             BranchNames = "";
-            GetBranchList(state, plantLoop.Name, loopSide.BranchList, loopSide.TotalBranches, BranchNames, LoopIdentifier);
+            BranchInputManager::GetBranchList(state, plantLoop.Name, loopSide.BranchList, loopSide.TotalBranches, BranchNames, LoopIdentifier);
             loopSide.Branch.allocate(loopSide.TotalBranches);
 
             // Cycle through all of the branches and set up the node data
             for (BranchNum = 1; BranchNum <= loopSide.TotalBranches; ++BranchNum) {
                 auto &branch = loopSide.Branch(BranchNum);
                 branch.Name = BranchNames(BranchNum);
-                branch.TotalComponents = NumCompsInBranch(state, BranchNames(BranchNum));
+                branch.TotalComponents = BranchInputManager::NumCompsInBranch(state, BranchNames(BranchNum));
                 branch.IsBypass = false;
 
                 CompTypes.allocate(branch.TotalComponents);
@@ -867,19 +864,19 @@ void GetPlantInput(EnergyPlusData &state)
                 OutletNodeNames.allocate(branch.TotalComponents);
                 OutletNodeNumbers.dimension(branch.TotalComponents, 0);
 
-                GetBranchData(state,
-                              plantLoop.Name,
-                              BranchNames(BranchNum),
-                              branch.PressureCurveType,
-                              branch.PressureCurveIndex,
-                              branch.TotalComponents,
-                              CompTypes,
-                              CompNames,
-                              InletNodeNames,
-                              InletNodeNumbers,
-                              OutletNodeNames,
-                              OutletNodeNumbers,
-                              ErrorsFound);
+                BranchInputManager::GetBranchData(state,
+                                                  plantLoop.Name,
+                                                  BranchNames(BranchNum),
+                                                  branch.PressureCurveType,
+                                                  branch.PressureCurveIndex,
+                                                  branch.TotalComponents,
+                                                  CompTypes,
+                                                  CompNames,
+                                                  InletNodeNames,
+                                                  InletNodeNumbers,
+                                                  OutletNodeNames,
+                                                  OutletNodeNumbers,
+                                                  ErrorsFound);
 
                 branch.Comp.allocate(branch.TotalComponents);
 
@@ -1430,7 +1427,7 @@ void GetPlantInput(EnergyPlusData &state)
                     }
 
                     if (this_comp.compPtr == nullptr) {
-                        ShowFatalError(state, format(" Plant component \"{}\" was not assigned a pointer.", this_comp_type));
+                        ShowFatalError(state, std::format(" Plant component \"{}\" was not assigned a pointer.", this_comp_type));
                     }
 
                     this_comp.Name = CompNames(CompNum);
@@ -1467,7 +1464,7 @@ void GetPlantInput(EnergyPlusData &state)
                 state.dataLoopNodes->NumofMixers = 0;
             } else {
                 errFlag = false;
-                GetNumSplitterMixerInConntrList(
+                BranchInputManager::GetNumSplitterMixerInConntrList(
                     state, plantLoop.Name, loopSide.ConnectList, state.dataLoopNodes->NumofSplitters, state.dataLoopNodes->NumofMixers, errFlag);
                 if (errFlag) {
                     ErrorsFound = true;
@@ -1496,19 +1493,19 @@ void GetPlantInput(EnergyPlusData &state)
                 }
                 OutletNodeNames.allocate(MaxNumAlphas);
                 OutletNodeNumbers.allocate(MaxNumAlphas);
-                GetLoopSplitter(state,
-                                plantLoop.Name,
-                                loopSide.ConnectList,
-                                loopSide.Splitter.Name,
-                                loopSide.Splitter.Exists,
-                                loopSide.Splitter.NodeNameIn,
-                                loopSide.Splitter.NodeNumIn,
-                                loopSide.Splitter.TotalOutletNodes,
-                                OutletNodeNames,
-                                OutletNodeNumbers,
-                                ErrorsFound,
-                                ConnNum,
-                                SplitNum);
+                BranchInputManager::GetLoopSplitter(state,
+                                                    plantLoop.Name,
+                                                    loopSide.ConnectList,
+                                                    loopSide.Splitter.Name,
+                                                    loopSide.Splitter.Exists,
+                                                    loopSide.Splitter.NodeNameIn,
+                                                    loopSide.Splitter.NodeNumIn,
+                                                    loopSide.Splitter.TotalOutletNodes,
+                                                    OutletNodeNames,
+                                                    OutletNodeNumbers,
+                                                    ErrorsFound,
+                                                    ConnNum,
+                                                    SplitNum);
 
                 if (SplitNum == 1) {
                     OutletNodeNames.deallocate();
@@ -1583,19 +1580,19 @@ void GetPlantInput(EnergyPlusData &state)
                 }
                 InletNodeNames.allocate(MaxNumAlphas);
                 InletNodeNumbers.allocate(MaxNumAlphas);
-                GetLoopMixer(state,
-                             plantLoop.Name,
-                             loopSide.ConnectList,
-                             loopSide.Mixer.Name,
-                             loopSide.Mixer.Exists,
-                             loopSide.Mixer.NodeNameOut,
-                             loopSide.Mixer.NodeNumOut,
-                             loopSide.Mixer.TotalInletNodes,
-                             InletNodeNames,
-                             InletNodeNumbers,
-                             ErrorsFound,
-                             ConnNum,
-                             MixNum);
+                BranchInputManager::GetLoopMixer(state,
+                                                 plantLoop.Name,
+                                                 loopSide.ConnectList,
+                                                 loopSide.Mixer.Name,
+                                                 loopSide.Mixer.Exists,
+                                                 loopSide.Mixer.NodeNameOut,
+                                                 loopSide.Mixer.NodeNumOut,
+                                                 loopSide.Mixer.TotalInletNodes,
+                                                 InletNodeNames,
+                                                 InletNodeNumbers,
+                                                 ErrorsFound,
+                                                 ConnNum,
+                                                 MixNum);
 
                 if (MixNum == 1) {
                     InletNodeNames.deallocate();
@@ -2166,9 +2163,9 @@ void fillPlantCondenserTopology(EnergyPlusData &state, DataPlant::PlantLoopData 
         // s->pdchTopPlantCompName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Component Name");
         // s->pdchTopPlantMixName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Mixer Name");
 
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, format("{}", rowCounter), loopType);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, format("{}", rowCounter), thisLoop.Name);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, format("{}", rowCounter), loopSide);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, std::format("{}", rowCounter), loopType);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, std::format("{}", rowCounter), thisLoop.Name);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, std::format("{}", rowCounter), loopSide);
         ++rowCounter;
 
         // Report for first branch
@@ -2223,10 +2220,10 @@ void fillPlantToplogySplitterRow2(EnergyPlusData &state,
 {
     auto &orp = state.dataOutRptPredefined;
     // s->pdchTopPlantSplitName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Splitter Name");
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, format("{}", rowCounter), loopType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, format("{}", rowCounter), loopName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, format("{}", rowCounter), side);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSplitName2, format("{}", rowCounter), splitterName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, std::format("{}", rowCounter), loopType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, std::format("{}", rowCounter), loopName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, std::format("{}", rowCounter), side);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSplitName2, std::format("{}", rowCounter), splitterName);
 }
 void fillPlantToplogyMixerRow2(EnergyPlusData &state,
                                const std::string_view &loopType,
@@ -2237,10 +2234,10 @@ void fillPlantToplogyMixerRow2(EnergyPlusData &state,
 {
     auto &orp = state.dataOutRptPredefined;
     // s->pdchTopPlantMixName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Mixer Name");
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, format("{}", rowCounter), loopType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, format("{}", rowCounter), loopName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, format("{}", rowCounter), side);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantMixName2, format("{}", rowCounter), mixerName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, std::format("{}", rowCounter), loopType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, std::format("{}", rowCounter), loopName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, std::format("{}", rowCounter), side);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantMixName2, std::format("{}", rowCounter), mixerName);
 }
 void fillPlantToplogyComponentRow2(EnergyPlusData &state,
                                    const std::string_view &loopType,
@@ -2255,12 +2252,12 @@ void fillPlantToplogyComponentRow2(EnergyPlusData &state,
     // s->pdchTopPlantBranchName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Branch Name");
     // s->pdchTopPlantCompType2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Component Type");
     // s->pdchTopPlantCompName2 = newPreDefColumn(state, s->pdstTopPlantLoop2, "Component Name");
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, format("{}", rowCounter), loopType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, format("{}", rowCounter), loopName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, format("{}", rowCounter), side);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantBranchName2, format("{}", rowCounter), branchName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompType2, format("{}", rowCounter), compType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompName2, format("{}", rowCounter), compName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopType2, std::format("{}", rowCounter), loopType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantLoopName2, std::format("{}", rowCounter), loopName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantSide2, std::format("{}", rowCounter), side);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantBranchName2, std::format("{}", rowCounter), branchName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompType2, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopPlantCompName2, std::format("{}", rowCounter), compName);
     ++rowCounter;
 }
 
@@ -2285,7 +2282,7 @@ void FillPlantEquipmentOperationLoad(EnergyPlusData &state)
         for (int jScheme = 1; jScheme <= thisLoop.NumOpSchemes; ++jScheme) {
             for (int kList = 1; kList <= thisLoop.OpScheme(jScheme).NumEquipLists; ++kList) {
                 ++row;
-                std::string rowS = format("{}", row);
+                std::string rowS = std::format("{}", row);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbPltLpNm, rowS, thisLoop.Name);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbNm, rowS, thisLoop.OpScheme(jScheme).Name);
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbType, rowS, thisLoop.OpScheme(jScheme).TypeOf);
@@ -2294,7 +2291,7 @@ void FillPlantEquipmentOperationLoad(EnergyPlusData &state)
                 } else {
                     OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbSchNm, rowS, "n/a");
                 }
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbIndex, rowS, format("{}", kList));
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbIndex, rowS, std::format("{}", kList));
                 OutputReportPredefined::PreDefTableEntry(state, orp->pdchPLtEqOpLbEqLstNm, rowS, thisLoop.OpScheme(jScheme).EquipList(kList).Name);
                 OutputReportPredefined::PreDefTableEntry(
                     state, orp->pdchPLtEqOpLbLow, rowS, thisLoop.OpScheme(jScheme).EquipList(kList).RangeLowerLimit);
@@ -2432,8 +2429,40 @@ void InitializeLoops(EnergyPlusData &state, bool const FirstHVACIteration) // tr
 
             // step 3, revise calling order
             // have now called each plant component model at least once with InitLoopEquip = .TRUE.
-            //  this means the calls to InterConnectTwoPlantLoopSides have now been made, so rework calling order
-            RevisePlantCallingOrder(state);
+            // this means the calls to InterConnectTwoPlantLoopSides have now been made. Revise once because
+            // RevisePlantCallingOrder internally guarantees demand-before-supply for every loop and resolves
+            // inter-loop constraints where possible; a cyclic dependency between loops can make full resolution
+            // impossible, in which case RevisePlantCallingOrder issues a warning.
+            if (passNum == 1) {
+                if (state.dataGlobal->DisplayExtraWarnings) {
+                    std::vector<std::string> initialCallingOrder;
+                    for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+                        auto const &callingOrderEntry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+                        char const loopSideLabel = callingOrderEntry.LoopSide == LoopSideLocation::Demand ? 'D' : 'S';
+                        initialCallingOrder.push_back(std::format(
+                            "{}{} = {}", callingOrderEntry.LoopIndex, loopSideLabel, state.dataPlnt->PlantLoop(callingOrderEntry.LoopIndex).Name));
+                    }
+                    RevisePlantCallingOrder(state);
+
+                    std::vector<std::string> revisedCallingOrder;
+                    for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+                        auto const &callingOrderEntry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+                        char const loopSideLabel = callingOrderEntry.LoopSide == LoopSideLocation::Demand ? 'D' : 'S';
+                        revisedCallingOrder.push_back(std::format(
+                            "{}{} = {}", callingOrderEntry.LoopIndex, loopSideLabel, state.dataPlnt->PlantLoop(callingOrderEntry.LoopIndex).Name));
+                    }
+                    ShowMessage(state, std::format("Initial plant calling order: {}", initialCallingOrder.front()));
+                    for (std::size_t callingIndex = 1; callingIndex < initialCallingOrder.size(); ++callingIndex) {
+                        ShowContinueError(state, std::format("                             {}", initialCallingOrder[callingIndex]));
+                    }
+                    ShowMessage(state, std::format("Revised plant calling order: {}", revisedCallingOrder.front()));
+                    for (std::size_t callingIndex = 1; callingIndex < revisedCallingOrder.size(); ++callingIndex) {
+                        ShowContinueError(state, std::format("                             {}", revisedCallingOrder[callingIndex]));
+                    }
+                } else {
+                    RevisePlantCallingOrder(state);
+                }
+            }
 
             // Step 4: Simulate plant loop components so their design flows are included
 
@@ -2665,12 +2694,12 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int LoopNum;                      // plant loop counter
-    Real64 LoopMaxMassFlowRate;       // maximum allowable loop mass flow rate
-    Real64 LoopSetPointTemp;          // the loop control or setpoint temperature
+    Real64 LoopMaxMassFlowRate = 0.0; // maximum allowable loop mass flow rate
+    Real64 LoopSetPointTemp = 0.0;    // the loop control or setpoint temperature
     Real64 LoopMaxTemp;               // maximum allowable loop temperature
     Real64 LoopMinTemp;               // minimum allowable loop temperature
-    Real64 LoopSetPointTempLo;        // the loop control or setpoint temperature
-    Real64 LoopSetPointTempHi;        // the loop control or setpoint temperature
+    Real64 LoopSetPointTempLo = 0.0;  // the loop control or setpoint temperature
+    Real64 LoopSetPointTempHi = 0.0;  // the loop control or setpoint temperature
     Real64 SecondaryLoopSetPointTemp; // loop setpoint temperature for common pipes with different secondary setpt
     int BranchNum;                    // branch loop counter
     int OpNum;                        // operation scheme counter
@@ -2678,10 +2707,10 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
     int ComponentInlet;               // component inlet node number
     int ComponentOutlet;              // component outlet node number
 
-    Real64 LoopMinMassFlowRate; // minimum allowable loop mass flow rate
+    Real64 LoopMinMassFlowRate = 0.0; // minimum allowable loop mass flow rate
     Real64 SteamDensity;
     Real64 SteamTemp;
-    Real64 StartEnthalpy;
+    Real64 StartEnthalpy = 0.0;
     Real64 Cp;
     Real64 rho;
     Real64 LoopSetPointTemperatureHi;
@@ -2749,19 +2778,19 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
                 state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).OutletNode.TemperatureHistory = 0.0;
                 state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).OutletNode.MassFlowRateHistory = 0.0;
 
-                if (state.dataPlnt->PlantLoop(LoopNum).FluidType != DataLoopNode::NodeFluidType::Steam) {
+                if (state.dataPlnt->PlantLoop(LoopNum).FluidType != Node::FluidType::Steam) {
                     Cp = state.dataPlnt->PlantLoop(LoopNum).glycol->getSpecificHeat(state, LoopSetPointTemp, RoutineNameAlt);
                     StartEnthalpy = Cp * LoopSetPointTemp;
                 }
                 // Use Min/Max flow rates to initialize loop
-                if (state.dataPlnt->PlantLoop(LoopNum).FluidType == DataLoopNode::NodeFluidType::Water) {
+                if (state.dataPlnt->PlantLoop(LoopNum).FluidType == Node::FluidType::Water) {
                     rho = state.dataPlnt->PlantLoop(LoopNum).glycol->getDensity(state, LoopSetPointTemp, RoutineNameAlt);
 
                     LoopMaxMassFlowRate = state.dataPlnt->PlantLoop(LoopNum).MaxVolFlowRate * rho;
                     LoopMinMassFlowRate = state.dataPlnt->PlantLoop(LoopNum).MinVolFlowRate * rho;
                 }
                 // use saturated liquid of steam at the loop setpoint temp as the starting enthalpy for a water loop
-                if (state.dataPlnt->PlantLoop(LoopNum).FluidType == DataLoopNode::NodeFluidType::Steam) {
+                if (state.dataPlnt->PlantLoop(LoopNum).FluidType == Node::FluidType::Steam) {
                     SteamTemp = 100.0;
                     auto *steam = Fluid::GetSteam(state);
                     state.dataPlnt->PlantLoop(LoopNum).FluidIndex = steam->Num;
@@ -2816,7 +2845,7 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
                         state.dataLoopNodes->Node(ComponentInlet).Enthalpy = StartEnthalpy;
                         state.dataLoopNodes->Node(ComponentInlet).HumRat = StartHumRat;
 
-                        state.dataLoopNodes->Node(ComponentOutlet).FluidType = state.dataLoopNodes->Node(BranchInlet).FluidType;
+                        state.dataLoopNodes->Node(ComponentOutlet).fluidType = state.dataLoopNodes->Node(BranchInlet).fluidType;
                         state.dataLoopNodes->Node(ComponentOutlet).Temp = state.dataLoopNodes->Node(BranchInlet).Temp;
                         state.dataLoopNodes->Node(ComponentOutlet).TempMin = state.dataLoopNodes->Node(BranchInlet).TempMin;
                         state.dataLoopNodes->Node(ComponentOutlet).TempMax = state.dataLoopNodes->Node(BranchInlet).TempMax;
@@ -3278,8 +3307,8 @@ void SizePlantLoop(EnergyPlusData &state,
         bool heat = false;
         bool cool = false;
         auto &supplySide = loop.LoopSide(LoopSideLocation::Supply);
-        for (auto &branch : supplySide.Branch) {
-            for (auto &comp : branch.Comp) {
+        for (const auto &branch : supplySide.Branch) {
+            for (const auto &comp : branch.Comp) {
                 DataPlant::CtrlType type = DataPlant::PlantEquipmentCtrlType[static_cast<int>(comp.Type)];
                 if (type == DataPlant::CtrlType::CoolingOp || type == DataPlant::CtrlType::DualOp) {
                     cool = true;
@@ -3303,8 +3332,8 @@ void SizePlantLoop(EnergyPlusData &state,
                 loop.MaxVolFlowRate = 0.0;
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                     ShowWarningError(state,
-                                     format("SizePlantLoop: Calculated Plant Sizing Design Volume Flow Rate=[{:.2R}] is too small. Set to 0.0",
-                                            loopSizData.DesVolFlowRate));
+                                     std::format("SizePlantLoop: Calculated Plant Sizing Design Volume Flow Rate=[{:.2f}] is too small. Set to 0.0",
+                                                 loopSizData.DesVolFlowRate));
                     ShowContinueError(state, "..occurs for PlantLoop=" + loop.Name);
                 }
             }
@@ -3315,9 +3344,8 @@ void SizePlantLoop(EnergyPlusData &state,
             }
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowFatalError(state, "Autosizing of plant loop requires a loop Sizing:Plant object");
                 ShowContinueError(state, "Occurs in PlantLoop object=" + loop.Name);
-                ErrorsFound = true;
+                ShowFatalError(state, "Autosizing of plant loop requires a loop Sizing:Plant object");
             }
         }
     }
@@ -3384,7 +3412,7 @@ void SizePlantLoop(EnergyPlusData &state,
 
     // should now have plant volume, calculate plant volume's mass for fluid type
     Real64 FluidDensity = 0.0;
-    if (loop.FluidType == DataLoopNode::NodeFluidType::Water) {
+    if (loop.FluidType == Node::FluidType::Water) {
         FluidDensity = loop.glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
         if (PlantSizNum > 0 && allocated(state.dataSize->PlantSizData)) { // method only works if sizing delta T is available
             auto &loopSizData = state.dataSize->PlantSizData(PlantSizNum);
@@ -3402,7 +3430,7 @@ void SizePlantLoop(EnergyPlusData &state,
         } else {
             OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchPLCLDesCap, loop.Name, "N/A");
         }
-    } else if (loop.FluidType == DataLoopNode::NodeFluidType::Steam) {
+    } else if (loop.FluidType == Node::FluidType::Steam) {
         auto *steam = Fluid::GetSteam(state);
         loop.FluidIndex = steam->Num;
         FluidDensity = steam->getSatDensity(state, 100.0, 1.0, RoutineName);
@@ -3488,8 +3516,8 @@ void ResizePlantLoopLevelSizes(EnergyPlusData &state, int const LoopNum // Suppl
                 state.dataPlnt->PlantLoop(LoopNum).MaxVolFlowRate = 0.0;
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                     ShowWarningError(state,
-                                     format("SizePlantLoop: Calculated Plant Sizing Design Volume Flow Rate=[{:.2R}] is too small. Set to 0.0",
-                                            state.dataSize->PlantSizData(PlantSizNum).DesVolFlowRate));
+                                     std::format("SizePlantLoop: Calculated Plant Sizing Design Volume Flow Rate=[{:.2f}] is too small. Set to 0.0",
+                                                 state.dataSize->PlantSizData(PlantSizNum).DesVolFlowRate));
                     ShowContinueError(state, "..occurs for PlantLoop=" + state.dataPlnt->PlantLoop(LoopNum).Name);
                 }
             }
@@ -3531,9 +3559,9 @@ void ResizePlantLoopLevelSizes(EnergyPlusData &state, int const LoopNum // Suppl
     }
 
     // should now have plant volume, calculate plant volume's mass for fluid type
-    if (state.dataPlnt->PlantLoop(LoopNum).FluidType == DataLoopNode::NodeFluidType::Water) {
+    if (state.dataPlnt->PlantLoop(LoopNum).FluidType == Node::FluidType::Water) {
         FluidDensity = state.dataPlnt->PlantLoop(LoopNum).glycol->getDensity(state, Constant::InitConvTemp, RoutineName);
-    } else if (state.dataPlnt->PlantLoop(LoopNum).FluidType == DataLoopNode::NodeFluidType::Steam) {
+    } else if (state.dataPlnt->PlantLoop(LoopNum).FluidType == Node::FluidType::Steam) {
         FluidDensity = Fluid::GetSteam(state)->getSatDensity(state, 100.0, 1.0, RoutineName);
     } else {
         assert(false);
@@ -3616,15 +3644,51 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   April 2011
-    //       MODIFIED       na
+    //       MODIFIED       Sept. 2026 Joe Robertson
     //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
-    // setup the order that plant loops are to be called
+    // Setup the order that plant loop sides are to be called while preserving demand-before-supply for each loop.
 
     // METHODOLOGY EMPLOYED:
-    // simple rule-based allocation of which order to call the half loops
-    // Examine for interconnected components and rearrange to impose the following rules
+    // The dependency graph is a map of required calling order: each loop side is a node, and an arrow from A to B
+    // means A must be called before B.
+    // This graph is built once up front and used to check each order; the topological sort is only a fallback.
+    // An interconnection is a call-order dependency created by equipment connected to two loops. For example, a
+    // water-cooled chiller connects chilled-water and condenser-water loops; the chilled-water supply side places
+    // a demand on the condenser-water loop, so it must be called before the condenser-water demand side.
+
+    // The steps below walk through the repair, fallback, and warning cases, with a small example for each. In the
+    // examples, D means demand side and S means supply side.
+
+    // 1. Rearrange loop sides to satisfy interconnection ordering, restoring demand-before-supply for each loop
+    //    after every pass.
+    //    In other words, each loop's demand side remains ahead of its supply side while the connected equipment's
+    //    ordering needs are worked out.
+
+    //    Example: Starting with A-D, B-D, A-S, B-S and requiring A-S before B-D, move B-D after A-S to get
+    //    A-D, A-S, B-D, B-S.
+
+    // 2. If these repairs repeat an order or reach their revision limit without satisfying all constraints, run
+    //    a stable topological sort on the existing dependency graph to find a valid order if one exists.
+    //    This is Kahn's algorithm: repeatedly place a side whose required predecessors have already been placed,
+    //    then make its successors eligible. When several sides are ready, prefer the one earliest in the current
+    //    order.
+    //    The repair loop allows up to TotNumHalfLoops full sweeps, with each sweep visiting every half-loop.
+    //    A repeated order only means these step-by-step repairs are stuck; it does not by itself mean that no
+    //    valid calling order exists. The graph-based attempt checks whether all requirements can be met together.
+
+    //    Example: with C-D, C-S, A-D, A-S, B-D, B-S and requirements A-D -> B-D -> C-D (plus each
+    //    loop's D -> S), a repair can satisfy one requirement while undoing an earlier move, eventually revisiting
+    //    an order it has already tried. This is a cycle in the sequence of attempted orders, not in the
+    //    requirements: A-D -> B-D -> C-D is one-way, so the fallback can produce A-D, A-S, B-D, C-D, C-S, B-S.
+
+    // 3. If the graph has a genuine cycle and no valid order exists, keep demand-before-supply intact and warn
+    //    that some inter-loop ordering constraints cannot be honored.
+
+    //    Example: A-D -> A-S -> B-D -> B-S -> A-D. Following these requirements leads back to A-D, which would
+    //    have to be called before itself. No sequence can satisfy this, so the function warns and preserves each
+    //    loop's demand-before-supply order.
 
     // Using/Aliasing
     using PlantUtilities::ShiftPlantLoopSideCallingOrder;
@@ -3636,51 +3700,253 @@ void RevisePlantCallingOrder(EnergyPlusData &state)
     bool thisLoopPutsDemandOnAnother;
     int ConnctNum;
 
-    for (int HalfLoopNum = 1; HalfLoopNum <= state.dataPlnt->TotNumHalfLoops; ++HalfLoopNum) {
+    if (state.dataPlnt->TotNumHalfLoops <= 0) {
+        return;
+    }
 
-        int LoopNum = state.dataPlnt->PlantCallingOrderInfo(HalfLoopNum).LoopIndex;
-        LoopSideNum = state.dataPlnt->PlantCallingOrderInfo(HalfLoopNum).LoopSide;
+    auto nodeIndex = [&state](int const loopNum, DataPlant::LoopSideLocation const loopSide) {
+        if (loopNum < 1 || loopNum > state.dataPlnt->TotNumLoops) {
+            return -1;
+        }
+        if (loopSide == LoopSideLocation::Demand) {
+            return 2 * (loopNum - 1);
+        }
+        if (loopSide == LoopSideLocation::Supply) {
+            return 2 * (loopNum - 1) + 1;
+        }
+        return -1;
+    };
 
-        if (allocated(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected)) {
-            for (ConnctNum = 1; ConnctNum <= isize(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected); ++ConnctNum) {
-                int OtherLoopNum = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopNum;
-                OtherLoopSideNum = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopSideNum;
-                state.dataPlantMgr->OtherLoopCallingIndex = FindLoopSideInCallingOrder(state, OtherLoopNum, OtherLoopSideNum);
+    // Treat each half-loop as a graph node (demand is even, supply is odd). An edge A -> B means A must be
+    // called before B: every loop adds demand -> supply, and each connection adds the direction described by
+    // LoopDemandsOnRemote. Reciprocal Connected records describe the same edge, so suppress duplicates when
+    // calculating in-degrees later.
+    std::vector<std::vector<int>> dependencyEdges(state.dataPlnt->TotNumHalfLoops);
+    auto addDependency = [&dependencyEdges](int const beforeNode, int const afterNode) {
+        if (beforeNode < 0 || afterNode < 0 || beforeNode >= static_cast<int>(dependencyEdges.size()) ||
+            afterNode >= static_cast<int>(dependencyEdges.size())) {
+            return;
+        }
+        auto &edges = dependencyEdges[beforeNode];
+        if (std::find(edges.begin(), edges.end(), afterNode) == edges.end()) {
+            edges.push_back(afterNode);
+        }
+    };
 
-                thisLoopPutsDemandOnAnother = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopDemandsOnRemote;
-                if (thisLoopPutsDemandOnAnother) {                                 // make sure this loop side is called before the other loop side
-                    if (state.dataPlantMgr->OtherLoopCallingIndex < HalfLoopNum) { // rearrange
-                        state.dataPlantMgr->newCallingIndex = min(HalfLoopNum + 1, state.dataPlnt->TotNumHalfLoops);
-                        ShiftPlantLoopSideCallingOrder(state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
-                    }
+    for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
+        addDependency(nodeIndex(loopNum, LoopSideLocation::Demand), nodeIndex(loopNum, LoopSideLocation::Supply));
+        for (auto const loopSide : {LoopSideLocation::Demand, LoopSideLocation::Supply}) {
+            auto const &connectedLoopSide = state.dataPlnt->PlantLoop(loopNum).LoopSide(loopSide);
+            if (!allocated(connectedLoopSide.Connected)) {
+                continue;
+            }
+            int const thisNode = nodeIndex(loopNum, loopSide);
+            for (int connectionNum = 1; connectionNum <= isize(connectedLoopSide.Connected); ++connectionNum) {
+                auto const &connection = connectedLoopSide.Connected(connectionNum);
+                int const remoteNode = nodeIndex(connection.LoopNum, connection.LoopSideNum);
+                if (connection.LoopDemandsOnRemote) {
+                    addDependency(thisNode, remoteNode);
+                } else {
+                    addDependency(remoteNode, thisNode);
+                }
+            }
+        }
+    }
 
-                } else {                                                           // make sure the other is called before this one
-                    if (state.dataPlantMgr->OtherLoopCallingIndex > HalfLoopNum) { // rearrange
-                        state.dataPlantMgr->newCallingIndex = max(HalfLoopNum, 1);
+    auto snapshotCallingOrder = [&state]() {
+        std::vector<std::pair<int, DataPlant::LoopSideLocation>> snapshot;
+        snapshot.reserve(state.dataPlnt->TotNumHalfLoops);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            snapshot.emplace_back(entry.LoopIndex, entry.LoopSide);
+        }
+        return snapshot;
+    };
 
-                        if (OtherLoopSideNum == LoopSideLocation::Supply) { // if this is a supply side, don't push it before its own demand side
-                            state.dataPlantMgr->OtherLoopDemandSideCallingIndex =
-                                FindLoopSideInCallingOrder(state, OtherLoopNum, LoopSideLocation::Demand);
-                            if (state.dataPlantMgr->OtherLoopDemandSideCallingIndex < HalfLoopNum) { // good to go
-                                state.dataPlantMgr->newCallingIndex = min(state.dataPlantMgr->OtherLoopDemandSideCallingIndex + 1,
-                                                                          state.dataPlnt->TotNumHalfLoops); // put it right after its demand side
-                                ShiftPlantLoopSideCallingOrder(state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
-                            } else { // move both sides of other loop before this, keeping demand side in front
-                                state.dataPlantMgr->NewOtherDemandSideCallingIndex = max(HalfLoopNum, 1);
-                                ShiftPlantLoopSideCallingOrder(
-                                    state, state.dataPlantMgr->OtherLoopDemandSideCallingIndex, state.dataPlantMgr->NewOtherDemandSideCallingIndex);
-                                // get fresh pointer after it has changed in previous call
-                                state.dataPlantMgr->OtherLoopCallingIndex = FindLoopSideInCallingOrder(state, OtherLoopNum, OtherLoopSideNum);
-                                state.dataPlantMgr->newCallingIndex = state.dataPlantMgr->NewOtherDemandSideCallingIndex + 1;
+    auto callingOrderSatisfiesAllConstraints = [&state, &dependencyEdges, &nodeIndex]() {
+        std::vector<int> callingPosition(dependencyEdges.size(), -1);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            int const node = nodeIndex(entry.LoopIndex, entry.LoopSide);
+            if (node < 0 || node >= static_cast<int>(callingPosition.size()) || callingPosition[node] != -1) {
+                return false;
+            }
+            callingPosition[node] = callingIndex;
+        }
+        if (std::find(callingPosition.begin(), callingPosition.end(), -1) != callingPosition.end()) {
+            return false;
+        }
+        for (int beforeNode = 0; beforeNode < static_cast<int>(dependencyEdges.size()); ++beforeNode) {
+            for (int const afterNode : dependencyEdges[beforeNode]) {
+                if (callingPosition[beforeNode] >= callingPosition[afterNode]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    // The in-place repair sweep can oscillate even when the dependency graph is acyclic. Preserve the current
+    // ordering as the stable tie-breaker while constructing a valid topological order for that case. Do not modify
+    // PlantCallingOrderInfo unless a complete ordering is found, so a genuine cycle retains the heuristic's final
+    // demand-before-supply order.
+    auto applyStableTopologicalOrder = [&state, &dependencyEdges, &nodeIndex]() {
+        std::vector<int> inDegree(dependencyEdges.size(), 0);
+        for (auto const &edges : dependencyEdges) {
+            for (int const afterNode : edges) {
+                ++inDegree[afterNode];
+            }
+        }
+
+        // Keep the current order as the tie-breaker, and reject an invalid or duplicate half-loop before sorting.
+        std::vector<int> currentOrder;
+        currentOrder.reserve(state.dataPlnt->TotNumHalfLoops);
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            auto const &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            int const node = nodeIndex(entry.LoopIndex, entry.LoopSide);
+            if (node < 0 || std::find(currentOrder.begin(), currentOrder.end(), node) != currentOrder.end()) {
+                return false;
+            }
+            currentOrder.push_back(node);
+        }
+
+        std::vector<bool> emitted(dependencyEdges.size(), false);
+        std::vector<int> topologicalOrder;
+        topologicalOrder.reserve(dependencyEdges.size());
+        // Kahn's algorithm: repeatedly emit the earliest currently-ready half-loop from the existing order.
+        // This preserves the old order as a tie-breaker while satisfying every dependency edge.
+        while (topologicalOrder.size() < dependencyEdges.size()) {
+            int selectedNode = -1;
+            for (int const node : currentOrder) {
+                if (!emitted[node] && inDegree[node] == 0) {
+                    selectedNode = node;
+                    break;
+                }
+            }
+            if (selectedNode < 0) {
+                // No remaining node is ready, so the un-emitted dependency graph contains a directed cycle.
+                return false;
+            }
+            emitted[selectedNode] = true;
+            topologicalOrder.push_back(selectedNode);
+            for (int const afterNode : dependencyEdges[selectedNode]) {
+                --inDegree[afterNode];
+            }
+        }
+
+        for (int callingIndex = 1; callingIndex <= state.dataPlnt->TotNumHalfLoops; ++callingIndex) {
+            int const node = topologicalOrder[callingIndex - 1];
+            auto &entry = state.dataPlnt->PlantCallingOrderInfo(callingIndex);
+            entry.LoopIndex = node / 2 + 1;
+            entry.LoopSide = (node % 2 == 0) ? LoopSideLocation::Demand : LoopSideLocation::Supply;
+        }
+        return true;
+    };
+
+    // Track every calling order seen so a cycle in the state space (not just an immediate fixed point) can be
+    // detected and stopped early instead of always running the full number-of-half-loops revision limit.
+    // Each entry is one complete order, represented as (loop index, loop side) pairs in calling sequence.
+    std::vector<std::vector<std::pair<int, DataPlant::LoopSideLocation>>> callingOrderHistory;
+    callingOrderHistory.push_back(snapshotCallingOrder());
+
+    bool converged = false;
+    int revisionsPerformed = 0;
+    for (int revision = 1; revision <= state.dataPlnt->TotNumHalfLoops; ++revision) {
+        revisionsPerformed = revision;
+
+        // Repair interconnections against the current order. A move made for one connection can invalidate
+        // another, so repeat this sweep until the full constraint check succeeds or the order stops progressing.
+        for (int HalfLoopNum = 1; HalfLoopNum <= state.dataPlnt->TotNumHalfLoops; ++HalfLoopNum) {
+
+            int LoopNum = state.dataPlnt->PlantCallingOrderInfo(HalfLoopNum).LoopIndex;
+            LoopSideNum = state.dataPlnt->PlantCallingOrderInfo(HalfLoopNum).LoopSide;
+
+            if (allocated(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected)) {
+                for (ConnctNum = 1; ConnctNum <= isize(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected); ++ConnctNum) {
+                    int OtherLoopNum = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopNum;
+                    OtherLoopSideNum = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopSideNum;
+                    state.dataPlantMgr->OtherLoopCallingIndex = FindLoopSideInCallingOrder(state, OtherLoopNum, OtherLoopSideNum);
+
+                    thisLoopPutsDemandOnAnother = state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Connected(ConnctNum).LoopDemandsOnRemote;
+                    if (thisLoopPutsDemandOnAnother) { // make sure this loop side is called before the other loop side
+                        if (state.dataPlantMgr->OtherLoopCallingIndex < HalfLoopNum) { // rearrange
+                            state.dataPlantMgr->newCallingIndex = min(HalfLoopNum + 1, state.dataPlnt->TotNumHalfLoops);
+                            ShiftPlantLoopSideCallingOrder(state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
+                        }
+
+                    } else {                                                           // make sure the other is called before this one
+                        if (state.dataPlantMgr->OtherLoopCallingIndex > HalfLoopNum) { // rearrange
+                            state.dataPlantMgr->newCallingIndex = max(HalfLoopNum, 1);
+
+                            if (OtherLoopSideNum == LoopSideLocation::Supply) { // if this is a supply side, don't push it before its own demand side
+                                state.dataPlantMgr->OtherLoopDemandSideCallingIndex =
+                                    FindLoopSideInCallingOrder(state, OtherLoopNum, LoopSideLocation::Demand);
+                                if (state.dataPlantMgr->OtherLoopDemandSideCallingIndex < HalfLoopNum) { // good to go
+                                    state.dataPlantMgr->newCallingIndex = min(state.dataPlantMgr->OtherLoopDemandSideCallingIndex + 1,
+                                                                              state.dataPlnt->TotNumHalfLoops); // put it right after its demand side
+                                    ShiftPlantLoopSideCallingOrder(
+                                        state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
+                                } else { // move both sides of other loop before this, keeping demand side in front
+                                    state.dataPlantMgr->NewOtherDemandSideCallingIndex = max(HalfLoopNum, 1);
+                                    ShiftPlantLoopSideCallingOrder(state,
+                                                                   state.dataPlantMgr->OtherLoopDemandSideCallingIndex,
+                                                                   state.dataPlantMgr->NewOtherDemandSideCallingIndex);
+                                    // get fresh pointer after it has changed in previous call
+                                    state.dataPlantMgr->OtherLoopCallingIndex = FindLoopSideInCallingOrder(state, OtherLoopNum, OtherLoopSideNum);
+                                    state.dataPlantMgr->newCallingIndex = state.dataPlantMgr->NewOtherDemandSideCallingIndex + 1;
+                                    ShiftPlantLoopSideCallingOrder(
+                                        state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
+                                }
+                            } else {
                                 ShiftPlantLoopSideCallingOrder(state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
                             }
-                        } else {
-                            ShiftPlantLoopSideCallingOrder(state, state.dataPlantMgr->OtherLoopCallingIndex, state.dataPlantMgr->newCallingIndex);
                         }
                     }
                 }
             }
         }
+
+        // Reassert each loop's demand-before-supply invariant after the interconnection moves; these moves can
+        // in turn disturb inter-loop ordering, which is why all graph constraints are checked afterward.
+        for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
+            int demandIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Demand);
+            int supplyIndex = FindLoopSideInCallingOrder(state, loopNum, LoopSideLocation::Supply);
+            if (demandIndex > supplyIndex) {
+                ShiftPlantLoopSideCallingOrder(state, demandIndex, supplyIndex);
+            }
+        }
+
+        if (callingOrderSatisfiesAllConstraints()) {
+            converged = true;
+            break;
+        }
+
+        // Reaching this check means the current order failed the full constraint check. A repeated permutation
+        // means this repair heuristic is oscillating, not necessarily that the dependency graph has a cycle. Stop
+        // the sweep here; the topological fallback below distinguishes those cases.
+        auto currentSnapshot = snapshotCallingOrder();
+        if (std::find(callingOrderHistory.begin(), callingOrderHistory.end(), currentSnapshot) != callingOrderHistory.end()) {
+            break;
+        }
+        callingOrderHistory.push_back(std::move(currentSnapshot));
+    }
+
+    if (!converged) {
+        converged = applyStableTopologicalOrder();
+    }
+
+    if (!converged) {
+        // A complete topological ordering does not exist, so at least two loop-side ordering requirements conflict.
+        // Demand-before-supply is still guaranteed for every loop, but the inter-loop calling order cannot reflect
+        // every interconnection.
+        ShowWarningError(state,
+                         std::format("RevisePlantCallingOrder: Could not find a plant calling order that satisfies all interconnected loop side "));
+        ShowContinueError(
+            state,
+            std::format("requirements after revision {}; a cyclic dependency exists between two or more interconnected loops ", revisionsPerformed));
+        ShowContinueError(state,
+                          std::format("(e.g., reciprocal heat recovery equipment). Demand-before-supply ordering is preserved for every loop, "));
+        ShowContinueError(state, std::format("but some inter-loop calling order constraints may not be honored."));
     }
 }
 
@@ -4605,18 +4871,18 @@ void CheckOngoingPlantWarnings(EnergyPlusData &state)
             ShowWarningError(
                 state, "Plant Loop: " + state.dataPlnt->PlantLoop(LoopNum).Name + " Demand Side is storing excess heat the majority of the time.");
             ShowContinueError(state,
-                              format("Excess Storage Time={:.2R}[hr], Total Loop Active Time={:.2R}[hr]",
-                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_CapExcessStorageTime,
-                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Demand).LoopSideInlet_TotalTime));
+                              std::format("Excess Storage Time={:.2f}[hr], Total Loop Active Time={:.2f}[hr]",
+                                          state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_CapExcessStorageTime,
+                                          state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Demand).LoopSideInlet_TotalTime));
         }
         if (state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_CapExcessStorageTime >
             state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_TotalTime / 2) {
             ShowWarningError(
                 state, "Plant Loop: " + state.dataPlnt->PlantLoop(LoopNum).Name + " Supply Side is storing excess heat the majority of the time.");
             ShowContinueError(state,
-                              format("Excess Storage Time={:.2R}[hr], Total Loop Active Time={:.2R}[hr]",
-                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_CapExcessStorageTime,
-                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Demand).LoopSideInlet_TotalTime));
+                              std::format("Excess Storage Time={:.2f}[hr], Total Loop Active Time={:.2f}[hr]",
+                                          state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Supply).LoopSideInlet_CapExcessStorageTime,
+                                          state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideLocation::Demand).LoopSideInlet_TotalTime));
         }
     }
 }
@@ -4635,7 +4901,7 @@ void ReportPlantCompWaterFlowData(EnergyPlusData &state, bool const reportFlag)
         state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate.resize(size_t(24 * state.dataGlobal->TimeStepsInHour));
         for (size_t ts = 0; ts < state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate.size(); ++ts) {
             state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate[ts] = 0.0;
-            for (auto &thisCoil : state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate) {
+            for (const auto &thisCoil : state.dataPlnt->PlantLoop(LoopNum).compDesWaterFlowRate) {
                 state.dataPlnt->PlantLoop(LoopNum).plantDesWaterFlowRate[ts] += thisCoil.tsDesWaterFlowRate[ts];
             }
         }

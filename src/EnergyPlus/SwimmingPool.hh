@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -70,7 +70,6 @@ namespace SwimmingPool {
         std::string Name;                // name of swimming pool
         std::string SurfaceName;         // surface name of pool
         int SurfacePtr;                  // index to surface array
-        std::string ZoneName;            // Name of zone the pool is in
         int ZonePtr;                     // Pointer to this zone in the Zone derived type
         std::string WaterInletNodeName;  // water inlet node name
         int WaterInletNode;              // water inlet node number

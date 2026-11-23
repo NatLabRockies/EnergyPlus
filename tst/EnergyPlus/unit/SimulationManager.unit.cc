@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -156,7 +156,7 @@ TEST_F(EnergyPlusFixture, Simulationmanager_writeInitialPerfLogValues)
     std::string expectedContents = "Program, Version, TimeStamp,Use Coil Direct Solution,Zone Radiant Exchange Algorithm,"
                                    "Override Mode,Number of Timesteps per Hour,Minimum Number of Warmup "
                                    "Days,SuppressAllBeginEnvironmentResets,Minimum System Timestep,MaxZoneTempDiff,MaxAllowedDelTemp,lastHeader,\n" +
-                                   state->dataStrGlobals->VerStringVar + ",False,ScriptF,MODE193,0,1,False,1.0,0.30,2.0000E-003,lastValue,\n";
+                                   state->dataStrGlobals->VerStringVar + ",False,ScriptF,MODE193,0,1,False,1.0,0.30,0.0020,lastValue,\n";
 
     EXPECT_EQ(perfLogContents, expectedContents);
 
@@ -230,7 +230,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
         });
 
         state->init_state_called = false;
-        compare_err_stream_substring("", true);
+        compare_err_stream("", true);
         // Input processor with throw a severe, so do not use assertions
         EXPECT_FALSE(process_idf(idf_objects, false));
         state->init_state(*state);
@@ -276,7 +276,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_DefaultState)
     EXPECT_FALSE(state->dataEnvrn->IgnoreBeamRadiation);
     EXPECT_FALSE(state->dataEnvrn->IgnoreDiffuseRadiation);
     EXPECT_FALSE(state->dataSysVars->DeveloperFlag);
-    EXPECT_FALSE(state->dataSysVars->TimingFlag);
 
     // no error message from
     EXPECT_TRUE(compare_err_stream("", true));
@@ -359,7 +358,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_Unicity)
         "    DisplayAllWarnings;      !- Key 1",
     });
 
-    compare_err_stream_substring("", true);
+    compare_err_stream("", true);
     // Input processor will throw a severe, so do not use assertions
     EXPECT_FALSE(process_idf(idf_objects, false));
     state->init_state(*state);
@@ -394,8 +393,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
         "    IgnoreSolarRadiation,",
         "    IgnoreBeamRadiation,",
         "    IgnoreDiffuseRadiation,",
-        "    DeveloperFlag,",
-        "    TimingFlag;",
+        "    DeveloperFlag;",
     });
 
     // This will throw a warning in InputProcessor since these aren't supported keys, so do not use assertions
@@ -411,8 +409,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
         "against any enum values.",
         "   ** Severe  ** <root>[Output:Diagnostics][Output:Diagnostics 1][diagnostics][3][key] - \"DeveloperFlag\" - Failed to match against any "
         "enum values.",
-        "   ** Severe  ** <root>[Output:Diagnostics][Output:Diagnostics 1][diagnostics][4][key] - \"TimingFlag\" - Failed to match against any enum "
-        "values.",
     });
     EXPECT_TRUE(compare_err_stream(expected_warning, true));
 
@@ -434,7 +430,6 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDiagnostics_UndocumentedFlags)
     EXPECT_TRUE(state->dataEnvrn->IgnoreBeamRadiation);
     EXPECT_TRUE(state->dataEnvrn->IgnoreDiffuseRadiation);
     EXPECT_TRUE(state->dataSysVars->DeveloperFlag);
-    EXPECT_TRUE(state->dataSysVars->TimingFlag);
 
     // no error message from
     EXPECT_TRUE(compare_err_stream("", true));
@@ -558,8 +553,8 @@ TEST_F(EnergyPlusFixture, SimulationManager_ReportLoopConnectionsTest)
     // Unit Test for Defect #11061: Test Error Message (modified level of message)
     state->dataBranchNodeConnections->NumCompSets = 1;
     state->dataBranchNodeConnections->CompSets.allocate(1);
-    state->dataBranchNodeConnections->CompSets(1).ParentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
-    state->dataBranchNodeConnections->CompSets(1).ComponentObjectType = DataLoopNode::ConnectionObjectType::WaterHeaterMixed;
+    state->dataBranchNodeConnections->CompSets(1).ParentObjectType = Node::ConnectionObjectType::WaterHeaterMixed;
+    state->dataBranchNodeConnections->CompSets(1).ComponentObjectType = Node::ConnectionObjectType::WaterHeaterMixed;
     state->dataBranchNodeConnections->CompSets(1).CName = "WaterHeaterMixed1";
     state->dataBranchNodeConnections->CompSets(1).InletNodeName = "MixedWaterHeater1Inlet";
     state->dataBranchNodeConnections->CompSets(1).OutletNodeName = "MixedWaterHeater1Outlet";

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,9 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
 #include <cassert>
 
-// EnergyPlus headers
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -56,9 +60,7 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/WindowManager.hh>
 
-// Windows library headers
-#include <WCEMultiLayerOptics.hpp>
-
+// Local Headers
 #include "WindowManagerExteriorData.hh"
 #include "WindowManagerExteriorOptical.hh"
 
@@ -245,7 +247,7 @@ namespace Window {
                 Real64 EpsGlIR = s_mat->materials(constrSh.LayerPoint(TotLay - 1))->AbsorpThermalBack;
                 Real64 RhoGlIR = 1 - EpsGlIR;
                 Real64 TauShIR = matShade->TransThermal;
-                Real64 EpsShIR = matShade->AbsorpThermal;
+                Real64 EpsShIR = matShade->AbsorpThermalIn;
                 Real64 RhoShIR = max(0.0, 1.0 - TauShIR - EpsShIR);
                 surfShade.effShadeEmi = EpsShIR * (1.0 + RhoGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR));
                 surfShade.effGlassEmi = EpsGlIR * TauShIR / (1.0 - RhoGlIR * RhoShIR);

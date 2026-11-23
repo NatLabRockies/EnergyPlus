@@ -5,7 +5,7 @@ macro( CREATE_DOC_TARGET SOURCE_FILENAME OUTPUT_FILENAME )
     set(XELATEX_MEM_FLAGS ON)
   endif()
   add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/pdf/${OUTPUT_FILENAME}.pdf
-    COMMAND ${CMAKE_COMMAND} -DXELATEX=${XELATEX} -DINNAME=${SOURCE_FILENAME} -DOUTNAME=${OUTPUT_FILENAME}
+    COMMAND ${CMAKE_COMMAND} -DXELATEX_COMPILER=${XELATEX_COMPILER} -DINNAME=${SOURCE_FILENAME} -DOUTNAME=${OUTPUT_FILENAME}
             -DORIGINAL_CMAKE_SOURCE_DIR=${PROJECT_SOURCE_DIR} -DORIGINAL_CMAKE_BINARY_DIR=${PROJECT_BINARY_DIR}
             -DTEX_INTERACTION=${TEX_INTERACTION} -DDOCS_TESTING=${DOCS_TESTING}
             -DXELATEX_MEM_FLAGS=${XELATEX_MEM_FLAGS}
@@ -25,7 +25,40 @@ macro( CREATE_DOC_TARGET SOURCE_FILENAME OUTPUT_FILENAME )
   if (DOCS_TESTING)
     add_custom_command(TARGET zPDF_${OUTPUT_FILENAME}
       POST_BUILD
-      COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tools/parse_latex_log.py" "${PROJECT_SOURCE_DIR}/${SOURCE_FILENAME}/${SOURCE_FILENAME}.log" "${PROJECT_SOURCE_DIR}/${SOURCE_FILENAME}" "${PROJECT_BINARY_DIR}/${OUTPUT_FILENAME}_errors.json"
+      COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tools/parse_latex_log.py" "${PROJECT_BINARY_DIR}/${SOURCE_FILENAME}/${SOURCE_FILENAME}.log" "${PROJECT_SOURCE_DIR}/${SOURCE_FILENAME}" "${PROJECT_BINARY_DIR}/${OUTPUT_FILENAME}_errors.json"
       )
   endif()
+endmacro()
+
+# Add custom command, target, and dependencies for the HTML rendering of a documentation file.
+# OUTPUT_DIRNAME becomes the directory name under html/ in the build tree, eg html/${OUTPUT_DIRNAME}/index.html
+macro( CREATE_HTML_DOC_TARGET SOURCE_FILENAME OUTPUT_DIRNAME )
+  add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/html/${OUTPUT_DIRNAME}/index.html
+    COMMAND ${CMAKE_COMMAND} -DPANDOC=${PANDOC} -DINNAME=${SOURCE_FILENAME} -DOUTNAME=${OUTPUT_DIRNAME}
+            -DHTML_ASSETS_DIR=${PROJECT_SOURCE_DIR}/html
+            -DORIGINAL_CMAKE_SOURCE_DIR=${PROJECT_SOURCE_DIR} -DORIGINAL_CMAKE_BINARY_DIR=${PROJECT_BINARY_DIR}
+            -DHTML_DOCS_HOME_URL=${HTML_DOCS_HOME_URL}
+            -DPython_EXECUTABLE=${Python_EXECUTABLE}
+            -P ${PROJECT_SOURCE_DIR}/cmake/BuildHtmlDocumentation.cmake
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${SOURCE_FILENAME}
+    DEPENDS ${INCLUDED_TEX} ${INCLUDED_IMAGES}
+            ${PROJECT_SOURCE_DIR}/cmake/BuildHtmlDocumentation.cmake
+            ${PROJECT_SOURCE_DIR}/cmake/build_search_index.py
+            ${PROJECT_SOURCE_DIR}/cmake/fix_chunked_html.py
+            ${PROJECT_SOURCE_DIR}/html/bootstrap-tables.lua
+            ${PROJECT_SOURCE_DIR}/html/numbered-cross-references.lua
+            ${PROJECT_SOURCE_DIR}/html/object-index.lua
+            ${PROJECT_SOURCE_DIR}/html/template_chunked.html
+            ${PROJECT_SOURCE_DIR}/html/header.html
+            ${PROJECT_SOURCE_DIR}/html/footer.html
+            ${PROJECT_SOURCE_DIR}/html/style.css
+    )
+
+  add_custom_target( zHTML_${OUTPUT_DIRNAME}
+    DEPENDS ${PROJECT_BINARY_DIR}/html/${OUTPUT_DIRNAME}/index.html
+    )
+
+  add_dependencies(html_docs zHTML_${OUTPUT_DIRNAME})
+
+  set_target_properties(zHTML_${OUTPUT_DIRNAME} PROPERTIES FOLDER Documentation)
 endmacro()

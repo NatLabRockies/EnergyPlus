@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,9 @@
 
 // EnergyPlus::SortAndStringUtilities Unit Tests
 
+// C++ Headers
+#include <array>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -66,6 +69,47 @@
 namespace EnergyPlus {
 
 using namespace EnergyPlus::General;
+
+TEST_F(EnergyPlusFixture, General_InvOrdinalDay)
+{
+    static constexpr std::array<int, 12> daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    for (int leapYear = 0; leapYear <= 1; ++leapYear) {
+        int ordinalDay = 0;
+        for (int expectedMonth = 1; expectedMonth <= 12; ++expectedMonth) {
+            int const numDays = daysInMonth[expectedMonth - 1] + ((expectedMonth == 2) ? leapYear : 0);
+            for (int expectedDay = 1; expectedDay <= numDays; ++expectedDay) {
+                ++ordinalDay;
+                int month = 0;
+                int day = 0;
+
+                General::InvOrdinalDay(ordinalDay, month, day, leapYear);
+
+                EXPECT_EQ(expectedMonth, month);
+                EXPECT_EQ(expectedDay, day);
+            }
+        }
+    }
+
+    int month = 12;
+    int day = 31;
+
+    General::InvOrdinalDay(-1, month, day, 0);
+    EXPECT_EQ(12, month);
+    EXPECT_EQ(31, day);
+
+    General::InvOrdinalDay(0, month, day, 0);
+    EXPECT_EQ(12, month);
+    EXPECT_EQ(31, day);
+
+    General::InvOrdinalDay(366, month, day, 0);
+    EXPECT_EQ(12, month);
+    EXPECT_EQ(31, day);
+
+    General::InvOrdinalDay(367, month, day, 1);
+    EXPECT_EQ(12, month);
+    EXPECT_EQ(31, day);
+}
 
 TEST_F(EnergyPlusFixture, General_ParseTime)
 {
@@ -250,33 +294,62 @@ TEST_F(EnergyPlusFixture, General_SolveRootTest)
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(-1, SolFla);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::RegulaFalsiThenBisection;
-    state->dataRootFinder->HVACSystemRootFinding.NumOfIter = 10;
+    state->dataRootFinder->rootAlgo = RootAlgo::RegulaFalsiThenBisection;
+    state->dataRootFinder->NumOfIter = 10;
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(28, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::Bisection;
+    state->dataRootFinder->rootAlgo = RootAlgo::Bisection;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(17, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::BisectionThenRegulaFalsi;
+    state->dataRootFinder->rootAlgo = RootAlgo::BisectionThenRegulaFalsi;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(12, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::Alternation;
-    state->dataRootFinder->HVACSystemRootFinding.NumOfIter = 3;
+    state->dataRootFinder->rootAlgo = RootAlgo::Alternation;
+    state->dataRootFinder->NumOfIter = 3;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(15, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
     // Add a unit test to deal with vary small X value for #6515
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::RegulaFalsi;
+    state->dataRootFinder->rootAlgo = RootAlgo::RegulaFalsi;
     Real64 small = 1.0e-11;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual_test, 0.0, small);
     EXPECT_EQ(-1, SolFla);
+}
+
+TEST_F(EnergyPlusFixture, General_SolveRoot2)
+{
+    SolveRootStats solveRootStats;
+    int maxIters = 30;
+    int SolFla;
+
+    for (int i = 0; i < 100; ++i) {
+        Real64 Request = (Real64)((i % 13) + 0.172);
+        auto residual = [Request](Real64 const Frac) {
+            Real64 const Actual = 1.0 + 2.0 * Frac + 10.0 * Frac * Frac;
+            return (Actual - Request) / Request;
+        };
+        General::SolveRoot2(*state, 0.001, maxIters, SolFla, residual, 0.0, 1.0, solveRootStats);
+    }
+
+    EXPECT_ENUM_EQ(solveRootStats.algo, RootAlgo::ShortBisectionThenRegulaFalsi);
+
+    for (int i = 0; i < 100; ++i) {
+        Real64 Request = (Real64)(1.00 / (i + 1));
+        auto residual = [Request](Real64 const Frac) {
+            Real64 const Actual = 1.0 + 1.0 / (1.0 + Frac);
+            return (Actual - Request) / Request;
+        };
+        General::SolveRoot2(*state, 0.001, maxIters, SolFla, residual, 0.0, 1.0, solveRootStats);
+    }
+
+    EXPECT_ENUM_EQ(solveRootStats.algo, RootAlgo::ShortBisectionThenRegulaFalsi);
 }
 
 TEST_F(EnergyPlusFixture, nthDayOfWeekOfMonth_test)

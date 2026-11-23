@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -118,7 +118,8 @@ TEST_F(EnergyPlusFixture, ICSSolarCollectorTest_CalcPassiveExteriorBaffleGapTest
     state->dataConstruction->Construct(ConstrNum).LayerPoint(MatNum) = 1;
     auto *p = new Material::MaterialBase;
     state->dataMaterial->materials.push_back(p);
-    p->AbsorpThermal = 0.8;
+    p->AbsorpThermalOut = 0.8;
+    p->AbsorpThermalIn = 0.8;
     // allocate exterior vented cavity variable data
     state->dataHeatBal->ExtVentedCavity.allocate(1);
     state->dataHeatBal->ExtVentedCavity(NumOfSurf).SurfPtrs.allocate(NumOfSurf);

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -94,7 +94,7 @@ struct CoilCoolingDX
                   HVAC::FanOp const fanOp,
                   bool singleMode,
                   Real64 LoadSHR = -1.0);
-    void setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, int airLoopNum);
+    void setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName);
     void getFixedData(int &evapInletNodeIndex,
                       int &evapOutletNodeIndex,
                       int &condInletNodeIndex,
@@ -106,15 +106,16 @@ struct CoilCoolingDX
                             Real64 &normalModeRatedCapacity,
                             std::vector<Real64> &normalModeFlowRates,
                             std::vector<Real64> &normalModeRatedCapacities);
-    static void inline passThroughNodeData(DataLoopNode::NodeData &in, DataLoopNode::NodeData &out);
+    static void inline passThroughNodeData(Node::NodeData &in, Node::NodeData &out);
     void size(EnergyPlusData &state);
 
     int getNumModes();
     int getOpModeCapFTIndex(HVAC::CoilMode mode = HVAC::CoilMode::Normal);
     Real64 condMassFlowRate(EnergyPlusData &state, HVAC::CoilMode mode);
 
-    CoilCoolingDXInputSpecification original_input_specs;
     std::string name;
+    HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+    int coilReportNum = -1;
     bool myOneTimeInitFlag = true;
     int evapInletNodeIndex = 0;
     int evapOutletNodeIndex = 0;
@@ -132,7 +133,6 @@ struct CoilCoolingDX
     Real64 evaporativeCondSupplyTankConsump = 0.0;
     Real64 evapCondPumpElecPower = 0.0;
     Real64 evapCondPumpElecConsumption = 0.0;
-    int airLoopNum = 0; // Add for AFN compatibility, revisit at a later date
     int supplyFanIndex = 0;
     HVAC::FanType supplyFanType = HVAC::FanType::Invalid;
     std::string supplyFanName;
@@ -175,7 +175,6 @@ struct CoilCoolingDX
     EnergyPlus::DataHeatBalance::HeatReclaimDataBase reclaimHeat;
 
     void setToHundredPercentDOAS();
-    bool isHundredPercentDOAS = false;
 
 private:
     static bool

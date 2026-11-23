@@ -23,7 +23,7 @@ TessData SurfaceImplementation::tessellate() {
   TESStesselator *tess = tessNewTess(nullptr);
 
   if (!tess) {
-    throw PenumbraException(fmt::format("Unable to create tessellator for surface, \"{}\".", name),
+    throw PenumbraException(std::format("Unable to create tessellator for surface, \"{}\".", name),
                             *logger);
   }
 
@@ -39,7 +39,7 @@ TessData SurfaceImplementation::tessellate() {
 
   if (!tessTesselate(tess, TESS_WINDING_ODD, TESS_POLYGONS, TessData::polygon_size,
                      TessData::vertex_size, nullptr)) {
-    throw PenumbraException(fmt::format("Unable to tessellate surface, \"{}\".", name), *logger);
+    throw PenumbraException(std::format("Unable to tessellate surface, \"{}\".", name), *logger);
   }
 
   // For now convert to glDrawArrays() style of vertices, sometime may change to glDrawElements

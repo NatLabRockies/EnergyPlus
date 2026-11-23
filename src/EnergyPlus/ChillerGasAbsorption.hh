@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -76,8 +76,6 @@ namespace ChillerGasAbsorption {
     {
         // Members
         // Parts of Type that do not correspond with IDD definition
-        bool Available = false; // need an array of logicals--load identifiers of available equipment
-        bool ON = false;        // simulate the machine at it's operating part load ratio
         bool InCoolingMode = false;
         bool InHeatingMode = false;
         // Part of Type that directly corresponds with IDD definition
@@ -125,7 +123,6 @@ namespace ChillerGasAbsorption {
         bool isEnterCondensTemp = false;            // if using entering conderser water temperature is TRUE, exiting is FALSE
         bool isWaterCooled = false;                 // if water cooled it is TRUE
         Real64 CHWLowLimitTemp = 0.0;               // Chilled Water Lower Limit Temperature
-        Real64 FuelHeatingValue = 0.0;
         // Calculated design values
         Real64 DesCondMassFlowRate = 0.0; // design nominal mass flow rate of water through the condenser [kg/s]
         Real64 DesHeatMassFlowRate = 0.0; // design nominal mass flow rate of water through the hot water side [kg/s]

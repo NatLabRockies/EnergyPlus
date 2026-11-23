@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -65,7 +65,7 @@ std::string format_errors_or_warnings(std::vector<std::pair<std::string, bool>> 
 
     std::string errs;
     for (auto const &[error, isContinued] : errors) {
-        errs += fmt::format("{}{}\n", isContinued ? "**   ~~~   **" : base, error);
+        errs += std::format("{}{}\n", isContinued ? "**   ~~~   **" : base, error);
     }
     return errs;
 }

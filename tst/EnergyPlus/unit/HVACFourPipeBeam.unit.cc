@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -227,16 +227,16 @@ TEST_F(EnergyPlusFixture, Beam_FactoryAllAutosize)
     state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = 3;
     bool ErrorsFound = false;
     state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode =
-        NodeInputManager::GetOnlySingleNode(*state,
-                                            "Zone 1 Node",
-                                            ErrorsFound,
-                                            DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
-                                            "BeamTest",
-                                            DataLoopNode::NodeFluidType::Air,
-                                            DataLoopNode::ConnectionType::ZoneNode,
-                                            NodeInputManager::CompFluidStream::Primary,
-                                            DataLoopNode::ObjectIsNotParent,
-                                            "Test zone node");
+        Node::GetOnlySingleNode(*state,
+                                "Zone 1 Node",
+                                ErrorsFound,
+                                Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                "BeamTest",
+                                Node::FluidType::Air,
+                                Node::ConnectionType::ZoneNode,
+                                Node::CompFluidStream::Primary,
+                                Node::ObjectIsNotParent,
+                                "Test zone node");
 
     state->dataDefineEquipment->AirDistUnit.allocate(1);
     state->dataDefineEquipment->AirDistUnit(1).EquipName(1) =
@@ -763,6 +763,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 
@@ -1722,7 +1723,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -2335,6 +2335,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 
@@ -3294,7 +3295,6 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -3825,6 +3825,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    Zone One Thermostat,  !- Name",
                           "    Zone One,      !- Zone or ZoneList Name",
                           "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+                          "    ,                      !- Temperature Difference Between Cutout And Setpoint",
                           "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
                           "    Zone One DualSPSched;  !- Control 1 Name",
 
@@ -4783,7 +4784,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 
 namespace EnergyPlus {
 
@@ -312,16 +313,16 @@ namespace Pollution {
     struct ComponentProps
     {
         Real64 sourceVal = 0.0;
-        std::array<Real64, (int)Pollutant::Num> pollutantVals = {0.0};
+        std::array<Real64, (int)Pollutant::Num> pollutantVals{};
     };
 
     struct CoefficientProps
     {
         bool used = false;
         Real64 sourceCoeff = 0.0;
-        std::array<Real64, (int)Pollutant::Num> pollutantCoeffs = {0.0};
+        std::array<Real64, (int)Pollutant::Num> pollutantCoeffs{};
         Sched::Schedule *sourceSched = nullptr;
-        std::array<Sched::Schedule *, (int)Pollutant::Num> pollutantScheds = {0};
+        std::array<Sched::Schedule *, (int)Pollutant::Num> pollutantScheds{};
     };
 
     void CalculatePollution(EnergyPlusData &state);
@@ -366,11 +367,11 @@ struct PollutionData : BaseGlobalStruct
     std::array<Pollution::ComponentProps, (int)Pollution::PollFuelComponent::Num> pollComps;
 
     // Meters, meter values, and grouped meter values
-    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = {-1};
-    std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals = {0.0};
-    std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals = {0.0};
+    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = filled_array{-1};
+    std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals{};
+    std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals{};
 
-    std::array<Real64, (int)Pollution::Pollutant::Num> pollutantVals = {0.0};
+    std::array<Real64, (int)Pollution::Pollutant::Num> pollutantVals{};
 
     std::vector<Pollution::PollFuel> pollFuelFactorList;
 

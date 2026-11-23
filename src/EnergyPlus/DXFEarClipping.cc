@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
 
 // ObjexxFCL Headers
@@ -189,7 +190,7 @@ namespace DXFEarClipping {
         int ncverts;
 
         // Object Data
-        Array1D<Vector_2d> vertex(nsides);
+        Array1D<Vector2D> vertex(nsides);
         Array1D<dTriangle> Triangle(nsides);
 
         if (surfclass == DataSurfaces::SurfaceClass::Floor || surfclass == DataSurfaces::SurfaceClass::Roof ||
@@ -237,24 +238,24 @@ namespace DXFEarClipping {
         removed = false;
         while (nvertcur > 3) {
             generate_ears(state, nsides, vertex, ears, nears, r_angles, nrangles, c_vertices, ncverts, removed, earverts, rangles);
-            if (!any_gt(ears, 0)) {
+            if (!std::ranges::any_of(ears, [](int const v) { return v > 0; })) {
                 ShowWarningError(state,
-                                 format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
-                                        surfname,
-                                        DataSurfaces::cSurfaceClass(surfclass)));
+                                 std::format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
+                                             surfname,
+                                             DataSurfaces::cSurfaceClass(surfclass)));
                 ++state.dataDXFEarClipping->errcount;
                 if (state.dataDXFEarClipping->errcount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                     ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
                 }
                 if (state.dataGlobal->DisplayExtraWarnings) {
-                    ShowMessage(state, format(" surface={} class={}", surfname, DataSurfaces::cSurfaceClass(surfclass)));
+                    ShowMessage(state, std::format(" surface={} class={}", surfname, DataSurfaces::cSurfaceClass(surfclass)));
 
                     for (int j = 1; j <= nsides; ++j) {
-                        ShowMessage(state, format(" side={} ({:.1R},{:.1R},{:.1R})", j, polygon(j).x, polygon(j).y, polygon(j).z));
+                        ShowMessage(state, std::format(" side={} ({:.1f},{:.1f},{:.1f})", j, polygon(j).x, polygon(j).y, polygon(j).z));
                     }
-                    ShowMessage(state, format(" number of triangles found={:12}", ncount));
+                    ShowMessage(state, std::format(" number of triangles found={:12}", ncount));
                     for (int j = 1; j <= nrangles; ++j) {
-                        ShowMessage(state, format(" r angle={} vert={} deg={:.1R}", j, r_angles(j), rangles(j) * Constant::RadToDeg));
+                        ShowMessage(state, std::format(" r angle={} vert={} deg={:.1f}", j, r_angles(j), rangles(j) * Constant::RadToDeg));
                     }
                 }
                 break; // while loop
@@ -356,9 +357,9 @@ namespace DXFEarClipping {
         return angle;
     }
 
-    bool polygon_contains_point_2d(int const nsides,            // number of sides (vertices)
-                                   Array1D<Vector_2d> &polygon, // points of polygon
-                                   Vector_2d const &point       // point to be tested
+    bool polygon_contains_point_2d(int const nsides,           // number of sides (vertices)
+                                   Array1D<Vector2D> &polygon, // points of polygon
+                                   Vector2D const &point       // point to be tested
     )
     {
 
@@ -405,7 +406,7 @@ namespace DXFEarClipping {
 
     void generate_ears(EnergyPlusData &state,
                        int const nvert, // number of vertices in polygon
-                       Array1D<Vector_2d> &vertex,
+                       Array1D<Vector2D> &vertex,
                        Array1D_int &ears,       // number of ears possible (dimensioned to nvert)
                        int &nears,              // number of ears found
                        Array1D_int &r_vertices, // number of reflex vertices (>180) possible
@@ -443,11 +444,11 @@ namespace DXFEarClipping {
         EP_SIZE_CHECK(rangles, nvert);
 
         // Subroutine local variable declarations:
-        bool inpoly; // in polygon or not
+        bool inpoly = false; // in polygon or not
 
         // Object Data
-        Vector_2d point;               // structure for point
-        Array1D<Vector_2d> testtri(3); // structure for triangle
+        Vector2D point;               // structure for point
+        Array1D<Vector2D> testtri(3); // structure for triangle
 
         // initialize, always recalculate
         ears = 0;
@@ -633,9 +634,9 @@ namespace DXFEarClipping {
     //{
 
     //    // Locals
-    //    // type (Vector_2d) nvertex(nvert)
+    //    // type (Vector2D) nvertex(nvert)
     //    // integer i
-    //    // type (Vector_2d) point
+    //    // type (Vector2D) point
     //    // integer nrep
 
     //    //  Vertex, nverts is in cw order, reorder for calc

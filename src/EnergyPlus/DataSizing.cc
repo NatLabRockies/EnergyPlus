@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -147,6 +147,8 @@ void ZoneSizingData::zeroMemberData()
     std::fill(this->HeatZoneTempSeq.begin(), this->HeatZoneTempSeq.end(), 0.0);
     std::fill(this->DesHeatSetPtSeq.begin(), this->DesHeatSetPtSeq.end(), 0.0);
     std::fill(this->HeatOutTempSeq.begin(), this->HeatOutTempSeq.end(), 0.0);
+    std::fill(this->HeatMCPISeq.begin(), this->HeatMCPISeq.end(), 0.0);
+    std::fill(this->HeatMCPVSeq.begin(), this->HeatMCPVSeq.end(), 0.0);
     std::fill(this->HeatZoneRetTempSeq.begin(), this->HeatZoneRetTempSeq.end(), 0.0);
     std::fill(this->HeatTstatTempSeq.begin(), this->HeatTstatTempSeq.end(), 0.0);
     std::fill(this->HeatZoneHumRatSeq.begin(), this->HeatZoneHumRatSeq.end(), 0.0);
@@ -249,8 +251,6 @@ void ZoneSizingData::zeroMemberData()
     this->CoolLatentLoadNoDOAS = 0.0;           // current zone dehumidification load without DOAS (HVAC time step)
     this->ZoneHeatLatentMassFlow = 0.0;         // current mass flow rate required to meet humidification load [kg/s]
     this->ZoneCoolLatentMassFlow = 0.0;         // current mass flow rate required to meet dehumidification load [kg/s]
-    this->ZoneHeatLatentVolFlow = 0.0;          // current volume flow rate required to meet humidification load [m3/s]
-    this->ZoneCoolLatentVolFlow = 0.0;          // current volume flow rate required to meet dehumidification load [m3/s]
     this->DesHeatLoadNoDOAS = 0.0;              // zone design heating load without DOAS [W]
     this->DesCoolLoadNoDOAS = 0.0;              // zone design cooling load without DOAS [W]
     this->DesLatentHeatLoad = 0.0;              // current zone humidification load (HVAC time step)
@@ -270,9 +270,7 @@ void ZoneSizingData::zeroMemberData()
     this->TimeStepNumAtLatentHeatNoDOASMax = 0; // time step number (in day) at latent heating peak without DOAS
     this->TimeStepNumAtLatentCoolNoDOASMax = 0; // time step number (in day) at latent cooling peak without DOAS
     this->OutTempAtLatentCoolPeak = 0.0;        // outdoor temperature at max latent cooling [C]
-    this->OutHumRatAtLatentCoolPeak = 0.0;      // outdoor humrat at max latent cooling [C]
     this->OutTempAtLatentHeatPeak = 0.0;        // outdoor temperature at max latent heating [C]
-    this->OutHumRatAtLatentHeatPeak = 0.0;      // outdoor humrat at max latent heating [C]
     this->ZoneRetTempAtLatentCoolPeak = 0.0;    // zone return temp at max cooling [C]
     this->ZoneRetTempAtLatentHeatPeak = 0.0;    // zone return temp at max heating [C]
 }
@@ -290,6 +288,8 @@ void ZoneSizingData::allocateMemberArrays(int const numOfTimeStepInDay)
     this->CoolZoneTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->DesCoolSetPtSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatOutTempSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatMCPISeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatMCPVSeq.dimension(numOfTimeStepInDay, 0.0);
     this->CoolOutTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatZoneRetTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatTstatTempSeq.dimension(numOfTimeStepInDay, 0.0);
@@ -349,7 +349,6 @@ void TermUnitZoneSizingData::copyFromZoneSizing(ZoneSizingData const &sourceData
     this->DesHeatOAFlowFrac = sourceData.DesHeatOAFlowFrac;
     this->DesCoolMassFlow = sourceData.DesCoolMassFlow;
     this->DesCoolMassFlowNoOA = sourceData.DesCoolMassFlowNoOA;
-    this->DesCoolOAFlowFrac = sourceData.DesCoolOAFlowFrac;
     this->DesHeatLoad = sourceData.DesHeatLoad;
     this->NonAirSysDesHeatLoad = sourceData.NonAirSysDesHeatLoad;
     this->DesCoolLoad = sourceData.DesCoolLoad;
@@ -429,8 +428,6 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     state.dataSize->DataEMSOverrideON = false;
     state.dataSize->DataScalableSizingON = false;
     state.dataSize->DataScalableCapSizingON = false;
-    state.dataSize->DataSysScalableFlowSizingON = false;
-    state.dataSize->DataSysScalableCapSizingON = false;
     state.dataSize->DataDesAccountForFanHeat = true;
     state.dataSize->DataDXCoolsLowSpeedsAutozize = false;
 
@@ -471,7 +468,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     state.dataSize->DataCoilSizingAirInHumRat = 0.0;
     state.dataSize->DataCoilSizingAirOutTemp = 0.0;
     state.dataSize->DataCoilSizingAirOutHumRat = 0.0;
-    state.dataSize->DataCoolCoilType = -1;
+    state.dataSize->DataCoolCoilType = HVAC::CoilType::Invalid;
     state.dataSize->DataCoolCoilIndex = -1;
 
     // These zone specific sizing variables are set in zone equipment to use for sizing.
@@ -499,7 +496,6 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
         ZoneEqSizing.DesHeatingLoad = 0.0;
         ZoneEqSizing.CoolingAirVolFlow = 0.0;
         ZoneEqSizing.HeatingAirVolFlow = 0.0;
-        ZoneEqSizing.SystemAirVolFlow = 0.0;
         ZoneEqSizing.DesignSizeFromParent = false;
     }
 
@@ -564,8 +560,8 @@ void GetCoilDesFlowT(EnergyPlusData &state,
         }
     } else {
         if ((sysSizInput.CoolCapControl == CapacityControl::VT) || (sysSizInput.CoolCapControl == CapacityControl::Bypass)) {
-            ShowWarningError(state,
-                             format("GetCoilDesFlow: AirLoopHVAC = {} has no time of peak cooling load for sizing.", sysSizInput.AirPriLoopName));
+            ShowWarningError(
+                state, std::format("GetCoilDesFlow: AirLoopHVAC = {} has no time of peak cooling load for sizing.", sysSizInput.AirPriLoopName));
             ShowContinueError(state, "Using Central Cooling Capacity Control Method=VAV instead of Bypass or VT.");
             sysSizInput.CoolCapControl = CapacityControl::VAV;
         }
@@ -1040,7 +1036,7 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     Real64 ZoneMaxCO2;                // Breathing-zone CO2 concentration
     Real64 ZoneMinCO2;                // Minimum CO2 concentration in zone
     Real64 ZoneContamControllerSched; // Schedule value for ZoneControl:ContaminantController
-    Real64 CO2PeopleGeneration;       // CO2 generation from people at design level
+    Real64 CO2PeopleGeneration = 0.0; // CO2 generation from people at design level
 
     OAVolumeFlowRate = 0.0;
 
@@ -1068,9 +1064,9 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::IAQProcedure && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" IndoorAirQualityProcedure" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" IndoorAirQualityProcedure" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
@@ -1079,9 +1075,9 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" ProportionalControlBasedOnDesignOccupancy" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" ProportionalControlBasedOnDesignOccupancy" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
@@ -1090,9 +1086,9 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" ProportionalControlBasedOnOccupancySchedule" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" ProportionalControlBasedOnOccupancySchedule" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
@@ -1231,14 +1227,14 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                             ++this->CO2MaxMinLimitErrorCount;
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch) {
                                 if (this->CO2MaxMinLimitErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(
                                         state,
-                                        format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, maximum target "
-                                               "CO2 concentration ({:.2R}), is not greater than minimum target CO2 concentration ({:.2R}).",
-                                               ZoneMaxCO2,
-                                               ZoneMinCO2));
+                                        std::format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, maximum target "
+                                                    "CO2 concentration ({:.2f}), is not greater than minimum target CO2 concentration ({:.2f}).",
+                                                    ZoneMaxCO2,
+                                                    ZoneMinCO2));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnOccupancySchedule\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
@@ -1246,23 +1242,24 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(
                                         state,
-                                        format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                               "ProportionalControlBasedOnOccupancySchedule, maximum target CO2 concentration is not greater than "
-                                               "minimum target CO2 concentration. Error continues...",
-                                               this->Name),
+                                        std::format(
+                                            "DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                            "ProportionalControlBasedOnOccupancySchedule, maximum target CO2 concentration is not greater than "
+                                            "minimum target CO2 concentration. Error continues...",
+                                            this->Name),
                                         this->CO2MaxMinLimitErrorIndex);
                                 }
                             }
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                                 if (this->CO2MaxMinLimitErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(
                                         state,
-                                        format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, maximum target "
-                                               "CO2 concentration ({:.2R}), is not greater than minimum target CO2 concentration ({:.2R}).",
-                                               ZoneMaxCO2,
-                                               ZoneMinCO2));
+                                        std::format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, maximum target "
+                                                    "CO2 concentration ({:.2f}), is not greater than minimum target CO2 concentration ({:.2f}).",
+                                                    ZoneMaxCO2,
+                                                    ZoneMinCO2));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnDesignOccupancy\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
@@ -1270,10 +1267,10 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(
                                         state,
-                                        format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                               "ProportionalControlBasedOnDesignOccupancy, maximum target CO2 concentration is not greater than "
-                                               "minimum target CO2 concentration. Error continues...",
-                                               this->Name),
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnDesignOccupancy, maximum target CO2 concentration is not greater than "
+                                                    "minimum target CO2 concentration. Error continues...",
+                                                    this->Name),
                                         this->CO2MaxMinLimitErrorIndex);
                                 }
                             }
@@ -1302,44 +1299,46 @@ OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                             ++this->CO2GainErrorCount;
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch) {
                                 if (this->CO2GainErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(state,
-                                                      format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, CO2 "
-                                                             "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
-                                                             thisZone.Name));
+                                                      std::format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, CO2 "
+                                                                  "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
+                                                                  thisZone.Name));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnOccupancySchedule\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
                                     ShowContinueErrorTimeStamp(state, "");
                                 } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                                                          "ProportionalControlBasedOnOccupancySchedule, CO2 generation from people "
-                                                                          "is not greater than zero. Error continues...",
-                                                                          this->Name),
-                                                                   this->CO2GainErrorIndex);
+                                    ShowRecurringWarningErrorAtEnd(
+                                        state,
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnOccupancySchedule, CO2 generation from people "
+                                                    "is not greater than zero. Error continues...",
+                                                    this->Name),
+                                        this->CO2GainErrorIndex);
                                 }
                             }
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                                 if (this->CO2GainErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(state,
-                                                      format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, CO2 "
-                                                             "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
-                                                             thisZone.Name));
+                                                      std::format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, CO2 "
+                                                                  "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
+                                                                  thisZone.Name));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnDesignOccupancy\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
                                     ShowContinueErrorTimeStamp(state, "");
                                 } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                                                          "ProportionalControlBasedOnDesignOccupancy, CO2 generation from people is "
-                                                                          "not greater than zero. Error continues...",
-                                                                          this->Name),
-                                                                   this->CO2GainErrorIndex);
+                                    ShowRecurringWarningErrorAtEnd(
+                                        state,
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnDesignOccupancy, CO2 generation from people is "
+                                                    "not greater than zero. Error continues...",
+                                                    this->Name),
+                                        this->CO2GainErrorIndex);
                                 }
                             }
                         }
@@ -1396,10 +1395,10 @@ Sched::Schedule *OARequirementsData::getZoneFlowFracSched(EnergyPlusData &state,
                 if (schedPtr != thisDSOA.oaFlowFracSched) {
                     notAllSame = true;
                     ShowWarningError(state,
-                                     format("getZoneFlowFracSched: Outdoor Air Schedules are not the same for all spaces in "
-                                            "DesignSpecification:OutdoorAir:SpaceList={}.",
-                                            this->Name));
-                    ShowContinueError(state, format("Using the first space schedule={}", schedPtr->Name));
+                                     std::format("getZoneFlowFracSched: Outdoor Air Schedules are not the same for all spaces in "
+                                                 "DesignSpecification:OutdoorAir:SpaceList={}.",
+                                                 this->Name));
+                    ShowContinueError(state, std::format("Using the first space schedule={}", schedPtr->Name));
                     break;
                 }
             }
@@ -1426,11 +1425,11 @@ Sched::Schedule *OARequirementsData::getZonePropCtlMinRateSched(EnergyPlusData &
                     notAllSame = true;
                     ShowWarningError(
                         state,
-                        format(
+                        std::format(
                             "getZoneFlowFracSched: Proportional Control Minimum Outdoor Air Flow Rate Schedules are not the same for all spaces in "
                             "DesignSpecification:OutdoorAir:SpaceList={}.",
                             this->Name));
-                    ShowContinueError(state, format("Using the first space schedule={}", schedPtr->Name));
+                    ShowContinueError(state, std::format("Using the first space schedule={}", schedPtr->Name));
                     break;
                 }
             }

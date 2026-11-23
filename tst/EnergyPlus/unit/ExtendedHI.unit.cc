@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -150,11 +150,10 @@ TEST_F(EnergyPlusFixture, extendedHI_Qv)
 
 TEST_F(EnergyPlusFixture, extendedHI_Zs)
 {
-    Real64 tol = 1e-8;
     std::vector<Real64> Rs_values = {0.0387, 0.5, 1, 1.2};
     std::vector<Real64> result = {52.1, 18750000.0, 600000000.0, 1492991999.9999998};
     for (size_t i = 0; i < Rs_values.size(); ++i) {
-        EXPECT_NEAR(ExtendedHI::Zs(Rs_values[i]), result[i], tol);
+        EXPECT_DOUBLE_EQ(ExtendedHI::Zs(Rs_values[i]), result[i]);
     }
 }
 
@@ -252,7 +251,7 @@ TEST_F(EnergyPlusFixture, extendedHI_find_eqvar)
 TEST_F(EnergyPlusFixture, extendedHI_find_T)
 {
     Real64 tol = 0.05;
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::Bisection;
+    state->dataRootFinder->rootAlgo = RootAlgo::Bisection;
     std::vector<Real64> Rf_values = {30, 32, 34, 36, 38};
     std::vector<Real64> result_0_rf = {240.08, 239.97, 239.89, 239.81, 239.74};
     for (size_t i = 0; i < Rf_values.size(); ++i) {
@@ -278,7 +277,7 @@ TEST_F(EnergyPlusFixture, extendedHI_find_T)
 TEST_F(EnergyPlusFixture, extendedHI_heatindex)
 {
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolverMethod = HVACSystemRootSolverAlgorithm::Bisection;
+    state->dataRootFinder->rootAlgo = RootAlgo::Bisection;
     std::vector<std::vector<Real64>> HI_values = {{199.9994, 199.9997, 200.0},
                                                   {209.9976, 209.9988, 210.0},
                                                   {219.9916, 219.9958, 220.0},
@@ -345,15 +344,15 @@ TEST_F(EnergyPlusFixture, extendedHI_heatindex_compare)
     //    uncomment the following to write out outputs comparing the old HI and the extended HI
     //    for (int T = 80; T < 112; T += 2) {
     //        for (int RH_percent = 40; RH_percent < 105; RH_percent += 5) {
-    //            fmt::print("{},{},{},{}\n", T, Fahrenheit2Celsius(T) + 273.15, RH_percent, calcHI(T * 1.0, RH_percent) + 273.15);
+    //            EnergyPlus::print("{},{},{},{}\n", T, Fahrenheit2Celsius(T) + 273.15, RH_percent, calcHI(T * 1.0, RH_percent) + 273.15);
     //        }
     //    }
     //
-    //    fmt::print("--------------------------extended HI------------------------------\n");
+    //    EnergyPlus::print("--------------------------extended HI------------------------------\n");
     //
     //    for (int T = 80; T < 112; T += 2) {
     //        for (int RH_percent = 40; RH_percent < 105; RH_percent += 5) {
-    //            fmt::print("{},{},{},{}\n",
+    //            EnergyPlus::print("{},{},{},{}\n",
     //                       T,
     //                       Fahrenheit2Celsius(T) + 273.15,
     //                       RH_percent,

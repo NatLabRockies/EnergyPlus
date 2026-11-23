@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -57,7 +57,6 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGenerators.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GeneratorFuelSupply.hh>
@@ -101,122 +100,136 @@ namespace GeneratorFuelSupply {
         //                      reuse with both Annex 42 models,
 
         static constexpr std::string_view routineName = "GetGeneratorFuelSupplyInput";
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        //  INTEGER                     :: GeneratorNum !Generator counter
-        Array1D_string AlphArray(25);  // character string data
-        Array1D<Real64> NumArray(200); // numeric data TODO deal with allocatable for extensible
-
         if (state.dataGeneratorFuelSupply->MyOneTimeFlag) {
-            int NumAlphas; // Number of elements in the alpha array
-            int NumNums;   // Number of elements in the numeric array
-            int IOStat;    // IO Status when calling get input subroutine
             bool ErrorsFound = false;
             std::string const cCurrentModuleObject = "Generator:FuelSupply";
-            int NumGeneratorFuelSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+            auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+            int NumGeneratorFuelSups = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+            auto const &fuelSupplySchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+            static constexpr std::string_view fuelTemperatureModelingModeFieldName = "Fuel Temperature Modeling Mode";
+            static constexpr std::string_view fuelTemperatureScheduleNameFieldName = "Fuel Temperature Schedule Name";
+            static constexpr std::string_view compressorPowerCurveFieldName = "Compressor Power Multiplier Function of Fuel Rate Curve Name";
+            static constexpr std::string_view fuelTypeFieldName = "Fuel Type";
 
             if (NumGeneratorFuelSups <= 0) {
-                ShowSevereError(state, format("No {} equipment specified in input file", cCurrentModuleObject));
+                ShowSevereError(state, std::format("No {} equipment specified in input file", cCurrentModuleObject));
                 ErrorsFound = true;
             }
 
             state.dataGenerator->FuelSupply.allocate(NumGeneratorFuelSups);
+            auto const fuelSupplyObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+            if (fuelSupplyObjects != inputProcessor->epJSON.end()) {
+                int FuelSupNum = 0;
+                for (auto const &fuelSupplyInstance : fuelSupplyObjects.value().items()) {
+                    auto const &fuelSupplyFields = fuelSupplyInstance.value();
+                    auto const fuelSupplyName = Util::makeUPPER(fuelSupplyInstance.key());
+                    auto const fuelTemperatureModelingMode =
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_modeling_mode");
+                    auto const fuelTemperatureReferenceNodeName = Util::makeUPPER(
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_reference_node_name"));
+                    auto const fuelTemperatureScheduleName = Util::makeUPPER(
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_schedule_name"));
+                    auto const compressorPowerCurveName = Util::makeUPPER(inputProcessor->getAlphaFieldValue(
+                        fuelSupplyFields, fuelSupplySchemaProps, "compressor_power_multiplier_function_of_fuel_rate_curve_name"));
+                    auto const fuelType = inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_type");
 
-            for (int FuelSupNum = 1; FuelSupNum <= NumGeneratorFuelSups; ++FuelSupNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         FuelSupNum,
-                                                                         AlphArray,
-                                                                         NumAlphas,
-                                                                         NumArray,
-                                                                         NumNums,
-                                                                         IOStat,
-                                                                         _,
-                                                                         _,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
+                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, fuelSupplyInstance.key());
 
-                ErrorObjectHeader eoh{routineName, cCurrentModuleObject, AlphArray(1)};
-                state.dataGenerator->FuelSupply(FuelSupNum).Name = AlphArray(1);
-                if (Util::SameString("TemperatureFromAirNode", AlphArray(2))) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempFromNode;
-                } else if (Util::SameString("Scheduled", AlphArray(2))) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempSchedule;
-                } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), AlphArray(2)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ErrorsFound = true;
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).NodeName = AlphArray(3);
-                state.dataGenerator->FuelSupply(FuelSupNum).NodeNum =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(3),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelSupply,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::Sensor,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
-
-                if (state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode == DataGenerators::FuelTemperatureMode::FuelInTempSchedule) {
-                    if ((state.dataGenerator->FuelSupply(FuelSupNum).sched = Sched::GetSchedule(state, AlphArray(4))) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(4), AlphArray(4));
-                        ErrorsFound = true;
-                    }
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).CompPowerCurveID = Curve::GetCurveIndex(state, AlphArray(5));
-                if (state.dataGenerator->FuelSupply(FuelSupNum).CompPowerCurveID == 0) {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(5), AlphArray(5)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ShowContinueError(state, "Curve named was not found ");
-                    ErrorsFound = true;
-                }
-
-                for (auto &e : state.dataGenerator->FuelSupply) {
-                    e.CompPowerLossFactor = NumArray(1);
-                }
-
-                if (Util::SameString(AlphArray(6), "GaseousConstituents")) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode = DataGenerators::FuelMode::GaseousConstituents;
-                } else if (Util::SameString(AlphArray(6), "LiquidGeneric")) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode = DataGenerators::FuelMode::GenericLiquid;
-                } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(6), AlphArray(6)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ErrorsFound = true;
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).LHVliquid = NumArray(2) * 1000.0; // generic liquid LHV  (kJ/kG input converted to J/kG )
-                state.dataGenerator->FuelSupply(FuelSupNum).HHV = NumArray(3) * 1000.0;       // generic liquid HHV (kJ/kG input converted to J/kG )
-                state.dataGenerator->FuelSupply(FuelSupNum).MW = NumArray(4);
-                state.dataGenerator->FuelSupply(FuelSupNum).eCO2 = NumArray(5);
-
-                if (state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode == DataGenerators::FuelMode::GaseousConstituents) {
-                    int NumFuelConstit = NumArray(6);
-                    state.dataGenerator->FuelSupply(FuelSupNum).NumConstituents = NumFuelConstit;
-
-                    if (NumFuelConstit > 12) {
-                        ShowSevereError(state, format("{} model not set up for more than 12 fuel constituents", cCurrentModuleObject));
-                        ErrorsFound = true;
-                    }
-                    if (NumFuelConstit < 1) {
-                        ShowSevereError(state, format("{} model needs at least one fuel constituent", cCurrentModuleObject));
+                    ++FuelSupNum;
+                    ErrorObjectHeader eoh{routineName, cCurrentModuleObject, fuelSupplyName};
+                    auto &fuelSupply = state.dataGenerator->FuelSupply(FuelSupNum);
+                    fuelSupply.Name = fuelSupplyName;
+                    if (Util::SameString("TemperatureFromAirNode", fuelTemperatureModelingMode)) {
+                        fuelSupply.FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempFromNode;
+                    } else if (Util::SameString("Scheduled", fuelTemperatureModelingMode)) {
+                        fuelSupply.FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempSchedule;
+                    } else {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", fuelTemperatureModelingModeFieldName, fuelTemperatureModelingMode));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
                         ErrorsFound = true;
                     }
 
-                    for (int ConstitNum = 1; ConstitNum <= NumFuelConstit; ++ConstitNum) {
-                        state.dataGenerator->FuelSupply(FuelSupNum).ConstitName(ConstitNum) = AlphArray(ConstitNum + 6);
-                        state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract(ConstitNum) = NumArray(ConstitNum + 6);
+                    fuelSupply.NodeName = fuelTemperatureReferenceNodeName;
+                    fuelSupply.NodeNum = Node::GetOnlySingleNode(state,
+                                                                 fuelSupply.NodeName,
+                                                                 ErrorsFound,
+                                                                 Node::ConnectionObjectType::GeneratorFuelSupply,
+                                                                 fuelSupplyName,
+                                                                 Node::FluidType::Air,
+                                                                 Node::ConnectionType::Sensor,
+                                                                 Node::CompFluidStream::Primary,
+                                                                 Node::ObjectIsNotParent);
+
+                    if (fuelSupply.FuelTempMode == DataGenerators::FuelTemperatureMode::FuelInTempSchedule) {
+                        if ((fuelSupply.sched = Sched::GetSchedule(state, fuelTemperatureScheduleName)) == nullptr) {
+                            ShowSevereItemNotFound(state, eoh, fuelTemperatureScheduleNameFieldName, fuelTemperatureScheduleName);
+                            ErrorsFound = true;
+                        }
                     }
 
-                    // check for molar fractions summing to 1.0.
-                    if (std::abs(sum(state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract) - 1.0) > 0.0001) {
-                        ShowSevereError(state, format("{} molar fractions do not sum to 1.0", cCurrentModuleObject));
-                        ShowContinueError(state, format("Sum was={:.5R}", sum(state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, AlphArray(1)));
+                    fuelSupply.CompPowerCurveID = Curve::GetCurveIndex(state, compressorPowerCurveName);
+                    if (fuelSupply.CompPowerCurveID == 0) {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", compressorPowerCurveFieldName, compressorPowerCurveName));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
+                        ShowContinueError(state, "Curve named was not found ");
                         ErrorsFound = true;
+                    }
+
+                    fuelSupply.CompPowerLossFactor =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "compressor_heat_loss_factor");
+
+                    if (Util::SameString(fuelType, "GaseousConstituents")) {
+                        fuelSupply.FuelTypeMode = DataGenerators::FuelMode::GaseousConstituents;
+                    } else if (Util::SameString(fuelType, "LiquidGeneric")) {
+                        fuelSupply.FuelTypeMode = DataGenerators::FuelMode::GenericLiquid;
+                    } else {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", fuelTypeFieldName, fuelType));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
+                        ErrorsFound = true;
+                    }
+
+                    fuelSupply.LHVliquid =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_lower_heating_value") *
+                        1000.0; // generic liquid LHV  (kJ/kG input converted to J/kG )
+                    fuelSupply.HHV =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_higher_heating_value") *
+                        1000.0; // generic liquid HHV (kJ/kG input converted to J/kG )
+                    fuelSupply.MW =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_molecular_weight");
+                    // unused - remove from inputs?
+                    // fuelSupply.eCO2 =
+                    //     inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_co2_emission_factor");
+
+                    if (fuelSupply.FuelTypeMode == DataGenerators::FuelMode::GaseousConstituents) {
+                        int const NumFuelConstit = inputProcessor->getIntFieldValue(
+                            fuelSupplyFields, fuelSupplySchemaProps, "number_of_constituents_in_gaseous_constituent_fuel_supply");
+                        fuelSupply.NumConstituents = NumFuelConstit;
+
+                        if (NumFuelConstit > 12) {
+                            ShowSevereError(state, std::format("{} model not set up for more than 12 fuel constituents", cCurrentModuleObject));
+                            ErrorsFound = true;
+                        }
+                        if (NumFuelConstit < 1) {
+                            ShowSevereError(state, std::format("{} model needs at least one fuel constituent", cCurrentModuleObject));
+                            ErrorsFound = true;
+                        }
+
+                        for (int ConstitNum = 1; ConstitNum <= NumFuelConstit; ++ConstitNum) {
+                            auto const constituentNameFieldName = std::format("constituent_{}_name", ConstitNum);
+                            auto const constituentMolarFractionFieldName = std::format("constituent_{}_molar_fraction", ConstitNum);
+                            fuelSupply.ConstitName(ConstitNum) =
+                                inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, constituentNameFieldName);
+                            fuelSupply.ConstitMolalFract(ConstitNum) =
+                                inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, constituentMolarFractionFieldName);
+                        }
+
+                        // check for molar fractions summing to 1.0.
+                        if (std::abs(sum(fuelSupply.ConstitMolalFract) - 1.0) > 0.0001) {
+                            ShowSevereError(state, std::format("{} molar fractions do not sum to 1.0", cCurrentModuleObject));
+                            ShowContinueError(state, std::format("Sum was={:#G}", sum(fuelSupply.ConstitMolalFract)));
+                            ShowContinueError(state, std::format("Entered in {} = {}", cCurrentModuleObject, fuelSupplyName));
+                            ErrorsFound = true;
+                        }
                     }
                 }
             }
@@ -228,7 +241,7 @@ namespace GeneratorFuelSupply {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("Problem found processing input for {}", cCurrentModuleObject));
+                ShowFatalError(state, std::format("Problem found processing input for {}", cCurrentModuleObject));
             }
 
             state.dataGeneratorFuelSupply->MyOneTimeFlag = false;
@@ -260,7 +273,6 @@ namespace GeneratorFuelSupply {
         }
         // Carbon Dioxide (CO2) Temp K 298-1200 (Chase 1998)
         state.dataGenerator->GasPhaseThermoChemistryData(1).ConstituentName = "CarbonDioxide";
-        state.dataGenerator->GasPhaseThermoChemistryData(1).ConstituentFormula = "CO2";
         state.dataGenerator->GasPhaseThermoChemistryData(1).StdRefMolarEnthOfForm = -393.5224; // KJ/mol
         state.dataGenerator->GasPhaseThermoChemistryData(1).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateA = 24.99735;
@@ -269,7 +281,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateD = 7.948387;
         state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateE = -0.136638;
         state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateF = -403.6075;
-        state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateG = 228.2431;
+        // ShomateG = 228.2431 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(1).ShomateH = -393.5224;
         state.dataGenerator->GasPhaseThermoChemistryData(1).NumCarbons = 1.0;
         state.dataGenerator->GasPhaseThermoChemistryData(1).NumHydrogens = 0.0;
@@ -278,7 +290,6 @@ namespace GeneratorFuelSupply {
 
         // Nitrogen (N2) Temp (K) 298-6000
         state.dataGenerator->GasPhaseThermoChemistryData(2).ConstituentName = "Nitrogen";
-        state.dataGenerator->GasPhaseThermoChemistryData(2).ConstituentFormula = "N2";
         state.dataGenerator->GasPhaseThermoChemistryData(2).StdRefMolarEnthOfForm = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(2).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateA = 26.092;
@@ -287,7 +298,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateD = 0.159274;
         state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateE = 0.044434;
         state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateF = -7.98923;
-        state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateG = 221.02;
+        // ShomateG = 221.02 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(2).ShomateH = 0.000;
         state.dataGenerator->GasPhaseThermoChemistryData(2).NumCarbons = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(2).NumHydrogens = 0.0;
@@ -296,7 +307,6 @@ namespace GeneratorFuelSupply {
 
         // Oxygen (O2) Temp (K) 298-6000
         state.dataGenerator->GasPhaseThermoChemistryData(3).ConstituentName = "Oxygen";
-        state.dataGenerator->GasPhaseThermoChemistryData(3).ConstituentFormula = "O2";
         state.dataGenerator->GasPhaseThermoChemistryData(3).StdRefMolarEnthOfForm = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(3).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateA = 29.659;
@@ -305,7 +315,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateD = 0.095780;
         state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateE = -0.219663;
         state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateF = -9.861391;
-        state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateG = 237.948;
+        // ShomateG = 237.948 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(3).ShomateH = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(3).NumCarbons = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(3).NumHydrogens = 0.0;
@@ -315,7 +325,6 @@ namespace GeneratorFuelSupply {
         // Water (H2O) Temp K 300-1700
         // need lower temperature range for Shomate coef for Water Vapor..
         state.dataGenerator->GasPhaseThermoChemistryData(4).ConstituentName = "Water";
-        state.dataGenerator->GasPhaseThermoChemistryData(4).ConstituentFormula = "H2O";
         state.dataGenerator->GasPhaseThermoChemistryData(4).StdRefMolarEnthOfForm = -241.8264; // KJ/mol
         state.dataGenerator->GasPhaseThermoChemistryData(4).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateA = 29.0373;
@@ -324,7 +333,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateD = -0.95914;
         state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateE = 0.11725;
         state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateF = -250.569;
-        state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateG = 223.3967;
+        // ShomateG = 223.3967 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(4).ShomateH = -241.8264;
         state.dataGenerator->GasPhaseThermoChemistryData(4).NumCarbons = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(4).NumHydrogens = 2.0;
@@ -334,7 +343,6 @@ namespace GeneratorFuelSupply {
         // Argon (Ar)  Temp K 298-600
 
         state.dataGenerator->GasPhaseThermoChemistryData(5).ConstituentName = "Argon";
-        state.dataGenerator->GasPhaseThermoChemistryData(5).ConstituentFormula = "Ar";
         state.dataGenerator->GasPhaseThermoChemistryData(5).StdRefMolarEnthOfForm = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(5).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateA = 20.786;
@@ -343,7 +351,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateD = 1.092131e-08;
         state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateE = -3.661371e-08;
         state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateF = -6.19735;
-        state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateG = 179.999;
+        // ShomateG = 179.999 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(5).ShomateH = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(5).NumCarbons = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(5).NumHydrogens = 0.0;
@@ -352,7 +360,6 @@ namespace GeneratorFuelSupply {
 
         // Hydrogen (H2) Temp K 298-1000
         state.dataGenerator->GasPhaseThermoChemistryData(6).ConstituentName = "Hydrogen";
-        state.dataGenerator->GasPhaseThermoChemistryData(6).ConstituentFormula = "H2";
         state.dataGenerator->GasPhaseThermoChemistryData(6).StdRefMolarEnthOfForm = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(6).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateA = 33.066178;
@@ -361,7 +368,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateD = -2.772874;
         state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateE = -0.158558;
         state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateF = -9.980797;
-        state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateG = 172.707974;
+        // ShomateG = 172.707974 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(6).ShomateH = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(6).NumCarbons = 0.0;
         state.dataGenerator->GasPhaseThermoChemistryData(6).NumHydrogens = 2.0;
@@ -370,7 +377,6 @@ namespace GeneratorFuelSupply {
 
         // Methane (CH4) Temp K 298-1300
         state.dataGenerator->GasPhaseThermoChemistryData(7).ConstituentName = "Methane";
-        state.dataGenerator->GasPhaseThermoChemistryData(7).ConstituentFormula = "CH4";
         state.dataGenerator->GasPhaseThermoChemistryData(7).StdRefMolarEnthOfForm = -74.8731; // KJ/mol (Chase 1998)
         state.dataGenerator->GasPhaseThermoChemistryData(7).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateA = -0.703029;
@@ -379,7 +385,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateD = 5.862788;
         state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateE = 0.678565;
         state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateF = -76.84376;
-        state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateG = 158.7163;
+        // ShomateG = 158.7163 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(7).ShomateH = -74.87310;
         state.dataGenerator->GasPhaseThermoChemistryData(7).NumCarbons = 1.0;
         state.dataGenerator->GasPhaseThermoChemistryData(7).NumHydrogens = 4.0;
@@ -388,7 +394,6 @@ namespace GeneratorFuelSupply {
 
         // Ethane (C2H6)
         state.dataGenerator->GasPhaseThermoChemistryData(8).ConstituentName = "Ethane";
-        state.dataGenerator->GasPhaseThermoChemistryData(8).ConstituentFormula = "C2H6";
         state.dataGenerator->GasPhaseThermoChemistryData(8).StdRefMolarEnthOfForm = -83.8605; // -83.8 !KJ/mol (Pittam and Pilcher 1972)
         state.dataGenerator->GasPhaseThermoChemistryData(8).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateA = -3.03849;
@@ -397,7 +402,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateD = 11.0348;
         state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateE = 0.30348;
         state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateF = -90.0633;
-        state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(8).ShomateH = -83.8605;
         state.dataGenerator->GasPhaseThermoChemistryData(8).NumCarbons = 2.0;
         state.dataGenerator->GasPhaseThermoChemistryData(8).NumHydrogens = 6.0;
@@ -409,11 +414,10 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(8).NASA_A4 = -0.12578319e-07;
         state.dataGenerator->GasPhaseThermoChemistryData(8).NASA_A5 = 0.04586267e-10;
         state.dataGenerator->GasPhaseThermoChemistryData(8).NASA_A6 = -0.11239176e+05;
-        state.dataGenerator->GasPhaseThermoChemistryData(8).NASA_A7 = 0.14432295e+02;
+        // NASA_A7 = 0.14432295e+02 - Unused
 
         // Propane (C3H8)
         state.dataGenerator->GasPhaseThermoChemistryData(9).ConstituentName = "Propane";
-        state.dataGenerator->GasPhaseThermoChemistryData(9).ConstituentFormula = "C3H8";
         state.dataGenerator->GasPhaseThermoChemistryData(9).StdRefMolarEnthOfForm = -103.855; //  -104.7 !kJ/mol  (Pittam and Pilcher 1972)
         state.dataGenerator->GasPhaseThermoChemistryData(9).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateA = -23.1747;
@@ -422,7 +426,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateD = 56.253;
         state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateE = 0.61164;
         state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateF = -109.206;
-        state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(9).ShomateH = -103.855;
         state.dataGenerator->GasPhaseThermoChemistryData(9).NumCarbons = 3.0;
         state.dataGenerator->GasPhaseThermoChemistryData(9).NumHydrogens = 8.0;
@@ -434,11 +438,10 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(9).NASA_A4 = -0.02126000e-06;
         state.dataGenerator->GasPhaseThermoChemistryData(9).NASA_A5 = 0.09243330e-10;
         state.dataGenerator->GasPhaseThermoChemistryData(9).NASA_A6 = -0.13954918e+05;
-        state.dataGenerator->GasPhaseThermoChemistryData(9).NASA_A7 = 0.01935533e+03;
+        // NASA_A7 = 0.01935533e+03 - Unused
 
         // Butane (C4H10)
         state.dataGenerator->GasPhaseThermoChemistryData(10).ConstituentName = "Butane";
-        state.dataGenerator->GasPhaseThermoChemistryData(10).ConstituentFormula = "C4H10";
         state.dataGenerator->GasPhaseThermoChemistryData(10).StdRefMolarEnthOfForm = -133.218; // -125.6 !kJ/mol  (Pittam and Pilcher 1972)
         state.dataGenerator->GasPhaseThermoChemistryData(10).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateA = -5.24343;
@@ -447,7 +450,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateD = 66.535;
         state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateE = -0.26994;
         state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateF = -149.365;
-        state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(10).ShomateH = -133.218;
         state.dataGenerator->GasPhaseThermoChemistryData(10).NumCarbons = 4.0;
         state.dataGenerator->GasPhaseThermoChemistryData(10).NumHydrogens = 10.0;
@@ -459,11 +462,10 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(10).NASA_A4 = 0.02037115e-06;
         state.dataGenerator->GasPhaseThermoChemistryData(10).NASA_A5 = -0.04079458e-10;
         state.dataGenerator->GasPhaseThermoChemistryData(10).NASA_A6 = -0.01760233e+06;
-        state.dataGenerator->GasPhaseThermoChemistryData(10).NASA_A7 = 0.03329595e+03;
+        // NASA_A7 = 0.03329595e+03 - Unused
 
         // Pentane (C5H12)
         state.dataGenerator->GasPhaseThermoChemistryData(11).ConstituentName = "Pentane";
-        state.dataGenerator->GasPhaseThermoChemistryData(11).ConstituentFormula = "C5H12";
         state.dataGenerator->GasPhaseThermoChemistryData(11).StdRefMolarEnthOfForm = -146.348; // -146.8 !kJ/mol (Good 1970)
         state.dataGenerator->GasPhaseThermoChemistryData(11).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateA = -34.9431;
@@ -472,7 +474,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateD = 76.8232;
         state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateE = 1.00948;
         state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateF = -155.348;
-        state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(11).ShomateH = -146.348;
         state.dataGenerator->GasPhaseThermoChemistryData(11).NumCarbons = 5.0;
         state.dataGenerator->GasPhaseThermoChemistryData(11).NumHydrogens = 12.0;
@@ -484,11 +486,10 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(11).NASA_A4 = -0.03701536e-06;
         state.dataGenerator->GasPhaseThermoChemistryData(11).NASA_A5 = 0.15255685e-10;
         state.dataGenerator->GasPhaseThermoChemistryData(11).NASA_A6 = -0.02003815e+06;
-        state.dataGenerator->GasPhaseThermoChemistryData(11).NASA_A7 = 0.01877256e+03;
+        // NASA_A7 = 0.01877256e+03 - Unused
 
         // Hexane  (C6H14)
         state.dataGenerator->GasPhaseThermoChemistryData(12).ConstituentName = "Hexane";
-        state.dataGenerator->GasPhaseThermoChemistryData(12).ConstituentFormula = "C6H14";
         state.dataGenerator->GasPhaseThermoChemistryData(12).StdRefMolarEnthOfForm = -166.966; // -167.2 !kJ/mol (Prosen and Rossini 1945)
         state.dataGenerator->GasPhaseThermoChemistryData(12).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateA = -46.7786;
@@ -497,7 +498,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateD = 103.784;
         state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateE = 1.23887;
         state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateF = -176.813;
-        state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(12).ShomateH = -166.966;
         state.dataGenerator->GasPhaseThermoChemistryData(12).NumCarbons = 6.0;
         state.dataGenerator->GasPhaseThermoChemistryData(12).NumHydrogens = 14.0;
@@ -509,12 +510,11 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(12).NASA_A4 = -0.04428362e-06;
         state.dataGenerator->GasPhaseThermoChemistryData(12).NASA_A5 = 0.01872237e-09;
         state.dataGenerator->GasPhaseThermoChemistryData(12).NASA_A6 = -0.02292749e+06;
-        state.dataGenerator->GasPhaseThermoChemistryData(12).NASA_A7 = 0.02088145e+03;
+        // NASA_A7 = 0.02088145e+03 - Unused
 
         // Methanol (CH3OH)
         // No Shomate coefficients???
         state.dataGenerator->GasPhaseThermoChemistryData(13).ConstituentName = "Methanol";
-        state.dataGenerator->GasPhaseThermoChemistryData(13).ConstituentFormula = "CH3OH";
         state.dataGenerator->GasPhaseThermoChemistryData(13).StdRefMolarEnthOfForm = -201.102; // -201.0 !kJ/mol (Hine and Arata 1976)
         state.dataGenerator->GasPhaseThermoChemistryData(13).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateA = 14.1952;
@@ -523,7 +523,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateD = -12.8461;
         state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateE = 0.15819;
         state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateF = -209.037;
-        state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(13).ShomateH = -201.102;
         state.dataGenerator->GasPhaseThermoChemistryData(13).NumCarbons = 1.0;
         state.dataGenerator->GasPhaseThermoChemistryData(13).NumHydrogens = 4.0;
@@ -535,12 +535,11 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(13).NASA_A4 = -0.08793194e-07;
         state.dataGenerator->GasPhaseThermoChemistryData(13).NASA_A5 = 0.02390570e-10;
         state.dataGenerator->GasPhaseThermoChemistryData(13).NASA_A6 = -0.02535348e+06;
-        state.dataGenerator->GasPhaseThermoChemistryData(13).NASA_A7 = 0.11232631e+02;
+        // NASA_A7 = 0.11232631e+02 - Unused
 
         // Ethanol (C2H5OH)
         // No Shomate coefficients???
         state.dataGenerator->GasPhaseThermoChemistryData(14).ConstituentName = "Ethanol";
-        state.dataGenerator->GasPhaseThermoChemistryData(14).ConstituentFormula = "C2H5OH";
         state.dataGenerator->GasPhaseThermoChemistryData(14).StdRefMolarEnthOfForm = -234.441; //  -235.3 !kJ/mol (Green 1960)
         state.dataGenerator->GasPhaseThermoChemistryData(14).ThermoMode = DataGenerators::ThermodynamicMode::NISTShomate;
         state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateA = -8.87256;
@@ -549,7 +548,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateD = 46.3528;
         state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateE = 0.48364;
         state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateF = -241.239;
-        state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateG = -999.0;
+        // ShomateG = -999.0 - Unused
         state.dataGenerator->GasPhaseThermoChemistryData(14).ShomateH = -234.441;
         state.dataGenerator->GasPhaseThermoChemistryData(14).NumCarbons = 2.0;
         state.dataGenerator->GasPhaseThermoChemistryData(14).NumHydrogens = 6.0;
@@ -561,7 +560,7 @@ namespace GeneratorFuelSupply {
         state.dataGenerator->GasPhaseThermoChemistryData(14).NASA_A4 = -0.16585986e-07;
         state.dataGenerator->GasPhaseThermoChemistryData(14).NASA_A5 = 0.73090440e-11;
         state.dataGenerator->GasPhaseThermoChemistryData(14).NASA_A6 = -0.29663086e+05;
-        state.dataGenerator->GasPhaseThermoChemistryData(14).NASA_A7 = 0.17289993e+02;
+        // NASA_A7 = 0.17289993e+02 - Unused
 
         if (state.dataGenerator->FuelSupply(FuelSupplyNum).FuelTypeMode == DataGenerators::FuelMode::GaseousConstituents) {
             // now calculate LHV of fuel for entire simulation
@@ -581,7 +580,7 @@ namespace GeneratorFuelSupply {
                 state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i) = thisGasID;
 
                 if (thisGasID == 0) {
-                    ShowSevereError(state, format("Fuel constituent not found in thermochemistry data: {}", thisName));
+                    ShowSevereError(state, std::format("Fuel constituent not found in thermochemistry data: {}", thisName));
                     ErrorsFound = true;
                 }
 

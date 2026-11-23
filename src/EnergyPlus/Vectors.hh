@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -64,17 +64,8 @@ struct EnergyPlusData;
 namespace Vectors {
 
     // Using/Aliasing
-    using DataVectorTypes::PlaneEq;
     using DataVectorTypes::Polyhedron;
     using DataVectorTypes::Vector;
-    using DataVectorTypes::Vector_2d;
-
-    // MODULE PARAMETER DEFINITIONS
-
-    // Object Data
-    extern Vector const XUnit;
-    extern Vector const YUnit;
-    extern Vector const ZUnit;
 
     // Functions
 
@@ -97,16 +88,6 @@ namespace Vectors {
                                  Vector &lcsy,
                                  Vector &lcsz,
                                  Vector const &NewellSurfaceNormalVector);
-
-    void PlaneEquation(Array1D<Vector> &verts, // Structure of the surface
-                       int const nverts,       // Number of vertices in the surface
-                       PlaneEq &plane,         // Equation of plane from inputs
-                       bool &error             // returns true for degenerate surface
-    );
-
-    Real64 Pt2Plane(Vector const &pt,   // Point for determining the distance
-                    PlaneEq const &pleq // Equation of the plane
-    );
 
     void CreateNewellAreaVector(Array1D<Vector> const &VList, int const NSides, Vector &OutNewellAreaVector);
 

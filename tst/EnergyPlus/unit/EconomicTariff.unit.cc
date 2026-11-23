@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -345,7 +345,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_Gas_CCF_Test)
     state->dataOutputProcessor->meterMap.insert_or_assign("NATURALGAS:FACILITY", state->dataOutputProcessor->meters.size() - 1);
 
     UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -386,7 +385,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_Electric_CCF_Test)
     state->dataOutputProcessor->meterMap.insert_or_assign("ELECTRICITY:FACILITY", state->dataOutputProcessor->meters.size() - 1);
 
     UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -449,8 +447,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariffReporting_Test)
     for (auto &tariff : state->dataEconTariff->tariff) {
         tariff.demandWindow = EconomicTariff::DemandWindow::Hour;
     }
-
-    SetPredefinedTables(*state); // need to setup the predefined table entry numbers
 
     LEEDtariffReporting(*state);
 
@@ -605,7 +601,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
 
     // This will only do the get input routines
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
 
     // tariff
     EXPECT_EQ(1, state->dataEconTariff->numTariff);
@@ -655,7 +650,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
     // This Should now call GatherForEconomics
     state->dataGlobal->DoOutputReporting = true;
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
     EXPECT_ENUM_EQ(Season::Winter, state->dataEconTariff->tariff(1).seasonForMonth(5));
     EXPECT_ENUM_EQ(Season::Invalid, state->dataEconTariff->tariff(1).seasonForMonth(6));
 
@@ -681,7 +675,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_GatherForEconomics)
 
     // This Should now call GatherForEconomics
     EconomicTariff::UpdateUtilityBills(*state);
-    ;
     EXPECT_ENUM_EQ(Season::Winter, state->dataEconTariff->tariff(1).seasonForMonth(5));
     EXPECT_ENUM_EQ(Season::Summer, state->dataEconTariff->tariff(1).seasonForMonth(6));
 }
@@ -808,6 +801,28 @@ TEST_F(EnergyPlusFixture, EconomicTariff_PushPopStack)
     EXPECT_EQ(dMonths(5), cMonths(5));
     EXPECT_EQ(dMonths(6), cMonths(6));
     EXPECT_EQ(dVarPt, cVarPt);
+}
+
+TEST_F(EnergyPlusFixture, EconomicTariff_PopStack_Underflow)
+{
+    // #11940 - On stack underflow, popStack must reset ALL monthly values to zero.
+    // monthlyArray = {0.0} on an Array1D asserts size_ == l.size() in Debug, and only resets month 1 in Release.
+    auto &s_econ = state->dataEconTariff;
+    s_econ->econVar.allocate(1);
+    s_econ->econVar(1).name = "TESTVAR";
+    s_econ->topOfStack = 0; // empty stack
+
+    Array1D<Real64> monthlyArray(NumMonths, 5.0);
+    int varPt = 1;
+
+    popStack(*state, monthlyArray, varPt);
+
+    EXPECT_EQ(0, varPt);
+    EXPECT_EQ(0, s_econ->topOfStack);
+    for (int iMonth = 1; iMonth <= NumMonths; ++iMonth) {
+        EXPECT_EQ(0.0, monthlyArray(iMonth)) << "Month " << iMonth;
+    }
+    compare_err_stream_substring("UtilityCost:Tariff: stack underflow in calculation of utility bills. On variable: TESTVAR");
 }
 
 TEST_F(EnergyPlusFixture, EconomicTariff_evaluateChargeSimple)
@@ -1753,8 +1768,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariff_with_Custom_Meter)
     state->dataEconTariff->tariff(7).totalAnnualEnergy = 3000.0;
     state->dataEconTariff->tariff(7).kindMtr = EconomicTariff::MeterType::Gas;
     state->dataEconTariff->tariff(7).reportMeterIndx = GetMeterIndex(*state, "BUILDING NATURAL GAS");
-
-    SetPredefinedTables(*state); // setup the predefined table entry numbers first
 
     LEEDtariffReporting(*state);
 

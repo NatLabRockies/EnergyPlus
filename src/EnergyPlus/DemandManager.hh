@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -137,14 +137,13 @@ namespace DemandManager {
         Real64 PeakDemand;                       // Peak demand in the billing month so far
         Real64 ScheduledLimit;                   // Scheduled demand limit
         Real64 DemandLimit;                      // Scheduled demand limit * Safety Fraction
-        Real64 AvoidedDemand;                    // Demand avoided by active DEMAND MANAGERs
         Real64 OverLimit;                        // Amount that demand limit is exceeded
         Real64 OverLimitDuration;                // Number of hours that demand limit is exceeded
 
         // Default Constructor
         DemandManagerListData()
             : Meter(0), SafetyFraction(1.0), BillingPeriod(0.0), AveragingWindow(1), ManagerPriority(ManagePriorityType::Invalid), MeterDemand(0.0),
-              AverageDemand(0.0), PeakDemand(0.0), ScheduledLimit(0.0), DemandLimit(0.0), AvoidedDemand(0.0), OverLimit(0.0), OverLimitDuration(0.0)
+              AverageDemand(0.0), PeakDemand(0.0), ScheduledLimit(0.0), DemandLimit(0.0), OverLimit(0.0), OverLimitDuration(0.0)
         {
         }
     };
@@ -154,7 +153,6 @@ namespace DemandManager {
         // Members
         std::string Name;                      // Name of DEMAND MANAGER
         ManagerType Type;                      // Type of DEMAND MANAGER (:LIGHTS, :ELECTRICEQUIPMENT, etc.)
-        int DemandManagerList;                 // Reference to parent DEMAND MANAGER LIST for error checking
         bool CanReduceDemand;                  // Flag to indicate whether manager can reduce demand
         Sched::Schedule *availSched = nullptr; // Availability Schedule
         bool Available;                        // Availability flag
@@ -180,7 +178,7 @@ namespace DemandManager {
 
         // Default Constructor
         DemandManagerData()
-            : Type(ManagerType::Invalid), DemandManagerList(0), CanReduceDemand(false), Available(false), Activate(false), Active(false),
+            : Type(ManagerType::Invalid), CanReduceDemand(false), Available(false), Activate(false), Active(false),
               LimitControl(ManagerLimit::Invalid), SelectionControl(ManagerSelection::Invalid), LimitDuration(0), ElapsedTime(0), RotationDuration(0),
               ElapsedRotationTime(0), RotatedLoadNum(0), LowerLimit(0.0), UpperLimit(0.0), NumOfLoads(0), FixedRate(0.0), ReductionRatio(0.0)
         {

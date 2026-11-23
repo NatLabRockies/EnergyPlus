@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -77,8 +77,6 @@ namespace FluidCoolers {
         std::string Name; // User identifier
         DataPlant::PlantEquipmentType FluidCoolerType;
         PerfInputMethod PerformanceInputMethod_Num;
-        bool Available;                               // need an array of logicals--load identifiers of available equipment
-        bool ON;                                      // Simulate the machine at it's operating part load ratio
         Real64 DesignWaterFlowRate;                   // Design water flow rate through the fluid cooler [m3/s]
         bool DesignWaterFlowRateWasAutoSized;         // true if design water rate was autosize on input
         Real64 DesWaterMassFlowRate;                  // Design water flow rate through the fluid cooler [kg/s]
@@ -115,12 +113,8 @@ namespace FluidCoolers {
         int OutletWaterTempErrorIndex;                // Index for outlet water temperature recurring error message
         int SmallWaterMassFlowErrorCount;             // Counter when water mass flow rate is very small
         int SmallWaterMassFlowErrorIndex;             // Index for very small water mass flow rate recurring error message
-        int WMFRLessThanMinAvailErrCount;             // Counter when water mass flow rate is less than minimum available
-        int WMFRLessThanMinAvailErrIndex;             // Index for water mass flow rate less than minavail recurring message
-        int WMFRGreaterThanMaxAvailErrCount;          // Counter when water mass flow rate is greater than minimum available
-        int WMFRGreaterThanMaxAvailErrIndex;          // Index for water mass flow rate > minavail recurring message
         PlantLocation plantLoc;                       // loop topology variables
-        bool oneTimeInitFlag;
+        // bool oneTimeInitFlag; // Defined in PlantComponent.hh
         bool beginEnvrnInit;
 
         // Report vars
@@ -143,8 +137,8 @@ namespace FluidCoolers {
 
         // Default Constructor
         FluidCoolerspecs()
-            : FluidCoolerType(DataPlant::PlantEquipmentType::Invalid), PerformanceInputMethod_Num(PerfInputMethod::NOMINAL_CAPACITY), Available(true),
-              ON(true), DesignWaterFlowRate(0.0), DesignWaterFlowRateWasAutoSized(false), DesWaterMassFlowRate(0.0), HighSpeedAirFlowRate(0.0),
+            : FluidCoolerType(DataPlant::PlantEquipmentType::Invalid), PerformanceInputMethod_Num(PerfInputMethod::NOMINAL_CAPACITY),
+              DesignWaterFlowRate(0.0), DesignWaterFlowRateWasAutoSized(false), DesWaterMassFlowRate(0.0), HighSpeedAirFlowRate(0.0),
               HighSpeedAirFlowRateWasAutoSized(false), HighSpeedFanPower(0.0), HighSpeedFanPowerWasAutoSized(false), HighSpeedFluidCoolerUA(0.0),
               HighSpeedFluidCoolerUAWasAutoSized(false), LowSpeedAirFlowRate(0.0), LowSpeedAirFlowRateWasAutoSized(false),
               LowSpeedAirFlowRateSizingFactor(0.0), LowSpeedFanPower(0.0), LowSpeedFanPowerWasAutoSized(false), LowSpeedFanPowerSizingFactor(0.0),
@@ -153,10 +147,9 @@ namespace FluidCoolers {
               FluidCoolerMassFlowRateMultiplier(0.0), FluidCoolerNominalCapacity(0.0), FluidCoolerLowSpeedNomCap(0.0),
               FluidCoolerLowSpeedNomCapWasAutoSized(false), FluidCoolerLowSpeedNomCapSizingFactor(0.0), WaterInletNodeNum(0), WaterOutletNodeNum(0),
               OutdoorAirInletNodeNum(0), HighMassFlowErrorCount(0), HighMassFlowErrorIndex(0), OutletWaterTempErrorCount(0),
-              OutletWaterTempErrorIndex(0), SmallWaterMassFlowErrorCount(0), SmallWaterMassFlowErrorIndex(0), WMFRLessThanMinAvailErrCount(0),
-              WMFRLessThanMinAvailErrIndex(0), WMFRGreaterThanMaxAvailErrCount(0), WMFRGreaterThanMaxAvailErrIndex(0), plantLoc{},
-              oneTimeInitFlag(true), beginEnvrnInit(true), InletWaterTemp(0.0), OutletWaterTemp(0.0), WaterMassFlowRate(0.0), Qactual(0.0),
-              FanPower(0.0), FanEnergy(0.0), WaterTemp(0.0), AirTemp(0.0), AirHumRat(0.0), AirPress(0.0), AirWetBulb(0.0), indexInArray(0)
+              OutletWaterTempErrorIndex(0), SmallWaterMassFlowErrorCount(0), SmallWaterMassFlowErrorIndex(0), plantLoc{}, beginEnvrnInit(true),
+              InletWaterTemp(0.0), OutletWaterTemp(0.0), WaterMassFlowRate(0.0), Qactual(0.0), FanPower(0.0), FanEnergy(0.0), WaterTemp(0.0),
+              AirTemp(0.0), AirHumRat(0.0), AirPress(0.0), AirWetBulb(0.0), indexInArray(0)
         {
         }
 

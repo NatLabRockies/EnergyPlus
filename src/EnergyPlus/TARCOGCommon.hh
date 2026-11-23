@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,7 +49,7 @@
 #define TARCOGCommon_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -88,7 +88,7 @@ namespace TARCOGCommon {
     );
 
     void matrixQBalance(int nlayer,
-                        Array2<Real64> &a,
+                        Array2D<Real64> &a,
                         Array1D<Real64> &b,
                         Array1D<Real64> const &thick,
                         Array1D<Real64> const &hcgas,
@@ -106,11 +106,11 @@ namespace TARCOGCommon {
                         Array1D<Real64> const &emis,
                         Real64 edgeGlCorrFac);
 
-    void EquationsSolver(EnergyPlusData &state, Array2<Real64> &a, Array1D<Real64> &b, int n, int &nperr, std::string &ErrorMessage);
+    void EquationsSolver(EnergyPlusData &state, Array2D<Real64> &a, Array1D<Real64> &b, int n, int &nperr, std::string &ErrorMessage);
 
-    void ludcmp(EnergyPlusData &state, Array2<Real64> &a, int n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage);
+    void ludcmp(EnergyPlusData &state, Array2D<Real64> &a, int n, Array1D_int &indx, Real64 &d, int &nperr, std::string &ErrorMessage);
 
-    void lubksb(Array2A<Real64> a, int n, const Array1D_int &indx, Array1D<Real64> &b);
+    void lubksb(Array2D<Real64> const &a, int n, const Array1D_int &indx, Array1D<Real64> &b);
 
     Real64 pos(Real64 x);
 

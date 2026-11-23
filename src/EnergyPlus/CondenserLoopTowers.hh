@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -130,8 +130,6 @@ namespace CondenserLoopTowers {
         PIM PerformanceInputMethod_Num = PIM::Invalid; // Method of entering tower performance: UA and Design Water
         //  Flow Rate, or Nominal Capacity
         std::string ModelCoeffObjectName;                 // Cooling Tower:Variable Speed Model Coefficient Object name
-        bool Available = true;                            // need an array of logicals--load identifiers of available equipment
-        bool ON = true;                                   // Simulate the machine at it's operating part load ratio
         Real64 DesignWaterFlowRate = 0.0;                 // Design water flow rate through the tower [m3/s]
         bool DesignWaterFlowRateWasAutoSized = false;     // true if previous was autosize on input
         Real64 DesignWaterFlowPerUnitNomCap = 0.0;        // scalable sizing factor for water flow per capacity [m3/s/W]
@@ -169,7 +167,6 @@ namespace CondenserLoopTowers {
         Real64 CalibratedWaterFlowRate = 0.0;         // Water flow ratio required for model calibration
         Real64 BasinHeaterPowerFTempDiff = 0.0;       // Basin heater capacity per degree C below setpoint (W/C)
         Real64 BasinHeaterSetPointTemp = 0.0;         // setpoint temperature for basin heater operation (C)
-        Real64 MakeupWaterDrift = 0.0;                // Makeup water flow rate fraction due to drift
         Real64 FreeConvectionCapacityFraction = 0.0;  // Percentage of tower capacity in free convection regime
         Real64 TowerMassFlowRateMultiplier = 0.0;     // Maximum tower flow rate is this multiplier times design flow rate
         Real64 HeatRejectCapNomCapSizingRatio = 1.25; // ratio of actual cap to nominal capacity []
@@ -196,7 +193,6 @@ namespace CondenserLoopTowers {
         int OutdoorAirInletNodeNum = 0;                // Node number of outdoor air inlet for the tower
         ModelType TowerModelType = ModelType::Invalid; // Type of empirical model (1=CoolTools)
         int FanPowerfAirFlowCurve = 0;                 // Index to fan power correlation curve for VS Towers
-        Sched::Schedule *blowDownSched = nullptr;      // Pointer to blow down schedule
         Sched::Schedule *basinHeaterSched = nullptr;   // Pointer to basin heater schedule
         int HighMassFlowErrorCount = 0;                // Counter when mass flow rate is > Design*TowerMassFlowRateMultiplier
         int HighMassFlowErrorIndex = 0;                // Index for high mass flow recurring error message
@@ -204,10 +200,6 @@ namespace CondenserLoopTowers {
         int OutletWaterTempErrorIndex = 0;             // Index for outlet water temperature recurring error message
         int SmallWaterMassFlowErrorCount = 0;          // Counter when water mass flow rate is very small
         int SmallWaterMassFlowErrorIndex = 0;          // Index for very small water mass flow rate recurring error message
-        int WMFRLessThanMinAvailErrCount = 0;          // Counter when water mass flow rate is less than minimum available
-        int WMFRLessThanMinAvailErrIndex = 0;          // Index for water mass flow rate less than minavail recurring message
-        int WMFRGreaterThanMaxAvailErrCount = 0;       // Counter when water mass flow rate is greater than minimum available
-        int WMFRGreaterThanMaxAvailErrIndex = 0;       // Index for water mass flow rate > minavail recurring message
         int CoolingTowerAFRRFailedCount = 0;           // Counter for air flow rate ratio out of bounds error
         int CoolingTowerAFRRFailedIndex = 0;           // Index for air flow rate ratio out of bounds error
         int SpeedSelected = 0;                         // speed of the two-speed fan selected (0:ON;1:LOW;2:HIGH)
@@ -282,8 +274,6 @@ namespace CondenserLoopTowers {
         Real64 AirFlowRatio = 0.0;           // Air flow ratio through variable speed cooling tower
         Real64 BasinHeaterPower = 0.0;       // Basin heater power (W)
         Real64 BasinHeaterConsumption = 0.0; // Basin heater energy consumption (J)
-        Real64 WaterUsage = 0.0;             // Tower water usage (m3/s)
-        Real64 WaterAmountUsed = 0.0;        // Tower make up water usage (m3)
         Real64 FanCyclingRatio = 0.0;        // cycling ratio of tower fan when min fan speed provide too much capacity (for VFD)
         Real64 EvaporationVdot = 0.0;
         Real64 EvaporationVol = 0.0;
@@ -301,30 +291,29 @@ namespace CondenserLoopTowers {
         Real64 coolingTowerRange = 0.0;
 
         // From VSTower struct - for Variable speed towers only
-        std::array<Real64, 35> Coeff = {0.0}; // - model coefficients
-        bool FoundModelCoeff = false;         // - TRUE if model is calibratable
-        Real64 MinInletAirWBTemp = 0.0;       // - model limit for min inlet air WB temp
-        Real64 MaxInletAirWBTemp = 0.0;       // - model limit for max inlet air WB temp
-        Real64 MinRangeTemp = 0.0;            // - model limit for min range temp
-        Real64 MaxRangeTemp = 0.0;            // - model limit for max range temp
-        Real64 MinApproachTemp = 0.0;         // - model limit for min approach temp
-        Real64 MaxApproachTemp = 0.0;         // - model limit for max approach temp
-        Real64 MinWaterFlowRatio = 0.0;       // - model limit for min water flow rate ratio
-        Real64 MaxWaterFlowRatio = 0.0;       // - model limit for max water flow rate ratio
-        Real64 MaxLiquidToGasRatio = 0.0;     // - model limit for max liquid to gas ratio
-        int VSErrorCountFlowFrac = 0;         // - counter if water flow rate ratio limits are exceeded
-        int VSErrorCountWFRR = 0;             // - counter if water flow rate ratio limits are exceeded
-        int VSErrorCountIAWB = 0;             // - counter if inlet air wet-bulb temperature limits are exceeded
-        int VSErrorCountTR = 0;               // - counter if tower range temperature limits are exceeded
-        int VSErrorCountTRCalc = 0;           // - counter if tower range temperature could not be calculated
-        int VSErrorCountTA = 0;               // - counter if tower approach temperature limits are exceeded
-        int ErrIndexFlowFrac = 0;             // - index to recurring error structure for liquid to gas ratio
-        int ErrIndexWFRR = 0;                 // - index to recurring error structure for water flow rate ratio
-        int ErrIndexIAWB = 0;                 // - index to recurring error structure for inlet air WB
-        int ErrIndexTR = 0;                   // - index to recurring error structure for tower range
-        int ErrIndexTRCalc = 0;               // - index to recurring error structure for tower range
-        int ErrIndexTA = 0;                   // - index to recurring error structure for tower approach
-        int ErrIndexLG = 0;                   // - index to recurring error structure for tower liquid/gas ratio
+        std::array<Real64, 35> Coeff{};   // - model coefficients
+        bool FoundModelCoeff = false;     // - TRUE if model is calibratable
+        Real64 MinInletAirWBTemp = 0.0;   // - model limit for min inlet air WB temp
+        Real64 MaxInletAirWBTemp = 0.0;   // - model limit for max inlet air WB temp
+        Real64 MinRangeTemp = 0.0;        // - model limit for min range temp
+        Real64 MaxRangeTemp = 0.0;        // - model limit for max range temp
+        Real64 MinApproachTemp = 0.0;     // - model limit for min approach temp
+        Real64 MaxApproachTemp = 0.0;     // - model limit for max approach temp
+        Real64 MinWaterFlowRatio = 0.0;   // - model limit for min water flow rate ratio
+        Real64 MaxWaterFlowRatio = 0.0;   // - model limit for max water flow rate ratio
+        Real64 MaxLiquidToGasRatio = 0.0; // - model limit for max liquid to gas ratio
+        int VSErrorCountFlowFrac = 0;     // - counter if water flow rate ratio limits are exceeded
+        int VSErrorCountWFRR = 0;         // - counter if water flow rate ratio limits are exceeded
+        int VSErrorCountIAWB = 0;         // - counter if inlet air wet-bulb temperature limits are exceeded
+        int VSErrorCountTR = 0;           // - counter if tower range temperature limits are exceeded
+        int VSErrorCountTRCalc = 0;       // - counter if tower range temperature could not be calculated
+        int VSErrorCountTA = 0;           // - counter if tower approach temperature limits are exceeded
+        int ErrIndexWFRR = 0;             // - index to recurring error structure for water flow rate ratio
+        int ErrIndexIAWB = 0;             // - index to recurring error structure for inlet air WB
+        int ErrIndexTR = 0;               // - index to recurring error structure for tower range
+        int ErrIndexTRCalc = 0;           // - index to recurring error structure for tower range
+        int ErrIndexTA = 0;               // - index to recurring error structure for tower approach
+        int ErrIndexLG = 0;               // - index to recurring error structure for tower liquid/gas ratio
         //- Tr = Range temperature
         std::string TrBuffer1; // - buffer to print Tr warning messages on following time step
         std::string TrBuffer2; // - buffer to print Tr warning messages on following time step
@@ -394,9 +383,11 @@ namespace CondenserLoopTowers {
         Real64 calculateSimpleTowerOutletTemp(EnergyPlusData &state, Real64 waterMassFlowRate, Real64 AirFlowRate, Real64 UAdesign);
 
         Real64 calculateVariableTowerOutletTemp(EnergyPlusData &state,
-                                                Real64 WaterFlowRateRatio,    // current water flow rate ratio (capped if applicable)
-                                                Real64 airFlowRateRatioLocal, // current air flow rate ratio
-                                                Real64 Twb                    // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                Real64 WaterFlowRateRatio,         // current water flow rate ratio (capped if applicable)
+                                                Real64 airFlowRateRatioLocal,      // current air flow rate ratio
+                                                Real64 Twb,                        // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                bool reportErrors = true,          // report solver failures during normal simulation
+                                                bool *outletTempIsUsable = nullptr // optional solver result usability status
         );
 
         void calculateWaterUsage(EnergyPlusData &state);
@@ -427,7 +418,7 @@ namespace CondenserLoopTowers {
 
         static CoolingTower *factory(EnergyPlusData &state, std::string_view objectName);
 
-        Real64 getDynamicMaxCapacity(EnergyPlusData &state) override;
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad) override;
     };
 
     void GetTowerInput(EnergyPlusData &state);

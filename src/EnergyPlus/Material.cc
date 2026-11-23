@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -44,6 +44,9 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
+
+// C++ Headers
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -209,17 +212,32 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->Conductivity = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "conductivity");
             mat->Density = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "density");
             mat->SpecHeat = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "specific_heat");
-            mat->AbsorpThermal = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_absorptance");
-            mat->AbsorpThermalInput = mat->AbsorpThermal;
-            mat->AbsorpSolar = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "solar_absorptance");
-            mat->AbsorpSolarInput = mat->AbsorpSolar;
-            mat->AbsorpVisible = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "visible_absorptance");
-            mat->AbsorpVisibleInput = mat->AbsorpVisible;
+            mat->AbsorpThermalOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_absorptance");
+            mat->AbsorpThermalInputOut = mat->AbsorpThermalOut;
+            mat->AbsorpSolarOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "solar_absorptance");
+            mat->AbsorpSolarInputOut = mat->AbsorpSolarOut;
+            mat->AbsorpVisibleOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "visible_absorptance");
+            mat->AbsorpVisibleInputOut = mat->AbsorpVisibleOut;
+            mat->hasAbsorpThermalInputIn = objectFields.contains("thermal_absorptance_inside_face");
+            mat->AbsorpThermalIn = mat->hasAbsorpThermalInputIn
+                                       ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_absorptance_inside_face")
+                                       : mat->AbsorpThermalOut;
+            mat->AbsorpThermalInputIn = mat->AbsorpThermalIn;
+            mat->hasAbsorpSolarInputIn = objectFields.contains("solar_absorptance_inside_face");
+            mat->AbsorpSolarIn = mat->hasAbsorpSolarInputIn
+                                     ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "solar_absorptance_inside_face")
+                                     : mat->AbsorpSolarOut;
+            mat->AbsorpSolarInputIn = mat->AbsorpSolarIn;
+            mat->hasAbsorpVisibleInputIn = objectFields.contains("visible_absorptance_inside_face");
+            mat->AbsorpVisibleIn = mat->hasAbsorpVisibleInputIn
+                                       ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "visible_absorptance_inside_face")
+                                       : mat->AbsorpVisibleOut;
+            mat->AbsorpVisibleInputIn = mat->AbsorpVisibleIn;
 
             if (mat->Conductivity > 0.0) {
                 mat->Resistance = mat->NominalR = mat->Thickness / mat->Conductivity;
             } else {
-                ShowSevereError(state, format("Positive thermal conductivity required for material {}", mat->Name));
+                ShowSevereError(state, std::format("Positive thermal conductivity required for material {}", mat->Name));
                 ErrorsFound = true;
             }
         }
@@ -240,72 +258,78 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->Density = 2240.0;    // kg/m3
         mat->SpecHeat = 900.0;    // J/kgK
         mat->Roughness = SurfaceRoughness::MediumRough;
-        mat->AbsorpSolar = 0.7;
-        mat->AbsorpThermal = 0.9;
-        mat->AbsorpVisible = 0.7;
+        mat->AbsorpSolarOut = 0.7;
+        mat->AbsorpThermalOut = 0.9;
+        mat->AbsorpVisibleOut = 0.7;
+        mat->AbsorpSolarIn = 0.7;
+        mat->AbsorpThermalIn = 0.9;
+        mat->AbsorpVisibleIn = 0.7;
         mat->Resistance = mat->NominalR = mat->Thickness / mat->Conductivity;
     }
 
     s_ipsc->cCurrentModuleObject = "Material:NoMass";
-    for (int Loop = 1; Loop <= s_mat->NumNoMasses; ++Loop) {
+    auto const instancesNM = s_ip->epJSON.find(s_ipsc->cCurrentModuleObject);
+    if (instancesNM != s_ip->epJSON.end()) {
+        auto const &objectSchemaProps = s_ip->getObjectSchemaProps(state, s_ipsc->cCurrentModuleObject);
 
-        // Call Input Get routine to retrieve material data
-        s_ip->getObjectItem(state,
-                            s_ipsc->cCurrentModuleObject,
-                            Loop,
-                            s_ipsc->cAlphaArgs,
-                            NumAlphas,
-                            s_ipsc->rNumericArgs,
-                            NumNums,
-                            IOStat,
-                            s_ipsc->lNumericFieldBlanks,
-                            s_ipsc->lAlphaFieldBlanks,
-                            s_ipsc->cAlphaFieldNames,
-                            s_ipsc->cNumericFieldNames);
+        auto &instancesValue = instancesNM.value();
 
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+        std::vector<std::string> idfSortedKeys = s_ip->getIDFOrderedKeys(state, s_ipsc->cCurrentModuleObject);
+        for (std::string const &key : idfSortedKeys) {
 
-        if (s_mat->materialMap.find(s_ipsc->cAlphaArgs(1)) != s_mat->materialMap.end()) {
-            ShowSevereDuplicateName(state, eoh);
-            ErrorsFound = true;
-            continue;
+            auto instance = instancesValue.find(key);
+            assert(instance != instancesValue.end());
+
+            auto const &objectFields = instance.value();
+            std::string matNameUC = Util::makeUPPER(key);
+            s_ip->markObjectAsUsed(s_ipsc->cCurrentModuleObject, key);
+
+            ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, key};
+
+            if (s_mat->materialMap.find(matNameUC) != s_mat->materialMap.end()) {
+                ShowSevereDuplicateName(state, eoh);
+                ErrorsFound = true;
+                continue;
+            }
+
+            // Load the material derived type from the input data.
+            auto *mat = new MaterialBase;
+            mat->group = Group::Regular;
+            mat->Name = matNameUC;
+
+            s_mat->materials.push_back(mat);
+            mat->Num = s_mat->materials.isize();
+            s_mat->materialMap.insert_or_assign(matNameUC, mat->Num);
+
+            std::string roughness = s_ip->getAlphaFieldValue(objectFields, objectSchemaProps, "roughness");
+            mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(roughness)));
+
+            mat->Resistance = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_resistance");
+            mat->NominalR = mat->Resistance;
+            mat->ROnly = true;
+
+            mat->AbsorpThermalOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_absorptance");
+            mat->AbsorpThermalInputOut = mat->AbsorpThermalOut;
+            mat->AbsorpSolarOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "solar_absorptance");
+            mat->AbsorpSolarInputOut = mat->AbsorpSolarOut;
+            mat->AbsorpVisibleOut = s_ip->getRealFieldValue(objectFields, objectSchemaProps, "visible_absorptance");
+            mat->AbsorpVisibleInputOut = mat->AbsorpVisibleOut;
+            mat->hasAbsorpThermalInputIn = objectFields.contains("thermal_absorptance_inside_face");
+            mat->AbsorpThermalIn = mat->hasAbsorpThermalInputIn
+                                       ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "thermal_absorptance_inside_face")
+                                       : mat->AbsorpThermalOut;
+            mat->AbsorpThermalInputIn = mat->AbsorpThermalIn;
+            mat->hasAbsorpSolarInputIn = objectFields.contains("solar_absorptance_inside_face");
+            mat->AbsorpSolarIn = mat->hasAbsorpSolarInputIn
+                                     ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "solar_absorptance_inside_face")
+                                     : mat->AbsorpSolarOut;
+            mat->AbsorpSolarInputIn = mat->AbsorpSolarIn;
+            mat->hasAbsorpVisibleInputIn = objectFields.contains("visible_absorptance_inside_face");
+            mat->AbsorpVisibleIn = mat->hasAbsorpVisibleInputIn
+                                       ? s_ip->getRealFieldValue(objectFields, objectSchemaProps, "visible_absorptance_inside_face")
+                                       : mat->AbsorpVisibleOut;
+            mat->AbsorpVisibleInputIn = mat->AbsorpVisibleIn;
         }
-
-        auto *mat = new MaterialBase;
-        mat->group = Group::Regular;
-        mat->Name = s_ipsc->cAlphaArgs(1);
-
-        s_mat->materials.push_back(mat);
-        mat->Num = s_mat->materials.isize();
-        s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
-
-        mat->Roughness = static_cast<SurfaceRoughness>(getEnumValue(surfaceRoughnessNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
-
-        mat->Resistance = s_ipsc->rNumericArgs(1);
-        mat->ROnly = true;
-        if (NumNums >= 2) {
-            mat->AbsorpThermal = s_ipsc->rNumericArgs(2);
-            mat->AbsorpThermalInput = s_ipsc->rNumericArgs(2);
-        } else {
-            mat->AbsorpThermal = 0.9;
-            mat->AbsorpThermalInput = 0.9;
-        }
-        if (NumNums >= 3) {
-            mat->AbsorpSolar = s_ipsc->rNumericArgs(3);
-            mat->AbsorpSolarInput = s_ipsc->rNumericArgs(3);
-        } else {
-            mat->AbsorpSolar = 0.7;
-            mat->AbsorpSolarInput = 0.7;
-        }
-        if (NumNums >= 4) {
-            mat->AbsorpVisible = s_ipsc->rNumericArgs(4);
-            mat->AbsorpVisibleInput = s_ipsc->rNumericArgs(4);
-        } else {
-            mat->AbsorpVisible = 0.7;
-            mat->AbsorpVisibleInput = 0.7;
-        }
-
-        mat->NominalR = mat->Resistance;
     }
 
     // Add a fictitious insulation layer for each construction defined with F or C factor method
@@ -313,7 +337,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         for (int Loop = 1; Loop <= TotFfactorConstructs + TotCfactorConstructs; ++Loop) {
             auto *mat = new MaterialBase;
             mat->group = Group::Regular;
-            mat->Name = format("~FC_Insulation_{}", Loop);
+            mat->Name = std::format("~FC_Insulation_{}", Loop);
 
             s_mat->materials.push_back(mat);
             mat->Num = s_mat->materials.isize();
@@ -321,9 +345,12 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
             mat->ROnly = true;
             mat->Roughness = SurfaceRoughness::MediumRough;
-            mat->AbsorpSolar = 0.0;
-            mat->AbsorpThermal = 0.0;
-            mat->AbsorpVisible = 0.0;
+            mat->AbsorpSolarOut = 0.0;
+            mat->AbsorpThermalOut = 0.0;
+            mat->AbsorpVisibleOut = 0.0;
+            mat->AbsorpSolarIn = 0.0;
+            mat->AbsorpThermalIn = 0.0;
+            mat->AbsorpVisibleIn = 0.0;
         }
     }
 
@@ -404,12 +431,18 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         // Load data for other properties that need defaults
         mat->ROnly = true;
         mat->NominalR = mat->Resistance = 0.01;
-        mat->AbsorpThermal = 0.9999;
-        mat->AbsorpThermalInput = 0.9999;
-        mat->AbsorpSolar = 1.0;
-        mat->AbsorpSolarInput = 1.0;
-        mat->AbsorpVisible = 1.0;
-        mat->AbsorpVisibleInput = 1.0;
+        mat->AbsorpThermalOut = 0.9999;
+        mat->AbsorpThermalInputOut = 0.9999;
+        mat->AbsorpSolarOut = 1.0;
+        mat->AbsorpSolarInputOut = 1.0;
+        mat->AbsorpVisibleOut = 1.0;
+        mat->AbsorpVisibleInputOut = 1.0;
+        mat->AbsorpThermalIn = 0.9999;
+        mat->AbsorpThermalInputIn = 0.9999;
+        mat->AbsorpSolarIn = 1.0;
+        mat->AbsorpSolarInputIn = 1.0;
+        mat->AbsorpVisibleIn = 1.0;
+        mat->AbsorpVisibleInputIn = 1.0;
     }
 
     // Glass materials, regular input: transmittance and front/back reflectance
@@ -470,20 +503,21 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         if (s_ipsc->rNumericArgs(12) == 0.0) {
             mat->GlassTransDirtFactor = 1.0;
         }
-        mat->AbsorpThermal = mat->AbsorpThermalBack;
+        mat->AbsorpThermalIn = mat->AbsorpThermalBack;
+        mat->AbsorpThermalOut = mat->AbsorpThermalFront;
 
         if (mat->Conductivity > 0.0) {
             mat->Resistance = mat->NominalR = mat->Thickness / mat->Conductivity;
         } else {
             ErrorsFound = true;
-            ShowSevereError(state, format("Window glass material {} has Conductivity = 0.0, must be >0.0, default = .9", mat->Name));
+            ShowSevereError(state, std::format("Window glass material {} has Conductivity = 0.0, must be >0.0, default = .9", mat->Name));
         }
 
         mat->windowOpticalData = static_cast<Window::OpticalDataModel>(getEnumValue(Window::opticalDataModelNamesUC, s_ipsc->cAlphaArgs(2)));
 
         if (mat->windowOpticalData == Window::OpticalDataModel::Spectral) {
             if (s_ipsc->lAlphaFieldBlanks(3)) {
-                ShowSevereCustom(state, eoh, format("{} = Spectral but {} is blank.", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaFieldNames(3)));
+                ShowSevereCustom(state, eoh, std::format("{} = Spectral but {} is blank.", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaFieldNames(3)));
                 ErrorsFound = true;
             } else if ((mat->GlassSpectralDataPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(3), s_mat->SpectralData)) == 0) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
@@ -496,103 +530,103 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
             if (s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(3) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(3)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(3)));
             }
 
             if (s_ipsc->rNumericArgs(2) + s_ipsc->rNumericArgs(4) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(4)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(4)));
             }
 
             if (s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(6) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(6)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(6)));
             }
 
             if (s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(7) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
             }
 
             if (s_ipsc->rNumericArgs(8) + s_ipsc->rNumericArgs(9) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(9)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(9)));
             }
 
             if (s_ipsc->rNumericArgs(8) + s_ipsc->rNumericArgs(10) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(10)));
+                ShowSevereCustom(state, eoh, std::format("{} + {} not <= 1.0", s_ipsc->cNumericFieldNames(8), s_ipsc->cNumericFieldNames(10)));
             }
 
             if (s_ipsc->rNumericArgs(2) < 0.0) {
-                ShowSevereCustom(state, eoh, format("{} not >= 0.0", s_ipsc->cNumericFieldNames(2)));
+                ShowSevereCustom(state, eoh, std::format("{} not >= 0.0", s_ipsc->cNumericFieldNames(2)));
                 ErrorsFound = true;
             }
 
             if (s_ipsc->rNumericArgs(2) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not <= 1.0", s_ipsc->cNumericFieldNames(2)));
+                ShowSevereCustom(state, eoh, std::format("{} not <= 1.0", s_ipsc->cNumericFieldNames(2)));
             }
 
             if (s_ipsc->rNumericArgs(3) < 0.0 || s_ipsc->rNumericArgs(3) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(3)));
+                ShowSevereCustom(state, eoh, std::format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(3)));
             }
 
             if (s_ipsc->rNumericArgs(4) < 0.0 || s_ipsc->rNumericArgs(4) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(4)));
+                ShowSevereCustom(state, eoh, std::format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(4)));
             }
 
             if (s_ipsc->rNumericArgs(5) < 0.0) {
-                ShowWarningCustom(state, eoh, format("{} not >= 0.0", s_ipsc->cNumericFieldNames(5)));
+                ShowWarningCustom(state, eoh, std::format("{} not >= 0.0", s_ipsc->cNumericFieldNames(5)));
             }
 
             if (s_ipsc->rNumericArgs(5) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not <= 1.0", s_ipsc->cNumericFieldNames(5)));
+                ShowSevereCustom(state, eoh, std::format("{} not <= 1.0", s_ipsc->cNumericFieldNames(5)));
             }
 
             if (s_ipsc->rNumericArgs(6) < 0.0 || s_ipsc->rNumericArgs(6) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(6)));
+                ShowSevereCustom(state, eoh, std::format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(6)));
             }
 
             if (s_ipsc->rNumericArgs(7) < 0.0 || s_ipsc->rNumericArgs(7) > 1.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(7)));
+                ShowSevereCustom(state, eoh, std::format("{} not >= 0.0 and <= 1.0", s_ipsc->cNumericFieldNames(7)));
             }
         }
 
         if (s_ipsc->rNumericArgs(8) > 1.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} not <= 1.0", s_ipsc->cNumericFieldNames(8)));
+            ShowSevereCustom(state, eoh, std::format("{} not <= 1.0", s_ipsc->cNumericFieldNames(8)));
         }
 
         if (s_ipsc->rNumericArgs(9) <= 0.0 || s_ipsc->rNumericArgs(9) >= 1.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(9)));
+            ShowSevereCustom(state, eoh, std::format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(9)));
         }
 
         if (s_ipsc->rNumericArgs(10) <= 0.0 || s_ipsc->rNumericArgs(10) >= 1.0) {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(10)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(10)));
         }
 
         if (s_ipsc->rNumericArgs(11) <= 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
+            ShowSevereCustom(state, eoh, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
         }
 
         if (s_ipsc->rNumericArgs(13) < 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} not > 0.0", s_ipsc->cNumericFieldNames(13)));
+            ShowSevereCustom(state, eoh, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(13)));
         }
 
         if (s_ipsc->rNumericArgs(14) < 0.0 || s_ipsc->rNumericArgs(14) >= 1.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(14)));
+            ShowSevereCustom(state, eoh, std::format("{} not > 0.0 and < 1.0", s_ipsc->cNumericFieldNames(14)));
         }
 
         if (s_ipsc->cAlphaArgs(4).empty()) {
@@ -601,8 +635,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             BooleanSwitch answer = getYesNoValue(s_ipsc->cAlphaArgs(4));
             if (answer == BooleanSwitch::Invalid) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("{} must be Yes or No, entered value={}", s_ipsc->cNumericFieldNames(4), s_ipsc->cAlphaArgs(4)));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("{} must be Yes or No, entered value={}", s_ipsc->cNumericFieldNames(4), s_ipsc->cAlphaArgs(4)));
             } else {
                 mat->SolarDiffusing = (answer == BooleanSwitch::Yes);
             }
@@ -629,36 +663,36 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
 
                 if (std::abs(maxAng - 90.0) > 1.0e-6) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 90.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
 
                 if (minLam < 0.1) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
 
                 if (maxLam > 4.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
             }
 
@@ -680,33 +714,33 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (std::abs(maxAng - 90.0) > 1.0e-6) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 90.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (minLam < 0.1) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (maxLam > 4.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
             }
 
@@ -728,33 +762,33 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (std::abs(maxAng - 90.0) > 1.0e-6) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 90.0 in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 90.0 in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (minLam < 0.1) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the minimum value = 0.1 micron in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the minimum value = 0.1 micron in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
                 if (maxLam > 4.0) {
                     ErrorsFound = true;
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("{} requires the maximum value = 4.0 microns in the entered table name={}",
-                                            s_ipsc->cAlphaFieldNames(5),
-                                            s_ipsc->cAlphaArgs(5)));
+                                     std::format("{} requires the maximum value = 4.0 microns in the entered table name={}",
+                                                 s_ipsc->cAlphaFieldNames(5),
+                                                 s_ipsc->cAlphaArgs(5)));
                 }
             }
         }
@@ -825,7 +859,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         if (s_ipsc->rNumericArgs(9) == 0.0) {
             mat->GlassTransDirtFactor = 1.0;
         }
-        mat->AbsorpThermal = mat->AbsorpThermalBack;
+        mat->AbsorpThermalIn = mat->AbsorpThermalBack;
+        mat->AbsorpThermalOut = mat->AbsorpThermalFront;
 
         if (mat->Conductivity > 0.0) {
             mat->Resistance = mat->NominalR = mat->Thickness / mat->Conductivity;
@@ -835,7 +870,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         if (s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(7) >= 1.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(7)));
+            ShowSevereCustom(state, eoh, std::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(7)));
         }
 
         if (s_ipsc->cAlphaArgs(2).empty()) {
@@ -846,8 +881,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->SolarDiffusing = false;
         } else {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} must be Yes or No, entered value={}", s_ipsc->cNumericFieldNames(2), s_ipsc->cAlphaArgs(4)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} must be Yes or No, entered value={}", s_ipsc->cNumericFieldNames(2), s_ipsc->cAlphaArgs(4)));
         }
     }
 
@@ -1020,11 +1055,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
             if (matGas->gases[0].vis.c0 <= 0.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
+                ShowSevereCustom(state, eoh, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
             }
             if (matGas->gases[0].cp.c0 <= 0.0) {
                 ErrorsFound = true;
-                ShowSevereCustom(state, eoh, format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
+                ShowSevereCustom(state, eoh, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
             }
             if (matGas->gases[0].wght <= 0.0) {
                 ErrorsFound = true;
@@ -1040,8 +1075,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 matGas->NominalR = matGas->Thickness / DenomRGas;
             } else {
                 ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
-                ShowContinueError(state,
-                                  format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
+                ShowContinueError(
+                    state, std::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3f}].", DenomRGas));
                 ErrorsFound = true;
             }
         }
@@ -1122,18 +1157,18 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
             if (matGas->gases[0].vis.c0 <= 0.0) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(5)));
             }
             if (matGas->gases[0].cp.c0 <= 0.0) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(8)));
             }
             if (matGas->gases[0].wght <= 0.0) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("{} not > 0.0", s_ipsc->cNumericFieldNames(11)));
             }
         }
 
@@ -1143,9 +1178,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             if (DenomRGas > 0.0) {
                 matGas->NominalR = matGas->Thickness / DenomRGas;
             } else {
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state,
-                                  format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3R}].", DenomRGas));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(
+                    state, std::format("Nominal resistance of gap at room temperature calculated at a negative Conductivity=[{:.3f}].", DenomRGas));
                 ErrorsFound = true;
             }
         }
@@ -1196,7 +1231,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             auto &gas = matGas->gases[NumGas];
             gas.type = static_cast<GasType>(getEnumValue(gasTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2 + NumGas))));
             if (gas.type == GasType::Invalid) {
-                ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1 + NumGas)));
+                ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1 + NumGas)));
                 // Error check?
                 ErrorsFound = true;
             }
@@ -1206,7 +1241,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         matGas->Thickness = s_ipsc->rNumericArgs(1);
         if (matGas->Thickness <= 0.0) {
-            ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, s_ipsc->cNumericFieldNames(1) + " must be greater than 0.");
         }
         matGas->ROnly = true;
@@ -1263,13 +1298,17 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->ReflectShade = s_ipsc->rNumericArgs(2);
         mat->TransVis = s_ipsc->rNumericArgs(3);
         mat->ReflectShadeVis = s_ipsc->rNumericArgs(4);
-        mat->AbsorpThermal = s_ipsc->rNumericArgs(5);
-        mat->AbsorpThermalInput = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalOut = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalInputOut = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalIn = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalInputIn = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalFront = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalBack = s_ipsc->rNumericArgs(5);
         mat->TransThermal = s_ipsc->rNumericArgs(6);
         mat->Thickness = s_ipsc->rNumericArgs(7);
         mat->Conductivity = s_ipsc->rNumericArgs(8);
-        mat->AbsorpSolar = max(0.0, 1.0 - mat->Trans - mat->ReflectShade);
-        mat->AbsorpSolarInput = mat->AbsorpSolar;
+        mat->AbsorpSolarOut = max(0.0, 1.0 - mat->Trans - mat->ReflectShade);
+        mat->AbsorpSolarInputOut = mat->AbsorpSolarOut;
         mat->toGlassDist = s_ipsc->rNumericArgs(9);
         mat->topOpeningMult = s_ipsc->rNumericArgs(10);
         mat->bottomOpeningMult = s_ipsc->rNumericArgs(11);
@@ -1277,6 +1316,8 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->rightOpeningMult = s_ipsc->rNumericArgs(13);
         mat->airFlowPermeability = s_ipsc->rNumericArgs(14);
         mat->ROnly = true;
+        mat->AbsorpSolarIn = mat->AbsorpSolarOut;
+        mat->AbsorpSolarInputIn = mat->AbsorpSolarIn;
 
         if (mat->Conductivity > 0.0) {
             mat->NominalR = mat->Thickness / mat->Conductivity;
@@ -1523,11 +1564,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matScreen->bmRefModel =
             static_cast<ScreenBeamReflectanceModel>(getEnumValue(screenBeamReflectanceModelNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(2))));
         if (matScreen->bmRefModel == ScreenBeamReflectanceModel::Invalid) {
-            ShowSevereError(state, format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
-                              format("{}=\"{}\", must be one of DoNotModel, ModelAsDirectBeam or ModelAsDiffuse.",
-                                     s_ipsc->cAlphaFieldNames(2),
-                                     s_ipsc->cAlphaArgs(2)));
+                              std::format("{}=\"{}\", must be one of DoNotModel, ModelAsDirectBeam or ModelAsDiffuse.",
+                                          s_ipsc->cAlphaFieldNames(2),
+                                          s_ipsc->cAlphaArgs(2)));
             ErrorsFound = true;
         }
         matScreen->Roughness = SurfaceRoughness::MediumRough;
@@ -1543,9 +1584,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
             ShowContinueError(state, s_ipsc->cNumericFieldNames(2) + " must be >= 0 and <= 1 for material " + matScreen->Name + '.');
         }
-        matScreen->AbsorpThermal = s_ipsc->rNumericArgs(3);
-        matScreen->AbsorpThermalInput = s_ipsc->rNumericArgs(3);
-        if (matScreen->AbsorpThermal < 0.0 || matScreen->AbsorpThermal > 1.0) {
+        matScreen->AbsorpThermalOut = s_ipsc->rNumericArgs(3);
+        matScreen->AbsorpThermalInputOut = s_ipsc->rNumericArgs(3);
+        if (matScreen->AbsorpThermalOut < 0.0 || matScreen->AbsorpThermalOut > 1.0) {
             ErrorsFound = true;
             ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value.");
             ShowContinueError(state, s_ipsc->cNumericFieldNames(3) + " must be >= 0 and <= 1");
@@ -1626,12 +1667,18 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         matScreen->ROnly = true;
 
         //   Calculate absorptance accounting for the open area in the screen assembly (used only in CreateShadedWindowConstruction)
-        matScreen->AbsorpSolar = max(0.0, 1.0 - matScreen->Trans - matScreen->ShadeRef);
-        matScreen->AbsorpSolarInput = matScreen->AbsorpSolar;
-        matScreen->AbsorpVisible = max(0.0, 1.0 - matScreen->TransVis - matScreen->ShadeRefVis);
-        matScreen->AbsorpVisibleInput = matScreen->AbsorpVisible;
-        matScreen->AbsorpThermal *= (1.0 - matScreen->Trans);
-        matScreen->AbsorpThermalInput = matScreen->AbsorpThermal;
+        matScreen->AbsorpSolarOut = max(0.0, 1.0 - matScreen->Trans - matScreen->ShadeRef);
+        matScreen->AbsorpSolarInputOut = matScreen->AbsorpSolarOut;
+        matScreen->AbsorpSolarIn = matScreen->AbsorpSolarOut;
+        matScreen->AbsorpSolarInputIn = matScreen->AbsorpSolarIn;
+        matScreen->AbsorpVisibleOut = max(0.0, 1.0 - matScreen->TransVis - matScreen->ShadeRefVis);
+        matScreen->AbsorpVisibleInputOut = matScreen->AbsorpVisibleOut;
+        matScreen->AbsorpVisibleIn = matScreen->AbsorpVisibleOut;
+        matScreen->AbsorpVisibleInputIn = matScreen->AbsorpVisibleIn;
+        matScreen->AbsorpThermalOut *= (1.0 - matScreen->Trans);
+        matScreen->AbsorpThermalInputOut = matScreen->AbsorpThermalOut;
+        matScreen->AbsorpThermalIn = matScreen->AbsorpThermalOut;
+        matScreen->AbsorpThermalInputIn = matScreen->AbsorpThermalIn;
 
         if (matScreen->Conductivity > 0.0) {
             matScreen->NominalR = (1.0 - matScreen->Trans) * matScreen->Thickness / matScreen->Conductivity;
@@ -1657,7 +1704,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, "See Engineering Reference for calculation procedure for visible solar transmittance.");
         }
 
-        if (matScreen->TransThermal + matScreen->AbsorpThermal >= 1.0) {
+        if (matScreen->TransThermal + matScreen->AbsorpThermalOut >= 1.0) {
             ErrorsFound = true;
             ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
             ShowSevereError(state, "Thermal hemispherical emissivity plus open area fraction (1-diameter/spacing)**2 not < 1.0");
@@ -1772,7 +1819,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                     ShowContinueError(state, " ...the screen diameter is recalculated from the material openness specified ");
                     ShowContinueError(state, " ...and wire spacing using the formula = wire spacing * (1.0 - SQRT(Opennes))");
                     matScreen->wireDiameter = matScreen->wireSpacing * (1.0 - std::sqrt(matScreen->TAR.Sol.Ft.Bm[0].BmTra));
-                    ShowContinueError(state, format(" ...Recalculated {}={:.4R} m", s_ipsc->cNumericFieldNames(10), matScreen->wireDiameter));
+                    ShowContinueError(state, std::format(" ...Recalculated {}={:.4f} m", s_ipsc->cNumericFieldNames(10), matScreen->wireDiameter));
                 }
             }
         }
@@ -1790,7 +1837,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             ShowContinueError(state, "Calculated visible transmittance + visible reflectance not < 1.0");
             ShowContinueError(state, "See Engineering Reference for calculation procedure for visible solar transmittance.");
         }
-        if (matScreen->TransThermal + matScreen->AbsorpThermal >= 1.0) {
+        if (matScreen->TransThermal + matScreen->AbsorpThermalOut >= 1.0) {
             ErrorsFound = true;
             ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
             ShowSevereError(state, "Thermal hemispherical emissivity plus open area fraction (1-diameter/spacing)**2 not < 1.0");
@@ -1874,11 +1921,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         if (matBlind->SlatWidth < matBlind->SlatSeparation) {
             ShowWarningError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Slat Angles/Widths");
             ShowContinueError(state,
-                              format("{} [{:.2R}] is less than {} [{:.2R}].",
-                                     s_ipsc->cNumericFieldNames(1),
-                                     matBlind->SlatWidth,
-                                     s_ipsc->cNumericFieldNames(2),
-                                     matBlind->SlatSeparation));
+                              std::format("{} [{:.2f}] is less than {} [{:.2f}].",
+                                          s_ipsc->cNumericFieldNames(1),
+                                          matBlind->SlatWidth,
+                                          s_ipsc->cNumericFieldNames(2),
+                                          matBlind->SlatSeparation));
             ShowContinueError(state, "This will allow direct beam to be transmitted when Slat angle = 0.");
         }
 
@@ -2001,18 +2048,18 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ErrorsFound = true;
                 ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
                 ShowContinueError(state,
-                                  format("{}=[{:.1R}], is less than smallest allowed by slat dimensions and spacing, [{:.1R}] deg.",
-                                         s_ipsc->cNumericFieldNames(4),
-                                         matBlind->SlatAngle,
-                                         MinSlatAngGeom));
+                                  std::format("{}=[{:.1f}], is less than smallest allowed by slat dimensions and spacing, [{:.1f}] deg.",
+                                              s_ipsc->cNumericFieldNames(4),
+                                              matBlind->SlatAngle,
+                                              MinSlatAngGeom));
             } else if (matBlind->SlatAngle > MaxSlatAngGeom) {
                 ErrorsFound = true;
                 ShowSevereError(state, s_ipsc->cCurrentModuleObject + "=\"" + s_ipsc->cAlphaArgs(1) + "\", Illegal value combination.");
                 ShowContinueError(state,
-                                  format("{}=[{:.1R}], is greater than largest allowed by slat dimensions and spacing, [{:.1R}] deg.",
-                                         s_ipsc->cNumericFieldNames(4),
-                                         matBlind->SlatAngle,
-                                         MinSlatAngGeom));
+                                  std::format("{}=[{:.1f}], is greater than largest allowed by slat dimensions and spacing, [{:.1f}] deg.",
+                                              s_ipsc->cNumericFieldNames(4),
+                                              matBlind->SlatAngle,
+                                              MinSlatAngGeom));
             }
         }
 
@@ -2153,63 +2200,64 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->slatAngleType = static_cast<SlatAngleType>(getEnumValue(slatAngleTypeNamesUC, Util::makeUPPER(s_ipsc->cAlphaArgs(3))));
         }
         if (mat->SlatWidth < mat->SlatSeparation) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Separation/Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("{}=\"{}\", Slat Separation/Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
-                              format("{} [{:.2R}] is less than {} [{:.2R}].",
-                                     s_ipsc->cNumericFieldNames(1),
-                                     mat->SlatWidth,
-                                     s_ipsc->cNumericFieldNames(2),
-                                     mat->SlatSeparation));
+                              std::format("{} [{:.2f}] is less than {} [{:.2f}].",
+                                          s_ipsc->cNumericFieldNames(1),
+                                          mat->SlatWidth,
+                                          s_ipsc->cNumericFieldNames(2),
+                                          mat->SlatSeparation));
             ShowContinueError(state, "This will allow direct beam to be transmitted when Slat angle = 0.");
         }
         if (mat->SlatSeparation < 0.001) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Separation", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} [{:.2R}]. Slate spacing must be > 0.0", s_ipsc->cNumericFieldNames(2), mat->SlatSeparation));
+            ShowWarningError(state, std::format("{}=\"{}\", Slat Separation", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} [{:.2f}]. Slate spacing must be > 0.0", s_ipsc->cNumericFieldNames(2), mat->SlatSeparation));
             ShowContinueError(state,
                               "...Setting slate spacing to default value of 0.025 m and "
                               "simulation continues.");
             mat->SlatSeparation = 0.025;
         }
         if (mat->SlatWidth < 0.001 || mat->SlatWidth >= 2.0 * mat->SlatSeparation) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("{}=\"{}\", Slat Width", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
-                              format("{} [{:.2R}]. Slat width range is 0 < Width <= 2*Spacing", s_ipsc->cNumericFieldNames(1), mat->SlatWidth));
+                              std::format("{} [{:.2f}]. Slat width range is 0 < Width <= 2*Spacing", s_ipsc->cNumericFieldNames(1), mat->SlatWidth));
             ShowContinueError(state, "...Setting slate width equal to slate spacing and simulation continues.");
             mat->SlatWidth = mat->SlatSeparation;
         }
         if (mat->SlatCrown < 0.0 || mat->SlatCrown >= 0.5 * mat->SlatWidth) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Crown", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("{}=\"{}\", Slat Crown", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state,
-                              format("{} [{:.2R}]. Slat crwon range is 0 <= crown < 0.5*Width", s_ipsc->cNumericFieldNames(3), mat->SlatCrown));
+                              std::format("{} [{:.2f}]. Slat crwon range is 0 <= crown < 0.5*Width", s_ipsc->cNumericFieldNames(3), mat->SlatCrown));
             ShowContinueError(state, "...Setting slate crown to 0.0 and simulation continues.");
             mat->SlatCrown = 0.0;
         }
         if (mat->SlatAngle < -90.0 || mat->SlatAngle > 90.0) {
-            ShowWarningError(state, format("{}=\"{}\", Slat Angle", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} [{:.2R}]. Slat angle range is -90.0 <= Angle < 90.0", s_ipsc->cNumericFieldNames(4), mat->SlatAngle));
+            ShowWarningError(state, std::format("{}=\"{}\", Slat Angle", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state,
+                              std::format("{} [{:.2f}]. Slat angle range is -90.0 <= Angle < 90.0", s_ipsc->cNumericFieldNames(4), mat->SlatAngle));
             ShowContinueError(state, "...Setting slate angle to 0.0 and simulation continues.");
             mat->SlatAngle = 0.0;
         }
 
         if ((s_ipsc->rNumericArgs(5) + s_ipsc->rNumericArgs(7) >= 1.0)) {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(5), s_ipsc->cNumericFieldNames(7)));
         }
         if ((s_ipsc->rNumericArgs(6) + s_ipsc->rNumericArgs(8) >= 1.0)) {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(8)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(6), s_ipsc->cNumericFieldNames(8)));
         }
         if ((s_ipsc->rNumericArgs(9) + s_ipsc->rNumericArgs(11) >= 1.0)) {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(9), s_ipsc->cNumericFieldNames(11)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(9), s_ipsc->cNumericFieldNames(11)));
         }
         if ((s_ipsc->rNumericArgs(10) + s_ipsc->rNumericArgs(12) >= 1.0)) {
             ErrorsFound = true;
-            ShowSevereError(state, format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(10), s_ipsc->cNumericFieldNames(12)));
+            ShowSevereError(state, std::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} + {} not < 1.0", s_ipsc->cNumericFieldNames(10), s_ipsc->cNumericFieldNames(12)));
         }
 
     } // TotBlindsEQL loop
@@ -2272,9 +2320,12 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->Conductivity = s_ipsc->rNumericArgs(7);
         mat->Density = s_ipsc->rNumericArgs(8);
         mat->SpecHeat = s_ipsc->rNumericArgs(9);
-        mat->AbsorpThermal = s_ipsc->rNumericArgs(10); // emissivity
-        mat->AbsorpSolar = s_ipsc->rNumericArgs(11);   // (1 - Albedo)
-        mat->AbsorpVisible = s_ipsc->rNumericArgs(12);
+        mat->AbsorpThermalOut = s_ipsc->rNumericArgs(10); // emissivity
+        mat->AbsorpSolarOut = s_ipsc->rNumericArgs(11);   // (1 - Albedo)
+        mat->AbsorpVisibleOut = s_ipsc->rNumericArgs(12);
+        mat->AbsorpThermalIn = mat->AbsorpThermalOut;
+        mat->AbsorpSolarIn = mat->AbsorpSolarOut;
+        mat->AbsorpVisibleIn = mat->AbsorpVisibleOut;
         mat->Porosity = s_ipsc->rNumericArgs(13);
         mat->MinMoisture = s_ipsc->rNumericArgs(14);
         mat->InitMoisture = s_ipsc->rNumericArgs(15);
@@ -2282,19 +2333,20 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         if (mat->Conductivity > 0.0) {
             mat->Resistance = mat->NominalR = mat->Thickness / mat->Conductivity;
         } else {
-            ShowSevereError(state, format("{}=\"{}\" is not defined correctly.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            ShowContinueError(state, format("{} is <=0.", s_ipsc->cNumericFieldNames(7)));
+            ShowSevereError(state, std::format("{}=\"{}\" is not defined correctly.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("{} is <=0.", s_ipsc->cNumericFieldNames(7)));
             ErrorsFound = true;
         }
 
         if (mat->InitMoisture > mat->Porosity) {
-            ShowWarningError(state, format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowWarningError(state, std::format("{}=\"{}\", Illegal value combination.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(
-                state, format("{} is greater than {}. It must be less or equal.", s_ipsc->cNumericFieldNames(15), s_ipsc->cNumericFieldNames(13)));
-            ShowContinueError(state, format("{} = {:.3T}.", s_ipsc->cNumericFieldNames(13), mat->Porosity));
-            ShowContinueError(state, format("{} = {:.3T}.", s_ipsc->cNumericFieldNames(15), mat->InitMoisture));
+                state,
+                std::format("{} is greater than {}. It must be less or equal.", s_ipsc->cNumericFieldNames(15), s_ipsc->cNumericFieldNames(13)));
+            ShowContinueError(state, std::format("{} = {:.3f}.", s_ipsc->cNumericFieldNames(13), mat->Porosity));
+            ShowContinueError(state, std::format("{} = {:.3f}.", s_ipsc->cNumericFieldNames(15), mat->InitMoisture));
             ShowContinueError(state,
-                              format("{} is reset to the maximum (saturation) value = {:.3T}.", s_ipsc->cNumericFieldNames(15), mat->Porosity));
+                              std::format("{} is reset to the maximum (saturation) value = {:.3f}.", s_ipsc->cNumericFieldNames(15), mat->Porosity));
             ShowContinueError(state, "Simulation continues.");
             mat->InitMoisture = mat->Porosity;
         }
@@ -2337,7 +2389,7 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         if (NumNums + 1 != NumAlphas) {
             ShowSevereCustom(
-                state, eoh, format("Check number of {} compared to number of {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cNumericFieldNames(1)));
+                state, eoh, std::format("Check number of {} compared to number of {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cNumericFieldNames(1)));
             ErrorsFound = true;
             continue;
         }
@@ -2361,10 +2413,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             auto *matGlass = s_mat->materials(matRef.matNum);
             // test that named material is of the right type
             if (matGlass->group != Group::Glass) {
-                ShowSevereCustom(
-                    state,
-                    eoh,
-                    format("{} = {}, Material is not a window glazing ", s_ipsc->cAlphaFieldNames(1 + iMatRef), s_ipsc->cAlphaArgs(1 + iMatRef)));
+                ShowSevereCustom(state,
+                                 eoh,
+                                 std::format("{} = {}, Material is not a window glazing ",
+                                             s_ipsc->cAlphaFieldNames(1 + iMatRef),
+                                             s_ipsc->cAlphaArgs(1 + iMatRef)));
                 ErrorsFound = true;
                 continue;
             }
@@ -2458,13 +2511,13 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         mat->Thickness = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} must be > 0, entered {:.2R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowSevereCustom(state, eoh, std::format("{} must be > 0, entered {:.2f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
         }
 
         mat->Pressure = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} must be > 0, entered {:.2R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowSevereCustom(state, eoh, std::format("{} must be > 0, entered {:.2f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
         }
 
         if (!s_ipsc->lAlphaFieldBlanks(2)) {
@@ -2483,9 +2536,10 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             mat->gapVentType = matGasMix->gapVentType;
         }
 
-        // Find referenced DeflectionState object and copy field from it
+        // Find referenced DeflectionState object and copy field (i.e., deflected thickness) from it
         if (!s_ipsc->lAlphaFieldBlanks(3)) {
-            auto const itInstances = s_ip->epJSON.find("WindowGap:DeflectionState");
+            std::string deflectionState = "WindowGap:DeflectionState";
+            auto const itInstances = s_ip->epJSON.find(deflectionState);
             if (itInstances == s_ip->epJSON.end()) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                 ErrorsFound = true;
@@ -2507,14 +2561,16 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 continue;
             }
 
+            s_ip->markObjectAsUsed(deflectionState, itObj.key());
             auto const &obj = itObj.value();
-            auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, "WindowGap:DeflectionState");
+            auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, deflectionState);
             mat->deflectedThickness = s_ip->getRealFieldValue(obj, objSchemaProps, "deflected_thickness");
         }
 
-        // Find referenced
+        // Find referenced SupportPillar obect and copy fields (i.e., spacing, radius) from it
         if (!s_ipsc->lAlphaFieldBlanks(4)) {
-            auto const itInstances = s_ip->epJSON.find("WindowGap:SupportPillar");
+            std::string supportPillar = "WindowGap:SupportPillar";
+            auto const itInstances = s_ip->epJSON.find(supportPillar);
             if (itInstances == s_ip->epJSON.end()) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
                 ErrorsFound = true;
@@ -2537,8 +2593,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 continue;
             }
 
+            s_ip->markObjectAsUsed(supportPillar, itObj.key());
             auto const &obj = itObj.value();
-            auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, "WindowGap:SupportPillar");
+            auto const &objSchemaProps = s_ip->getObjectSchemaProps(state, supportPillar);
             mat->pillarSpacing = s_ip->getRealFieldValue(obj, objSchemaProps, "spacing");
             mat->pillarRadius = s_ip->getRealFieldValue(obj, objSchemaProps, "radius");
         }
@@ -2590,9 +2647,10 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
         // Simon: in heat balance radiation exchange routines AbsorpThermal is used
         // and program will crash if value is not assigned.  Not sure if this is correct
         // or some additional calculation is necessary. Simon TODO
-        mat->AbsorpThermal = s_ipsc->rNumericArgs(5);
         mat->AbsorpThermalFront = s_ipsc->rNumericArgs(4);
         mat->AbsorpThermalBack = s_ipsc->rNumericArgs(5);
+        mat->AbsorpThermalIn = mat->AbsorpThermalBack;
+        mat->AbsorpThermalOut = mat->AbsorpThermalFront;
 
         mat->topOpeningMult = s_ipsc->rNumericArgs(6);
         mat->bottomOpeningMult = s_ipsc->rNumericArgs(7);
@@ -2609,59 +2667,68 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
 
         if (s_ipsc->rNumericArgs(1) <= 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowSevereCustom(
+                state, eoh, std::format("{} must be > 0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
         }
 
         if (s_ipsc->rNumericArgs(2) <= 0.0) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} must be > 0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowSevereCustom(
+                state, eoh, std::format("{} must be > 0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
         }
 
         if ((s_ipsc->rNumericArgs(3) < 0.0) || (s_ipsc->rNumericArgs(3) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(3), s_ipsc->rNumericArgs(3)));
+                state,
+                eoh,
+                std::format("{} value must be >= 0 and <= 1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(3), s_ipsc->rNumericArgs(3)));
         }
 
         if ((s_ipsc->rNumericArgs(4) <= 0.0) || (s_ipsc->rNumericArgs(4) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
+                state,
+                eoh,
+                std::format("{} value must be >= 0 and <= 1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(4), s_ipsc->rNumericArgs(4)));
         }
 
         if ((s_ipsc->rNumericArgs(5) <= 0.0) || (s_ipsc->rNumericArgs(5) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} value must be >= 0 and <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(5), s_ipsc->rNumericArgs(5)));
+                state,
+                eoh,
+                std::format("{} value must be >= 0 and <= 1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(5), s_ipsc->rNumericArgs(5)));
         }
 
         if ((s_ipsc->rNumericArgs(6) < 0.0) || (s_ipsc->rNumericArgs(6) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} must be >= 0 or <= 1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(6), s_ipsc->rNumericArgs(6)));
+                state, eoh, std::format("{} must be >= 0 or <= 1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(6), s_ipsc->rNumericArgs(6)));
         }
 
         if ((s_ipsc->rNumericArgs(7) < 0.0) || (s_ipsc->rNumericArgs(7) > 1.0)) {
             ErrorsFound = true;
-            ShowSevereCustom(state, eoh, format("{} must be >=0 or <=1, entered {:.2R}", s_ipsc->cNumericFieldNames(7), s_ipsc->rNumericArgs(7)));
+            ShowSevereCustom(
+                state, eoh, std::format("{} must be >=0 or <=1, entered {:.2f}", s_ipsc->cNumericFieldNames(7), s_ipsc->rNumericArgs(7)));
         }
 
         if ((s_ipsc->rNumericArgs(8) < 0.0) || (s_ipsc->rNumericArgs(8) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(8), s_ipsc->rNumericArgs(8)));
+                state, eoh, std::format("{} must be >=0 or <=1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(8), s_ipsc->rNumericArgs(8)));
         }
 
         if ((s_ipsc->rNumericArgs(9) < 0.0) || (s_ipsc->rNumericArgs(9) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(9), s_ipsc->rNumericArgs(9)));
+                state, eoh, std::format("{} must be >=0 or <=1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(9), s_ipsc->rNumericArgs(9)));
         }
 
         if ((s_ipsc->rNumericArgs(10) < 0.0) || (s_ipsc->rNumericArgs(10) > 1.0)) {
             ErrorsFound = true;
             ShowSevereCustom(
-                state, eoh, format("{} must be >=0 or <=1, entered value = {:.2R}", s_ipsc->cNumericFieldNames(10), s_ipsc->rNumericArgs(10)));
+                state, eoh, std::format("{} must be >=0 or <=1, entered value = {:.2f}", s_ipsc->cNumericFieldNames(10), s_ipsc->rNumericArgs(10)));
         }
 
         if ((mat->LayerType == TARCOGParams::TARCOGLayerType::VENETBLIND_HORIZ) ||
@@ -2669,19 +2736,19 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
             if (s_ipsc->rNumericArgs(11) <= 0.0) {
                 ErrorsFound = true;
                 ShowSevereCustom(
-                    state, eoh, format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(11), s_ipsc->rNumericArgs(11)));
+                    state, eoh, std::format("{} must be >0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(11), s_ipsc->rNumericArgs(11)));
             }
 
             if (s_ipsc->rNumericArgs(12) <= 0.0) {
                 ErrorsFound = true;
                 ShowSevereCustom(
-                    state, eoh, format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(12), s_ipsc->rNumericArgs(12)));
+                    state, eoh, std::format("{} must be >0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(12), s_ipsc->rNumericArgs(12)));
             }
 
             if (s_ipsc->rNumericArgs(13) <= 0.0) {
                 ErrorsFound = true;
                 ShowSevereCustom(
-                    state, eoh, format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(13), s_ipsc->rNumericArgs(13)));
+                    state, eoh, std::format("{} must be >0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(13), s_ipsc->rNumericArgs(13)));
             }
 
             if ((s_ipsc->rNumericArgs(14) < -90.0) || (s_ipsc->rNumericArgs(14) > 90.0)) {
@@ -2689,13 +2756,13 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ShowSevereCustom(
                     state,
                     eoh,
-                    format("{} must be >=-90 and <=90, entered value = {:.2R}", s_ipsc->cNumericFieldNames(14), s_ipsc->rNumericArgs(14)));
+                    std::format("{} must be >=-90 and <=90, entered value = {:.2f}", s_ipsc->cNumericFieldNames(14), s_ipsc->rNumericArgs(14)));
             }
 
             if (s_ipsc->rNumericArgs(15) <= 0.0) {
                 ErrorsFound = true;
                 ShowSevereCustom(
-                    state, eoh, format("{} must be >0, entered value = {:.2R}", s_ipsc->cNumericFieldNames(15), s_ipsc->rNumericArgs(15)));
+                    state, eoh, std::format("{} must be >0, entered value = {:.2f}", s_ipsc->cNumericFieldNames(15), s_ipsc->rNumericArgs(15)));
             }
 
             if ((s_ipsc->rNumericArgs(16) < 0.0) ||
@@ -2703,9 +2770,9 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                 ErrorsFound = true;
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("{} must be = 0 or greater than SlatWidth/2, entered value = {:.2R}",
-                                        s_ipsc->cNumericFieldNames(16),
-                                        s_ipsc->rNumericArgs(16)));
+                                 std::format("{} must be = 0 or greater than SlatWidth/2, entered value = {:.2f}",
+                                             s_ipsc->cNumericFieldNames(16),
+                                             s_ipsc->rNumericArgs(16)));
             }
         }
 
@@ -2721,15 +2788,17 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     if (DoReport) {
 
         print(state.files.eio,
-              "! <Material Details>,Material Name,ThermalResistance {{m2-K/w}},Roughness,Thickness {{m}},Conductivity "
-              "{{w/m-K}},Density {{kg/m3}},Specific Heat "
-              "{{J/kg-K}},Absorptance:Thermal,Absorptance:Solar,Absorptance:Visible\n");
+              "! <Material Details>,Material Name,ThermalResistance {{m2-K/W}},Roughness,Thickness {{m}},Conductivity "
+              "{{W/m-K}},Density {{kg/m3}},Specific Heat "
+              "{{J/kg-K}},Absorptance:Thermal:OutsideFace,Absorptance:Solar:OutsideFace,Absorptance:Visible:OutsideFace,"
+              "Absorptance:Thermal:InsideFace,Absorptance:Solar:InsideFace,Absorptance:Visible:InsideFace\n");
 
-        print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/w}}\n");
+        print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/W}}\n");
 
         // Formats
-        constexpr std::string_view Format_701(" Material Details,{},{:.4R},{},{:.4R},{:.3R},{:.3R},{:.3R},{:.4R},{:.4R},{:.4R}\n");
-        constexpr std::string_view Format_702(" Material:Air,{},{:.4R}\n");
+        constexpr std::string_view Format_701(
+            " Material Details,{},{:.5f},{},{:.4f},{:.3f},{:.3f},{:.3f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f}\n");
+        constexpr std::string_view Format_702(" Material:Air,{},{:.5f}\n");
 
         for (auto const *mat : s_mat->materials) {
 
@@ -2747,9 +2816,12 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                       mat->Conductivity,
                       mat->Density,
                       mat->SpecHeat,
-                      mat->AbsorpThermal,
-                      mat->AbsorpSolar,
-                      mat->AbsorpVisible);
+                      mat->AbsorpThermalOut,
+                      mat->AbsorpSolarOut,
+                      mat->AbsorpVisibleOut,
+                      mat->AbsorpThermalIn,
+                      mat->AbsorpSolarIn,
+                      mat->AbsorpVisibleIn);
             } break;
             }
         }
@@ -2785,6 +2857,48 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
                              "[ ]",
                              mat->AbsorpVisibleEMSOverrideOn,
                              mat->AbsorpVisibleEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Solar Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpSolarOutEMSOverrideOn,
+                             mat->AbsorpSolarOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Thermal Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpThermalOutEMSOverrideOn,
+                             mat->AbsorpThermalOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Visible Absorptance Outside Face",
+                             "[ ]",
+                             mat->AbsorpVisibleOutEMSOverrideOn,
+                             mat->AbsorpVisibleOutEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Solar Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpSolarInEMSOverrideOn,
+                             mat->AbsorpSolarInEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Thermal Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpThermalInEMSOverrideOn,
+                             mat->AbsorpThermalInEMSOverride);
+            SetupEMSActuator(state,
+                             "Material",
+                             mat->Name,
+                             "Surface Property Visible Absorptance Inside Face",
+                             "[ ]",
+                             mat->AbsorpVisibleInEMSOverrideOn,
+                             mat->AbsorpVisibleInEMSOverride);
         }
     }
 
@@ -2836,62 +2950,120 @@ void GetVariableAbsorptanceInput(EnergyPlusData &state, bool &errorsFound)
         if (mat->group != Group::Regular) {
             ShowSevereError(
                 state,
-                format("{}: Reference Material is not appropriate type for Thermal/Solar Absorptance properties, material={}, must have regular "
-                       "properties (Thermal/Solar Absorptance)",
-                       s_ipsc->cCurrentModuleObject,
-                       mat->Name));
+                std::format("{}: Reference Material is not appropriate type for Thermal/Solar Absorptance properties, material={}, must have regular "
+                            "properties (Thermal/Solar Absorptance)",
+                            s_ipsc->cCurrentModuleObject,
+                            mat->Name));
             errorsFound = true;
             continue;
         }
 
-        mat->absorpVarCtrlSignal = VariableAbsCtrlSignal::SurfaceTemperature; // default value
-        mat->absorpVarCtrlSignal = static_cast<VariableAbsCtrlSignal>(getEnumValue(variableAbsCtrlSignalNamesUC, s_ipsc->cAlphaArgs(3)));
+        mat->absorpVarCtrlSignalOut = VariableAbsCtrlSignal::SurfaceTemperature; // default value
+        mat->absorpVarCtrlSignalOut = static_cast<VariableAbsCtrlSignal>(getEnumValue(variableAbsCtrlSignalNamesUC, s_ipsc->cAlphaArgs(3)));
+        mat->absorpThermalVarCurveOut = Curve::GetCurve(state, s_ipsc->cAlphaArgs(4));
+        mat->absorpThermalVarSchedOut = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(5));
+        mat->absorpSolarVarCurveOut = Curve::GetCurve(state, s_ipsc->cAlphaArgs(6));
+        mat->absorpSolarVarSchedOut = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(7));
 
-        mat->absorpThermalVarCurve = Curve::GetCurve(state, s_ipsc->cAlphaArgs(4));
-        mat->absorpThermalVarSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(5));
-        mat->absorpSolarVarCurve = Curve::GetCurve(state, s_ipsc->cAlphaArgs(6));
-        mat->absorpSolarVarSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(7));
-        if (mat->absorpVarCtrlSignal == VariableAbsCtrlSignal::Scheduled) {
-            if ((mat->absorpThermalVarSched == nullptr) && (mat->absorpSolarVarSched == nullptr)) {
-                ShowSevereError(
-                    state,
-                    format("{}: Control signal \"Scheduled\" is chosen but both thermal and solar absorptance schedules are undefined, for object {}",
-                           s_ipsc->cCurrentModuleObject,
-                           s_ipsc->cAlphaArgs(1)));
+        // error checking for outside face values
+        if (mat->absorpVarCtrlSignalOut == VariableAbsCtrlSignal::Scheduled) {
+            if ((mat->absorpThermalVarSchedOut == nullptr) && (mat->absorpSolarVarSchedOut == nullptr)) {
+                ShowSevereError(state,
+                                std::format("{}: Control signal \"Scheduled\" is chosen but both outside face thermal and solar absorptance "
+                                            "schedules are undefined, for object {}",
+                                            s_ipsc->cCurrentModuleObject,
+                                            s_ipsc->cAlphaArgs(1)));
                 errorsFound = true;
                 return;
             }
-            if ((mat->absorpThermalVarCurve != nullptr) || (mat->absorpSolarVarCurve != nullptr)) {
-                ShowWarningError(state,
-                                 format("{}: Control signal \"Scheduled\" is chosen. Thermal or solar absorptance function name is going to be "
-                                        "ignored, for object {}",
-                                        s_ipsc->cCurrentModuleObject,
-                                        s_ipsc->cAlphaArgs(1)));
+            if ((mat->absorpThermalVarCurveOut != nullptr) || (mat->absorpSolarVarCurveOut != nullptr)) {
+                ShowWarningError(
+                    state,
+                    std::format("{}: Control signal \"Scheduled\" is chosen. Outside face thermal or solar absorptance function name is going to be "
+                                "ignored, for object {}",
+                                s_ipsc->cCurrentModuleObject,
+                                s_ipsc->cAlphaArgs(1)));
                 errorsFound = true;
                 return;
             }
 
         } else { // controlled by performance table or curve
-            if ((mat->absorpThermalVarCurve == nullptr) && (mat->absorpSolarVarCurve == nullptr)) {
-                ShowSevereError(state,
-                                format("{}: Non-schedule control signal is chosen but both thermal and solar absorptance table or curve are "
-                                       "undefined, for object {}",
-                                       s_ipsc->cCurrentModuleObject,
-                                       s_ipsc->cAlphaArgs(1)));
+            if ((mat->absorpThermalVarCurveOut == nullptr) && (mat->absorpSolarVarCurveOut == nullptr)) {
+                ShowSevereError(
+                    state,
+                    std::format("{}: Non-schedule control signal is chosen but both outside face thermal and solar absorptance table or curve are "
+                                "undefined, for object {}",
+                                s_ipsc->cCurrentModuleObject,
+                                s_ipsc->cAlphaArgs(1)));
                 errorsFound = true;
                 return;
             }
-            if ((mat->absorpThermalVarSched != nullptr) || (mat->absorpSolarVarSched != nullptr)) {
-                ShowWarningError(state,
-                                 format("{}: Non-schedule control signal is chosen. Thermal or solar absorptance schedule name is going to be "
-                                        "ignored, for object {}",
-                                        s_ipsc->cCurrentModuleObject,
-                                        s_ipsc->cAlphaArgs(1)));
+            if ((mat->absorpThermalVarSchedOut != nullptr) || (mat->absorpSolarVarSchedOut != nullptr)) {
+                ShowWarningError(
+                    state,
+                    std::format("{}: Non-schedule control signal is chosen. Outside face thermal or solar absorptance schedule name is going to be "
+                                "ignored, for object {}",
+                                s_ipsc->cCurrentModuleObject,
+                                s_ipsc->cAlphaArgs(1)));
                 errorsFound = true;
                 return;
             }
         }
-    }
+
+        mat->absorpVarCtrlSignalIn = static_cast<VariableAbsCtrlSignal>(getEnumValue(variableAbsCtrlSignalNamesUC, s_ipsc->cAlphaArgs(8)));
+        if (mat->absorpVarCtrlSignalIn != VariableAbsCtrlSignal::Invalid) {
+            mat->absorpThermalVarCurveIn = Curve::GetCurve(state, s_ipsc->cAlphaArgs(9));
+            mat->absorpThermalVarSchedIn = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(10));
+            mat->absorpSolarVarCurveIn = Curve::GetCurve(state, s_ipsc->cAlphaArgs(11));
+            mat->absorpSolarVarSchedIn = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(12));
+            // error checking for inside face values
+            if (mat->absorpVarCtrlSignalIn == VariableAbsCtrlSignal::Scheduled) {
+                if ((mat->absorpThermalVarSchedIn == nullptr) && (mat->absorpSolarVarSchedIn == nullptr)) {
+                    ShowSevereError(state,
+                                    std::format("{}: Control signal \"Scheduled\" is chosen but both inside face thermal and solar absorptance "
+                                                "schedules are undefined, for object {}",
+                                                s_ipsc->cCurrentModuleObject,
+                                                s_ipsc->cAlphaArgs(1)));
+                    errorsFound = true;
+                    return;
+                }
+                if ((mat->absorpThermalVarCurveIn != nullptr) || (mat->absorpSolarVarCurveIn != nullptr)) {
+                    ShowWarningError(
+                        state,
+                        std::format(
+                            "{}: Control signal \"Scheduled\" is chosen. Inside face thermal or solar absorptance function name is going to be "
+                            "ignored, for object {}",
+                            s_ipsc->cCurrentModuleObject,
+                            s_ipsc->cAlphaArgs(1)));
+                    errorsFound = true;
+                    return;
+                }
+
+            } else { // controlled by performance table or curve
+                if ((mat->absorpThermalVarCurveIn == nullptr) && (mat->absorpSolarVarCurveIn == nullptr)) {
+                    ShowSevereError(
+                        state,
+                        std::format("{}: Non-schedule control signal is chosen but both inside face thermal and solar absorptance table or curve are "
+                                    "undefined, for object {}",
+                                    s_ipsc->cCurrentModuleObject,
+                                    s_ipsc->cAlphaArgs(1)));
+                    errorsFound = true;
+                    return;
+                }
+                if ((mat->absorpThermalVarSchedIn != nullptr) || (mat->absorpSolarVarSchedIn != nullptr)) {
+                    ShowWarningError(
+                        state,
+                        std::format(
+                            "{}: Non-schedule control signal is chosen. Inside face thermal or solar absorptance schedule name is going to be "
+                            "ignored, for object {}",
+                            s_ipsc->cCurrentModuleObject,
+                            s_ipsc->cAlphaArgs(1)));
+                    errorsFound = true;
+                    return;
+                }
+            }
+        }
+    } // end of loop over variable absorbtance input objects
 } // GetVariableAbsorptanceInput()
 
 void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound) // set to true if errors found in input
@@ -2961,13 +3133,14 @@ void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound) // set
             ShowWarningCustom(
                 state,
                 eoh,
-                format("{} of items in data set is not a multiple of 4 (Wavelength,Trans,ReflFront,ReflBack), remainder items set to 0.0", NumNums));
+                std::format("{} of items in data set is not a multiple of 4 (Wavelength,Trans,ReflFront,ReflBack), remainder items set to 0.0",
+                            NumNums));
             ErrorsFound = true;
             continue;
         }
 
         if (TotLam > MaxSpectralDataElements) {
-            ShowSevereCustom(state, eoh, format("More than {} entries in set ({})", MaxSpectralDataElements, NumNums));
+            ShowSevereCustom(state, eoh, std::format("More than {} entries in set ({})", MaxSpectralDataElements, NumNums));
             ErrorsFound = true;
             continue;
         }
@@ -2998,19 +3171,19 @@ void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound) // set
             RhoB = specData.ReflBack(LamNum);
             if (LamNum < TotLam && specData.WaveLength(LamNum + 1) <= Lam) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}{}=\"{}\" invalid set.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}{}=\"{}\" invalid set.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  format("... Wavelengths not in increasing order. at wavelength#={}, value=[{:.4T}], next is [{:.4T}].",
-                                         LamNum,
-                                         Lam,
-                                         specData.WaveLength(LamNum + 1)));
+                                  std::format("... Wavelengths not in increasing order. at wavelength#={}, value=[{:.4f}], next is [{:.4f}].",
+                                              LamNum,
+                                              Lam,
+                                              specData.WaveLength(LamNum + 1)));
             }
 
             if (Lam < 0.1 || Lam > 4.0) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}{}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state,
-                                  format("... A wavelength is not in the range 0.1 to 4.0 microns; at wavelength#={}, value=[{:.4T}].", LamNum, Lam));
+                ShowSevereError(state, std::format("{}{}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(
+                    state, std::format("... A wavelength is not in the range 0.1 to 4.0 microns; at wavelength#={}, value=[{:.4f}].", LamNum, Lam));
             }
 
             // TH 2/15/2011. CR 8343
@@ -3018,23 +3191,24 @@ void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound) // set
             //  Relax rules to allow directly use of spectral data from IGDB
             if (Tau > 1.01) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("... A transmittance is > 1.0; at wavelength#={}, value=[{:.4T}].", LamNum, Tau));
+                ShowSevereError(state, std::format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("... A transmittance is > 1.0; at wavelength#={}, value=[{:.4f}].", LamNum, Tau));
             }
 
             if (RhoF < 0.0 || RhoF > 1.02 || RhoB < 0.0 || RhoB > 1.02) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, format("... A reflectance is < 0.0 or > 1.0; at wavelength#={}, RhoF value=[{:.4T}].", LamNum, RhoF));
-                ShowContinueError(state, format("... A reflectance is < 0.0 or > 1.0; at wavelength#={}, RhoB value=[{:.4T}].", LamNum, RhoB));
+                ShowSevereError(state, std::format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(state, std::format("... A reflectance is < 0.0 or > 1.0; at wavelength#={}, RhoF value=[{:.4f}].", LamNum, RhoF));
+                ShowContinueError(state, std::format("... A reflectance is < 0.0 or > 1.0; at wavelength#={}, RhoB value=[{:.4f}].", LamNum, RhoB));
             }
 
             if ((Tau + RhoF) > 1.03 || (Tau + RhoB) > 1.03) {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state,
-                                  format("... Transmittance + reflectance) > 1.0 for an entry; at wavelength#={}",
-                                         format("{}, value(Tau+RhoF)=[{:.4T}], value(Tau+RhoB)=[{:.4T}].", LamNum, (Tau + RhoF), (Tau + RhoB))));
+                ShowSevereError(state, std::format("{}: {}=\"{}\" invalid value.", routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowContinueError(
+                    state,
+                    std::format("... Transmittance + reflectance) > 1.0 for an entry; at wavelength#={}",
+                                std::format("{}, value(Tau+RhoF)=[{:.4f}], value(Tau+RhoB)=[{:.4f}].", LamNum, (Tau + RhoF), (Tau + RhoB))));
             }
         }
     }
@@ -3079,7 +3253,8 @@ void MaterialGlass::SetupSimpleWindowGlazingSystem(EnergyPlusData &state)
     this->TransThermal = 0.0;
     this->AbsorpThermalBack = 0.84;
     this->AbsorpThermalFront = 0.84;
-    this->AbsorpThermal = this->AbsorpThermalBack;
+    this->AbsorpThermalIn = this->AbsorpThermalBack;
+    this->AbsorpThermalOut = this->AbsorpThermalFront;
 
     // step 1. Determine U-factor without film coefficients
     // Simple window model has its own correlation for film coefficients (m2-K/W) under Winter conditions as function of U-factor
@@ -3095,9 +3270,9 @@ void MaterialGlass::SetupSimpleWindowGlazingSystem(EnergyPlusData &state)
     if (Rlw <= 0.0) { // U factor of film coefficients is better than user input.
         Rlw = max(Rlw, 0.001);
         ShowWarningError(state,
-                         format("WindowMaterial:SimpleGlazingSystem: {} has U-factor higher than that provided by surface film resistances, "
-                                "Check value of U-factor",
-                                this->Name));
+                         std::format("WindowMaterial:SimpleGlazingSystem: {} has U-factor higher than that provided by surface film resistances, "
+                                     "Check value of U-factor",
+                                     this->Name));
     }
 
     // Step 2. determine layer thickness.
@@ -3115,8 +3290,8 @@ void MaterialGlass::SetupSimpleWindowGlazingSystem(EnergyPlusData &state)
         this->NominalR = this->Resistance = Rlw;
     } else {
         ErrorsFound = true;
-        ShowSevereError(state,
-                        format("WindowMaterial:SimpleGlazingSystem: {} has Conductivity <= 0.0, must be >0.0, Check value of U-factor", this->Name));
+        ShowSevereError(
+            state, std::format("WindowMaterial:SimpleGlazingSystem: {} has Conductivity <= 0.0, must be >0.0, Check value of U-factor", this->Name));
     }
 
     // step 4. determine solar transmission (revised to 10-1-2009 version from LBNL.)
@@ -3401,7 +3576,7 @@ void CalcScreenTransmittance([[maybe_unused]] EnergyPlusData &state,
     }
 } // CalcScreenTransmittance()
 
-void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3<Real64> const &solcos, Real64 &phi, Real64 &theta)
+void GetRelativePhiTheta(Real64 phiWin, Real64 thetaWin, Vector3D const &solcos, Real64 &phi, Real64 &theta)
 {
     phi = std::abs(std::acos(solcos.z) - phiWin);
     theta = std::abs(std::atan2(solcos.x, solcos.y) - thetaWin);

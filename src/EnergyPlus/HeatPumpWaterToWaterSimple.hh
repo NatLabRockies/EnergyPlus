@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -68,11 +68,7 @@ namespace HeatPumpWaterToWaterSimple {
     {
         // Members
         std::string Name;                       // user identifier
-        bool checkEquipName;                    // name check flag
         DataPlant::PlantEquipmentType WWHPType; // equipment type num
-        bool Available;                         // need an array of logicals--load identifiers of available equipment
-        bool ON;                                // simulate the machine at it's operating part load ratio
-        bool IsOn;                              // flag that the heat pump is ON during current time step
         bool MustRun;                           // flag that the heat pump is MUST RUN during current time step
         Real64 SourceSideDesignMassFlow;        // Design flow rate (kg/s)
 
@@ -143,16 +139,16 @@ namespace HeatPumpWaterToWaterSimple {
 
         // Default Constructor
         GshpSpecs()
-            : checkEquipName(true), WWHPType(DataPlant::PlantEquipmentType::Invalid), Available(false), ON(false), IsOn(false), MustRun(false),
-              SourceSideDesignMassFlow(0.0), LoadSideDesignMassFlow(0.0), RatedLoadVolFlowCool(0.0), ratedLoadVolFlowCoolWasAutoSized(false),
-              RatedSourceVolFlowCool(0.0), ratedSourceVolFlowCoolWasAutoSized(false), RatedCapCool(0.0), ratedCapCoolWasAutoSized(false),
-              RatedPowerCool(0.0), ratedPowerCoolWasAutoSized(false), CoolCapCurveIndex(0), CoolPowCurveIndex(0), CoolCapNegativeCounter(0),
-              CoolCapNegativeIndex(0), CoolPowerNegativeCounter(0), CoolPowerNegativeIndex(0), RatedLoadVolFlowHeat(0.0),
-              ratedLoadVolFlowHeatWasAutoSized(false), RatedSourceVolFlowHeat(0.0), ratedSourceVolFlowHeatWasAutoSized(false), RatedCapHeat(0.0),
-              ratedCapHeatWasAutoSized(false), RatedPowerHeat(0.0), ratedPowerHeatWasAutoSized(false), HeatCapCurveIndex(0), HeatPowCurveIndex(0),
-              LoadSideInletNodeNum(0), LoadSideOutletNodeNum(0), SourceSideInletNodeNum(0), SourceSideOutletNodeNum(0), HeatCapNegativeCounter(0),
-              HeatCapNegativeIndex(0), HeatPowerNegativeCounter(0), HeatPowerNegativeIndex(0), SourcePlantLoc{}, LoadPlantLoc{}, CondMassFlowIndex(0),
-              refCOP(0.0), sizFac(0.0), companionIndex(0), companionIdentified(false), reportPower(0.0), reportEnergy(0.0), reportQLoad(0.0),
+            : WWHPType(DataPlant::PlantEquipmentType::Invalid), MustRun(false), SourceSideDesignMassFlow(0.0), LoadSideDesignMassFlow(0.0),
+              RatedLoadVolFlowCool(0.0), ratedLoadVolFlowCoolWasAutoSized(false), RatedSourceVolFlowCool(0.0),
+              ratedSourceVolFlowCoolWasAutoSized(false), RatedCapCool(0.0), ratedCapCoolWasAutoSized(false), RatedPowerCool(0.0),
+              ratedPowerCoolWasAutoSized(false), CoolCapCurveIndex(0), CoolPowCurveIndex(0), CoolCapNegativeCounter(0), CoolCapNegativeIndex(0),
+              CoolPowerNegativeCounter(0), CoolPowerNegativeIndex(0), RatedLoadVolFlowHeat(0.0), ratedLoadVolFlowHeatWasAutoSized(false),
+              RatedSourceVolFlowHeat(0.0), ratedSourceVolFlowHeatWasAutoSized(false), RatedCapHeat(0.0), ratedCapHeatWasAutoSized(false),
+              RatedPowerHeat(0.0), ratedPowerHeatWasAutoSized(false), HeatCapCurveIndex(0), HeatPowCurveIndex(0), LoadSideInletNodeNum(0),
+              LoadSideOutletNodeNum(0), SourceSideInletNodeNum(0), SourceSideOutletNodeNum(0), HeatCapNegativeCounter(0), HeatCapNegativeIndex(0),
+              HeatPowerNegativeCounter(0), HeatPowerNegativeIndex(0), SourcePlantLoc{}, LoadPlantLoc{}, CondMassFlowIndex(0), refCOP(0.0),
+              sizFac(0.0), companionIndex(0), companionIdentified(false), reportPower(0.0), reportEnergy(0.0), reportQLoad(0.0),
               reportQLoadEnergy(0.0), reportQSource(0.0), reportQSourceEnergy(0.0), reportLoadSideMassFlowRate(0.0), reportLoadSideInletTemp(0.0),
               reportLoadSideOutletTemp(0.0), reportSourceSideMassFlowRate(0.0), reportSourceSideInletTemp(0.0), reportSourceSideOutletTemp(0.0),
               MyPlantScanFlag(true), MyEnvrnFlag(true), myCoolingSizesReported(false), myHeatingSizesReported(false)

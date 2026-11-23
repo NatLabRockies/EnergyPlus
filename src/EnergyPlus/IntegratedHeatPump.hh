@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -86,48 +86,47 @@ namespace IntegratedHeatPump {
     struct IntegratedHeatPumpData // variable speed coil
     {
         // Members
-        std::string Name;    // Name of the  Coil
-        std::string IHPtype; // type of coil
+        std::string Name; // Name of the Coil
 
         std::string SCCoilType; // Numeric Equivalent for SC Coil Type
         std::string SCCoilName;
         int SCCoilIndex; // Index to SC coil
-        DataLoopNode::ConnectionObjectType SCCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SCCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SHCoilType; // Numeric Equivalent for SH Coil Type
         std::string SHCoilName;
         int SHCoilIndex; // Index to SH coil
-        DataLoopNode::ConnectionObjectType SHCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SHCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SCWHCoilType; // Numeric Equivalent for SCWH Coil Type
         std::string SCWHCoilName;
         int SCWHCoilIndex; // Index to SCWH coil
-        DataLoopNode::ConnectionObjectType SCWHCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SCWHCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string DWHCoilType; // Numeric Equivalent for DWH Coil Type
         std::string DWHCoilName;
         int DWHCoilIndex; // Index to DWH coil
-        DataLoopNode::ConnectionObjectType DWHCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType DWHCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SCDWHCoolCoilType; // Numeric Equivalent for SCDWH Coil Type, cooling part
         std::string SCDWHCoolCoilName;
         int SCDWHCoolCoilIndex; // Index to SCDWH coil, cooling part
-        DataLoopNode::ConnectionObjectType SCDWHCoolCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SCDWHCoolCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SCDWHWHCoilType; // Numeric Equivalent for SCDWH Coil Type, water heating part
         std::string SCDWHWHCoilName;
         int SCDWHWHCoilIndex; // Index to SCDWH coil, water heating part
-        DataLoopNode::ConnectionObjectType SCDWHWHCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SCDWHWHCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SHDWHHeatCoilType; // Numeric Equivalent for SHDWH Coil Type, heating part
         std::string SHDWHHeatCoilName;
         int SHDWHHeatCoilIndex; // Index to SHDWH coil, heating part
-        DataLoopNode::ConnectionObjectType SHDWHHeatCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SHDWHHeatCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         std::string SHDWHWHCoilType; // Numeric Equivalent for SHDWH Coil Type, water heating part
         std::string SHDWHWHCoilName;
         int SHDWHWHCoilIndex; // Index to SHDWH coil, water heating part
-        DataLoopNode::ConnectionObjectType SHDWHWHCoilTypeNum = DataLoopNode::ConnectionObjectType::Invalid;
+        Node::ConnectionObjectType SHDWHWHCoilTypeNum = Node::ConnectionObjectType::Invalid;
 
         int AirCoolInletNodeNum; // Node Number of the Air cooling coil Inlet
         int AirHeatInletNodeNum; // Node Number of the Air cooling coil Inlet
@@ -155,7 +154,6 @@ namespace IntegratedHeatPump {
         std::string WHtankName;
         int WHtankID;
         int LoopNum;
-        int LoopSideNum;
         bool IsWHCallAvail;
         // whether water heating call available
         bool CheckWHCall;
@@ -225,7 +223,7 @@ namespace IntegratedHeatPump {
               SHDWHWHCoilIndex(0), AirCoolInletNodeNum(0), AirHeatInletNodeNum(0), AirOutletNodeNum(0), WaterInletNodeNum(0), WaterOutletNodeNum(0),
               WaterTankoutNod(0), ModeMatchSCWH(0), MinSpedSCWH(1), MinSpedSCDWH(1), MinSpedSHDWH(1), TindoorOverCoolAllow(0.0),
               TambientOverCoolAllow(0.0), TindoorWHHighPriority(0.0), TambientWHHighPriority(0.0), WaterVolSCDWH(0.0), TimeLimitSHDWH(0.0),
-              WHtankType(DataPlant::PlantEquipmentType::Invalid), WHtankID(0), LoopNum(0), LoopSideNum(0), IsWHCallAvail(false), CheckWHCall(false),
+              WHtankType(DataPlant::PlantEquipmentType::Invalid), WHtankID(0), LoopNum(0), IsWHCallAvail(false), CheckWHCall(false),
               CurMode(IHPOperationMode::Idle), ControlledZoneTemp(0), WaterFlowAccumVol(0), SHDWHRunTime(0), CoolVolFlowScale(0), HeatVolFlowScale(0),
               MaxHeatAirMassFlow(0), MaxHeatAirVolFlow(0), MaxCoolAirMassFlow(0), MaxCoolAirVolFlow(0), IHPCoilsSized(false), IDFanID(0),
               fanPlace(HVAC::FanPlace::Invalid), ODAirInletNodeNum(0),                                                // oudoor coil inlet Nod

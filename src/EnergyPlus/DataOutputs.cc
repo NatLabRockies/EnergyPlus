@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -145,7 +145,7 @@ bool isKeyRegexLike(std::string_view key)
 }
 
 OutputReportingVariables::OutputReportingVariables(EnergyPlusData &state, std::string const &KeyValue, std::string const &VariableName)
-    : key(KeyValue), variableName(VariableName), is_simple_string(!DataOutputs::isKeyRegexLike(KeyValue))
+    : key(KeyValue), is_simple_string(!DataOutputs::isKeyRegexLike(KeyValue))
 {
 
     if (is_simple_string) {
@@ -154,7 +154,7 @@ OutputReportingVariables::OutputReportingVariables(EnergyPlusData &state, std::s
     pattern = std::make_shared<RE2>(KeyValue);
     case_insensitive_pattern = std::make_shared<RE2>("(?i)" + KeyValue);
     if (!pattern->ok()) {
-        ShowSevereError(state, format("Regular expression \"{}\" for variable name \"{}\" in input file is incorrect", KeyValue, VariableName));
+        ShowSevereError(state, std::format("Regular expression \"{}\" for variable name \"{}\" in input file is incorrect", KeyValue, VariableName));
         ShowContinueError(state, pattern->error());
         ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
     }

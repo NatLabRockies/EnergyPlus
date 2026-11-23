@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -82,27 +82,16 @@ namespace HVACInterfaceManager {
     struct CommonPipeData
     {
         // Members
-        DataPlant::CommonPipeType CommonPipeType = DataPlant::CommonPipeType::No; // type of common pipe used if any
         FlowType SupplySideInletPumpType = FlowType::Invalid;
-        FlowType DemandSideInletPumpType = FlowType::Invalid;
         // Following report variables are used in uncontrolled common pipe
         int FlowDir = 0;   // Direction in which flow is in Common Pipe
         Real64 Flow = 0.0; // Flow in the Common Pipe
         Real64 Temp = 0.0;
         // Following report variables are used in two-way common pipe
-        Real64 SecCPLegFlow = 0.0;       // Mass flow in the secondary side Common pipe leg
-        Real64 PriCPLegFlow = 0.0;       // Mass flow in the primary side Common pipe leg
-        Real64 SecToPriFlow = 0.0;       // Mass flow in the pipe from Secondary to primary side
-        Real64 PriToSecFlow = 0.0;       // Mass flow in the pipe from primary to Secondary side
-        Real64 PriInTemp = 0.0;          // Temperature at primary inlet node
-        Real64 PriOutTemp = 0.0;         // Temperature at primary outlet node
-        Real64 SecInTemp = 0.0;          // Temperature at secondary inlet node
-        Real64 SecOutTemp = 0.0;         // Temperature at secondary outlet node
-        Real64 PriInletSetPoint = 0.0;   // Setpoint at Primary inlet node
-        Real64 SecInletSetPoint = 0.0;   // Setpoint at Secondary inlet node
-        bool PriInletControlled = false; // True if Primary inlet node is controlled
-        bool SecInletControlled = false; // True if secondary inlet is controlled
-        Real64 PriFlowRequest = 0.0;     // total flow request on supply side.
+        Real64 SecCPLegFlow = 0.0; // Mass flow in the secondary side Common pipe leg
+        Real64 PriCPLegFlow = 0.0; // Mass flow in the primary side Common pipe leg
+        Real64 SecToPriFlow = 0.0; // Mass flow in the pipe from Secondary to primary side
+        Real64 PriToSecFlow = 0.0; // Mass flow in the pipe from primary to Secondary side
         bool MyEnvrnFlag = true;
     };
 

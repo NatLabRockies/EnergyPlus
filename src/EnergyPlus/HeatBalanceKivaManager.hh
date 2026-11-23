@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -161,6 +161,11 @@ namespace HeatBalanceKivaManager {
         std::map<int, ConvectionAlgorithms> surfaceConvMap;
         std::map<int, Kiva::Aggregator> surfaceMap;
         Real64 timestep;
+
+        // Last zone timestep advanced; initialization resets this for each environment.
+        int lastCalculationDay = -1;
+        int lastCalculationHour = -1;
+        int lastCalculationTimeStep = -1;
 
         struct Settings
         {

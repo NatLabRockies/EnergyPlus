@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -109,7 +109,6 @@ namespace DataHVACControllers {
 
 struct HVACCtrlData : BaseGlobalStruct
 {
-    Array1D_string const ControllerTypes = Array1D_string(1, std::string("Controller:WaterCoil"));
     static constexpr std::array<std::string_view, 5> ActionTypes = {"No action", "Reverse action", "Normal action"};
     Array1D_string const ControllerModeTypes = Array1D_string({-1, 5},
                                                               {"Wrong action mode",

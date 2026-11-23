@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -54,13 +54,12 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Array2S.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -254,7 +253,6 @@ namespace Fluid {
     {
         // Members
         std::string Name; // Name of the glycol
-        int Num = 0;
 
         std::string CpTempArrayName;
         bool CpDataPresent = false; // Flag set when specific heat data is available
@@ -298,8 +296,6 @@ namespace Fluid {
 
         std::string GlycolName; // Name of non-water fluid that is part of this mixture
         // (refers to ethylene glycol, propylene glycol, or user fluid)
-        int BaseGlycolIndex = 0; // Index in user defined glycol data (>0 = index in raw data,
-        // -1=propylene glycol, -2=ethylene glycol)
         Real64 Concentration = 0.0; // Concentration (if applicable)
 
         bool CpDataPresent = false;   // Flag set when specific heat data is available
@@ -409,7 +405,7 @@ namespace Fluid {
                                    int NumOfConcs,                     // number of concentrations (dimension of raw data)
                                    int NumOfTemps,                     // number of temperatures (dimension of raw data)
                                    const Array1D<Real64> &RawConcData, // concentrations for raw data
-                                   Array2S<Real64> RawPropData,        // raw property data (temperature,concentration)
+                                   Array2D<Real64> const &RawPropData, // raw property data (temperature,concentration)
                                    Real64 Concentration,               // concentration of actual fluid mix
                                    Array1D<Real64> &InterpData         // interpolated output data at proper concentration
     );
@@ -541,7 +537,7 @@ namespace Fluid {
     RefrigProps *GetRefrig(EnergyPlusData &state, std::string_view name);
     RefrigProps *GetSteam(EnergyPlusData &state);
 
-    int GetGlycolRawNum(EnergyPlusData &state, std::string_view name);
+    int GetGlycolRawNum(EnergyPlusData const &state, std::string_view name);
     GlycolRawProps *GetGlycolRaw(EnergyPlusData &state, std::string_view name);
 
     int GetGlycolNum(EnergyPlusData &state, std::string_view name);
@@ -589,8 +585,6 @@ struct FluidData : BaseGlobalStruct
 
     int SatErrCountGetSupHeatEnthalpyRefrig = 0;
     int SatErrCountGetSupHeatDensityRefrig = 0;
-    int TempLoRangeErrIndexGetQualityRefrig = 0;
-    int TempHiRangeErrIndexGetQualityRefrig = 0;
     int TempRangeErrCountGetInterpolatedSatProp = 0;
     int TempRangeErrIndexGetInterpolatedSatProp = 0;
 

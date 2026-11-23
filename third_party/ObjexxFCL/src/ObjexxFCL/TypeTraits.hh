@@ -18,53 +18,8 @@
 #include <cstddef>
 #include <ios>
 #include <limits>
-#include <type_traits>
 
 namespace ObjexxFCL {
-
-template< class A, class B >
-inline
-bool
-same_type_as( A const &, B const & )
-{
-	return std::is_same< A, B >::value;
-}
-
-// is_a: Type Test for const Reference Argument
-template< class B, class A >
-inline
-bool
-is_a( A const & )
-{
-	return std::is_same< A, B >::value || std::is_base_of< B, A >::value;
-}
-
-// is_a: Type Test for non-const Reference Argument
-template< class B, class A >
-inline
-bool
-is_a( A & )
-{
-	return std::is_same< A, B >::value || std::is_base_of< B, A >::value;
-}
-
-// is_a: Type Test for const Pointer Argument
-template< class B, class A >
-inline
-bool
-is_a( A const * )
-{
-	return std::is_same< A, B >::value || std::is_base_of< B, A >::value;
-}
-
-// is_a: Type Test for non-const Pointer Argument
-template< class B, class A >
-inline
-bool
-is_a( A * )
-{
-	return std::is_same< A, B >::value || std::is_base_of< B, A >::value;
-}
 
 // TypeTraits: Type Traits Template
 template< typename T >

@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,26.1;
+  Version,27.1;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -368,15 +368,6 @@
     Until: 23:00,0,          !- Field 96
     Until: 24:00,0;          !- Field 98
 
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-
   Schedule:Compact,
     LTG_APT_SCH,             !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -397,8 +388,6 @@
     Until: 22:00,0.124476338,!- Field 27
     Until: 23:00,0.067896184,!- Field 29
     Until: 24:00,0.028290077;!- Field 31
-
-                             !- Field 32
 
   Schedule:Compact,
     LTG_COR_SCH,             !- Name
@@ -596,9 +585,6 @@
     FOR: AllOtherDays,       !- Field 26
     UNTIL: 24:00,15.6;       !- Field 27
 
-                             !- Field 28
-                             !- Field 32
-
   Schedule:Compact,
     HTGSETP_OFF_SCH_Yes_Optimum_w_SB,  !- Name
     Temperature,             !- Schedule Type Limits Name
@@ -695,9 +681,6 @@
     UNTIL: 24:00,29.4,       !- Field 24
     FOR: AllOtherDays,       !- Field 26
     UNTIL: 24:00,29.4;       !- Field 27
-
-                             !- Field 28
-                             !- Field 32
 
   Schedule:Compact,
     CLGSETP_OFF_SCH_Yes_Optimum_w_SB,  !- Name
@@ -27461,6 +27444,7 @@
     G SW Apartment Thermostat,  !- Name
     G SW Apartment,          !- Zone or ZoneList Name
     ZONE CONTROL TYPE SCHED, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27472,6 +27456,7 @@
     G NW Apartment Thermostat,  !- Name
     G NW Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27483,6 +27468,7 @@
     Office Thermostat,       !- Name
     Office,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     OffCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27494,6 +27480,7 @@
     G NE Apartment Thermostat,  !- Name
     G NE Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27505,6 +27492,7 @@
     G N1 Apartment Thermostat,  !- Name
     G N1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27516,6 +27504,7 @@
     G N2 Apartment Thermostat,  !- Name
     G N2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27527,6 +27516,7 @@
     G S1 Apartment Thermostat,  !- Name
     G S1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27538,6 +27528,7 @@
     G S2 Apartment Thermostat,  !- Name
     G S2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27549,6 +27540,7 @@
     F2 SW Apartment Thermostat,  !- Name
     F2 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27560,6 +27552,7 @@
     F2 NW Apartment Thermostat,  !- Name
     F2 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27571,6 +27564,7 @@
     F2 SE Apartment Thermostat,  !- Name
     F2 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27582,6 +27576,7 @@
     F2 NE Apartment Thermostat,  !- Name
     F2 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27593,6 +27588,7 @@
     F2 N1 Apartment Thermostat,  !- Name
     F2 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27604,6 +27600,7 @@
     F2 N2 Apartment Thermostat,  !- Name
     F2 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27615,6 +27612,7 @@
     F2 S1 Apartment Thermostat,  !- Name
     F2 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27626,6 +27624,7 @@
     F2 S2 Apartment Thermostat,  !- Name
     F2 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27637,6 +27636,7 @@
     F3 SW Apartment Thermostat,  !- Name
     F3 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27648,6 +27648,7 @@
     F3 NW Apartment Thermostat,  !- Name
     F3 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27659,6 +27660,7 @@
     F3 SE Apartment Thermostat,  !- Name
     F3 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27670,6 +27672,7 @@
     F3 NE Apartment Thermostat,  !- Name
     F3 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27681,6 +27684,7 @@
     F3 N1 Apartment Thermostat,  !- Name
     F3 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27692,6 +27696,7 @@
     F3 N2 Apartment Thermostat,  !- Name
     F3 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27703,6 +27708,7 @@
     F3 S1 Apartment Thermostat,  !- Name
     F3 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27714,6 +27720,7 @@
     F3 S2 Apartment Thermostat,  !- Name
     F3 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27725,6 +27732,7 @@
     F4 SW Apartment Thermostat,  !- Name
     F4 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27736,6 +27744,7 @@
     F4 NW Apartment Thermostat,  !- Name
     F4 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27747,6 +27756,7 @@
     F4 SE Apartment Thermostat,  !- Name
     F4 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27758,6 +27768,7 @@
     F4 NE Apartment Thermostat,  !- Name
     F4 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27769,6 +27780,7 @@
     F4 N1 Apartment Thermostat,  !- Name
     F4 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27780,6 +27792,7 @@
     F4 N2 Apartment Thermostat,  !- Name
     F4 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27791,6 +27804,7 @@
     F4 S1 Apartment Thermostat,  !- Name
     F4 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27802,6 +27816,7 @@
     F4 S2 Apartment Thermostat,  !- Name
     F4 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27813,6 +27828,7 @@
     M SW Apartment Thermostat,  !- Name
     M SW Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27824,6 +27840,7 @@
     M NW Apartment Thermostat,  !- Name
     M NW Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27835,6 +27852,7 @@
     M SE Apartment Thermostat,  !- Name
     M SE Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27846,6 +27864,7 @@
     M NE Apartment Thermostat,  !- Name
     M NE Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27857,6 +27876,7 @@
     M N1 Apartment Thermostat,  !- Name
     M N1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27868,6 +27888,7 @@
     M N2 Apartment Thermostat,  !- Name
     M N2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27879,6 +27900,7 @@
     M S1 Apartment Thermostat,  !- Name
     M S1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27890,6 +27912,7 @@
     M S2 Apartment Thermostat,  !- Name
     M S2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27901,6 +27924,7 @@
     F6 SW Apartment Thermostat,  !- Name
     F6 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27912,6 +27936,7 @@
     F6 NW Apartment Thermostat,  !- Name
     F6 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27923,6 +27948,7 @@
     F6 SE Apartment Thermostat,  !- Name
     F6 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27934,6 +27960,7 @@
     F6 NE Apartment Thermostat,  !- Name
     F6 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27945,6 +27972,7 @@
     F6 N1 Apartment Thermostat,  !- Name
     F6 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27956,6 +27984,7 @@
     F6 N2 Apartment Thermostat,  !- Name
     F6 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27967,6 +27996,7 @@
     F6 S1 Apartment Thermostat,  !- Name
     F6 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27978,6 +28008,7 @@
     F6 S2 Apartment Thermostat,  !- Name
     F6 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -27989,6 +28020,7 @@
     F7 SW Apartment Thermostat,  !- Name
     F7 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28000,6 +28032,7 @@
     F7 NW Apartment Thermostat,  !- Name
     F7 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28011,6 +28044,7 @@
     F7 SE Apartment Thermostat,  !- Name
     F7 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28022,6 +28056,7 @@
     F7 NE Apartment Thermostat,  !- Name
     F7 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28033,6 +28068,7 @@
     F7 N1 Apartment Thermostat,  !- Name
     F7 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28044,6 +28080,7 @@
     F7 N2 Apartment Thermostat,  !- Name
     F7 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28055,6 +28092,7 @@
     F7 S1 Apartment Thermostat,  !- Name
     F7 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28066,6 +28104,7 @@
     F7 S2 Apartment Thermostat,  !- Name
     F7 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28077,6 +28116,7 @@
     F8 SW Apartment Thermostat,  !- Name
     F8 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28088,6 +28128,7 @@
     F8 NW Apartment Thermostat,  !- Name
     F8 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28099,6 +28140,7 @@
     F8 SE Apartment Thermostat,  !- Name
     F8 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28110,6 +28152,7 @@
     F8 NE Apartment Thermostat,  !- Name
     F8 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28121,6 +28164,7 @@
     F8 N1 Apartment Thermostat,  !- Name
     F8 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28132,6 +28176,7 @@
     F8 N2 Apartment Thermostat,  !- Name
     F8 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28143,6 +28188,7 @@
     F8 S1 Apartment Thermostat,  !- Name
     F8 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28154,6 +28200,7 @@
     F8 S2 Apartment Thermostat,  !- Name
     F8 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28165,6 +28212,7 @@
     F9 SW Apartment Thermostat,  !- Name
     F9 SW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28176,6 +28224,7 @@
     F9 NW Apartment Thermostat,  !- Name
     F9 NW Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28187,6 +28236,7 @@
     F9 SE Apartment Thermostat,  !- Name
     F9 SE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28198,6 +28248,7 @@
     F9 NE Apartment Thermostat,  !- Name
     F9 NE Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28209,6 +28260,7 @@
     F9 N1 Apartment Thermostat,  !- Name
     F9 N1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28220,6 +28272,7 @@
     F9 N2 Apartment Thermostat,  !- Name
     F9 N2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28231,6 +28284,7 @@
     F9 S1 Apartment Thermostat,  !- Name
     F9 S1 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28242,6 +28296,7 @@
     F9 S2 Apartment Thermostat,  !- Name
     F9 S2 Apartment,         !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28253,6 +28308,7 @@
     T SW Apartment Thermostat,  !- Name
     T SW Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28264,6 +28320,7 @@
     T NW Apartment Thermostat,  !- Name
     T NW Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28275,6 +28332,7 @@
     T SE Apartment Thermostat,  !- Name
     T SE Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28286,6 +28344,7 @@
     T NE Apartment Thermostat,  !- Name
     T NE Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28297,6 +28356,7 @@
     T N1 Apartment Thermostat,  !- Name
     T N1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28308,6 +28368,7 @@
     T N2 Apartment Thermostat,  !- Name
     T N2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28319,6 +28380,7 @@
     T S1 Apartment Thermostat,  !- Name
     T S1 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -28330,6 +28392,7 @@
     T S2 Apartment Thermostat,  !- Name
     T S2 Apartment,          !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     AptCoolingSetPoint,      !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type

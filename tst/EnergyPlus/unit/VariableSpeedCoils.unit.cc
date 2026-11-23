@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -3002,7 +3002,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
     // get coil inputs
     VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     // Setting predefined tables is needed though
-    OutputReportPredefined::SetPredefinedTables(*state);
     // Set up some environmental parameters
     state->dataEnvrn->OutDryBulbTemp = 5.0;
     state->dataEnvrn->OutHumRat = 0.0009;
@@ -3040,12 +3039,10 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
     state->dataLoopNodes->Node(vsCoolingCoil.AirInletNodeNum).MassFlowRate = vsCoolingCoil.AirMassFlowRate;
     VariableSpeedCoils::CalcVarSpeedCoilCooling(
         *state, DXCoilNum, fanOp, SensLoad, LatentLoad, compressorOp, PartLoadFrac, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
-    ;
     // check coil outlet and inlet air conditions match
     EXPECT_EQ(vsCoolingCoil.OutletAirDBTemp, vsCoolingCoil.InletAirDBTemp);
     EXPECT_EQ(vsCoolingCoil.OutletAirHumRat, vsCoolingCoil.InletAirHumRat);
     EXPECT_EQ(vsCoolingCoil.OutletAirEnthalpy, vsCoolingCoil.InletAirEnthalpy);
-    ;
     // test 2: compressor is On and PLR > 0
     compressorOp = HVAC::CompressorOp::On;
     PartLoadFrac = 0.1;
@@ -3067,7 +3064,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
     EXPECT_NEAR(vsCoolingCoil.Power, 785.588, 0.001);
     EXPECT_NEAR(vsCoolingCoil.QSource, 3915.355, 0.001);
     EXPECT_NEAR(vsCoolingCoil.QLoadTotal, 3182.143, 0.001);
-    ;
     // test 3: dx cooling coil unavailable, compressor is On and PLR > 0
     // run init the coil to reset coil air inlet and outlet conditions
     VariableSpeedCoils::InitVarSpeedCoil(*state, DXCoilNum, SensLoad, LatentLoad, fanOp, OnOffAirFlowRatio, SpeedRatio, SpeedCal);
@@ -6960,7 +6956,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
 
     // Setting predefined tables is needed though
-    OutputReportPredefined::SetPredefinedTables(*state);
     // Set up some environmental parameters
     state->dataEnvrn->OutDryBulbTemp = -5.0;
     state->dataEnvrn->OutHumRat = 0.0009;
@@ -6987,6 +6982,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     state->dataLoopNodes->Node(2).MassFlowRate = 0.2;
     state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).AirMassFlowRate = 0.2;
     state->dataEnvrn->OutDryBulbTemp = -5.0;
+    state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).FindCompanionUpStreamCoil = false;
 
     // Run a compressor "On" scenario first
     HVAC::CompressorOp compressorOp = HVAC::CompressorOp::On;
@@ -7001,7 +6997,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
                                               SensLoad,
                                               LatentLoad,
                                               OnOffAirFlowRatio);
-
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 908.10992432432420, 1e-3);
     // Real64 COPwDefrost = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).COP;
     EXPECT_LT(state->dataVariableSpeedCoils->HeatingCapacityMultiplier, 1.0);
@@ -7084,7 +7079,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
 
     // Without the current PR (PR 10109), the DefrostPower would remain 908.1 and fail the following test:
     EXPECT_NEAR(state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum).DefrostPower, 0.0, 1e-3);
-    ;
     // new test: dx cooling coil unavailable, compressor is On and PLR > 0
     auto &vsHeatingCoil = state->dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum);
     // Set up some environmental parameters
@@ -7108,10 +7102,9 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
     EXPECT_NEAR(vsHeatingCoil.OutletAirDBTemp, 7.16, 0.001);
     EXPECT_NEAR(vsHeatingCoil.OutletAirHumRat, 0.0, 0.001);
     EXPECT_NEAR(vsHeatingCoil.OutletAirEnthalpy, 7219.7401811854543, 0.001);
-    EXPECT_NEAR(vsHeatingCoil.Power, 280.91365138509082, 0.0);
-    EXPECT_NEAR(vsHeatingCoil.QSource, 1163.0343848520001, 0.0);
+    EXPECT_DOUBLE_EQ(vsHeatingCoil.Power, 280.91365138509082);
+    EXPECT_DOUBLE_EQ(vsHeatingCoil.QSource, 1163.0343848520001);
     EXPECT_NEAR(vsHeatingCoil.QLoadTotal, 1443.9480362370909, 0.001);
-    ;
     // reset the heating coil availability schedule to AlwaysOff
     vsHeatingCoil.availSched = Sched::GetScheduleAlwaysOff(*state);
     VariableSpeedCoils::SimVariableSpeedCoils(*state,
@@ -7247,7 +7240,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ZeroRatedCoolingCapacity_Test)
     // get coil inputs
     VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     // Setting predefined tables is needed though
-    OutputReportPredefined::SetPredefinedTables(*state);
     // Set up some environmental parameters
     state->dataEnvrn->OutDryBulbTemp = 5.0;
     state->dataEnvrn->OutHumRat = 0.0009;
@@ -7451,7 +7443,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_UpdateVarSpeedCoil_Test)
     thisInletNode.GenContam = 12.345;
     thisOutletNode.GenContam = 0.0;
     thisVarSpeedCoil.reportCoilFinalSizes = false;
-    thisVarSpeedCoil.VSCoilType = HVAC::Coil_CoolingAirToAirVariableSpeed;
+    thisVarSpeedCoil.coilType = HVAC::CoilType::CoolingDXVariableSpeed;
 
     // Run the test
     VariableSpeedCoils::UpdateVarSpeedCoil(*state, coilNum);

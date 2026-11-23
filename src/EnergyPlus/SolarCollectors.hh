@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -78,28 +78,28 @@ namespace SolarCollectors {
 
     struct ParametersData
     {
-        std::string Name;                                    // Name of solar collector parameters
-        Real64 Area = 0.0;                                   // Gross area of collector (m2)
-        Real64 TestMassFlowRate = 0.0;                       // Test volumetric flow rate (m3/s)
-        TestTypeEnum TestType = TestTypeEnum::INLET;         // Test correlation type (INLET | AVERAGE | OUTLET)
-        Real64 eff0 = 0.0;                                   // Coefficient 1 of efficiency equation (Y-intercept)
-        Real64 eff1 = 0.0;                                   // Coefficient 2 of efficiency equation (1st order)
-        Real64 eff2 = 0.0;                                   // Coefficient 3 of efficiency equation (2nd order)
-        Real64 iam1 = 0.0;                                   // Coefficient 2 of incident angle modifier (1st order)
-        Real64 iam2 = 0.0;                                   // Coefficient 3 of incident angle modifier (2nd order)
-        Real64 Volume = 0.0;                                 // collector water net volume (m3)
-        Real64 SideHeight = 0.0;                             // collector side height (m)
-        Real64 ThermalMass = 0.0;                            // thermal mass of the absorber plate (J/m2C)
-        Real64 ULossSide = 0.0;                              // heat loss conductance for collector side (W/m2C)
-        Real64 ULossBottom = 0.0;                            // heat loss conductance for collector bottom (W/m2C)
-        Real64 AspectRatio = 0.0;                            // collector aspect ratio (dimensionless)
-        int NumOfCovers = 0;                                 // number of transparent collector covers
-        Real64 CoverSpacing = 0.0;                           // collector cover spacings (m)
-        std::array<Real64, 2> RefractiveIndex = {0.0};       // refractive index of inner and outer covers (dimensionless)
-        std::array<Real64, 2> ExtCoefTimesThickness = {0.0}; // extinction coefficient times thickness of covers (dimensionless)
-        std::array<Real64, 2> EmissOfCover = {0.0};          // emissivity of inner and outer covers (dimensionless)
-        Real64 EmissOfAbsPlate = 0.0;                        // emissivity Of absorber plate (dimensionless)
-        Real64 AbsorOfAbsPlate = 0.0;                        // absorptance of the absorber plate (dimensionless)
+        std::string Name;                              // Name of solar collector parameters
+        Real64 Area = 0.0;                             // Gross area of collector (m2)
+        Real64 TestMassFlowRate = 0.0;                 // Test volumetric flow rate (m3/s)
+        TestTypeEnum TestType = TestTypeEnum::INLET;   // Test correlation type (INLET | AVERAGE | OUTLET)
+        Real64 eff0 = 0.0;                             // Coefficient 1 of efficiency equation (Y-intercept)
+        Real64 eff1 = 0.0;                             // Coefficient 2 of efficiency equation (1st order)
+        Real64 eff2 = 0.0;                             // Coefficient 3 of efficiency equation (2nd order)
+        Real64 iam1 = 0.0;                             // Coefficient 2 of incident angle modifier (1st order)
+        Real64 iam2 = 0.0;                             // Coefficient 3 of incident angle modifier (2nd order)
+        Real64 Volume = 0.0;                           // collector water net volume (m3)
+        Real64 SideHeight = 0.0;                       // collector side height (m)
+        Real64 ThermalMass = 0.0;                      // thermal mass of the absorber plate (J/m2C)
+        Real64 ULossSide = 0.0;                        // heat loss conductance for collector side (W/m2C)
+        Real64 ULossBottom = 0.0;                      // heat loss conductance for collector bottom (W/m2C)
+        Real64 AspectRatio = 0.0;                      // collector aspect ratio (dimensionless)
+        int NumOfCovers = 0;                           // number of transparent collector covers
+        Real64 CoverSpacing = 0.0;                     // collector cover spacings (m)
+        std::array<Real64, 2> RefractiveIndex{};       // refractive index of inner and outer covers (dimensionless)
+        std::array<Real64, 2> ExtCoefTimesThickness{}; // extinction coefficient times thickness of covers (dimensionless)
+        std::array<Real64, 2> EmissOfCover{};          // emissivity of inner and outer covers (dimensionless)
+        Real64 EmissOfAbsPlate = 0.0;                  // emissivity Of absorber plate (dimensionless)
+        Real64 AbsorOfAbsPlate = 0.0;                  // absorptance of the absorber plate (dimensionless)
 
         Real64 IAM(EnergyPlusData &state, Real64 IncidentAngle);
     };
@@ -147,13 +147,13 @@ namespace SolarCollectors {
         Real64 TempOfInnerCover = 0.0;   // temperature of the collector inner cover [C]
         Real64 TempOfOuterCover = 0.0;   // temperature of the collector inner cover [C]
         // Data from elsewhere and calculated
-        Real64 TauAlphaSkyDiffuse = 0.0;                   // Transmittance-absorptance product sky diffuse radiation
-        Real64 TauAlphaGndDiffuse = 0.0;                   // Transmittance-absorptance product grn diffuse radiation
-        Real64 TauAlphaBeam = 0.0;                         // Transmittance-absorptance product beam radiation
-        std::array<Real64, 2> CoversAbsSkyDiffuse = {0.0}; // sky diffuse solar absorptance of cover
-        std::array<Real64, 2> CoversAbsGndDiffuse = {0.0}; // ground diffuse solar absorptance of cover
-        std::array<Real64, 2> CoverAbs = {0.0};            // solar rad weighted covers absorptance
-        Real64 TimeElapsed = 0.0;                          // Fraction of the current hour that has elapsed (h)
+        Real64 TauAlphaSkyDiffuse = 0.0;             // Transmittance-absorptance product sky diffuse radiation
+        Real64 TauAlphaGndDiffuse = 0.0;             // Transmittance-absorptance product grn diffuse radiation
+        Real64 TauAlphaBeam = 0.0;                   // Transmittance-absorptance product beam radiation
+        std::array<Real64, 2> CoversAbsSkyDiffuse{}; // sky diffuse solar absorptance of cover
+        std::array<Real64, 2> CoversAbsGndDiffuse{}; // ground diffuse solar absorptance of cover
+        std::array<Real64, 2> CoverAbs{};            // solar rad weighted covers absorptance
+        Real64 TimeElapsed = 0.0;                    // Fraction of the current hour that has elapsed (h)
         // Saved in order to identify the beginning of a new system time
         Real64 UbLoss = 0.0;                 // Over all bottom loss coefficient [W/m2C]
         Real64 UsLoss = 0.0;                 // Over all side loss coefficient [W/m2C]

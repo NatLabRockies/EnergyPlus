@@ -274,7 +274,7 @@ The yearly schedule is used to cover the entire year using references to week sc
 
 \paragraph{Field: Name}\label{field-name-5-021}
 
-This field should contain a unique (between Schedule:Year, \hyperref[schedulecompact]{Schedule:Compact}, and \hyperref[schedulefile]{Schedule:File}) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration) to define the appropriate schedule values.
+This field should contain a unique (between Schedule:Year, \hyperref[schedulecompact]{Schedule:Compact}, \hyperref[scheduleyearrules]{Schedule:Year:Rules}, and \hyperref[schedulefile]{Schedule:File}) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration) to define the appropriate schedule values.
 
 \paragraph{Field: Schedule Type Limits Name}\label{field-schedule-type-limits-name-3}
 
@@ -336,7 +336,7 @@ This object is an unusual object for description. For the data the number of fie
 
 \paragraph{Field: Name}\label{field-name-6-019}
 
-This field should contain a unique (between \hyperref[scheduleyear]{Schedule:Year}, Schedule:Compact, and \hyperref[schedulefile]{Schedule:File}) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration) to define the appropriate schedule values.
+This field should contain a unique (between \hyperref[scheduleyear]{Schedule:Year}, Schedule:Compact, \hyperref[scheduleyearrules]{Schedule:Year:Rules}, and \hyperref[schedulefile]{Schedule:File}) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration) to define the appropriate schedule values.
 
 \paragraph{Field: Schedule Type Limits Name}\label{field-schedule-type-limits-name-4}
 
@@ -416,6 +416,194 @@ Schedule:Compact,
   Until: 24:00, 0.0;
 \end{lstlisting}
 
+\subsection{Schedule:Year:Rules}\label{scheduleyearrules}
+
+A Schedule:Year:Rules defines a yearly schedule using a default day profile and a prioritized list of override rules (\hyperref[scheduleweekrule]{Schedule:Week:Rule} objects).
+For the ordinary day-of-week types (Sunday through Saturday), rules are evaluated in ascending Rule Priority Order; the first matching rule is used.
+If no rule matches, the Default Day Schedule is used.
+Summer design days, winter design days, holidays, Custom Day 1, and Custom Day 2 use the corresponding day schedules specified in this object instead of a matching weekday rule.
+If one of these special day schedule fields is blank, the Default Day Schedule is used for that day type.
+February 29 is an exception: if no rule date range includes February 29, it inherits the resolved schedule for February 28 instead of using the default day schedule.
+
+\subsubsection{Inputs}\label{inputs-scheduleyearrules}
+
+\paragraph{Field: Name}\label{field-name-scheduleyearrules}
+
+This field should contain a name that is unique among all schedules that can be referenced through a Schedule Name field.
+It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration) to define the appropriate schedule values.
+It is also referenced by optional \hyperref[scheduleweekrule]{Schedule:Week:Rule} objects.
+
+\paragraph{Field: Schedule Type Limits Name}\label{field-schedule-type-limits-name-scheduleyearrules}
+
+This field contains a reference to the \hyperref[scheduletypelimits]{ScheduleTypeLimits} object.
+If the referenced object is found, its restrictions are used to validate the values in the day schedules referenced by this object and its associated \hyperref[scheduleweekrule]{Schedule:Week:Rule} objects.
+
+\paragraph{Field: Default Day Schedule Name}\label{field-default-day-schedule-name-scheduleyearrules}
+
+This field is the name of the default day schedule (ref. Schedule:Day:Constant, Schedule:Day:Hourly, Schedule:Day:Interval, and Schedule:Day:List objects) used for ordinary day-of-week types when no schedule rule applies and as the fallback for any blank special day schedule field below.
+
+\paragraph{Field: Summer Design Day Schedule Name}\label{field-summer-design-day-schedule-name-scheduleyearrules}
+
+This field is the name of the summer design day schedule. If this field is blank, the Default Day Schedule is used.
+
+\paragraph{Field: Winter Design Day Schedule Name}\label{field-winter-design-day-schedule-name-scheduleyearrules}
+
+This field is the name of the winter design day schedule. If this field is blank, the Default Day Schedule is used.
+
+\paragraph{Field: Holiday Schedule Name}\label{field-holiday-schedule-name-scheduleyearrules}
+
+This field is the name of the holiday schedule. If this field is blank, the Default Day Schedule is used.
+
+\paragraph{Field: Custom Day 1 Schedule Name}\label{field-custom-day-1-schedule-name-scheduleyearrules}
+
+This field is the name of the Custom Day 1 schedule. If this field is blank, the Default Day Schedule is used.
+
+\paragraph{Field: Custom Day 2 Schedule Name}\label{field-custom-day-2-schedule-name-scheduleyearrules}
+
+This field is the name of the Custom Day 2 schedule. If this field is blank, the Default Day Schedule is used.
+
+An example of IDF input:
+
+\begin{lstlisting}
+Schedule:Year:Rules,
+  occupants schedule year rules,          !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  occupants schedule default day,         !- Default Day Schedule Name
+  occupants schedule default day,         !- Summer Design Day Schedule Name
+  occupants schedule default day,         !- Winter Design Day Schedule Name
+  occupants schedule default day,         !- Holiday Schedule Name
+  occupants schedule default day,         !- Custom Day 1 Schedule Name
+  occupants schedule default day;         !- Custom Day 2 Schedule Name
+\end{lstlisting}
+
+\subsection{Schedule:Week:Rule}\label{scheduleweekrule}
+
+A Schedule:Week:Rule defines one override rule for a \hyperref[scheduleyearrules]{Schedule:Year:Rules}.
+Rules are evaluated in ascending Rule Priority Order; the first matching rule wins.
+A rule matches an ordinary day-of-week type when: (a) the date falls within one of the specified date ranges, and (b) the corresponding Apply \textless{}Day of Week\textgreater{} field is Yes.
+The special day schedules in the parent Schedule:Year:Rules object are used for summer design days, winter design days, holidays, Custom Day 1, and Custom Day 2 regardless of matching rules.
+
+\subsubsection{Inputs}\label{inputs-scheduleweekrule}
+
+\paragraph{Field: Name}\label{field-name-scheduleweekrule}
+
+This field should contain a name that is unique among all Schedule:Week:Rule objects.
+
+\paragraph{Field: Schedule Year Rules Name}\label{field-schedule-year-rules-name-scheduleweekrule}
+
+This field should reference the appropriate parent \hyperref[scheduleyearrules]{Schedule:Year:Rules} to define the appropriate schedule values.
+
+\paragraph{Field: Rule Priority Order}\label{field-rule-priority-order-scheduleweekrule}
+
+This integer field determines the priority of this rule relative to the other rules associated with the same Schedule:Year:Rules object.
+Lower values have higher priority, with 0 representing the highest priority.
+When applicable date ranges overlap, the matching rule with the lowest Rule Priority Order is used for each ordinary day-of-week type.
+Rule Priority Order values must be unique within a Schedule:Year:Rules object; duplicate values are severe input errors.
+
+\paragraph{Field: Day Schedule Name}\label{field-day-schedule-name-scheduleweekrule}
+
+This field is the name of the day schedule (ref. Schedule:Day:Constant, Schedule:Day:Hourly, Schedule:Day:Interval, and Schedule:Day:List objects) used when this rule applies.
+
+\paragraph{Field: Apply Sunday}\label{field-apply-sunday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Sunday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Monday}\label{field-apply-monday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Monday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Tuesday}\label{field-apply-tuesday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Tuesday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Wednesday}\label{field-apply-wednesday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Wednesday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Thursday}\label{field-apply-thursday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Thursday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Friday}\label{field-apply-friday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Friday in which the rule applies.
+Default: No.
+
+\paragraph{Field: Apply Saturday}\label{field-apply-saturday-scheduleweekrule}
+
+This field determines whether the day schedule is used for each Saturday in which the rule applies.
+Default: No.
+
+\paragraph{Field Set: Start/End Month/Day}
+
+This object is extensible, so sets of the next four numeric fields can be added to the end of this object.
+Each field set specifies an inclusive date range for this rule.
+If the start date occurs later in the calendar year than the end date, the range wraps across December 31; for example, November 1 through January 31 applies from November 1 through December 31 and from January 1 through January 31.
+For fields of the first set, default values apply; fields for subsequent sets are required to be specified.
+
+\paragraph{Field: Start Month \#}\label{field-start-month-scheduleweekrule}
+
+This numeric field contains the starting month number (1 = January, 2 = February, etc.) for which the rule applies.
+Default: 1.
+
+\paragraph{Field: Start Day \#}\label{field-date-start-day-scheduleweekrule}
+
+This numeric field contains the starting day of the starting month (must be valid for month) for which the rule applies.
+Default: 1.
+
+\paragraph{Field: End Month \#}\label{field-end-month-scheduleweekrule}
+
+This numeric field contains the ending month number (11 = November, 12 = December, etc.) for which the rule applies.
+Default: 12.
+
+\paragraph{Field: End Day \#}\label{field-end-day-scheduleweekrule}
+
+This numeric field contains the ending day of the ending month (must be valid for month) for which the rule applies.
+Default: 31.
+
+An example of IDF input:
+
+\begin{lstlisting}
+Schedule:Week:Rule,
+  occupants schedule week rule1,          !- Name
+  occupants schedule year rules,          !- Schedule Year Rules Name
+  0,                                      !- Rule Priority Order
+  occupants schedule day,                 !- Day Schedule Name
+  No,                                     !- Apply Sunday
+  Yes,                                    !- Apply Monday
+  No,                                     !- Apply Tuesday
+  Yes,                                    !- Apply Wednesday
+  No,                                     !- Apply Thursday
+  Yes,                                    !- Apply Friday
+  No,                                     !- Apply Saturday
+  7,                                      !- Start Month
+  1,                                      !- Start Day
+  7,                                      !- End Month
+  31;                                     !- End Day
+
+Schedule:Week:Rule,
+  occupants schedule week rule2,          !- Name
+  occupants schedule year rules,          !- Schedule Year Rules Name
+  1,                                      !- Rule Priority Order
+  occupants schedule day,                 !- Day Schedule Name
+  No,                                     !- Apply Sunday
+  Yes,                                    !- Apply Monday
+  No,                                     !- Apply Tuesday
+  Yes,                                    !- Apply Wednesday
+  No,                                     !- Apply Thursday
+  Yes,                                    !- Apply Friday
+  No,                                     !- Apply Saturday
+  1,                                      !- Start Month
+  1,                                      !- Start Day
+  12,                                     !- End Month
+  31;                                     !- End Day
+\end{lstlisting}
+
 \subsection{Schedule:Constant}\label{scheduleconstant}
 
 The constant schedule is used to assign a constant hourly value. This schedule is created when a fixed hourly value is desired to represent a period of interest (e.g., always on operation mode for supply air fan).
@@ -464,7 +652,7 @@ Two optional fields: \textbf{Interpolate to Timestep} and \textbf{Minutes per It
 
 \paragraph{Field: Name}\label{field-name-8-018}
 
-This field should contain a unique (between \hyperref[scheduleyear]{Schedule:Year}, \hyperref[schedulecompact]{Schedule:Compact}, and Schedule:File) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration, \hyperref[fuelfactors]{FuelFactors}) to define the appropriate schedule values.
+This field should contain a unique (between \hyperref[scheduleyear]{Schedule:Year}, \hyperref[schedulecompact]{Schedule:Compact}, \hyperref[scheduleyearrules]{Schedule:Year:Rules}, and Schedule:File) designation for the schedule. It is referenced by various ``scheduled'' items (e.g.~\hyperref[lights-000]{Lights}, \hyperref[people]{People}, Infiltration, \hyperref[fuelfactors]{FuelFactors}) to define the appropriate schedule values.
 
 \paragraph{Field: Schedule Type Limits Name}\label{field-schedule-type-limits-name-6}
 

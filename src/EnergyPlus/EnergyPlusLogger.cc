@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/EnergyPlusLogger.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
@@ -59,7 +63,7 @@ void EnergyPlusLogger::error(const std::string_view message)
     if (Log_level::Error >= minimum_level) {
         const std::pair<EnergyPlusData *, std::string> &contextPair =
             *(reinterpret_cast<std::pair<EnergyPlusData *, std::string> *>(message_context));
-        std::string fullMessage = fmt::format("{}: {}", contextPair.second, message);
+        std::string fullMessage = std::format("{}: {}", contextPair.second, message);
         ShowSevereError(*contextPair.first, fullMessage);
     }
 }
@@ -69,7 +73,7 @@ void EnergyPlusLogger::warning(const std::string_view message)
     if (Log_level::Warning >= minimum_level) {
         const std::pair<EnergyPlusData *, std::string> &contextPair =
             *(reinterpret_cast<std::pair<EnergyPlusData *, std::string> *>(message_context));
-        std::string fullMessage = fmt::format("{}: {}", contextPair.second, message);
+        std::string fullMessage = std::format("{}: {}", contextPair.second, message);
         ShowWarningError(*contextPair.first, fullMessage);
     }
 }
@@ -79,7 +83,7 @@ void EnergyPlusLogger::info(const std::string_view message)
     if (Log_level::Info >= minimum_level) {
         const std::pair<EnergyPlusData *, std::string> &contextPair =
             *(reinterpret_cast<std::pair<EnergyPlusData *, std::string> *>(message_context));
-        std::string fullMessage = fmt::format("{}: {}", contextPair.second, message);
+        std::string fullMessage = std::format("{}: {}", contextPair.second, message);
         ShowMessage(*contextPair.first, fullMessage);
     }
 }

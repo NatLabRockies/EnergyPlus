@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -2496,6 +2496,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    SPACE1-1 Control,        !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",
@@ -2507,6 +2508,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    SPACE2-1 Control,        !- Name",
         "    SPACE2-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",
@@ -2518,6 +2520,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    SPACE3-1 Control,        !- Name",
         "    SPACE3-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",
@@ -2529,6 +2532,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    SPACE4-1 Control,        !- Name",
         "    SPACE4-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type",
         "    CoolingSetPoint,         !- Control 1 Name",
         "    ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type",
@@ -2782,7 +2786,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "  ZoneControl:Humidistat,",
         "    SPACE1-1 Humidistat,     !- Name",
         "    SPACE1-1,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  HeatExchanger:Desiccant:BalancedFlow,",
         "    OA Desiccant Heat Exchanger,  !- Name",
@@ -2857,7 +2861,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -2873,7 +2876,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 1;
 
-    GetDesiccantDehumidifierInput(*state);
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumDesicDehums);
     EXPECT_EQ("OA DESICCANT SYSTEM", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("OA DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
@@ -3846,13 +3848,14 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
         "    Main Zone Control,        !- Name",
         "    Main Zone,                !- Zone or ZoneList Name",
         "    Desiccant Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    DualSetPoint;            !- Control 1 Name",
 
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -4061,7 +4064,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -5033,13 +5035,14 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         "    Main Zone Control,        !- Name",
         "    Main Zone,                !- Zone or ZoneList Name",
         "    Desiccant Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    DualSetPoint;            !- Control 1 Name",
 
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -5486,7 +5489,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -5504,7 +5506,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumGenericDesicDehums);
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingWater, state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).regenCoilType);
 
     CompName = state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name;
     CompIndex = state->dataDesiccantDehumidifiers->NumGenericDesicDehums;
@@ -5524,7 +5526,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         }
     }
     // verify results
-    EXPECT_EQ(RegCoilCapacity, state->dataWaterCoils->WaterCoil(CoilIndex).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(RegCoilCapacity, state->dataWaterCoils->WaterCoil(CoilIndex).DesWaterHeatingCoilRate);
 }
 
 TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
@@ -6466,13 +6468,14 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "    Main Zone Control,        !- Name",
         "    Main Zone,                !- Zone or ZoneList Name",
         "    Desiccant Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    DualSetPoint;            !- Control 1 Name",
 
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -6742,7 +6745,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -6760,7 +6762,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
 
-    EXPECT_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolingCoil_TypeNum, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
 
     EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).CoilUpstreamOfProcessSide, Selection::Yes);
 

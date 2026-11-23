@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -122,12 +122,10 @@ namespace ExternalInterface {
         int ITSValue;                          // Integer value of variable at the Zone Time Step
         int VarIndex;                          // Index Value of variable
         OutputProcessor::VariableType VarType; // Type of variable at the Zone Time Step
-        std::string VarUnits;                  // Units string, may be blank
 
         // Default Constructor
         eplusOutputVariableType()
-            : Name(std::string()), VarKey(std::string()), RTSValue(0.0), ITSValue(0), VarIndex(0), VarType(OutputProcessor::VariableType::Invalid),
-              VarUnits(std::string())
+            : Name(std::string()), VarKey(std::string()), RTSValue(0.0), ITSValue(0), VarIndex(0), VarType(OutputProcessor::VariableType::Invalid)
         {
         }
     };
@@ -176,12 +174,10 @@ namespace ExternalInterface {
 
         std::string Name; // Name of energyplus input variable from Type schedule
         int VarIndex;     // Index Value of this variable
-        int InitialValue; // Initial value used during the warmup
 
         // Default Constructor
         eplusInputVariableScheduleType() : Name(std::string()), VarIndex(0)
         {
-            // InitialValue not initialized in default constructor
         }
     };
 
@@ -213,8 +209,6 @@ namespace ExternalInterface {
     {
 
         std::string Name;               // FMU Filename
-        std::string modelID;            // FMU modelID
-        std::string modelGUID;          // FMU modelGUID
         fs::path WorkingFolder;         // Path to the FMU working folder
         fs::path WorkingFolder_wLib;    // Path to the binaries
         std::string fmiVersionNumber;   // Version number of FMI used
@@ -225,8 +219,6 @@ namespace ExternalInterface {
         int NumOutputVariablesSchedule; // Number of output variables from type schedule
         int NumOutputVariablesVariable; // Number of output variables from type variable
         int NumOutputVariablesActuator; // Number of output variables from type actuator
-        int LenModelID;                 // Length of modelID trimmed
-        int LenModelGUID;               // Length of modelGUID trimmed
         int LenWorkingFolder;           // Length of working folder trimmed
         int LenWorkingFolder_wLib;      // Length of working folder with libraries trimmed
         fmiComponent fmicomponent;      // FMU instance
@@ -253,10 +245,10 @@ namespace ExternalInterface {
 
         // Default Constructor
         InstanceType()
-            : Name(std::string()), modelID(std::string()), modelGUID(std::string()), WorkingFolder(fs::path()), WorkingFolder_wLib(fs::path()),
-              fmiVersionNumber(std::string()), NumInputVariablesInFMU(0), NumInputVariablesInIDF(0), NumOutputVariablesInFMU(0),
-              NumOutputVariablesInIDF(0), NumOutputVariablesSchedule(0), NumOutputVariablesVariable(0), NumOutputVariablesActuator(0), LenModelID(0),
-              LenModelGUID(0), LenWorkingFolder(0), LenWorkingFolder_wLib(0)
+            : Name(std::string()), WorkingFolder(fs::path()), WorkingFolder_wLib(fs::path()), fmiVersionNumber(std::string()),
+              NumInputVariablesInFMU(0), NumInputVariablesInIDF(0), NumOutputVariablesInFMU(0), NumOutputVariablesInIDF(0),
+              NumOutputVariablesSchedule(0), NumOutputVariablesVariable(0), NumOutputVariablesActuator(0), LenWorkingFolder(0),
+              LenWorkingFolder_wLib(0)
         {
             // fmiStatus, Index, and arrays not initialized in default constructor
         }
@@ -265,22 +257,17 @@ namespace ExternalInterface {
     struct FMUType
     {
 
-        std::string Name;                  // FMU Filename
-        Real64 TimeOut;                    // Default TimeOut value
-        int Visible;                       // Default Visible value
-        int Interactive;                   // Default Interactive value
-        int LoggingOn;                     // Default LoggingOn value
-        int NumInstances;                  // Number of Instances
-        int TotNumInputVariablesInIDF;     // Number of input variables
-        int TotNumOutputVariablesSchedule; // Number of output variables from type schedule
-        int TotNumOutputVariablesVariable; // Number of output variables from type variable
-        int TotNumOutputVariablesActuator; // Number of output variables from type actuator
-        Array1D<InstanceType> Instance;    // Variable Types structure for energyplus input variables from type actuator
+        std::string Name;               // FMU Filename
+        Real64 TimeOut;                 // Default TimeOut value
+        int Visible;                    // Default Visible value
+        int Interactive;                // Default Interactive value
+        int LoggingOn;                  // Default LoggingOn value
+        int NumInstances;               // Number of Instances
+        int TotNumInputVariablesInIDF;  // Number of input variables
+        Array1D<InstanceType> Instance; // Variable Types structure for energyplus input variables from type actuator
 
         // Default Constructor
-        FMUType()
-            : Name(std::string()), TimeOut(0.0), Visible(0), Interactive(0), LoggingOn(0), NumInstances(0), TotNumInputVariablesInIDF(0),
-              TotNumOutputVariablesSchedule(0), TotNumOutputVariablesVariable(0), TotNumOutputVariablesActuator(0)
+        FMUType() : Name(std::string()), TimeOut(0.0), Visible(0), Interactive(0), LoggingOn(0), NumInstances(0), TotNumInputVariablesInIDF(0)
         {
             // Instance not instantiated in default constructor
         }

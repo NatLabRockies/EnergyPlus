@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -110,14 +110,13 @@ using namespace RoomAir;
 using namespace DataMoistureBalanceEMPD;
 using namespace DataSurfaces;
 using namespace DataHeatBalSurface;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataHeatBalFanSys;
 using namespace EnergyPlus::Psychrometrics;
 
 class RoomAirflowNetworkTest : public EnergyPlusFixture
 {
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -157,7 +156,7 @@ protected:
         state->afn->AirflowNetworkLinkSimu.allocate(5);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -174,7 +173,6 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     state->dataHeatBal->Zone(ZoneNum).ZoneVolCapMultpSens = 1;
 
     state->dataRoomAir->AFNZoneInfo(ZoneNum).IsUsed = true;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).ActualZoneID = ZoneNum;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).NumOfAirNodes = NumOfAirNodes;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node.allocate(NumOfAirNodes);
     state->dataRoomAir->AFNZoneInfo(ZoneNum).ControlAirNodeID = 1;
@@ -210,8 +208,6 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions.allocate(1);
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsFractions(1) = 0.4;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions(1) = 0.6;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasIntGainsAssigned = true;
-    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasIntGainsAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasSurfacesAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasSurfacesAssigned = true;
     state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasHVACAssigned = true;

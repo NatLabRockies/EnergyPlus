@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -75,7 +75,6 @@
 // EnergyPlus Headers
 using namespace EnergyPlus::DataDefineEquip;
 using namespace EnergyPlus::DataEnvironment;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::Psychrometrics;
@@ -346,7 +345,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_Sim)
     state->dataLoopNodes->Node(InletNode).HumRat = 0.0075;
     state->dataLoopNodes->Node(InletNode).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
-    ;
     // set zone air node properties
     state->dataLoopNodes->Node(ZoneAirNodeNum).Temp = 20.0;
     state->dataLoopNodes->Node(ZoneAirNodeNum).HumRat = 0.0075;
@@ -625,6 +623,17 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_OASpecification)
     // check AT air mass flow rates
     EXPECT_EQ(expectedMassFlow, state->dataSingleDuct->sd_airterminal(SysNum).sd_airterminalInlet.AirMassFlowRate);
     EXPECT_EQ(expectedMassFlow, state->dataSingleDuct->sd_airterminal(SysNum).sd_airterminalOutlet.AirMassFlowRate);
+
+    // The air loop may request a minimum flow above the terminal's physical maximum while resolving a flow mismatch. The terminal's local
+    // availability bounds must remain valid without changing the shared-node request used by the next air-loop iteration.
+    auto &airTerminal = state->dataSingleDuct->sd_airterminal(SysNum);
+    state->dataLoopNodes->Node(InletNode).MassFlowRate = 3.2;
+    state->dataLoopNodes->Node(InletNode).MassFlowRateMinAvail = 3.2;
+    state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = 3.2;
+    airTerminal.InitSys(*state, FirstHVACIteration);
+    EXPECT_EQ(3.2, state->dataLoopNodes->Node(InletNode).MassFlowRateMinAvail);
+    EXPECT_EQ(MassFlowRateMaxAvail, airTerminal.sd_airterminalInlet.AirMassFlowRateMinAvail);
+    EXPECT_EQ(MassFlowRateMaxAvail, airTerminal.sd_airterminalInlet.AirMassFlowRateMaxAvail);
 }
 
 TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_EMSOverrideAirFlow)
@@ -720,13 +729,11 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_EMSOverrideAirFlow)
     state->dataLoopNodes->Node(InletNode).HumRat = 0.0075;
     state->dataLoopNodes->Node(InletNode).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(InletNode).Temp, state->dataLoopNodes->Node(InletNode).HumRat);
-    ;
     // set zone air node properties
     state->dataLoopNodes->Node(ZoneAirNodeNum).Temp = 20.0;
     state->dataLoopNodes->Node(ZoneAirNodeNum).HumRat = 0.0075;
     state->dataLoopNodes->Node(ZoneAirNodeNum).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(ZoneAirNodeNum).Temp, state->dataLoopNodes->Node(ZoneAirNodeNum).HumRat);
-    ;
     state->dataSingleDuct->GetInputFlag = false;
     FirstHVACIteration = false;
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = MassFlowRateMaxAvail;
@@ -1084,7 +1091,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_SimSensibleOutPutTest)
     int const ZoneAirNodeNum = state->dataZoneEquip->ZoneEquipConfig(ZonePtr).ZoneNode;
 
     thisAirTerminal.availSched->currentVal = 1.0; // unit is always available
-    ;
     // design maximum air mass flow rate
     Real64 MassFlowRateMaxAvail = thisAirTerminal.MaxAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     EXPECT_EQ(1.0, thisAirTerminal.MaxAirVolFlowRate);
@@ -1138,7 +1144,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_SimSensibleOutPutTest)
     EXPECT_EQ(thisAirTerminal.sd_airterminalOutlet.AirHumRat, thisAirTerminal.sd_airterminalInlet.AirHumRat);
     EXPECT_EQ(thisAirTerminal.sd_airterminalOutlet.AirEnthalpy, thisAirTerminal.sd_airterminalInlet.AirEnthalpy);
     EXPECT_EQ(thisAirTerminal.sd_airterminalOutlet.AirMassFlowRate, thisAirTerminal.sd_airterminalInlet.AirMassFlowRate);
-    ;
     // test 2: cooling mode test
     // set air inlet node properties
     state->dataLoopNodes->Node(InletNode).Temp = 15.0;
@@ -1168,7 +1173,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_SimSensibleOutPutTest)
     EXPECT_EQ(0.0, thisAirTerminal.sd_airterminalInlet.AirMassFlowRate);         // inlet mass flow rate is zero
     EXPECT_EQ(0.0, thisAirTerminal.sd_airterminalOutlet.AirMassFlowRate);        // outlet mass flow rate is zero
     EXPECT_EQ(0.0, SysOutputProvided);                                           // delivered sensible cooling is zero
-    ;
     // reset mass flow rate to the maximum available
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = MassFlowRateMaxAvail;
     EXPECT_EQ(1.0, MassFlowRateMaxAvail);
@@ -1280,7 +1284,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctCVNoReheat_DownstreamLeakTest)
     int const ZoneAirNodeNum = state->dataZoneEquip->ZoneEquipConfig(ZonePtr).ZoneNode;
 
     thisAirTerminal.availSched->currentVal = 1.0; // unit is always available
-    ;
     // design maximum air mass flow rate
     Real64 MassFlowRateMaxAvail = thisAirTerminal.MaxAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     EXPECT_EQ(1.0, thisAirTerminal.MaxAirVolFlowRate);

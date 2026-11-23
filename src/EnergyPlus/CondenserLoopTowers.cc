@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -46,8 +46,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -125,9 +127,7 @@ namespace CondenserLoopTowers {
             return thisObj;
         }
         // If we didn't find it, fatal
-        ShowFatalError(state, format("CoolingTowerFactory: Error getting inputs for tower named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("CoolingTowerFactory: Error getting inputs for tower named: {}", objectName)); // LCOV_EXCL_LINE
     }
 
     void CoolingTower::simulate(EnergyPlusData &state,
@@ -151,7 +151,7 @@ namespace CondenserLoopTowers {
             this->calculateMerkelVariableSpeedTower(state, CurLoad, RunFlag);
             break;
         default:
-            ShowFatalError(state, format("Plant Equipment Type specified for {} is not a Cooling Tower.", this->Name));
+            ShowFatalError(state, std::format("Plant Equipment Type specified for {} is not a Cooling Tower.", this->Name));
         }
         this->calculateWaterUsage(state);
         this->update(state);
@@ -285,25 +285,25 @@ namespace CondenserLoopTowers {
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_SingleSpd;
             tower.TowerMassFlowRateMultiplier = 2.5;
-            tower.WaterInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                          AlphArray(2),
-                                                                          ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                                          tower.Name,
-                                                                          DataLoopNode::NodeFluidType::Water,
-                                                                          DataLoopNode::ConnectionType::Inlet,
-                                                                          NodeInputManager::CompFluidStream::Primary,
-                                                                          DataLoopNode::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                           AlphArray(3),
-                                                                           ErrorsFound,
-                                                                           DataLoopNode::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                                           tower.Name,
-                                                                           DataLoopNode::NodeFluidType::Water,
-                                                                           DataLoopNode::ConnectionType::Outlet,
-                                                                           NodeInputManager::CompFluidStream::Primary,
-                                                                           DataLoopNode::ObjectIsNotParent);
-            BranchNodeConnections::TestCompSet(state, s_ipsc->cCurrentModuleObject, tower.Name, AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
+                                                              AlphArray(2),
+                                                              ErrorsFound,
+                                                              Node::ConnectionObjectType::CoolingTowerSingleSpeed,
+                                                              tower.Name,
+                                                              Node::FluidType::Water,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
+            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                               AlphArray(3),
+                                                               ErrorsFound,
+                                                               Node::ConnectionObjectType::CoolingTowerSingleSpeed,
+                                                               tower.Name,
+                                                               Node::FluidType::Water,
+                                                               Node::ConnectionType::Outlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent);
+            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, tower.Name, AlphArray(2), AlphArray(3), "Chilled Water Nodes");
             tower.DesignWaterFlowRate = NumArray(1);
             if (tower.DesignWaterFlowRate == DataSizing::AutoSize) {
                 tower.DesignWaterFlowRateWasAutoSized = true;
@@ -388,7 +388,7 @@ namespace CondenserLoopTowers {
                     tower.BasinHeaterSetPointTemp = 2.0;
                 }
                 if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(state, eoh, format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(18)));
+                    ShowWarningCustom(state, eoh, std::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(18)));
                 }
             }
 
@@ -434,21 +434,21 @@ namespace CondenserLoopTowers {
             if (s_ipsc->lAlphaFieldBlanks(10)) {
                 tower.OutdoorAirInletNodeNum = 0;
             } else {
-                tower.OutdoorAirInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                   AlphArray(10),
-                                                                                   ErrorsFound,
-                                                                                   DataLoopNode::ConnectionObjectType::CoolingTowerSingleSpeed,
-                                                                                   tower.Name,
-                                                                                   DataLoopNode::NodeFluidType::Air,
-                                                                                   DataLoopNode::ConnectionType::OutsideAirReference,
-                                                                                   NodeInputManager::CompFluidStream::Primary,
-                                                                                   DataLoopNode::ObjectIsNotParent);
+                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                       AlphArray(10),
+                                                                       ErrorsFound,
+                                                                       Node::ConnectionObjectType::CoolingTowerSingleSpeed,
+                                                                       tower.Name,
+                                                                       Node::FluidType::Air,
+                                                                       Node::ConnectionType::OutsideAirReference,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
                     ShowSevereCustom(state,
                                      eoh,
-                                     format("Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}"
-                                            "does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
-                                            AlphArray(10)));
+                                     std::format("Outdoor Air Inlet Node Name not valid Outdoor Air Node= {}"
+                                                 "does not appear in an OutdoorAir:NodeList or as an OutdoorAir:Node.",
+                                                 AlphArray(10)));
                     ErrorsFound = true;
                 }
             }
@@ -582,25 +582,25 @@ namespace CondenserLoopTowers {
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_TwoSpd;
             tower.TowerMassFlowRateMultiplier = 2.5;
-            tower.WaterInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                          AlphArray(2),
-                                                                          ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                                          tower.Name,
-                                                                          DataLoopNode::NodeFluidType::Water,
-                                                                          DataLoopNode::ConnectionType::Inlet,
-                                                                          NodeInputManager::CompFluidStream::Primary,
-                                                                          DataLoopNode::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                           AlphArray(3),
-                                                                           ErrorsFound,
-                                                                           DataLoopNode::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                                           tower.Name,
-                                                                           DataLoopNode::NodeFluidType::Water,
-                                                                           DataLoopNode::ConnectionType::Outlet,
-                                                                           NodeInputManager::CompFluidStream::Primary,
-                                                                           DataLoopNode::ObjectIsNotParent);
-            BranchNodeConnections::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
+                                                              AlphArray(2),
+                                                              ErrorsFound,
+                                                              Node::ConnectionObjectType::CoolingTowerTwoSpeed,
+                                                              tower.Name,
+                                                              Node::FluidType::Water,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
+            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                               AlphArray(3),
+                                                               ErrorsFound,
+                                                               Node::ConnectionObjectType::CoolingTowerTwoSpeed,
+                                                               tower.Name,
+                                                               Node::FluidType::Water,
+                                                               Node::ConnectionType::Outlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent);
+            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
 
             if (NumAlphas >= 4) {
                 tower.PerformanceInputMethod_Num = static_cast<PIM>(getEnumValue(PIMNamesUC, Util::makeUPPER(AlphArray(4))));
@@ -700,7 +700,7 @@ namespace CondenserLoopTowers {
                     tower.BasinHeaterSetPointTemp = 2.0;
                 }
                 if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(state, eoh, format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(26)));
+                    ShowWarningCustom(state, eoh, std::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(26)));
                 }
             }
 
@@ -766,15 +766,15 @@ namespace CondenserLoopTowers {
             if (s_ipsc->lAlphaFieldBlanks(10)) {
                 tower.OutdoorAirInletNodeNum = 0;
             } else {
-                tower.OutdoorAirInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                   AlphArray(10),
-                                                                                   ErrorsFound,
-                                                                                   DataLoopNode::ConnectionObjectType::CoolingTowerTwoSpeed,
-                                                                                   tower.Name,
-                                                                                   DataLoopNode::NodeFluidType::Air,
-                                                                                   DataLoopNode::ConnectionType::OutsideAirReference,
-                                                                                   NodeInputManager::CompFluidStream::Primary,
-                                                                                   DataLoopNode::ObjectIsNotParent);
+                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                       AlphArray(10),
+                                                                       ErrorsFound,
+                                                                       Node::ConnectionObjectType::CoolingTowerTwoSpeed,
+                                                                       tower.Name,
+                                                                       Node::FluidType::Air,
+                                                                       Node::ConnectionType::OutsideAirReference,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
                     ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(10), AlphArray(10));
                     ErrorsFound = true;
@@ -785,18 +785,18 @@ namespace CondenserLoopTowers {
             //   Can't tell yet if autosized, check later in initialize.
             if (tower.HighSpeedAirFlowRate <= tower.LowSpeedAirFlowRate && tower.HighSpeedAirFlowRate != DataSizing::AutoSize) {
                 ShowSevereError(state,
-                                format("{} \"{}\". Low speed air flow rate must be less than the high speed air flow rate.",
-                                       s_ipsc->cCurrentModuleObject,
-                                       tower.Name));
+                                std::format("{} \"{}\". Low speed air flow rate must be less than the high speed air flow rate.",
+                                            s_ipsc->cCurrentModuleObject,
+                                            tower.Name));
                 ErrorsFound = true;
             }
             //   Low speed air flow rate must be greater than free convection air flow rate.
             //   Can't tell yet if autosized, check later in initialize.
             if (tower.LowSpeedAirFlowRate <= tower.FreeConvAirFlowRate && tower.LowSpeedAirFlowRate != DataSizing::AutoSize) {
                 ShowSevereError(state,
-                                format("{} \"{}\". Free convection air flow rate must be less than the low speed air flow rate.",
-                                       s_ipsc->cCurrentModuleObject,
-                                       tower.Name));
+                                std::format("{} \"{}\". Free convection air flow rate must be less than the low speed air flow rate.",
+                                            s_ipsc->cCurrentModuleObject,
+                                            tower.Name));
                 ErrorsFound = true;
             }
 
@@ -804,121 +804,125 @@ namespace CondenserLoopTowers {
             if (tower.PerformanceInputMethod_Num == PIM::UFactor) {
                 if (tower.DesignWaterFlowRate == 0.0) {
                     ShowSevereError(state,
-                                    format("{} \"{}\". Tower performance input method requires a design water flow rate greater than zero.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                                    std::format("{} \"{}\". Tower performance input method requires a design water flow rate greater than zero.",
+                                                s_ipsc->cCurrentModuleObject,
+                                                tower.Name));
                     ErrorsFound = true;
                 }
                 if (tower.HighSpeedTowerUA <= tower.LowSpeedTowerUA && tower.HighSpeedTowerUA != DataSizing::AutoSize) {
                     ShowSevereError(state,
-                                    format("{} \"{}\". Tower UA at low fan speed must be less than the tower UA at high fan speed.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                                    std::format("{} \"{}\". Tower UA at low fan speed must be less than the tower UA at high fan speed.",
+                                                s_ipsc->cCurrentModuleObject,
+                                                tower.Name));
                     ErrorsFound = true;
                 }
                 if (tower.LowSpeedTowerUA <= tower.FreeConvTowerUA && tower.LowSpeedTowerUA != DataSizing::AutoSize) {
-                    ShowSevereError(state,
-                                    format("{} \"{}\". Tower UA at free convection air flow rate must be less than the tower UA at low fan speed.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                    ShowSevereError(
+                        state,
+                        std::format("{} \"{}\". Tower UA at free convection air flow rate must be less than the tower UA at low fan speed.",
+                                    s_ipsc->cCurrentModuleObject,
+                                    tower.Name));
                     ErrorsFound = true;
                 }
                 if (tower.FreeConvTowerUA > 0.0 && tower.FreeConvAirFlowRate == 0.0) {
                     ShowSevereError(
                         state,
-                        format("{} \"{}\". Free convection air flow rate must be greater than zero when free convection UA is greater than zero.",
-                               s_ipsc->cCurrentModuleObject,
-                               tower.Name));
+                        std::format(
+                            "{} \"{}\". Free convection air flow rate must be greater than zero when free convection UA is greater than zero.",
+                            s_ipsc->cCurrentModuleObject,
+                            tower.Name));
                     ErrorsFound = true;
                 }
             } else if (tower.PerformanceInputMethod_Num == PIM::NominalCapacity) {
                 if (tower.TowerNominalCapacity == 0.0) {
                     ShowSevereError(state,
-                                    format("{} \"{}\". Tower performance input method requires valid high-speed nominal capacity.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                                    std::format("{} \"{}\". Tower performance input method requires valid high-speed nominal capacity.",
+                                                s_ipsc->cCurrentModuleObject,
+                                                tower.Name));
                     ErrorsFound = true;
                 }
                 if (tower.TowerLowSpeedNomCap == 0.0) {
                     ShowSevereError(state,
-                                    format("{} \"{}\". Tower performance input method requires valid low-speed nominal capacity.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                                    std::format("{} \"{}\". Tower performance input method requires valid low-speed nominal capacity.",
+                                                s_ipsc->cCurrentModuleObject,
+                                                tower.Name));
                     ErrorsFound = true;
                 }
                 if (tower.DesignWaterFlowRate != 0.0) {
                     if (tower.DesignWaterFlowRate > 0.0) {
                         ShowWarningError(state,
-                                         format("{} \"{}\". Nominal capacity input method and design water flow rate have been specified.",
-                                                s_ipsc->cCurrentModuleObject,
-                                                tower.Name));
+                                         std::format("{} \"{}\". Nominal capacity input method and design water flow rate have been specified.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     tower.Name));
                     } else {
                         ShowSevereError(
                             state,
-                            format("{} \"{}\". Nominal capacity input method has been specified and design water flow rate is being autosized.",
-                                   s_ipsc->cCurrentModuleObject,
-                                   tower.Name));
+                            std::format("{} \"{}\". Nominal capacity input method has been specified and design water flow rate is being autosized.",
+                                        s_ipsc->cCurrentModuleObject,
+                                        tower.Name));
                     }
                     ShowContinueError(state, "Design water flow rate will be set according to nominal tower capacity.");
                 }
                 if (tower.HighSpeedTowerUA != 0.0) {
                     if (tower.HighSpeedTowerUA > 0.0) {
                         ShowWarningError(state,
-                                         format("{} \"{}\". Nominal capacity input method and tower UA at high fan speed have been specified.",
-                                                s_ipsc->cCurrentModuleObject,
-                                                tower.Name));
+                                         std::format("{} \"{}\". Nominal capacity input method and tower UA at high fan speed have been specified.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     tower.Name));
                     } else {
                         ShowSevereError(
                             state,
-                            format("{} \"{}\". Nominal capacity input method has been specified and tower UA at high fan speed is being autosized.",
-                                   s_ipsc->cCurrentModuleObject,
-                                   tower.Name));
+                            std::format(
+                                "{} \"{}\". Nominal capacity input method has been specified and tower UA at high fan speed is being autosized.",
+                                s_ipsc->cCurrentModuleObject,
+                                tower.Name));
                     }
                     ShowContinueError(state, "Tower UA at high fan speed will be set according to nominal tower capacity.");
                 }
                 if (tower.LowSpeedTowerUA != 0.0) {
                     if (tower.LowSpeedTowerUA > 0.0) {
                         ShowWarningError(state,
-                                         format("{} \"{}\". Nominal capacity input method and tower UA at low fan speed have been specified.",
-                                                s_ipsc->cCurrentModuleObject,
-                                                tower.Name));
+                                         std::format("{} \"{}\". Nominal capacity input method and tower UA at low fan speed have been specified.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     tower.Name));
                     } else {
                         ShowSevereError(
                             state,
-                            format("{} \"{}\". Nominal capacity input method has been specified and tower UA at low fan speed is being autosized.",
-                                   s_ipsc->cCurrentModuleObject,
-                                   tower.Name));
+                            std::format(
+                                "{} \"{}\". Nominal capacity input method has been specified and tower UA at low fan speed is being autosized.",
+                                s_ipsc->cCurrentModuleObject,
+                                tower.Name));
                     }
                     ShowContinueError(state, "Tower UA at low fan speed will be set according to nominal tower capacity.");
                 }
                 if (tower.FreeConvTowerUA != 0.0) {
                     if (tower.FreeConvTowerUA > 0.0) {
                         ShowWarningError(state,
-                                         format("{} \"{}\". Nominal capacity input method and free convection UA have been specified.",
-                                                s_ipsc->cCurrentModuleObject,
-                                                tower.Name));
+                                         std::format("{} \"{}\". Nominal capacity input method and free convection UA have been specified.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     tower.Name));
                     } else {
                         ShowSevereError(
                             state,
-                            format("{} \"{}\". Nominal capacity input method has been specified and free convection UA is being autosized.",
-                                   s_ipsc->cCurrentModuleObject,
-                                   tower.Name));
+                            std::format("{} \"{}\". Nominal capacity input method has been specified and free convection UA is being autosized.",
+                                        s_ipsc->cCurrentModuleObject,
+                                        tower.Name));
                     }
                     ShowContinueError(state, "Free convection UA will be set according to nominal tower capacity.");
                 }
                 if (tower.TowerLowSpeedNomCap >= tower.TowerNominalCapacity) {
                     ShowSevereError(state,
-                                    format("{} \"{}\". Low-speed nominal capacity must be less than the high-speed nominal capacity.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name));
+                                    std::format("{} \"{}\". Low-speed nominal capacity must be less than the high-speed nominal capacity.",
+                                                s_ipsc->cCurrentModuleObject,
+                                                tower.Name));
                     ErrorsFound = true;
                 }
                 if (!tower.TowerLowSpeedNomCapWasAutoSized) {
                     if (tower.TowerFreeConvNomCap >= tower.TowerLowSpeedNomCap) {
                         ShowSevereError(state,
-                                        format("{} \"{}\". Free convection nominal capacity must be less than the low-speed nominal capacity.",
-                                               s_ipsc->cCurrentModuleObject,
-                                               tower.Name));
+                                        std::format("{} \"{}\". Free convection nominal capacity must be less than the low-speed nominal capacity.",
+                                                    s_ipsc->cCurrentModuleObject,
+                                                    tower.Name));
                         ErrorsFound = true;
                     }
                 }
@@ -961,33 +965,33 @@ namespace CondenserLoopTowers {
             auto &tower = state.dataCondenserLoopTowers->towers(TowerNum);
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_VarSpd;
-            tower.WaterInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                          AlphArray(2),
-                                                                          ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                                          AlphArray(1),
-                                                                          DataLoopNode::NodeFluidType::Water,
-                                                                          DataLoopNode::ConnectionType::Inlet,
-                                                                          NodeInputManager::CompFluidStream::Primary,
-                                                                          DataLoopNode::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                           AlphArray(3),
-                                                                           ErrorsFound,
-                                                                           DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                                           AlphArray(1),
-                                                                           DataLoopNode::NodeFluidType::Water,
-                                                                           DataLoopNode::ConnectionType::Outlet,
-                                                                           NodeInputManager::CompFluidStream::Primary,
-                                                                           DataLoopNode::ObjectIsNotParent);
-            BranchNodeConnections::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
+                                                              AlphArray(2),
+                                                              ErrorsFound,
+                                                              Node::ConnectionObjectType::CoolingTowerVariableSpeed,
+                                                              AlphArray(1),
+                                                              Node::FluidType::Water,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
+            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                               AlphArray(3),
+                                                               ErrorsFound,
+                                                               Node::ConnectionObjectType::CoolingTowerVariableSpeed,
+                                                               AlphArray(1),
+                                                               Node::FluidType::Water,
+                                                               Node::ConnectionType::Outlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent);
+            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
 
             if ((Util::SameString(AlphArray(4), "CoolToolsUserDefined") || Util::SameString(AlphArray(4), "YorkCalcUserDefined")) &&
                 s_ipsc->lAlphaFieldBlanks(5)) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("A {} must be specified when {} is specified as CoolToolsUserDefined or YorkCalcUserDefined",
-                                        s_ipsc->cAlphaFieldNames(5),
-                                        s_ipsc->cAlphaFieldNames(4)));
+                                 std::format("A {} must be specified when {} is specified as CoolToolsUserDefined or YorkCalcUserDefined",
+                                             s_ipsc->cAlphaFieldNames(5),
+                                             s_ipsc->cAlphaFieldNames(4)));
                 ErrorsFound = true;
             } else if ((Util::SameString(AlphArray(4), "CoolToolsCrossFlow") || Util::SameString(AlphArray(4), "YorkCalc")) &&
                        !s_ipsc->lAlphaFieldBlanks(5)) {
@@ -1003,12 +1007,13 @@ namespace CondenserLoopTowers {
             if (!s_ipsc->lAlphaFieldBlanks(6)) {
                 tower.FanPowerfAirFlowCurve = Curve::GetCurveIndex(state, AlphArray(6));
                 if (tower.FanPowerfAirFlowCurve == 0) {
-                    ShowWarningCustom(state,
-                                      eoh,
-                                      format("The Fan Power Ratio as a function of Air Flow Rate Ratio Curve Name specified as {} was not found."
-                                             "Fan Power as a function of Air Flow Rate Ratio will default to Fan Power = (Air Flow Rate Ratio)^3."
-                                             "The simulation continues.",
-                                             AlphArray(6)));
+                    ShowWarningCustom(
+                        state,
+                        eoh,
+                        std::format("The Fan Power Ratio as a function of Air Flow Rate Ratio Curve Name specified as {} was not found."
+                                    "Fan Power as a function of Air Flow Rate Ratio will default to Fan Power = (Air Flow Rate Ratio)^3."
+                                    "The simulation continues.",
+                                    AlphArray(6)));
                 }
             }
 
@@ -1121,10 +1126,10 @@ namespace CondenserLoopTowers {
                     // verify the correct number of coefficients for the CoolTools model
                     if (NumNums2 != 43) {
                         ShowSevereError(state,
-                                        format("CoolingTower:VariableSpeed \"{}\". The number of numeric inputs for object "
-                                               "CoolingTowerPerformance:CoolTools \"{}\" must equal 43.",
-                                               tower.Name,
-                                               tower.ModelCoeffObjectName));
+                                        std::format("CoolingTower:VariableSpeed \"{}\". The number of numeric inputs for object "
+                                                    "CoolingTowerPerformance:CoolTools \"{}\" must equal 43.",
+                                                    tower.Name,
+                                                    tower.ModelCoeffObjectName));
                         ErrorsFound = true;
                     } else {
 
@@ -1144,11 +1149,12 @@ namespace CondenserLoopTowers {
                     break;
                 }
                 if (!vstower.FoundModelCoeff) {
-                    ShowSevereError(state,
-                                    format("CoolingTower:VariableSpeed \"{}\". User defined name for variable speed cooling tower model coefficients "
-                                           "object not found = {}",
-                                           tower.Name,
-                                           tower.ModelCoeffObjectName));
+                    ShowSevereError(
+                        state,
+                        std::format("CoolingTower:VariableSpeed \"{}\". User defined name for variable speed cooling tower model coefficients "
+                                    "object not found = {}",
+                                    tower.Name,
+                                    tower.ModelCoeffObjectName));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(AlphArray(4), "YorkCalcUserDefined")) {
@@ -1164,10 +1170,10 @@ namespace CondenserLoopTowers {
                     // verify the correct number of coefficients for the YorkCalc model
                     if (NumNums2 != 36) {
                         ShowSevereError(state,
-                                        format("CoolingTower:VariableSpeed \"{}\". The number of numeric inputs for object "
-                                               "CoolingTowerPerformance:YorkCalc \"{}\" must equal 36.",
-                                               tower.Name,
-                                               tower.ModelCoeffObjectName));
+                                        std::format("CoolingTower:VariableSpeed \"{}\". The number of numeric inputs for object "
+                                                    "CoolingTowerPerformance:YorkCalc \"{}\" must equal 36.",
+                                                    tower.Name,
+                                                    tower.ModelCoeffObjectName));
                         ErrorsFound = true;
                     } else {
 
@@ -1189,11 +1195,12 @@ namespace CondenserLoopTowers {
                 }
 
                 if (!vstower.FoundModelCoeff) {
-                    ShowSevereError(state,
-                                    format("{} \"{}\". User defined name for variable speed cooling tower model coefficients object not found = {}",
-                                           s_ipsc->cCurrentModuleObject,
-                                           tower.Name,
-                                           tower.ModelCoeffObjectName));
+                    ShowSevereError(
+                        state,
+                        std::format("{} \"{}\". User defined name for variable speed cooling tower model coefficients object not found = {}",
+                                    s_ipsc->cCurrentModuleObject,
+                                    tower.Name,
+                                    tower.ModelCoeffObjectName));
                     ErrorsFound = true;
                 }
             } else {
@@ -1235,11 +1242,11 @@ namespace CondenserLoopTowers {
             if (NumArray(1) < vstower.MinInletAirWBTemp || NumArray(1) > vstower.MaxInletAirWBTemp) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("The design inlet air wet-bulb temperature of {:5.2F}"
-                                        "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
-                                        tower.DesignInletWB,
-                                        vstower.MinInletAirWBTemp,
-                                        vstower.MaxInletAirWBTemp));
+                                 std::format("The design inlet air wet-bulb temperature of {:5.2F}"
+                                             "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
+                                             tower.DesignInletWB,
+                                             vstower.MinInletAirWBTemp,
+                                             vstower.MaxInletAirWBTemp));
                 ErrorsFound = true;
             }
 
@@ -1247,11 +1254,11 @@ namespace CondenserLoopTowers {
             if (NumArray(2) < vstower.MinApproachTemp || NumArray(2) > vstower.MaxApproachTemp) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("The design approach temperature of {:5.2F}"
-                                        "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
-                                        tower.DesignApproach,
-                                        vstower.MinApproachTemp,
-                                        vstower.MaxApproachTemp));
+                                 std::format("The design approach temperature of {:5.2F}"
+                                             "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
+                                             tower.DesignApproach,
+                                             vstower.MinApproachTemp,
+                                             vstower.MaxApproachTemp));
                 ErrorsFound = true;
             }
 
@@ -1259,11 +1266,11 @@ namespace CondenserLoopTowers {
             if (NumArray(3) < vstower.MinRangeTemp || NumArray(3) > vstower.MaxRangeTemp) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 format("The design range temperature of {:5.2F}"
-                                        "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
-                                        tower.DesignRange,
-                                        vstower.MinRangeTemp,
-                                        vstower.MaxRangeTemp));
+                                 std::format("The design range temperature of {:5.2F}"
+                                             "must be within the model limits of {:5.2F} and {:5.2F} degrees C",
+                                             tower.DesignRange,
+                                             vstower.MinRangeTemp,
+                                             vstower.MaxRangeTemp));
                 ErrorsFound = true;
             }
 
@@ -1326,7 +1333,7 @@ namespace CondenserLoopTowers {
                     tower.BasinHeaterSetPointTemp = 2.0;
                 }
                 if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(state, eoh, format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(10)));
+                    ShowWarningCustom(state, eoh, std::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(10)));
                 }
             }
 
@@ -1396,15 +1403,15 @@ namespace CondenserLoopTowers {
             if (s_ipsc->lAlphaFieldBlanks(12)) {
                 tower.OutdoorAirInletNodeNum = 0;
             } else {
-                tower.OutdoorAirInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                   AlphArray(12),
-                                                                                   ErrorsFound,
-                                                                                   DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeed,
-                                                                                   tower.Name,
-                                                                                   DataLoopNode::NodeFluidType::Air,
-                                                                                   DataLoopNode::ConnectionType::OutsideAirReference,
-                                                                                   NodeInputManager::CompFluidStream::Primary,
-                                                                                   DataLoopNode::ObjectIsNotParent);
+                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                       AlphArray(12),
+                                                                       ErrorsFound,
+                                                                       Node::ConnectionObjectType::CoolingTowerVariableSpeed,
+                                                                       tower.Name,
+                                                                       Node::FluidType::Air,
+                                                                       Node::ConnectionType::OutsideAirReference,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
                     ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(12), AlphArray(12));
                     ErrorsFound = true;
@@ -1440,25 +1447,25 @@ namespace CondenserLoopTowers {
             auto &tower = state.dataCondenserLoopTowers->towers(TowerNum);
             tower.Name = AlphArray(1);
             tower.TowerType = DataPlant::PlantEquipmentType::CoolingTower_VarSpdMerkel;
-            tower.WaterInletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                          AlphArray(2),
-                                                                          ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                                          AlphArray(1),
-                                                                          DataLoopNode::NodeFluidType::Water,
-                                                                          DataLoopNode::ConnectionType::Inlet,
-                                                                          NodeInputManager::CompFluidStream::Primary,
-                                                                          DataLoopNode::ObjectIsNotParent);
-            tower.WaterOutletNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                           AlphArray(3),
-                                                                           ErrorsFound,
-                                                                           DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                                           AlphArray(1),
-                                                                           DataLoopNode::NodeFluidType::Water,
-                                                                           DataLoopNode::ConnectionType::Outlet,
-                                                                           NodeInputManager::CompFluidStream::Primary,
-                                                                           DataLoopNode::ObjectIsNotParent);
-            BranchNodeConnections::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
+            tower.WaterInletNodeNum = Node::GetOnlySingleNode(state,
+                                                              AlphArray(2),
+                                                              ErrorsFound,
+                                                              Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
+                                                              AlphArray(1),
+                                                              Node::FluidType::Water,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Primary,
+                                                              Node::ObjectIsNotParent);
+            tower.WaterOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                               AlphArray(3),
+                                                               ErrorsFound,
+                                                               Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
+                                                               AlphArray(1),
+                                                               Node::FluidType::Water,
+                                                               Node::ConnectionType::Outlet,
+                                                               Node::CompFluidStream::Primary,
+                                                               Node::ObjectIsNotParent);
+            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Chilled Water Nodes");
 
             if (Util::SameString(AlphArray(4), "UFactorTimesAreaAndDesignWaterFlowRate")) {
                 tower.PerformanceInputMethod_Num = PIM::UFactor;
@@ -1481,7 +1488,7 @@ namespace CondenserLoopTowers {
                 tower.TowerNominalCapacityWasAutoSized = true;
             }
             tower.TowerFreeConvNomCap = NumArray(3);
-            if (tower.TowerFreeConvNomCap == DataSizing::AutoSize) {
+            if (s_ipsc->lNumericFieldBlanks(3) || tower.TowerFreeConvNomCap == DataSizing::AutoSize) {
                 tower.TowerFreeConvNomCapWasAutoSized = true;
             }
             tower.TowerFreeConvNomCapSizingFactor = NumArray(4);
@@ -1571,7 +1578,7 @@ namespace CondenserLoopTowers {
                     tower.BasinHeaterSetPointTemp = 2.0;
                 }
                 if (tower.BasinHeaterSetPointTemp < 2.0) {
-                    ShowWarningCustom(state, eoh, format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(22)));
+                    ShowWarningCustom(state, eoh, std::format("{} is less than 2 deg C. Freezing could occur.", s_ipsc->cNumericFieldNames(22)));
                 }
             }
 
@@ -1637,16 +1644,15 @@ namespace CondenserLoopTowers {
             if (s_ipsc->lAlphaFieldBlanks(14)) {
                 tower.OutdoorAirInletNodeNum = 0;
             } else {
-                tower.OutdoorAirInletNodeNum =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(14),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
-                                                        tower.Name,
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::OutsideAirReference,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
+                tower.OutdoorAirInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                       AlphArray(14),
+                                                                       ErrorsFound,
+                                                                       Node::ConnectionObjectType::CoolingTowerVariableSpeedMerkel,
+                                                                       tower.Name,
+                                                                       Node::FluidType::Air,
+                                                                       Node::ConnectionType::OutsideAirReference,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
                 if (!OutAirNodeManager::CheckOutAirNodeNumber(state, tower.OutdoorAirInletNodeNum)) {
                     ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(14), AlphArray(14));
                     ErrorsFound = true;
@@ -1675,8 +1681,8 @@ namespace CondenserLoopTowers {
         }
 
         // check if setpoint on outlet node
-        this->SetpointIsOnOutlet = !((state.dataLoopNodes->Node(this->WaterOutletNodeNum).TempSetPoint == DataLoopNode::SensedNodeFlagValue) &&
-                                     (state.dataLoopNodes->Node(this->WaterOutletNodeNum).TempSetPointHi == DataLoopNode::SensedNodeFlagValue));
+        this->SetpointIsOnOutlet = !((state.dataLoopNodes->Node(this->WaterOutletNodeNum).TempSetPoint == Node::SensedNodeFlagValue) &&
+                                     (state.dataLoopNodes->Node(this->WaterOutletNodeNum).TempSetPointHi == Node::SensedNodeFlagValue));
     }
 
     void CoolingTower::initEachEnvironment(EnergyPlusData &state)
@@ -2324,33 +2330,36 @@ namespace CondenserLoopTowers {
                 if (PltSizCondNum > 0) {
                     // check the tower range against the plant sizing data
                     if (std::abs(DesTowerWaterDeltaT - PlantSizData(PltSizCondNum).DeltaT) > TolTemp) {
-                        ShowWarningError(state,
-                                         format("Error when autosizing the load for cooling tower = {}. Tower Design Range Temperature is different "
-                                                "from the Design Loop Delta Temperature.",
-                                                this->Name));
-                        ShowContinueError(state, format("Tower Design Range Temperature specified in tower = {}", this->Name));
+                        ShowWarningError(
+                            state,
+                            std::format("Error when autosizing the load for cooling tower = {}. Tower Design Range Temperature is different "
+                                        "from the Design Loop Delta Temperature.",
+                                        this->Name));
+                        ShowContinueError(state, std::format("Tower Design Range Temperature specified in tower = {}", this->Name));
                         ShowContinueError(state,
-                                          format("is inconsistent with Design Loop Delta Temperature specified in Sizing:Plant object = {}.",
-                                                 PlantSizData(PltSizCondNum).PlantLoopName));
-                        ShowContinueError(state, format("..The Design Range Temperature specified in tower is = {:.2T}", this->DesignRange));
+                                          std::format("is inconsistent with Design Loop Delta Temperature specified in Sizing:Plant object = {}.",
+                                                      PlantSizData(PltSizCondNum).PlantLoopName));
+                        ShowContinueError(state, std::format("..The Design Range Temperature specified in tower is = {:.2f}", this->DesignRange));
                         ShowContinueError(state,
-                                          format("..The Design Loop Delta Temperature specified in plant sizing data is = {:.2T}",
-                                                 PlantSizData(PltSizCondNum).DeltaT));
+                                          std::format("..The Design Loop Delta Temperature specified in plant sizing data is = {:.2f}",
+                                                      PlantSizData(PltSizCondNum).DeltaT));
                     }
                     // check if the tower approach is different from plant sizing data
                     DesTowerApproachFromPlant = PlantSizData(PltSizCondNum).ExitTemp - this->DesignInletWB;
                     if (std::abs(DesTowerApproachFromPlant - this->DesignApproach) > TolTemp) {
                         ShowWarningError(state,
-                                         format("Error when autosizing the UA for cooling tower = {}. Tower Design Approach Temperature is "
-                                                "inconsistent with Approach from Plant Sizing Data.",
-                                                this->Name));
+                                         std::format("Error when autosizing the UA for cooling tower = {}. Tower Design Approach Temperature is "
+                                                     "inconsistent with Approach from Plant Sizing Data.",
+                                                     this->Name));
                         ShowContinueError(state,
-                                          format("The Design Approach Temperature from inputs specified in Sizing:Plant object = {}",
-                                                 PlantSizData(PltSizCondNum).PlantLoopName));
-                        ShowContinueError(state, format("is inconsistent with Design Approach Temperature specified in tower = {}.", this->Name));
+                                          std::format("The Design Approach Temperature from inputs specified in Sizing:Plant object = {}",
+                                                      PlantSizData(PltSizCondNum).PlantLoopName));
                         ShowContinueError(state,
-                                          format("..The Design Approach Temperature from inputs specified is = {:.2T}", DesTowerApproachFromPlant));
-                        ShowContinueError(state, format("..The Design Approach Temperature specified in tower is = {:.2T}", this->DesignApproach));
+                                          std::format("is inconsistent with Design Approach Temperature specified in tower = {}.", this->Name));
+                        ShowContinueError(
+                            state, std::format("..The Design Approach Temperature from inputs specified is = {:.2f}", DesTowerApproachFromPlant));
+                        ShowContinueError(state,
+                                          std::format("..The Design Approach Temperature specified in tower is = {:.2f}", this->DesignApproach));
                     }
                 }
             }
@@ -2416,7 +2425,7 @@ namespace CondenserLoopTowers {
                 }
             } else {
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
-                    ShowSevereError(state, format("Autosizing error for cooling tower object = {}", this->Name));
+                    ShowSevereError(state, std::format("Autosizing error for cooling tower object = {}", this->Name));
                     ShowFatalError(state, "Autosizing of cooling tower condenser flow rate requires a loop Sizing:Plant object.");
                 }
             }
@@ -2485,7 +2494,7 @@ namespace CondenserLoopTowers {
                 } else {
                     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                         ShowSevereError(state, "Autosizing of cooling tower fan power requires a loop Sizing:Plant object.");
-                        ShowFatalError(state, format(" Occurs in cooling tower object= {}", this->Name));
+                        ShowFatalError(state, std::format(" Occurs in cooling tower object= {}", this->Name));
                     }
                 }
             }
@@ -2574,21 +2583,23 @@ namespace CondenserLoopTowers {
                     //  temperature is less than design inlet air wet bulb temperature
                     if (PlantSizData(PltSizCondNum).ExitTemp <= this->DesignInletWB) {
                         ShowSevereError(state,
-                                        format("Error when autosizing the UA value for cooling tower = {}. Design Loop Exit Temperature must be "
-                                               "greater than {:.2T} C when autosizing the tower UA.",
-                                               this->Name,
-                                               this->DesignInletWB));
+                                        std::format("Error when autosizing the UA value for cooling tower = {}. Design Loop Exit Temperature must be "
+                                                    "greater than {:.2f} C when autosizing the tower UA.",
+                                                    this->Name,
+                                                    this->DesignInletWB));
                         ShowContinueError(state,
-                                          format("The Design Loop Exit Temperature specified in Sizing:Plant object = {} ({:.2T} C)",
-                                                 PlantSizData(PltSizCondNum).PlantLoopName,
-                                                 PlantSizData(PltSizCondNum).ExitTemp));
+                                          std::format("The Design Loop Exit Temperature specified in Sizing:Plant object = {} ({:.2f} C)",
+                                                      PlantSizData(PltSizCondNum).PlantLoopName,
+                                                      PlantSizData(PltSizCondNum).ExitTemp));
                         ShowContinueError(
-                            state, format("is less than or equal to the design inlet air wet-bulb temperature of {:.2T} C.", this->DesignInletWB));
-                        ShowContinueError(state,
-                                          format("If using HVACTemplate:Plant:ChilledWaterLoop, then check that input field Condenser Water Design "
-                                                 "Setpoint must be > {:.2T} C if autosizing the cooling tower.",
-                                                 this->DesignInletWB));
-                        ShowFatalError(state, format("Autosizing of cooling tower fails for tower = {}.", this->Name));
+                            state,
+                            std::format("is less than or equal to the design inlet air wet-bulb temperature of {:.2f} C.", this->DesignInletWB));
+                        ShowContinueError(
+                            state,
+                            std::format("If using HVACTemplate:Plant:ChilledWaterLoop, then check that input field Condenser Water Design "
+                                        "Setpoint must be > {:.2f} C if autosizing the cooling tower.",
+                                        this->DesignInletWB));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower fails for tower = {}.", this->Name));
                     }
 
                     Real64 const solveDesignWaterMassFlow = rho * tmpDesignWaterFlowRate; // design water mass flow rate
@@ -2608,10 +2619,10 @@ namespace CondenserLoopTowers {
                     General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f1, UA0, UA1);
                     if (SolFla == -1) {
                         ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                     } else if (SolFla == -2) {
                         ShowSevereError(state, "Bad starting values for UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                     }
 
                     if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -2670,33 +2681,36 @@ namespace CondenserLoopTowers {
                     //  => This basically means that approach is negative, which is impossible (must be > 0 per IDD)
                     // * If not, hardcoded above to 21C
                     if (DesTowerExitWaterTemp <= this->DesignInletWB) {
-                        ShowSevereError(state,
-                                        format("Error when autosizing the UA value for cooling tower = {}. Design Tower Exit Temperature must be "
-                                               "greater than {:.2T} C when autosizing the tower UA.",
-                                               this->Name,
-                                               this->DesignInletWB));
-                        ShowContinueError(state, format("The User-specified Design Loop Exit Temperature={:.2T}", DesTowerExitWaterTemp));
+                        ShowSevereError(
+                            state,
+                            std::format("Error when autosizing the UA value for cooling tower = {}. Design Tower Exit Temperature must be "
+                                        "greater than {:.2f} C when autosizing the tower UA.",
+                                        this->Name,
+                                        this->DesignInletWB));
+                        ShowContinueError(state, std::format("The User-specified Design Loop Exit Temperature={:.2f}", DesTowerExitWaterTemp));
                         ShowContinueError(
-                            state, format("is less than or equal to the design inlet air wet-bulb temperature of {:.2T} C.", this->DesignInletWB));
+                            state,
+                            std::format("is less than or equal to the design inlet air wet-bulb temperature of {:.2f} C.", this->DesignInletWB));
 
                         if (this->TowerInletCondsAutoSize) {
                             ShowContinueError(state,
-                                              format("Because you did not specify the Design Approach Temperature, and you do not have a "
-                                                     "Sizing:Plant object, it was defaulted to {:.2T} C.",
-                                                     DesTowerExitWaterTemp));
+                                              std::format("Because you did not specify the Design Approach Temperature, and you do not have a "
+                                                          "Sizing:Plant object, it was defaulted to {:.2f} C.",
+                                                          DesTowerExitWaterTemp));
                         } else {
                             // Should never get there...
                             ShowContinueError(state,
-                                              format("The Design Loop Exit Temperature is the sum of the design air inlet wet-bulb temperature= "
-                                                     "{:.2T} C plus the cooling tower design approach temperature = {:.2T}C.",
-                                                     this->DesignInletWB,
-                                                     this->DesignApproach));
+                                              std::format("The Design Loop Exit Temperature is the sum of the design air inlet wet-bulb temperature= "
+                                                          "{:.2f} C plus the cooling tower design approach temperature = {:.2f}C.",
+                                                          this->DesignInletWB,
+                                                          this->DesignApproach));
                         }
-                        ShowContinueError(state,
-                                          format("If using HVACTemplate:Plant:ChilledWaterLoop, then check that input field Condenser Water Design "
-                                                 "Setpoint must be > {:.2T} C if autosizing the cooling tower.",
-                                                 this->DesignInletWB));
-                        ShowFatalError(state, format("Autosizing of cooling tower fails for tower = {}.", this->Name));
+                        ShowContinueError(
+                            state,
+                            std::format("If using HVACTemplate:Plant:ChilledWaterLoop, then check that input field Condenser Water Design "
+                                        "Setpoint must be > {:.2f} C if autosizing the cooling tower.",
+                                        this->DesignInletWB));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower fails for tower = {}.", this->Name));
                     }
 
                     Real64 const solveWaterMassFlow = rho * tmpDesignWaterFlowRate; // design water mass flow rate
@@ -2715,10 +2729,10 @@ namespace CondenserLoopTowers {
                     General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                     if (SolFla == -1) {
                         ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                     } else if (SolFla == -2) {
                         ShowSevereError(state, "Bad starting values for UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                     }
 
                     if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
@@ -2788,10 +2802,10 @@ namespace CondenserLoopTowers {
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                 if (SolFla == -1) {
                     ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     this->HighSpeedTowerUA = UA;
@@ -2962,10 +2976,10 @@ namespace CondenserLoopTowers {
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                 if (SolFla == -1) {
                     ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     this->LowSpeedTowerUA = UA;
@@ -3053,31 +3067,31 @@ namespace CondenserLoopTowers {
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                 if (SolFla == -1) {
                     ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for UA calculations");
                     ShowContinueError(state, "Tower inlet design water temperature assumed to be 35.0 C.");
                     ShowContinueError(state, "Tower inlet design air dry-bulb temperature assumed to be 35.0 C.");
                     ShowContinueError(state, "Tower inlet design air wet-bulb temperature assumed to be 25.6 C.");
                     ShowContinueError(state,
-                                      format("Tower load assumed to be {:.3T} times free convection capacity of {:.0T} W.",
-                                             this->HeatRejectCapNomCapSizingRatio,
-                                             this->TowerFreeConvNomCap));
+                                      std::format("Tower load assumed to be {:.3f} times free convection capacity of {:.0f} W.",
+                                                  this->HeatRejectCapNomCapSizingRatio,
+                                                  this->TowerFreeConvNomCap));
 
                     Real64 OutWaterTemp; // outlet water temperature during sizing [C]
 
                     OutWaterTemp = this->calculateSimpleTowerOutletTemp(state, solveWaterFlow, this->FreeConvAirFlowRate, UA0);
                     Real64 CoolingOutput = Cp * solveWaterFlow * (this->WaterTemp - OutWaterTemp); // tower capacity during sizing [W]
-                    ShowContinueError(state, format("Tower capacity at lower UA guess ({:.4T}) = {:.0T} W.", UA0, CoolingOutput));
+                    ShowContinueError(state, std::format("Tower capacity at lower UA guess ({:.4f}) = {:.0f} W.", UA0, CoolingOutput));
 
                     OutWaterTemp = this->calculateSimpleTowerOutletTemp(state, solveWaterFlow, this->FreeConvAirFlowRate, UA1);
                     CoolingOutput = Cp * solveWaterFlow * (this->WaterTemp - OutWaterTemp);
-                    ShowContinueError(state, format("Tower capacity at upper UA guess ({:.4T}) = {:.0T} W.", UA1, CoolingOutput));
+                    ShowContinueError(state, std::format("Tower capacity at upper UA guess ({:.4f}) = {:.0f} W.", UA1, CoolingOutput));
 
                     if (CoolingOutput < DesTowerLoad) {
                         ShowContinueError(state, "Free convection capacity should be less than tower capacity at upper UA guess.");
                     }
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                     this->FreeConvTowerUA = UA;
@@ -3141,34 +3155,35 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state,
                                       "Inlet air wet-bulb, range, and/or approach temperature does not allow calibration of water flow rate ratio "
                                       "for this variable-speed cooling tower.");
-                    ShowFatalError(state, format("Cooling tower calibration failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Cooling tower calibration failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for cooling tower water flow rate ratio calibration.");
                     ShowContinueError(state,
                                       "Inlet air wet-bulb, range, and/or approach temperature does not allow calibration of water flow rate ratio "
                                       "for this variable-speed cooling tower.");
-                    ShowFatalError(state, format("Cooling tower calibration failed for tower {}.", this->Name));
+                    ShowFatalError(state, std::format("Cooling tower calibration failed for tower {}.", this->Name));
                 }
             } else {
                 ShowSevereError(state, "Bad starting values for cooling tower water flow rate ratio calibration.");
                 ShowContinueError(state, "Design inlet air wet-bulb or range temperature must be modified to achieve the design approach");
                 ShowContinueError(state,
-                                  format("A water flow rate ratio of {:.6F} was calculated to yield an approach temperature of {:.2F}.",
-                                         WaterFlowRateRatio,
-                                         Tapproach));
-                ShowFatalError(state, format("Cooling tower calibration failed for tower {}.", this->Name));
+                                  std::format("A water flow rate ratio of {:.6F} was calculated to yield an approach temperature of {:.2F}.",
+                                              WaterFlowRateRatio,
+                                              Tapproach));
+                ShowFatalError(state, std::format("Cooling tower calibration failed for tower {}.", this->Name));
             }
 
             this->CalibratedWaterFlowRate = this->DesignWaterFlowRate / WaterFlowRatio;
 
             if (WaterFlowRatio < this->MinWaterFlowRatio || WaterFlowRatio > this->MaxWaterFlowRatio) {
-                ShowWarningError(state,
-                                 format("CoolingTower:VariableSpeed, \"{}\" the calibrated water flow rate ratio is determined to be {:9.6F}. This "
-                                        "is outside the valid range of {:.2F} to {:.2F}.",
-                                        this->Name,
-                                        WaterFlowRatio,
-                                        this->MinWaterFlowRatio,
-                                        this->MaxWaterFlowRatio));
+                ShowWarningError(
+                    state,
+                    std::format("CoolingTower:VariableSpeed, \"{}\" the calibrated water flow rate ratio is determined to be {:9.6F}. This "
+                                "is outside the valid range of {:.2F} to {:.2F}.",
+                                this->Name,
+                                WaterFlowRatio,
+                                this->MinWaterFlowRatio,
+                                this->MaxWaterFlowRatio));
             }
 
             Real64 const rho =
@@ -3262,15 +3277,16 @@ namespace CondenserLoopTowers {
                 if (this->DesignWaterFlowRate > 0.0) {
                     if (this->FreeConvAirFlowRate >= this->HighSpeedAirFlowRate) {
                         ShowSevereError(state,
-                                        format("{} \"{}\". Free convection air flow rate must be less than the design air flow rate.",
-                                               cCoolingTower_SingleSpeed,
-                                               this->Name));
+                                        std::format("{} \"{}\". Free convection air flow rate must be less than the design air flow rate.",
+                                                    cCoolingTower_SingleSpeed,
+                                                    this->Name));
                         ErrorsFound = true;
                     }
                     if (this->FreeConvTowerUA >= this->HighSpeedTowerUA) {
-                        ShowSevereError(
-                            state,
-                            format("{} \"{}\". Free convection UA must be less than the design tower UA.", cCoolingTower_SingleSpeed, this->Name));
+                        ShowSevereError(state,
+                                        std::format("{} \"{}\". Free convection UA must be less than the design tower UA.",
+                                                    cCoolingTower_SingleSpeed,
+                                                    this->Name));
                         ErrorsFound = true;
                     }
                 }
@@ -3280,31 +3296,31 @@ namespace CondenserLoopTowers {
                 if (this->DesignWaterFlowRate > 0.0) {
                     if (this->HighSpeedAirFlowRate <= this->LowSpeedAirFlowRate) {
                         ShowSevereError(state,
-                                        format("{} \"{}\". Low speed air flow rate must be less than the high speed air flow rate.",
-                                               cCoolingTower_TwoSpeed,
-                                               this->Name));
+                                        std::format("{} \"{}\". Low speed air flow rate must be less than the high speed air flow rate.",
+                                                    cCoolingTower_TwoSpeed,
+                                                    this->Name));
                         ErrorsFound = true;
                     }
                     if (this->LowSpeedAirFlowRate <= this->FreeConvAirFlowRate) {
                         ShowSevereError(state,
-                                        format("{} \"{}\". Free convection air flow rate must be less than the low speed air flow rate.",
-                                               cCoolingTower_TwoSpeed,
-                                               this->Name));
+                                        std::format("{} \"{}\". Free convection air flow rate must be less than the low speed air flow rate.",
+                                                    cCoolingTower_TwoSpeed,
+                                                    this->Name));
                         ErrorsFound = true;
                     }
                     if (this->HighSpeedTowerUA <= this->LowSpeedTowerUA) {
                         ShowSevereError(state,
-                                        format("{} \"{}\". Tower UA at low fan speed must be less than the tower UA at high fan speed.",
-                                               cCoolingTower_TwoSpeed,
-                                               this->Name));
+                                        std::format("{} \"{}\". Tower UA at low fan speed must be less than the tower UA at high fan speed.",
+                                                    cCoolingTower_TwoSpeed,
+                                                    this->Name));
                         ErrorsFound = true;
                     }
                     if (this->LowSpeedTowerUA <= this->FreeConvTowerUA) {
                         ShowSevereError(
                             state,
-                            format("{} \"{}\". Tower UA at free convection air flow rate must be less than the tower UA at low fan speed.",
-                                   cCoolingTower_TwoSpeed,
-                                   this->Name));
+                            std::format("{} \"{}\". Tower UA at free convection air flow rate must be less than the tower UA at low fan speed.",
+                                        cCoolingTower_TwoSpeed,
+                                        this->Name));
                         ErrorsFound = true;
                     }
                 }
@@ -3373,33 +3389,35 @@ namespace CondenserLoopTowers {
             if (PltSizCondNum > 0) {
                 // check the tower range against the plant sizing data
                 if (std::abs(DesTowerWaterDeltaT - PlantSizData(PltSizCondNum).DeltaT) > TolTemp) {
-                    ShowWarningError(state,
-                                     format("Error when autosizing the load for cooling tower = {}. Tower Design Range Temperature is different from "
-                                            "the Design Loop Delta Temperature.",
-                                            this->Name));
-                    ShowContinueError(state, format("Tower Design Range Temperature specified in tower = {}", this->Name));
-                    ShowContinueError(state,
-                                      format("is inconsistent with Design Loop Delta Temperature specified in Sizing:Plant object = {}.",
-                                             PlantSizData(PltSizCondNum).PlantLoopName));
-                    ShowContinueError(state, format("..The Design Range Temperature specified in tower is = {:.2T}", this->DesignRange));
-                    ShowContinueError(
+                    ShowWarningError(
                         state,
-                        format("..The Design Loop Delta Temperature specified in plant sizing data is = {:.2T}", PlantSizData(PltSizCondNum).DeltaT));
+                        std::format("Error when autosizing the load for cooling tower = {}. Tower Design Range Temperature is different from "
+                                    "the Design Loop Delta Temperature.",
+                                    this->Name));
+                    ShowContinueError(state, std::format("Tower Design Range Temperature specified in tower = {}", this->Name));
+                    ShowContinueError(state,
+                                      std::format("is inconsistent with Design Loop Delta Temperature specified in Sizing:Plant object = {}.",
+                                                  PlantSizData(PltSizCondNum).PlantLoopName));
+                    ShowContinueError(state, std::format("..The Design Range Temperature specified in tower is = {:.2f}", this->DesignRange));
+                    ShowContinueError(state,
+                                      std::format("..The Design Loop Delta Temperature specified in plant sizing data is = {:.2f}",
+                                                  PlantSizData(PltSizCondNum).DeltaT));
                 }
                 // check if the tower approach is different from plant sizing data
                 DesTowerApproachFromPlant = PlantSizData(PltSizCondNum).ExitTemp - this->DesignInletWB;
                 if (std::abs(DesTowerApproachFromPlant - this->DesignApproach) > TolTemp) {
-                    ShowWarningError(state,
-                                     format("Error when autosizing the UA for cooling tower = {}. Tower Design Approach Temperature is inconsistent "
-                                            "with Approach from Plant Sizing Data.",
-                                            this->Name));
+                    ShowWarningError(
+                        state,
+                        std::format("Error when autosizing the UA for cooling tower = {}. Tower Design Approach Temperature is inconsistent "
+                                    "with Approach from Plant Sizing Data.",
+                                    this->Name));
                     ShowContinueError(state,
-                                      format("The Design Approach Temperature from inputs specified in Sizing:Plant object = {}",
-                                             PlantSizData(PltSizCondNum).PlantLoopName));
-                    ShowContinueError(state, format("is inconsistent with Design Approach Temperature specified in tower = {}.", this->Name));
+                                      std::format("The Design Approach Temperature from inputs specified in Sizing:Plant object = {}",
+                                                  PlantSizData(PltSizCondNum).PlantLoopName));
+                    ShowContinueError(state, std::format("is inconsistent with Design Approach Temperature specified in tower = {}.", this->Name));
                     ShowContinueError(state,
-                                      format("..The Design Approach Temperature from inputs specified is = {:.2T}", DesTowerApproachFromPlant));
-                    ShowContinueError(state, format("..The Design Approach Temperature specified in tower is = {:.2T}", this->DesignApproach));
+                                      std::format("..The Design Approach Temperature from inputs specified is = {:.2f}", DesTowerApproachFromPlant));
+                    ShowContinueError(state, std::format("..The Design Approach Temperature specified in tower is = {:.2f}", this->DesignApproach));
                 }
             }
         }
@@ -3431,7 +3449,7 @@ namespace CondenserLoopTowers {
                     }
                 } else { // do not have enough data to size.
                     if (state.dataPlnt->PlantFirstSizesOkayToFinalize && this->TowerNominalCapacityWasAutoSized) {
-                        ShowSevereError(state, format("Autosizing error for cooling tower object = {}", this->Name));
+                        ShowSevereError(state, std::format("Autosizing error for cooling tower object = {}", this->Name));
                         ShowFatalError(state, "Autosizing of cooling tower nominal capacity requires a loop Sizing:Plant object.");
                     }
                 }
@@ -3467,9 +3485,9 @@ namespace CondenserLoopTowers {
                                                          NomCapUser);
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(tmpNomTowerCap - NomCapUser) / NomCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                    ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
-                                    ShowContinueError(state, format("User-Specified Nominal Capacity of {:.2R} [W]", NomCapUser));
-                                    ShowContinueError(state, format("differs from Design Size Nominal Capacity of {:.2R} [W]", tmpNomTowerCap));
+                                    ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                                    ShowContinueError(state, std::format("User-Specified Nominal Capacity of {:.2f} [W]", NomCapUser));
+                                    ShowContinueError(state, std::format("differs from Design Size Nominal Capacity of {:.2f} [W]", tmpNomTowerCap));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -3512,11 +3530,12 @@ namespace CondenserLoopTowers {
                                                          NomCapUser);
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(tmpTowerFreeConvNomCap - NomCapUser) / NomCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                    ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
-                                    ShowContinueError(state, format("User-Specified Free Convection Nominal Capacity of {:.2R} [W]", NomCapUser));
-                                    ShowContinueError(
-                                        state,
-                                        format("differs from Design Size Free Convection Nominal Capacity of {:.2R} [W]", tmpTowerFreeConvNomCap));
+                                    ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                                    ShowContinueError(state,
+                                                      std::format("User-Specified Free Convection Nominal Capacity of {:.2f} [W]", NomCapUser));
+                                    ShowContinueError(state,
+                                                      std::format("differs from Design Size Free Convection Nominal Capacity of {:.2f} [W]",
+                                                                  tmpTowerFreeConvNomCap));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -3563,9 +3582,11 @@ namespace CondenserLoopTowers {
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(tmpDesignWaterFlowRate - NomDesWaterFlowUser) / NomDesWaterFlowUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
-                                    ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
-                                    ShowContinueError(state, format("User-Specified Design Water Flow Rate of {:.2R} [m3/s]", NomDesWaterFlowUser));
-                                    ShowContinueError(state, format("differs from Design Water Flow Rate of {:.2R} [m3/s]", tmpDesignWaterFlowRate));
+                                    ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                                    ShowContinueError(state,
+                                                      std::format("User-Specified Design Water Flow Rate of {:#G} [m3/s]", NomDesWaterFlowUser));
+                                    ShowContinueError(state,
+                                                      std::format("differs from Design Water Flow Rate of {:#G} [m3/s]", tmpDesignWaterFlowRate));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -3614,9 +3635,9 @@ namespace CondenserLoopTowers {
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpDesignAirFlowRate - DesignAirFlowRateUser) / DesignAirFlowRateUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
-                                ShowContinueError(state, format("User-Specified Design Air Flow Rate of {:.2R} [m3/s]", DesignAirFlowRateUser));
-                                ShowContinueError(state, format("differs from Design Air Flow Rate of {:.2R} [m3/s]", tmpDesignAirFlowRate));
+                                ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                                ShowContinueError(state, std::format("User-Specified Design Air Flow Rate of {:#G} [m3/s]", DesignAirFlowRateUser));
+                                ShowContinueError(state, std::format("differs from Design Air Flow Rate of {:#G} [m3/s]", tmpDesignAirFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -3658,13 +3679,13 @@ namespace CondenserLoopTowers {
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpFreeConvAirFlowRate - FreeConvAirFlowUser) / FreeConvAirFlowUser) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                                ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
                                 ShowContinueError(
                                     state,
-                                    format("User-Specified Design Free Convection Regime Air Flow Rate of {:.2R} [m3/s]", FreeConvAirFlowUser));
+                                    std::format("User-Specified Design Free Convection Regime Air Flow Rate of {:#G} [m3/s]", FreeConvAirFlowUser));
                                 ShowContinueError(
                                     state,
-                                    format("differs from Design Free Convection Regime Air Flow Rate of {:.2R} [m3/s]", tmpFreeConvAirFlowRate));
+                                    std::format("differs from Design Free Convection Regime Air Flow Rate of {:#G} [m3/s]", tmpFreeConvAirFlowRate));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -3703,10 +3724,10 @@ namespace CondenserLoopTowers {
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                 if (SolFla == -1) {
                     ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                    ShowFatalError(state, format("calculating cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("calculating cooling tower UA failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                 }
                 this->HighSpeedTowerUA = UA;
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -3741,10 +3762,10 @@ namespace CondenserLoopTowers {
                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f2, UA0, UA1);
                 if (SolFla == -1) {
                     ShowSevereError(state, "Iteration limit exceeded in calculating tower free convection UA");
-                    ShowFatalError(state, format("calculating cooling tower UA failed for tower {}", this->Name));
+                    ShowFatalError(state, std::format("calculating cooling tower UA failed for tower {}", this->Name));
                 } else if (SolFla == -2) {
                     ShowSevereError(state, "Bad starting values for UA");
-                    ShowFatalError(state, format("Autosizing of cooling tower UA failed for free convection tower {}", this->Name));
+                    ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for free convection tower {}", this->Name));
                 }
                 this->FreeConvTowerUA = UA;
                 if (state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -3816,7 +3837,7 @@ namespace CondenserLoopTowers {
                         }
                     } else {
                         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                            ShowSevereError(state, format("Autosizing error for cooling tower object = {}", this->Name));
+                            ShowSevereError(state, std::format("Autosizing error for cooling tower object = {}", this->Name));
                             ShowFatalError(state, "Autosizing of cooling tower nominal capacity requires a loop Sizing:Plant object.");
                         }
                     }
@@ -3915,7 +3936,7 @@ namespace CondenserLoopTowers {
                         }
                     } else {
                         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                            ShowSevereError(state, format("Autosizing error for cooling tower object = {}", this->Name));
+                            ShowSevereError(state, std::format("Autosizing error for cooling tower object = {}", this->Name));
                             ShowFatalError(state, "Autosizing of cooling tower nominal capacity requires a loop Sizing:Plant object.");
                         }
                     }
@@ -4006,10 +4027,10 @@ namespace CondenserLoopTowers {
                     General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                     if (SolFla == -1) {
                         ShowSevereError(state, "Iteration limit exceeded in calculating tower UA");
-                        ShowFatalError(state, format("calculating cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("calculating cooling tower UA failed for tower {}", this->Name));
                     } else if (SolFla == -2) {
                         ShowSevereError(state, "Bad starting values for UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for tower {}", this->Name));
                     }
                     this->HighSpeedTowerUA = UA;
                     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -4044,12 +4065,12 @@ namespace CondenserLoopTowers {
                     General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f3, UA0, UA1);
                     if (SolFla == -1) {
                         ShowSevereError(state, "Iteration limit exceeded in calculating tower free convection UA");
-                        ShowFatalError(state, format("calculating cooling tower UA failed for tower {}", this->Name));
+                        ShowFatalError(state, std::format("calculating cooling tower UA failed for tower {}", this->Name));
                     } else if (SolFla == -2) {
                         ShowSevereError(state, "Bad starting values for UA");
-                        ShowFatalError(state, format("Autosizing of cooling tower UA failed for free convection tower {}", this->Name));
+                        ShowFatalError(state, std::format("Autosizing of cooling tower UA failed for free convection tower {}", this->Name));
                     }
-                    this->LowSpeedTowerUA = UA;
+                    this->FreeConvTowerUA = UA;
                     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                         BaseSizer::reportSizerOutput(state,
                                                      DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
@@ -4138,7 +4159,7 @@ namespace CondenserLoopTowers {
                     } else {
                         tmpNomTowerCap = 0.0; // Suppress uninitialized warnings
                         if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                            ShowSevereError(state, format("Autosizing error for cooling tower object = {}", this->Name));
+                            ShowSevereError(state, std::format("Autosizing error for cooling tower object = {}", this->Name));
                             ShowFatalError(state, "Autosizing of cooling tower nominal capacity requires a loop Sizing:Plant object.");
                         }
                     }
@@ -4278,9 +4299,9 @@ namespace CondenserLoopTowers {
                     if (state.dataGlobal->DisplayExtraWarnings) {
                         if ((std::abs(tmpHighSpeedFanPower - HighSpeedFanPowerUser) / HighSpeedFanPowerUser) >
                             state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state, format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
-                            ShowContinueError(state, format("User-Specified Design Fan Power of {:.2R} [W]", HighSpeedFanPowerUser));
-                            ShowContinueError(state, format("differs from Design Fan Power of {:.2R} [W]", tmpHighSpeedFanPower));
+                            ShowMessage(state, std::format("SizeVSMerkelTower: Potential issue with equipment sizing for {}", this->Name));
+                            ShowContinueError(state, std::format("User-Specified Design Fan Power of {:.2f} [W]", HighSpeedFanPowerUser));
+                            ShowContinueError(state, std::format("differs from Design Fan Power of {:.2f} [W]", tmpHighSpeedFanPower));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -4614,7 +4635,7 @@ namespace CondenserLoopTowers {
                         }
                         if (NumIteration > MaxIteration) {
                             ShowWarningError(
-                                state, format("Cooling tower fluid bypass iteration exceeds maximum limit of {} for {}", MaxItChar, this->Name));
+                                state, std::format("Cooling tower fluid bypass iteration exceeds maximum limit of {} for {}", MaxItChar, this->Name));
                         }
                         this->BypassFraction = BypassFraction2;
                         // may not meet TempSetPoint due to limit of tower outlet temp to OWTLowerLimit
@@ -4965,7 +4986,6 @@ namespace CondenserLoopTowers {
         this->FanPower = 0.0;
         this->OutletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
 
-        this->WaterUsage = 0.0;
         Real64 Twb = this->AirWetBulb;
         Real64 TwbCapped = this->AirWetBulb;
 
@@ -5107,7 +5127,7 @@ namespace CondenserLoopTowers {
                         if (!state.dataGlobal->WarmupFlag) {
                             ShowWarningError(
                                 state,
-                                format("Cooling tower iteration limit exceeded when calculating air flow rate ratio for tower {}", this->Name));
+                                std::format("Cooling tower iteration limit exceeded when calculating air flow rate ratio for tower {}", this->Name));
                         }
                         //           IF RegulaFalsi cannot find a solution then provide detailed output for debugging
                     } else if (SolFla == -2) {
@@ -5117,17 +5137,19 @@ namespace CondenserLoopTowers {
                                 ++this->CoolingTowerAFRRFailedCount;
                                 ShowWarningError(
                                     state,
-                                    format("CoolingTower:VariableSpeed \"{}\" - Cooling tower air flow rate ratio calculation failed ", this->Name));
-                                ShowContinueError(state,
-                                                  format("...with conditions as Twb = {:5.2F}, Trange = {:5.2F}, Tapproach = {:5.2F}, and water flow "
-                                                         "rate ratio = {:5.2F}",
-                                                         TwbCapped,
-                                                         Tr,
-                                                         Ta,
-                                                         WaterFlowRateRatioCapped));
+                                    std::format("CoolingTower:VariableSpeed \"{}\" - Cooling tower air flow rate ratio calculation failed ",
+                                                this->Name));
+                                ShowContinueError(
+                                    state,
+                                    std::format("...with conditions as Twb = {:5.2F}, Trange = {:5.2F}, Tapproach = {:5.2F}, and water flow "
+                                                "rate ratio = {:5.2F}",
+                                                TwbCapped,
+                                                Tr,
+                                                Ta,
+                                                WaterFlowRateRatioCapped));
                                 ShowContinueError(state, "...a solution could not be found within the valid range of air flow rate ratios");
                                 ShowContinueErrorTimeStamp(
-                                    state, format(" ...Valid air flow rate ratio range = {:5.2F} to 1.0.", this->MinimumVSAirFlowFrac));
+                                    state, std::format(" ...Valid air flow rate ratio range = {:5.2F} to 1.0.", this->MinimumVSAirFlowFrac));
                                 ShowContinueError(state, "...Consider modifying the design approach or design range temperature for this tower.");
                             } else {
                                 ShowRecurringWarningErrorAtEnd(state,
@@ -5171,9 +5193,9 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state, this->LGBuffer2);
                 } else {
                     ShowRecurringWarningErrorAtEnd(state,
-                                                   format("{} \"{}\" - Liquid to gas ratio is out of range error continues...",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                          this->Name),
+                                                   std::format("{} \"{}\" - Liquid to gas ratio is out of range error continues...",
+                                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                               this->Name),
                                                    this->ErrIndexLG,
                                                    this->LGLast,
                                                    this->LGLast);
@@ -5196,15 +5218,15 @@ namespace CondenserLoopTowers {
                     //          Report warnings only during actual simulation
                     if (!state.dataGlobal->WarmupFlag) {
                         this->PrintLGMessage = true;
-                        this->LGBuffer1 = format("{} \"{}\" - Liquid to gas ratio (L/G) is out of range at {:5.2F}.",
-                                                 DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                 this->Name,
-                                                 FlowFraction);
-                        this->LGBuffer2 = format(" ...Valid maximum ratio = {:5.2F}. Occurrence info = {}, {} {}",
-                                                 this->MaxLiquidToGasRatio,
-                                                 state.dataEnvrn->EnvironmentName,
-                                                 state.dataEnvrn->CurMnDy,
-                                                 General::CreateSysTimeIntervalString(state));
+                        this->LGBuffer1 = std::format("{} \"{}\" - Liquid to gas ratio (L/G) is out of range at {:5.2F}.",
+                                                      DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                      this->Name,
+                                                      FlowFraction);
+                        this->LGBuffer2 = std::format(" ...Valid maximum ratio = {:5.2F}. Occurrence info = {}, {} {}",
+                                                      this->MaxLiquidToGasRatio,
+                                                      state.dataEnvrn->EnvironmentName,
+                                                      state.dataEnvrn->CurMnDy,
+                                                      General::CreateSysTimeIntervalString(state));
 
                         this->LGLast = FlowFraction;
                     }
@@ -5229,9 +5251,10 @@ namespace CondenserLoopTowers {
         // Find a fan speed that operates the tower to meet MyLoad
 
         // SUBROUTINE PARAMETER DEFINITIONS:
-        Real64 constexpr DesignWetBulb(25.56); // tower outdoor air entering wetbulb for design [C]
-        int constexpr MaxIte(500);             // Maximum number of iterations for solver
-        Real64 constexpr Acc(1.e-3);           // Accuracy of solver result
+        Real64 constexpr DesignWetBulb(25.56);    // tower outdoor air entering wetbulb for design [C]
+        int constexpr MaxIte(500);                // Maximum number of iterations for solver
+        Real64 constexpr LoadAbsTolerance(1.e-3); // Absolute load tolerance [W]
+        Real64 constexpr LoadRelTolerance(1.e-7); // Relative load tolerance [fraction]
         static constexpr std::string_view RoutineName("calculateMerkelVariableSpeedTower");
 
         Real64 const CpWater =
@@ -5350,7 +5373,7 @@ namespace CondenserLoopTowers {
         Real64 FullSpeedFanQdot =
             this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
         Real64 FanPowerAdjustFac = 0.0;
-        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // full speed is what we want.
+        if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the current cells cannot exceed the load at full speed
 
             if ((FullSpeedFanQdot + HVAC::SmallLoad) < std::abs(MyLoad) && (this->NumCellOn < this->NumCell) &&
                 ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin)) {
@@ -5364,20 +5387,21 @@ namespace CondenserLoopTowers {
                     UAadjustedPerCell = UAdesignPerCell * UAwetbulbAdjFac * UAairflowAdjFac * UAwaterflowAdjFac;
                     this->OutletWaterTemp =
                         this->calculateSimpleTowerOutletTemp(state, WaterMassFlowRatePerCell, AirFlowRatePerCell, UAadjustedPerCell);
+                    FullSpeedFanQdot =
+                        this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
                     IncrNumCellFlag = (FullSpeedFanQdot + HVAC::SmallLoad) < std::abs(MyLoad) && (this->NumCellOn < this->NumCell) &&
                                       ((this->WaterMassFlowRate / (this->NumCellOn + 1)) >= WaterMassFlowRatePerCellMin);
                 }
-                FullSpeedFanQdot =
-                    this->WaterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - this->OutletWaterTemp);
             }
-            this->Qactual = FullSpeedFanQdot;
-            CalcBasinHeaterPower(
-                state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
-            // now calculate fan power
-            FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
-            this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
-
-            return;
+            if (FullSpeedFanQdot <= std::abs(MyLoad)) { // the active cells still cannot exceed the load
+                this->Qactual = FullSpeedFanQdot;
+                CalcBasinHeaterPower(
+                    state, this->BasinHeaterPowerFTempDiff, this->basinHeaterSched, this->BasinHeaterSetPointTemp, this->BasinHeaterPower);
+                // now calculate fan power
+                FanPowerAdjustFac = Curve::CurveValue(state, this->FanPowerfAirFlowCurve, this->airFlowRateRatio);
+                this->FanPower = this->HighSpeedFanPower * FanPowerAdjustFac * this->NumCellOn / this->NumCell;
+                return;
+            }
         }
 
         // next find minimum air flow ratio cooling rate
@@ -5413,20 +5437,21 @@ namespace CondenserLoopTowers {
                 return std::abs(MyLoad) - Qdot;
             };
             int SolFla = 0;
-            General::SolveRoot(state, Acc, MaxIte, SolFla, this->airFlowRateRatio, f, this->MinimumVSAirFlowFrac, 1.0);
+            Real64 const loadTolerance = std::max(LoadAbsTolerance, LoadRelTolerance * std::abs(MyLoad));
+            General::SolveRoot(state, loadTolerance, MaxIte, SolFla, this->airFlowRateRatio, f, this->MinimumVSAirFlowFrac, 1.0);
 
             if (SolFla == -1) {
                 if (!state.dataGlobal->WarmupFlag) {
                     if (this->VSMerkelAFRErrorIter < 1) {
                         ++this->VSMerkelAFRErrorIter;
                         ShowWarningError(state,
-                                         format("{} - Iteration limit exceeded calculating variable speed fan ratio for unit = {}",
-                                                cCoolingTower_VariableSpeedMerkel,
-                                                this->Name));
+                                         std::format("{} - Iteration limit exceeded calculating variable speed fan ratio for unit = {}",
+                                                     cCoolingTower_VariableSpeedMerkel,
+                                                     this->Name));
                         ShowContinueError(state,
-                                          format("Estimated air flow ratio  = {:.4R}",
-                                                 (std::abs(MyLoad) - MinSpeedFanQdot) / (FullSpeedFanQdot - MinSpeedFanQdot)));
-                        ShowContinueError(state, format("Calculated air flow ratio = {:.4R}", this->airFlowRateRatio));
+                                          std::format("Estimated air flow ratio  = {:.4f}",
+                                                      (std::abs(MyLoad) - MinSpeedFanQdot) / (FullSpeedFanQdot - MinSpeedFanQdot)));
+                        ShowContinueError(state, std::format("Calculated air flow ratio = {:.4f}", this->airFlowRateRatio));
                         ShowContinueErrorTimeStamp(state,
                                                    "The calculated air flow ratio will be used and the simulation continues. Occurrence info:");
                     }
@@ -5444,10 +5469,10 @@ namespace CondenserLoopTowers {
                     if (this->VSMerkelAFRErrorFail < 1) {
                         ++this->VSMerkelAFRErrorFail;
                         ShowWarningError(state,
-                                         format("{} - solver failed calculating variable speed fan ratio for unit = {}",
-                                                cCoolingTower_VariableSpeedMerkel,
-                                                this->Name));
-                        ShowContinueError(state, format("Estimated air flow ratio  = {:.4R}", this->airFlowRateRatio));
+                                         std::format("{} - solver failed calculating variable speed fan ratio for unit = {}",
+                                                     cCoolingTower_VariableSpeedMerkel,
+                                                     this->Name));
+                        ShowContinueError(state, std::format("Estimated air flow ratio  = {:.4f}", this->airFlowRateRatio));
                         ShowContinueErrorTimeStamp(state, "The estimated air flow ratio will be used and the simulation continues. Occurrence info:");
                     }
                     ShowRecurringWarningErrorAtEnd(
@@ -5593,8 +5618,9 @@ namespace CondenserLoopTowers {
     Real64 CoolingTower::calculateVariableTowerOutletTemp(EnergyPlusData &state,
                                                           Real64 const WaterFlowRateRatio,    // current water flow rate ratio (capped if applicable)
                                                           Real64 const airFlowRateRatioLocal, // current air flow rate ratio
-                                                          Real64 const Twb // current inlet air wet-bulb temperature (C, capped if applicable)
-    )
+                                                          Real64 const Twb, // current inlet air wet-bulb temperature (C, capped if applicable)
+                                                          bool const reportErrors,
+                                                          bool *outletTempIsUsable)
     {
 
         // SUBROUTINE INFORMATION:
@@ -5634,37 +5660,49 @@ namespace CondenserLoopTowers {
         int SolFla = 0;
         General::SolveRoot(state, Acc, MaxIte, SolFla, Tr, f, 0.001, max(this->MaxRangeTemp, VSTowerMaxRangeTemp));
 
+        if (outletTempIsUsable != nullptr) {
+            *outletTempIsUsable = (SolFla != General::SOLVEROOT_ERROR_ITER);
+        }
+
         // calculate outlet temperature
         Real64 outletWaterTempLocal = this->WaterTemp - min(Tr, this->MaxRangeTemp);
 
-        if (SolFla == -1) {
+        // A root outside the model bounds has a usable maximum-range fallback.
+        if (SolFla == General::SOLVEROOT_ERROR_INIT) {
+            outletWaterTempLocal = this->WaterTemp - this->MaxRangeTemp;
+        }
+
+        if (!reportErrors) {
+            return outletWaterTempLocal;
+        }
+
+        if (SolFla == General::SOLVEROOT_ERROR_ITER) {
             ShowSevereError(state, "Iteration limit exceeded in calculating tower nominal capacity at minimum air flow ratio");
             ShowContinueError(
                 state,
                 "Design inlet air wet-bulb or approach temperature must be modified to achieve an acceptable range at the minimum air flow rate");
-            ShowContinueError(state, format("Cooling tower simulation failed to converge for tower {}", this->Name));
-        } else if (SolFla == -2) {
-            // bad starting value means that solution corresponds to a range that is beyond
-            // the bounds of the model; The maximum range is used here
-            outletWaterTempLocal = this->WaterTemp - this->MaxRangeTemp;
+            ShowContinueError(state, std::format("Cooling tower simulation failed to converge for tower {}", this->Name));
+        } else if (SolFla == General::SOLVEROOT_ERROR_INIT) {
             ++this->VSErrorCountTRCalc;
             if (this->VSErrorCountTRCalc < 2) {
                 ShowWarningError(
                     state,
-                    format("The range for the cooling tower {} likely exceeds the bounds of the model. The maximum range of the model is used {}.",
-                           this->Name,
-                           this->MaxRangeTemp));
+                    std::format(
+                        "The range for the cooling tower {} likely exceeds the bounds of the model. The maximum range of the model is used {}.",
+                        this->Name,
+                        this->MaxRangeTemp));
                 ShowContinueError(state,
-                                  format(" ... Occurrence info = {}, {} {}",
-                                         state.dataEnvrn->EnvironmentName,
-                                         state.dataEnvrn->CurMnDy,
-                                         General::CreateSysTimeIntervalString(state)));
+                                  std::format(" ... Occurrence info = {}, {} {}",
+                                              state.dataEnvrn->EnvironmentName,
+                                              state.dataEnvrn->CurMnDy,
+                                              General::CreateSysTimeIntervalString(state)));
             } else {
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("The range for the cooling tower {} likely exceeds the bounds of the model. The maximum range of the model is used {}",
-                           this->Name,
-                           this->MaxRangeTemp),
+                    std::format(
+                        "The range for the cooling tower {} likely exceeds the bounds of the model. The maximum range of the model is used {}",
+                        this->Name,
+                        this->MaxRangeTemp),
                     this->ErrIndexTRCalc);
             }
         }
@@ -5790,9 +5828,9 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state, " ...This is not an unexpected occurrence when simulating actual conditions.");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state,
-                                                   format("{} \"{}\" - Tower range temperature is out of range error continues...",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                          this->Name),
+                                                   std::format("{} \"{}\" - Tower range temperature is out of range error continues...",
+                                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                               this->Name),
                                                    this->ErrIndexTR,
                                                    this->TrLast,
                                                    this->TrLast);
@@ -5807,9 +5845,9 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state, " ...Wet-bulb temperatures outside model boundaries may not adversely affect tower performance.");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state,
-                                                   format("{} \"{}\" - Inlet air wet-bulb temperature is out of range error continues...",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                          this->Name),
+                                                   std::format("{} \"{}\" - Inlet air wet-bulb temperature is out of range error continues...",
+                                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                               this->Name),
                                                    this->ErrIndexIAWB,
                                                    this->TwbLast,
                                                    this->TwbLast);
@@ -5825,9 +5863,9 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state, " ...This is not an unexpected occurrence when simulating actual conditions.");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state,
-                                                   format("{} \"{}\" - Tower approach temperature is out of range error continues...",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                          this->Name),
+                                                   std::format("{} \"{}\" - Tower approach temperature is out of range error continues...",
+                                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                               this->Name),
                                                    this->ErrIndexTA,
                                                    this->TaLast,
                                                    this->TaLast);
@@ -5842,9 +5880,9 @@ namespace CondenserLoopTowers {
                     ShowContinueError(state, " ...Water flow rate ratios outside model boundaries may not adversely affect tower performance.");
                 } else {
                     ShowRecurringWarningErrorAtEnd(state,
-                                                   format("{} \"{}\" - Water flow rate ratio is out of range error continues...",
-                                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                          this->Name),
+                                                   std::format("{} \"{}\" - Water flow rate ratio is out of range error continues...",
+                                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                               this->Name),
                                                    this->ErrIndexWFRR,
                                                    this->WaterFlowRateRatioLast,
                                                    this->WaterFlowRateRatioLast);
@@ -5858,9 +5896,9 @@ namespace CondenserLoopTowers {
 
         //   check boundaries of independent variables and post warnings to individual buffers to print at end of time step
         if (Twb < this->MinInletAirWBTemp || Twb > this->MaxInletAirWBTemp) {
-            OutputChar = format("{:.2R}", Twb);
-            OutputCharLo = format("{:.2R}", this->MinInletAirWBTemp);
-            OutputCharHi = format("{:.2R}", this->MaxInletAirWBTemp);
+            OutputChar = std::format("{:.2f}", Twb);
+            OutputCharLo = std::format("{:.2f}", this->MinInletAirWBTemp);
+            OutputCharHi = std::format("{:.2f}", this->MaxInletAirWBTemp);
             if (Twb < this->MinInletAirWBTemp) {
                 TwbCapped = this->MinInletAirWBTemp;
             }
@@ -5869,14 +5907,14 @@ namespace CondenserLoopTowers {
             }
             if (!state.dataGlobal->WarmupFlag) {
                 this->PrintTwbMessage = true;
-                this->TwbBuffer1 = format("{} \"{}\" - Inlet air wet-bulb temperature is outside model boundaries at {}.",
-                                          DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                          this->Name,
-                                          OutputChar);
+                this->TwbBuffer1 = std::format("{} \"{}\" - Inlet air wet-bulb temperature is outside model boundaries at {}.",
+                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                               this->Name,
+                                               OutputChar);
                 this->TwbBuffer2 = " ...Valid range = " + OutputCharLo + " to " + OutputCharHi +
                                    ". Occurrence info = " + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' +
                                    General::CreateSysTimeIntervalString(state);
-                TrimValue = format("{:.6R}", TwbCapped);
+                TrimValue = std::format("{:.6f}", TwbCapped);
                 this->TwbBuffer3 = " ...Inlet air wet-bulb temperature passed to the model = " + TrimValue;
                 this->TwbLast = Twb;
             } else {
@@ -5887,9 +5925,9 @@ namespace CondenserLoopTowers {
         }
 
         if (Tr < this->MinRangeTemp || Tr > this->MaxRangeTemp) {
-            OutputChar = format("{:.2R}", Tr);
-            OutputCharLo = format("{:.2R}", this->MinRangeTemp);
-            OutputCharHi = format("{:.2R}", this->MaxRangeTemp);
+            OutputChar = std::format("{:.2f}", Tr);
+            OutputCharLo = std::format("{:.2f}", this->MinRangeTemp);
+            OutputCharHi = std::format("{:.2f}", this->MaxRangeTemp);
             if (Tr < this->MinRangeTemp) {
                 TrCapped = this->MinRangeTemp;
             }
@@ -5898,14 +5936,14 @@ namespace CondenserLoopTowers {
             }
             if (!state.dataGlobal->WarmupFlag) {
                 this->PrintTrMessage = true;
-                this->TrBuffer1 = format("{} \"{}\" - Tower range temperature is outside model boundaries at {}.",
-                                         DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                         this->Name,
-                                         OutputChar);
+                this->TrBuffer1 = std::format("{} \"{}\" - Tower range temperature is outside model boundaries at {}.",
+                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                              this->Name,
+                                              OutputChar);
                 this->TrBuffer2 = " ...Valid range = " + OutputCharLo + " to " + OutputCharHi +
                                   ". Occurrence info = " + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' +
                                   General::CreateSysTimeIntervalString(state);
-                TrimValue = format("{:.5R}", Tr);
+                TrimValue = std::format("{:.5f}", Tr);
                 this->TrBuffer3 = " ...Tower range temperature passed to the model = " + TrimValue;
                 this->TrLast = Tr;
             } else {
@@ -5916,9 +5954,9 @@ namespace CondenserLoopTowers {
         }
 
         if (Ta < this->MinApproachTemp || Ta > this->MaxApproachTemp) {
-            OutputChar = format("{:.2R}", Ta);
-            OutputCharLo = format("{:.2R}", this->MinApproachTemp);
-            OutputCharHi = format("{:.2R}", this->MaxApproachTemp);
+            OutputChar = std::format("{:.2f}", Ta);
+            OutputCharLo = std::format("{:.2f}", this->MinApproachTemp);
+            OutputCharHi = std::format("{:.2f}", this->MaxApproachTemp);
             if (Ta < this->MinApproachTemp) {
                 TaCapped = this->MinApproachTemp;
             }
@@ -5927,14 +5965,14 @@ namespace CondenserLoopTowers {
             }
             if (!state.dataGlobal->WarmupFlag) {
                 this->PrintTaMessage = true;
-                this->TaBuffer1 = format("{} \"{}\" - Tower approach temperature is outside model boundaries at {}.",
-                                         DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                         this->Name,
-                                         OutputChar);
+                this->TaBuffer1 = std::format("{} \"{}\" - Tower approach temperature is outside model boundaries at {}.",
+                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                              this->Name,
+                                              OutputChar);
                 this->TaBuffer2 = " ...Valid range = " + OutputCharLo + " to " + OutputCharHi +
                                   ". Occurrence info = " + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' +
                                   General::CreateSysTimeIntervalString(state);
-                TrimValue = format("{:.5R}", Ta);
+                TrimValue = std::format("{:.5f}", Ta);
                 this->TaBuffer3 = " ...Tower approach temperature passed to the model = " + TrimValue;
                 this->TaLast = Ta;
             } else {
@@ -5950,9 +5988,9 @@ namespace CondenserLoopTowers {
             this->PrintWFRRMessage = false;
         } else {
             if (WaterFlowRateRatio < this->MinWaterFlowRatio || WaterFlowRateRatio > this->MaxWaterFlowRatio) {
-                OutputChar = format("{:.2R}", WaterFlowRateRatio);
-                OutputCharLo = format("{:.2R}", this->MinWaterFlowRatio);
-                OutputCharHi = format("{:.2R}", this->MaxWaterFlowRatio);
+                OutputChar = std::format("{:.2f}", WaterFlowRateRatio);
+                OutputCharLo = std::format("{:.2f}", this->MinWaterFlowRatio);
+                OutputCharHi = std::format("{:.2f}", this->MaxWaterFlowRatio);
                 if (WaterFlowRateRatio < this->MinWaterFlowRatio) {
                     WaterFlowRateRatioCapped = this->MinWaterFlowRatio;
                 }
@@ -5961,14 +5999,14 @@ namespace CondenserLoopTowers {
                 }
                 if (!state.dataGlobal->WarmupFlag) {
                     this->PrintWFRRMessage = true;
-                    this->WFRRBuffer1 = format("{} \"{}\" - Water flow rate ratio is outside model boundaries at {}.",
-                                               DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                               this->Name,
-                                               OutputChar);
+                    this->WFRRBuffer1 = std::format("{} \"{}\" - Water flow rate ratio is outside model boundaries at {}.",
+                                                    DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                    this->Name,
+                                                    OutputChar);
                     this->WFRRBuffer2 = " ...Valid range = " + OutputCharLo + " to " + OutputCharHi +
                                         ". Occurrence info = " + state.dataEnvrn->EnvironmentName + ", " + state.dataEnvrn->CurMnDy + ' ' +
                                         General::CreateSysTimeIntervalString(state);
-                    TrimValue = format("{:.5R}", WaterFlowRateRatioCapped);
+                    TrimValue = std::format("{:.5f}", WaterFlowRateRatioCapped);
                     this->WFRRBuffer3 = " ...Water flow rate ratio passed to the model = " + TrimValue;
                     this->WaterFlowRateRatioLast = WaterFlowRateRatio;
                 } else {
@@ -6134,18 +6172,18 @@ namespace CondenserLoopTowers {
         if (state.dataLoopNodes->Node(this->WaterOutletNodeNum).MassFlowRate > this->DesWaterMassFlowRate * this->TowerMassFlowRateMultiplier) {
             ++this->HighMassFlowErrorCount;
             if (this->HighMassFlowErrorCount < 2) {
-                ShowWarningError(state, format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
+                ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
                 ShowContinueError(state, " Condenser Loop Mass Flow Rate is much greater than the towers design mass flow rate.");
                 ShowContinueError(
-                    state, format(" Condenser Loop Mass Flow Rate = {:.6T}", state.dataLoopNodes->Node(this->WaterOutletNodeNum).MassFlowRate));
-                ShowContinueError(state, format(" Tower Design Mass Flow Rate   = {:.6T}", this->DesWaterMassFlowRate));
+                    state, std::format(" Condenser Loop Mass Flow Rate = {:.6f}", state.dataLoopNodes->Node(this->WaterOutletNodeNum).MassFlowRate));
+                ShowContinueError(state, std::format(" Tower Design Mass Flow Rate   = {:.6f}", this->DesWaterMassFlowRate));
                 ShowContinueErrorTimeStamp(state, "");
             } else {
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{} \"{}\"  Condenser Loop Mass Flow Rate is much greater than the towers design mass flow rate error continues...",
-                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                           this->Name),
+                    std::format("{} \"{}\"  Condenser Loop Mass Flow Rate is much greater than the towers design mass flow rate error continues...",
+                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                this->Name),
                     this->HighMassFlowErrorIndex,
                     state.dataLoopNodes->Node(this->WaterOutletNodeNum).MassFlowRate,
                     state.dataLoopNodes->Node(this->WaterOutletNodeNum).MassFlowRate);
@@ -6159,19 +6197,20 @@ namespace CondenserLoopTowers {
         if (outletWaterTempTooLow && flowIsOn) {
             ++this->OutletWaterTempErrorCount;
             if (this->OutletWaterTempErrorCount < 2) {
-                ShowWarningError(state, format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
+                ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
                 ShowContinueError(
                     state,
-                    format("Cooling tower water outlet temperature ({:.2F} C) is below the specified minimum condenser loop temp of {:.2F} C",
-                           this->OutletWaterTemp,
-                           LoopMinTemp));
+                    std::format("Cooling tower water outlet temperature ({:.2F} C) is below the specified minimum condenser loop temp of {:.2F} C",
+                                this->OutletWaterTemp,
+                                LoopMinTemp));
                 ShowContinueErrorTimeStamp(state, "");
             } else {
                 ShowRecurringWarningErrorAtEnd(
                     state,
-                    format("{} \"{}\" Cooling tower water outlet temperature is below the specified minimum condenser loop temp error continues...",
-                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                           this->Name),
+                    std::format(
+                        "{} \"{}\" Cooling tower water outlet temperature is below the specified minimum condenser loop temp error continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                        this->Name),
                     this->OutletWaterTempErrorIndex,
                     this->OutletWaterTemp,
                     this->OutletWaterTemp);
@@ -6182,15 +6221,15 @@ namespace CondenserLoopTowers {
         if (this->WaterMassFlowRate > 0.0 && this->WaterMassFlowRate <= DataBranchAirLoopPlant::MassFlowTolerance) {
             ++this->SmallWaterMassFlowErrorCount;
             if (this->SmallWaterMassFlowErrorCount < 2) {
-                ShowWarningError(state, format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
+                ShowWarningError(state, std::format("{} \"{}\"", DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)], this->Name));
                 ShowContinueError(state, "Cooling tower water mass flow rate near zero.");
                 ShowContinueErrorTimeStamp(state, "");
-                ShowContinueError(state, format("Actual Mass flow = {:.2T}", this->WaterMassFlowRate));
+                ShowContinueError(state, std::format("Actual Mass flow = {:.2f}", this->WaterMassFlowRate));
             } else {
                 ShowRecurringWarningErrorAtEnd(state,
-                                               format("{} \"{}\"  Cooling tower water mass flow rate near zero error continues...",
-                                                      DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
-                                                      this->Name),
+                                               std::format("{} \"{}\"  Cooling tower water mass flow rate near zero error continues...",
+                                                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->TowerType)],
+                                                           this->Name),
                                                this->SmallWaterMassFlowErrorIndex,
                                                this->WaterMassFlowRate,
                                                this->WaterMassFlowRate);
@@ -6217,7 +6256,6 @@ namespace CondenserLoopTowers {
             this->FanPower = 0.0;
             this->FanEnergy = 0.0;
             this->AirFlowRatio = 0.0;
-            this->WaterAmountUsed = 0.0;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
             this->FanCyclingRatio = 0.0;
             this->BypassFraction = 0.0; // added for fluid bypass
@@ -6227,7 +6265,6 @@ namespace CondenserLoopTowers {
             this->InletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp;
             this->FanEnergy = this->FanPower * ReportingConstant;
             this->AirFlowRatio = this->airFlowRateRatio;
-            this->WaterAmountUsed = this->WaterUsage * ReportingConstant;
             this->BasinHeaterConsumption = this->BasinHeaterPower * ReportingConstant;
         }
     }
@@ -6253,19 +6290,19 @@ namespace CondenserLoopTowers {
         }
     }
 
-    Real64 CoolingTower::getDynamicMaxCapacity(EnergyPlusData &state)
+    Real64 CoolingTower::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
     {
         // TODO: does not include faults object impact
         static constexpr std::string_view routineName("getDynamicMaxCapacity");
         Real64 outletWaterTemp = 0.0;
         Real64 constexpr designWetBulb = 25.56;
-        Real64 constexpr airFlowRateRatio = 1.0;
+        Real64 constexpr ratedAirFlowRateRatio = 1.0;
         Real64 constexpr waterFlowRateRatio = 1.0;
         Real64 const CpWater =
             this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp, routineName);
-        // use operating max (i.e., at current plant flow rates, could be 0 if plant is off) or max available capacity?
-        // Real64 waterMassFlowRate = state.dataLoopNodes->Node(this->WaterInletNodeNum).MassFlowRateMaxAvail;
-        Real64 waterMassFlowRate = this->DesWaterMassFlowRate;
+        // Use design flow when estimating maximum available capacity. Current flow may be zero for idle equipment,
+        // which would prevent subsequent towers from being staged when the operating tower cannot meet the remaining load.
+        Real64 const waterMassFlowRate = this->DesWaterMassFlowRate;
         this->AirWetBulb = (this->OutdoorAirInletNodeNum > 0) ? state.dataLoopNodes->Node(this->OutdoorAirInletNodeNum).OutAirWetBulb
                                                               : state.dataEnvrn->OutWetBulbTemp;
 
@@ -6281,29 +6318,19 @@ namespace CondenserLoopTowers {
             outletWaterTemp = this->calculateSimpleTowerOutletTemp(state, WaterMassFlowRatePerCell, AirFlowRate, UAdesign);
         } break;
         case DataPlant::PlantEquipmentType::CoolingTower_VarSpd: {
-            Real64 TrCapped; // range temp passed to VS tower model
-            Real64 TaCapped; // approach temp passed to VS tower model
-            Real64 Twb = this->AirWetBulb;
-            Real64 TwbCapped = this->AirWetBulb;
-            // water temperature setpoint
-            Real64 TempSetPoint(0.0); // Outlet water temperature setpoint (C)
-            switch (this->plantLoc.loop->LoopDemandCalcScheme) {
-            case DataPlant::LoopDemandCalcScheme::SingleSetPoint: {
-                TempSetPoint = this->plantLoc.side->TempSetPoint;
-            } break;
-            case DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand: {
-                TempSetPoint = this->plantLoc.side->TempSetPointHi;
-            } break;
-            default: {
-                assert(false);
-            } break;
+            Real64 const TwbCapped = std::clamp(this->AirWetBulb, this->MinInletAirWBTemp, this->MaxInletAirWBTemp);
+            // YorkCalc limits liquid-to-gas ratio during actual operation instead of limiting water flow ratio.
+            bool const isYorkCalc = this->TowerModelType == ModelType::YorkCalcModel || this->TowerModelType == ModelType::YorkCalcUserDefined;
+            Real64 const waterFlowRateRatioCapped =
+                isYorkCalc ? waterFlowRateRatio : std::clamp(waterFlowRateRatio, this->MinWaterFlowRatio, this->MaxWaterFlowRatio);
+            bool outletTempIsUsable = false;
+            outletWaterTemp =
+                this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, ratedAirFlowRateRatio, TwbCapped, false, &outletTempIsUsable);
+            if (!outletTempIsUsable) {
+                minLoad = 0.0;
+                optLoad = 0.0;
+                return 0.0;
             }
-            Real64 Tr = state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - TempSetPoint;
-            Real64 Ta = TempSetPoint - this->AirWetBulb;
-            Real64 waterFlowRateRatioCapped = 0.0; // Water flow rate ratio passed to VS tower model
-            // check independent inputs with respect to model boundaries
-            this->checkModelBounds(state, Twb, Tr, Ta, waterFlowRateRatio, TwbCapped, TrCapped, TaCapped, waterFlowRateRatioCapped);
-            outletWaterTemp = this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, airFlowRateRatio, TwbCapped);
         } break;
         case DataPlant::PlantEquipmentType::CoolingTower_VarSpdMerkel: {
             // only needed for calculateSimpleTowerOutletTemp
@@ -6314,7 +6341,7 @@ namespace CondenserLoopTowers {
             Real64 const waterMassFlowRatePerCell = waterMassFlowRate / this->NumCell;
             Real64 const WaterFlowRateRatio = waterMassFlowRatePerCell / this->DesWaterMassFlowRatePerCell; // this should always be 1 ?
             Real64 const UAwetbulbAdjFac = Curve::CurveValue(state, this->UAModFuncWetBulbDiffCurvePtr, (designWetBulb - this->AirWetBulb));
-            Real64 const UAairflowAdjFac = Curve::CurveValue(state, this->UAModFuncAirFlowRatioCurvePtr, airFlowRateRatio);
+            Real64 const UAairflowAdjFac = Curve::CurveValue(state, this->UAModFuncAirFlowRatioCurvePtr, ratedAirFlowRateRatio);
             Real64 const UAwaterflowAdjFac = Curve::CurveValue(state, this->UAModFuncWaterFlowRatioCurvePtr, WaterFlowRateRatio);
             Real64 const UAadjustedPerCell = UAdesignPerCell * UAwetbulbAdjFac * UAairflowAdjFac * UAwaterflowAdjFac;
             outletWaterTemp = this->calculateSimpleTowerOutletTemp(state, waterMassFlowRatePerCell, airFlowRatePerCell, UAadjustedPerCell);
@@ -6322,7 +6349,10 @@ namespace CondenserLoopTowers {
         default:
             assert(false);
         }
-        return waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
+        Real64 const maxLoad = waterMassFlowRate * CpWater * (state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp - outletWaterTemp);
+        minLoad = 0.0;
+        optLoad = maxLoad;
+        return maxLoad;
     }
 
 } // namespace CondenserLoopTowers

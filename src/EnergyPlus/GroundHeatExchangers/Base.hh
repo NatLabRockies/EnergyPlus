@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -62,9 +62,7 @@ namespace GroundHeatExchangers {
 
     struct GLHEBase : PlantComponent
     {
-        bool available = false; // load identifier of available equipment
-        bool on = false;        // simulate the machine at it's operating part load ratio
-        std::string name;       // user identifier
+        std::string name; // user identifier
         PlantLocation plantLoc;
         int inletNodeNum = 0;  // Node number on the inlet side of the plant
         int outletNodeNum = 0; // Node number on the outlet side of the plant
@@ -106,7 +104,6 @@ namespace GroundHeatExchangers {
         bool updateCurSimTime = true; // Used to reset the CurSimTime to reset after WarmupFlag
         bool triggerDesignDayReset = false;
         bool needToSetupOutputVars = true;
-        bool runGheDesigner = true;
 
         // to enable the calculation of the sub-hourly contribution.
         // Recommended size, the product of Minimum sub-hourly history required and

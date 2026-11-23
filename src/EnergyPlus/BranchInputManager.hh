@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -94,7 +94,6 @@ namespace BranchInputManager {
         // Members
         std::string CType;          // Component Type (Cannot be SPLITTER or MIXER)
         std::string Name;           // Component Name
-        int CtrlType = 0;           // Active, Passive, Bypass (1,2,3)
         std::string InletNodeName;  // Inlet Node ID
         int InletNode = 0;          // Inlet Node Number
         std::string OutletNodeName; // Outlet Node ID
@@ -107,11 +106,10 @@ namespace BranchInputManager {
         std::string Name;             // Name for this Branch
         std::string AssignedLoopName; // Loop Name for this branch
         DataBranchAirLoopPlant::PressureCurveType PressureCurveType =
-            DataBranchAirLoopPlant::PressureCurveType::Invalid;                     // Integer index of pressure curve type
-        int PressureCurveIndex = 0;                                                 // Integer index of pressure curve
-        DataLoopNode::NodeFluidType FluidType = DataLoopNode::NodeFluidType::Blank; // Fluid type (see DataLoopNode)
-        int NumOfComponents = 0;                                                    // Number of Components on this Branch
-        Array1D<ComponentData> Component;                                           // Component definitions for each component
+            DataBranchAirLoopPlant::PressureCurveType::Invalid; // Integer index of pressure curve type
+        int PressureCurveIndex = 0;                             // Integer index of pressure curve
+        int NumOfComponents = 0;                                // Number of Components on this Branch
+        Array1D<ComponentData> Component;                       // Component definitions for each component
     };
 
     struct SplitterData
@@ -181,7 +179,7 @@ namespace BranchInputManager {
                                DataBranchAirLoopPlant::PressureCurveType &PressCurveType, // Index of pressure curve object
                                int &PressCurveIndex,                                      // Index of pressure curve object
                                int &NumComps,                                             // Number of Components on Branch
-                               Array1D<ComponentData> const &BComponents,                 // Component data returned
+                               Array1D<ComponentData> &BComponents,                       // Component data returned
                                bool &ErrorsFound // True when Loop Name is already assigned and this not same loop
     );
 

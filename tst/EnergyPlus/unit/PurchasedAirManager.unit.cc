@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -77,7 +77,6 @@
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataHeatBalance;
 using namespace EnergyPlus::DataHeatBalFanSys;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::DataZoneEnergyDemands;
@@ -95,7 +94,7 @@ public:
     bool ErrorsFound = false;
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -134,7 +133,7 @@ protected:
         state->dataZoneEquip->ZoneEquipInputsFilled = false;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -397,15 +396,15 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_PlenumTest)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
 
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
 
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
 
     bool FirstHVACIteration(true);
     bool SimZone(true);
@@ -525,14 +524,14 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_ExhaustNodeTest)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
 
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
 
     bool FirstHVACIteration(true);
     bool SimZone(true);
@@ -654,13 +653,13 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_IntermediateOutputVarsTest)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
     auto &PurchAir(state->dataPurchasedAirMgr->PurchAir);
 
     bool FirstHVACIteration(true);
@@ -826,13 +825,13 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_EMSOverrideTest)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
 
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
@@ -935,13 +934,13 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_NoCapacityTest)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
 
     bool FirstHVACIteration(true);
     bool SimZone(true);
@@ -1084,13 +1083,13 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_EMSOverrideTest_Revised)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     state->dataEnvrn->StdRhoAir = 1.0; // Prevent divide by zero
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
 
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
@@ -1256,12 +1255,12 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_EMSOverrideTest_Revised_ZeroFlow)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     state->dataHeatBal->space(1).HTSurfaceFirst = 1;
     state->dataHeatBal->space(1).HTSurfaceLast = 1;
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
 
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
@@ -1467,10 +1466,10 @@ TEST_F(ZoneIdealLoadsTest, IdealLoads_Fix_SA_HumRat_Test)
 
     state->dataGlobal->DoWeathSim = true;
 
-    bool ErrorsFound = false;
-    GetZoneData(*state, ErrorsFound);
+    bool errorsFound = false;
+    GetZoneData(*state, errorsFound);
     AllocateHeatBalArrays(*state);
-    EXPECT_FALSE(ErrorsFound); // expect no errors
+    EXPECT_FALSE(errorsFound); // expect no errors
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
 
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;

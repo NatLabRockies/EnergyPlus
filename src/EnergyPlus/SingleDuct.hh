@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -60,6 +60,7 @@
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FluidProperties.hh>
+#include <EnergyPlus/General.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 
@@ -91,16 +92,7 @@ namespace SingleDuct {
         SingleDuctCBVAVNoReheat,
         Num,
     };
-    enum class HeatingCoilType : int
-    {
-        Invalid = -1,
-        None,
-        Gas,
-        Electric,
-        SimpleHeating,
-        SteamAirHeating,
-        Num,
-    };
+
     enum class MinFlowFraction
     {
         Invalid = -1,
@@ -131,18 +123,18 @@ namespace SingleDuct {
     struct SingleDuctAirTerminal
     {
         // Members
-        int SysNum;                                         // index to single duct air terminal unit
-        std::string SysName;                                // Name of the Sys
-        std::string sysType;                                // Type of Sys ie. VAV, Mixing, Inducing, etc.
-        SysType SysType_Num;                                // Numeric Equivalent for System type
-        Sched::Schedule *availSched = nullptr;              // availability schedule
-        std::string ReheatComp;                             // Type of the Reheat Coil Object
-        HeatingCoilType ReheatComp_Num;                     // Numeric Equivalent in this module for Coil type
-        int ReheatComp_Index;                               // Returned Index number from other routines
-        std::string ReheatName;                             // name of reheat coil
-        DataPlant::PlantEquipmentType ReheatComp_PlantType; // typeOf_ number for plant type of heating coil
-        HVAC::FanType fanType;                              // Numeric Equivalent in this module for fan type
-        int Fan_Index;                                      // Returned Index number from other routines
+        int SysNum;                                              // index to single duct air terminal unit
+        std::string SysName;                                     // Name of the Sys
+        std::string sysType;                                     // Type of Sys ie. VAV, Mixing, Inducing, etc.
+        SysType SysType_Num;                                     // Numeric Equivalent for System type
+        Sched::Schedule *availSched = nullptr;                   // availability schedule
+        std::string ReheatComp;                                  // Type of the Reheat Coil Object
+        HVAC::CoilType reheatCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent in this module for Coil type
+        int ReheatComp_Index;                                    // Returned Index number from other routines
+        std::string ReheatName;                                  // name of reheat coil
+        DataPlant::PlantEquipmentType ReheatComp_PlantType;      // typeOf_ number for plant type of heating coil
+        HVAC::FanType fanType;                                   // Numeric Equivalent in this module for fan type
+        int Fan_Index;                                           // Returned Index number from other routines
         int ControlCompTypeNum;
         int CompErrIndex;
         std::string FanName;                  // name of fan
@@ -195,13 +187,18 @@ namespace SingleDuct {
         bool NoOAFlowInputFromUser;           // avoids OA calculation if no input specified by user
         int OARequirementsPtr;                // - Index to DesignSpecification:OutdoorAir object
         int AirLoopNum;
-        PlantLocation HWplantLoc;     // plant topology, Component location
-        std::string ZoneHVACUnitType; // type of Zone HVAC unit for air terminal mixer units
-        std::string ZoneHVACUnitName; // name of Zone HVAC unit for air terminal mixer units
-        int SecInNode;                // zone or zone unit air node number
+        PlantLocation HWplantLoc; // plant topology, Component location
+        int SecInNode;            // zone or zone unit air node number
         // warning variables
-        int IterationLimit;                                       // Used for RegulaFalsi error -1
-        int IterationFailed;                                      // Used for RegulaFalsi error -2
+        // VS VAV terminal: separate recurring-error indices per distinct message, since the supply air
+        // flow solve (cooling and heating) always runs regardless of reheat coil type, and can co-occur
+        // with the reheat-coil-specific solves below (which are themselves mutually exclusive by coil type).
+        int IterationLimit;                                       // Used for RegulaFalsi error -1, supply air flow solve
+        int IterationFailed;                                      // Used for RegulaFalsi error -2, supply air flow solve
+        int IterationLimitSteamCoil;                              // Used for RegulaFalsi error -1, steam heating coil control solve
+        int IterationFailedSteamCoil;                             // Used for RegulaFalsi error -2, steam heating coil control solve
+        int IterationLimitHeatingCoil;                            // Used for RegulaFalsi error -1, gas/electric heating coil control solve
+        int IterationFailedHeatingCoil;                           // Used for RegulaFalsi error -2, gas/electric heating coil control solve
         DataZoneEquipment::PerPersonVentRateMode OAPerPersonMode; // mode for how per person rates are determined, DCV or design.
         bool EMSOverrideAirFlow;                                  // if true, EMS is calling to override flow rate
         Real64 EMSMassFlowRateValue;                              // value EMS is directing to use for flow rate [kg/s]
@@ -218,23 +215,24 @@ namespace SingleDuct {
         SingleDuctAirTerminalFlowConditions sd_airterminalInlet;
         SingleDuctAirTerminalFlowConditions sd_airterminalOutlet;
 
+        General::SolveRootStats solveRootStats;
         // Default Constructor
         SingleDuctAirTerminal()
-            : SysNum(-1), SysType_Num(SysType::Invalid), ReheatComp_Num(HeatingCoilType::None), ReheatComp_Index(0),
-              ReheatComp_PlantType(DataPlant::PlantEquipmentType::Invalid), fanType(HVAC::FanType::Invalid), Fan_Index(0), ControlCompTypeNum(0),
-              CompErrIndex(0), MaxAirVolFlowRate(0.0), AirMassFlowRateMax(0.0), MaxHeatAirVolFlowRate(0.0), HeatAirMassFlowRateMax(0.0),
-              ZoneMinAirFracMethod(MinFlowFraction::Constant), ZoneMinAirFracDes(0.0), ZoneMinAirFrac(0.0), ZoneMinAirFracReport(0.0),
-              ZoneFixedMinAir(0.0), ConstantMinAirFracSetByUser(false), FixedMinAirSetByUser(false), DesignMinAirFrac(0.0), DesignFixedMinAir(0.0),
-              InletNodeNum(0), OutletNodeNum(0), ReheatControlNode(0), ReheatCoilOutletNode(0), ReheatCoilMaxCapacity(0.0), ReheatAirOutletNode(0),
-              MaxReheatWaterVolFlow(0.0), MaxReheatSteamVolFlow(0.0), MaxReheatWaterFlow(0.0), MaxReheatSteamFlow(0.0), MinReheatWaterVolFlow(0.0),
-              MinReheatSteamVolFlow(0.0), MinReheatWaterFlow(0.0), MinReheatSteamFlow(0.0), ControllerOffset(0.0), MaxReheatTemp(0.0),
-              MaxReheatTempSetByUser(false), DamperHeatingAction(Action::HeatingNotUsed), DamperPosition(0.0), ADUNum(0), ErrCount1(0), ErrCount1c(0),
-              ErrCount2(0), ZoneFloorArea(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0), MaxAirVolFlowRateDuringReheat(0.0),
-              MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0), OutdoorAirFlowRate(0.0),
-              NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWplantLoc{}, SecInNode(0), IterationLimit(0), IterationFailed(0),
-              OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false), EMSMassFlowRateValue(0.0),
-              ZoneTurndownMinAirFrac(1.0), MyEnvrnFlag(true), MySizeFlag(true), GetGasElecHeatCoilCap(true), PlantLoopScanFlag(true), MassFlow1(0.0),
-              MassFlow2(0.0), MassFlow3(0.0), MassFlowDiff(0.0)
+            : SysNum(-1), SysType_Num(SysType::Invalid), ReheatComp_Index(0), ReheatComp_PlantType(DataPlant::PlantEquipmentType::Invalid),
+              fanType(HVAC::FanType::Invalid), Fan_Index(0), ControlCompTypeNum(0), CompErrIndex(0), MaxAirVolFlowRate(0.0), AirMassFlowRateMax(0.0),
+              MaxHeatAirVolFlowRate(0.0), HeatAirMassFlowRateMax(0.0), ZoneMinAirFracMethod(MinFlowFraction::Constant), ZoneMinAirFracDes(0.0),
+              ZoneMinAirFrac(0.0), ZoneMinAirFracReport(0.0), ZoneFixedMinAir(0.0), ConstantMinAirFracSetByUser(false), FixedMinAirSetByUser(false),
+              DesignMinAirFrac(0.0), DesignFixedMinAir(0.0), InletNodeNum(0), OutletNodeNum(0), ReheatControlNode(0), ReheatCoilOutletNode(0),
+              ReheatCoilMaxCapacity(0.0), ReheatAirOutletNode(0), MaxReheatWaterVolFlow(0.0), MaxReheatSteamVolFlow(0.0), MaxReheatWaterFlow(0.0),
+              MaxReheatSteamFlow(0.0), MinReheatWaterVolFlow(0.0), MinReheatSteamVolFlow(0.0), MinReheatWaterFlow(0.0), MinReheatSteamFlow(0.0),
+              ControllerOffset(0.0), MaxReheatTemp(0.0), MaxReheatTempSetByUser(false), DamperHeatingAction(Action::HeatingNotUsed),
+              DamperPosition(0.0), ADUNum(0), ErrCount1(0), ErrCount1c(0), ErrCount2(0), ZoneFloorArea(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0),
+              MaxAirVolFlowRateDuringReheat(0.0), MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0),
+              OutdoorAirFlowRate(0.0), NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWplantLoc{}, SecInNode(0),
+              IterationLimit(0), IterationFailed(0), IterationLimitSteamCoil(0), IterationFailedSteamCoil(0), IterationLimitHeatingCoil(0),
+              IterationFailedHeatingCoil(0), OAPerPersonMode(DataZoneEquipment::PerPersonVentRateMode::Invalid), EMSOverrideAirFlow(false),
+              EMSMassFlowRateValue(0.0), ZoneTurndownMinAirFrac(1.0), MyEnvrnFlag(true), MySizeFlag(true), GetGasElecHeatCoilCap(true),
+              PlantLoopScanFlag(true), MassFlow1(0.0), MassFlow2(0.0), MassFlow3(0.0), MassFlowDiff(0.0)
         {
         }
 
@@ -257,7 +255,7 @@ namespace SingleDuct {
                        int ZoneNode,
                        Real64 HWFlow,
                        Real64 HCoilReq,
-                       HVAC::FanType fanType,
+                       HVAC::FanType t_fanType,
                        Real64 AirFlow,
                        int FanOn,
                        Real64 &LoadMet);
@@ -292,7 +290,6 @@ namespace SingleDuct {
         Real64 MixedAirMassFlowRate = 0.0;               // mixed air in mass flow rate
         Real64 MassFlowRateMaxAvail = 0.0;               // maximum air mass flow rate allowed through component
         int ADUNum = 0;                                  // index of Air Distribution Unit
-        int TermUnitSizingIndex = 0;                     // Pointer to TermUnitSizing and TermUnitFinalZoneSizing data for this terminal unit
         bool OneTimeInitFlag = true;                     // true if one-time inits should be done
         bool OneTimeInitFlag2 = true;                    // true if more one-time inits should be done
         int CtrlZoneInNodeIndex = 0;                     // which controlled zone inlet node number corresponds with this unit
@@ -360,7 +357,6 @@ struct SingleDuctData : BaseGlobalStruct
     int NumSDAirTerminal = 0;              // The Number of single duct air terminals found in the Input
     bool GetInputFlag = true;              // Flag set to make sure you get input once
     bool GetATMixerFlag = true;            // Flag set to make sure you get input once
-    bool InitATMixerFlag = true;           // Flag set to make sure you do begin simulation initializaztions once for mixer
     bool ZoneEquipmentListChecked = false; // True after the Zone Equipment List has been checked for items
 
     int SysNumGSI = 0;   // The Sys that you are currently loading input into
@@ -385,7 +381,6 @@ struct SingleDuctData : BaseGlobalStruct
     int CoilWaterOutletNodeSS = 0;
     int CoilSteamInletNodeSS = 0;
     int CoilSteamOutletNodeSS = 0;
-    Fluid::GlycolProps *water = nullptr;
     Real64 UserInputMaxHeatAirVolFlowRateSS = 0.0; // user input for MaxHeatAirVolFlowRate
     Real64 MinAirMassFlowRevActSVAV = 0.0;         // minimum air mass flow rate used in "reverse action" air mass flow rate calculation
     Real64 MaxAirMassFlowRevActSVAV = 0.0;         // maximum air mass flow rate used in "reverse action" air mass flow rate calculation

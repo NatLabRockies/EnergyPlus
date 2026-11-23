@@ -5,15 +5,10 @@
 #include <memory>
 #include <iostream>
 
-#ifndef NDEBUG
-#ifdef __unix__
-#include <cfenv>
-#endif
-#endif
-
 // Penumbra
 #include <penumbra/penumbra.h>
 #include "penumbra-implementation.h"
+#include "fp-exception-guard.h"
 
 namespace Penumbra {
 
@@ -26,6 +21,8 @@ Penumbra::Penumbra(const std::shared_ptr<Courierr::Courierr> &logger)
 Penumbra::~Penumbra() = default;
 
 bool Penumbra::is_valid_context() {
+  // GLFW/windowing-system initialization may raise FP exceptions; mask any traps the host enabled
+  FloatingPointExceptionGuard fp_guard;
   bool invalid(false);
   if (!glfwInit()) {
     invalid = true;
@@ -34,18 +31,7 @@ bool Penumbra::is_valid_context() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-#ifndef NDEBUG
-#ifdef __unix__
-  // Temporarily Disable floating point exceptions
-  fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   GLFWwindow *window = glfwCreateWindow(1, 1, "Penumbra", nullptr, nullptr);
-#ifndef NDEBUG
-#ifdef __unix__
-  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   glfwMakeContextCurrent(window);
   invalid |= !window;
   glfwDestroyWindow(window);
@@ -53,7 +39,7 @@ bool Penumbra::is_valid_context() {
 }
 
 VendorType Penumbra::get_vendor_name() {
-  VendorType vendor_type;
+  VendorType vendor_type{VendorType::unknown};
   auto vendor_name = Context::get_vendor_name();
   if (vendor_name == "NVIDIA") {
     vendor_type = VendorType::nvidia;
@@ -66,9 +52,12 @@ VendorType Penumbra::get_vendor_name() {
     vendor_type = VendorType::vmware;
   } else if (vendor_name == "Mesa" || vendor_name == "Mesa/X.org") {
     vendor_type = VendorType::mesa;
+  } else if (vendor_name == "Apple" || vendor_name == "Apple Inc." ||
+             vendor_name == "Apple Computer, Inc.") {
+    vendor_type = VendorType::apple;
   } else {
     throw PenumbraException(
-        fmt::format("Failed to find GPU or vendor name ({}) is not in list.", vendor_name),
+        std::format("Failed to find GPU or vendor name ({}) is not in list.", vendor_name),
         *(penumbra->logger));
   }
   return vendor_type;

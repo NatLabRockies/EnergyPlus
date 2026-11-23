@@ -2049,11 +2049,49 @@ and total cooling capacity of the Coil:Cooling:DX object.  Actuators
 called “Coil:Cooling:DX:SingleSpeed” are available with control types
 “Autosized Rated Air Flow Rate” (in m3/s), “Autosized Rated Total
 Cooling Capacity” (in W), and “Autosized Rated Sensible Heat Ratio” (in
-W/W).  These are only useful from the calling point named
-AfterComponentInputReadIn.
+W/W). Actuators called "Coil:Cooling:DX:MultiSpeed" are available with
+control types "Autosized Rated Air Flow Rate Speed n" (in m3/s), and
+"Autosized Rated Total Cooling Capacity Speed n" (in W) where n is an
+integer between 1 and 4.  These are only useful from the calling point
+named AfterComponentInputReadIn.
 
 DX Heating Coils
 ~~~~~~~~~~~~~~~~
+
+An actuator is available for overriding the autosize value of the gross
+rated heating capacity of the Coil:Heating:DX:SingleSpeed object.  The
+actuator is called “Coil:Heating:DX:SingleSpeed” with control type
+“Autosized Rated Total Heating Capacity” (in W). Actuators called
+“Coil:Heating:DX:MultiSpeed” are available with control types
+“Autosized Rated Air Flow Rate Speed n” (in m3/s) and “Autosized Rated
+Total Heating Capacity Speed n” (in W), where n is an integer between 1
+and 4. They are only useful from the calling point named
+AfterComponentInputReadIn.
+
+A sample EMS program might look like this:
+
+  EnergyManagementSystem:Actuator,
+    MSDXHeatOverride4,   !- Name
+    Sys 3 Heat Pump Air Source Heating Coil,    !- Actuated Component Unique Name
+    Coil:Heating:DX:MultiSpeed,      !- Actuated Component Type
+    Autosized Rated Total Heating Capacity Speed 4;  !- Actuated Component Control Type
+
+  EnergyManagementSystem:Actuator,
+    MSDXAirflowOverride4,   !- Name
+    Sys 3 Heat Pump Air Source Heating Coil,    !- Actuated Component Unique Name
+    Coil:Heating:DX:MultiSpeed,      !- Actuated Component Type
+    Autosized Rated Air Flow Rate Speed 4;  !- Actuated Component Control Type
+
+  EnergyManagementSystem:ProgramCallingManager,
+    MSDXHeatCoilSizing,  !- Name
+    AfterComponentInputReadIn,  !- EnergyPlus Model Calling Point
+    MSDXHeatingCoilSize;    !- Program Name 1
+
+  EnergyManagementSystem:Program,
+    MSDXHeatingCoilSize,    !- Name
+    SET MSDXHeatOverride4 = 8000.0,
+    SET MSDXAirflowOverride4 = MSDXHeatOverride4 * 0.00005;
+
 
 Actuators are available for overriding the input power and heating capacity
 frost adjustment factors of the Coil:Heating:DX objects.  Actuators called
@@ -2355,19 +2393,64 @@ models for convection coefficients.
 Material Surface Properties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three actuators are available for controlling the surface properties
-material related to absorptance. Those material layers used in a
-Construction object that lie at the outside and the inside of the
-assembly determine the surface properties of a heat transfer surface. 
-Actuators called “Material” are available with the control types
-“Surface Property Solar Absorptance,” “Surface Property Thermal
-Absorptance,” and “Surface Property Visible Absorptance.”  These are
-dimensionless parameters between 0.0 and 1.0.  These actuators are
-useful for modeling switchable coatings such as thermochromic paints.
-Note that for a single-layer construction, both the inside and outside
-properties will be overwritten. For overwriting outside properties
-alone, please use “MaterialProperty:VariableAbsorptance” (see
-InputOutputReference).
+Nine actuators with the component type ``Material`` are available for
+controlling material absorptance. The actuator unique identifier is a
+material name, not a surface name. Therefore, an actuator affects every
+opaque Construction in which that material is exposed on the
+corresponding face. The first layer of a Construction supplies its
+outside-face properties, and the last layer supplies its inside-face
+properties. In a single-layer Construction, the same material supplies
+both faces.
+
+For each of the Solar, Thermal, and Visible properties, the available
+control types are as follows:
+
+-  ``Surface Property <Property> Absorptance`` is the legacy control
+   type and applies the same value to both faces of the material.
+
+-  ``Surface Property <Property> Absorptance Outside Face`` applies
+   only when the material is the outside layer of a Construction.
+
+-  ``Surface Property <Property> Absorptance Inside Face`` applies only
+   when the material is the inside layer of a Construction.
+
+A face-specific actuator takes precedence over a legacy actuator when
+both are active for the same property and face. Setting the
+face-specific actuator to ``Null`` relinquishes its control: an active
+legacy actuator then supplies the value. If both actuators are
+``Null``, EnergyPlus restores the value supplied by the material input.
+The actuator values are dimensionless, and the effective value is
+limited to the range 0.0001 through 0.9999.
+
+For example, consider a single-layer Construction with an active legacy
+Thermal actuator set to 0.30 and an active Inside Face Thermal actuator
+set to 0.60. The effective outside-face value is 0.30 and the
+inside-face value is 0.60. Setting the Inside Face actuator to ``Null``
+makes both faces 0.30; subsequently setting the legacy actuator to
+``Null`` restores the material input values.
+
+Use the ``BeginZoneTimestepBeforeInitHeatBalance`` calling point to
+apply a new value during the current zone timestep. A value assigned at
+a later calling point is not applied to the surface heat balance until
+the next initialization.
+
+For a surface whose exposed materials have a referenced face-specific
+Thermal actuator, EnergyPlus registers the ``Surface Thermal
+Absorptance Outside Face`` and ``Surface Thermal Absorptance Inside
+Face`` output variables. A referenced face-specific Solar actuator
+similarly registers the ``Surface Solar Absorptance Outside Face`` and
+``Surface Solar Absorptance Inside Face`` output variables. A property
+without a referenced face-specific actuator retains its legacy
+unqualified output-variable name.
+
+These actuators are useful for modeling switchable coatings such as
+thermochromic paints. For schedule- or curve-based control of Thermal
+and Solar absorptance, ``MaterialProperty:VariableAbsorptance`` provides
+a dedicated alternative. That object is evaluated after the EMS
+material actuators at the surface level. If both mechanisms target the
+same property and face, ``MaterialProperty:VariableAbsorptance``
+determines the effective value; overlapping controls should therefore
+be used only when this precedence is intended.
 
 Surface Construction State
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2517,6 +2600,27 @@ described below.
    used to add energy (i.e. positive numbers only), and the energy used
    is added to the electric heating sub-meter.
 
+A separate actuator, called “CondFD Surface,” is available for exterior
+surfaces that use the Conduction Finite Difference solution algorithm.
+Unlike the material-layer actuators above, this actuator operates on the
+surface as a whole and is identified by the surface name alone (not
+SurfName:MatName).
+
+-  “Sky Longwave Radiation Override”. Has units of [W/m2]. Replaces
+   the default sky longwave radiation term (h_sky * (T_sky - T_surf))
+   in the exterior face heat balance with a user-specified net heat
+   flux. Positive values indicate net radiation into the surface;
+   negative values indicate net radiation leaving the surface (cooling).
+   Only applies to exterior CondFD surfaces. The actuated component
+   unique name is the surface name (e.g. “ZN001:ROOF001”). The override
+   affects only the sky term of the actuated surface: its exchange with
+   the ground, the outdoor air and surrounding surfaces is unchanged, and
+   other exterior surfaces, including windows and surfaces that use the
+   CTF algorithm, keep the sky temperature calculated by EnergyPlus. The
+   flux is applied as given, independent of the surface temperature in
+   that time step. To change the sky temperature for all exterior
+   surfaces, use WeatherProperty:SkyTemperature instead.
+
 Conduction Finite Difference Outputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2547,6 +2651,15 @@ CondFD EMS Heat Source Energy After Layer N
 '''''''''''''''''''''''''''''''''''''''''''
 
 This output reports the heat energy added after material layer N
+
+-  Zone,Average,CondFD EMS Sky Longwave Radiation Override Heat Flux [W/m2]
+
+CondFD EMS Sky Longwave Radiation Override Heat Flux
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+This output reports the user-specified net sky longwave radiation heat
+flux applied to the exterior surface via the EMS actuator. Reports 0.0
+when not actuated.
 
 Air Movement
 ------------

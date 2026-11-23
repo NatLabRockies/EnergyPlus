@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -132,11 +132,11 @@ void WriteInputArguments(EnergyPlusData &state,
                          const Array1D<Real64> &tvent,
                          const Array1D<Real64> &presure,
                          const Array1D_int &nmix,
-                         Array2A_int const iprop,
-                         Array2A<Real64> const frct,
-                         Array2A<Real64> const xgcon,
-                         Array2A<Real64> const xgvis,
-                         Array2A<Real64> const xgcp,
+                         Array2D_int const &iprop,
+                         Array2D<Real64> const &frct,
+                         Array2D<Real64> const &xgcon,
+                         Array2D<Real64> const &xgvis,
+                         Array2D<Real64> const &xgcp,
                          const Array1D<Real64> &xwght)
 {
 
@@ -169,11 +169,6 @@ void WriteInputArguments(EnergyPlusData &state,
     EP_SIZE_CHECK(tvent, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
 
     // Locals
@@ -325,27 +320,27 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1068, hin);
 
     if (standard == TARCOGGassesParams::Stdrd::ISO15099) {
-        print(InArgumentsFile, Format_1070, standard);
+        print(InArgumentsFile, Format_1070, static_cast<int>(standard));
     }
     if (standard == TARCOGGassesParams::Stdrd::EN673) {
-        print(InArgumentsFile, Format_1071, standard);
+        print(InArgumentsFile, Format_1071, static_cast<int>(standard));
     }
     if (standard == TARCOGGassesParams::Stdrd::EN673Design) {
-        print(InArgumentsFile, Format_1072, standard);
+        print(InArgumentsFile, Format_1072, static_cast<int>(standard));
     }
 
     if (ThermalMod == TARCOGThermalModel::ISO15099) {
-        print(InArgumentsFile, Format_10731, ThermalMod);
+        print(InArgumentsFile, Format_10731, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
     if (ThermalMod == TARCOGThermalModel::SCW) {
-        print(InArgumentsFile, Format_10732, ThermalMod);
+        print(InArgumentsFile, Format_10732, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
     if (ThermalMod == TARCOGThermalModel::CSM) {
-        print(InArgumentsFile, Format_10733, ThermalMod);
+        print(InArgumentsFile, Format_10733, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
@@ -364,26 +359,26 @@ void WriteInputArguments(EnergyPlusData &state,
     for (i = 1; i <= nlayer; ++i) {
         switch (LayerType(i)) {
         case TARCOGLayerType::DIFFSHADE: { // Diffuse Shade
-            print(InArgumentsFile, Format_10806, i, LayerType(i));
+            print(InArgumentsFile, Format_10806, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::WOVSHADE: { // Woven Shade
-            print(InArgumentsFile, Format_10805, i, LayerType(i));
+            print(InArgumentsFile, Format_10805, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::VENETBLIND_HORIZ: { // Horizontal venetian blind
-            print(InArgumentsFile, Format_10804, i, LayerType(i));
+            print(InArgumentsFile, Format_10804, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::VENETBLIND_VERT: { // Vertical venetian blind
-            print(InArgumentsFile, Format_10810, i, LayerType(i));
+            print(InArgumentsFile, Format_10810, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::SPECULAR: { // Specular layer
             if (nslice(i) <= 1) {
-                print(InArgumentsFile, Format_10802, i, LayerType(i)); // Monolithic glass
+                print(InArgumentsFile, Format_10802, i, static_cast<int>(LayerType(i))); // Monolithic glass
             } else {
-                print(InArgumentsFile, Format_10803, i, LayerType(i)); // Laminated layer
+                print(InArgumentsFile, Format_10803, i, static_cast<int>(LayerType(i))); // Laminated layer
             }
         } break;
         default: {
-            print(InArgumentsFile, Format_10809, i, LayerType(i));
+            print(InArgumentsFile, Format_10809, i, static_cast<int>(LayerType(i)));
         } break;
         }
 
@@ -473,13 +468,13 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
                             int const nlayer,
                             const Array1D<TARCOGParams::TARCOGLayerType> &LayerType,
                             const Array1D_int &nmix,
-                            Array2A<Real64> const frct,
+                            Array2D<Real64> const &frct,
                             const Array1D<Real64> &thick,
                             const Array1D<Real64> &scon,
                             const Array1D<Real64> &gap,
-                            Array2A<Real64> const xgcon,
-                            Array2A<Real64> const xgvis,
-                            Array2A<Real64> const xgcp,
+                            Array2D<Real64> const &xgcon,
+                            Array2D<Real64> const &xgvis,
+                            Array2D<Real64> const &xgcp,
                             const Array1D<Real64> &xwght)
 {
 
@@ -487,13 +482,9 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     // Argument array dimensioning
     EP_SIZE_CHECK(LayerType, maxlay);
     EP_SIZE_CHECK(nmix, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(thick, maxlay);
     EP_SIZE_CHECK(scon, maxlay);
     EP_SIZE_CHECK(gap, MaxGap);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
 
     // Locals
@@ -539,7 +530,7 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     for (i = 1; i <= nlayer; ++i) {
         if ((TARCOGLayerType)LayerType(i) == TARCOGLayerType::VENETBLIND_HORIZ ||
             (TARCOGLayerType)LayerType(i) == TARCOGLayerType::VENETBLIND_VERT) { // SD layer
-            print(InArgumentsFile, Format_1084, i, LayerType(i));
+            print(InArgumentsFile, Format_1084, i, static_cast<int>(LayerType(i)));
             print(InArgumentsFile, Format_1090, thick(i));
             print(InArgumentsFile, Format_1091, scon(i));
         }
@@ -550,8 +541,6 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
         if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1111, i - 1);
-        }
-        if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1112, gap(i - 1));
         }
         if (i == 1) {
@@ -965,11 +954,11 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
                           const Array1D<Real64> &tvent,
                           const Array1D<Real64> &presure,
                           const Array1D_int &nmix,
-                          Array2A_int const iprop,
-                          Array2A<Real64> const frct,
-                          Array2A<Real64> const xgcon,
-                          Array2A<Real64> const xgvis,
-                          Array2A<Real64> const xgcp,
+                          Array2D_int const &iprop,
+                          Array2D<Real64> const &frct,
+                          Array2D<Real64> const &xgcon,
+                          Array2D<Real64> const &xgvis,
+                          Array2D<Real64> const &xgcp,
                           const Array1D<Real64> &xwght,
                           const Array1D<Real64> &gama)
 {
@@ -1008,11 +997,6 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
     EP_SIZE_CHECK(tvent, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
 
@@ -1112,7 +1096,16 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
     print(files.WINCogFile, Format_200);
     print(files.WINCogFile, Format_113);
     print(files.WINCogFile, Format_210);
-    print(files.WINCogFile, Format_1010, nlayer, 2, standard, ThermalMod, CalcDeflection, SDScalar, VacuumPressure, VacuumMaxGapThickness);
+    print(files.WINCogFile,
+          Format_1010,
+          nlayer,
+          2,
+          static_cast<int>(standard),
+          static_cast<int>(ThermalMod),
+          static_cast<int>(CalcDeflection),
+          SDScalar,
+          VacuumPressure,
+          VacuumMaxGapThickness);
 
     print(files.WINCogFile, Format_113);
     print(files.WINCogFile, Format_300);
@@ -1191,7 +1184,7 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
               tir(2 * i - 1),
               YoungsMod(i),
               PoissonsRat(i),
-              LayerType(i),
+              static_cast<int>(LayerType(i)),
               nslice(i));
 
         if (IsShadingLayer(LayerType(i))) {

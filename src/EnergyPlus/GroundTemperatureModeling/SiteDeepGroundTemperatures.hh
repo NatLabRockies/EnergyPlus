@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -53,6 +53,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 #include <EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh>
 
 namespace EnergyPlus {
@@ -66,7 +67,7 @@ namespace GroundTemp {
     struct SiteDeepGroundTemps final : BaseGroundTempsModel
     {
         int timeOfSimInMonths = 12;
-        std::array<Real64, 12> deepGroundTemps = {13.0};
+        std::array<Real64, 12> deepGroundTemps = filled_array{13.0};
 
         static SiteDeepGroundTemps *DeepGTMFactory(EnergyPlusData &state, const std::string &objectName);
 

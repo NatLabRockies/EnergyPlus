@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -86,7 +86,10 @@ namespace HeatingCoils {
         std::string Name;             // Name of the HeatingCoil
         std::string HeatingCoilType;  // Type of HeatingCoil ie. Heating or Cooling
         std::string HeatingCoilModel; // Type of HeatingCoil ie. Simple, Detailed, etc.
-        int HCoilType_Num = 0;
+
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+        int coilReportNum = -1;
+
         Constant::eFuel FuelType = Constant::eFuel::Invalid; // Type of fuel used, reference resource type integers
         Sched::Schedule *availSched = nullptr;               // availability schedule
         int InsuffTemperatureWarn = 0;                       // Used for recurring error message
@@ -107,12 +110,9 @@ namespace HeatingCoils {
         Real64 Efficiency = 0.0;      // HeatingCoil Efficiency Value
         Real64 NominalCapacity = 0.0; // Nominal Capacity of Coil [W]
         Real64 DesiredOutletTemp = 0.0;
-        Real64 DesiredOutletHumRat = 0.0;
-        Real64 AvailTemperature = 0.0; // Used in heat recovery test [C]
         int AirInletNodeNum = 0;
         int AirOutletNodeNum = 0;
-        int TempSetPointNodeNum = 0; // If applicable this is the node number that the temp setpoint exists.
-        int Control = 0;
+        int TempSetPointNodeNum = 0;           // If applicable this is the node number that the temp setpoint exists.
         int PLFCurveIndex = 0;                 // Index for part-load factor curve index for gas heating coil
         Real64 ParasiticElecLoad = 0.0;        // parasitic electric load associated with the gas heating coil
         Real64 ParasiticFuelConsumption = 0.0; // parasitic fuel consumption associated with the gas heating coil (standing pilot light) [J]
@@ -124,6 +124,7 @@ namespace HeatingCoils {
         int PLFErrorIndex = 0;                 // used in recurring error warnings
         int PLFErrorCount = 0;                 // used in recurring error warnings
         std::string ReclaimHeatingCoilName;    // Name of reclaim heating coil
+        std::string ReclaimHeatingSourceType;  // Object type of reclaim heating source
         int ReclaimHeatingSourceIndexNum = 0;  // Index to reclaim heating source (condenser) of a specific type
         HeatObjTypes ReclaimHeatingSource = HeatObjTypes::Invalid; // The source for the Reclaim Heating Coil
         int NumOfStages = 0;                                       // Number of speeds
@@ -209,15 +210,15 @@ namespace HeatingCoils {
     void GetCoilIndex(EnergyPlusData &state, std::string const &HeatingCoilName, int &HeatingCoilIndex, bool &ErrorsFound);
 
     void CheckHeatingCoilSchedule(EnergyPlusData &state,
-                                  std::string const &CompType, // unused1208
-                                  std::string_view CompName,
+                                  std::string_view const CompType, // unused1208
+                                  std::string const &CompName,
                                   Real64 &Value,
                                   int &CompIndex);
 
     Real64 GetCoilCapacity(EnergyPlusData &state,
-                           std::string const &CoilType, // must match coil types in this module
-                           std::string const &CoilName, // must match coil names for the coil type
-                           bool &ErrorsFound            // set to true if problem
+                           std::string_view const CoilType, // must match coil types in this module
+                           std::string const &CoilName,     // must match coil names for the coil type
+                           bool &ErrorsFound                // set to true if problem
     );
 
     Sched::Schedule *GetCoilAvailSched(EnergyPlusData &state,
@@ -250,10 +251,10 @@ namespace HeatingCoils {
                               bool &ErrorsFound            // set to true if problem
     );
 
-    int GetHeatingCoilTypeNum(EnergyPlusData &state,
-                              std::string const &CoilType, // must match coil types in this module
-                              std::string const &CoilName, // must match coil names for the coil type
-                              bool &ErrorsFound            // set to true if problem
+    HVAC::CoilType GetHeatingCoilTypeNum(EnergyPlusData &state,
+                                         std::string_view const CoilType, // must match coil types in this module
+                                         std::string const &CoilName,     // must match coil names for the coil type
+                                         bool &ErrorsFound                // set to true if problem
     );
 
     int GetHeatingCoilIndex(EnergyPlusData &state,

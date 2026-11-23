@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -161,8 +161,12 @@ int main()
     if (errorsOccurred > 0) {
         printf("C API Test: Errors were caught during dew point calculation, good!\n");
     } else {
+#ifdef EP_psych_errors
         printf("C API Test: Errors were NOT caught during dew point calculation, bad!\n");
         return 1;
+#else
+        printf("C API Test: Psychrometric errors are disabled; no dew point calculation errors expected.\n");
+#endif
     }
 
     printf("EnergyPlus Version: %s", energyPlusVersion());

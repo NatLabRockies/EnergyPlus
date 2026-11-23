@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -101,6 +101,9 @@ CONFIGURATIONS = {
     },
     'mac13-arm64': {
         'os': OS.Mac, 'bitness': Bitness.ARM64, 'asset_pattern': 'Darwin-macOS13-arm64.tar.gz', 'os_version': '13'
+    },
+    'mac14-arm64': {
+        'os': OS.Mac, 'bitness': Bitness.ARM64, 'asset_pattern': 'Darwin-macOS14.0-arm64.tar.gz', 'os_version': '14.0'
     },
     'win32': {
         'os': OS.Windows, 'bitness': Bitness.X86, 'asset_pattern': 'Windows-i386.zip', 'os_version': '2022'
@@ -270,7 +273,7 @@ def main() -> int:
         type=handle_msvc_arg,
         choices=list(MSVC),
         default=None,
-        help="For MSVC builds, this is the Visual Studio version ('16', '17')",
+        help="For MSVC builds, this is the Visual Studio version ('16', '17', '18')",
     )
     parser.add_argument("--verbose", action="store_true", help="If specified, get verbose output")
     args = parser.parse_args()

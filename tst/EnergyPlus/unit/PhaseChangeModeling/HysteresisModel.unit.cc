@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,7 +47,6 @@
 
 // Google Test Headers
 #include <EnergyPlus/PhaseChangeModeling/HysteresisModel.hh>
-#include <fstream>
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -58,7 +57,7 @@ class HysteresisTest : public testing::Test
 {
 public:
     Material::MaterialPhaseChange ModelA;
-    virtual void SetUp()
+    void SetUp() override
     {
         this->ModelA.Name = "PCM Name";
         this->ModelA.totalLatentHeat = 25000;     // J/kg ?
@@ -78,7 +77,7 @@ public:
         this->ModelA.fullyLiquidDensity = 4.0;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 };

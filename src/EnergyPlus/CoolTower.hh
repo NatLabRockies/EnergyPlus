@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -84,7 +84,6 @@ namespace CoolTower {
     {
         // Members
         std::string Name;                                                  // The component name
-        std::string CompType;                                              // Type of component
         Sched::Schedule *availSched = nullptr;                             // schedule
         int ZonePtr = 0;                                                   // Index to zone
         int spacePtr = 0;                                                  // Index to space (if applicable)
@@ -115,7 +114,6 @@ namespace CoolTower {
         Real64 CoolTAirVol = 0.0;                                          // Air volume in m3
         Real64 ActualAirVolFlowRate = 0.0;                                 // Actual air flow rate in m3/s
         Real64 InletDBTemp = 0.0;                                          // Outdoor dry bulb temperature in C
-        Real64 InletWBTemp = 0.0;                                          // Outdoor wet bulb temperature in C
         Real64 InletHumRat = 0.0;                                          // Outdoor humidity ratio
         Real64 OutletTemp = 0.0;                                           // Dry bulb temperature at cooltower exit in C
         Real64 OutletHumRat = 0.0;                                         // Humidity ratio at cooltower exit

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cassert>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -194,11 +195,11 @@ void Calc_ISO15099(EnergyPlusData &state,
                    Real64 const heightt,
                    Real64 const width,
                    const Array1D<Real64> &presure,
-                   Array2A_int const iprop,
-                   Array2A<Real64> const frct,
-                   Array2A<Real64> const xgcon,
-                   Array2A<Real64> const xgvis,
-                   Array2A<Real64> const xgcp,
+                   Array2D_int const &iprop,
+                   Array2D<Real64> const &frct,
+                   Array2D<Real64> const &xgcon,
+                   Array2D<Real64> const &xgvis,
+                   Array2D<Real64> const &xgcp,
                    const Array1D<Real64> &xwght,
                    const Array1D<Real64> &gama,
                    const Array1D_int &nmix,
@@ -258,7 +259,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                    Array1D<Real64> &ShadeGapKeffConv,
                    Real64 const SDScalar,
                    int const SHGCCalc,
-                   int &NumOfIterations,
+                   int &t_NumOfIterations,
                    Real64 const edgeGlCorrFac)
 {
 
@@ -270,11 +271,6 @@ void Calc_ISO15099(EnergyPlusData &state,
     EP_SIZE_CHECK(emis, maxlay2);
     EP_SIZE_CHECK(asol, maxlay);
     EP_SIZE_CHECK(presure, maxlay1);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
-    xgcon.dim(3, maxgas);
-    xgvis.dim(3, maxgas);
-    xgcp.dim(3, maxgas);
     EP_SIZE_CHECK(xwght, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(nmix, maxlay1);
@@ -311,15 +307,15 @@ void Calc_ISO15099(EnergyPlusData &state,
     EP_SIZE_CHECK(ShadeGapKeffConv, MaxGap);
 
     //  REAL(r64) :: grho(maxgas,3)
-    Real64 shgct_NOSD;
+    Real64 shgct_NOSD = 0.0;
     Real64 trmout;
 
     Real64 Gout;
     Real64 Gin;
     Real64 AchievedErrorTolerance;
     Real64 AchievedErrorToleranceSolar;
-    int NumOfIter;
-    int NumOfIterSolar;
+    int NumOfIter = 0;
+    int NumOfIterSolar = 0;
 
     Real64 tgg;
     Real64 qc1;
@@ -566,7 +562,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIterSolar,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIterSolar;
+        t_NumOfIterations = NumOfIterSolar;
         // exit on error:
 
         if (nlayer > 1) {
@@ -720,7 +716,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIter,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIter;
+        t_NumOfIterations = NumOfIter;
 
         // exit on error:
         if (!(GoAhead(nperr))) {
@@ -734,23 +730,23 @@ void Calc_ISO15099(EnergyPlusData &state,
         // bi...do an Unshaded run if necessary (Uvalue/Winter conditions):
         // bi...Prepare variables for UNSHADED (NO SD) run:
 
-        bool NeedUnshadedRun = false;
         int FirstSpecularLayer = 1;
         int nlayer_NOSD = nlayer;
         if (IsShadingLayer(LayerType(1))) {
             --nlayer_NOSD;
             FirstSpecularLayer = 2;
-            NeedUnshadedRun = true;
+            // NeedUnshadedRun = true;
         }
 
         if (IsShadingLayer(LayerType(nlayer))) {
             --nlayer_NOSD;
-            NeedUnshadedRun = true;
+            // NeedUnshadedRun = true;
         }
 
         // no unshaded run for now
-        NeedUnshadedRun = false;
+        bool const NeedUnshadedRun = false;
         // bi...Set outdoor & indoor gas properties:
+        // Preserve the dormant unshaded calculation until it can be re-enabled.
         if (NeedUnshadedRun) {
             int NumOfIter_NOSD;
             state.dataThermalISO15099Calc->nmix_NOSD(1) = nmix(1);
@@ -817,7 +813,8 @@ void Calc_ISO15099(EnergyPlusData &state,
             hout_NOSD = houtt;
 
             // Simon: Removed unshaded debug output for now
-            int UnshadedDebug = 0;
+            int constexpr UnshadedDebug = 0;
+            // Preserve the disabled debug output alongside the dormant unshaded calculation.
             if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
                 print(files.DebugOutputFile, "\n");
                 print(files.DebugOutputFile, "UNSHADED RUN:\n");
@@ -977,7 +974,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                     NumOfIter_NOSD,
                     edgeGlCorrFac);
 
-            NumOfIterations = NumOfIter_NOSD;
+            t_NumOfIterations = NumOfIter_NOSD;
             // exit on error
             if (!(GoAhead(nperr))) {
                 return;
@@ -991,6 +988,7 @@ void Calc_ISO15099(EnergyPlusData &state,
             ShadeHcRatioIn = ShadeHcModifiedIn / HcUnshadedIn;
 
             // bi...unshaded results:
+            // Preserve the disabled debug output alongside the dormant unshaded calculation.
             if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
                 WriteOutputArguments(files.DebugOutputFile,
                                      files.DBGD,
@@ -1184,14 +1182,14 @@ void therm1d(EnergyPlusData &state,
              Real64 const height,
              Real64 const heightt,
              Real64 const width,
-             Array2_int const &iprop,
-             Array2<Real64> const &frct,
+             Array2D_int const &iprop,
+             Array2D<Real64> const &frct,
              const Array1D<Real64> &presure,
              const Array1D_int &nmix,
              const Array1D<Real64> &wght,
-             Array2<Real64> const &gcon,
-             Array2<Real64> const &gvis,
-             Array2<Real64> const &gcp,
+             Array2D<Real64> const &gcon,
+             Array2D<Real64> const &gvis,
+             Array2D<Real64> const &gcp,
              const Array1D<Real64> &gama,
              const Array1D_int &SupportPillar,
              const Array1D<Real64> &PillarSpacing,
@@ -1353,8 +1351,8 @@ void therm1d(EnergyPlusData &state,
 
     CalculationOutcome CalcOutcome;
 
-    bool iterationsFinished; // To mark whether or not iterations are finished
-    bool saveIterationResults;
+    bool iterationsFinished;                 // To mark whether or not iterations are finished
+    bool const saveIterationResults = false; // Diagnostic iteration output is currently disabled.
     bool updateGapTemperature;
     // logical :: TurnOnNewton
 
@@ -1386,8 +1384,6 @@ void therm1d(EnergyPlusData &state,
 
     maxiter = NumOfIterations;
 
-    saveIterationResults = false;
-
     for (i = 1; i <= nlayer; ++i) {
         k = 2 * i;
         Radiation(k) = Ebb(i);
@@ -1409,6 +1405,7 @@ void therm1d(EnergyPlusData &state,
     }
 
     // first store results before iterations begin
+    // Preserve the diagnostic output path so it can be re-enabled when needed.
     if (saveIterationResults) {
         storeIterationResults(state,
                               files,
@@ -1703,7 +1700,6 @@ void therm1d(EnergyPlusData &state,
         // it is important not to update gaps around shading layers since that is already calculated by
         // shading routines
         for (i = 1; i <= nlayer + 1; ++i) {
-            updateGapTemperature = true;
             if ((i == 1) || (i == nlayer + 1)) {
                 // update gap array with interior and exterior temperature
                 updateGapTemperature = true;
@@ -1727,6 +1723,7 @@ void therm1d(EnergyPlusData &state,
         }
 
         // and store results during iterations
+        // Preserve the diagnostic output path so it can be re-enabled when needed.
         if (saveIterationResults) {
             storeIterationResults(state,
                                   files,
@@ -2177,14 +2174,14 @@ void hatter(EnergyPlusData &state,
             Array1D<Real64> const &Radiation,
             Real64 const trmout,
             Real64 const trmin,
-            Array2_int const &iprop,
-            Array2<Real64> const &frct,
+            Array2D_int const &iprop,
+            Array2D<Real64> const &frct,
             const Array1D<Real64> &presure,
             const Array1D_int &nmix,
             const Array1D<Real64> &wght,
-            Array2<Real64> const &gcon,
-            Array2<Real64> const &gvis,
-            Array2<Real64> const &gcp,
+            Array2D<Real64> const &gcon,
+            Array2D<Real64> const &gvis,
+            Array2D<Real64> const &gcp,
             const Array1D<Real64> &gama,
             const Array1D_int &SupportPillar,
             const Array1D<Real64> &PillarSpacing,
@@ -2385,14 +2382,14 @@ void effectiveLayerCond(EnergyPlusData &state,
                         const Array1D<TARCOGLayerType> &LayerType, // Layer type
                         const Array1D<Real64> &scon,               // Layer thermal conductivity
                         const Array1D<Real64> &thick,              // Layer thickness
-                        Array2A_int const iprop,                   // Gas type in gaps
-                        Array2A<Real64> const frct,                // Fraction of gas
+                        Array2D_int const &iprop,                  // Gas type in gaps
+                        Array2D<Real64> const &frct,               // Fraction of gas
                         const Array1D_int &nmix,                   // Gas mixture
                         const Array1D<Real64> &pressure,           // Gas pressure [Pa]
                         const Array1D<Real64> &wght,               // Molecular weight
-                        Array2A<Real64> const gcon,                // Gas specific conductivity
-                        Array2A<Real64> const gvis,                // Gas specific viscosity
-                        Array2A<Real64> const gcp,                 // Gas specific heat
+                        Array2D<Real64> const &gcon,               // Gas specific conductivity
+                        Array2D<Real64> const &gvis,               // Gas specific viscosity
+                        Array2D<Real64> const &gcp,                // Gas specific heat
                         const Array1D<Real64> &EffectiveOpenness,  // Layer effective openness [m2]
                         Array1D<Real64> const &theta,              // Layer surface temperatures [K]
                         Array1D<Real64> &sconScaled,               // Layer conductivity divided by thickness
@@ -2447,14 +2444,14 @@ void filmi(EnergyPlusData &state,
            Real64 const tilt,
            Real64 const wsi,
            Real64 const height,
-           Array2A_int const iprop,
-           Array2A<Real64> const frct,
+           Array2D_int const &iprop,
+           Array2D<Real64> const &frct,
            const Array1D<Real64> &presure,
            const Array1D_int &nmix,
            const Array1D<Real64> &wght,
-           Array2A<Real64> const gcon,
-           Array2A<Real64> const gvis,
-           Array2A<Real64> const gcp,
+           Array2D<Real64> const &gcon,
+           Array2D<Real64> const &gvis,
+           Array2D<Real64> const &gcp,
            Real64 &hcin,
            int const ibc,
            int &nperr,
@@ -2482,14 +2479,9 @@ void filmi(EnergyPlusData &state,
 
     // Using
     // Argument array dimensioning
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
     EP_SIZE_CHECK(wght, maxgas);
-    gcon.dim(3, maxgas);
-    gvis.dim(3, maxgas);
-    gcp.dim(3, maxgas);
 
     // Locals
     Real64 tiltr;
@@ -2589,15 +2581,15 @@ void filmg(EnergyPlusData &state,
            int const nlayer,
            Real64 const height,
            const Array1D<Real64> &gap,
-           Array2A_int const iprop,
-           Array2A<Real64> const frct,
+           Array2D_int const &iprop,
+           Array2D<Real64> const &frct,
            Real64 const VacuumPressure,
            const Array1D<Real64> &presure,
            const Array1D_int &nmix,
            const Array1D<Real64> &wght,
-           Array2A<Real64> const gcon,
-           Array2A<Real64> const gvis,
-           Array2A<Real64> const gcp,
+           Array2D<Real64> const &gcon,
+           Array2D<Real64> const &gvis,
+           Array2D<Real64> const &gcp,
            const Array1D<Real64> &gama,
            Array1D<Real64> &hcgas,
            Array1D<Real64> &Rayleigh,
@@ -2636,14 +2628,9 @@ void filmg(EnergyPlusData &state,
     EP_SIZE_CHECK(theta, maxlay2);
     EP_SIZE_CHECK(Tgap, maxlay1);
     EP_SIZE_CHECK(gap, MaxGap);
-    iprop.dim(maxgas, maxlay1);
-    frct.dim(maxgas, maxlay1);
     EP_SIZE_CHECK(presure, maxlay1);
     EP_SIZE_CHECK(nmix, maxlay1);
     EP_SIZE_CHECK(wght, maxgas);
-    gcon.dim(3, maxgas);
-    gvis.dim(3, maxgas);
-    gcp.dim(3, maxgas);
     EP_SIZE_CHECK(gama, maxgas);
     EP_SIZE_CHECK(hcgas, maxlay1);
     EP_SIZE_CHECK(Rayleigh, maxlay);
@@ -2957,15 +2944,15 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat = "";
         }
         if (mod(i, 2) == 1) {
-            dynFormat += fmt::format("Ebf({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebf({:3})", (i + 1) / 2);
         } else {
-            dynFormat += fmt::format("Ebb({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebb({:3})", (i + 1) / 2);
         }
         if (i != 2 * nlayer) {
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write Ebb and Ebf
@@ -2977,7 +2964,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write headers for Rb and Rf
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
+        const std::string a = std::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
         if (i == 1) {
             dynFormat = "";
         }
@@ -2990,7 +2977,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
     // write Rb and Rf
     print(files.TarcogIterationsFile, "{:16.8F}   {:16.8F}", Rf(1), Rb(1));
@@ -3001,7 +2988,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write header for temperatures
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", i);
+        const std::string a = std::format("{:3}", i);
         if (i == 1) {
             dynFormat = "";
         }
@@ -3010,7 +2997,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "==";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write temperatures
@@ -3026,14 +3013,14 @@ void storeIterationResults(EnergyPlusData &state,
     if (index == 0) {
         dynFormat = "  ";
         for (i = 1; i <= 2 * nlayer; ++i) {
-            const std::string a = fmt::format("{:3}", i);
+            const std::string a = std::format("{:3}", i);
             if (i != 2 * nlayer) {
                 dynFormat += "theta(" + a + "),";
             } else {
                 dynFormat += "theta(" + a + ')';
             }
         }
-        print(files.IterationCSVFile, dynFormat);
+        print(files.IterationCSVFile, "{}", dynFormat);
         print(files.IterationCSVFile, "\n");
     }
     print(files.IterationCSVFile, "{:16.8F}   \n", theta(1) - Constant::Kelvin);
@@ -3045,7 +3032,7 @@ void storeIterationResults(EnergyPlusData &state,
     // close(IterationCSVFileNumber)
 }
 
-void CalculateFuncResults(int const nlayer, Array2<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes)
+void CalculateFuncResults(int const nlayer, Array2D<Real64> const &a, const Array1D<Real64> &b, const Array1D<Real64> &x, Array1D<Real64> &FRes)
 {
     // Tuned Rewritten to traverse a in unit stride order
     int const nlayer4(4 * nlayer);

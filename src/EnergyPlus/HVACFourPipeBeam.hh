@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -100,19 +100,19 @@ namespace FourPipeBeam {
         ///// Note use of shared_ptr here is not a good pattern, not to be replicated without further discussion.
         static std::shared_ptr<AirTerminalUnit> fourPipeBeamFactory(EnergyPlusData &state, std::string objectName);
         void simulate(EnergyPlusData &state,
-                      bool const FirstHVACIteration, // TRUE if first HVAC iteration in time step
-                      Real64 &NonAirSysOutput        // convective cooling by the beam system [W]
-        );
+                      bool FirstHVACIteration, // TRUE if first HVAC iteration in time step
+                      Real64 &NonAirSysOutput  // convective cooling by the beam system [W]
+                      ) override;
 
-        int getZoneIndex();
+        int getZoneIndex() override;
 
-        int getAirLoopNum();
+        int getAirLoopNum() override;
 
-        Real64 getPrimAirDesignVolFlow();
+        Real64 getPrimAirDesignVolFlow() override;
 
-        int getTermUnitSizingIndex();
+        int getTermUnitSizingIndex() override;
 
-        void reportTerminalUnit(EnergyPlusData &state);
+        void reportTerminalUnit(EnergyPlusData &state) override;
 
     private: // Methods
         void

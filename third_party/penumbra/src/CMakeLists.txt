@@ -29,7 +29,7 @@ target_include_directories(${PROJECT_NAME}
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw tess2 penumbra_common_interface PUBLIC courierr fmt)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw tess2 penumbra_common_interface PUBLIC courierr)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 # If MSVC_RUNTIME_LIBRARY is not by a parent project use the default.

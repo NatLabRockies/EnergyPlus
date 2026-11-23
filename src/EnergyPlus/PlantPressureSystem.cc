@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -46,7 +46,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cmath>
+
+// C++ Headers
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -259,7 +263,7 @@ void InitPressureDrop(EnergyPlusData &state, int const LoopNum, bool const First
                     state.dataPlantPressureSys->FullParallelBranchSetFound[static_cast<int>(LoopSideNum)] = true;
                 } else {
                     // we aren't ok
-                    ShowSevereError(state, format("Pressure drop component configuration error detected on loop: {}", loop.Name));
+                    ShowSevereError(state, std::format("Pressure drop component configuration error detected on loop: {}", loop.Name));
                     ShowContinueError(state, "Pressure drop components must be on ALL or NONE of the parallel branches.");
                     ShowContinueError(state, "Partial distribution is not allowed.");
                     ErrorsFound = true;
@@ -276,7 +280,7 @@ void InitPressureDrop(EnergyPlusData &state, int const LoopNum, bool const First
                 SeriesPressureComponentFound) {
                 // we are fine, either way we will always have a path with at least one pressure component hit
             } else {
-                ShowSevereError(state, format("Pressure drop component configuration error detected on loop: {}", loop.Name));
+                ShowSevereError(state, std::format("Pressure drop component configuration error detected on loop: {}", loop.Name));
                 ShowContinueError(state, "The loop has at least one fluid path which does not encounter a pressure component.");
                 ShowContinueError(state, "Either use at least one serial component for pressure drop OR all possible parallel paths");
                 ShowContinueError(state, "must be pressure drop components.");
@@ -292,13 +296,13 @@ void InitPressureDrop(EnergyPlusData &state, int const LoopNum, bool const First
         // Also issue one time warning if there is a mismatch between plant loop simulation type and whether objects were entered
         if (loop.HasPressureComponents && (loop.PressureSimType == DataPlant::PressSimType::NoPressure)) {
             // Then we found pressure components on the branches, but the plant loop said it didn't want to do pressure simulation
-            ShowWarningError(state, format("Error for pressure simulation on plant loop: {}", loop.Name));
+            ShowWarningError(state, std::format("Error for pressure simulation on plant loop: {}", loop.Name));
             ShowContinueError(state, "Plant loop contains pressure simulation components on the branches,");
             ShowContinueError(state, " yet in the PlantLoop object, there is no pressure simulation specified.");
             ShowContinueError(state, "Simulation continues, ignoring pressure simulation data.");
         } else if ((!loop.HasPressureComponents) && (loop.PressureSimType != DataPlant::PressSimType::NoPressure)) {
             // Then we don't have any pressure components on the branches, yet the plant loop wants to do some sort of pressure simulation
-            ShowWarningError(state, format("Error for pressure simulation on plant loop: {}", loop.Name));
+            ShowWarningError(state, std::format("Error for pressure simulation on plant loop: {}", loop.Name));
             ShowContinueError(state, "Plant loop is requesting a pressure simulation,");
             ShowContinueError(state, " yet there are no pressure simulation components detected on any of the branches in that loop.");
             ShowContinueError(state, "Simulation continues, ignoring pressure simulation data.");
@@ -340,7 +344,7 @@ void InitPressureDrop(EnergyPlusData &state, int const LoopNum, bool const First
         if (loop.CommonPipeType != DataPlant::CommonPipeType::No) {
             // There is a common pipe!
             if (!state.dataPlantPressureSys->CommonPipeErrorEncountered) {
-                ShowSevereError(state, format("Invalid pressure simulation configuration for Plant Loop={}", loop.Name));
+                ShowSevereError(state, std::format("Invalid pressure simulation configuration for Plant Loop={}", loop.Name));
                 ShowContinueError(state, "Currently pressure simulations cannot be performed for loops with common pipes.");
                 ShowContinueError(state, "To repair, either remove the common pipe simulation, or remove the pressure simulation.");
                 ShowContinueError(state, "The simulation will continue, but the pump power is not updated with pressure drop data.");
@@ -421,7 +425,7 @@ void BranchPressureDrop(EnergyPlusData &state,
         if (state.dataPlantPressureSys->ErrorCounter == 1) {
             ShowSevereError(state, "Plant pressure simulation encountered a branch which contains invalid branch pressure curve type.");
             ShowContinueError(state,
-                              format("Occurs for branch: {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
+                              std::format("Occurs for branch: {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
             ShowContinueError(state, "This error will be issued only once, although other branches may encounter the same problem");
             ShowContinueError(state, "For now, pressure drop on this branch will be set to zero.");
             ShowContinueError(state, "Verify all pressure inputs and pressure drop output variables to ensure proper simulation");
@@ -672,15 +676,15 @@ void DistributePressureOnBranch(EnergyPlusData &state,
             state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Comp(NumCompsOnBranch).Type)]) {
         PumpFound = true;
         if (TempBranchPressureDrop != 0.0) {
-            ShowSevereError(state, format("Error in plant pressure simulation for plant loop: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+            ShowSevereError(state, std::format("Error in plant pressure simulation for plant loop: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
             if (LoopSideNum == DataPlant::LoopSideLocation::Demand) {
-                ShowContinueError(
-                    state,
-                    format("Occurs for demand side, branch: {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
+                ShowContinueError(state,
+                                  std::format("Occurs for demand side, branch: {}",
+                                              state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
             } else if (LoopSideNum == DataPlant::LoopSideLocation::Supply) {
-                ShowContinueError(
-                    state,
-                    format("Occurs for supply side, branch: {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
+                ShowContinueError(state,
+                                  std::format("Occurs for supply side, branch: {}",
+                                              state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Branch(BranchNum).Name));
             }
             ShowContinueError(state, "Branch contains only a single pump component, yet also a pressure drop component.");
             ShowContinueError(state, "Either add a second component to this branch after the pump, or move pressure drop data.");
@@ -840,7 +844,7 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
     using Curve::CurveValue;
 
     // Return value
-    Real64 ResolvedLoopMassFlowRate;
+    Real64 ResolvedLoopMassFlowRate = 0.0;
 
     // FUNCTION PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("ResolvedLoopMassFlowRate: ");
@@ -881,7 +885,7 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
         ++state.dataPlantPressureSys->ZeroKWarningCounter;
         if (state.dataPlantPressureSys->ZeroKWarningCounter == 1) {
             ShowWarningError(state, "Pump pressure-flow resolution attempted, but invalid loop conditions encountered.");
-            ShowContinueError(state, format("Loop being calculated: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+            ShowContinueError(state, std::format("Loop being calculated: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
             ShowContinueError(state, "An invalid pressure/flow condition existed which resulted in the approximation of");
             ShowContinueError(state, "the pressure coefficient K to be zero.  The pressure simulation will use the requested (design)");
             ShowContinueError(state, "pump flow in order to proceed with the simulation.  This warning is only issued once.");
@@ -903,7 +907,8 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
         // Calculate System Mass Flow Rate
         LocalSystemMassFlow = std::sqrt(SystemPressureDrop / LoopEffectiveK);
 
-        MassFlowIterativeHistory = eoshift(MassFlowIterativeHistory, -1, LocalSystemMassFlow);
+        std::shift_right(MassFlowIterativeHistory.begin(), MassFlowIterativeHistory.end(), 1);
+        MassFlowIterativeHistory(1) = LocalSystemMassFlow;
 
         PhiSystem = LocalSystemMassFlow / (NodeDensity * PumpSpeed * PumpImpellerDia);
 
@@ -950,7 +955,7 @@ Real64 ResolveLoopFlowVsPressure(EnergyPlusData &state,
         ++state.dataPlantPressureSys->MaxIterWarningCounter;
         if (state.dataPlantPressureSys->MaxIterWarningCounter == 1) {
             ShowWarningError(state, "Pump pressure-flow resolution attempted, but iteration loop did not converge.");
-            ShowContinueError(state, format("Loop being calculated: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+            ShowContinueError(state, std::format("Loop being calculated: {}", state.dataPlnt->PlantLoop(LoopNum).Name));
             ShowContinueError(state, "A mismatch between the pump curve entered and the pressure drop components");
             ShowContinueError(state, "on the loop may be the cause.  The pressure simulation will use the requested (design)");
             ShowContinueError(state, "pump flow in order to proceed with the simulation.  This warning is only issued once.");

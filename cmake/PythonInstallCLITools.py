@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -54,15 +54,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
-import platform
 from pathlib import Path
 from subprocess import run
-from sys import argv, executable
+from sys import executable
 
 PKGS = {
     "energyplus_launch": "3.7.4",
-    "energyplus_transition_tools": "2.1.4",
-    "ghedesigner": "2.0",
+    "energyplus_transition_tools": "3.1.0",
+    "ghedesigner": "2.1.1",
 }
 
 
@@ -75,21 +74,6 @@ def install_packages(python_lib_dir: Path):
         return
 
     to_install = [f"{n}=={v}" for n, v in pkgs_to_install.items()]
-
-    is_windows = platform.system() == "Windows"
-    is_arm = platform.machine().lower() in ("arm64", "aarch64")
-    if "ghedesigner" in pkgs_to_install and is_windows and is_arm:
-        # there are no arm64 Windows wheels for scipy on PyPi (as of 2025-09-05, Scipy 1.16.1)
-        # I got a wheel built on https://github.com/scipy/scipy/actions/runs/17428824000 (weel builder)
-        scipy_wheel_url = (
-            "https://github.com/jmarrec/EnergyPlus/releases/download/"
-            "v25.2.0-pre-IOFreeze-1/scipy-1.17.0.dev0-cp312-cp312-win_arm64.whl"
-        )
-        print(
-            f"PYTHON: Installing scipy from {scipy_wheel_url} since this is Windows ARM64 "
-            "and no official wheel exists as of 1.16.1"
-        )
-        to_install.append(scipy_wheel_url)
 
     print(f"PYTHON: CLI packages not found or out of date, pip installing these now: {to_install}")
     run([executable, "-m", "pip", "install", f"--target={python_lib_dir}", "--upgrade", *to_install], check=True)

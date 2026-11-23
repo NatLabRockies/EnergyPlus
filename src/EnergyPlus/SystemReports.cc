@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <string>
 #include <unordered_map>
 
@@ -104,7 +105,6 @@ namespace EnergyPlus::SystemReports {
 // This module embodies the scheme(s) for reporting ventilation loads and energy use.
 
 // Using/Aliasing
-using namespace DataLoopNode;
 using namespace DataAirLoop;
 using namespace DataPlant;
 using namespace DataZoneEquipment;
@@ -125,8 +125,6 @@ void InitEnergyReports(EnergyPlusData &state)
     // METHODOLOGY EMPLOYED:
     // Once all compsets have been established (second iteration) find all components
     // subcomponents, etc.
-
-    int constexpr EnergyTransfer(1);
 
     if (!state.dataSysRpts->VentReportStructureCreated) {
         return;
@@ -328,7 +326,6 @@ void InitEnergyReports(EnergyPlusData &state)
                     auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(ListNum);
                     for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumMeteredVars; ++VarNum) {
                         if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
-                            thisZoneEquipList.EquipData(AirDistUnitNum).EnergyTransComp = EnergyTransfer;
                             const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
                             const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
                             int Idx = 0;
@@ -341,7 +338,6 @@ void InitEnergyReports(EnergyPlusData &state)
                             if (MatchFound) {
                                 UpdateZoneCompPtrArray(state, Idx, ListNum, AirDistUnitNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                             }
-                            thisZoneEquipList.EquipData(AirDistUnitNum).ZoneEqToPlantPtr = Idx;
                             break;
                         }
                     }
@@ -350,7 +346,6 @@ void InitEnergyReports(EnergyPlusData &state)
                              ++VarNum) {
                             if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).resource ==
                                 Constant::eResource::EnergyTransfer) {
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).EnergyTransComp = EnergyTransfer;
                                 const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
                                 const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
                                 int Idx = 0;
@@ -364,7 +359,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                     UpdateZoneSubCompPtrArray(
                                         state, Idx, ListNum, AirDistUnitNum, SubEquipNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                                 }
-                                thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).ZoneEqToPlantPtr = Idx;
                                 break;
                             }
                         }
@@ -380,10 +374,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                         .SubSubEquipData(SubSubEquipNum)
                                         .MeteredVar(VarNum)
                                         .resource == Constant::eResource::EnergyTransfer) {
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .EnergyTransComp = EnergyTransfer;
                                     const std::string &CompType =
                                         thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).SubSubEquipData(SubSubEquipNum).TypeOf;
                                     const std::string &CompName =
@@ -407,10 +397,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                                                      MatchBranch,
                                                                      MatchComp);
                                     }
-                                    thisZoneEquipList.EquipData(AirDistUnitNum)
-                                        .SubEquipData(SubEquipNum)
-                                        .SubSubEquipData(SubSubEquipNum)
-                                        .ZoneEqToPlantPtr = Idx;
                                     break;
                                 }
                             }
@@ -1044,7 +1030,12 @@ void InitEnergyReports(EnergyPlusData &state)
     // initialize energy report variables
 }
 
-void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &ArrayCount, int &LoopCount, bool &ConnectionFlag)
+void FindFirstLastPtr([[maybe_unused]] EnergyPlusData &state,
+                      [[maybe_unused]] int &LoopType,
+                      [[maybe_unused]] int &LoopNum,
+                      [[maybe_unused]] int &ArrayCount,
+                      [[maybe_unused]] int &LoopCount,
+                      [[maybe_unused]] bool &ConnectionFlag)
 {
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Dan Fisher
@@ -1058,150 +1049,6 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
     // METHODOLOGY EMPLOYED:
     // Once all compsets have been established (second iteration) find all components
     // subcomponents, etc.
-
-    int DemandSideLoopNum;
-    int DemandSideBranchNum;
-    int DemandSideCompNum;
-    int DemandSideLoopType;
-    bool found;
-
-    // Object Data
-    auto &LoopStack = state.dataSysRpts->LoopStack;
-
-    return; // Autodesk:? Is this routine now an intentional NOOP?
-
-    if (state.dataSysRpts->OneTimeFlag_FindFirstLastPtr) {
-        LoopStack.allocate(state.dataSysRpts->MaxLoopArraySize);
-        state.dataAirSystemsData->DemandSideConnect.allocate(state.dataSysRpts->MaxCompArraySize);
-
-        state.dataSysRpts->OneTimeFlag_FindFirstLastPtr = false;
-    }
-    for (auto &e : LoopStack) {
-        e.LoopNum = 0;
-        e.LoopType = 0;
-    }
-
-    ConnectionFlag = false;
-    //    countloop=0
-    //    write(outputfiledebug,*) '1228=lt,lc,lnum,cflag,arrcnt',looptype,loopcount,LoopNum,connectionflag,arraycount
-
-    while (LoopCount > 0) {
-        //        write(outputfiledebug,*) '1231==lt,lc,lnum,cflag,arrcnt',looptype,loopcount,LoopNum,connectionflag,arraycount
-        //        write(outputfiledebug,*) 'loop=plname',TRIM(plantloop(LoopNum)%name)
-        --LoopCount;
-        //        countloop=countloop+1
-        //        if (countloop > 100) exit
-        if (LoopType == 1) {
-            for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
-                 ++BranchNum) {
-                for (int SupplySideCompNum = 1;
-                     SupplySideCompNum <=
-                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
-                     ++SupplySideCompNum) {
-                    {
-                        auto const &thisVentRepComp =
-                            state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                                SupplySideCompNum);
-                        DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
-                        DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
-                        DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
-                        DemandSideCompNum = thisVentRepComp.ConnectPlant.CompNum;
-                    }
-                    // If the connection is valid load the connection array
-                    if (DemandSideLoopType == 1 || DemandSideLoopType == 2) {
-                        ConnectionFlag = true;
-                        ++ArrayCount;
-                        if (ArrayCount > state.dataSysRpts->MaxCompArraySize) {
-                            state.dataAirSystemsData->DemandSideConnect.redimension(state.dataSysRpts->MaxCompArraySize += 100);
-                        }
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopType = DemandSideLoopType;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopNum = DemandSideLoopNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).BranchNum = DemandSideBranchNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).CompNum = DemandSideCompNum;
-
-                        found = false;
-                        print(state.files.debug, "1271=lstacksize {}\n", size(LoopStack));
-                        for (int Idx = 1; Idx <= isize(LoopStack); ++Idx) {
-                            if (DemandSideLoopNum == LoopStack(Idx).LoopNum && DemandSideLoopType == LoopStack(Idx).LoopType) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            ++LoopCount;
-                            //       write(outputfiledebug,*) '1280=lc,mxsize',loopcount,maxlooparraysize
-                            //       write(outputfiledebug,*) '1281=dsloopnum,dslooptype',DemandSideLoopNum,DemandSideLoopType
-                            if (LoopCount > state.dataSysRpts->MaxLoopArraySize) {
-                                LoopStack.redimension(state.dataSysRpts->MaxLoopArraySize += 100);
-                            }
-                            //               write(outputfiledebug,*)
-                            //               '1294=lcnt,dsloopnum,dslooptype',loopcount,DemandSideLoopNum,DemandSideLoopType
-                            LoopStack(LoopCount).LoopNum = DemandSideLoopNum;
-                            LoopStack(LoopCount).LoopType = DemandSideLoopType;
-                        }
-                    }
-                }
-            }
-        } else if (LoopType == 2) {
-            for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
-                 ++BranchNum) {
-                for (int SupplySideCompNum = 1;
-                     SupplySideCompNum <=
-                     state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
-                     ++SupplySideCompNum) {
-                    {
-                        auto const &thisVentRepComp =
-                            state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                                SupplySideCompNum);
-                        DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
-                        DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
-                        DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
-                        DemandSideCompNum = thisVentRepComp.ConnectPlant.CompNum;
-                    }
-                    // If the connection is valid load the connection array
-                    if (DemandSideLoopType == 1 || DemandSideLoopType == 2) {
-                        ConnectionFlag = true;
-                        ++ArrayCount;
-                        if (ArrayCount > state.dataSysRpts->MaxCompArraySize) {
-                            state.dataAirSystemsData->DemandSideConnect.redimension(state.dataSysRpts->MaxCompArraySize += 100);
-                        }
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopType = DemandSideLoopType;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).LoopNum = DemandSideLoopNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).BranchNum = DemandSideBranchNum;
-                        state.dataAirSystemsData->DemandSideConnect(ArrayCount).CompNum = DemandSideCompNum;
-
-                        found = false;
-                        for (int Idx = 1; Idx <= isize(LoopStack); ++Idx) {
-                            if (DemandSideLoopNum == LoopStack(Idx).LoopNum && DemandSideLoopType == LoopStack(Idx).LoopType) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            ++LoopCount;
-                            //       write(outputfiledebug,*) '1341=lcnt,arrsize',loopcount,maxlooparraysize
-                            //       write(outputfiledebug,*) '1342=lsloopnum,dslooptype',DemandSideLoopNum,DemandSideLoopType
-                            if (LoopCount > state.dataSysRpts->MaxLoopArraySize) {
-                                LoopStack.redimension(state.dataSysRpts->MaxLoopArraySize += 100);
-                            }
-                            LoopStack(LoopCount).LoopNum = DemandSideLoopNum;
-                            LoopStack(LoopCount).LoopType = DemandSideLoopType;
-                        }
-                    }
-                }
-            }
-        } else {
-            print(state.files.debug, "{}\n", "1361=error");
-            // error
-        }
-
-        // now unload the LoopNum and LoopType arrays
-        if (LoopCount > 0) {
-            LoopType = LoopStack(LoopCount).LoopType;
-            LoopNum = LoopStack(LoopCount).LoopNum;
-        }
-
-    } // While loop
 }
 
 void UpdateZoneCompPtrArray(EnergyPlusData &state,
@@ -2223,14 +2070,14 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     int PlantLoopNum;
 
     // Dimension GetChildrenData arrays
-    EPVector<DataLoopNode::ConnectionObjectType> SubCompTypes;
+    EPVector<Node::ConnectionObjectType> SubCompTypes;
     Array1D_string SubCompNames;
     Array1D_string InletNodeNames;
     Array1D_int InletNodeNumbers;
-    Array1D<NodeInputManager::CompFluidStream> InletFluidStreams;
+    Array1D<Node::CompFluidStream> InletFluidStreams;
     Array1D_string OutletNodeNames;
     Array1D_int OutletNodeNumbers;
-    Array1D<NodeInputManager::CompFluidStream> OutletFluidStreams;
+    Array1D<Node::CompFluidStream> OutletFluidStreams;
     int NumChildren;
     int NumGrandChildren;
     bool IsParent;
@@ -2246,15 +2093,14 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumBranches; ++BranchNum) {
             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
-                DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(
-                    EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC,
+                Node::ConnectionObjectType TypeOfComp = static_cast<Node::ConnectionObjectType>(
+                    EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC,
                                              state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf));
                 std::string &NameOfComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                 // Get complete list of components for complex branches
-                if (BranchNodeConnections::IsParentObject(state, TypeOfComp, NameOfComp)) {
+                if (Node::IsParentObject(state, TypeOfComp, NameOfComp)) {
 
-                    state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Parent = true;
-                    NumChildren = BranchNodeConnections::GetNumChildren(state, TypeOfComp, NameOfComp);
+                    NumChildren = Node::GetNumChildren(state, TypeOfComp, NameOfComp);
 
                     SubCompTypes.allocate(NumChildren);
                     SubCompNames.allocate(NumChildren);
@@ -2264,23 +2110,23 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     OutletNodeNumbers.allocate(NumChildren);
                     state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp.allocate(NumChildren);
 
-                    BranchNodeConnections::GetChildrenData(state,
-                                                           TypeOfComp,
-                                                           NameOfComp,
-                                                           NumChildren,
-                                                           SubCompTypes,
-                                                           SubCompNames,
-                                                           InletNodeNames,
-                                                           InletNodeNumbers,
-                                                           OutletNodeNames,
-                                                           OutletNodeNumbers,
-                                                           ErrorsFound);
+                    Node::GetChildrenData(state,
+                                          TypeOfComp,
+                                          NameOfComp,
+                                          NumChildren,
+                                          SubCompTypes,
+                                          SubCompNames,
+                                          InletNodeNames,
+                                          InletNodeNumbers,
+                                          OutletNodeNames,
+                                          OutletNodeNumbers,
+                                          ErrorsFound);
 
                     for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                         {
                             auto &thisSubComponent =
                                 state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum);
-                            thisSubComponent.TypeOf = BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                            thisSubComponent.TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                             thisSubComponent.Name = SubCompNames(SubCompNum);
                             thisSubComponent.NodeNameIn = InletNodeNames(SubCompNum);
                             thisSubComponent.NodeNameOut = OutletNodeNames(SubCompNum);
@@ -2298,19 +2144,18 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
 
                 } else {
                     NumChildren = 0;
-                    state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Parent = false;
                 }
                 state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).NumSubComps = NumChildren;
 
                 // check for 'grandchildren'
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                    DataLoopNode::ConnectionObjectType TypeOfSubComp = static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumValue(
-                        BranchNodeConnections::ConnectionObjectTypeNamesUC,
+                    Node::ConnectionObjectType TypeOfSubComp = static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(
+                        Node::ConnectionObjectTypeNamesUC,
                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf));
                     std::string &NameOfSubComp =
                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).Name;
-                    if (BranchNodeConnections::IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
-                        NumGrandChildren = BranchNodeConnections::GetNumChildren(state, TypeOfSubComp, NameOfSubComp);
+                    if (Node::IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
+                        NumGrandChildren = Node::GetNumChildren(state, TypeOfSubComp, NameOfSubComp);
                         SubCompTypes.allocate(NumGrandChildren);
                         SubCompNames.allocate(NumGrandChildren);
                         InletNodeNames.allocate(NumGrandChildren);
@@ -2323,17 +2168,17 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             .SubComp(SubCompNum)
                             .SubSubComp.allocate(NumGrandChildren);
 
-                        BranchNodeConnections::GetChildrenData(state,
-                                                               TypeOfSubComp,
-                                                               NameOfSubComp,
-                                                               NumGrandChildren,
-                                                               SubCompTypes,
-                                                               SubCompNames,
-                                                               InletNodeNames,
-                                                               InletNodeNumbers,
-                                                               OutletNodeNames,
-                                                               OutletNodeNumbers,
-                                                               ErrorsFound);
+                        Node::GetChildrenData(state,
+                                              TypeOfSubComp,
+                                              NameOfSubComp,
+                                              NumGrandChildren,
+                                              SubCompTypes,
+                                              SubCompNames,
+                                              InletNodeNames,
+                                              InletNodeNumbers,
+                                              OutletNodeNames,
+                                              OutletNodeNumbers,
+                                              ErrorsFound);
 
                         for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                             {
@@ -2342,18 +2187,18 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                                                                 .Comp(CompNum)
                                                                 .SubComp(SubCompNum)
                                                                 .SubSubComp(SubSubCompNum);
-                                thisSubSubComponent.TypeOf = static_cast<std::string>(
-                                    BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))]);
+                                thisSubSubComponent.TypeOf =
+                                    static_cast<std::string>(Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))]);
                                 thisSubSubComponent.Name = SubCompNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNameIn = InletNodeNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNameOut = OutletNodeNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNumIn = InletNodeNumbers(SubSubCompNum);
                                 thisSubSubComponent.NodeNumOut = OutletNodeNumbers(SubSubCompNum);
-                                NumLeft = BranchNodeConnections::GetNumChildren(state, SubCompTypes(SubSubCompNum), SubCompNames(SubSubCompNum));
+                                NumLeft = Node::GetNumChildren(state, SubCompTypes(SubSubCompNum), SubCompNames(SubSubCompNum));
                                 if (NumLeft > 0) {
                                     ShowSevereError(
                                         state,
-                                        format("Hanging Children for component={}:{}", thisSubSubComponent.TypeOf, SubCompNames(SubSubCompNum)));
+                                        std::format("Hanging Children for component={}:{}", thisSubSubComponent.TypeOf, SubCompNames(SubSubCompNum)));
                                 }
                             }
                         }
@@ -2502,20 +2347,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
         for (CompNum = 1; CompNum <= state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).NumOfEquipTypes; ++CompNum) {
             std::string &TypeOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipTypeName(CompNum);
             std::string &NameOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipName(CompNum);
-            DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
-            BranchNodeConnections::GetComponentData(state,
-                                                    TypeOfCompNum,
-                                                    NameOfComp,
-                                                    IsParent,
-                                                    NumInlets,
-                                                    InletNodeNames,
-                                                    InletNodeNumbers,
-                                                    InletFluidStreams,
-                                                    NumOutlets,
-                                                    OutletNodeNames,
-                                                    OutletNodeNumbers,
-                                                    OutletFluidStreams);
+            Node::ConnectionObjectType TypeOfCompNum =
+                static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfComp));
+            Node::GetComponentData(state,
+                                   TypeOfCompNum,
+                                   NameOfComp,
+                                   IsParent,
+                                   NumInlets,
+                                   InletNodeNames,
+                                   InletNodeNumbers,
+                                   InletFluidStreams,
+                                   NumOutlets,
+                                   OutletNodeNames,
+                                   OutletNodeNumbers,
+                                   OutletFluidStreams);
             {
                 auto &thisEquipData = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum);
                 thisEquipData.TypeOf = TypeOfComp;
@@ -2526,7 +2371,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 thisEquipData.InletNodeNums.allocate(NumInlets);
                 thisEquipData.NumInlets = NumInlets;
                 thisEquipData.InletNodeNums = InletNodeNumbers;
-                thisEquipData.Parent = IsParent;
                 NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
                 thisEquipData.NumMeteredVars = NumVariables;
                 if (NumVariables > 0) {
@@ -2566,8 +2410,8 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     meteredVars.deallocate();
                 }
 
-                if (BranchNodeConnections::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
-                    NumChildren = BranchNodeConnections::GetNumChildren(state, TypeOfCompNum, NameOfComp);
+                if (Node::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
+                    NumChildren = Node::GetNumChildren(state, TypeOfCompNum, NameOfComp);
                     thisEquipData.NumSubEquip = NumChildren;
 
                     SubCompTypes.allocate(NumChildren);
@@ -2578,21 +2422,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     OutletNodeNumbers.allocate(NumChildren);
                     thisEquipData.SubEquipData.allocate(NumChildren);
 
-                    BranchNodeConnections::GetChildrenData(state,
-                                                           TypeOfCompNum,
-                                                           NameOfComp,
-                                                           NumChildren,
-                                                           SubCompTypes,
-                                                           SubCompNames,
-                                                           InletNodeNames,
-                                                           InletNodeNumbers,
-                                                           OutletNodeNames,
-                                                           OutletNodeNumbers,
-                                                           ErrorsFound);
+                    Node::GetChildrenData(state,
+                                          TypeOfCompNum,
+                                          NameOfComp,
+                                          NumChildren,
+                                          SubCompTypes,
+                                          SubCompNames,
+                                          InletNodeNames,
+                                          InletNodeNumbers,
+                                          OutletNodeNames,
+                                          OutletNodeNumbers,
+                                          ErrorsFound);
 
                     for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                        thisEquipData.SubEquipData(SubCompNum).TypeOf =
-                            BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                        thisEquipData.SubEquipData(SubCompNum).TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                         thisEquipData.SubEquipData(SubCompNum).Name = SubCompNames(SubCompNum);
                         thisEquipData.SubEquipData(SubCompNum).OutletNodeNum = OutletNodeNumbers(SubCompNum);
                         thisEquipData.SubEquipData(SubCompNum).InletNodeNum = InletNodeNumbers(SubCompNum);
@@ -2611,10 +2454,10 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                     std::string &TypeOfSubComp = thisEquipData.SubEquipData(SubCompNum).TypeOf;
                     std::string &NameOfSubComp = thisEquipData.SubEquipData(SubCompNum).Name;
-                    DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                        EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
-                    if (BranchNodeConnections::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
-                        NumGrandChildren = BranchNodeConnections::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
+                    Node::ConnectionObjectType TypeOfSubCompNum =
+                        static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                    if (Node::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
+                        NumGrandChildren = Node::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                         thisEquipData.SubEquipData(SubCompNum).NumSubSubEquip = NumGrandChildren;
                         SubCompTypes.allocate(NumGrandChildren);
                         SubCompNames.allocate(NumGrandChildren);
@@ -2624,21 +2467,21 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         OutletNodeNumbers.allocate(NumGrandChildren);
                         thisEquipData.SubEquipData(SubCompNum).SubSubEquipData.allocate(NumGrandChildren);
                         // Sankar added the array number for EquipData
-                        BranchNodeConnections::GetChildrenData(state,
-                                                               TypeOfSubCompNum,
-                                                               NameOfSubComp,
-                                                               NumGrandChildren,
-                                                               SubCompTypes,
-                                                               SubCompNames,
-                                                               InletNodeNames,
-                                                               InletNodeNumbers,
-                                                               OutletNodeNames,
-                                                               OutletNodeNumbers,
-                                                               ErrorsFound);
+                        Node::GetChildrenData(state,
+                                              TypeOfSubCompNum,
+                                              NameOfSubComp,
+                                              NumGrandChildren,
+                                              SubCompTypes,
+                                              SubCompNames,
+                                              InletNodeNames,
+                                              InletNodeNumbers,
+                                              OutletNodeNames,
+                                              OutletNodeNumbers,
+                                              ErrorsFound);
 
                         for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).TypeOf =
-                                BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
+                                Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).Name = SubCompNames(SubSubCompNum);
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).OutletNodeNum = OutletNodeNumbers(SubSubCompNum);
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).InletNodeNum = InletNodeNumbers(SubSubCompNum);
@@ -2768,12 +2611,12 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         auto &thisComp = ThisReportData.Branch(BranchNum).Comp(CompNum);
                         std::string &TypeOfComp = thisComp.TypeOf;
                         std::string &NameOfComp = thisComp.Name;
-                        DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                            EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
+                        Node::ConnectionObjectType TypeOfCompNum =
+                            static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfComp));
                         // Get complete list of components for complex branches
-                        if (BranchNodeConnections::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
+                        if (Node::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
 
-                            NumChildren = BranchNodeConnections::GetNumChildren(state, TypeOfCompNum, NameOfComp);
+                            NumChildren = Node::GetNumChildren(state, TypeOfCompNum, NameOfComp);
 
                             SubCompTypes.allocate(NumChildren);
                             SubCompNames.allocate(NumChildren);
@@ -2783,21 +2626,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             OutletNodeNumbers.allocate(NumChildren);
                             thisComp.SubComp.allocate(NumChildren);
 
-                            BranchNodeConnections::GetChildrenData(state,
-                                                                   TypeOfCompNum,
-                                                                   NameOfComp,
-                                                                   NumChildren,
-                                                                   SubCompTypes,
-                                                                   SubCompNames,
-                                                                   InletNodeNames,
-                                                                   InletNodeNumbers,
-                                                                   OutletNodeNames,
-                                                                   OutletNodeNumbers,
-                                                                   ErrorsFound);
+                            Node::GetChildrenData(state,
+                                                  TypeOfCompNum,
+                                                  NameOfComp,
+                                                  NumChildren,
+                                                  SubCompTypes,
+                                                  SubCompNames,
+                                                  InletNodeNames,
+                                                  InletNodeNumbers,
+                                                  OutletNodeNames,
+                                                  OutletNodeNumbers,
+                                                  ErrorsFound);
 
                             for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                                thisComp.SubComp(SubCompNum).TypeOf =
-                                    BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                                thisComp.SubComp(SubCompNum).TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                                 thisComp.SubComp(SubCompNum).Name = SubCompNames(SubCompNum);
                                 thisComp.SubComp(SubCompNum).NodeNameIn = InletNodeNames(SubCompNum);
                                 thisComp.SubComp(SubCompNum).NodeNameOut = OutletNodeNames(SubCompNum);
@@ -2821,10 +2663,10 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                             std::string &TypeOfSubComp = thisComp.SubComp(SubCompNum).TypeOf;
                             std::string NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
-                            DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                                EnergyPlus::getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
-                            if (BranchNodeConnections::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
-                                NumGrandChildren = BranchNodeConnections::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
+                            Node::ConnectionObjectType TypeOfSubCompNum =
+                                static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                            if (Node::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
+                                NumGrandChildren = Node::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                                 SubCompTypes.allocate(NumGrandChildren);
                                 SubCompNames.allocate(NumGrandChildren);
                                 InletNodeNames.allocate(NumGrandChildren);
@@ -2833,23 +2675,22 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                                 OutletNodeNumbers.allocate(NumGrandChildren);
                                 thisComp.SubComp(SubCompNum).SubSubComp.allocate(NumGrandChildren);
 
-                                BranchNodeConnections::GetChildrenData(state,
-                                                                       TypeOfSubCompNum,
-                                                                       NameOfSubComp,
-                                                                       NumGrandChildren,
-                                                                       SubCompTypes,
-                                                                       SubCompNames,
-                                                                       InletNodeNames,
-                                                                       InletNodeNumbers,
-                                                                       OutletNodeNames,
-                                                                       OutletNodeNumbers,
-                                                                       ErrorsFound);
+                                Node::GetChildrenData(state,
+                                                      TypeOfSubCompNum,
+                                                      NameOfSubComp,
+                                                      NumGrandChildren,
+                                                      SubCompTypes,
+                                                      SubCompNames,
+                                                      InletNodeNames,
+                                                      InletNodeNumbers,
+                                                      OutletNodeNames,
+                                                      OutletNodeNumbers,
+                                                      ErrorsFound);
 
                                 for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                                     {
                                         auto &thisSubSubComp = thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum);
-                                        thisSubSubComp.TypeOf =
-                                            BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
+                                        thisSubSubComp.TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
                                         thisSubSubComp.Name = SubCompNames(SubSubCompNum);
                                         thisSubSubComp.NodeNameIn = InletNodeNames(SubSubCompNum);
                                         thisSubSubComp.NodeNameOut = OutletNodeNames(SubSubCompNum);
@@ -3384,9 +3225,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         DEHUMIDIFIER_DESICCANT_SYSTEM,
         DUCT,
         EVAPORATIVECOOLER_DIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_CELDEKPAD,
-        EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL,
+        EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS,
         EVAPORATIVECOOLER_INDIRECT_WETCOIL,
         FAN_COMPONENTMODEL,
         FAN_SYSTEMMODEL,
@@ -3479,9 +3320,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         {"DEHUMIDIFIER:DESICCANT:SYSTEM", DEHUMIDIFIER_DESICCANT_SYSTEM},
         {"DUCT", DUCT},
         {"EVAPORATIVECOOLER:DIRECT:CELDEKPAD", EVAPORATIVECOOLER_DIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:DIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:CELDEKPAD", EVAPORATIVECOOLER_INDIRECT_CELDEKPAD},
-        {"EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL", EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL},
+        {"EVAPORATIVECOOLER:INDIRECT:USEREFFECTIVENESS", EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS},
         {"EVAPORATIVECOOLER:INDIRECT:WETCOIL", EVAPORATIVECOOLER_INDIRECT_WETCOIL},
         {"FAN:COMPONENTMODEL", FAN_COMPONENTMODEL},
         {"FAN:SYSTEMMODEL", FAN_SYSTEMMODEL},
@@ -3698,8 +3539,8 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case EVAPORATIVECOOLER_DIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_CELDEKPAD:
     case EVAPORATIVECOOLER_INDIRECT_WETCOIL:
-    case EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL:
-    case EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL:
+    case EVAPORATIVECOOLER_DIRECT_USEREFFECTIVENESS:
+    case EVAPORATIVECOOLER_INDIRECT_USEREFFECTIVENESS:
         if (CompLoadFlag) {
             thisSysLoadRepVars.EvapCLNG += std::abs(CompLoad);
         }
@@ -4525,7 +4366,6 @@ void MatchPlantSys(EnergyPlusData &state,
             auto &thisComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum);
             for (int VarNum = 1; VarNum <= thisComp.NumMeteredVars; ++VarNum) {
                 if (thisComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
-                    thisComp.EnergyTransComp = EnergyTrans;
                     const std::string &CompType = thisComp.TypeOf;
                     const std::string &CompName = thisComp.Name;
                     bool MatchFound = false; // Set to .TRUE. when a match is found
@@ -4538,7 +4378,6 @@ void MatchPlantSys(EnergyPlusData &state,
                     if (MatchFound) {
                         UpdateAirSysCompPtrArray(state, Idx, AirLoopNum, BranchNum, CompNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
                     }
-                    thisComp.AirSysToPlantPtr = Idx;
                     break;
                 }
             }
@@ -4607,7 +4446,7 @@ void MatchPlantSys(EnergyPlusData &state,
     }
 }
 
-void FindDemandSideMatch(EnergyPlusData &state,
+void FindDemandSideMatch(EnergyPlusData const &state,
                          std::string const &CompType, // Inlet node of the component to find the match of
                          std::string_view CompName,   // Outlet node of the component to find the match of
                          bool &MatchFound,            // Set to .TRUE. when a match is found
@@ -4637,48 +4476,46 @@ void FindDemandSideMatch(EnergyPlusData &state,
     MatchFound = false;
     MatchLoopType = 0;
     MatchLoop = 0;
-    MatchLoop = 0;
     MatchBranch = 0;
     MatchComp = 0;
 
     // Now cycle through all of the demand side loops to see if we can find
     // a match for the component type and name.  Once a match is found,
     // record the type of loop and the loop, branch, and component numbers.
-    if (!MatchFound) { // Go through the plant demand side loops
-        for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
-            for (int PassBranchNum = 1;
-                 PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
-                 ++PassBranchNum) {
-                for (int PassCompNum = 1;
-                     PassCompNum <=
-                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
-                     ++PassCompNum) {
-                    if (Util::SameString(CompType,
-                                         state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                             .Branch(PassBranchNum)
-                                             .Comp(PassCompNum)
-                                             .TypeOf) &&
-                        Util::SameString(CompName,
-                                         state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                             .Branch(PassBranchNum)
-                                             .Comp(PassCompNum)
-                                             .Name)) {
-                        // Found a match on the plant demand side--increment the counter
-                        MatchFound = true;
-                        MatchLoopType = 1;
-                        MatchLoop = PassLoopNum;
-                        MatchBranch = PassBranchNum;
-                        MatchComp = PassCompNum;
-                        break; // PassCompNum DO loop
-                    }
-                }
-                if (MatchFound) {
-                    break; // PassBranchNum DO loop
+    // Go through the plant demand side loops
+    for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
+        for (int PassBranchNum = 1;
+             PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
+             ++PassBranchNum) {
+            for (int PassCompNum = 1;
+                 PassCompNum <=
+                 state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
+                 ++PassCompNum) {
+                if (Util::SameString(CompType,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .TypeOf) &&
+                    Util::SameString(CompName,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .Name)) {
+                    // Found a match on the plant demand side--increment the counter
+                    MatchFound = true;
+                    MatchLoopType = 1;
+                    MatchLoop = PassLoopNum;
+                    MatchBranch = PassBranchNum;
+                    MatchComp = PassCompNum;
+                    break; // PassCompNum DO loop
                 }
             }
             if (MatchFound) {
-                break; // PassLoopNum DO loop
+                break; // PassBranchNum DO loop
             }
+        }
+        if (MatchFound) {
+            break; // PassLoopNum DO loop
         }
     }
 
@@ -4857,12 +4694,12 @@ void ReportAirLoopConnections(EnergyPlusData &state)
             std::string ChrOut;
             std::string ChrOut2;
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum > 0) {
-                ChrOut = fmt::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum);
+                ChrOut = std::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum);
             } else {
                 ChrOut = errstring;
             }
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum > 0) {
-                ChrOut2 = fmt::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum);
+                ChrOut2 = std::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum);
             } else {
                 ChrOut2 = errstring;
             }
@@ -4948,16 +4785,15 @@ void reportAirLoopToplogy(EnergyPlusData &state)
     int rowCounter = 1;
     for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
         auto &pas = state.dataAirSystemsData->PrimaryAirSystems(airLoopNum);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, format("{}", rowCounter), pas.Name);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, std::format("{}", rowCounter), pas.Name);
         ++rowCounter;
         for (int BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
             auto &pasBranch = pas.Branch(BranchNum);
             if (pas.Splitter.Exists) {
-                for (int outNum : pas.Splitter.BranchNumOut) {
-                    if (outNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, format("{}", rowCounter), pas.Splitter.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Splitter.BranchNumOut.begin(), pas.Splitter.BranchNumOut.end(), [BranchNum](int outNum) {
+                        return outNum == BranchNum;
+                    })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
                 }
             }
             for (int CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
@@ -4966,30 +4802,29 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                     state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
                 for (int SubCompNum = 1; SubCompNum <= pasBranchComp.NumSubComps; ++SubCompNum) {
                     auto &pasBranchSubComp = pasBranchComp.SubComp(SubCompNum);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSubCompType, format("{}", rowCounter), pasBranchSubComp.TypeOf);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSubCompName, format("{}", rowCounter), pasBranchSubComp.Name);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSubCompType, std::format("{}", rowCounter), pasBranchSubComp.TypeOf);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSubCompName, std::format("{}", rowCounter), pasBranchSubComp.Name);
                     fillAirloopToplogyComponentRow(
                         state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
                     for (int SubSubCompNum = 1; SubSubCompNum <= pasBranchSubComp.NumSubSubComps; ++SubSubCompNum) {
                         auto &pasBranchSubSubComp = pasBranchSubComp.SubSubComp(SubSubCompNum);
                         OutputReportPredefined::PreDefTableEntry(
-                            state, orp->pdchTopAirSubCompType, format("{}", rowCounter), pasBranchSubComp.TypeOf);
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSubCompName, format("{}", rowCounter), pasBranchSubComp.Name);
+                            state, orp->pdchTopAirSubCompType, std::format("{}", rowCounter), pasBranchSubComp.TypeOf);
                         OutputReportPredefined::PreDefTableEntry(
-                            state, orp->pdchTopAirSubSubCompType, format("{}", rowCounter), pasBranchSubSubComp.TypeOf);
+                            state, orp->pdchTopAirSubCompName, std::format("{}", rowCounter), pasBranchSubComp.Name);
                         OutputReportPredefined::PreDefTableEntry(
-                            state, orp->pdchTopAirSubSubCompName, format("{}", rowCounter), pasBranchSubSubComp.Name);
+                            state, orp->pdchTopAirSubSubCompType, std::format("{}", rowCounter), pasBranchSubSubComp.TypeOf);
+                        OutputReportPredefined::PreDefTableEntry(
+                            state, orp->pdchTopAirSubSubCompName, std::format("{}", rowCounter), pasBranchSubSubComp.Name);
                         fillAirloopToplogyComponentRow(
                             state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
                     }
                 }
             }
             if (pas.Mixer.Exists) {
-                for (int inNum : pas.Mixer.BranchNumIn) {
-                    if (inNum == BranchNum) {
-                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, format("{}", rowCounter - 1), pas.Mixer.Name);
-                        break;
-                    }
+                if (std::any_of(pas.Mixer.BranchNumIn.begin(), pas.Mixer.BranchNumIn.end(), [BranchNum](int inNum) { return inNum == BranchNum; })) {
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
                 }
             }
         }
@@ -5010,21 +4845,22 @@ void reportAirLoopToplogy(EnergyPlusData &state)
     for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
         auto &pas = state.dataAirSystemsData->PrimaryAirSystems(airLoopNum);
         auto &thisAtoZInfo = state.dataAirLoop->AirToZoneNodeInfo(airLoopNum);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
         ++rowCounter;
         for (int ductNum = 1; ductNum <= thisAtoZInfo.NumSupplyNodes; ++ductNum) {
             auto &thisBranch = pas.Branch(thisAtoZInfo.SupplyDuctBranchNum(ductNum));
             if (thisAtoZInfo.SupplyAirPathNum(ductNum) > 0) {
                 auto &thisSupplyPath = state.dataZoneEquip->SupplyAirPath(thisAtoZInfo.SupplyAirPathNum(ductNum));
                 for (int compNum = 1; compNum <= thisSupplyPath.NumOfComponents; ++compNum) {
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, format("{}", rowCounter), thisBranch.Name);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopAirSupplyDuctType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                        state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopAirSupplyPCompType, format("{}", rowCounter), thisSupplyPath.ComponentType(compNum));
+                        state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopAirSupplyPCompName, format("{}", rowCounter), thisSupplyPath.ComponentName(compNum));
+                        state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(compNum));
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(compNum));
                     ++rowCounter;
                 }
                 if (thisBranch.DuctType == HVAC::AirDuctType::Cooling || thisBranch.DuctType == HVAC::AirDuctType::Main) {
@@ -5041,26 +4877,28 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                             if (thisCoolADU.SupplyAirPathExists) {
                                 int spCompNum = thisSupplyPath.OutletNodeSupplyPathCompNum(thisCoolADU.SupplyAirPathOutNodeIndex);
                                 OutputReportPredefined::PreDefTableEntry(
-                                    state, orp->pdchTopAirSupplyPCompType, format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
+                                    state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
                                 OutputReportPredefined::PreDefTableEntry(
-                                    state, orp->pdchTopAirSupplyPCompName, format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
+                                    state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
                             }
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                                state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirSupplyBranchName, format("{}", rowCounter), thisBranch.Name);
+                                state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirSupplyDuctType,
+                                                                     std::format("{}", rowCounter),
+                                                                     HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirSupplyDuctType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
-                            OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirZoneName, format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
+                                state, orp->pdchTopAirZoneName, std::format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
                             auto &aduIndex = zel.EquipIndex(thisCoolADU.AirDistUnitIndex);
                             OutputReportPredefined::PreDefTableEntry(state,
                                                                      orp->pdchTopAirTermUnitType,
-                                                                     format("{}", rowCounter),
+                                                                     std::format("{}", rowCounter),
                                                                      state.dataDefineEquipment->AirDistUnit(aduIndex).EquipType(1));
                             OutputReportPredefined::PreDefTableEntry(state,
                                                                      orp->pdchTopAirTermUnitName,
-                                                                     format("{}", rowCounter),
+                                                                     std::format("{}", rowCounter),
                                                                      state.dataDefineEquipment->AirDistUnit(aduIndex).EquipName(1));
                             if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
                                 auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
@@ -5070,11 +4908,11 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                                         if (retPathCompNum > 0) {
                                             OutputReportPredefined::PreDefTableEntry(state,
                                                                                      orp->pdchTopAirReturnPCompType,
-                                                                                     format("{}", rowCounter),
+                                                                                     std::format("{}", rowCounter),
                                                                                      thisReturnPath.ComponentType(retPathCompNum));
                                             OutputReportPredefined::PreDefTableEntry(state,
                                                                                      orp->pdchTopAirReturnPCompName,
-                                                                                     format("{}", rowCounter),
+                                                                                     std::format("{}", rowCounter),
                                                                                      thisReturnPath.ComponentName(retPathCompNum));
                                         }
                                         break;
@@ -5098,26 +4936,28 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                             if (thisHeatADU.SupplyAirPathExists) {
                                 int spCompNum = thisSupplyPath.OutletNodeSupplyPathCompNum(thisHeatADU.SupplyAirPathOutNodeIndex);
                                 OutputReportPredefined::PreDefTableEntry(
-                                    state, orp->pdchTopAirSupplyPCompType, format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
+                                    state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
                                 OutputReportPredefined::PreDefTableEntry(
-                                    state, orp->pdchTopAirSupplyPCompName, format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
+                                    state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
                             }
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                                state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirSupplyBranchName, format("{}", rowCounter), thisBranch.Name);
+                                state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirSupplyDuctType,
+                                                                     std::format("{}", rowCounter),
+                                                                     HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
                             OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirSupplyDuctType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
-                            OutputReportPredefined::PreDefTableEntry(
-                                state, orp->pdchTopAirZoneName, format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
+                                state, orp->pdchTopAirZoneName, std::format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
                             auto &aduIndex = zel.EquipIndex(thisHeatADU.AirDistUnitIndex);
                             OutputReportPredefined::PreDefTableEntry(state,
                                                                      orp->pdchTopAirTermUnitType,
-                                                                     format("{}", rowCounter),
+                                                                     std::format("{}", rowCounter),
                                                                      state.dataDefineEquipment->AirDistUnit(aduIndex).EquipType(1));
                             OutputReportPredefined::PreDefTableEntry(state,
                                                                      orp->pdchTopAirTermUnitName,
-                                                                     format("{}", rowCounter),
+                                                                     std::format("{}", rowCounter),
                                                                      state.dataDefineEquipment->AirDistUnit(aduIndex).EquipName(1));
                             if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
                                 auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
@@ -5126,11 +4966,11 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                                     if (retPathCompNum > 0) {
                                         OutputReportPredefined::PreDefTableEntry(state,
                                                                                  orp->pdchTopAirReturnPCompType,
-                                                                                 format("{}", rowCounter),
+                                                                                 std::format("{}", rowCounter),
                                                                                  thisReturnPath.ComponentType(retPathCompNum));
                                         OutputReportPredefined::PreDefTableEntry(state,
                                                                                  orp->pdchTopAirReturnPCompName,
-                                                                                 format("{}", rowCounter),
+                                                                                 std::format("{}", rowCounter),
                                                                                  thisReturnPath.ComponentName(retPathCompNum));
                                     }
                                 }
@@ -5141,27 +4981,27 @@ void reportAirLoopToplogy(EnergyPlusData &state)
                 }
 
             } else {
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, format("{}", rowCounter), thisBranch.Name);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
                 OutputReportPredefined::PreDefTableEntry(
-                    state, orp->pdchTopAirSupplyDuctType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                    state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
                 ++rowCounter;
             }
         }
         if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
             auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
             for (int compNum = 1; compNum <= thisReturnPath.NumOfComponents; ++compNum) {
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
                 if (compNum == thisReturnPath.OutletRetPathCompNum) {
                     auto &thisBranch = pas.Branch(pas.InletBranchNum[0]);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, format("{}", rowCounter), thisBranch.Name);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopAirSupplyDuctType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                        state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
                 }
                 OutputReportPredefined::PreDefTableEntry(
-                    state, orp->pdchTopAirReturnPCompType, format("{}", rowCounter), thisReturnPath.ComponentType(compNum));
+                    state, orp->pdchTopAirReturnPCompType, std::format("{}", rowCounter), thisReturnPath.ComponentType(compNum));
                 OutputReportPredefined::PreDefTableEntry(
-                    state, orp->pdchTopAirReturnPCompName, format("{}", rowCounter), thisReturnPath.ComponentName(compNum));
+                    state, orp->pdchTopAirReturnPCompName, std::format("{}", rowCounter), thisReturnPath.ComponentName(compNum));
                 ++rowCounter;
             }
         }
@@ -5181,11 +5021,12 @@ void fillAirloopToplogyComponentRow(EnergyPlusData &state,
     // s->pdchTopAirBranchName = newPreDefColumn(state, s->pdstTopAirLoop, "Branch Name");
     // s->pdchTopAirCompType = newPreDefColumn(state, s->pdstTopAirLoop, "Component Type");
     // s->pdchTopAirCompName = newPreDefColumn(state, s->pdstTopAirLoop, "Component Name");
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, format("{}", rowCounter), loopName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirBranchName, format("{}", rowCounter), branchName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchType, format("{}", rowCounter), HVAC::airDuctTypeNames[(int)ductType]);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompType, format("{}", rowCounter), compType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompName, format("{}", rowCounter), compName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, std::format("{}", rowCounter), loopName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirBranchName, std::format("{}", rowCounter), branchName);
+    OutputReportPredefined::PreDefTableEntry(
+        state, orp->pdchTopAirSupplyBranchType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)ductType]);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompType, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompName, std::format("{}", rowCounter), compName);
     ++rowCounter;
 }
 
@@ -5204,7 +5045,7 @@ void reportZoneEquipmentToplogy(EnergyPlusData &state)
     int rowCounter = 1;
     for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
         const std::string_view zoneName = state.dataHeatBal->Zone(zoneNum).Name;
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, format("{}", rowCounter), zoneName);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, std::format("{}", rowCounter), zoneName);
         ++rowCounter;
         if (!state.dataZoneEquip->ZoneEquipConfig(zoneNum).IsControlled) {
             continue;
@@ -5215,17 +5056,19 @@ void reportZoneEquipmentToplogy(EnergyPlusData &state)
             fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
             for (int SubCompNum = 1; SubCompNum <= zelEquipData.NumSubEquip; ++SubCompNum) {
                 auto &zelSubEquipData = zelEquipData.SubEquipData(SubCompNum);
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompType, format("{}", rowCounter), zelSubEquipData.TypeOf);
-                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompName, format("{}", rowCounter), zelSubEquipData.Name);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompType, std::format("{}", rowCounter), zelSubEquipData.TypeOf);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompName, std::format("{}", rowCounter), zelSubEquipData.Name);
                 fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
                 for (int SubSubCompNum = 1; SubSubCompNum <= zelSubEquipData.NumSubSubEquip; ++SubSubCompNum) {
                     auto &zelSubSubEquipData = zelSubEquipData.SubSubEquipData(SubSubCompNum);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompType, format("{}", rowCounter), zelSubEquipData.TypeOf);
-                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompName, format("{}", rowCounter), zelSubEquipData.Name);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopZnEqpSubSubCompType, format("{}", rowCounter), zelSubSubEquipData.TypeOf);
+                        state, orp->pdchTopZnEqpSubCompType, std::format("{}", rowCounter), zelSubEquipData.TypeOf);
                     OutputReportPredefined::PreDefTableEntry(
-                        state, orp->pdchTopZnEqpSubSubCompName, format("{}", rowCounter), zelSubSubEquipData.Name);
+                        state, orp->pdchTopZnEqpSubCompName, std::format("{}", rowCounter), zelSubEquipData.Name);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubSubCompType, std::format("{}", rowCounter), zelSubSubEquipData.TypeOf);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubSubCompName, std::format("{}", rowCounter), zelSubSubEquipData.Name);
                     fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
                 }
             }
@@ -5241,9 +5084,9 @@ void fillZoneEquipToplogyComponentRow(
     // s->pdchTopZnEqpName = newPreDefColumn(state, s->pdstTopZnEqp, "Zone Name");
     // s->pdchTopZnEqpCompType = newPreDefColumn(state, s->pdstTopZnEqp, "Component Type");
     // s->pdchTopZnEqpCompName = newPreDefColumn(state, s->pdstTopZnEqp, "Component Name");
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, format("{}", rowCounter), zoneName);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompType, format("{}", rowCounter), compType);
-    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompName, format("{}", rowCounter), compName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, std::format("{}", rowCounter), zoneName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompType, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompName, std::format("{}", rowCounter), compName);
     ++rowCounter;
 }
 

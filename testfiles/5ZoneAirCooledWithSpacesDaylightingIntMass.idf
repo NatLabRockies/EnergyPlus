@@ -103,7 +103,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,27.1;
 
   Building,
     Building,                !- Name
@@ -551,8 +551,6 @@
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
 
-                             !- Field 4
-
   Schedule:Compact,
     ShadeTransSch,           !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -567,6 +565,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -577,6 +576,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Conference,              !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Conference/meeting,  !- Tag 1
     Std 90.1 Conference/Meeting/Multipurpose;  !- Tag 2
 
@@ -587,6 +587,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Reception,               !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Reception areas,!- Tag 1
     Std 90.1 Lobby;          !- Tag 2
 
@@ -597,6 +598,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -607,6 +609,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -617,6 +620,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Storage,                 !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Storage,        !- Tag 1
     Std 90.1 Storage;        !- Tag 2
 
@@ -627,6 +631,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -637,6 +642,7 @@
     autocalculate,           !- Volume {m3}
     ,                        !- Floor Area {m2}
     Office,                  !- Space Type
+    ,                        !- Construction Assignment Set Name
     Std 62.1 Office Space,   !- Tag 1
     Std 90.1 Office-Open Plan;  !- Tag 2
 
@@ -2657,6 +2663,7 @@
     Zone 1 Control,          !- Name
     Zone 1,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2668,6 +2675,7 @@
     Zone 2 Control,          !- Name
     Zone 2,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2679,6 +2687,7 @@
     Zone 3 Control,          !- Name
     Zone 3,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2690,6 +2699,7 @@
     Zone 4 Control,          !- Name
     Zone 4,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type
@@ -2701,6 +2711,7 @@
     Zone 5 Control,          !- Name
     Zone 5,                  !- Zone or ZoneList Name
     Zone Control Type Sched, !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     CoolingSetPoint,         !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type

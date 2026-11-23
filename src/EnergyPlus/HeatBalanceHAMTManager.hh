@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -132,7 +132,6 @@ namespace HeatBalanceHAMTManager {
         Real64 vpsat;   // Saturation Vapor Pressure
         Real64 rh;
         Real64 rhp1;
-        Real64 rhp2;             // Relative Humidity
         Real64 rhp;              // cell relative humidity (percent - reporting)
         Real64 dwdphi;           // Moisture storage capacity
         Real64 dw;               // Liquid transport Coefficient
@@ -146,8 +145,8 @@ namespace HeatBalanceHAMTManager {
         // Default Constructor
         subcell()
             : matid(-1), sid(-1), Qadds(0.0), density(-1.0), wthermalc(0.0), spech(0.0), htc(-1.0), vtc(-1.0), mu(-1.0), volume(0.0), temp(0.0),
-              tempp1(0.0), tempp2(0.0), wreport(0.0), water(0.0), vp(0.0), vpp1(0.0), vpsat(0.0), rh(0.1), rhp1(0.1), rhp2(0.1), rhp(10.0),
-              dwdphi(-1.0), dw(-1.0), origin(3, 0.0), length(3, 0.0), overlap(6, 0.0), dist(6, 0.0), adjs(6, 0), adjsl(6, 0)
+              tempp1(0.0), tempp2(0.0), wreport(0.0), water(0.0), vp(0.0), vpp1(0.0), vpsat(0.0), rh(0.1), rhp1(0.1), rhp(10.0), dwdphi(-1.0),
+              dw(-1.0), origin(3, 0.0), length(3, 0.0), overlap(6, 0.0), dist(6, 0.0), adjs(6, 0), adjsl(6, 0)
         {
         }
     };

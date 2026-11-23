@@ -1,6 +1,7 @@
 #include <cstdint>  // std::uint8_t
 #include <fstream>  // std::ifstream
-#include <vector>   // std::vector
+#include <stdexcept>
+#include <vector>  // std::vector
 #ifndef __cppcheck__
 #  if __has_include(<filesystem>)
 #    include <filesystem>
@@ -14,9 +15,8 @@ namespace fs = std::experimental::filesystem;
 #  endif
 #endif
 
-#include <fmt/format.h>       // fmt::print
-#include <fmt/os.h>           // fmt::output_file, fmt::file
 #include <nlohmann/json.hpp>  // json
+#include <EnergyPlus/Formatters.hh>
 
 using json = nlohmann::json;
 
@@ -71,6 +71,7 @@ static constexpr auto header = R"cpp(
 #include <embedded/EmbeddedEpJSONSchema.hh>
 
 #include <array>
+#include <string>
 
 namespace EnergyPlus {
 
@@ -82,9 +83,9 @@ namespace EmbeddedEpJSONSchema {
 static constexpr auto footer = R"cpp(
     // clang-format on
 
-    const gsl::span<const std::uint8_t> embeddedEpJSONSchema()
+    const std::span<const std::uint8_t> embeddedEpJSONSchema()
     {
-        return gsl::span<const std::uint8_t>(embeddedSchema);
+        return std::span<const std::uint8_t>(embeddedSchema);
     }
 
     const std::string_view embeddedEpJSONSchemaView()
@@ -100,15 +101,15 @@ static constexpr auto footer = R"cpp(
 
 int main(int argc, char const* argv[]) {
   if (argc != 3) {
-    fmt::print(stderr, "usage: ./generate_embeddable_schema path/to/Energy+.schema.epJSON path/to/EmbeddedEpJSONSchema.cc\n");
+    EnergyPlus::print(stderr, "usage: ./generate_embeddable_schema path/to/Energy+.schema.epJSON path/to/EmbeddedEpJSONSchema.cc\n");
     return 1;
   }
 
-  fmt::print(stderr, "Generating the **embedded** epJSON schema\n");
+  EnergyPlus::print(stderr, "Generating the **embedded** epJSON schema\n");
 
   std::ifstream schema_stream(argv[1], std::ifstream::in);
   if (!schema_stream.is_open()) {
-    fmt::print("schema file path {} not found\n", argv[1]);
+    EnergyPlus::print("schema file path {} not found\n", argv[1]);
     return 1;
   }
   auto const input_json = json::parse(schema_stream);
@@ -117,23 +118,30 @@ int main(int argc, char const* argv[]) {
   const fs::path outFilePath(argv[2]);
   const auto outFileDir = outFilePath.parent_path();
   if (!fs::is_directory(outFileDir)) {
-    fmt::print(stderr, "Output Directory does not exist: {}\n", outFileDir.generic_string());
+    EnergyPlus::print(stderr, "Output Directory does not exist: {}\n", outFileDir.generic_string());
     fs::create_directory(outFileDir);
   }
 
-  auto outfile = fmt::output_file(argv[2], fmt::file::WRONLY | fmt::file::CREATE | fmt::file::TRUNC);
-  outfile.print("{}", header);
+  std::FILE* outfile = std::fopen(argv[2], "w");
+  if (outfile == nullptr) {
+    EnergyPlus::print(stderr, "Could not open output file: {}\n", argv[2]);
+    return 1;
+  }
 
-  outfile.print("    static constexpr std::array< std::uint8_t, {} > embeddedSchema = {{{{\n", v_cbor.size());
+  EnergyPlus::print(outfile, "{}", header);
+
+  EnergyPlus::print(outfile, "    static constexpr std::array< std::uint8_t, {} > embeddedSchema = {{{{\n", v_cbor.size());
 
   for (size_t i = 0; i < v_cbor.size(); ++i) {
-    outfile.print("{:#04x},", v_cbor[i]);  // Format the std::uint8_t as hex
+    EnergyPlus::print(outfile, "{:#04x},", v_cbor[i]);  // Format the std::uint8_t as hex
     if (i % 40 == 0 && i != 0) {
-      outfile.print("\n");
+      EnergyPlus::print(outfile, "\n");
     }
   }
-  outfile.print("}}}};\n");
-  outfile.print("{}", footer);
+  EnergyPlus::print(outfile, "}}}};\n");
+  EnergyPlus::print(outfile, "{}", footer);
+
+  std::fclose(outfile);
 
   return 0;
 }

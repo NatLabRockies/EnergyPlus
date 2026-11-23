@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,6 +111,8 @@ namespace HeatBalanceManager {
 
     void GetZoneLocalEnvData(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
+    void getZoneMRTCalculationData(EnergyPlusData &state);
+
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
@@ -185,7 +187,6 @@ struct HeatBalanceMgrData : BaseGlobalStruct
 {
 
     bool ManageHeatBalanceGetInputFlag = true;
-    bool DoReport = false;
     bool ChangeSet = true; // Toggle for checking storm windows
     bool FirstWarmupWrite = true;
     bool WarmupConvergenceWarning = false;
@@ -240,7 +241,6 @@ struct HeatBalanceMgrData : BaseGlobalStruct
 
         ManageHeatBalanceGetInputFlag = true;
         UniqueConstructNames.clear();
-        DoReport = false;
         ChangeSet = true;
         FirstWarmupWrite = true;
         WarmupConvergenceWarning = false;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,7 +49,6 @@
 #define GeneralRoutines_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2S.hh>
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
@@ -177,7 +176,7 @@ void ValidateComponent(EnergyPlusData &state,
 );
 
 // Why is this in GeneralRoutines? Asking for a friend
-void CalcBasinHeaterPower(EnergyPlusData &state,
+void CalcBasinHeaterPower(EnergyPlusData const &state,
                           Real64 const Capacity,     // Basin heater capacity per degree C below setpoint (W/C)
                           Sched::Schedule *sched,    // Pointer to basin heater schedule
                           Real64 const SetPointTemp, // setpoint temperature for basin heater operation (C)
@@ -188,7 +187,7 @@ void TestAirPathIntegrity(EnergyPlusData &state, bool &ErrFound);
 
 void TestSupplyAirPathIntegrity(EnergyPlusData &state, bool &ErrFound);
 
-void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2S_int ValRetAPaths);
+void TestReturnAirPathIntegrity(EnergyPlusData &state, bool &ErrFound, Array2D_int &ValRetAPaths);
 
 void CalcComponentSensibleLatentOutput(Real64 const MassFlow,  // air mass flow rate, {kg/s}
                                        Real64 const TDB2,      // dry-bulb temperature at state 2 {C}
@@ -214,6 +213,8 @@ Real64 calcZoneSensibleOutput(Real64 const MassFlow, // air mass flow rate, {kg/
                               Real64 const TDBEquip, // dry-bulb temperature at equipment outlet {C}
                               Real64 const TDBZone,  // dry-bulb temperature at zone air node {C}
                               Real64 const WZone);
+
+void CheckBranchEquipInZoneHVACEquipList(EnergyPlusData &state, int const branchNum, bool &errorsFound);
 
 struct GeneralRoutinesData : BaseGlobalStruct
 {

@@ -99,7 +99,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,27.1;
 
   Building,
     VRF TU with DOAS RH Control,  !- Name
@@ -1789,6 +1789,7 @@
     SPACE1-1 Thermostat,     !- Name
     SPACE1-1,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -1895,6 +1896,7 @@
     SPACE2-1 Thermostat,     !- Name
     SPACE2-1,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2001,6 +2003,7 @@
     SPACE3-1 Thermostat,     !- Name
     SPACE3-1,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2107,6 +2110,7 @@
     SPACE4-1 Thermostat,     !- Name
     SPACE4-1,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2213,6 +2217,7 @@
     SPACE5-1 Thermostat,     !- Name
     SPACE5-1,                !- Zone or ZoneList Name
     HVACTemplate-Always 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2460,32 +2465,32 @@
   ZoneControl:Humidistat,
     Humidistat_SPACE1,       !- Name
     SPACE1-1,                !- Zone Name
-    SchCpct_NeverOn,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    SchCpct_RHSP55;          !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    SchCpct_NeverOn,         !- Humidifying Setpoint Schedule Name
+    SchCpct_RHSP55;          !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Humidistat_SPACE2,       !- Name
     SPACE2-1,                !- Zone Name
-    SchCpct_NeverOn,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    SchCpct_RHSP55;          !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    SchCpct_NeverOn,         !- Humidifying Setpoint Schedule Name
+    SchCpct_RHSP55;          !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Humidistat_SPACE3,       !- Name
     SPACE3-1,                !- Zone Name
-    SchCpct_NeverOn,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    SchCpct_RHSP55;          !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    SchCpct_NeverOn,         !- Humidifying Setpoint Schedule Name
+    SchCpct_RHSP55;          !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Humidistat_SPACE4,       !- Name
     SPACE4-1,                !- Zone Name
-    SchCpct_NeverOn,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    SchCpct_RHSP55;          !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    SchCpct_NeverOn,         !- Humidifying Setpoint Schedule Name
+    SchCpct_RHSP55;          !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Humidistat_SPACE5,       !- Name
     SPACE5-1,                !- Zone Name
-    SchCpct_NeverOn,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    SchCpct_RHSP55;          !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    SchCpct_NeverOn,         !- Humidifying Setpoint Schedule Name
+    SchCpct_RHSP55;          !- Dehumidifying Setpoint Schedule Name
 
   Schedule:Compact,
     SchCpct_NeverOn,         !- Name

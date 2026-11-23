@@ -1409,7 +1409,7 @@ The convergence tolerance for the unit heating output. This field allows the use
 The unit is controlled by matching the unit output to the zone demand. For units with water coils, the model must be numerically inverted to obtain a specified output. The heating convergence tolerance is the error tolerance used to terminate the numerical inversion procedure. Basically this is the fraction:
 
 \begin{equation}
-\frac{{\left| {{Q_{unit{\kern 1pt} heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
+\frac{{\left| {{Q_{unit heater,out}} - {Q_{zoneload}}} \right|}}{{{Q_{zoneload}}}} \le HeatingConvergenceTolerance
 \end{equation}
 
 \paragraph{Field: Availability Manager List Name}\label{field-availability-manager-list-name-2}
@@ -1579,7 +1579,7 @@ This numeric input field defines the magnitude, in Watts, of a significant zone 
 
 \paragraph{Field: First Evaporative Cooler Object Type}\label{field-first-evaporative-cooler-object-type}
 
-This alpha input field defines the type of evaporative cooler used in the unit. The zone evaporative cooler unit can have one or two separate cooler components and this field is for the first cooler. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectresearchspecial]{EvaporativeCooler:Direct:ResearchSpecial}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectresearchspecial]{EvaporativeCooler:Indirect:ResearchSpecial}.
+This alpha input field defines the type of evaporative cooler used in the unit. The zone evaporative cooler unit can have one or two separate cooler components and this field is for the first cooler. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectusereffectiveness]{EvaporativeCooler:Direct:UserEffectiveness}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectusereffectiveness]{EvaporativeCooler:Indirect:UserEffectiveness}.
 
 \paragraph{Field: First Evaporative Cooler Object Name}\label{field-first-evaporative-cooler-object-name}
 
@@ -1587,7 +1587,7 @@ This alpha input field defines the user-defined name of the first evaporative co
 
 \paragraph{Field: Second Evaporative Cooler Object Type}\label{field-second-evaporative-cooler-object-type}
 
-This optional alpha input field defines the type of evaporative cooler used in the unit. This field is used when the zone evaporative cooler unit has two separate evaporative cooler sections arranged in series. For example, some coolers are arranged with both direct and indirect evaporative coolers. If the unit has only one type of cooler, this field should be left blank. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectresearchspecial]{EvaporativeCooler:Direct:ResearchSpecial}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectresearchspecial]{EvaporativeCooler:Indirect:ResearchSpecial}
+This optional alpha input field defines the type of evaporative cooler used in the unit. This field is used when the zone evaporative cooler unit has two separate evaporative cooler sections arranged in series. For example, some coolers are arranged with both direct and indirect evaporative coolers. If the unit has only one type of cooler, this field should be left blank. There are five types of evaporative cooler component models to choose from: \hyperref[evaporativecoolerdirectceldekpad]{EvaporativeCooler:Direct:CelDekPad}, \hyperref[evaporativecoolerdirectusereffectiveness]{EvaporativeCooler:Direct:UserEffectiveness}, \hyperref[evaporativecoolerindirectceldekpad]{EvaporativeCooler:Indirect:CelDekPad}, \hyperref[evaporativecoolerindirectwetcoil]{EvaporativeCooler:Indirect:WetCoil}, or \hyperref[evaporativecoolerindirectusereffectiveness]{EvaporativeCooler:Indirect:UserEffectiveness}
 
 \paragraph{Field: Second Evaporative Cooler Name}\label{field-second-evaporative-cooler-name}
 
@@ -2040,7 +2040,7 @@ This input field defines the convergence tolerance for the unit's cooling output
 The window air conditioner is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX coil is frequently non-linear, the air conditioner model must call the DX coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {{Q_{ZoneLoad}} - {Q_{WindowAirConditioner,out}})} \right|}}{{{Q_{ZoneLoad}}}} \le Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2640,7 +2640,7 @@ This numeric field defines the convergence tolerance for the unit's heating outp
 The heat pump is controlled by matching its sensible (temperature) heating output to the zone sensible load (demand). Because the performance of the DX heating coil is frequently non-linear, the heat pump model must call the DX heating coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The heating convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Heating Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -2671,7 +2671,7 @@ This numeric field defines the convergence tolerance for the unit's cooling outp
 The heat pump is controlled by matching its sensible (temperature) cooling output to the zone sensible load (demand). Because the performance of the DX cooling coil is frequently non-linear, the heat pump model must call the DX cooling coil model several times (iterate) to determine the proper run time fraction to meet the zone load. The cooling convergence tolerance is the error tolerance used to terminate the iteration procedure when the following equation is satisfied:
 
 \begin{equation}
-\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling{\kern 1pt} Convergence{\kern 1pt} Tolerance
+\frac{{\left| {({Q_{ZoneLoad}} - {Q_{HeatPump,out}})} \right|}}{{{Q_{ZoneLoad}}}}\,\, \le \,\,Cooling Convergence Tolerance
 \end{equation}
 
 The maximum number of iterations is limited, with a warning message generated if the above equation is not satisfied within the maximum number of iterations.
@@ -3516,6 +3516,8 @@ The model has inputs for water removal, energy factor and air flow rate at rated
 
 The model assumes that this equipment dehumidifies and heats the air. If used in tandem with another system that cools and dehumidifies the zone air, then the zone dehumidifier should be specified as the lowest cooling priority in the \hyperref[zonehvacequipmentlist]{ZoneHVAC:EquipmentList} object for best control of zone temperature and humidity levels (e.g., if there are 3 pieces of equipment in \hyperref[zonehvacequipmentlist]{ZoneHVAC:EquipmentList}, then the zone dehumidifier should have Cooling Priority = 3). With this zone equipment prioritization, the other cooling and dehumidification system would operate first to meet the temperature setpoint (and possibly meet the high humidity setpoint as well). If additional dehumidification is needed, then the zone dehumidifier would operate. The sensible heat generated by the dehumidifier is carried over to the zone air heat balance for the next HVAC time step.
 
+A \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object must also be specified for the zone to which the dehumidifier is connected (connect via a zone air exhaust node and a zone air inlet node, ref. \hyperref[zonehvacequipmentconnections]{ZoneHVAC:EquipmentConnections}).
+
 \subsubsection{Inputs}\label{inputs-12-021}
 
 \paragraph{Field: Name}\label{field-name-12-014}
@@ -3588,7 +3590,7 @@ This numeric field contains the off-cycle parasitic electric power in Watts. Thi
 
 This field is optional. It is used to specify where condensate from the dehumidifier is collected. If blank or omitted, then any water (condensate) removed is discarded. Enter the name of a Water Storage Tank (ref. \hyperref[waterusestorage]{WaterUse:Storage}) object defined elsewhere and the condensate will then be collected in that tank.
 
-Following is an example input for a zone DX dehumidifier object. A \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object must also be specified for the zone to which the dehumidifier is connected (connect via a zone air exhaust node and a zone air inlet node, ref. \hyperref[zonehvacequipmentconnections]{ZoneHVAC:EquipmentConnections}).
+Following is an example input for a zone DX dehumidifier object.
 
 \begin{lstlisting}
 ZoneHVAC:Dehumidifier:DX,
@@ -4423,7 +4425,7 @@ This optional numeric field scales all extensive dependent variables including: 
 This numeric field specifies the minimum time that must pass before the hybrid unit can change mode. If the value in this field is larger than each timestep, the mode selected in one time step will persist in later time steps until the minimum time between mode change is satisfied. If the value in this field is smaller than each timestep, it will determine the minimum part runtime fraction allowed for any mode. Supply air mass flow rate and outdoor air fraction within a mode are not subject to minimum runtime and may change in every time step, or with any part runtime fraction. Mode 0 does not have a minimum time. If this field is blank, the default minimum time between mode change is 10 minutes.
 
 \paragraph{Field: First Fuel Type}
-This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Electric Power Power Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default first fuel type is Electricity.
+This alpha field is retained for input compatibility but is not currently used by the model. System electric power is reported and metered as electricity regardless of this field.
 
 \paragraph{Field: Second Fuel Type}
 This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Second Fuel Consumption Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default second fuel type is None.

@@ -59,7 +59,6 @@
 				<li>Each dimension can have an arbitrary index range.</li>
 				<li>Array passing &quot;tricks&quot;: Arrays and array elements can be passed to functions where they are declared with a different rank or dimensions.</li>
 				<li>Assumed size array arguments.</li>
-				<li>Array sections (slices) and assumed shape array arguments.</li>
 				<li>Treating members of arrays of user-defined types as arrays.</li>
 				<li>Note: This ObjexxFCL variant uses row-major array layout, unlike Fortran's column-major layout.</li>
 			</ul>
@@ -92,8 +91,6 @@
 			<p>In addition to the Fortran intrinsic support there are numeric, string, and character functions that extend and fill holes in the C++ standard library.</p>
 			<h3>ChunkVector: Very Large Vectors</h3>
 			<p>ChunkVector is similar in interface to std::vector but uses multiple contiguous &quot;chunks&quot; of user-specified size to avoid allocation failures for very large vectors in a fragmented memory environment and to greatly reduce the performance cost of resizing operations. In typical use there is no performance degradation for ChunkVector element access compared to std::vector.</p>
-			<h3>CArray &amp; Cstring: Safe C-Style Array and String Wrappers</h3>
-			<p>These are lightweight wrappers around C-style arrays and strings that catch memory errors such as leaks and buffer overflows. This allows the safe use of functions requiring those C-style types.</p>
 		</td>
 		<td></td>
 		<td width="100%" valign="top">

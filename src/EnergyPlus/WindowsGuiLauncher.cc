@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -61,7 +61,7 @@ int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int
     std::wstring directory(path);
     size_t pos = directory.find_last_of(L"\\/");
     if (pos != std::wstring::npos) {
-        directory = directory.substr(0, pos); // Extract just the directory path
+        directory.resize(pos); // Extract just the directory path
     }
 
     // Construct the target application path (assuming it's in the same directory)

@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-#include <fmt/format.h>
+#include <format>
 
 namespace Courierr {
 
@@ -37,7 +37,7 @@ class SimpleCourierr : public Courierr {
   private:
     void write_message(const std::string_view message_type, const std::string_view message)
     {
-        std::cout << fmt::format("[{}] {}", message_type, message) << std::endl;
+        std::cout << std::format("[{}] {}", message_type, message) << std::endl;
     }
 };
 

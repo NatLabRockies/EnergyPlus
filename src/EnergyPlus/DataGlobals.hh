@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -111,6 +111,7 @@ struct DataGlobal : BaseGlobalStruct
     int numSpaceTypes = 0;           // Number of unique space types
     int TimeStep = 0;                // Counter for time steps (fractional hours)
     Real64 TimeStepZone = 0.0;       // Zone time step in fractional hours
+    bool SetupFlag = false;          // True during the setup portion of a simulation
     bool WarmupFlag = false;         // True during the warmup portion of a simulation
     Int64 StdOutputRecordCount = 0;  // Count of Standard output records
     Int64 StdMeterRecordCount = 0;   // Count of Meter output records
@@ -124,7 +125,6 @@ struct DataGlobal : BaseGlobalStruct
     bool DoPureLoadCalc = false;     // if true, just run sizing and no full simulation of design days, or weather days, or HVAC Sizing Simulations
     bool DoHVACSizingSimulation = false;              // User input in SimulationControl object
     int HVACSizingSimMaxIterations = 0;               // User input in SimulationControl object
-    bool WeathSimReq = false;                         // Input has a RunPeriod request
     bool DoOutputReporting = false;                   // TRUE if variables to be written out
     bool DoingSizing = false;                         // TRUE when "sizing" is being performed (some error messages won't be displayed)
     bool DoingHVACSizingSimulations = false;          // true when HVAC Sizing Simulations are being performed.
@@ -135,8 +135,6 @@ struct DataGlobal : BaseGlobalStruct
     bool DisplayUnusedSchedules = false;              // True when selection for  "DisplayUnusedSchedules" is entered
     bool DisplayAdvancedReportVariables = false;      // True when selection for  "DisplayAdvancedReportVariables" is entered
     bool DisplayZoneAirHeatBalanceOffBalance = false; // True when selection for  "DisplayZoneAirHeatBalanceOffBalance" is entered
-    bool DisplayInputInAudit = false;                 // True when environmental variable "DisplayInputInAudit" is used
-    bool CreateMinimalSurfaceVariables = false;       // True when selection for  "CreateMinimalSurfaceVariables" is entered
     Real64 CurrentTime = 0.0;                         // CurrentTime, in fractional hours, from start of day. Uses Loads time step.
     int SimTimeSteps = 0;                             // Number of (Loads) timesteps since beginning of run period (environment).
     int MinutesInTimeStep = 0;    // Minutes per time step calculated from NumTimeStepInHour (number of minutes per load time step)

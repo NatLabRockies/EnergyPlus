@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -95,7 +95,6 @@ namespace RuntimeLanguageProcessor {
         int Variable;       // points to a variable in ErlVariable structure
         Token Parenthesis;  // identifies if token is left or right parenthesis
         int Expression;     // points to an expression in ErlExpression structure
-        std::string Error;  // holds token processing error message content
 
         // Default Constructor
         TokenType() : Type(Token::Invalid), Number(0.0), Operator(ErlFunc::Invalid), Variable(0), Parenthesis(Token::Invalid), Expression(0)

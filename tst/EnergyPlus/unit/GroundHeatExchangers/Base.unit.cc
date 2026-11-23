@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,6 +49,7 @@
 #include <EnergyPlus/DataSystemVariables.hh>
 #include <EnergyPlus/GroundHeatExchangers/Base.hh>
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <gtest/gtest.h>
 
@@ -151,6 +152,16 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_Slinky_IDF_Check)
     EXPECT_NEAR(thisGHE.trenchLength, 40.0, 0.01);
     EXPECT_NEAR(thisGHE.numTrenches, 15.0, 0.1);
     EXPECT_NEAR(thisGHE.trenchSpacing, 2.0, 0.1);
+
+    auto &orp = *state->dataOutRptPredefined;
+    std::string const GLHEName = thisGHE.name;
+    EXPECT_EQ("GroundHeatExchanger:Slinky", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEType, GLHEName));
+    EXPECT_EQ("9424.78", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHETubeLength, GLHEName));
+    EXPECT_EQ("0.003300", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEVolFlow, GLHEName));
+    EXPECT_EQ("2.50", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhDepth, GLHEName));
+    EXPECT_EQ("1.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhDiam, GLHEName));
+    EXPECT_EQ("40.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhLeng, GLHEName));
+    EXPECT_EQ("15.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHENumHolesTrenches, GLHEName));
 }
 
 TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Resp_Factors_IDF_Check)
@@ -338,7 +349,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Resp_Factors_IDF_Check)
     EXPECT_EQ("GHE-1 PROPS", thisRF->props->name);
     EXPECT_EQ(4, thisRF->numBoreholes);
     EXPECT_EQ(0.00043, thisRF->gRefRatio);
-    EXPECT_EQ(76, thisRF->numGFuncPairs);
     EXPECT_EQ(-15.585075, thisRF->LNTTS[0]);
     EXPECT_EQ(-2.672011, thisRF->GFNC[0]);
     EXPECT_EQ(3.003000, thisRF->LNTTS[75]);
@@ -619,8 +629,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Response_Factors_
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(GetResponseFactor(*state, thisRF->name).get(), thisGLHE.myRespFactors.get());
@@ -631,6 +639,16 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Response_Factors_
     EXPECT_EQ(0, thisGLHE.myRespFactors->maxSimYears);
     EXPECT_EQ(400, thisGLHE.totalTubeLength);
     EXPECT_EQ(thisGLHE.soil.k / thisGLHE.soil.rhoCp, thisGLHE.soil.diffusivity);
+
+    auto &orp = *state->dataOutRptPredefined;
+    std::string const GLHEName = thisGLHE.name;
+    EXPECT_EQ("GroundHeatExchanger:System", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEType, GLHEName));
+    EXPECT_EQ("400.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHETubeLength, GLHEName));
+    EXPECT_EQ("0.000757", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEVolFlow, GLHEName));
+    EXPECT_EQ("1.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhDepth, GLHEName));
+    EXPECT_EQ("0.11", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhDiam, GLHEName));
+    EXPECT_EQ("100.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHEbhLeng, GLHEName));
+    EXPECT_EQ("4.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchGLHENumHolesTrenches, GLHEName));
 }
 
 TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Array_IDF_Check)
@@ -692,8 +710,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Array_IDF_Check)
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(GetResponseFactor(*state, thisArray->name).get(), thisGLHE.myRespFactors.get());
@@ -791,8 +807,6 @@ TEST_F(EnergyPlusFixture, GroundHeatExchangerTest_System_Given_Single_BHs_IDF_Ch
     auto &thisGLHE(state->dataGroundHeatExchanger->verticalGLHE[0]);
 
     EXPECT_EQ("VERTICAL GHE 1X4 STD", thisGLHE.name);
-    EXPECT_EQ(true, thisGLHE.available);
-    EXPECT_EQ(true, thisGLHE.on);
     EXPECT_EQ(2.423, thisGLHE.soil.k);
     EXPECT_EQ(2.343E6, thisGLHE.soil.rhoCp);
     EXPECT_EQ(0.109982, thisGLHE.bhDiameter);

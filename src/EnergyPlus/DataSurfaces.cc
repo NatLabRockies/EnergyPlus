@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -80,7 +80,6 @@ using namespace DataVectorTypes;
 using namespace DataBSDFWindow;
 using namespace DataHeatBalance;
 using namespace DataZoneEquipment;
-using namespace DataLoopNode;
 using namespace Psychrometrics;
 using namespace DataEnvironment;
 using namespace Window;
@@ -97,9 +96,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     // If sorting by y for slab method can detect clockwise faster by just comparing edges at bottom or top-most vertex
     Real64 area(0.0); // Actually 2x the signed area
     for (Vertices::size_type i = 0; i < n; ++i) {
-        Vector2D const &v(vertices[i]);
+        Vector2D const &vi(vertices[i]);
         Vector2D const &w(vertices[(i + 1) % n]);
-        area += (v.x * w.y) - (w.x * v.y);
+        area += (vi.x * w.y) - (w.x * vi.y);
     }
     if (area < 0.0) {
         std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
@@ -112,8 +111,8 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     }
     if (shapeCat == ShapeCat::Rectangular) { // Set side length squared for ray--surface intersection tests
         assert(n == 4u);
-        s1 = edges[0].magnitude_squared();
-        s3 = edges[3].magnitude_squared();
+        s1 = edges[0].length_squared();
+        s3 = edges[3].length_squared();
     } else if ((shapeCat == ShapeCat::Nonconvex) || (n >= nVerticesBig)) { // Set up slabs
         assert(n >= 4u);
         slabYs.reserve(n);
@@ -129,22 +128,22 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             Real64 xu(std::numeric_limits<Real64>::lowest());
             Real64 const yl(slabYs[iSlab]);
             Real64 const yu(slabYs[iSlab + 1]);
-            slabs.emplace_back(yl, yu);
+            slabs.emplace_back();
             Slab &slab(slabs.back());
             using CrossEdge = std::tuple<Real64, Real64, size_type>;
             using CrossEdges = std::vector<CrossEdge>;
             CrossEdges crossEdges;
             for (size_type i = 0; i < n; ++i) { // Find edges crossing slab
-                Vector2D const &v(vertices[i]);
+                Vector2D const &vi(vertices[i]);
                 Vector2D const &w(vertices[(i + 1) % n]);
-                if (((v.y <= yl) && (yu <= w.y)) || // Crosses upward
-                    ((yu <= v.y) && (w.y <= yl)))   // Crosses downward
+                if (((vi.y <= yl) && (yu <= w.y)) || // Crosses upward
+                    ((yu <= vi.y) && (w.y <= yl)))   // Crosses downward
                 {
                     Edge const &e(edges[i]);
                     assert(e.y != 0.0);
                     Real64 const exy(e.x / e.y);
-                    Real64 const xb(v.x + (yl - v.y) * exy); // x_bot coordinate where edge intersects yl
-                    Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
+                    Real64 const xb(vi.x + (yl - vi.y) * exy); // x_bot coordinate where edge intersects yl
+                    Real64 const xt(vi.x + (yu - vi.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
                     crossEdges.emplace_back(xb, xt, i);
@@ -192,7 +191,7 @@ void SurfaceData::set_computed_geometry()
 {
     if (Vertex.size() >= 3) { // Skip no-vertex "surfaces"
         shapeCat = computed_shapeCat();
-        plane = computed_plane();
+        plane = Plane::fromVertices(Vertex);
         surface2d = computed_surface2d();
     }
 }
@@ -234,8 +233,8 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
         // check whether this zone is a controlled zone or not
         if (!state.dataHeatBal->Zone(Zone).IsControlled) {
             ShowFatalError(state,
-                           format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
-                                  state.dataHeatBal->Zone(Zone).Name));
+                           std::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
+                                       state.dataHeatBal->Zone(Zone).Name));
             // return;
         }
         // determine supply air conditions
@@ -393,33 +392,14 @@ ShapeCat SurfaceData::computed_shapeCat() const
     }
 }
 
-// Computed Plane
-SurfaceData::Plane SurfaceData::computed_plane() const
-{
-    Vertices::size_type const n(Vertex.size());
-    assert(n >= 3);
-    Vector center(0.0);                           // Center (vertex average) point (not mass centroid)
-    Real64 a(0.0), b(0.0), c(0.0), d(0.0);        // Plane coefficients
-    for (Vertices::size_type i = 0; i < n; ++i) { // Newell's method for robustness (not speed)
-        Vector const &v(Vertex[i]);
-        Vector const &w(Vertex[(i + 1) % n]);
-        a += (v.y - w.y) * (v.z + w.z);
-        b += (v.z - w.z) * (v.x + w.x);
-        c += (v.x - w.x) * (v.y + w.y);
-        center += v;
-    }
-    d = -(dot(center, Vector(a, b, c)) / n); // center/n is the center point
-    return Plane(a, b, c, d);                // a*x + b*y + c*z + d = 0
-}
-
 // Computed axis-projected 2D surface
 Surface2D SurfaceData::computed_surface2d() const
 {
     // Project along axis of min surface range for 2D intersection use
     Vertices::size_type const n(Vertex.size());
     assert(n >= 3);
-    assert(plane == computed_plane()); // Set plane first
-    using Vertex2D = ObjexxFCL::Vector2<Real64>;
+    assert(plane == Plane::fromVertices(Vertex)); // Set plane first
+    using Vertex2D = Vector2D;
     using Vertices2D = ObjexxFCL::Array1D<Vertex2D>;
 
     // Select axis to project along
@@ -475,7 +455,7 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (std::abs(SinTilt) < Constant::SmallDistance) {
         return 0.0;
     }
-    using Vertex2D = ObjexxFCL::Vector2<Real64>;
+    using Vertex2D = Vector2D;
     using Vertices2D = ObjexxFCL::Array1D<Vertex2D>;
     Vertices::size_type const n(Vertex.size());
     assert(n >= 3);
@@ -506,14 +486,14 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (totalWidth == 0.0) {
         // This should never happen, but if it does, print a somewhat meaningful fatal error
         // (instead of allowing a divide by zero).
-        ShowFatalError(state, format("Calculated projected surface width is zero for surface=\"{}\"", Name));
+        ShowFatalError(state, std::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
     }
 
     Real64 averageHeight = 0.0;
     for (Vertices::size_type i = 0; i < n; ++i) {
         Vertex2D const &v(v2d[i]);
 
-        Vertex2D *v2;
+        Vertex2D const *v2;
         if (i == n - 1) {
             v2 = &v2d[0];
         } else {
@@ -694,8 +674,20 @@ std::string cSurfaceClass(SurfaceClass const ClassNo)
     case SurfaceClass::Window: {
         ClassName = "Window";
     } break;
+    case SurfaceClass::FixedWindow: {
+        ClassName = "FixedWindow";
+    } break;
+    case SurfaceClass::OperableWindow: {
+        ClassName = "OperableWindow";
+    } break;
+    case SurfaceClass::Skylight: {
+        ClassName = "Skylight";
+    } break;
     case SurfaceClass::GlassDoor: {
         ClassName = "Glass Door";
+    } break;
+    case SurfaceClass::OverheadDoor: {
+        ClassName = "OverheadDoor";
     } break;
     case SurfaceClass::Door: {
         ClassName = "Door";
@@ -758,23 +750,40 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
         if (thisConstruct.TotLayers == 0) {
             continue;
         }
-        if (thisConstruct.LayerPoint(1) == 0) {
-            continue; // error finding material number
+        if (thisConstruct.LayerPoint(1) == 0 || thisConstruct.LayerPoint(thisConstruct.TotLayers) == 0) {
+            continue; // error finding material number for either outside or inside (shouldn't ever get to this?)
         }
-        auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
-        if (mat->group != Material::Group::Regular) {
+        auto const *matExt = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
+        auto const *matInt = state.dataMaterial->materials(thisConstruct.LayerPoint(thisConstruct.TotLayers));
+        if (matExt->group != Material::Group::Regular && matInt->group != Material::Group::Regular) {
             continue;
         }
 
-        if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
+        bool pushedBack =
+            false; // gets set to true when the exterior gets pushed back to avoid double counting a surface in AllVaryAbsOpaqSurfaceList
+        if (matExt->group == Material::Group::Regular && matExt->absorpVarCtrlSignalOut != Material::VariableAbsCtrlSignal::Invalid) {
             // check for dynamic coating defined on interior surface
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
                 ShowWarningError(state,
-                                 format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
-                                        "will be ignored here",
-                                        thisSurface.Name));
+                                 std::format("MaterialProperty:VariableAbsorptance defined for the outside material of an interior surface, {}."
+                                             " This VariableAbsorptance property will be ignored here.",
+                                             thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
+                pushedBack = true;
+            }
+        }
+        if (matInt->group == Material::Group::Regular && matInt->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid) {
+            // check for dynamic coating defined on interior surface
+            if (thisSurface.ExtBoundCond != ExternalEnvironment) {
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined for the inside material of an interior surface, {}."
+                                             " This VariableAbsorptance property will be ignored here.",
+                                             thisSurface.Name));
+            } else {
+                if (!pushedBack) {
+                    state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum); // only add if the outside didn't already add this
+                }
             }
         }
     }
@@ -786,11 +795,27 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (mat->group != Material::Group::Regular) {
                 continue;
             }
-            if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
-                ShowWarningError(state,
-                                 format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
-                                        "property will be ignored here",
-                                        mat->Name));
+            if (mat->absorpVarCtrlSignalOut != Material::VariableAbsCtrlSignal::Invalid) {
+                ShowWarningError(
+                    state,
+                    std::format("MaterialProperty:VariableAbsorptance for the outside face defined on an inside-layer material, {} in {}."
+                                " This VariableAbsorptance property will be ignored here.",
+                                mat->Name,
+                                thisConstruct.Name));
+            }
+        }
+        for (int Layer = 1; Layer <= thisConstruct.TotLayers - 1; ++Layer) {
+            auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(Layer));
+            if (mat->group != Material::Group::Regular) {
+                continue;
+            }
+            if (mat->absorpVarCtrlSignalIn != Material::VariableAbsCtrlSignal::Invalid) {
+                ShowWarningError(
+                    state,
+                    std::format("MaterialProperty:VariableAbsorptance for the inside face defined on an outside-layer material, {} in {}."
+                                " This VariableAbsorptance property will be ignored here.",
+                                mat->Name,
+                                thisConstruct.Name));
             }
         }
     }

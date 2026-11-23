@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -95,7 +95,6 @@ namespace Dayltg {
         Array1D<Real64> PipeTransSolBeam; // Table of beam solar transmittance vs. cosine angle
         Real64 TransSolIso = 0.0;         // Diffuse isotropic solar transmittance (constant)
         Real64 TransSolHorizon = 0.0;     // Diffuse horizon solar transmittance (constant)
-        Real64 ExtLength = 0.0;           // Exterior exposed length of pipe
         Array1D<Real64> TZoneHeatGain;    // convection gain to transition zones
         // Report variables
         Real64 TransmittedSolar = 0.0;  // Solar transmitted by the TDD [W]

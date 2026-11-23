@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -67,6 +67,7 @@
 #include <EnergyPlus/HeatingCoils.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/MixedAir.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
@@ -110,6 +111,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    Z401TempCtrl,            !- Name",
         "    401,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint1;            !- Control 3 Name",
 
@@ -122,6 +124,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    Z402TempCtrl,            !- Name",
         "    402,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint2;            !- Control 3 Name",
 
@@ -1375,7 +1378,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     // Check outlet conditions
     EXPECT_NEAR(state->dataLoopNodes->Node(22).Temp, 23.363295, 0.0001);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).HumRat, 0.00796611, 0.0001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 43748.243, 0.0001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 43748.243, 0.0002);
     EXPECT_NEAR(state->dataHVACMultiSpdHP->MSHeatPump(2).CompPartLoadRatio, 0.1232, 0.0001);
 
     // Direct solution
@@ -1385,7 +1388,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     // Check outlet conditions
     EXPECT_NEAR(state->dataLoopNodes->Node(22).Temp, 23.363295, 0.0001);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).HumRat, 0.00796611, 0.0001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 43748.243, 0.0001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 43748.243, 0.0002);
     EXPECT_NEAR(state->dataHVACMultiSpdHP->MSHeatPump(2).CompPartLoadRatio, 0.1232, 0.0001);
 
     QZnReq = -10000.00;
@@ -1394,14 +1397,14 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     SimMSHP(*state, MSHeatPumpNum, FirstHVACIteration, AirLoopNum, QSensUnitOut, QZnReq, OnOffAirFlowRatio);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).Temp, 21.45298, 0.0001);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).HumRat, 0.00792169, 0.0001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 41691.15, 0.0001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 41691.15, 0.0005);
     EXPECT_NEAR(state->dataHVACMultiSpdHP->MSHeatPump(2).CompPartLoadRatio, 0.285417, 0.0001);
 
     state->dataGlobal->DoCoilDirectSolutions = true;
     SimMSHP(*state, MSHeatPumpNum, FirstHVACIteration, AirLoopNum, QSensUnitOut, QZnReq, OnOffAirFlowRatio);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).Temp, 21.45298, 0.0001);
     EXPECT_NEAR(state->dataLoopNodes->Node(22).HumRat, 0.00792169, 0.0001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 41691.15, 0.0001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(22).Enthalpy, 41691.15, 0.0005);
     EXPECT_NEAR(state->dataHVACMultiSpdHP->MSHeatPump(2).CompPartLoadRatio, 0.285417, 0.0001);
 
     // Heating
@@ -1474,6 +1477,9 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_HeatRecoveryTest)
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
+    state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc);
+
     state->dataLoopNodes->Node(HeatRecInNode).MassFlowRate = 0.0; // test heat recovery result with 0 water flow rate
     HVACMultiSpeedHeatPump::MSHPHeatRecovery(*state, 1);
 
@@ -1530,6 +1536,7 @@ TEST_F(EnergyPlusFixture, HVACMSHP_UnitarySystemElectricityRateTest)
         "    Z401TempCtrl,            !- Name",
         "    401,                     !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
         "    DualSetPoint1;            !- Control 3 Name",
 

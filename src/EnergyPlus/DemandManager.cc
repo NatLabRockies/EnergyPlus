@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -123,7 +123,6 @@ void ManageDemand(EnergyPlusData &state)
                     state.dataDemandManager->DemandManagerList(ListNum).PeakDemand = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).ScheduledLimit = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).DemandLimit = 0.0;
-                    state.dataDemandManager->DemandManagerList(ListNum).AvoidedDemand = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).OverLimit = 0.0;
                     state.dataDemandManager->DemandManagerList(ListNum).OverLimitDuration = 0.0;
                 } // ListNum
@@ -352,19 +351,19 @@ void GetDemandManagerListInput(EnergyPlusData &state)
             thisDemandMgrList.Meter = GetMeterIndex(state, s_ipsc->cAlphaArgs(2));
 
             if (thisDemandMgrList.Meter == -1) {
-                ShowSevereError(state, format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-                ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, thisDemandMgrList.Name));
+                ShowSevereError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                ShowContinueError(state, std::format("Entered in {} = {}", cCurrentModuleObject, thisDemandMgrList.Name));
                 ErrorsFound = true;
 
             } else if ((state.dataOutputProcessor->meters[thisDemandMgrList.Meter]->resource == Constant::eResource::Electricity) ||
                        (state.dataOutputProcessor->meters[thisDemandMgrList.Meter]->resource == Constant::eResource::ElectricityNet)) {
             } else {
                 ShowSevereError(state,
-                                format("{} = \"{}\" invalid value {} = \"{}\".",
-                                       cCurrentModuleObject,
-                                       thisDemandMgrList.Name,
-                                       s_ipsc->cAlphaFieldNames(2),
-                                       s_ipsc->cAlphaArgs(2)));
+                                std::format("{} = \"{}\" invalid value {} = \"{}\".",
+                                            cCurrentModuleObject,
+                                            thisDemandMgrList.Name,
+                                            s_ipsc->cAlphaFieldNames(2),
+                                            s_ipsc->cAlphaArgs(2)));
                 ShowContinueError(state, "Only Electricity and ElectricityNet meters are currently allowed.");
                 ErrorsFound = true;
             }
@@ -418,24 +417,22 @@ void GetDemandManagerListInput(EnergyPlusData &state)
                         thisManager = Util::FindItemInList(s_ipsc->cAlphaArgs(MgrNum * 2 + 6), state.dataDemandManager->DemandMgr);
                         if (thisManager == 0) {
                             ShowSevereError(state,
-                                            format("{} = \"{}\" invalid {} = \"{}\" not found.",
-                                                   cCurrentModuleObject,
-                                                   thisDemandMgrList.Name,
-                                                   s_ipsc->cAlphaFieldNames(MgrNum * 2 + 6),
-                                                   s_ipsc->cAlphaArgs(MgrNum * 2 + 6)));
+                                            std::format("{} = \"{}\" invalid {} = \"{}\" not found.",
+                                                        cCurrentModuleObject,
+                                                        thisDemandMgrList.Name,
+                                                        s_ipsc->cAlphaFieldNames(MgrNum * 2 + 6),
+                                                        s_ipsc->cAlphaArgs(MgrNum * 2 + 6)));
                             ErrorsFound = true;
                         }
                     } else {
                         ShowSevereError(state,
-                                        format("{} = \"{}\" invalid value {} = \"{}\".",
-                                               cCurrentModuleObject,
-                                               thisDemandMgrList.Name,
-                                               s_ipsc->cAlphaFieldNames(MgrNum * 2 + 5),
-                                               s_ipsc->cAlphaArgs(MgrNum * 2 + 5)));
+                                        std::format("{} = \"{}\" invalid value {} = \"{}\".",
+                                                    cCurrentModuleObject,
+                                                    thisDemandMgrList.Name,
+                                                    s_ipsc->cAlphaFieldNames(MgrNum * 2 + 5),
+                                                    s_ipsc->cAlphaArgs(MgrNum * 2 + 5)));
                         ErrorsFound = true;
                     }
-
-                    // Check that each is not already referenced using %DemandManagerList field
 
                 } // MgrNum
             }
@@ -498,7 +495,7 @@ void GetDemandManagerListInput(EnergyPlusData &state)
                                 thisDemandMgrList.Name);
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("Errors found in processing input for {}.", cCurrentModuleObject));
+                ShowFatalError(state, std::format("Errors found in processing input for {}.", cCurrentModuleObject));
             }
 
         } // ListNum
@@ -670,23 +667,23 @@ void GetDemandManagerInput(EnergyPlusData &state)
                 demandMgr.Load.allocate(demandMgr.NumOfLoads);
 
                 for (int LoadNum = 1; LoadNum <= demandMgr.NumOfLoads; ++LoadNum) {
-                    int LoadPtr = Util::FindItemInList(AlphArray(LoadNum + 4), state.dataExteriorEnergyUse->ExteriorLights);
+                    int LoadPtr = Util::FindItemInList(Util::makeUPPER(AlphArray(LoadNum + 4)), state.dataExteriorEnergyUse->ExteriorLights);
 
                     if (LoadPtr > 0) {
                         demandMgr.Load(LoadNum) = LoadPtr;
 
                     } else {
                         ShowSevereError(state,
-                                        format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                               CurrentModuleObject,
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cAlphaFieldNames(LoadNum + 4),
-                                               AlphArray(LoadNum + 4)));
+                                        std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                    CurrentModuleObject,
+                                                    s_ipsc->cAlphaArgs(1),
+                                                    s_ipsc->cAlphaFieldNames(LoadNum + 4),
+                                                    AlphArray(LoadNum + 4)));
                         ErrorsFound = true;
                     }
                 } // LoadNum
             } else {
-                ShowSevereError(state, format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Number of loads is calculated to be less than one. Demand manager must have at least one load assigned.");
                 ErrorsFound = true;
             }
@@ -763,11 +760,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
                         ++demandMgr.NumOfLoads;
                     } else {
                         ShowSevereError(state,
-                                        format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                               CurrentModuleObject,
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cAlphaFieldNames(LoadNum + 4),
-                                               AlphArray(LoadNum + 4)));
+                                        std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                    CurrentModuleObject,
+                                                    s_ipsc->cAlphaArgs(1),
+                                                    s_ipsc->cAlphaFieldNames(LoadNum + 4),
+                                                    AlphArray(LoadNum + 4)));
                         ErrorsFound = true;
                     }
                 }
@@ -794,7 +791,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
                     }
                 } // LoadNum
             } else {
-                ShowSevereError(state, format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Number of loads is calculated to be less than one. Demand manager must have at least one load assigned.");
                 ErrorsFound = true;
             }
@@ -872,11 +869,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
                         ++demandMgr.NumOfLoads;
                     } else {
                         ShowSevereError(state,
-                                        format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                               CurrentModuleObject,
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cAlphaFieldNames(LoadNum + 4),
-                                               AlphArray(LoadNum + 4)));
+                                        std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                    CurrentModuleObject,
+                                                    s_ipsc->cAlphaArgs(1),
+                                                    s_ipsc->cAlphaFieldNames(LoadNum + 4),
+                                                    AlphArray(LoadNum + 4)));
                         ErrorsFound = true;
                     }
                 }
@@ -903,7 +900,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
                     }
                 } // LoadNum
             } else {
-                ShowSevereError(state, format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Number of loads is calculated to be less than one. Demand manager must have at least one load assigned.");
                 ErrorsFound = true;
             }
@@ -961,11 +958,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
             demandMgr.UpperLimit = NumArray(3);
 
             if (demandMgr.LowerLimit > demandMgr.UpperLimit) {
-                ShowSevereError(state, format("Invalid input for {} = {}", CurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid input for {} = {}", CurrentModuleObject, AlphArray(1)));
                 ShowContinueError(
                     state,
-                    format("{} [{:.2R}] > {} [{:.2R}]", s_ipsc->cNumericFieldNames(2), NumArray(2), s_ipsc->cNumericFieldNames(3), NumArray(3)));
-                ShowContinueError(state, format("{} cannot be greater than {}", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(3)));
+                    std::format("{} [{:.2f}] > {} [{:.2f}]", s_ipsc->cNumericFieldNames(2), NumArray(2), s_ipsc->cNumericFieldNames(3), NumArray(3)));
+                ShowContinueError(state, std::format("{} cannot be greater than {}", s_ipsc->cNumericFieldNames(2), s_ipsc->cNumericFieldNames(3)));
                 ErrorsFound = true;
             }
 
@@ -991,11 +988,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
                         ++demandMgr.NumOfLoads;
                     } else {
                         ShowSevereError(state,
-                                        format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                               CurrentModuleObject,
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cAlphaFieldNames(LoadNum + 4),
-                                               AlphArray(LoadNum + 4)));
+                                        std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                    CurrentModuleObject,
+                                                    s_ipsc->cAlphaArgs(1),
+                                                    s_ipsc->cAlphaFieldNames(LoadNum + 4),
+                                                    AlphArray(LoadNum + 4)));
                         ErrorsFound = true;
                     }
                 }
@@ -1020,7 +1017,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
                     }
                 } // LoadNum
             } else {
-                ShowSevereError(state, format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Number of loads is calculated to be less than one. Demand manager must have at least one load assigned.");
                 ErrorsFound = true;
             }
@@ -1095,11 +1092,11 @@ void GetDemandManagerInput(EnergyPlusData &state)
                     ++demandMgr.NumOfLoads;
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                           CurrentModuleObject,
-                                           s_ipsc->cAlphaArgs(1),
-                                           s_ipsc->cAlphaFieldNames(LoadNum + AlphaShift),
-                                           AlphArray(LoadNum + AlphaShift)));
+                                    std::format("{}=\"{}\" invalid {}=\"{}\" not found.",
+                                                CurrentModuleObject,
+                                                s_ipsc->cAlphaArgs(1),
+                                                s_ipsc->cAlphaFieldNames(LoadNum + AlphaShift),
+                                                AlphArray(LoadNum + AlphaShift)));
                     ErrorsFound = true;
                 }
             }
@@ -1113,7 +1110,7 @@ void GetDemandManagerInput(EnergyPlusData &state)
                     }
                 }
             } else {
-                ShowSevereError(state, format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("{}=\"{}\" invalid value for number of loads.", CurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Number of loads is calculated to be less than one. Demand manager must have at least one load assigned.");
                 ErrorsFound = true;
             }

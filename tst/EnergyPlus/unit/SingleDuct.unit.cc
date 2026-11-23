@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // EnergyPlus::Standalone ERV Unit Tests
 
+#include <algorithm>
 #include <fstream>
 
 // Google Test Headers
@@ -1092,6 +1093,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1099,6 +1101,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -1309,9 +1312,9 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     // ); apply limit based on min stop
     MaxAirVolFractionDuringReheatDes = max(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(1).ZoneMinAirFrac);
     // apply model math
-    MaxAirVolFlowRateDuringReheatDes =
-        min(max(MaxAirVolFlowRateDuringReheatDes, MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate),
-            state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate);
+    MaxAirVolFlowRateDuringReheatDes = std::clamp(MaxAirVolFlowRateDuringReheatDes,
+                                                  MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate,
+                                                  state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRate);
     // EXPECT zone floor area == 0, others as calculated above
     EXPECT_EQ(state->dataSingleDuct->sd_airterminal(1).ZoneFloorArea, 0.0);
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(1).MaxAirVolFlowRateDuringReheat, MaxAirVolFlowRateDuringReheatDes, 0.0000000000001);
@@ -1325,14 +1328,21 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     MaxAirVolFractionDuringReheatDes =
         min(1.0, (state->dataSize->FinalZoneSizing(2).DesHeatVolFlow / state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate));
     MaxAirVolFractionDuringReheatDes = max(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(2).ZoneMinAirFrac);
-    MaxAirVolFlowRateDuringReheatDes =
-        min(max(MaxAirVolFlowRateDuringReheatDes, MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate),
-            state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate);
+    MaxAirVolFlowRateDuringReheatDes = std::clamp(MaxAirVolFlowRateDuringReheatDes,
+                                                  MaxAirVolFractionDuringReheatDes * state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate,
+                                                  state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRate);
 
     // EXPECT zone floor area > 0, others as calculated above
     EXPECT_GT(state->dataSingleDuct->sd_airterminal(2).ZoneFloorArea, 0.0);
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRateDuringReheat, MaxAirVolFlowRateDuringReheatDes, 0.0000000000001);
     EXPECT_NEAR(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(2).MaxAirVolFractionDuringReheat, 0.0000000000001);
+
+    // Check system minimum heating air flow ratio warning when DesHeatVolFlow/DesMainVolFlow is grater than SysAirMinFlowRat
+    EXPECT_NEAR(0.8831, state->dataSize->FinalSysSizing(1).DesHeatVolFlow / state->dataSize->FinalSysSizing(1).DesMainVolFlow, 0.0001);
+    EXPECT_NEAR(0.3, state->dataSize->FinalSysSizing(1).SysAirMinFlowRat, 0.0001);
+    std::string error_string = delimited_string(
+        {"The central heating coil may undersize if autosized. Consider increasing the Central Heating Maximum System Air Flow Ratio."});
+    EXPECT_TRUE(compare_err_stream_substring(error_string));
 }
 
 TEST_F(EnergyPlusFixture, TestOAMassFlowRateUsingStdRhoAir)
@@ -2307,6 +2317,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2314,6 +2325,7 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
         " Space2 Thermostat,        !- Name",
         " Space2,                   !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
 
@@ -2535,6 +2547,34 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
     EXPECT_EQ(ZoneDesTemp, 17.0);
     EXPECT_EQ(ZoneDesHumRat, 0.008);
     EXPECT_NEAR(DesCoilLoad, 120.5, 0.1);
+
+    // Check TU sizing
+    auto &tu1 = state->dataSingleDuct->sd_airterminal(1);
+    Real64 minOA = state->dataSize->TermUnitFinalZoneSizing(1).MinOA;
+    Real64 maxAirFlow = tu1.MaxAirVolFlowRate;
+    EXPECT_NEAR(minOA, 0.05, 0.001);
+    EXPECT_NEAR(maxAirFlow, 0.327, 0.001);
+
+    // reset to autosize for next test
+    tu1.MaxAirVolFlowRate = DataSizing::AutoSize;
+    tu1.MaxHeatAirVolFlowRate = DataSizing::AutoSize;
+    tu1.ZoneMinAirFracDes = DataSizing::AutoSize;
+    tu1.ZoneFixedMinAir = DataSizing::AutoSize;
+    // expect a TU connected to a 100% OA system to size to the OA flow rate, not the zone design flow rate
+    state->dataSize->SysSizInput(1).loadSizingType = LoadSizing::Ventilation;
+    state->dataSize->SysSizInput(1).CoolOAOption = OAControl::AllOA;
+    state->dataSize->SysSizInput(1).HeatOAOption = OAControl::AllOA;
+    EXPECT_FALSE(state->dataAirSystemsData->PrimaryAirSystems(1).isAllOA);
+    state->dataSize->CurTermUnitSizingNum = 1;
+    state->files.eio.ensure_open(*state, "OpenOutputFiles", state->files.outputControl.eio);
+    tu1.SizeSys(*state);
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.MaxHeatAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.ZoneMinAirFracDes, 1.0, 0.001);
+    EXPECT_EQ(tu1.ZoneMinAirFracMethod, SingleDuct::MinFlowFraction::Constant);
+    EXPECT_NEAR(tu1.ZoneFixedMinAir, 0.0, 0.001);
+    // minimum flow is actually MaxAirVolFlowRate * ZoneMinAirFracDes * ZoneTurndownMinAirFrac
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate * tu1.ZoneMinAirFracDes * tu1.ZoneTurndownMinAirFrac, 0.05, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, TerminalUnitMixerInitTest)
@@ -3083,8 +3123,6 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto *schA = Sched::AddScheduleConstant(*state, "schA");
     [[maybe_unused]] auto *schB = Sched::AddScheduleConstant(*state, "schB");
 
@@ -3101,6 +3139,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     siz(1).HeatDesTemp = 40.0;
     siz(1).DesHeatLoad = 2000.0;
     siz(1).DesCoolLoad = 3000.0;
+    siz(1).ZoneName = "Zone A";
+    siz(1).TotalZoneFloorArea = 100.0;
 
     auto &sdat = state->dataSingleDuct->sd_airterminal;
     sdat.allocate(2);
@@ -3113,11 +3153,13 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     sdat(1).ReheatComp = "watercoil";
     sdat(1).fanType = HVAC::FanType::VAV;
     sdat(1).FanName = "FanA";
+    sdat(1).ZoneMinAirFracDes = 0.2;
+    sdat(1).ZoneTurndownMinAirFrac = 0.8;
 
     sdat(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.0480", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));
@@ -3133,15 +3175,21 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     EXPECT_EQ("Fan:VariableVolume", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU a"));
     EXPECT_EQ("FanA", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU a"));
 
+    EXPECT_EQ("0.000480", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerArea, "Zone A"));
+    EXPECT_EQ("0.048000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerZone, "Zone A"));
+    EXPECT_EQ("0.000500", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerArea, "Zone A"));
+    EXPECT_EQ("0.050000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerZone, "Zone A"));
+
     adu(2).Name = "ADU b";
     adu(2).TermUnitSizingNum = 2;
 
-    siz(2).DesCoolVolFlowMin = 0.16;
     siz(2).MinOA = 0.06;
     siz(2).CoolDesTemp = 12.6;
     siz(2).HeatDesTemp = 41.0;
     siz(2).DesHeatLoad = 2100.0;
     siz(2).DesCoolLoad = 3100.0;
+    siz(2).ZoneName = "Zone B";
+    siz(2).TotalZoneFloorArea = 100.0;
 
     sdat(2).ADUNum = 2;
     sdat(2).sysType = "AirTerminal:SingleDuct:ConstantVolume:Reheat";
@@ -3152,6 +3200,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     sdat(2).ReheatComp = "furncoil";
     sdat(2).fanType = HVAC::FanType::OnOff;
     sdat(2).FanName = "FanB";
+    sdat(2).ZoneMinAirFracDes = 0.2;
+    sdat(2).ZoneTurndownMinAirFrac = 0.8;
 
     auto &oa = state->dataSize->OARequirements;
     oa.allocate(1);
@@ -3159,8 +3209,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
 
     sdat(2).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.16", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
-    EXPECT_EQ("0.06", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
+    EXPECT_EQ("0.0496", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
+    EXPECT_EQ("0.0600", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
     EXPECT_EQ("12.60", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU b"));
     EXPECT_EQ("41.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU b"));
     EXPECT_EQ("2100.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU b"));
@@ -3175,4 +3225,286 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolCoilType, "ADU b"));
     EXPECT_EQ("Fan:OnOff", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU b"));
     EXPECT_EQ("FanB", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU b"));
+
+    EXPECT_EQ("0.000496", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerArea, "Zone B"));
+    EXPECT_EQ("0.049600", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerZone, "Zone B"));
+    EXPECT_EQ("0.000600", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerArea, "Zone B"));
+    EXPECT_EQ("0.060000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerZone, "Zone B"));
+}
+
+TEST_F(EnergyPlusFixture, VAVReheatNoReheatTest_ErrorMessages)
+{
+    std::string const idf_objects = delimited_string({
+        "    ScheduleTypeLimits,",
+        "    Fraction,                !- Name",
+        "    0.0,                     !- Lower Limit Value",
+        "    1.0,                     !- Upper Limit Value",
+        "    CONTINUOUS;              !- Numeric Type",
+        "  Schedule:Compact,",
+        "    MySchedule,              !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: AllDays,            !- Field 2",
+        "    Until: 24:00,0.4;        !- Field 3",
+        "  Zone,",
+        "    Zone 1;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 1,                !- Zone Name",
+        "    Zone 1 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 1 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 1 Air Node,           !- Zone Air Node Name",
+        "    Zone 1 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 1 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 1 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 1 ADU,    !- Name",
+        "    Zone 1 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:Reheat,  !- Air Terminal Object Type",
+        "    Zone 1 VAV Reheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:Reheat,",
+        "    Zone 1 VAV Reheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 1 VAV Reheat Coil Air Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 1 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    Constant,                !- Zone Minimum Air Flow Input Method",
+        "    0.4,                     !- Constant Minimum Air Flow Fraction",
+        "    autosize,                !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    MySchedule,              !- Minimum Air Flow Fraction Schedule Name",
+        "    Coil:Heating:Electric,   !- Reheat Coil Object Type",
+        "    Zone 1 Reheat Coil,      !- Reheat Coil Name",
+        "    ,                        !- Maximum Hot Water or Steam Flow Rate{m3/s}",
+        "    ,                        !- Minimum Hot Water or Steam Flow Rate{m3/s}",
+        "    Zone 1 Supply Inlet,     !- Air Outlet Node Name",
+        "    0.001,                   !- Convergence Tolerance",
+        "    ,                        !- Damper Heating Action",
+        "    ,                        !- Maximum Flow per Zone Floor Area During Reheat",
+        "    ;                        !- Maximum Flow Fraction During Reheat",
+        "Coil:Heating:Electric,",
+        "    Zone 1 Reheat Coil,      !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    1,                       !- Efficiency",
+        "    100,                     !- Nominal Capacity of the Coil {W}",
+        "    Zone 1 VAV Reheat Coil Air Inlet,  !- Air Inlet Node Name",
+        "    Zone 1 Supply Inlet,     !- Air Outlet Node Name",
+        "    ;                        !- Temperature Setpoint Node Name",
+        "  Zone,",
+        "    Zone 2;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 2,                !- Zone Name",
+        "    Zone 2 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 2 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 2 Air Node,           !- Zone Air Node Name",
+        "    Zone 2 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 2 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 2 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 2 ADU,    !- Name",
+        "    Zone 2 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:Reheat,  !- Air Terminal Object Type",
+        "    Zone 2 VAV Reheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:Reheat,",
+        "    Zone 2 VAV Reheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 2 VAV Reheat Coil Air Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 2 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    FixedFlowRate,           !- Zone Minimum Air Flow Input Method",
+        "    0.1,                     !- Constant Minimum Air Flow Fraction",
+        "    0.4,                     !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    ,                        !- Minimum Air Flow Fraction Schedule Name",
+        "    Coil:Heating:Electric,   !- Reheat Coil Object Type",
+        "    Zone 2 Reheat Coil,      !- Reheat Coil Name",
+        "    ,                        !- Maximum Hot Water or Steam Flow Rate{m3/s}",
+        "    ,                        !- Minimum Hot Water or Steam Flow Rate{m3/s}",
+        "    Zone 2 Supply Inlet,     !- Air Outlet Node Name",
+        "    0.001,                   !- Convergence Tolerance",
+        "    ,                        !- Damper Heating Action",
+        "    ,                        !- Maximum Flow per Zone Floor Area During Reheat",
+        "    ;                        !- Maximum Flow Fraction During Reheat",
+        "Coil:Heating:Electric,",
+        "    Zone 2 Reheat Coil,      !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    1,                       !- Efficiency",
+        "    100,                     !- Nominal Capacity of the Coil {W}",
+        "    Zone 2 VAV Reheat Coil Air Inlet,  !- Air Inlet Node Name",
+        "    Zone 2 Supply Inlet,     !- Air Outlet Node Name",
+        "    ;                        !- Temperature Setpoint Node Name",
+        "  Zone,",
+        "    Zone 3;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 3,                !- Zone Name",
+        "    Zone 3 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 3 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 3 Air Node,           !- Zone Air Node Name",
+        "    Zone 3 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 3 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 3 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 3 ADU,    !- Name",
+        "    Zone 3 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:Reheat,  !- Air Terminal Object Type",
+        "    Zone 3 VAV Reheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:Reheat,",
+        "    Zone 3 VAV Reheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 3 VAV Reheat Coil Air Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 3 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    Scheduled,               !- Zone Minimum Air Flow Input Method",
+        "    0.0,                     !- Constant Minimum Air Flow Fraction",
+        "    0.4,                     !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    MySchedule,              !- Minimum Air Flow Fraction Schedule Name",
+        "    Coil:Heating:Electric,   !- Reheat Coil Object Type",
+        "    Zone 3 Reheat Coil,      !- Reheat Coil Name",
+        "    ,                        !- Maximum Hot Water or Steam Flow Rate{m3/s}",
+        "    ,                        !- Minimum Hot Water or Steam Flow Rate{m3/s}",
+        "    Zone 3 Supply Inlet,     !- Air Outlet Node Name",
+        "    0.001,                   !- Convergence Tolerance",
+        "    ,                        !- Damper Heating Action",
+        "    ,                        !- Maximum Flow per Zone Floor Area During Reheat",
+        "    ;                        !- Maximum Flow Fraction During Reheat",
+        "Coil:Heating:Electric,",
+        "    Zone 3 Reheat Coil,      !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    1,                       !- Efficiency",
+        "    100,                     !- Nominal Capacity of the Coil {W}",
+        "    Zone 3 VAV Reheat Coil Air Inlet,  !- Air Inlet Node Name",
+        "    Zone 3 Supply Inlet,     !- Air Outlet Node Name",
+        "    ;                        !- Temperature Setpoint Node Name",
+        "  Zone,",
+        "    Zone 4;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 4,                !- Zone Name",
+        "    Zone 4 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 4 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 4 Air Node,           !- Zone Air Node Name",
+        "    Zone 4 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 4 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 4 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 4 ADU,    !- Name",
+        "    Zone 4 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:NoReheat,  !- Air Terminal Object Type",
+        "    Zone 4 VAV NoReheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:NoReheat,",
+        "    Zone 4 VAV NoReheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 4 Supply Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 4 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    Scheduled,               !- Zone Minimum Air Flow Input Method",
+        "    0.0,                     !- Constant Minimum Air Flow Fraction",
+        "    0.4,                     !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    MySchedule;              !- Minimum Air Flow Fraction Schedule Name",
+        "  Zone,",
+        "    Zone 5;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 5,                !- Zone Name",
+        "    Zone 5 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 5 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 5 Air Node,           !- Zone Air Node Name",
+        "    Zone 5 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 5 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 5 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 5 ADU,    !- Name",
+        "    Zone 5 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:NoReheat,  !- Air Terminal Object Type",
+        "    Zone 5 VAV NoReheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:NoReheat,",
+        "    Zone 5 VAV NoReheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 5 Supply Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 5 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    Constant,                !- Zone Minimum Air Flow Input Method",
+        "    0.1,                     !- Constant Minimum Air Flow Fraction",
+        "    0.4,                     !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    MySchedule;              !- Minimum Air Flow Fraction Schedule Name",
+        "  Zone,",
+        "    Zone 6;                !- Name",
+        "ZoneHVAC:EquipmentConnections,",
+        "    Zone 6,                !- Zone Name",
+        "    Zone 6 Equipment,             !- Zone Conditioning Equipment List Name",
+        "    Zone 6 Supply Inlet,       !- Zone Air Inlet Node or NodeList Name",
+        "    ,      !- Zone Air Exhaust Node or NodeList Name",
+        "    Zone 6 Air Node,           !- Zone Air Node Name",
+        "    Zone 6 Return Node;       !- Zone Return Air Node Name",
+        "ZoneHVAC:EquipmentList,",
+        "    Zone 6 Equipment,             !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    Zone 6 ADU,            !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+        "ZoneHVAC:AirDistributionUnit,",
+        "    Zone 6 ADU,    !- Name",
+        "    Zone 6 Supply Inlet,     !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:VAV:NoReheat,  !- Air Terminal Object Type",
+        "    Zone 6 VAV NoReheat;           !- Air Terminal Name",
+        "AirTerminal:SingleDuct:VAV:NoReheat,",
+        "    Zone 6 VAV NoReheat,       !- Name",
+        "    ,                        !- Availability Schedule Name",
+        "    Zone 6 Supply Inlet,  !- Damper Air Outlet Node Name",
+        "    Zone 6 Zone Equip Inlet, !- Air Inlet Node Name",
+        "    1.0,                     !- Maximum Air Flow Rate {m3/s}",
+        "    FixedFlowRate,           !- Zone Minimum Air Flow Input Method",
+        "    0.1,                     !- Constant Minimum Air Flow Fraction",
+        "    0.4,                     !- Fixed Minimum Air Flow Rate{m3/s}",
+        "    ;                        !- Minimum Air Flow Fraction Schedule Name",
+    });
+
+    std::string const err_messages = delimited_string({
+        "   ** Warning ** Since Zone Minimum Air Flow Input Method = FIXEDFLOWRATE, input for Constant Minimum Air Flow Fraction will be ignored.",
+        "   **   ~~~   ** Occurs in AirTerminal:SingleDuct:VAV:Reheat = ZONE 2 VAV REHEAT",
+        "   ** Warning ** Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored.",
+        "   **   ~~~   ** Occurs in AirTerminal:SingleDuct:VAV:NoReheat = ZONE 5 VAV NOREHEAT",
+        "   ** Warning ** Since Zone Minimum Air Flow Input Method = FIXEDFLOWRATE, input for Constant Minimum Air Flow Fraction will be ignored.",
+        "   **   ~~~   ** Occurs in AirTerminal:SingleDuct:VAV:NoReheat = ZONE 6 VAV NOREHEAT",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool ErrorsFound = false;
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    DataZoneEquipment::GetZoneEquipmentData(*state);
+    state->dataSize->TermUnitFinalZoneSizing.allocate(6);
+    state->dataSize->TermUnitSizing.allocate(6);
+    state->dataSize->FinalZoneSizing.allocate(6);
+    ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment(*state);
+    SingleDuct::GetSysInput(*state);
+    EXPECT_TRUE(compare_err_stream(err_messages));
 }

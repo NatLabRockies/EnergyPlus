@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -629,6 +629,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
         "    Zone 1 Thermostat,       !- Name",
         "    West Zone,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -857,7 +858,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     SetupWindowShadingControlActuators(*state);
 
     // init_state() checks for EMS so there will be actuators for schedules and materials already
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 19);
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 37);
 
     // add a blind layer in between glass
     state->dataConstruction->Construct(4).TotLayers = 5;
@@ -886,13 +887,13 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     state->dataSurface->surfShades(windowSurfNum).blind.movableSlats = true;
     // check if EMS actuator is available when blind layer is added
     SetupWindowShadingControlActuators(*state);
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 21);
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ControlTypeName, "Control Status");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).Units, "[ShadeStatus]");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ControlTypeName, "Slat Angle");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).Units, "[degrees]");
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 39);
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(38).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(38).ControlTypeName, "Control Status");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(38).Units, "[ShadeStatus]");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(39).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(39).ControlTypeName, "Slat Angle");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(39).Units, "[degrees]");
 }
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_setUserTemperatureLocationPerpendicular)
@@ -1047,7 +1048,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
     thisConstruct.Name = "TestThisConstruction";
 
     std::string const error_string0 = delimited_string(
-        {format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** ConstructionProperty:InternalHeatSource has a tube spacing that is less than 2 mm.  This is not allowed.",
          "   **   ~~~   ** Construction=TestThisConstruction has this problem.  The tube spacing has been reset to 0.15m (~6 "
          "inches) for this construction.",
@@ -1363,8 +1364,10 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_ComputeNominalUwithConvCoeffsTest)
     // in DataHeatBalance.cc
     int numTypesSurfaceClass = static_cast<int>(DataSurfaces::SurfaceClass::Num);
     bool surfClassOK = false;
-    if (numTypesSurfaceClass == 15) {
+    if (numTypesSurfaceClass == 19) {
         surfClassOK = true;
     }
-    EXPECT_TRUE(surfClassOK);
+    EXPECT_TRUE(surfClassOK)
+        << "If this test fails, it is likely that a new surface class has been added.  Please check to see if the new surface class should be "
+           "included in ComputeNominalUwithConvCoeffs in DataHeatBalance.cc and update this test to reflect the new number of surface classes.";
 }

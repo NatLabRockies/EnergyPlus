@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -87,9 +87,9 @@ protected:
     //        return EnergyPlusFixture::process_idd(idd, errors_found);
     //    }
 
-    bool processErrors(EnergyPlusData &state)
+    bool processErrors(EnergyPlusData &t_state)
     {
-        return state.dataInputProcessing->inputProcessor->processErrors(state);
+        return t_state.dataInputProcessing->inputProcessor->processErrors(t_state);
     }
 
     std::vector<std::string> const &validationErrors()

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -92,17 +92,13 @@ namespace HWBaseboardRadiator {
         Real64 WaterMassFlowRateMax = 0.0;
         Real64 WaterMassFlowRateStd = 0.0;
         Real64 WaterVolFlowRateMax = 0.0;
-        Real64 WaterInletTempStd = 0.0;
         Real64 WaterInletTemp = 0.0;
         Real64 WaterInletEnthalpy = 0.0;
-        Real64 WaterOutletTempStd = 0.0;
         Real64 WaterOutletTemp = 0.0;
         Real64 WaterOutletEnthalpy = 0.0;
-        Real64 AirInletTempStd = 0.0;
         Real64 AirInletTemp = 0.0;
         Real64 AirOutletTemp = 0.0;
         Real64 AirInletHumRat = 0.0;
-        Real64 AirOutletTempStd = 0.0;
         Real64 FracConvect = 0.0;
         Array1D<Real64> FracDistribToSurf;
         Real64 TotPower = 0.0;
@@ -129,7 +125,7 @@ namespace HWBaseboardRadiator {
         Real64 LastQBBRadSrc = 0.0;      // Need to keep the last value in case we are still iterating
     };
 
-    struct HWBaseboardDesignData : HWBaseboardParams
+    struct HWBaseboardDesignData
     {
         // Members
         std::string designName;
@@ -148,17 +144,6 @@ namespace HWBaseboardRadiator {
 
         // Default Constructor
         HWBaseboardNumericFieldData()
-        {
-        }
-    };
-
-    struct HWBaseboardDesignNumericFieldData
-    {
-        // Members
-        Array1D_string FieldNames;
-
-        // Default Constructor
-        HWBaseboardDesignNumericFieldData()
         {
         }
     };
@@ -208,14 +193,12 @@ struct HWBaseboardRadiatorData : BaseGlobalStruct
     Array1D_bool CheckEquipName;
     Array1D_bool SetLoopIndexFlag; // get loop number flag
     int NumHWBaseboards = 0;
-    int NumHWBaseboardDesignObjs = 0; // Number of HW Baseboard systems design objects
     // Object Data
     Array1D<HWBaseboardRadiator::HWBaseboardParams> HWBaseboard;
     Array1D<HWBaseboardRadiator::HWBaseboardDesignData> HWBaseboardDesignObject;
     Array1D<HWBaseboardRadiator::HWBaseboardNumericFieldData> HWBaseboardNumericFields;
     bool GetInputFlag = true; // One time get input flag
     bool MyOneTimeFlag = true;
-    int Iter = 0;
     bool MyEnvrnFlag2 = true;
     Array1D_bool MyEnvrnFlag;
 
@@ -233,14 +216,12 @@ struct HWBaseboardRadiatorData : BaseGlobalStruct
         this->CheckEquipName.clear();
         this->SetLoopIndexFlag.clear();
         this->NumHWBaseboards = 0;
-        this->NumHWBaseboardDesignObjs = 0;
         this->HWBaseboard.clear();
         this->HWBaseboardDesignObject.clear();
         this->HWBaseboardNumericFields.clear();
         this->GetInputFlag = true;
         this->MyOneTimeFlag = true;
         this->MyEnvrnFlag.clear();
-        this->Iter = 0;
         this->MyEnvrnFlag2 = true;
     }
 };

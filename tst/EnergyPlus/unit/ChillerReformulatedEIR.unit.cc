@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -68,7 +68,6 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::ChillerReformulatedEIR;
-using namespace EnergyPlus::DataLoopNode;
 
 TEST_F(EnergyPlusFixture, ChillerElectricReformulatedEIR_WaterCooledChillerVariableSpeedCondenser)
 {
@@ -344,7 +343,6 @@ TEST_F(EnergyPlusFixture, ChillerElectricReformulatedEIR_OutputReport)
 
     EXPECT_TRUE(process_idf(idf_objects, false));
     state->init_state(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);
     state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);

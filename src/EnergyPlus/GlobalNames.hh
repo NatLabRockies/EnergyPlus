@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -67,16 +67,6 @@ struct EnergyPlusData;
 
 namespace GlobalNames {
 
-    struct ComponentNameData
-    {
-        // Members
-        std::string CompType; // Component Type
-        std::string CompName; // Component Name (user supplied)
-
-        // Default Constructor
-        ComponentNameData() = default;
-    };
-
     void IntraObjUniquenessCheck(EnergyPlusData &state,
                                  std::string const &NameToVerify,
                                  std::string_view const CurrentModuleObject,
@@ -132,13 +122,6 @@ namespace GlobalNames {
 struct GlobalNamesData : BaseGlobalStruct
 {
 
-    int NumChillers = 0;
-    int NumBoilers = 0;
-    int NumBaseboards = 0;
-    int NumCoils = 0;
-    int CurMaxChillers = 0;
-    int CurMaxCoils = 0;
-    int numAirDistUnits = 0;
     std::unordered_map<std::string, std::string> ChillerNames;
     std::unordered_map<std::string, std::string> BoilerNames;
     std::unordered_map<std::string, std::string> BaseboardNames;
@@ -155,13 +138,6 @@ struct GlobalNamesData : BaseGlobalStruct
 
     void clear_state() override
     {
-        this->NumChillers = 0;
-        this->NumBoilers = 0;
-        this->NumBaseboards = 0;
-        this->NumCoils = 0;
-        this->CurMaxChillers = 0;
-        this->CurMaxCoils = 0;
-        this->numAirDistUnits = 0;
         this->ChillerNames.clear();
         this->BoilerNames.clear();
         this->BaseboardNames.clear();

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -163,9 +163,9 @@ struct CoilCoolingDXCurveFitSpeed
     Real64 maxRatedVolFlowPerRatedTotCap = HVAC::MaxRatedVolFlowPerRatedTotCap1;
 
     void CalcSpeedOutput(EnergyPlusData &state,
-                         const DataLoopNode::NodeData &inletNode,
-                         DataLoopNode::NodeData &outletNode,
-                         Real64 PLR,
+                         const Node::NodeData &inletNode,
+                         Node::NodeData &outletNode,
+                         Real64 t_PLR,
                          HVAC::FanOp const fanOp,
                          Real64 condInletTemp);
 
@@ -179,10 +179,10 @@ struct CoilCoolingDXCurveFitSpeed
                             Real64 const h,   // Inlet enthalpy {J/kg-dryair}
                             Real64 const p);  // Outlet node pressure {Pa}
 
-    Real64 calcEffectiveSHR(const DataLoopNode::NodeData &inletNode,
+    Real64 calcEffectiveSHR(const Node::NodeData &inletNode,
                             Real64 const inletWetBulb,
                             Real64 const SHRss,      // Steady-state sensible heat ratio
-                            Real64 const RTF,        // Compressor run-time fraction
+                            Real64 const t_RTF,      // Compressor run-time fraction
                             Real64 const QLatRated,  // Rated latent capacity
                             Real64 const QLatActual, // Actual latent capacity
                             Real64 const HeatingRTF  // Used to recalculate Toff for cycling fan systems

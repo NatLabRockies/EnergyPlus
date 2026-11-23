@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,12 +49,12 @@
 #define Psychrometrics_hh_INCLUDED
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-// #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -62,7 +62,6 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PsychCacheData.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -869,7 +868,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbRhovLBnd0C_error(state, Tdb, Rhovapor, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }
@@ -1206,7 +1205,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbRhov_error(state, Tdb, Rhovapor, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }
@@ -1263,7 +1262,7 @@ namespace Psychrometrics {
                 PsyRhFnTdbWPb_error(state, TDB, W, RHValue, CalledFrom);
             }
 #endif
-            return min(max(RHValue, 0.01), 1.0);
+            return std::clamp(RHValue, 0.01, 1.0);
         }
         return RHValue;
     }

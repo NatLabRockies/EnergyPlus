@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -84,6 +84,16 @@ namespace Fans {
 
     static constexpr std::array<std::string_view, (int)AvailManagerMode::Num> availManagerModeNamesUC = {"COUPLED", "DECOUPLED"};
 
+    enum class HeatLossDest
+    {
+        Invalid = -1,
+        Zone,
+        Outside,
+        Num
+    };
+
+    static constexpr std::array<std::string_view, (int)HeatLossDest::Num> heatLossDestNamesUC = {"ZONE", "OUTSIDE"};
+
     struct FanBase
     {
         FanBase()
@@ -154,7 +164,8 @@ namespace Fans {
         Real64 totalEnergy = 0.0; // Fan energy in [J]
                                   //    Real64 fanRuntimeFraction; // Fraction of the timestep that the fan operates
 
-        Real64 powerLossToAir = 0.0; // fan heat gain into process air [W]
+        Real64 powerLossToAir = 0.0;  // fan heat gain into process air [W]
+        Real64 powerLossToZone = 0.0; // fan heat gain into zone [W]
 
         Real64 inletAirMassFlowRate = 0.0; // MassFlow through the Fan being Simulated [kg/Sec]
         Real64 outletAirMassFlowRate = 0.0;
@@ -192,6 +203,8 @@ namespace Fans {
         Real64 EMSTotalEffValue = 0.0;            // EMS value for total efficiency of the Fan, fraction on 0..1
 
         std::string sizingPrefix;
+        HeatLossDest heatLossDest = HeatLossDest::Invalid; // enum for where motor loss go
+        int zoneNum = 0;                                   // zone index for motor heat losses as internal gains
     };
 
     enum class VFDEffType
@@ -206,11 +219,11 @@ namespace Fans {
 
     struct FanComponent : public FanBase
     {
-        void set_size(EnergyPlusData &state);
+        void set_size(EnergyPlusData &state) override;
 
-        void init(EnergyPlusData &state);
+        void init(EnergyPlusData &state) override;
 
-        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow);
+        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow) override;
 
         void getInputsForDesignHeatGain(EnergyPlusData &state,
                                         Real64 &deltaP,
@@ -219,11 +232,11 @@ namespace Fans {
                                         Real64 &motInAirFrac,
                                         Real64 &fanShaftPow,
                                         Real64 &motInPower,
-                                        bool &fanCompModel);
+                                        bool &fanCompModel) override;
 
-        void update(EnergyPlusData &state);
+        void update(EnergyPlusData &state) override;
 
-        void report(EnergyPlusData &state);
+        void report(EnergyPlusData &state) override;
 
         void simulateConstant(EnergyPlusData &state);
 
@@ -279,7 +292,6 @@ namespace Fans {
         int motorMaxEffCurveNum = 0;                 // Motor maximum efficiency curve index
         int plMotorEffCurveNum = 0;                  // Motor part-load efficiency curve index
         int vfdEffCurveNum = 0;                      // VFD efficiency curve index
-        Real64 deltaPressTot = 0.0;                  // Total pressure rise across fan [N/m2]
         Real64 airPower = 0.0;                       // Air power for fan being Simulated [W]
         Real64 fanSpeed = 0.0;                       // Fan shaft rotational speed [rpm]
         Real64 fanTorque = 0.0;                      // Fan shaft torque [N-m]
@@ -305,13 +317,11 @@ namespace Fans {
     struct NightVentPerfData
     {
         // Members
-        std::string FanName;             // Name of the fan that will use this data
-        Real64 FanEff = 0.0;             // Fan total efficiency; motor and mechanical
-        Real64 DeltaPress = 0.0;         // Delta Pressure Across the Fan [N/m2]
-        Real64 MaxAirFlowRate = 0.0;     // Max Specified Volume Flow Rate of Fan [m3/s]
-        Real64 MaxAirMassFlowRate = 0.0; // Max flow rate of fan in kg/sec
-        Real64 MotEff = 0.0;             // Fan motor efficiency
-        Real64 MotInAirFrac = 0.0;       // Fraction of motor heat entering air stream
+        std::string FanName;       // Name of the fan that will use this data
+        Real64 FanEff = 0.0;       // Fan total efficiency; motor and mechanical
+        Real64 DeltaPress = 0.0;   // Delta Pressure Across the Fan [N/m2]
+        Real64 MotEff = 0.0;       // Fan motor efficiency
+        Real64 MotInAirFrac = 0.0; // Fraction of motor heat entering air stream
     };
 
     void GetFanInput(EnergyPlusData &state);
@@ -337,14 +347,6 @@ namespace Fans {
 
     static constexpr std::array<std::string_view, (int)PowerSizing::Num> powerSizingNamesUC = {
         "POWERPERFLOW", "POWERPERFLOWPERPRESSURE", "TOTALEFFICIENCYANDPRESSURE"};
-
-    enum class HeatLossDest
-    {
-        Invalid = -1,
-        Zone,
-        Outside,
-        Num
-    };
 
     enum class SpeedControl : int
     {
@@ -375,7 +377,7 @@ namespace Fans {
 
         Real64 getDesignTemperatureRise(EnergyPlusData &state) const;
 
-        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow);
+        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow) override;
 
         void getInputsForDesignHeatGain(EnergyPlusData &state,
                                         Real64 &deltaP,
@@ -384,7 +386,7 @@ namespace Fans {
                                         Real64 &motInAirFrac,
                                         Real64 &fanShaftPow,
                                         Real64 &motInPower,
-                                        bool &fanCompModel);
+                                        bool &fanCompModel) override;
 
         SpeedControl speedControl = SpeedControl::Invalid; // Discrete or Continuous speed control method
         Real64 designElecPower = 0.0;                      // design electric power consumption [W]
@@ -399,9 +401,9 @@ namespace Fans {
         // FEI
         static Real64 report_fei(EnergyPlusData &state, Real64 const designFlowRate, Real64 const designElecPower, Real64 const designDeltaPress);
 
-        void init(EnergyPlusData &state);
+        void init(EnergyPlusData &state) override;
 
-        void set_size(EnergyPlusData &state);
+        void set_size(EnergyPlusData &state) override;
 
         void
         calcSimpleSystemFan(EnergyPlusData &state,
@@ -414,9 +416,9 @@ namespace Fans {
                             ObjexxFCL::Optional<Real64 const> pressureRise2 // Pressure difference to use for operating mode 2
         );
 
-        void update(EnergyPlusData &state);
+        void update(EnergyPlusData &state) override;
 
-        void report(EnergyPlusData &state);
+        void report(EnergyPlusData &state) override;
 
     public:
         // data
@@ -426,10 +428,7 @@ namespace Fans {
         Real64 elecPowerPerFlowRate = 0.0;                    // scaling factor for PowerPerFlow method
         Real64 elecPowerPerFlowRatePerPressure = 0.0;         // scaling factor for PowerPerFlowPerPressure
         Real64 nightVentPressureDelta = 0.0;                  // fan pressure rise during night ventilation mode
-        Real64 nightVentFlowFraction = 0.0;                   // fan's flow fraction during night ventilation mode, not used
-        int zoneNum = 0;                                      // zone index for motor heat losses as internal gains
         Real64 zoneRadFract = 0.0;                            // thermal radiation split for motor losses
-        HeatLossDest heatLossDest = HeatLossDest::Invalid;    // enum for where motor loss go
         Real64 qdotConvZone = 0.0;                            // fan power lost to surrounding zone by convection to air (W)
         Real64 qdotRadZone = 0.0;                             // fan power lost to surrounding zone by radiation to zone surfaces(W)
         std::vector<Real64> powerFracAtSpeed;                 // array of power fractions for speed levels
@@ -448,7 +447,6 @@ struct FansData : BaseGlobalStruct
 {
     int NumNightVentPerf = 0;    // number of FAN:NIGHT VENT PERFORMANCE objects found in the input
     bool GetFanInputFlag = true; // Flag set to make sure you get input once
-    bool MyOneTimeFlag = true;
     bool ZoneEquipmentListChecked = false;
 
     Array1D<Fans::NightVentPerfData> NightVentPerf;

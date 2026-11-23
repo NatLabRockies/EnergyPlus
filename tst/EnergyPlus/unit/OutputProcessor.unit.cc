@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,8 @@
 
 // EnergyPlus::OutputProcessor Unit Tests
 
+#include <algorithm>
+
 // Google Test Headers
 #include <gtest/gtest.h>
 
@@ -67,6 +69,7 @@
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SystemReports.hh>
 #include <EnergyPlus/WeatherManager.hh>
+#include <EnergyPlus/api/datatransfer.h>
 
 #include <climits>
 #include <map>
@@ -3264,7 +3267,7 @@ namespace OutputProcessor {
                                 light_consumption,
                                 TimeStepType::Zone,
                                 StoreType::Sum,
-                                format("SPACE {} LIGHTS", i),
+                                std::format("SPACE {} LIGHTS", i),
                                 Constant::eResource::Electricity,
                                 Group::Building,
                                 EndUseCat::InteriorLights,
@@ -5034,20 +5037,14 @@ namespace OutputProcessor {
         EXPECT_EQ(op->meters[14]->Name, "METER AIR SYSTEM HOT WATER ENERGY");
     }
 
-    TEST_F(EnergyPlusFixture, OutputProcessor_DuplicateMeterCustom)
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustom_InvalidReference)
     {
         std::string const idf_objects = delimited_string({"Meter:Custom,",
                                                           "CustomMeter1,               !- Name",
                                                           "Generic,                    !- Fuel Type",
                                                           ",                           !- Key Name 1",
                                                           "DistrictHeatingWater:Facility;   !- Variable or Meter 1 Name",
-                                                          "Meter:Custom,",
-                                                          "CustomMeter2,               !- Name",
-                                                          "Generic,                    !- Fuel Type",
-                                                          ",                           !- Key Name 1",
-                                                          "CustomMeter1;               !- Variable or Meter 1 Name",
-                                                          "Output:Meter,CustomMeter1,Hourly;",
-                                                          "Output:Meter,CustomMeter2,Hourly;"});
+                                                          "Output:Meter,CustomMeter1,Hourly;"});
 
         ASSERT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
@@ -5062,14 +5059,142 @@ namespace OutputProcessor {
             {"   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", invalid Output Variable or Meter Name=\"DISTRICTHEATINGWATER:FACILITY\".",
              "   **   ~~~   ** ...will not be shown with the Meter results.",
              "   ** Warning ** Meter:Custom=\"CUSTOMMETER1\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom.",
-             "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", contains a reference to another Meter:Custom in field: Output Variable or Meter "
-             "Name=\"CUSTOMMETER1\".",
-             "   ** Warning ** Meter:Custom=\"CUSTOMMETER2\", no items assigned ",
-             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom being assigned to another "
-             "Meter:Custom."});
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom."});
         compare_err_stream(errMsg);
+    }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustom_MeterCustomDecrement_ReferenceValidation)
+    {
+        auto &op = state->dataOutputProcessor;
+        std::string const idf_objects = delimited_string({
+            "  Meter:Custom,",
+            "    MyCustomLights,             !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    SPACE1-1,                   !- Key Name 1",
+            "    Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    GoodDecrement,              !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    Electricity:Building,       !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    GoodDecrementFromCustomSource,  !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    MyCustomLights,             !- Source Meter Name",
+            "    SPACE1-1,                   !- Key Name 1",
+            "    Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    BadDecrementSource,         !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    GoodDecrement,              !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    BadDecrementGroup,          !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    Electricity:Building,       !- Source Meter Name",
+            "    ,                           !- Key Name 1",
+            "    GoodDecrement;              !- Output Variable or Meter Name 1",
+            "  Meter:Custom,",
+            "    BadCustomRefDec,            !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    ,                           !- Key Name 1",
+            "    GoodDecrement;              !- Output Variable or Meter Name 1",
+            "  Meter:Custom,",
+            "    BadCustomRefCustom,         !- Name",
+            "    Electricity,                !- Fuel Type",
+            "    ,                           !- Key Name 1",
+            "    MyCustomLights;             !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0;
+        SetupOutputVariable(*state,
+                            "Lights Electricity Energy",
+                            Constant::Units::J,
+                            light_consumption,
+                            TimeStepType::Zone,
+                            StoreType::Sum,
+                            "SPACE1-1",
+                            Constant::eResource::Electricity,
+                            Group::Building,
+                            EndUseCat::InteriorLights,
+                            "GeneralLights",
+                            "SPACE1-1",
+                            1,
+                            1);
+
+        bool errors_found = false;
+
+        GetCustomMeterInput(*state, errors_found);
+
+        // BadDecrementSource's bad Source Meter Name reference is a hard error; the others are warnings only.
+        EXPECT_TRUE(errors_found);
+
+        // MyCustomLights (Meter:Custom) is valid.
+        // GoodDecrement is valid: its Source Meter Name is a Normal meter, and its group references a Meter:Custom.
+        // GoodDecrementFromCustomSource is valid: its Source Meter Name is itself a Meter:Custom.
+        EXPECT_NE(op->meterMap.find("MYCUSTOMLIGHTS"), op->meterMap.end());
+        EXPECT_NE(op->meterMap.find("GOODDECREMENT"), op->meterMap.end());
+        EXPECT_NE(op->meterMap.find("GOODDECREMENTFROMCUSTOMSOURCE"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADDECREMENTSOURCE"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADDECREMENTGROUP"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADCUSTOMREFDEC"), op->meterMap.end());
+        EXPECT_EQ(op->meterMap.find("BADCUSTOMREFCUSTOM"), op->meterMap.end());
+
+        std::string errMsg = delimited_string(
+            {"   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", contains a reference to another Meter:CustomDecrement in field: Output "
+             "Variable or Meter Name=\"GOODDECREMENT\".",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFDEC\", no items assigned ",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom.",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", contains a reference to another Meter:Custom in field: Output "
+             "Variable or Meter Name=\"MYCUSTOMLIGHTS\".",
+             "   ** Warning ** Meter:Custom=\"BADCUSTOMREFCUSTOM\", no items assigned ",
+             "   **   ~~~   ** ...will not be shown with the Meter results. This may be caused by a Meter:Custom or Meter:CustomDecrement being "
+             "assigned to a Meter:Custom.",
+             "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTSOURCE\", contains a reference to another Meter:CustomDecrement in field: "
+             "Source Meter Name=\"GOODDECREMENT\".",
+             "   ** Warning ** Meter:CustomDecrement=\"BADDECREMENTGROUP\", contains a reference to another Meter:CustomDecrement in field: "
+             "Output Variable or Meter Name=\"GOODDECREMENT\"."});
+        compare_err_stream(errMsg);
+    }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_MeterCustomDecrement_SameCustomMeterAsSourceAndSubtraction)
+    {
+        std::string const idf_objects = delimited_string({
+            "  Meter:Custom,",
+            "    My Custom Meter,           !- Name",
+            "    Generic,                   !- Resource Type",
+            "    Test Key,                  !- Key Name 1",
+            "    Test Energy;               !- Output Variable or Meter Name 1",
+            "  Meter:CustomDecrement,",
+            "    My Decrement Meter,        !- Name",
+            "    Generic,                   !- Resource Type",
+            "    My Custom Meter,           !- Source Meter Name",
+            "    ,                          !- Key Name 1",
+            "    My Custom Meter;           !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 testEnergy = 100.0;
+        SetupOutputVariable(*state, "Test Energy", Constant::Units::J, testEnergy, TimeStepType::Zone, StoreType::Sum, "Test Key");
+
+        bool errorsFound = false;
+        GetCustomMeterInput(*state, errorsFound);
+        ASSERT_FALSE(errorsFound);
+
+        int const decrementMeterNum = GetMeterIndex(*state, "MY DECREMENT METER");
+        ASSERT_NE(-1, decrementMeterNum);
+
+        // The same custom meter is the starting value and the value being subtracted, so the result must be zero.
+        EXPECT_DOUBLE_EQ(0.0, GetInstantMeterValue(*state, decrementMeterNum, TimeStepType::Zone));
     }
 
     TEST_F(EnergyPlusFixture, OutputProcessor_unitStringToEnum)
@@ -5313,6 +5438,11 @@ namespace OutputProcessor {
         EXPECT_EQ(1, op->EndUseCategory(2).NumSubcategories);
         EXPECT_EQ("General", op->EndUseCategory(2).SubcategoryName(1));
 
+        auto const zeroMeter = std::find_if(op->meterMap.begin(), op->meterMap.end(), [](auto const &meterEntry) { return meterEntry.second == 0; });
+        ASSERT_NE(op->meterMap.end(), zeroMeter);
+        EXPECT_EQ(0, getMeterHandle(state, zeroMeter->first.c_str()));
+        EXPECT_EQ(GetMeterIndex(*state, "ELECTRICITY:FACILITY"), getMeterHandle(state, "Electricity:Facility"));
+
         int found = GetMeterIndex(*state, "COOLING:ELECTRICITY");
         EXPECT_NE(-1, found);
         EXPECT_EQ((int)Constant::eResource::Electricity, (int)op->meters[found]->resource);
@@ -5406,7 +5536,7 @@ namespace OutputProcessor {
                                 light_consumption,
                                 TimeStepType::Zone,
                                 StoreType::Sum,
-                                fmt::format("LIGHTS {}", i + 1),
+                                std::format("LIGHTS {}", i + 1),
                                 Constant::eResource::Electricity,
                                 Group::Building,
                                 EndUseCat::InteriorLights,
@@ -5432,7 +5562,7 @@ namespace OutputProcessor {
                  ++state->dataEnvrn->DayOfMonth) {
 
                 ++state->dataGlobal->DayOfSim;
-                state->dataGlobal->DayOfSimChr = fmt::to_string(state->dataGlobal->DayOfSim);
+                state->dataGlobal->DayOfSimChr = std::to_string(state->dataGlobal->DayOfSim);
 
                 ++state->dataEnvrn->DayOfWeek;
                 if (state->dataEnvrn->DayOfWeek > 7) {
@@ -5459,7 +5589,7 @@ namespace OutputProcessor {
                         records_written += numOutputVariables;
                         if (records_written > (INT_MAX_AS_SIZE_T - numOutputVariables)) {
                             EXPECT_EQ("2005-12-22 02:45",
-                                      fmt::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}",
+                                      std::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}",
                                                   state->dataGlobal->CalendarYear,
                                                   state->dataEnvrn->Month,
                                                   state->dataEnvrn->DayOfMonth,
@@ -5497,6 +5627,116 @@ namespace OutputProcessor {
         EXPECT_GT(state->dataGlobal->StdOutputRecordCount, 0);
         EXPECT_GT(state->dataGlobal->StdMeterRecordCount, 0);
     }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_GetCustomMeterInput_RegexKeyName)
+    {
+        auto &op = state->dataOutputProcessor;
+
+        std::string const idf_objects = delimited_string({
+            "Meter:Custom,",
+            "LightsRegexMeter,           !- Name",
+            "Electricity,                !- Fuel Type",
+            "SPACE[1-3]-1 LIGHTS.*,      !- Key Name 1",
+            "Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0.0;
+        for (int i = 1; i <= 5; ++i) {
+            SetupOutputVariable(*state,
+                                "Lights Electricity Energy",
+                                Constant::Units::J,
+                                light_consumption,
+                                TimeStepType::Zone,
+                                StoreType::Sum,
+                                std::format("SPACE{}-1 LIGHTS 1", i),
+                                Constant::eResource::Electricity,
+                                Group::Building,
+                                EndUseCat::InteriorLights,
+                                "GeneralLights",
+                                std::format("SPACE{}-1", i),
+                                1,
+                                1);
+        }
+
+        bool errors_found = false;
+        GetCustomMeterInput(*state, errors_found);
+        ASSERT_FALSE(errors_found);
+
+        int const meterIdx = GetMeterIndex(*state, "LIGHTSREGEXMETER");
+        ASSERT_NE(-1, meterIdx);
+        auto const *meter = op->meters[meterIdx];
+
+        // Regex SPACE[1-3]-1 LIGHTS.* should match SPACE1-1, SPACE2-1, SPACE3-1 but not SPACE4-1 or SPACE5-1
+        ASSERT_EQ(3u, meter->srcVarNums.size());
+
+        std::vector<std::string> matchedKeys;
+        matchedKeys.reserve(meter->srcVarNums.size());
+        for (int const varIdx : meter->srcVarNums) {
+            matchedKeys.push_back(op->outVars[varIdx]->key);
+        }
+        std::sort(matchedKeys.begin(), matchedKeys.end());
+        EXPECT_EQ((std::vector<std::string>{"SPACE1-1 LIGHTS 1", "SPACE2-1 LIGHTS 1", "SPACE3-1 LIGHTS 1"}), matchedKeys);
+    }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_GetCustomMeterDecrement_RegexKeyName)
+    {
+        auto &op = state->dataOutputProcessor;
+
+        // The extensible group subtracts the matched variables from the source meter.
+        // Regex SPACE[4-5]-1 LIGHTS.* should subtract only SPACE4-1 and SPACE5-1 from Electricity:Building.
+        std::string const idf_objects = delimited_string({
+            "Meter:CustomDecrement,",
+            "LightsDecMeter,              !- Name",
+            "Electricity,                 !- Fuel Type",
+            "Electricity:Building,        !- Source Meter Name",
+            "SPACE[4-5]-1 LIGHTS.*,       !- Key Name 1",
+            "Lights Electricity Energy;   !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0.0;
+        for (int i = 1; i <= 5; ++i) {
+            SetupOutputVariable(*state,
+                                "Lights Electricity Energy",
+                                Constant::Units::J,
+                                light_consumption,
+                                TimeStepType::Zone,
+                                StoreType::Sum,
+                                std::format("SPACE{}-1 LIGHTS 1", i),
+                                Constant::eResource::Electricity,
+                                Group::Building,
+                                EndUseCat::InteriorLights,
+                                "GeneralLights",
+                                std::format("SPACE{}-1", i),
+                                1,
+                                1);
+        }
+
+        bool errors_found = false;
+        GetCustomMeterInput(*state, errors_found);
+        ASSERT_FALSE(errors_found);
+
+        int const meterIdx = GetMeterIndex(*state, "LIGHTSDECMETER");
+        ASSERT_NE(-1, meterIdx);
+        auto const *meter = op->meters[meterIdx];
+
+        // srcVarNums for a CustomDecrement holds the additive variables (what is subtracted from the source meter)
+        ASSERT_EQ(2u, meter->srcVarNums.size());
+
+        std::vector<std::string> matchedKeys;
+        matchedKeys.reserve(meter->srcVarNums.size());
+        for (int const varIdx : meter->srcVarNums) {
+            matchedKeys.push_back(op->outVars[varIdx]->key);
+        }
+        std::sort(matchedKeys.begin(), matchedKeys.end());
+        EXPECT_EQ((std::vector<std::string>{"SPACE4-1 LIGHTS 1", "SPACE5-1 LIGHTS 1"}), matchedKeys);
+    }
+
 } // namespace OutputProcessor
 
 } // namespace EnergyPlus

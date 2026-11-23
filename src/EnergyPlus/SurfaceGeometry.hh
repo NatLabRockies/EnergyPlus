@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -48,14 +48,12 @@
 #ifndef SurfaceGeometry_hh_INCLUDED
 #define SurfaceGeometry_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1S.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataVectorTypes.hh>
 #include <EnergyPlus/DataViewFactorInformation.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Geometry/Vector2D.hh>
 #include <EnergyPlus/HeatBalanceKivaManager.hh>
 #include <EnergyPlus/Vectors.hh>
 
@@ -165,17 +163,16 @@ namespace SurfaceGeometry {
     );
 
     void GetRectSubSurfaces(EnergyPlusData &state,
-                            bool &ErrorsFound,                       // Error flag indicator (true if errors found)
-                            int &SurfNum,                            // Count of Current SurfaceNumber
-                            int const TotWindows,                    // Number of Window SubSurfaces to obtain
-                            int const TotDoors,                      // Number of Door SubSurfaces to obtain
-                            int const TotGlazedDoors,                // Number of Glass Door SubSurfaces to obtain
-                            int const TotIZWindows,                  // Number of Interzone Window SubSurfaces to obtain
-                            int const TotIZDoors,                    // Number of Interzone Door SubSurfaces to obtain
-                            int const TotIZGlazedDoors,              // Number of Interzone Glass Door SubSurfaces to obtain
-                            const Array1D<SurfaceClass> &SubSurfIDs, // ID Assignments for valid sub surface classes
-                            int &AddedSubSurfaces,                   // Subsurfaces added when windows reference Window5
-                            int &NeedToAddSubSurfaces                // Number of surfaces to add, based on unentered IZ surfaces
+                            bool &ErrorsFound,          // Error flag indicator (true if errors found)
+                            int &SurfNum,               // Count of Current SurfaceNumber
+                            int const TotWindows,       // Number of Window SubSurfaces to obtain
+                            int const TotDoors,         // Number of Door SubSurfaces to obtain
+                            int const TotGlazedDoors,   // Number of Glass Door SubSurfaces to obtain
+                            int const TotIZWindows,     // Number of Interzone Window SubSurfaces to obtain
+                            int const TotIZDoors,       // Number of Interzone Door SubSurfaces to obtain
+                            int const TotIZGlazedDoors, // Number of Interzone Glass Door SubSurfaces to obtain
+                            int &AddedSubSurfaces,      // Subsurfaces added when windows reference Window5
+                            int &NeedToAddSubSurfaces   // Number of surfaces to add, based on unentered IZ surfaces
     );
 
     void CheckWindowShadingControlFrameDivider(EnergyPlusData &state,
@@ -276,9 +273,10 @@ namespace SurfaceGeometry {
     };
 
     void GetVertices(EnergyPlusData &state,
-                     int const SurfNum,             // Current surface number
-                     int const NSides,              // Number of sides to figure
-                     Array1S<Real64> const Vertices // Vertices, in specified order
+                     int const SurfNum,              // Current surface number
+                     int const NSides,               // Number of sides to figure
+                     Array1D<Real64> const &Numbers, // Numeric input fields, vertices in specified order
+                     int const firstVertexIndex      // Index in Numbers of the first vertex coordinate
     );
 
     void ReverseAndRecalculate(EnergyPlusData &state,
@@ -306,7 +304,7 @@ namespace SurfaceGeometry {
 
     void GetOSCData(EnergyPlusData &state, bool &ErrorsFound);
 
-    void GetOSCMData(EnergyPlusData &state, bool &ErrorsFound);
+    void GetOSCMData(EnergyPlusData &state);
 
     void GetFoundationData(EnergyPlusData &state, bool &ErrorsFound);
 
@@ -363,7 +361,7 @@ namespace SurfaceGeometry {
 
     bool isAlmostEqual3dPt(DataVectorTypes::Vector v1, DataVectorTypes::Vector v2);
 
-    bool isAlmostEqual2dPt(DataVectorTypes::Vector_2d v1, DataVectorTypes::Vector_2d v2);
+    bool isAlmostEqual2dPt(Vector2D v1, Vector2D v2);
 
     int findIndexOfVertex(DataVectorTypes::Vector vertexToFind, std::vector<DataVectorTypes::Vector> const &listOfVertices);
 
@@ -544,16 +542,44 @@ struct SurfaceGeometryData : BaseGlobalStruct
 
     // Default Constructor
     SurfaceGeometryData()
-        : BaseSurfCls(3, {"WALL", "FLOOR", "ROOF"}),
-          SubSurfCls(6, {"WINDOW", "DOOR", "GLASSDOOR", "SHADING", "TUBULARDAYLIGHTDOME", "TUBULARDAYLIGHTDIFFUSER"}),
-          BaseSurfIDs(3, {DataSurfaces::SurfaceClass::Wall, DataSurfaces::SurfaceClass::Floor, DataSurfaces::SurfaceClass::Roof}),
-          SubSurfIDs(6,
-                     {DataSurfaces::SurfaceClass::Window,
-                      DataSurfaces::SurfaceClass::Door,
-                      DataSurfaces::SurfaceClass::GlassDoor,
-                      DataSurfaces::SurfaceClass::Shading,
-                      DataSurfaces::SurfaceClass::TDD_Dome,
-                      DataSurfaces::SurfaceClass::TDD_Diffuser})
+        : BaseSurfCls(3,
+                      {
+                          "WALL",
+                          "FLOOR",
+                          "ROOF",
+                      }),
+          SubSurfCls(10,
+                     {
+                         "WINDOW",
+                         "FIXEDWINDOW",
+                         "OPERABLEWINDOW",
+                         "SKYLIGHT",
+                         "DOOR",
+                         "GLASSDOOR",
+                         "OVERHEADDOOR",
+                         "SHADING",
+                         "TUBULARDAYLIGHTDOME",
+                         "TUBULARDAYLIGHTDIFFUSER",
+                     }),
+          BaseSurfIDs(3,
+                      {
+                          DataSurfaces::SurfaceClass::Wall,
+                          DataSurfaces::SurfaceClass::Floor,
+                          DataSurfaces::SurfaceClass::Roof,
+                      }),
+          SubSurfIDs(10,
+                     {
+                         DataSurfaces::SurfaceClass::Window,
+                         DataSurfaces::SurfaceClass::FixedWindow,
+                         DataSurfaces::SurfaceClass::OperableWindow,
+                         DataSurfaces::SurfaceClass::Skylight,
+                         DataSurfaces::SurfaceClass::Door,
+                         DataSurfaces::SurfaceClass::GlassDoor,
+                         DataSurfaces::SurfaceClass::OverheadDoor,
+                         DataSurfaces::SurfaceClass::Shading,
+                         DataSurfaces::SurfaceClass::TDD_Dome,
+                         DataSurfaces::SurfaceClass::TDD_Diffuser,
+                     })
     {
     }
 };

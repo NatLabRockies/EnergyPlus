@@ -1,3 +1,12 @@
+# RelWithDebInfo (foremost), Release and MinSizeRel all define NDEBUG by default, which disables assert().
+# For profiling builds, the overhead of assert() is preponderant and renders results useless.
+# But keeping asserts enabled in RelWithDebInfo lets CI catch things like array bounds violations, but still run much faster than Debug.
+option(FORCE_ENABLE_ASSERTS "Keep assertions enabled in optimized builds such as RelWithDebInfo by undefining NDEBUG" OFF)
+mark_as_advanced(FORCE_ENABLE_ASSERTS)
+
+option(ENABLE_NATIVE_OPTIMIZATION "Enable native architecture optimizations (e.g. -march=native). Produces non-portable binaries." OFF)
+mark_as_advanced(ENABLE_NATIVE_OPTIMIZATION)
+
 # Compiler-agnostic compiler flags first
 target_compile_definitions(project_options INTERFACE -DOBJEXXFCL_ALIGN=64) # Align ObjexxFCL arrays to 64B
 target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:-DOBJEXXFCL_ARRAY_INIT_DEBUG>) # Initialize ObjexxFCL arrays to aid debugging
@@ -25,6 +34,9 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_options(project_options INTERFACE /MP) # Enables multi-processor compilation of source within a single project
   target_compile_options(project_options INTERFACE /Zc:externConstexpr)  # allows constexpr to be extern'd in headers, which is part of the standard, and supported by default on non-vs compilers
   target_compile_options(project_options INTERFACE /utf-8)  # Specifies both the source character set and the execution character set as UTF-8
+  target_compile_options(project_options INTERFACE /permissive-)  # Enable standards-conforming compiler behavior
+
+  target_compile_options(project_warnings INTERFACE /W4 /WX)
 
   # string(REGEX REPLACE "/W3" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}"
   # )# Increase to /W2 then /W3 as more serious warnings are addressed (using regex to avoid VC override warnings)
@@ -55,6 +67,16 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_definitions(project_options INTERFACE WIN32_LEAN_AND_MEAN) # Excludes rarely used services and headers from compilation
   #    ADD_CXX_DEFINITIONS("-d2SSAOptimizer-") # this disables this optimizer which has known major issues
 
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    # MSVC has no compiler-time CPU auto-detection equivalent to -march=native; the user must pick the level.
+    set(MSVC_NATIVE_ARCH "AVX2" CACHE STRING "MSVC /arch: level used when ENABLE_NATIVE_OPTIMIZATION=ON (SSE2, SSE4.2, AVX, AVX2, AVX512, AVX10.1, AVX10.2)")
+    set_property(CACHE MSVC_NATIVE_ARCH PROPERTY STRINGS "SSE2" "SSE4.2" "AVX" "AVX2" "AVX512" "AVX10.1" "AVX10.2")
+    mark_as_advanced(MSVC_NATIVE_ARCH)
+
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling /arch:${MSVC_NATIVE_ARCH}")
+    target_compile_options(project_options INTERFACE /arch:${MSVC_NATIVE_ARCH})
+  endif()
+
   # ADDITIONAL RELEASE-MODE-SPECIFIC FLAGS
   if (ENABLE_HARDENED_RUNTIME)
     message(AUTHOR_WARNING "Enabling /GS and /guard:cf for hardened runtime")
@@ -77,6 +99,7 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:/RTCsu>) # Runtime checks
   target_compile_options(project_fp_options INTERFACE $<$<CONFIG:Debug>:/fp:strict>) # Floating point model
   target_compile_options(turn_off_warnings INTERFACE /W0)
+  target_compile_options(warnings_as_not_error INTERFACE /WX-) # Disable treating warnings as errors
 
   option(FORCE_DEBUG_ARITHM_MSVC "Enable trapping floating point exceptions in non Debug mode" OFF)
   mark_as_advanced(FORCE_DEBUG_ARITHM_MSVC)
@@ -91,13 +114,30 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   option(FORCE_DEBUG_ARITHM_GCC_OR_CLANG "Enable trapping floating point exceptions in non Debug mode" OFF)
   mark_as_advanced(FORCE_DEBUG_ARITHM_GCC_OR_CLANG)
 
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+      # -mcpu=native sets both arch and tune; -march=native alone doesn't tune on AArch64 in Clang
+      # (GCC 13+ maps -march=native to -mcpu=native automatically, but -mcpu=native is correct for all versions)
+      message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -mcpu=native (AArch64)")
+      target_compile_options(project_options INTERFACE -mcpu=native)
+    else()
+      message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
+      target_compile_options(project_options INTERFACE -march=native)
+    endif()
+    # Enable fast-math for vectorization; keep -fno-finite-math-only so NaN/Inf remain valid.
+    # -ffp-contract=off is intentionally skipped below when this option is ON.
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -ffast-math -fno-finite-math-only")
+    target_compile_options(project_options INTERFACE -ffast-math -fno-finite-math-only)
+  endif()
+
   # COMPILER FLAGS
   target_compile_options(project_options INTERFACE -pipe) # Faster compiler processing
-  target_compile_options(project_options INTERFACE -Werror) # Compiler Driven Development
+  target_compile_options(project_warnings INTERFACE -Werror) # Compiler Driven Development
   target_compile_options(project_warnings INTERFACE -Wpedantic)
   # Turn on warnings about constructs/situations that may be non-portable or outside of the standard
   target_compile_options(project_warnings INTERFACE -Wall) # Turn on warnings
   target_compile_options(project_warnings INTERFACE -Wextra) # Turn on warnings
+  target_compile_options(project_warnings INTERFACE -Wsuggest-override) # Flag virtual overrides missing the `override` keyword
   target_compile_options(project_warnings INTERFACE -Wno-unknown-pragmas)
   if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0)
     target_compile_options(project_warnings INTERFACE -Wno-deprecated-copy)
@@ -105,6 +145,14 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   target_compile_options(project_warnings INTERFACE -Wno-attributes) # Don't warn on attributes Clang doesn't know
   target_compile_options(project_warnings INTERFACE -Wno-delete-non-virtual-dtor)
   target_compile_options(project_warnings INTERFACE -Wno-missing-braces)
+  # for optimized builds, lets turn OFF NDEBUG, which will re-enable assert statements
+  if(FORCE_ENABLE_ASSERTS)
+    target_compile_options(
+      project_options INTERFACE $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-UNDEBUG>
+    )
+  endif()
+  # Keep frame pointers around in RelWithDebInfo so profilers (perf, gprof, ...) can unwind the stack reliably
+  target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-fno-omit-frame-pointer>)
   if(CMAKE_COMPILER_IS_GNUCXX) # g++
     # Suppress unused-but-set warnings until more serious ones are addressed
     target_compile_options(project_warnings INTERFACE -Wno-unused-but-set-parameter -Wno-unused-but-set-variable)
@@ -120,16 +168,24 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
     # depending on the level of overflow check selected, the stringop-overflow can also emit false positives
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wstringop-overflow
     target_compile_options(project_warnings INTERFACE -Wno-stringop-overflow)
-    # for RelWithDebInfo builds, lets turn OFF NDEBUG, which will re-enable assert statements
-    target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-UNDEBUG>)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+      # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
+      target_compile_options(project_warnings INTERFACE -Wno-restrict)
+    endif()
+    if(NOT ENABLE_NATIVE_OPTIMIZATION)
+      target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
+    endif()
   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    target_compile_options(project_warnings INTERFACE -Wshadow-field) # Equivalent to MSVC's C4458 (declaration of 'identifier' hides class member); narrower than -Wshadow
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
       # Suppress unused-but-set warnings until more serious ones are addressed
       target_compile_options(project_warnings INTERFACE -Wno-unused-but-set-parameter -Wno-unused-but-set-variable)
     endif()
     target_compile_options(project_warnings INTERFACE -Wno-vexing-parse)
     target_compile_options(project_warnings INTERFACE -Wno-invalid-source-encoding)
-    target_compile_options(project_fp_options INTERFACE -ffp-contract=off)
+    if(NOT ENABLE_NATIVE_OPTIMIZATION)
+      target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is on)
+    endif()
   endif()
 
   set(need_arithm_debug_genex "$<OR:$<BOOL:${FORCE_DEBUG_ARITHM_GCC_OR_CLANG}>,$<CONFIG:Debug>>")
@@ -159,8 +215,14 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   # ADD_CXX_RELEASE_DEFINITIONS("-Ofast") # -Ofast (or -ffast-math) needed to auto-vectorize floating point loops
 
   target_compile_options(turn_off_warnings INTERFACE -w)
+  target_compile_options(warnings_as_not_error INTERFACE -Wno-error) # Disable treating warnings as errors
 
 elseif(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling /QxHost")
+    target_compile_options(project_options INTERFACE /QxHost)
+  endif()
 
   # Disabled Warnings: Enable some of these as more serious warnings are addressed
   #   161 Unrecognized pragma
@@ -216,6 +278,11 @@ elseif(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   target_compile_options(turn_off_warnings INTERFACE /w)
 
 elseif(UNIX AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -xHost")
+    target_compile_options(project_options INTERFACE -xHost)
+  endif()
 
   # Disabled Warnings: Enable some of these as more serious warnings are addressed
   #   161 Unrecognized pragma
@@ -296,6 +363,16 @@ if("Ninja" STREQUAL ${CMAKE_GENERATOR})
     endif()
 
   endif()
+endif()
+
+# Embeds the compiler command line into the binary (.GCC.command.line section), so the exact flags used can be recovered later with:
+#   `readelf --string-dump=.GCC.command.line energyplus`
+# ELF-only, so excludes AppleClang (Mach-O). Applied to the energyplus executable target only, see src/EnergyPlus/CMakeLists.txt.
+set(ENERGYPLUS_RECORD_SWITCHES_FLAGS "")
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(ENERGYPLUS_RECORD_SWITCHES_FLAGS -frecord-gcc-switches)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(ENERGYPLUS_RECORD_SWITCHES_FLAGS -frecord-command-line)
 endif()
 
 # Xcode/Ninja generators undefined MAKE

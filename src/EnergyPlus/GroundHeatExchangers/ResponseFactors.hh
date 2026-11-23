@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -66,7 +66,6 @@ namespace GroundHeatExchangers {
         static constexpr auto moduleName = "GroundHeatExchanger:ResponseFactors";
         std::string name;                                        // Name
         unsigned int numBoreholes = 0;                           // Number of boreholes
-        int numGFuncPairs = 0;                                   // Number of g-function pairs
         Real64 gRefRatio = 0.0;                                  // Reference ratio of g-function set
         Real64 maxSimYears = 0.0;                                // Maximum length of simulation in years
         std::vector<Real64> time;                                // response time in seconds

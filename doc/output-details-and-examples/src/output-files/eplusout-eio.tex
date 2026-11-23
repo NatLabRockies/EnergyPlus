@@ -86,7 +86,7 @@ Environment:Site Atmospheric Variation,0.330,460.000,6.500000E-003
 
 ~SurfaceGeometry,UpperLeftCorner,CounterClockwise,RelativeCoordinateSystem
 
-The simulation parameters output is the simplest form of reporting in the \textbf{eplusout.eio} file. Each of the ``header'' records (lines starting with an ``!'') are followed immediately by the one and only data line. By and large, these data lines are all merely echoes of the entries in the IDF (or defaulted for blank fields). For most of these descriptions, you can look at the object fields (of same name) in the \href{InputOutputReference.pdf}{Input Output Reference} document.
+The simulation parameters output is the simplest form of reporting in the \textbf{eplusout.eio} file. Each of the ``header'' records (lines starting with an ``!'') are followed immediately by the one and only data line. By and large, these data lines are all merely echoes of the entries in the IDF (or defaulted for blank fields). For most of these descriptions, you can look at the object fields (of same name) in the \href{https://energyplus.readthedocs.io/en/latest/guides/input-output-reference/index.html}{Input Output Reference} document.
 
 \subsection{Version}\label{version}
 
@@ -2411,7 +2411,7 @@ This is the calculated number of CTFs (Conduction Transfer Functions). The condu
 
 \subsubsection{Field: Time Step}\label{field-time-step}
 
-The ``timestep'' in the construction line is the timestep at which the CTFs are valid. Because CTFs for certain constructions might not be stable at the user specified timestep (might be too ``heavy'' from a thermal mass standpoint), this may be different from the zone timestep (specified in ``TimeStep in Hour''). In all cases though, this will be greater than or equal to the zone timestep. If the timestep for the construction is greater than the zone timestep, E+ will use interpolated histories to solve for the surface heat balances for this surface (see discussion on interpolated histories in the \href{EngineeringDoc.pdf}{Engineering Reference} document).
+The ``timestep'' in the construction line is the timestep at which the CTFs are valid. Because CTFs for certain constructions might not be stable at the user specified timestep (might be too ``heavy'' from a thermal mass standpoint), this may be different from the zone timestep (specified in ``TimeStep in Hour''). In all cases though, this will be greater than or equal to the zone timestep. If the timestep for the construction is greater than the zone timestep, E+ will use interpolated histories to solve for the surface heat balances for this surface (see discussion on interpolated histories in the \href{https://energyplus.readthedocs.io/en/latest/guides/engineering-reference/index.html}{Engineering Reference} document).
 
 \subsubsection{Field: Thermal Conductance}\label{field-thermal-conductance}
 

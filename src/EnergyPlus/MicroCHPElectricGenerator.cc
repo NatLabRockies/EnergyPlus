@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -117,9 +118,7 @@ PlantComponent *MicroCHPDataStruct::factory(EnergyPlusData &state, std::string c
         }
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, format("LocalMicroCHPGenFactory: Error getting inputs for micro-CHP gen named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("LocalMicroCHPGenFactory: Error getting inputs for micro-CHP gen named: {}", objectName)); // LCOV_EXCL_LINE
 }
 
 void GetMicroCHPGeneratorInput(EnergyPlusData &state)
@@ -154,7 +153,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
         state.dataCHPElectGen->NumMicroCHPParams = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (state.dataCHPElectGen->NumMicroCHPParams <= 0) {
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -177,8 +176,6 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, AlphArray(1)};
 
             auto &microCHPParams = state.dataCHPElectGen->MicroCHPParamInput(CHPParamNum);
-
-            std::string ObjMSGName = s_ipsc->cCurrentModuleObject + " Named " + AlphArray(1);
 
             microCHPParams.Name = AlphArray(1);        // A1 name
             microCHPParams.MaxElecPower = NumArray(1); // N1 Maximum Electric Power [W]
@@ -207,8 +204,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.PlantFlowControl = false;
             }
             if ((!(Util::SameString(AlphArray(4), "InternalControl"))) && (!(Util::SameString(AlphArray(4), "PlantControl")))) {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(4), AlphArray(4)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(4), AlphArray(4)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
             if (microCHPParams.InternalFlowControl) { // get the curve
@@ -237,15 +234,15 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             microCHPParams.RadiativeFraction = NumArray(9); // N9 radiative fraction for skin losses
             microCHPParams.MCeng = NumArray(10);            // N10 Aggregated Thermal Mass of Generator MC_eng
             if (microCHPParams.MCeng <= 0.0) {
-                ShowSevereError(state, format("Invalid, {} = {:.5R}", s_ipsc->cNumericFieldNames(10), NumArray(10)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {:.5f}", s_ipsc->cNumericFieldNames(10), NumArray(10)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, "Thermal mass must be greater than zero");
                 ErrorsFound = true;
             }
             microCHPParams.MCcw = NumArray(11); // Aggregated Thermal Mass of Heat Recovery MC_cw
             if (microCHPParams.MCcw <= 0.0) {
-                ShowSevereError(state, format("Invalid, {} = {:.5R}", s_ipsc->cNumericFieldNames(11), NumArray(11)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {:.5f}", s_ipsc->cNumericFieldNames(11), NumArray(11)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, "Thermal mass must be greater than zero");
                 ErrorsFound = true;
             }
@@ -256,8 +253,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.WarmUpByEngineTemp = false;
             }
             if ((!(Util::SameString(AlphArray(7), "NominalEngineTemperature"))) && (!(Util::SameString(AlphArray(7), "TimeDelay")))) {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(7), AlphArray(7)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(7), AlphArray(7)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
             microCHPParams.kf = NumArray(13);          // N13 Warmup Fuel Flow Rate Coefficient k_f
@@ -275,8 +272,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.WarmRestartOkay = false;
             }
             if ((!(Util::SameString(AlphArray(8), "MandatoryCoolDown"))) && (!(Util::SameString(AlphArray(8), "OptionalCoolDown")))) {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -286,7 +283,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
 
         if (state.dataCHPElectGen->NumMicroCHPs <= 0) {
             // shouldn't ever come here?
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -321,8 +318,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             if (thisParamID != 0) {
                 microCHP.A42Model = state.dataCHPElectGen->MicroCHPParamInput(thisParamID); // entire structure of input data assigned here!
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -330,8 +327,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHP.ZoneName = AlphArray(3); //  A3 Zone Name
                 microCHP.ZoneID = Util::FindItemInList(microCHP.ZoneName, state.dataHeatBal->Zone);
                 if (microCHP.ZoneID == 0) {
-                    ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(3), AlphArray(3)));
-                    ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(3), AlphArray(3)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             } else {
@@ -340,53 +337,53 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             microCHP.PlantInletNodeName = AlphArray(4);  //  A4 Cooling Water Inlet Node Name
             microCHP.PlantOutletNodeName = AlphArray(5); //  A5 Cooling Water Outlet Node Name
             // find node ids for water path
-            microCHP.PlantInletNodeID = NodeInputManager::GetOnlySingleNode(state,
-                                                                            AlphArray(4),
-                                                                            ErrorsFound,
-                                                                            DataLoopNode::ConnectionObjectType::GeneratorMicroCHP,
-                                                                            AlphArray(1),
-                                                                            DataLoopNode::NodeFluidType::Water,
-                                                                            DataLoopNode::ConnectionType::Inlet,
-                                                                            NodeInputManager::CompFluidStream::Primary,
-                                                                            DataLoopNode::ObjectIsNotParent);
-            microCHP.PlantOutletNodeID = NodeInputManager::GetOnlySingleNode(state,
-                                                                             AlphArray(5),
-                                                                             ErrorsFound,
-                                                                             DataLoopNode::ConnectionObjectType::GeneratorMicroCHP,
-                                                                             AlphArray(1),
-                                                                             DataLoopNode::NodeFluidType::Water,
-                                                                             DataLoopNode::ConnectionType::Outlet,
-                                                                             NodeInputManager::CompFluidStream::Primary,
-                                                                             DataLoopNode::ObjectIsNotParent);
-            BranchNodeConnections::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(4), AlphArray(5), "Heat Recovery Nodes");
+            microCHP.PlantInletNodeID = Node::GetOnlySingleNode(state,
+                                                                AlphArray(4),
+                                                                ErrorsFound,
+                                                                Node::ConnectionObjectType::GeneratorMicroCHP,
+                                                                AlphArray(1),
+                                                                Node::FluidType::Water,
+                                                                Node::ConnectionType::Inlet,
+                                                                Node::CompFluidStream::Primary,
+                                                                Node::ObjectIsNotParent);
+            microCHP.PlantOutletNodeID = Node::GetOnlySingleNode(state,
+                                                                 AlphArray(5),
+                                                                 ErrorsFound,
+                                                                 Node::ConnectionObjectType::GeneratorMicroCHP,
+                                                                 AlphArray(1),
+                                                                 Node::FluidType::Water,
+                                                                 Node::ConnectionType::Outlet,
+                                                                 Node::CompFluidStream::Primary,
+                                                                 Node::ObjectIsNotParent);
+            Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(4), AlphArray(5), "Heat Recovery Nodes");
 
             microCHP.AirInletNodeName = AlphArray(6); //  A6 Air Inlet Node Name
             // check the node connections
-            microCHP.AirInletNodeID = NodeInputManager::GetOnlySingleNode(state,
-                                                                          AlphArray(6),
-                                                                          ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::GeneratorMicroCHP,
-                                                                          AlphArray(1),
-                                                                          DataLoopNode::NodeFluidType::Air,
-                                                                          DataLoopNode::ConnectionType::Inlet,
-                                                                          NodeInputManager::CompFluidStream::Secondary,
-                                                                          DataLoopNode::ObjectIsNotParent);
+            microCHP.AirInletNodeID = Node::GetOnlySingleNode(state,
+                                                              AlphArray(6),
+                                                              ErrorsFound,
+                                                              Node::ConnectionObjectType::GeneratorMicroCHP,
+                                                              AlphArray(1),
+                                                              Node::FluidType::Air,
+                                                              Node::ConnectionType::Inlet,
+                                                              Node::CompFluidStream::Secondary,
+                                                              Node::ObjectIsNotParent);
 
             microCHP.AirOutletNodeName = AlphArray(7); //  A7 Air Outlet Node Name
-            microCHP.AirOutletNodeID = NodeInputManager::GetOnlySingleNode(state,
-                                                                           AlphArray(7),
-                                                                           ErrorsFound,
-                                                                           DataLoopNode::ConnectionObjectType::GeneratorMicroCHP,
-                                                                           AlphArray(1),
-                                                                           DataLoopNode::NodeFluidType::Air,
-                                                                           DataLoopNode::ConnectionType::Outlet,
-                                                                           NodeInputManager::CompFluidStream::Secondary,
-                                                                           DataLoopNode::ObjectIsNotParent);
+            microCHP.AirOutletNodeID = Node::GetOnlySingleNode(state,
+                                                               AlphArray(7),
+                                                               ErrorsFound,
+                                                               Node::ConnectionObjectType::GeneratorMicroCHP,
+                                                               AlphArray(1),
+                                                               Node::FluidType::Air,
+                                                               Node::ConnectionType::Outlet,
+                                                               Node::CompFluidStream::Secondary,
+                                                               Node::ObjectIsNotParent);
 
             microCHP.FuelSupplyID = Util::FindItemInList(AlphArray(8), state.dataGenerator->FuelSupply); // Fuel Supply ID
             if (microCHP.FuelSupplyID == 0) {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -401,7 +398,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
+            ShowFatalError(state, std::format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
         }
 
         // setup report variables
@@ -711,15 +708,14 @@ void MicroCHPDataStruct::onInitLoopEquip(EnergyPlusData &state, const EnergyPlus
 {
     static constexpr std::string_view RoutineName("MicroCHPDataStruct::onInitLoopEquip");
 
-    Real64 rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum)
-                     .glycol->getDensity(state, state.dataLoopNodes->Node(this->PlantInletNodeID).Temp, RoutineName);
+    Real64 rho = this->CWPlantLoc.loop->glycol->getDensity(state, state.dataLoopNodes->Node(this->PlantInletNodeID).Temp, RoutineName);
     if (this->A42Model.InternalFlowControl) { // got a curve
         this->PlantMassFlowRateMax =
             2.0 * this->A42Model.WaterFlowCurve->value(state, this->A42Model.MaxElecPower, state.dataLoopNodes->Node(this->PlantInletNodeID).Temp);
     } else if (this->CWPlantLoc.loopSideNum == DataPlant::LoopSideLocation::Supply) {
-        if (state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).MaxMassFlowRate > 0.0) {
-            this->PlantMassFlowRateMax = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).MaxMassFlowRate;
-        } else if (state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).PlantSizNum > 0) {
+        if (this->CWPlantLoc.loop->MaxMassFlowRate > 0.0) {
+            this->PlantMassFlowRateMax = this->CWPlantLoc.loop->MaxMassFlowRate;
+        } else if (this->CWPlantLoc.loop->PlantSizNum > 0) {
             this->PlantMassFlowRateMax = state.dataSize->PlantSizData(this->CWPlantLoc.loopNum).DesVolFlowRate * rho;
         } else {
             this->PlantMassFlowRateMax = 2.0;
@@ -789,12 +785,8 @@ void MicroCHPDataStruct::InitMicroCHPNoNormalizeGenerators(EnergyPlusData &state
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).CurrentOpMode = DataGenerators::OperatingMode::Off;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FractionalDayofLastShutDown = 0.0;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FractionalDayofLastStartUp = 0.0;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).HasBeenOn = false;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).DuringStartUp = false;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).DuringShutDown = false;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).FuelMdotLastTimestep = 0.0;
         state.dataGenerator->GeneratorDynamics(DynaCntrlNum).PelLastTimeStep = 0.0;
-        state.dataGenerator->GeneratorDynamics(DynaCntrlNum).NumCycles = 0;
 
         state.dataGenerator->FuelSupply(this->FuelSupplyID).QskinLoss = 0.0;
 
@@ -852,7 +844,7 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
     static constexpr std::string_view RoutineName("CalcMicroCHPNoNormalizeGeneratorModel");
 
     DataGenerators::OperatingMode CurrentOpMode = DataGenerators::OperatingMode::Invalid;
-    Real64 NdotFuel;
+    Real64 NdotFuel = 0.0;
     Real64 AllowedLoad = 0.0;
     Real64 PLRforSubtimestepStartUp(1.0);
     Real64 PLRforSubtimestepShutDown(0.0);
@@ -1170,7 +1162,7 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
         Teng = FuncDetermineEngineTemp(
             TcwOut, this->A42Model.MCeng, this->A42Model.UAhx, this->A42Model.UAskin, thisAmbientTemp, Qgenss, this->A42Model.TengLast, dt);
 
-        Real64 Cp = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getSpecificHeat(state, TcwIn, RoutineName);
+        Real64 Cp = this->CWPlantLoc.loop->glycol->getSpecificHeat(state, TcwIn, RoutineName);
 
         TcwOut =
             FuncDetermineCoolantWaterExitTemp(TcwIn, this->A42Model.MCcw, this->A42Model.UAhx, MdotCW * Cp, Teng, this->A42Model.TempCWOutLast, dt);
@@ -1389,7 +1381,7 @@ void MicroCHPDataStruct::CalcUpdateHeatRecovery(EnergyPlusData &state) const
 
     state.dataLoopNodes->Node(this->PlantOutletNodeID).Temp = this->A42Model.TcwOut;
 
-    Real64 Cp = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getSpecificHeat(state, this->A42Model.TcwIn, RoutineName);
+    Real64 Cp = this->CWPlantLoc.loop->glycol->getSpecificHeat(state, this->A42Model.TcwIn, RoutineName);
 
     state.dataLoopNodes->Node(this->PlantOutletNodeID).Enthalpy = this->A42Model.TcwOut * Cp;
 }
@@ -1420,7 +1412,7 @@ void MicroCHPDataStruct::UpdateMicroCHPGeneratorRecords(EnergyPlusData &state) /
     this->A42Model.ACEnergyGen = this->A42Model.Pnet * state.dataHVACGlobal->TimeStepSysSec;     // energy produced (J)
     this->A42Model.QdotHX = this->A42Model.UAhx * (this->A42Model.Teng - this->A42Model.TcwOut); //  heat recovered rate (W)
 
-    Real64 Cp = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getSpecificHeat(state, this->A42Model.TcwIn, RoutineName);
+    Real64 Cp = this->CWPlantLoc.loop->glycol->getSpecificHeat(state, this->A42Model.TcwIn, RoutineName);
 
     this->A42Model.QdotHR = this->PlantMassFlowRate * Cp * (this->A42Model.TcwOut - this->A42Model.TcwIn);
     this->A42Model.TotalHeatEnergyRec = this->A42Model.QdotHR * state.dataHVACGlobal->TimeStepSysSec; // heat recovered energy (J)

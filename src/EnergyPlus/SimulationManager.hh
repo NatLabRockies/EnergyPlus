@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -75,8 +75,6 @@ namespace SimulationManager {
     std::unique_ptr<std::ostream>
     OpenStreamFile(EnergyPlusData &state, const fs::path &fileName, std::ios_base::openmode mode = (std::ios_base::out | std::ios_base::trunc));
 
-    std::unique_ptr<fmt::ostream> OpenFmtStreamFile(EnergyPlusData &state, const fs::path &filePath);
-
     void OpenOutputFiles(EnergyPlusData &state);
 
     void CloseOutputFiles(EnergyPlusData &state);
@@ -97,7 +95,6 @@ struct SimulationManagerData : BaseGlobalStruct
 {
     bool RunPeriodsInInput = false;
     bool RunControlInInput = false;
-    bool PreP_Fatal = false;
     bool WarningOut = true;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
@@ -114,7 +111,6 @@ struct SimulationManagerData : BaseGlobalStruct
     {
         this->RunPeriodsInInput = false;
         this->RunControlInInput = false;
-        this->PreP_Fatal = false;
         this->WarningOut = true;
     }
 };

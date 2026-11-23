@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -100,8 +100,8 @@ void GASSES90(EnergyPlusData &state,
 {
 
     static Real64 const two_sqrt_2(2.0 * std::sqrt(2.0));
-    Real64 molmix;
-    Real64 cpmixm;
+    Real64 molmix = 0.0;
+    Real64 cpmixm = 0.0;
     Real64 phimup;
     Real64 downer;
     Real64 psiup;
@@ -254,7 +254,7 @@ void GASSES90(EnergyPlusData &state,
     pr = cp * visc / con; // calculate the Prandtl number
 }
 
-void GassesLow(Real64 const tmean, Real64 const mwght, Real64 const pressure, Real64 const gama, Real64 &cond, int &nperr, std::string &ErrorMessage)
+void GassesLow(Real64 const tmean, Real64 const mwght, Real64 const pressure, Real64 const gama, Real64 &con, int &nperr, std::string &ErrorMessage)
 {
 
     Real64 const alpha = alpha1 * alpha2 / (alpha2 + alpha1 * (1 - alpha2));
@@ -267,7 +267,7 @@ void GassesLow(Real64 const tmean, Real64 const mwght, Real64 const pressure, Re
 
     Real64 const B = alpha * (gama + 1) / (gama - 1) * std::sqrt(Constant::UniversalGasConst / (8 * Constant::Pi * mwght * tmean));
 
-    cond = B * pressure;
+    con = B * pressure;
 }
 
 } // namespace EnergyPlus::TARCOGGasses90

@@ -1,265 +1,218 @@
-
  ! ========================================================================
  ! The following was created by the Basement preprocessor program.
  ! Weather File Location=Chicago Ohare Intl Ap IL USA TMY3
  !
 
-SurfaceProperty:OtherSideCoefficients,
-  surfPropOthSdCoefBasementAvgWall,    !- Name
-  0.0,                                 !- Combined Convective Radiative Film Coefficient
-  1.0,                                 !- Constant Temperature
-  1.0,                                 !- Constant Temperature Coefficient
-  0.0,                                 !- External Dry-Bulb Temperature Coefficient
-  0.0,                                 !- Ground Temperature Coefficient
-  0.0,                                 !- Wind Speed Coefficient
-  0.0,                                 !- Zone Air Temperature Coefficient
-  scheduleOSCBasementWallSurfaceTemp,  !- Constant Temperature Schedule Name
-  No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
-  24;                                  !- Period of Sinusoidal Variation
 
-Schedule:Compact,
-  scheduleOSCBasementWallSurfaceTemp,  !- Name
-  Temperature,                         !- ScheduleType
-  Through:   1/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.70,                               !- Field
-  Through:   2/28,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.69,                               !- Field
-  Through:   3/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.88,                               !- Field
-  Through:   4/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.04,                               !- Field
-  Through:   5/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.26,                               !- Field
-  Through:   6/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.38,                               !- Field
-  Through:   7/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.52,                               !- Field
-  Through:   8/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.59,                               !- Field
-  Through:   9/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.56,                               !- Field
-  Through:  10/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.34,                               !- Field
-  Through:  11/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.14,                               !- Field
-  Through:  12/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.84;                               !- Field
+  SurfaceProperty:OtherSideCoefficients,
+    surfPropOthSdCoefBasementAvgWall,  !- Name
+    0.0,                     !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+    1.0,                     !- Constant Temperature {C}
+    1.0,                     !- Constant Temperature Coefficient
+    0.0,                     !- External Dry-Bulb Temperature Coefficient
+    0.0,                     !- Ground Temperature Coefficient
+    0.0,                     !- Wind Speed Coefficient
+    0.0,                     !- Zone Air Temperature Coefficient
+    scheduleOSCBasementWallSurfaceTemp,  !- Constant Temperature Schedule Name
+    No,                      !- Sinusoidal Variation of Constant Temperature Coefficient
+    24;                      !- Period of Sinusoidal Variation {hr}
 
-SurfaceProperty:OtherSideCoefficients,
-  surfPropOthSdCoefBasementAvgFloor,   !- Name
-  0.0,                                 !- Combined Convective Radiative Film Coefficient
-  1.0,                                 !- Constant Temperature
-  1.0,                                 !- Constant Temperature Coefficient
-  0.0,                                 !- External Dry-Bulb Temperature Coefficient
-  0.0,                                 !- Ground Temperature Coefficient
-  0.0,                                 !- Wind Speed Coefficient
-  0.0,                                 !- Zone Air Temperature Coefficient
-  scheduleOSCBasementFloorTemp,        !- Constant Temperature Schedule Name
-  No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
-  24;                                  !- Period of Sinusoidal Variation
+  Schedule:Compact,
+    scheduleOSCBasementWallSurfaceTemp,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through:   1/31,         !- Field 1
+    For:AllDays,             !- Field 2
+    Until:24:00,18.70,       !- Field 3
+    Through:   2/28,         !- Field 5
+    For:AllDays,             !- Field 6
+    Until:24:00,18.69,       !- Field 7
+    Through:   3/31,         !- Field 9
+    For:AllDays,             !- Field 10
+    Until:24:00,18.88,       !- Field 11
+    Through:   4/30,         !- Field 13
+    For:AllDays,             !- Field 14
+    Until:24:00,19.04,       !- Field 15
+    Through:   5/31,         !- Field 17
+    For:AllDays,             !- Field 18
+    Until:24:00,19.26,       !- Field 19
+    Through:   6/30,         !- Field 21
+    For:AllDays,             !- Field 22
+    Until:24:00,19.38,       !- Field 23
+    Through:   7/31,         !- Field 25
+    For:AllDays,             !- Field 26
+    Until:24:00,19.52,       !- Field 27
+    Through:   8/31,         !- Field 29
+    For:AllDays,             !- Field 30
+    Until:24:00,19.59,       !- Field 31
+    Through:   9/30,         !- Field 33
+    For:AllDays,             !- Field 34
+    Until:24:00,19.56,       !- Field 35
+    Through:  10/31,         !- Field 37
+    For:AllDays,             !- Field 38
+    Until:24:00,19.34,       !- Field 39
+    Through:  11/30,         !- Field 41
+    For:AllDays,             !- Field 42
+    Until:24:00,19.14,       !- Field 43
+    Through:  12/31,         !- Field 45
+    For:AllDays,             !- Field 46
+    Until:24:00,18.84;       !- Field 47
 
-Schedule:Compact,
-  scheduleOSCBasementFloorTemp,        !- Name
-  Temperature,                         !- ScheduleType
-  Through:   1/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:   2/28,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:   3/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.88,                               !- Field
-  Through:   4/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.88,                               !- Field
-  Through:   5/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.88,                               !- Field
-  Through:   6/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:   7/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:   8/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:   9/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89,                               !- Field
-  Through:  10/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.90,                               !- Field
-  Through:  11/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.90,                               !- Field
-  Through:  12/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.89;                               !- Field
+  SurfaceProperty:OtherSideCoefficients,
+    surfPropOthSdCoefBasementAvgFloor,  !- Name
+    0.0,                     !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+    1.0,                     !- Constant Temperature {C}
+    1.0,                     !- Constant Temperature Coefficient
+    0.0,                     !- External Dry-Bulb Temperature Coefficient
+    0.0,                     !- Ground Temperature Coefficient
+    0.0,                     !- Wind Speed Coefficient
+    0.0,                     !- Zone Air Temperature Coefficient
+    scheduleOSCBasementFloorTemp,  !- Constant Temperature Schedule Name
+    No,                      !- Sinusoidal Variation of Constant Temperature Coefficient
+    24;                      !- Period of Sinusoidal Variation {hr}
 
-SurfaceProperty:OtherSideCoefficients,
-  surfPropOthSdCoefBasementUpperWall,  !- Name
-  0.0,                                 !- Combined Convective Radiative Film Coefficient
-  1.0,                                 !- Constant Temperature
-  1.0,                                 !- Constant Temperature Coefficient
-  0.0,                                 !- External Dry-Bulb Temperature Coefficient
-  0.0,                                 !- Ground Temperature Coefficient
-  0.0,                                 !- Wind Speed Coefficient
-  0.0,                                 !- Zone Air Temperature Coefficient
-  scheduleOSCBasementUpperWallTemp,    !- Constant Temperature Schedule Name
-  No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
-  24;                                  !- Period of Sinusoidal Variation
+  Schedule:Compact,
+    scheduleOSCBasementFloorTemp,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through:   1/31,         !- Field 1
+    For:AllDays,             !- Field 2
+    Until:24:00,19.89,       !- Field 3
+    Through:   2/28,         !- Field 5
+    For:AllDays,             !- Field 6
+    Until:24:00,19.89,       !- Field 7
+    Through:   3/31,         !- Field 9
+    For:AllDays,             !- Field 10
+    Until:24:00,19.88,       !- Field 11
+    Through:   4/30,         !- Field 13
+    For:AllDays,             !- Field 14
+    Until:24:00,19.88,       !- Field 15
+    Through:   5/31,         !- Field 17
+    For:AllDays,             !- Field 18
+    Until:24:00,19.88,       !- Field 19
+    Through:   6/30,         !- Field 21
+    For:AllDays,             !- Field 22
+    Until:24:00,19.89,       !- Field 23
+    Through:   7/31,         !- Field 25
+    For:AllDays,             !- Field 26
+    Until:24:00,19.89,       !- Field 27
+    Through:   8/31,         !- Field 29
+    For:AllDays,             !- Field 30
+    Until:24:00,19.89,       !- Field 31
+    Through:   9/30,         !- Field 33
+    For:AllDays,             !- Field 34
+    Until:24:00,19.89,       !- Field 35
+    Through:  10/31,         !- Field 37
+    For:AllDays,             !- Field 38
+    Until:24:00,19.90,       !- Field 39
+    Through:  11/30,         !- Field 41
+    For:AllDays,             !- Field 42
+    Until:24:00,19.90,       !- Field 43
+    Through:  12/31,         !- Field 45
+    For:AllDays,             !- Field 46
+    Until:24:00,19.89;       !- Field 47
 
-Schedule:Compact,
-  scheduleOSCBasementUpperWallTemp,    !- Name
-  Temperature,                         !- ScheduleType
-  Through:   1/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.07,                               !- Field
-  Through:   2/28,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.11,                               !- Field
-  Through:   3/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.46,                               !- Field
-  Through:   4/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.70,                               !- Field
-  Through:   5/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.02,                               !- Field
-  Through:   6/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.15,                               !- Field
-  Through:   7/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.34,                               !- Field
-  Through:   8/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.38,                               !- Field
-  Through:   9/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.28,                               !- Field
-  Through:  10/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.90,                               !- Field
-  Through:  11/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.60,                               !- Field
-  Through:  12/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  18.18;                               !- Field
+  SurfaceProperty:OtherSideCoefficients,
+    surfPropOthSdCoefBasementUpperWall,  !- Name
+    0.0,                     !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+    1.0,                     !- Constant Temperature {C}
+    1.0,                     !- Constant Temperature Coefficient
+    0.0,                     !- External Dry-Bulb Temperature Coefficient
+    0.0,                     !- Ground Temperature Coefficient
+    0.0,                     !- Wind Speed Coefficient
+    0.0,                     !- Zone Air Temperature Coefficient
+    scheduleOSCBasementUpperWallTemp,  !- Constant Temperature Schedule Name
+    No,                      !- Sinusoidal Variation of Constant Temperature Coefficient
+    24;                      !- Period of Sinusoidal Variation {hr}
 
-SurfaceProperty:OtherSideCoefficients,
-  surfPropOthSdCoefBasementLowerWall,  !- Name
-  0.0,                                 !- Combined Convective Radiative Film Coefficient
-  1.0,                                 !- Constant Temperature
-  1.0,                                 !- Constant Temperature Coefficient
-  0.0,                                 !- External Dry-Bulb Temperature Coefficient
-  0.0,                                 !- Ground Temperature Coefficient
-  0.0,                                 !- Wind Speed Coefficient
-  0.0,                                 !- Zone Air Temperature Coefficient
-  scheduleOSCBasementLowerWallTemp,    !- Constant Temperature Schedule Name
-  No,                                  !- Sinusoidal Variation of Constant Temperature Coefficient
-  24;                                  !- Period of Sinusoidal Variation
+  Schedule:Compact,
+    scheduleOSCBasementUpperWallTemp,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through:   1/31,         !- Field 1
+    For:AllDays,             !- Field 2
+    Until:24:00,18.07,       !- Field 3
+    Through:   2/28,         !- Field 5
+    For:AllDays,             !- Field 6
+    Until:24:00,18.11,       !- Field 7
+    Through:   3/31,         !- Field 9
+    For:AllDays,             !- Field 10
+    Until:24:00,18.46,       !- Field 11
+    Through:   4/30,         !- Field 13
+    For:AllDays,             !- Field 14
+    Until:24:00,18.70,       !- Field 15
+    Through:   5/31,         !- Field 17
+    For:AllDays,             !- Field 18
+    Until:24:00,19.02,       !- Field 19
+    Through:   6/30,         !- Field 21
+    For:AllDays,             !- Field 22
+    Until:24:00,19.15,       !- Field 23
+    Through:   7/31,         !- Field 25
+    For:AllDays,             !- Field 26
+    Until:24:00,19.34,       !- Field 27
+    Through:   8/31,         !- Field 29
+    For:AllDays,             !- Field 30
+    Until:24:00,19.38,       !- Field 31
+    Through:   9/30,         !- Field 33
+    For:AllDays,             !- Field 34
+    Until:24:00,19.28,       !- Field 35
+    Through:  10/31,         !- Field 37
+    For:AllDays,             !- Field 38
+    Until:24:00,18.90,       !- Field 39
+    Through:  11/30,         !- Field 41
+    For:AllDays,             !- Field 42
+    Until:24:00,18.60,       !- Field 43
+    Through:  12/31,         !- Field 45
+    For:AllDays,             !- Field 46
+    Until:24:00,18.18;       !- Field 47
 
-Schedule:Compact,
-  scheduleOSCBasementLowerWallTemp,    !- Name
-  Temperature,                         !- ScheduleType
-  Through:   1/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.34,                               !- Field
-  Through:   2/28,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.26,                               !- Field
-  Through:   3/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.30,                               !- Field
-  Through:   4/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.39,                               !- Field
-  Through:   5/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.49,                               !- Field
-  Through:   6/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.61,                               !- Field
-  Through:   7/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.70,                               !- Field
-  Through:   8/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.80,                               !- Field
-  Through:   9/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.84,                               !- Field
-  Through:  10/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.78,                               !- Field
-  Through:  11/30,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.68,                               !- Field
-  Through:  12/31,                     !- Field
-  For:AllDays,                         !- Field
-  Until:24:00,                         !- Field
-  19.50;                               !- Field
+  SurfaceProperty:OtherSideCoefficients,
+    surfPropOthSdCoefBasementLowerWall,  !- Name
+    0.0,                     !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+    1.0,                     !- Constant Temperature {C}
+    1.0,                     !- Constant Temperature Coefficient
+    0.0,                     !- External Dry-Bulb Temperature Coefficient
+    0.0,                     !- Ground Temperature Coefficient
+    0.0,                     !- Wind Speed Coefficient
+    0.0,                     !- Zone Air Temperature Coefficient
+    scheduleOSCBasementLowerWallTemp,  !- Constant Temperature Schedule Name
+    No,                      !- Sinusoidal Variation of Constant Temperature Coefficient
+    24;                      !- Period of Sinusoidal Variation {hr}
+
+  Schedule:Compact,
+    scheduleOSCBasementLowerWallTemp,  !- Name
+    Temperature,             !- Schedule Type Limits Name
+    Through:   1/31,         !- Field 1
+    For:AllDays,             !- Field 2
+    Until:24:00,19.34,       !- Field 3
+    Through:   2/28,         !- Field 5
+    For:AllDays,             !- Field 6
+    Until:24:00,19.26,       !- Field 7
+    Through:   3/31,         !- Field 9
+    For:AllDays,             !- Field 10
+    Until:24:00,19.30,       !- Field 11
+    Through:   4/30,         !- Field 13
+    For:AllDays,             !- Field 14
+    Until:24:00,19.39,       !- Field 15
+    Through:   5/31,         !- Field 17
+    For:AllDays,             !- Field 18
+    Until:24:00,19.49,       !- Field 19
+    Through:   6/30,         !- Field 21
+    For:AllDays,             !- Field 22
+    Until:24:00,19.61,       !- Field 23
+    Through:   7/31,         !- Field 25
+    For:AllDays,             !- Field 26
+    Until:24:00,19.70,       !- Field 27
+    Through:   8/31,         !- Field 29
+    For:AllDays,             !- Field 30
+    Until:24:00,19.80,       !- Field 31
+    Through:   9/30,         !- Field 33
+    For:AllDays,             !- Field 34
+    Until:24:00,19.84,       !- Field 35
+    Through:  10/31,         !- Field 37
+    For:AllDays,             !- Field 38
+    Until:24:00,19.78,       !- Field 39
+    Through:  11/30,         !- Field 41
+    For:AllDays,             !- Field 42
+    Until:24:00,19.68,       !- Field 43
+    Through:  12/31,         !- Field 45
+    For:AllDays,             !- Field 46
+    Until:24:00,19.50;       !- Field 47
+

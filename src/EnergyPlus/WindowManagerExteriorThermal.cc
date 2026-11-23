@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,7 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// EnergyPlus headers
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
+#include <WCETarcog.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -56,12 +60,6 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WindowManager.hh>
-
-// Windows library headers
-#include <WCEMultiLayerOptics.hpp>
-#include <WCETarcog.hpp>
-
-// EnergyPlus headers
 #include <EnergyPlus/WindowManagerExteriorThermal.hh>
 
 namespace EnergyPlus {
@@ -592,8 +590,8 @@ namespace Window {
             auto const *matShade = dynamic_cast<Material::MaterialShade const *>(mat);
             assert(matShade != nullptr);
 
-            emissFront = matShade->AbsorpThermal;
-            emissBack = matShade->AbsorpThermal;
+            emissFront = matShade->AbsorpThermalOut;
+            emissBack = matShade->AbsorpThermalIn;
             transThermalFront = matShade->TransThermal;
             transThermalBack = matShade->TransThermal;
             thickness = matShade->Thickness;
@@ -614,8 +612,8 @@ namespace Window {
 
             // Simon: Existing code already takes into account geometry of Woven and scales down
             // emissivity for opening area.
-            emissFront = matScreen->AbsorpThermal;
-            emissBack = matScreen->AbsorpThermal;
+            emissFront = matScreen->AbsorpThermalOut;
+            emissBack = matScreen->AbsorpThermalIn;
             transThermalFront = matScreen->TransThermal;
             transThermalBack = matScreen->TransThermal;
             thickness = matScreen->Thickness;

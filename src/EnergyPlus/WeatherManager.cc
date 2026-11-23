@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -46,14 +46,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdio>
+#include <format>
 #include <map>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/string.functions.hh>
 #include <ObjexxFCL/time.hh>
 
@@ -715,7 +716,8 @@ namespace Weather {
                 if (state.dataWeather->NumIntervalsPerHour != state.dataGlobal->TimeStepsInHour) {
                     ShowSevereError(
                         state,
-                        format("{}Number of intervals per hour on Weather file does not match specified number of Time Steps Per Hour", RoutineName));
+                        std::format("{}Number of intervals per hour on Weather file does not match specified number of Time Steps Per Hour",
+                                    RoutineName));
                     ErrorsFound = true;
                 }
             }
@@ -729,24 +731,24 @@ namespace Weather {
                     CheckWeatherFileValidity(state);
                 }
                 if (ErrorsFound) {
-                    ShowSevereError(state, format("{}No location specified, program will terminate.", RoutineName));
+                    ShowSevereError(state, std::format("{}No location specified, program will terminate.", RoutineName));
                 }
             } else {
                 ErrorsFound = true;
-                ShowSevereError(state, format("{}No Design Days or Run Period(s) specified, program will terminate.", RoutineName));
+                ShowSevereError(state, std::format("{}No Design Days or Run Period(s) specified, program will terminate.", RoutineName));
             }
             if (state.dataSysVars->DDOnly && state.dataEnvrn->TotDesDays == 0) {
                 ErrorsFound = true;
                 ShowSevereError(
                     state,
-                    format("{}Requested Design Days only (DataSystemVariables::DDOnly) but no Design Days specified, program will terminate.",
-                           RoutineName));
+                    std::format("{}Requested Design Days only (DataSystemVariables::DDOnly) but no Design Days specified, program will terminate.",
+                                RoutineName));
             }
             if (state.dataSysVars->ReverseDD && state.dataEnvrn->TotDesDays == 1) {
                 ErrorsFound = true;
                 ShowSevereError(
                     state,
-                    format(
+                    std::format(
                         "{}Requested Reverse Design Days (DataSystemVariables::ReverseDD) but only 1 Design Day specified, program will terminate.",
                         RoutineName));
             }
@@ -754,7 +756,7 @@ namespace Weather {
             // Throw a Fatal now that we have said it'll terminate
             if (ErrorsFound) {
                 CloseWeatherFile(state); // will only close if opened.
-                ShowFatalError(state, format("{}Errors found in Weather Data Input. Program terminates.", RoutineName));
+                ShowFatalError(state, std::format("{}Errors found in Weather Data Input. Program terminates.", RoutineName));
             }
 
             state.dataEnvrn->CurrentOverallSimDay = 0;
@@ -782,7 +784,7 @@ namespace Weather {
             state.dataEnvrn->DayOfYear = envCurr.StartJDay;
             state.dataEnvrn->DayOfMonth = envCurr.StartDay;
             state.dataGlobal->CalendarYear = envCurr.StartYear;
-            state.dataGlobal->CalendarYearChr = fmt::to_string(state.dataGlobal->CalendarYear);
+            state.dataGlobal->CalendarYearChr = std::to_string(state.dataGlobal->CalendarYear);
             state.dataEnvrn->Month = envCurr.StartMonth;
             state.dataGlobal->NumOfDayInEnvrn = envCurr.TotalDays; // Set day loop maximum from DataGlobals
 
@@ -790,7 +792,7 @@ namespace Weather {
                 (state.dataHeatBal->AdaptiveComfortRequested_ASH55 || state.dataHeatBal->AdaptiveComfortRequested_CEN15251)) {
                 if (state.dataGlobal->KindOfSim == Constant::KindOfSim::DesignDay) {
                     if (state.dataGlobal->DoDesDaySim) {
-                        ShowWarningError(state, format("{}Adaptive Comfort being reported during design day.", RoutineName));
+                        ShowWarningError(state, std::format("{}Adaptive Comfort being reported during design day.", RoutineName));
                         Real64 GrossApproxAvgDryBulb = (state.dataWeather->DesDayInput(state.dataWeather->Envrn).MaxDryBulb +
                                                         (state.dataWeather->DesDayInput(state.dataWeather->Envrn).MaxDryBulb -
                                                          state.dataWeather->DesDayInput(state.dataWeather->Envrn).DailyDBRange)) /
@@ -889,9 +891,10 @@ namespace Weather {
                                     continue;
                                 }
 
-                                ShowSevereError(
-                                    state,
-                                    format("{}Weatherfile does not support leap years but runperiod includes a leap year ({})", RoutineName, year));
+                                ShowSevereError(state,
+                                                std::format("{}Weatherfile does not support leap years but runperiod includes a leap year ({})",
+                                                            RoutineName,
+                                                            year));
                                 missingLeap = true;
                             }
                         }
@@ -904,10 +907,11 @@ namespace Weather {
                                 int runStartJulian = dataperiod.DataStJDay;
                                 int runEndJulian = dataperiod.DataEnJDay;
                                 if (!dataperiod.HasYearData) {
-                                    ShowSevereError(state,
-                                                    format("{}Actual weather runperiod has been entered but weatherfile DATA PERIOD does not have "
-                                                           "year included in start/end date.",
-                                                           RoutineName));
+                                    ShowSevereError(
+                                        state,
+                                        std::format("{}Actual weather runperiod has been entered but weatherfile DATA PERIOD does not have "
+                                                    "year included in start/end date.",
+                                                    RoutineName));
                                     ShowContinueError(state, "...to match the RunPeriod, the DATA PERIOD should be mm/dd/yyyy for both, or");
                                     ShowContinueError(state, "(...set \"Treat Weather as Actual\" to \"No\".)");
                                 }
@@ -946,61 +950,59 @@ namespace Weather {
 
                         if (!OkRun) {
                             if (!envCurr.ActualWeather) {
-                                StDate = format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
-                                EnDate = format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
-                                ShowSevereError(state,
-                                                format("{}Runperiod [mm/dd] (Start={},End={}) requested not within Data Period(s) from Weather File",
-                                                       RoutineName,
-                                                       StDate,
-                                                       EnDate));
-                            } else {
-                                StDate = format(DateFormatWithYear, envCurr.StartMonth, envCurr.StartDay, envCurr.StartYear);
-                                EnDate = format(DateFormatWithYear, envCurr.EndMonth, envCurr.EndDay, envCurr.EndYear);
+                                StDate = std::format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
+                                EnDate = std::format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
                                 ShowSevereError(
                                     state,
-                                    format("{}Runperiod [mm/dd/yyyy] (Start={},End={}) requested not within Data Period(s) from Weather File",
-                                           RoutineName,
-                                           StDate,
-                                           EnDate));
+                                    std::format("{}Runperiod [mm/dd] (Start={},End={}) requested not within Data Period(s) from Weather File",
+                                                RoutineName,
+                                                StDate,
+                                                EnDate));
+                            } else {
+                                StDate = std::format(DateFormatWithYear, envCurr.StartMonth, envCurr.StartDay, envCurr.StartYear);
+                                EnDate = std::format(DateFormatWithYear, envCurr.EndMonth, envCurr.EndDay, envCurr.EndYear);
+                                ShowSevereError(
+                                    state,
+                                    std::format("{}Runperiod [mm/dd/yyyy] (Start={},End={}) requested not within Data Period(s) from Weather File",
+                                                RoutineName,
+                                                StDate,
+                                                EnDate));
                             }
 
                             auto const &dataPeriod1 = state.dataWeather->DataPeriods(1);
-                            StDate = format(DateFormat, dataPeriod1.StMon, dataPeriod1.StDay);
-                            EnDate = format(DateFormat, dataPeriod1.EnMon, dataPeriod1.EnDay);
+                            StDate = std::format(DateFormat, dataPeriod1.StMon, dataPeriod1.StDay);
+                            EnDate = std::format(DateFormat, dataPeriod1.EnMon, dataPeriod1.EnDay);
                             if (dataPeriod1.StYear > 0) {
-                                StDate += format("/{}", dataPeriod1.StYear);
+                                StDate += std::format("/{}", dataPeriod1.StYear);
                             } else {
                                 StDate += "/<noyear>";
                             }
                             if (dataPeriod1.EnYear > 0) {
-                                EnDate += format("/{}", dataPeriod1.EnYear);
+                                EnDate += std::format("/{}", dataPeriod1.EnYear);
                             } else {
                                 EnDate += "/<noyear>";
                             }
                             if (state.dataWeather->NumDataPeriods == 1) {
-                                ShowContinueError(state, format("Weather Data Period (Start={},End={})", StDate, EnDate));
+                                ShowContinueError(state, std::format("Weather Data Period (Start={},End={})", StDate, EnDate));
                             } else {
-                                ShowContinueError(state, format("Multiple Weather Data Periods 1st (Start={},End={})", StDate, EnDate));
+                                ShowContinueError(state, std::format("Multiple Weather Data Periods 1st (Start={},End={})", StDate, EnDate));
                             }
-                            ShowFatalError(state, format("{}Program terminates due to preceding condition.", RoutineName));
+                            ShowFatalError(state, std::format("{}Program terminates due to preceding condition.", RoutineName));
                         }
 
                         if (missingLeap) {
                             // Bail out now if we still need to
-                            ShowFatalError(state, format("{}Program terminates due to preceding condition.", RoutineName));
+                            ShowFatalError(state, std::format("{}Program terminates due to preceding condition.", RoutineName));
                         }
 
                         // Following builds Environment start/end for ASHRAE 55 warnings
-                        StDate = format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
-                        EnDate = format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
+                        StDate = std::format(DateFormat, envCurr.StartMonth, envCurr.StartDay);
+                        EnDate = std::format(DateFormat, envCurr.EndMonth, envCurr.EndDay);
                         if (envCurr.KindOfEnvrn == Constant::KindOfSim::RunPeriodWeather) {
-                            StDate += format("/{}", envCurr.StartYear);
-                            EnDate += format("/{}", envCurr.EndYear);
+                            StDate += std::format("/{}", envCurr.StartYear);
+                            EnDate += std::format("/{}", envCurr.EndYear);
                         }
                         state.dataEnvrn->EnvironmentStartEnd = StDate + " - " + EnDate;
-                        state.dataEnvrn->StartYear = envCurr.StartYear;
-                        state.dataEnvrn->EndYear = envCurr.EndYear;
-
                         int TWeekDay = (envCurr.DayOfWeek == 0) ? 1 : envCurr.DayOfWeek;
                         auto const &MonWeekDay = envCurr.MonWeekDay;
 
@@ -1018,7 +1020,7 @@ namespace Weather {
                                   StDate,
                                   EnDate,
                                   Sched::dayTypeNames[TWeekDay],
-                                  fmt::to_string(envCurr.TotalDays),
+                                  std::to_string(envCurr.TotalDays),
                                   "Use RunPeriod Specified Day",
                                   AlpUseDST,
                                   AlpUseSpec,
@@ -1032,16 +1034,16 @@ namespace Weather {
                             (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather && state.dataGlobal->DoWeathSim) &&
                             (state.dataHeatBal->AdaptiveComfortRequested_ASH55 || state.dataHeatBal->AdaptiveComfortRequested_CEN15251)) {
                             if (state.dataWeather->WFAllowsLeapYears) {
-                                ShowSevereError(
-                                    state,
-                                    format("{}AdaptiveComfort Reporting does not work correctly with leap years in weather files.", RoutineName));
+                                ShowSevereError(state,
+                                                std::format("{}AdaptiveComfort Reporting does not work correctly with leap years in weather files.",
+                                                            RoutineName));
                                 ErrorsFound = true;
                             }
                             if (state.dataWeather->NumDataPeriods != 1) {
                                 ShowSevereError(
                                     state,
-                                    format("{}AdaptiveComfort Reporting does not work correctly with multiple dataperiods in weather files.",
-                                           RoutineName));
+                                    std::format("{}AdaptiveComfort Reporting does not work correctly with multiple dataperiods in weather files.",
+                                                RoutineName));
                                 ErrorsFound = true;
                             }
                             auto const &dataPeriod1 = state.dataWeather->DataPeriods(1);
@@ -1050,23 +1052,23 @@ namespace Weather {
                                 int RunEnJDay = General::OrdinalDay(dataPeriod1.EnMon, dataPeriod1.EnDay, state.dataWeather->LeapYearAdd);
                                 if (RunEnJDay - RunStJDay + 1 != 365) {
                                     ShowSevereError(state,
-                                                    format("{}AdaptiveComfort Reporting does not work correctly with weather files that do "
-                                                           "not contain 365 days.",
-                                                           RoutineName));
+                                                    std::format("{}AdaptiveComfort Reporting does not work correctly with weather files that do "
+                                                                "not contain 365 days.",
+                                                                RoutineName));
                                     ErrorsFound = true;
                                 }
                             } else {
                                 ShowSevereError(state,
-                                                format("{}AdaptiveComfort Reporting does not work correctly with weather files that do not "
-                                                       "start on 1 January.",
-                                                       RoutineName));
+                                                std::format("{}AdaptiveComfort Reporting does not work correctly with weather files that do not "
+                                                            "start on 1 January.",
+                                                            RoutineName));
                                 ErrorsFound = true;
                             }
                             if (state.dataWeather->NumIntervalsPerHour != 1) {
                                 ShowSevereError(state,
-                                                format("{}AdaptiveComfort Reporting does not work correctly with weather files that have "
-                                                       "multiple interval records per hour.",
-                                                       RoutineName));
+                                                std::format("{}AdaptiveComfort Reporting does not work correctly with weather files that have "
+                                                            "multiple interval records per hour.",
+                                                            RoutineName));
                                 ErrorsFound = true;
                             }
                         } // if
@@ -1132,8 +1134,8 @@ namespace Weather {
                                 Source = "InputFile";
                             }
                             if (state.dataWeather->DaylightSavingIsActive && state.dataReportFlag->DoWeatherInitReporting) {
-                                StDate = format(DateFormat, DSTActStMon, DSTActStDay);
-                                EnDate = format(DateFormat, DSTActEnMon, DSTActEnDay);
+                                StDate = std::format(DateFormat, DSTActStMon, DSTActStDay);
+                                EnDate = std::format(DateFormat, DSTActEnMon, DSTActEnDay);
                                 print(state.files.eio, EnvDSTYFormat, Source, StDate, EnDate);
                             } else if (state.dataGlobal->DoOutputReporting) {
                                 print(state.files.eio, EnvDSTNFormat, Source);
@@ -1142,7 +1144,7 @@ namespace Weather {
                                 auto &specialDay = state.dataWeather->SpecialDays(k);
                                 static constexpr std::string_view EnvSpDyFormat("Environment:Special Days,{},{},{},{},{:3}\n");
                                 if (specialDay.WthrFile && state.dataWeather->UseSpecialDays && state.dataReportFlag->DoWeatherInitReporting) {
-                                    StDate = format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
+                                    StDate = std::format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
                                     print(state.files.eio,
                                           EnvSpDyFormat,
                                           specialDay.Name,
@@ -1152,7 +1154,7 @@ namespace Weather {
                                           specialDay.Duration);
                                 }
                                 if (!specialDay.WthrFile && state.dataReportFlag->DoWeatherInitReporting) {
-                                    StDate = format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
+                                    StDate = std::format(DateFormat, specialDay.ActStMon, specialDay.ActStDay);
                                     print(state.files.eio,
                                           EnvSpDyFormat,
                                           specialDay.Name,
@@ -1168,7 +1170,7 @@ namespace Weather {
                                state.dataGlobal->KindOfSim == Constant::KindOfSim::HVACSizeDesignDay) { // Design Day
                         auto const &desDayInput = state.dataWeather->DesDayInput(envCurr.DesignDayNum);
                         state.dataEnvrn->RunPeriodEnvironment = false;
-                        StDate = format(DateFormat, desDayInput.Month, desDayInput.DayOfMonth);
+                        StDate = std::format(DateFormat, desDayInput.Month, desDayInput.DayOfMonth);
                         EnDate = StDate;
                         if (state.dataReportFlag->DoWeatherInitReporting) {
                             print(state.files.eio,
@@ -1198,7 +1200,7 @@ namespace Weather {
         }
 
         if (ErrorsFound && !state.dataGlobal->DoingSizing && !state.dataGlobal->KickOffSimulation) {
-            ShowSevereError(state, format("{}Errors found in getting a new environment", RoutineName));
+            ShowSevereError(state, std::format("{}Errors found in getting a new environment", RoutineName));
             Available = false;
         } else if (ErrorsFound) {
             Available = false;
@@ -1219,7 +1221,7 @@ namespace Weather {
                 envNew = envBase; // copy over seed data from current array element
                 envNew.SeedEnvrnNum = i;
                 envNew.KindOfEnvrn = Constant::KindOfSim::HVACSizeDesignDay;
-                envNew.Title = format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
+                envNew.Title = std::format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
                 envNew.HVACSizingIterationNum = HVACSizingIterCount;
             } else if (state.dataWeather->Environment(i).KindOfEnvrn == Constant::KindOfSim::RunPeriodDesign) {
                 state.dataWeather->Environment.redimension(++state.dataWeather->NumOfEnvrn);
@@ -1228,7 +1230,7 @@ namespace Weather {
                 envNew = envBase; // copy over seed data
                 envNew.SeedEnvrnNum = i;
                 envNew.KindOfEnvrn = Constant::KindOfSim::HVACSizeRunPeriodDesign;
-                envNew.Title = format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
+                envNew.Title = std::format("{} HVAC Sizing Pass {}", envBase.Title, HVACSizingIterCount);
                 envNew.HVACSizingIterationNum = HVACSizingIterCount;
             }
         } // for each loop over Environment data structure
@@ -1281,7 +1283,7 @@ namespace Weather {
             }
         }
 
-        if (any_eq(WeekDays, 0)) {
+        if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
             // need to start at StMon and go backwards.
             // EndDayOfMonth is also "days" in month.  (without leap year day in February)
             CurWeekDay = StWeekDay;
@@ -1381,7 +1383,7 @@ namespace Weather {
                 }
             }
 
-            if (any_eq(WeekDays, 0)) {
+            if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
                 // need to start at StMon and go backwards.
                 // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                 CurWeekDay = WeekDays(StartMonth);
@@ -1478,7 +1480,7 @@ namespace Weather {
                     }
                 }
 
-                if (any_eq(WeekDays, 0)) {
+                if (std::ranges::any_of(WeekDays, [&](auto const &elem) { return elem == 0; })) {
                     // need to start at StMon and go backwards.
                     // EndDayOfMonth is also "days" in month.  (without leap year day in February)
                     CurWeekDay = WeekDays(StartMonth);
@@ -1536,10 +1538,10 @@ namespace Weather {
 
         static constexpr std::string_view RoutineName("SetDSTDateRanges: ");
 
-        int ActStartMonth; // Actual Start Month
-        int ActStartDay;   // Actual Start Day of Month
-        int ActEndMonth;   // Actual End Month
-        int ActEndDay;     // Actual End Day of Month
+        int ActStartMonth = 0; // Actual Start Month
+        int ActStartDay = 0;   // Actual Start Day of Month
+        int ActEndMonth;       // Actual End Month
+        int ActEndDay;         // Actual End Day of Month
 
         bool ErrorsFound = false;
         if (state.dataWeather->DST.StDateType == DateType::MonthDay) {
@@ -1552,7 +1554,7 @@ namespace Weather {
             }
             ThisDay += 7 * (state.dataWeather->DST.StDay - 1);
             if (ThisDay > state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.StMon)) {
-                ShowSevereError(state, format("{}Determining DST: DST Start Date, Nth Day of Month, not enough Nths", RoutineName));
+                ShowSevereError(state, std::format("{}Determining DST: DST Start Date, Nth Day of Month, not enough Nths", RoutineName));
                 ErrorsFound = true;
             } else {
                 ActStartMonth = state.dataWeather->DST.StMon;
@@ -1579,7 +1581,7 @@ namespace Weather {
             if ((ThisDay >> state.dataWeather->EndDayOfMonthWithLeapDay(state.dataWeather->DST.EnMon)) != 0) {
                 ActEndMonth = 0; // Suppress uninitialized warning
                 ActEndDay = 0;   // Suppress uninitialized warning
-                ShowSevereError(state, format("{}Determining DST: DST End Date, Nth Day of Month, not enough Nths", RoutineName));
+                ShowSevereError(state, std::format("{}Determining DST: DST End Date, Nth Day of Month, not enough Nths", RoutineName));
                 ErrorsFound = true;
             } else {
                 ActEndMonth = state.dataWeather->DST.EnMon;
@@ -1595,7 +1597,7 @@ namespace Weather {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Program terminates due to preceding condition(s).", RoutineName));
+            ShowFatalError(state, std::format("{}Program terminates due to preceding condition(s).", RoutineName));
         }
 
         if (present(DSTActStMon)) {
@@ -1609,10 +1611,16 @@ namespace Weather {
         int JDay = General::OrdinalDay(ActStartMonth, ActStartDay, state.dataWeather->LeapYearAdd);
         int JDay1 = General::OrdinalDay(ActEndMonth, ActEndDay, state.dataWeather->LeapYearAdd);
         if (JDay1 >= JDay) {
-            DSTIdx({JDay, JDay1}) = 1;
+            for (int Day = JDay; Day <= JDay1; ++Day) {
+                DSTIdx(Day) = 1;
+            }
         } else {
-            DSTIdx({JDay, 366}) = 1;
-            DSTIdx({1, JDay1}) = 1;
+            for (int Day = JDay; Day <= 366; ++Day) {
+                DSTIdx(Day) = 1;
+            }
+            for (int Day = 1; Day <= JDay1; ++Day) {
+                DSTIdx(Day) = 1;
+            }
         }
     }
 
@@ -1667,8 +1675,8 @@ namespace Weather {
                 }
                 ThisDay += 7 * (specialDay.Day - 1);
                 if (ThisDay > state.dataWeather->EndDayOfMonthWithLeapDay(specialDay.Month)) {
-                    ShowSevereError(state,
-                                    format("{}Special Day Date, Nth Day of Month, not enough Nths, for SpecialDay={}", RoutineName, specialDay.Name));
+                    ShowSevereError(
+                        state, std::format("{}Special Day Date, Nth Day of Month, not enough Nths, for SpecialDay={}", RoutineName, specialDay.Name));
                     ErrorsFound = true;
                     continue;
                 }
@@ -1687,7 +1695,7 @@ namespace Weather {
             if (state.dataWeather->SpecialDayTypes(JDay) != 0) {
                 ShowWarningError(
                     state,
-                    format("{}Special Day definition ({}) is overwriting previously entered special day period", RoutineName, specialDay.Name));
+                    std::format("{}Special Day definition ({}) is overwriting previously entered special day period", RoutineName, specialDay.Name));
                 if (state.dataWeather->UseSpecialDays) {
                     ShowContinueError(state, "...This could be caused by definitions on the Weather File.");
                 }
@@ -1707,7 +1715,7 @@ namespace Weather {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Program terminates due to preceding condition(s).", RoutineName));
+            ShowFatalError(state, std::format("{}Program terminates due to preceding condition(s).", RoutineName));
         }
     }
 
@@ -1833,11 +1841,8 @@ namespace Weather {
 
             // Set Tomorrow's date data
             state.dataEnvrn->MonthTomorrow = state.dataWeather->TomorrowVariables.Month;
-            state.dataEnvrn->DayOfMonthTomorrow = state.dataWeather->TomorrowVariables.DayOfMonth;
             state.dataEnvrn->DayOfWeekTomorrow = state.dataWeather->TomorrowVariables.DayOfWeek;
             state.dataEnvrn->HolidayIndexTomorrow = state.dataWeather->TomorrowVariables.HolidayIndex;
-            state.dataEnvrn->YearTomorrow = state.dataWeather->TomorrowVariables.Year;
-
             if (envCurr.KindOfEnvrn == Constant::KindOfSim::RunPeriodWeather) {
                 if (state.dataEnvrn->Month == 1 && state.dataEnvrn->DayOfMonth == 1 && envCurr.ActualWeather) {
                     if (state.dataWeather->DatesShouldBeReset) {
@@ -2017,9 +2022,6 @@ namespace Weather {
             state.dataWeather->RptDayType = state.dataEnvrn->DayOfWeek;
         }
         state.dataEnvrn->DSTIndicator = state.dataWeather->TodayVariables.DaylightSavingIndex;
-        state.dataEnvrn->EquationOfTime = state.dataWeather->TodayVariables.EquationOfTime;
-        state.dataEnvrn->CosSolarDeclinAngle = state.dataWeather->TodayVariables.CosSolarDeclinAngle;
-        state.dataEnvrn->SinSolarDeclinAngle = state.dataWeather->TodayVariables.SinSolarDeclinAngle;
     }
 
     void SetCurrentWeather(EnergyPlusData &state)
@@ -2067,11 +2069,11 @@ namespace Weather {
 
         Sched::UpdateScheduleVals(state);
 
-        state.dataEnvrn->CurMnDyHr =
-            format("{:02d}/{:02d} {:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, (unsigned short)(state.dataGlobal->HourOfDay - 1));
-        state.dataEnvrn->CurMnDy = format("{:02d}/{:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth);
+        state.dataEnvrn->CurMnDyHr = std::format(
+            "{:02d}/{:02d} {:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, (unsigned short)(state.dataGlobal->HourOfDay - 1));
+        state.dataEnvrn->CurMnDy = std::format("{:02d}/{:02d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth);
         state.dataEnvrn->CurMnDyYr =
-            format("{:02d}/{:02d}/{:04d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->CalendarYear);
+            std::format("{:02d}/{:02d}/{:04d}", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->CalendarYear);
 
         state.dataGlobal->WeightNow = state.dataWeather->Interpolation(state.dataGlobal->TimeStep);
         state.dataGlobal->WeightPreviousHour = 1.0 - state.dataGlobal->WeightNow;
@@ -2097,7 +2099,7 @@ namespace Weather {
         // Determine if Sun is up or down, set Solar Cosine values for time step.
         DetermineSunUpDown(state, state.dataEnvrn->SOLCOS);
         if (state.dataEnvrn->SunIsUp && state.dataWeather->SolarAltitudeAngle < 0.0) {
-            ShowFatalError(state, format("SetCurrentWeather: At {} Sun is Up but Solar Altitude Angle is < 0.0", state.dataEnvrn->CurMnDyHr));
+            ShowFatalError(state, std::format("SetCurrentWeather: At {} Sun is Up but Solar Altitude Angle is < 0.0", state.dataEnvrn->CurMnDyHr));
         }
 
         auto const &today = state.dataWeather->wvarsHrTsToday(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay);
@@ -2220,9 +2222,9 @@ namespace Weather {
         }
 
         if (state.dataEnvrn->IsSnow) {
-            state.dataEnvrn->GndReflectance = max(min(state.dataEnvrn->GndReflectance * state.dataWeather->SnowGndRefModifier, 1.0), 0.0);
+            state.dataEnvrn->GndReflectance = std::clamp(state.dataEnvrn->GndReflectance * state.dataWeather->SnowGndRefModifier, 0.0, 1.0);
             state.dataEnvrn->GndReflectanceForDayltg =
-                max(min(state.dataEnvrn->GndReflectanceForDayltg * state.dataWeather->SnowGndRefModifierForDayltg, 1.0), 0.0);
+                std::clamp(state.dataEnvrn->GndReflectanceForDayltg * state.dataWeather->SnowGndRefModifierForDayltg, 0.0, 1.0);
         }
 
         state.dataEnvrn->GndSolarRad =
@@ -2299,22 +2301,22 @@ namespace Weather {
         int WDay;
         int WHour;
         int WMinute;
-        Real64 DryBulb;
-        Real64 DewPoint;
-        Real64 RelHum;
-        Real64 AtmPress;
+        Real64 DryBulb = 0.0;
+        Real64 DewPoint = 0.0;
+        Real64 RelHum = 0.0;
+        Real64 AtmPress = 0.0;
         Real64 ETHoriz;
         Real64 ETDirect;
         Real64 IRHoriz;
         Real64 GLBHoriz;
-        Real64 DirectRad;
-        Real64 DiffuseRad;
+        Real64 DirectRad = 0.0;
+        Real64 DiffuseRad = 0.0;
         Real64 GLBHorizIllum;
         Real64 DirectNrmIllum;
         Real64 DiffuseHorizIllum;
         Real64 ZenLum;
-        Real64 WindDir;
-        Real64 WindSpeed;
+        Real64 WindDir = 0.0;
+        Real64 WindSpeed = 0.0;
         Real64 TotalSkyCover;
         Real64 OpaqueSkyCover;
         Real64 Visibility;
@@ -2395,11 +2397,11 @@ namespace Weather {
                                              LiquidPrecip);
                 } else if (WeatherDataLine.eof) {
                     if (NumRewinds > 0) {
-                        std::string date = fmt::to_string(thisEnviron.StartMonth) + '/' + fmt::to_string(thisEnviron.StartDay);
+                        std::string date = std::to_string(thisEnviron.StartMonth) + '/' + std::to_string(thisEnviron.StartDay);
                         if (thisEnviron.MatchYear) {
-                            date += '/' + fmt::to_string(thisEnviron.StartYear);
+                            date += '/' + std::to_string(thisEnviron.StartYear);
                         }
-                        ShowSevereError(state, format("Multiple rewinds on EPW while searching for first day {}", date));
+                        ShowSevereError(state, std::format("Multiple rewinds on EPW while searching for first day {}", date));
                     } else {
                         state.files.inputWeatherFile.rewind();
                         ++NumRewinds;
@@ -2446,13 +2448,13 @@ namespace Weather {
                 }
                 if (!WeatherDataLine.good) {
                     ShowFatalError(state,
-                                   format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                          WYear,
-                                          WMonth,
-                                          WDay,
-                                          WHour,
-                                          WMinute,
-                                          state.files.inputWeatherFile.error_state_to_string()),
+                                   std::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                               WYear,
+                                               WMonth,
+                                               WDay,
+                                               WHour,
+                                               WMinute,
+                                               state.files.inputWeatherFile.error_state_to_string()),
                                    OptionalOutputFileRef{state.files.eso});
                 }
                 if (state.dataWeather->CurDayOfWeek <= 7) {
@@ -2470,50 +2472,50 @@ namespace Weather {
                     // Do the range checks on the first set of fields -- no others.
                     bool ErrorsFound = false;
                     if (DryBulb < 99.9 && (DryBulb < -90.0 || DryBulb > 70.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("DryBulb Temperature ({:.2R}) is out of range [-90.0, 70.0]", DryBulb));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("DryBulb Temperature ({:.2f}) is out of range [-90.0, 70.0]", DryBulb));
                         ErrorsFound = true;
                     }
 
                     if (DewPoint < 99.9 && (DewPoint < -90.0 || DewPoint > 70.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("DewPoint Temperature ({:.2R}) is out of range [-90.0, 70.0]", DewPoint));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("DewPoint Temperature ({:.2f}) is out of range [-90.0, 70.0]", DewPoint));
                         ErrorsFound = true;
                     }
 
                     if (RelHum < 999.0 && (RelHum < 0.0 || RelHum > 110.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Relative Humidity ({:.2R}) is out of range [0.0, 100.0]", RelHum));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Relative Humidity ({:.2f}) is out of range [0.0, 100.0]", RelHum));
                         ErrorsFound = true;
                     }
 
                     if (AtmPress < 999999.0 && (AtmPress <= 31000.0 || AtmPress > 120000.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Atmospheric Pressure ({:.0R}) is out of range [31000, 120000]", AtmPress));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Atmospheric Pressure ({:.0f}) is out of range [31000, 120000]", AtmPress));
                         ErrorsFound = true;
                     }
 
                     if (DirectRad < 0.0) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Direct Radiation ({:.2R}) is out of range [0.0, -]", DirectRad));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Direct Radiation ({:.2f}) is out of range [0.0, -]", DirectRad));
                         ErrorsFound = true;
                     }
 
                     if (DiffuseRad < 0.0) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Diffuse Radiation ({:.2R}) is out of range [0.0, -]", DiffuseRad));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Diffuse Radiation ({:.2f}) is out of range [0.0, -]", DiffuseRad));
                         ErrorsFound = true;
                     }
 
                     if (WindDir < 999.0 && (WindDir < 0.0 || WindDir > 360.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Wind Direction ({:.2R}) is out of range [0.0, 360.0]", WindDir));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Wind Direction ({:.2f}) is out of range [0.0, 360.0]", WindDir));
                         ErrorsFound = true;
                     }
 
                     if (WindSpeed < 999.0 && (WindSpeed < 0.0 || WindSpeed > 40.0)) {
-                        ShowSevereError(state, format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
-                        ShowContinueError(state, format("Wind Speed ({:.2R}) is out of range [0.0, 40.0]", WindSpeed));
+                        ShowSevereError(state, std::format("{}: {}", routineName, state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("Wind Speed ({:.2f}) is out of range [0.0, 40.0]", WindSpeed));
                         ErrorsFound = true;
                     }
 
@@ -2527,13 +2529,13 @@ namespace Weather {
                         if (!WeatherDataLine.good) {
                             readList(WeatherDataLine.data, WYear, WMonth, WDay, WHour, WMinute);
                             ShowFatalError(state,
-                                           format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute,
-                                                  state.files.inputWeatherFile.error_state_to_string()),
+                                           std::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                                       WYear,
+                                                       WMonth,
+                                                       WDay,
+                                                       WHour,
+                                                       WMinute,
+                                                       state.files.inputWeatherFile.error_state_to_string()),
                                            OptionalOutputFileRef{state.files.eso});
                         }
                     }
@@ -2542,13 +2544,13 @@ namespace Weather {
                         if (!WeatherDataLine.good) {
                             readList(WeatherDataLine.data, WYear, WMonth, WDay, WHour, WMinute);
                             ShowFatalError(state,
-                                           format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute,
-                                                  state.files.inputWeatherFile.error_state_to_string()),
+                                           std::format("Error occurred on EPW while searching for first day, stopped at {}/{}/{} {}:{} IO Error='{}'",
+                                                       WYear,
+                                                       WMonth,
+                                                       WDay,
+                                                       WHour,
+                                                       WMinute,
+                                                       state.files.inputWeatherFile.error_state_to_string()),
                                            OptionalOutputFileRef{state.files.eso});
                         }
                     }
@@ -2688,35 +2690,36 @@ namespace Weather {
                                                          Albedo,
                                                          LiquidPrecip);
                             } else {
-                                ShowFatalError(state,
-                                               format("End-of-File encountered after {}/{}/{} {}:{}, starting from first day of Weather File would "
-                                                      "not be \"next day\"",
-                                                      WYear,
-                                                      WMonth,
-                                                      WDay,
-                                                      WHour,
-                                                      WMinute));
+                                ShowFatalError(
+                                    state,
+                                    std::format("End-of-File encountered after {}/{}/{} {}:{}, starting from first day of Weather File would "
+                                                "not be \"next day\"",
+                                                WYear,
+                                                WMonth,
+                                                WDay,
+                                                WHour,
+                                                WMinute));
                             }
                         } else {
                             ShowFatalError(state,
-                                           format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
-                                                  WYear,
-                                                  WMonth,
-                                                  WDay,
-                                                  WHour,
-                                                  WMinute),
+                                           std::format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
+                                                       WYear,
+                                                       WMonth,
+                                                       WDay,
+                                                       WHour,
+                                                       WMinute),
                                            OptionalOutputFileRef{state.files.eso});
                         }
                     }
 
                     if (hour != WHour) {
                         ShowFatalError(state,
-                                       format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
-                                              WYear,
-                                              WMonth,
-                                              WDay,
-                                              WHour,
-                                              WMinute),
+                                       std::format("Unexpected error condition in middle of reading EPW file, stopped at {}/{}/{} {}:{}",
+                                                   WYear,
+                                                   WMonth,
+                                                   WDay,
+                                                   WHour,
+                                                   WMinute),
                                        OptionalOutputFileRef{state.files.eso});
                     }
 
@@ -3242,9 +3245,9 @@ namespace Weather {
                                        std::string_view SaveLine,
                                        std::string_view Line)
     {
-        ShowSevereError(state, fmt::format("Invalid Weather Line at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
-        ShowContinueError(state, fmt::format("Full Data Line={}", SaveLine));
-        ShowContinueError(state, fmt::format("Remainder of line={}", Line));
+        ShowSevereError(state, std::format("Invalid Weather Line at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
+        ShowContinueError(state, std::format("Full Data Line={}", SaveLine));
+        ShowContinueError(state, std::format("Remainder of line={}", Line));
         ShowFatalError(state, "Error in Reading Weather Data");
     }
 
@@ -3315,7 +3318,7 @@ namespace Weather {
             const bool succeeded = readList(current_line.substr(pos, (nth_pos - 1) - pos), WYear, WMonth, WDay, WHour, WMinute);
             if (!succeeded) {
                 ShowSevereError(state, "Invalid Date info in Weather Line");
-                ShowContinueError(state, fmt::format("Entire Data Line={}", Line));
+                ShowContinueError(state, std::format("Entire Data Line={}", Line));
                 ShowFatalError(state, "Error in Reading Weather Data");
             }
         }
@@ -3335,7 +3338,7 @@ namespace Weather {
         }
 
         if (DateInError) {
-            ShowSevereError(state, format("Reading Weather Data Line, Invalid Date, Year={}, Month={}, Day={}", WYear, WMonth, WDay));
+            ShowSevereError(state, std::format("Reading Weather Data Line, Invalid Date, Year={}, Month={}, Day={}", WYear, WMonth, WDay));
             ShowFatalError(state, "Program terminates due to previous condition.");
         }
 
@@ -3343,8 +3346,9 @@ namespace Weather {
         pos = index(Line, ','); // WYear
         if (pos == std::string::npos) {
             ShowSevereError(
-                state, format("Invalid Weather Line (no commas) at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
-            ShowContinueError(state, fmt::format("Full Data Line={}", Line));
+                state,
+                std::format("Invalid Weather Line (no commas) at date={:4}/{:2}/{:2} Hour#={:2} Min#={:2}", WYear, WMonth, WDay, WHour, WMinute));
+            ShowContinueError(state, std::format("Full Data Line={}", Line));
             ShowFatalError(state, "Error in Reading Weather Data");
         }
         current_line.remove_prefix(nth_occurrence(Line, ',', 6)); // remove WYear,WMonth,WDay,WHour,WMinute,Data Source/Integrity
@@ -3538,7 +3542,7 @@ namespace Weather {
         designDay.DayOfMonth = desDayInput.DayOfMonth;
         designDay.DayOfYear = General::OrdinalDay(designDay.Month, designDay.DayOfMonth, 0);
         static constexpr std::string_view MnDyFmt("{:02}/{:02}");
-        state.dataEnvrn->CurMnDy = format(MnDyFmt, desDayInput.Month, desDayInput.DayOfMonth);
+        state.dataEnvrn->CurMnDy = std::format(MnDyFmt, desDayInput.Month, desDayInput.DayOfMonth);
         // EnvironmentName = DesDayInput( EnvrnNum ).Title;
         state.dataEnvrn->RunPeriodEnvironment = false;
         // Following builds Environment start/end for ASHRAE 55 warnings
@@ -3548,13 +3552,13 @@ namespace Weather {
         if (desDayInput.PressureEntered) {
             if (std::abs((desDayInput.PressBarom - state.dataEnvrn->StdBaroPress) / state.dataEnvrn->StdBaroPress) > 0.1) { // 10% off
                 ShowWarningError(state,
-                                 format("SetUpDesignDay: Entered DesignDay Barometric Pressure={:.0R} differs by more than 10% from Standard "
-                                        "Barometric Pressure={:.0R}.",
-                                        desDayInput.PressBarom,
-                                        state.dataEnvrn->StdBaroPress));
+                                 std::format("SetUpDesignDay: Entered DesignDay Barometric Pressure={:.0f} differs by more than 10% from Standard "
+                                             "Barometric Pressure={:.0f}.",
+                                             desDayInput.PressBarom,
+                                             state.dataEnvrn->StdBaroPress));
                 ShowContinueError(
                     state,
-                    format("...occurs in DesignDay={}, Standard Pressure (based on elevation) will be used.", state.dataEnvrn->EnvironmentName));
+                    std::format("...occurs in DesignDay={}, Standard Pressure (based on elevation) will be used.", state.dataEnvrn->EnvironmentName));
                 desDayInput.PressBarom = state.dataEnvrn->StdBaroPress;
             }
         } else {
@@ -3606,50 +3610,61 @@ namespace Weather {
             std::string_view const AlpUseRain = (desDayInput.RainInd == 1) ? "Yes" : "No";
             std::string_view const AlpUseSnow = (desDayInput.SnowInd == 1) ? "Yes" : "No";
             print(state.files.eio, "Environment:Design Day Data,");
-            print(state.files.eio, "{:.2R},", desDayInput.MaxDryBulb);
-            print(state.files.eio, "{:.2R},", desDayInput.DailyDBRange);
+            print(state.files.eio, "{:.2f},", desDayInput.MaxDryBulb);
+            print(state.files.eio, "{:.2f},", desDayInput.DailyDBRange);
 
             static constexpr std::array<std::string_view, (int)DesDayDryBulbRangeType::Num> DesDayDryBulbRangeTypeStrings = {
                 "DefaultMultipliers,", "MultiplierSchedule,", "DifferenceSchedule,", "TemperatureProfile,"};
 
             print(state.files.eio, "{}", DesDayDryBulbRangeTypeStrings[(int)desDayInput.dryBulbRangeType]);
 
-            static constexpr std::array<std::string_view, (int)DesDayHumIndType::Num> DesDayHumIndTypeStrings = {
-                "Wetbulb,{:.2R},{{C}},",
-                "Dewpoint,{:.2R},{{C}},",
-                "Enthalpy,{:.2R},{{J/kgDryAir}},",
-                "HumidityRatio,{:.4R},{{kgWater/kgDryAir}},",
-                "Schedule,<schedule values from 0.0 to 100.0>,{{percent}},",
-                "WetBulbProfileDefaultMultipliers,{:.2R},{{C}},",
-                "WetBulbProfileDifferenceSchedule,{:.2R},{{C}},",
-                "WetBulbProfileMultiplierSchedule,{:.2R},{{C}},"};
-
             // Hum Ind Type, Hum Ind Value at Max Temp, Hum Ind Units
-            if (desDayInput.HumIndType == DesDayHumIndType::RelHumSch) {
-                print(state.files.eio, DesDayHumIndTypeStrings[(int)desDayInput.HumIndType]);
-            } else if (desDayInput.HumIndType == DesDayHumIndType::WBProfDef) {
+            switch (desDayInput.HumIndType) {
+            case DesDayHumIndType::WetBulb:
+                print(state.files.eio, "Wetbulb,{:.2f},{{C}},", desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::DewPoint:
+                print(state.files.eio, "Dewpoint,{:.2f},{{C}},", desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::Enthalpy:
+                print(state.files.eio, "Enthalpy,{:.2f},{{J/kgDryAir}},", desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::HumRatio:
+                print(state.files.eio, "HumidityRatio,{:.4f},{{kgWater/kgDryAir}},", desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::RelHumSch:
+                print(state.files.eio, "Schedule,<schedule values from 0.0 to 100.0>,{{percent}},");
+                break;
+            case DesDayHumIndType::WBProfDef:
                 print(state.files.eio,
-                      DesDayHumIndTypeStrings[(int)desDayInput.HumIndType],
+                      "WetBulbProfileDefaultMultipliers,{:.2f},{{C}},",
                       state.dataWeather->DesDayInput(state.dataWeather->Envrn).HumIndValue);
-            } else {
-                print(state.files.eio, DesDayHumIndTypeStrings[(int)desDayInput.HumIndType], desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::WBProfDif:
+                print(state.files.eio, "WetBulbProfileDifferenceSchedule,{:.2f},{{C}},", desDayInput.HumIndValue);
+                break;
+            case DesDayHumIndType::WBProfMul:
+                print(state.files.eio, "WetBulbProfileMultiplierSchedule,{:.2f},{{C}},", desDayInput.HumIndValue);
+                break;
+            default:
+                break;
             }
 
-            print(state.files.eio, "{:.0R},", desDayInput.PressBarom);
-            print(state.files.eio, "{:.0R},", desDayInput.WindDir);
-            print(state.files.eio, "{:.1R},", desDayInput.WindSpeed);
-            print(state.files.eio, "{:.2R},", desDayInput.SkyClear);
+            print(state.files.eio, "{:.0f},", desDayInput.PressBarom);
+            print(state.files.eio, "{:.0f},", desDayInput.WindDir);
+            print(state.files.eio, "{:.1f},", desDayInput.WindSpeed);
+            print(state.files.eio, "{:.2f},", desDayInput.SkyClear);
 
             print(state.files.eio, "{},{}\n", AlpUseRain, AlpUseSnow);
 
             static constexpr std::string_view DDayMiscFormat("Environment:Design Day Misc,{:3},");
             print(state.files.eio, DDayMiscFormat, designDay.DayOfYear);
-            print(state.files.eio, "{:.1R},", A);
-            print(state.files.eio, "{:.4R},", B);
-            print(state.files.eio, "{:.4R},", C);
-            print(state.files.eio, "{:.1R},", AVSC);
-            print(state.files.eio, "{:.2R},", designDay.EquationOfTime * 60.0);
-            print(state.files.eio, "{:.1R},", std::asin(designDay.SinSolarDeclinAngle) / Constant::DegToRad);
+            print(state.files.eio, "{:.1f},", A);
+            print(state.files.eio, "{:.4f},", B);
+            print(state.files.eio, "{:.4f},", C);
+            print(state.files.eio, "{:.1f},", AVSC);
+            print(state.files.eio, "{:.2f},", designDay.EquationOfTime * 60.0);
+            print(state.files.eio, "{:.1f},", std::asin(designDay.SinSolarDeclinAngle) / Constant::DegToRad);
 
             // Why have a different string for "Schedule" here than the one used for input? Really, why?
             static constexpr std::array<std::string_view, (int)DesDaySolarModel::Num> DesDaySolarModelStrings = {
@@ -3664,8 +3679,8 @@ namespace Weather {
         // set the values.  For the scheduled values, these are already set in the DDxxx array.
 
         state.dataGlobal->CurrentTime = 25.0;
-        Real64 HumidityRatio; // Humidity Ratio -- when constant for day
-        bool ConstantHumidityRatio;
+        Real64 HumidityRatio = 0.0; // Humidity Ratio -- when constant for day
+        bool ConstantHumidityRatio = false;
 
         switch (desDayInput.HumIndType) {
         case DesDayHumIndType::WetBulb: {
@@ -3703,7 +3718,7 @@ namespace Weather {
         } break;
         default: {
             ShowSevereError(state, "SetUpDesignDay: Invalid Humidity Indicator type");
-            ShowContinueError(state, format("Occurred in Design Day={}", desDayInput.Title));
+            ShowContinueError(state, std::format("Occurred in Design Day={}", desDayInput.Title));
         } break;
         } // switch
 
@@ -3835,8 +3850,8 @@ namespace Weather {
                 // Generate solar values for timestep
                 //    working results = BeamRad and DiffRad
                 //    stored to program globals at end of loop
-                Real64 BeamRad;
-                Real64 DiffRad;
+                Real64 BeamRad = 0.0;
+                Real64 DiffRad = 0.0;
                 if (desDayInput.solarModel == DesDaySolarModel::SolarModel_Schedule) {
                     // scheduled: set value unconditionally (whether sun up or not)
                     BeamRad = desDayModsTS.BeamSolarRad;
@@ -3851,7 +3866,7 @@ namespace Weather {
                         CurTime = double(hour) + state.dataEnvrn->TS1TimeOffset;
                     }
 
-                    Vector3<Real64> SUNCOS; // Sun direction cosines
+                    Vector3D SUNCOS; // Sun direction cosines
                     CalculateSunDirectionCosines(
                         state, CurTime, designDay.EquationOfTime, designDay.SinSolarDeclinAngle, designDay.CosSolarDeclinAngle, SUNCOS);
                     Real64 CosZenith = SUNCOS.z; // Cosine of Zenith Angle of Sun
@@ -3964,6 +3979,8 @@ namespace Weather {
             switch (state.dataWeather->WPSkyTemperature(envCurr.WP_Type1).skyTempModel) {
             case SkyTempModel::ScheduleValue: {
                 std::vector<Real64> const &dayVals = state.dataWeather->WPSkyTemperature(envCurr.WP_Type1).sched->getDayVals(state);
+                // The array elements are assigned below; cppcheck does not recognize mutation through this ObjexxFCL alias.
+                // cppcheck-suppress constVariableReference
                 auto &desDayModsEnv = state.dataWeather->desDayMods(EnvrnNum);
                 for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
                     for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
@@ -4221,7 +4238,7 @@ namespace Weather {
                                       Real64 const EqOfTime,     // Equation of Time
                                       Real64 const SinSolDeclin, // Sine of Solar Declination
                                       Real64 const CosSolDeclin, // Cosine of Solar Declination
-                                      Vector3<Real64> &SUNCOS)
+                                      Vector3D &SUNCOS)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4235,8 +4252,6 @@ namespace Weather {
 
         // REFERENCES:
         // "NECAP Engineering Manual", 1974, p.3-117
-
-        EP_SIZE_CHECK(SUNCOS, 3); // NOLINT(misc-static-assert)
 
         // COMPUTE THE HOUR ANGLE
         Real64 H = (15.0 * (12.0 - (TimeValue + EqOfTime)) + (state.dataEnvrn->TimeZoneMeridian - state.dataEnvrn->Longitude)) * Constant::DegToRad;
@@ -4255,7 +4270,7 @@ namespace Weather {
         }
     }
 
-    void DetermineSunUpDown(EnergyPlusData &state, Vector3<Real64> &SunCOS)
+    void DetermineSunUpDown(EnergyPlusData &state, Vector3D &SunCOS)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4367,8 +4382,9 @@ namespace Weather {
                 if (Line.eof) {
                     ShowFatalError(
                         state,
-                        format("OpenWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
-                               epwHeaders[typeNum]),
+                        std::format(
+                            "OpenWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
+                            epwHeaders[typeNum]),
                         OptionalOutputFileRef(state.files.eso));
                 }
 
@@ -4423,19 +4439,20 @@ namespace Weather {
                         std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) / max(state.dataEnvrn->Elevation, 1.0) >
                             0.10) {
                         ShowWarningError(state, "Weather file location will be used rather than entered (IDF) Location object.");
-                        ShowContinueError(state, format("..Location object={}", state.dataWeather->LocationTitle));
-                        ShowContinueError(state, format("..Weather File Location={}", state.dataEnvrn->WeatherFileLocationTitle));
+                        ShowContinueError(state, std::format("..Location object={}", state.dataWeather->LocationTitle));
+                        ShowContinueError(state, std::format("..Weather File Location={}", state.dataEnvrn->WeatherFileLocationTitle));
                         ShowContinueError(
                             state,
-                            format("..due to location differences, Latitude difference=[{:.2R}] degrees, Longitude difference=[{:.2R}] degrees.",
-                                   std::abs(state.dataEnvrn->Latitude - state.dataWeather->WeatherFileLatitude),
-                                   std::abs(state.dataEnvrn->Longitude - state.dataWeather->WeatherFileLongitude)));
-                        ShowContinueError(state,
-                                          format("..Time Zone difference=[{:.1R}] hour(s), Elevation difference=[{:.2R}] percent, [{:.2R}] meters.",
-                                                 std::abs(state.dataEnvrn->TimeZoneNumber - state.dataWeather->WeatherFileTimeZone),
-                                                 std::abs((state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) /
-                                                          max(state.dataEnvrn->Elevation, 1.0) * 100.0),
-                                                 std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation)));
+                            std::format("..due to location differences, Latitude difference=[{:.2f}] degrees, Longitude difference=[{:.2f}] degrees.",
+                                        std::abs(state.dataEnvrn->Latitude - state.dataWeather->WeatherFileLatitude),
+                                        std::abs(state.dataEnvrn->Longitude - state.dataWeather->WeatherFileLongitude)));
+                        ShowContinueError(
+                            state,
+                            std::format("..Time Zone difference=[{:.1f}] hour(s), Elevation difference=[{:.2f}] percent, [{:.2f}] meters.",
+                                        std::abs(state.dataEnvrn->TimeZoneNumber - state.dataWeather->WeatherFileTimeZone),
+                                        std::abs((state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation) /
+                                                 max(state.dataEnvrn->Elevation, 1.0) * 100.0),
+                                        std::abs(state.dataEnvrn->Elevation - state.dataWeather->WeatherFileElevation)));
                     }
                 }
             }
@@ -4462,7 +4479,7 @@ namespace Weather {
                 "{GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation\n");
             print(state.files.eio, "{}", LocHdFormat);
 
-            static constexpr std::string_view LocFormat("Site:Location,{},{:.2R},{:.2R},{:.2R},{:.2R},{:.0R},{:.4R}\n");
+            static constexpr std::string_view LocFormat("Site:Location,{},{:.2f},{:.2f},{:.2f},{:.2f},{:.0f},{:.4f}\n");
             print(state.files.eio,
                   LocFormat,
                   state.dataWeather->LocationTitle,
@@ -4496,17 +4513,17 @@ namespace Weather {
         }
 
         if ((state.dataEnvrn->Latitude < -90.0) || (state.dataEnvrn->Latitude > 90.0)) {
-            ShowSevereError(state, format("Latitude must be between -90 and 90; Entered={:.2R}", state.dataEnvrn->Latitude));
+            ShowSevereError(state, std::format("Latitude must be between -90 and 90; Entered={:.2f}", state.dataEnvrn->Latitude));
             LocationError = true;
         }
 
         if ((state.dataEnvrn->Longitude < -180.0) || (state.dataEnvrn->Longitude > 180.0)) {
-            ShowSevereError(state, format("Longitude must be between -180 and 180; Entered={:.2R}", state.dataEnvrn->Longitude));
+            ShowSevereError(state, std::format("Longitude must be between -180 and 180; Entered={:.2f}", state.dataEnvrn->Longitude));
             LocationError = true;
         }
 
         if ((state.dataEnvrn->TimeZoneNumber < -12.00) || (state.dataEnvrn->TimeZoneNumber > 14.00)) {
-            ShowSevereError(state, format("Time Zone must be between -12 and +14; Entered={:.2R}", state.dataEnvrn->TimeZoneNumber));
+            ShowSevereError(state, std::format("Time Zone must be between -12 and +14; Entered={:.2f}", state.dataEnvrn->TimeZoneNumber));
             LocationError = true;
         }
 
@@ -4525,10 +4542,11 @@ namespace Weather {
                 if (DiffCalc > 1.0 && DiffCalc < 24.0) {
                     if (DiffCalc < 3.0) {
                         ShowWarningError(state,
-                                         format("Standard Time Meridian and Time Zone differ by more than 1, Difference=\"{:.1R}\"", DiffCalc));
+                                         std::format("Standard Time Meridian and Time Zone differ by more than 1, Difference=\"{:.1f}\"", DiffCalc));
                         ShowContinueError(state, "Solar Positions may be incorrect");
                     } else {
-                        ShowSevereError(state, format("Standard Time Meridian and Time Zone differ by more than 2, Difference=\"{:.1R}\"", DiffCalc));
+                        ShowSevereError(state,
+                                        std::format("Standard Time Meridian and Time Zone differ by more than 2, Difference=\"{:.1f}\"", DiffCalc));
                         ShowContinueError(state, "Solar Positions will be incorrect");
                         //          LocationError=.TRUE.
                     }
@@ -4626,7 +4644,7 @@ namespace Weather {
         if (state.dataWeather->EnvironmentReportNbr != 1) { //  problem
             ShowFatalError(state, "ReportOutputFileHeaders: Assigned report number for Environment title is not 1.  Contact Support.");
         }
-        state.dataWeather->EnvironmentReportChr = fmt::to_string(state.dataWeather->EnvironmentReportNbr);
+        state.dataWeather->EnvironmentReportChr = std::to_string(state.dataWeather->EnvironmentReportNbr);
         strip(state.dataWeather->EnvironmentReportChr);
         print(state.files.eso, "{}{}\n", state.dataWeather->EnvironmentReportChr, EnvironmentString);
         print(state.files.mtr, "{}{}\n", state.dataWeather->EnvironmentReportChr, EnvironmentString);
@@ -4731,7 +4749,6 @@ namespace Weather {
         int RPD2 = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "SizingPeriod:WeatherFileConditionType");
         state.dataWeather->TotRunPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "RunPeriod");
         state.dataWeather->NumOfEnvrn = state.dataEnvrn->TotDesDays + state.dataWeather->TotRunPers + RPD1 + RPD2;
-        state.dataGlobal->WeathSimReq = state.dataWeather->TotRunPers > 0;
         state.dataWeather->TotReportPers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Output:Table:ReportPeriod");
 #ifdef GET_OUT
         state.dataWeather->SPSiteScheduleNamePtr.allocate(state.dataEnvrn->TotDesDays * 5);
@@ -4913,27 +4930,27 @@ namespace Weather {
             if (reportPeriodInput.startYear == 0) {
                 if (reportPeriodInput.endYear != 0) { // Have to have an input start year to input an end year
                     ShowSevereError(state,
-                                    format("{}: object={}, end year cannot be specified if the start year is not.",
-                                           ipsc->cCurrentModuleObject,
-                                           reportPeriodInput.title));
+                                    std::format("{}: object={}, end year cannot be specified if the start year is not.",
+                                                ipsc->cCurrentModuleObject,
+                                                reportPeriodInput.title));
                     ErrorsFound = true;
                 }
             } else if (reportPeriodInput.startYear < 1583) { // Bail on the proleptic Gregorian calendar
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
-                                       ipsc->cCurrentModuleObject,
-                                       reportPeriodInput.title,
-                                       reportPeriodInput.startYear));
+                                std::format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
+                                            ipsc->cCurrentModuleObject,
+                                            reportPeriodInput.title,
+                                            reportPeriodInput.startYear));
                 ErrorsFound = true;
             }
 
             if (reportPeriodInput.endYear != 0 && reportPeriodInput.startYear > reportPeriodInput.endYear) {
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is after the end year ({}).",
-                                       ipsc->cCurrentModuleObject,
-                                       reportPeriodInput.title,
-                                       reportPeriodInput.startYear,
-                                       reportPeriodInput.endYear));
+                                std::format("{}: object={}, start year ({}) is after the end year ({}).",
+                                            ipsc->cCurrentModuleObject,
+                                            reportPeriodInput.title,
+                                            reportPeriodInput.startYear,
+                                            reportPeriodInput.endYear));
                 ErrorsFound = true;
             }
 
@@ -5071,27 +5088,27 @@ namespace Weather {
             if (runPeriodInput.startYear == 0) {
                 if (runPeriodInput.endYear != 0) { // Have to have an input start year to input an end year
                     ShowSevereError(state,
-                                    format("{}: object={}, end year cannot be specified if the start year is not.",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title));
+                                    std::format("{}: object={}, end year cannot be specified if the start year is not.",
+                                                ipsc->cCurrentModuleObject,
+                                                runPeriodInput.title));
                     ErrorsFound = true;
                 }
             } else if (runPeriodInput.startYear < 1583) { // Bail on the proleptic Gregorian calendar
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
-                                       ipsc->cCurrentModuleObject,
-                                       runPeriodInput.title,
-                                       runPeriodInput.startYear));
+                                std::format("{}: object={}, start year ({}) is too early, please choose a date after 1582.",
+                                            ipsc->cCurrentModuleObject,
+                                            runPeriodInput.title,
+                                            runPeriodInput.startYear));
                 ErrorsFound = true;
             }
 
             if (runPeriodInput.endYear != 0 && runPeriodInput.startYear > runPeriodInput.endYear) {
                 ShowSevereError(state,
-                                format("{}: object={}, start year ({}) is after the end year ({}).",
-                                       ipsc->cCurrentModuleObject,
-                                       runPeriodInput.title,
-                                       runPeriodInput.startYear,
-                                       runPeriodInput.endYear));
+                                std::format("{}: object={}, start year ({}) is after the end year ({}).",
+                                            ipsc->cCurrentModuleObject,
+                                            runPeriodInput.title,
+                                            runPeriodInput.startYear,
+                                            runPeriodInput.endYear));
                 ErrorsFound = true;
             }
 
@@ -5101,11 +5118,11 @@ namespace Weather {
                 int dayType = getEnumValue(Sched::dayTypeNamesUC, state.dataIPShortCut->cAlphaArgs(2));
                 if (dayType < 1) {
                     ShowWarningError(state,
-                                     format("{}: object={}{} invalid (Day of Week) [{}] for Start is not valid, Sunday will be used.",
-                                            state.dataIPShortCut->cCurrentModuleObject,
-                                            state.dataWeather->RunPeriodInput(i).title,
-                                            state.dataIPShortCut->cAlphaFieldNames(2),
-                                            state.dataIPShortCut->cAlphaArgs(2)));
+                                     std::format("{}: object={}{} invalid (Day of Week) [{}] for Start is not valid, Sunday will be used.",
+                                                 state.dataIPShortCut->cCurrentModuleObject,
+                                                 state.dataWeather->RunPeriodInput(i).title,
+                                                 state.dataIPShortCut->cAlphaFieldNames(2),
+                                                 state.dataIPShortCut->cAlphaArgs(2)));
                     runPeriodInput.startWeekDay = Sched::DayType::Sunday;
                 } else {
                     runPeriodInput.startWeekDay = static_cast<Sched::DayType>(dayType);
@@ -5131,10 +5148,10 @@ namespace Weather {
                 } else {                                         // Have an input start year
                     if (!isLeapYear(runPeriodInput.startYear)) { // Start year is not a leap year
                         ShowSevereError(state,
-                                        format("{}: object={}, start year ({}) is not a leap year but the requested start date is 2/29.",
-                                               ipsc->cCurrentModuleObject,
-                                               runPeriodInput.title,
-                                               runPeriodInput.startYear));
+                                        std::format("{}: object={}, start year ({}) is not a leap year but the requested start date is 2/29.",
+                                                    ipsc->cCurrentModuleObject,
+                                                    runPeriodInput.title,
+                                                    runPeriodInput.startYear));
                         ErrorsFound = true;
                     } else { // Start year is a leap year
                         Sched::DayType weekday =
@@ -5142,12 +5159,12 @@ namespace Weather {
                         if (inputWeekday) { // Check for correctness of input
                             if (weekday != runPeriodInput.startWeekDay) {
                                 ShowWarningError(state,
-                                                 format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
-                                                        ipsc->cCurrentModuleObject,
-                                                        runPeriodInput.title,
-                                                        ipsc->cAlphaArgs(2),
-                                                        runPeriodInput.startYear,
-                                                        Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
+                                                 std::format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
+                                                             ipsc->cCurrentModuleObject,
+                                                             runPeriodInput.title,
+                                                             ipsc->cAlphaArgs(2),
+                                                             runPeriodInput.startYear,
+                                                             Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
                                 runPeriodInput.startWeekDay = weekday;
                             }
                         } else { // Set the weekday if it was not input
@@ -5159,11 +5176,11 @@ namespace Weather {
                 // Non leap-day start date
                 if (!validMonthDay(runPeriodInput.startMonth, runPeriodInput.startDay)) {
                     ShowSevereError(state,
-                                    format("{}: object={}, Invalid input start month/day ({}/{})",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title,
-                                           runPeriodInput.startMonth,
-                                           runPeriodInput.startDay));
+                                    std::format("{}: object={}, Invalid input start month/day ({}/{})",
+                                                ipsc->cCurrentModuleObject,
+                                                runPeriodInput.title,
+                                                runPeriodInput.startMonth,
+                                                runPeriodInput.startDay));
                     ErrorsFound = true;
                 } else {                                 // Month/day is valid
                     if (runPeriodInput.startYear == 0) { // No input starting year
@@ -5182,12 +5199,12 @@ namespace Weather {
                         if (inputWeekday) { // Check for correctness of input
                             if (weekday != runPeriodInput.startWeekDay) {
                                 ShowWarningError(state,
-                                                 format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
-                                                        ipsc->cCurrentModuleObject,
-                                                        runPeriodInput.title,
-                                                        ipsc->cAlphaArgs(2),
-                                                        runPeriodInput.startYear,
-                                                        Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
+                                                 std::format("{}: object={}, start weekday ({}) does not match the start year ({}), corrected to {}.",
+                                                             ipsc->cCurrentModuleObject,
+                                                             runPeriodInput.title,
+                                                             ipsc->cAlphaArgs(2),
+                                                             runPeriodInput.startYear,
+                                                             Sched::dayTypeNamesUC[static_cast<int>(weekday)]));
                                 runPeriodInput.startWeekDay = weekday;
                             }
                         } else { // Set the weekday if it was not input
@@ -5219,20 +5236,20 @@ namespace Weather {
                 } else {                                       // Have an input end year
                     if (!isLeapYear(runPeriodInput.endYear)) { // End year is not a leap year
                         ShowSevereError(state,
-                                        format("{}: object={}, end year ({}) is not a leap year but the requested end date is 2/29.",
-                                               ipsc->cCurrentModuleObject,
-                                               runPeriodInput.title,
-                                               runPeriodInput.startYear));
+                                        std::format("{}: object={}, end year ({}) is not a leap year but the requested end date is 2/29.",
+                                                    ipsc->cCurrentModuleObject,
+                                                    runPeriodInput.title,
+                                                    runPeriodInput.startYear));
                         ErrorsFound = true;
                     } else {
                         runPeriodInput.endJulianDate = computeJulianDate(runPeriodInput.endYear, runPeriodInput.endMonth, runPeriodInput.endDay);
                         if (runPeriodInput.startJulianDate > runPeriodInput.endJulianDate) {
                             ShowSevereError(state,
-                                            format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
-                                                   ipsc->cCurrentModuleObject,
-                                                   runPeriodInput.title,
-                                                   runPeriodInput.startJulianDate,
-                                                   runPeriodInput.endJulianDate));
+                                            std::format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
+                                                        ipsc->cCurrentModuleObject,
+                                                        runPeriodInput.title,
+                                                        runPeriodInput.startJulianDate,
+                                                        runPeriodInput.endJulianDate));
                             ErrorsFound = true;
                         }
                     }
@@ -5241,11 +5258,11 @@ namespace Weather {
                 // Non leap-day end date
                 if (!validMonthDay(runPeriodInput.endMonth, runPeriodInput.endDay)) {
                     ShowSevereError(state,
-                                    format("{}: object={}, Invalid input end month/day ({}/{})",
-                                           ipsc->cCurrentModuleObject,
-                                           runPeriodInput.title,
-                                           runPeriodInput.startMonth,
-                                           runPeriodInput.startDay));
+                                    std::format("{}: object={}, Invalid input end month/day ({}/{})",
+                                                ipsc->cCurrentModuleObject,
+                                                runPeriodInput.title,
+                                                runPeriodInput.startMonth,
+                                                runPeriodInput.startDay));
                     ErrorsFound = true;
                 } else {                               // Month/day is valid
                     if (runPeriodInput.endYear == 0) { // No input end year
@@ -5260,11 +5277,11 @@ namespace Weather {
                         runPeriodInput.endJulianDate = computeJulianDate(runPeriodInput.endYear, runPeriodInput.endMonth, runPeriodInput.endDay);
                         if (runPeriodInput.startJulianDate > runPeriodInput.endJulianDate) {
                             ShowSevereError(state,
-                                            format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
-                                                   ipsc->cCurrentModuleObject,
-                                                   runPeriodInput.title,
-                                                   runPeriodInput.startJulianDate,
-                                                   runPeriodInput.endJulianDate));
+                                            std::format("{}: object={}, start Julian date ({}) is after the end Julian date ({}).",
+                                                        ipsc->cCurrentModuleObject,
+                                                        runPeriodInput.title,
+                                                        runPeriodInput.startJulianDate,
+                                                        runPeriodInput.endJulianDate));
                             ErrorsFound = true;
                         }
                     }
@@ -5363,7 +5380,6 @@ namespace Weather {
             state.dataWeather->Environment.redimension(++state.dataWeather->NumOfEnvrn);
             state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::RunPeriodWeather;
             nRunPeriods = 1;
-            state.dataGlobal->WeathSimReq = true;
             state.dataWeather->RunPeriodInput.allocate(nRunPeriods);
             auto &runPerInput1 = state.dataWeather->RunPeriodInput(1);
             runPerInput1.startJulianDate = General::OrdinalDay(runPerInput1.startMonth, runPerInput1.startDay, state.dataWeather->LeapYearAdd);
@@ -5372,8 +5388,6 @@ namespace Weather {
             if (runPerInput1.dayOfWeek != 0 && !ErrorsFound) {
                 SetupWeekDaysByMonth(state, runPerInput1.startMonth, runPerInput1.startDay, runPerInput1.dayOfWeek, runPerInput1.monWeekDay);
             }
-        } else {
-            nRunPeriods = 1;
         }
     }
 
@@ -5448,11 +5462,11 @@ namespace Weather {
             case 12: {
                 if (runPerDesInput.startDay > 31) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    std::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                ipsc->cCurrentModuleObject,
+                                                runPerDesInput.title,
+                                                ipsc->cNumericFieldNames(2),
+                                                runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
@@ -5462,32 +5476,32 @@ namespace Weather {
             case 11: {
                 if (runPerDesInput.startDay > 30) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    std::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                ipsc->cCurrentModuleObject,
+                                                runPerDesInput.title,
+                                                ipsc->cNumericFieldNames(2),
+                                                runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
             case 2: {
                 if (runPerDesInput.startDay > 28 + state.dataWeather->LeapYearAdd) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (Day of Month) [{}]",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cNumericFieldNames(2),
-                                           runPerDesInput.startDay));
+                                    std::format("{}: object={} {} invalid (Day of Month) [{}]",
+                                                ipsc->cCurrentModuleObject,
+                                                runPerDesInput.title,
+                                                ipsc->cNumericFieldNames(2),
+                                                runPerDesInput.startDay));
                     ErrorsFound = true;
                 }
             } break;
             default: {
                 ShowSevereError(state,
-                                format("{}: object={} {} invalid (Month) [{}]",
-                                       ipsc->cCurrentModuleObject,
-                                       runPerDesInput.title,
-                                       ipsc->cNumericFieldNames(1),
-                                       runPerDesInput.startMonth));
+                                std::format("{}: object={} {} invalid (Month) [{}]",
+                                            ipsc->cCurrentModuleObject,
+                                            runPerDesInput.title,
+                                            ipsc->cNumericFieldNames(1),
+                                            runPerDesInput.startMonth));
                 ErrorsFound = true;
             } break;
             } // switch
@@ -5498,11 +5512,11 @@ namespace Weather {
                 runPerDesInput.dayOfWeek = getEnumValue(Sched::dayTypeNamesUC, ipsc->cAlphaArgs(2));
                 if (runPerDesInput.dayOfWeek < 1 || runPerDesInput.dayOfWeek == 8) {
                     ShowWarningError(state,
-                                     format("{}: object={} {} invalid (Day of Week) [{} for Start is not Valid, Monday will be Used.",
-                                            ipsc->cCurrentModuleObject,
-                                            runPerDesInput.title,
-                                            ipsc->cAlphaFieldNames(1),
-                                            ipsc->cAlphaArgs(1)));
+                                     std::format("{}: object={} {} invalid (Day of Week) [{} for Start is not Valid, Monday will be Used.",
+                                                 ipsc->cCurrentModuleObject,
+                                                 runPerDesInput.title,
+                                                 ipsc->cAlphaFieldNames(1),
+                                                 ipsc->cAlphaArgs(1)));
                     runPerDesInput.dayOfWeek = (int)Sched::DayType::Monday; // Defaults to Monday
                 }
             }
@@ -5595,21 +5609,21 @@ namespace Weather {
                     WhichPeriod = Util::FindItem(ipsc->cAlphaArgs(2), state.dataWeather->TypicalExtremePeriods, &TypicalExtremeData::MatchValue2);
                     if (WhichPeriod != 0) {
                         ShowWarningError(state,
-                                         format("{}: object={} {}={} matched to {}",
-                                                ipsc->cCurrentModuleObject,
-                                                runPerDesInput.title,
-                                                ipsc->cAlphaFieldNames(2),
-                                                ipsc->cAlphaArgs(2),
-                                                state.dataWeather->TypicalExtremePeriods(WhichPeriod).MatchValue2));
+                                         std::format("{}: object={} {}={} matched to {}",
+                                                     ipsc->cCurrentModuleObject,
+                                                     runPerDesInput.title,
+                                                     ipsc->cAlphaFieldNames(2),
+                                                     ipsc->cAlphaArgs(2),
+                                                     state.dataWeather->TypicalExtremePeriods(WhichPeriod).MatchValue2));
                     }
                 }
                 if (WhichPeriod == 0) {
                     ShowSevereError(state,
-                                    format("{}: object={} {} invalid (not on Weather File)={}",
-                                           ipsc->cCurrentModuleObject,
-                                           runPerDesInput.title,
-                                           ipsc->cAlphaFieldNames(2),
-                                           ipsc->cAlphaArgs(2)));
+                                    std::format("{}: object={} {} invalid (not on Weather File)={}",
+                                                ipsc->cCurrentModuleObject,
+                                                runPerDesInput.title,
+                                                ipsc->cAlphaFieldNames(2),
+                                                ipsc->cAlphaArgs(2)));
                     ErrorsFound = true;
                 } else {
                     auto const &typicalExtPer = state.dataWeather->TypicalExtremePeriods(WhichPeriod);
@@ -5762,7 +5776,8 @@ namespace Weather {
                 specialDay.Duration = int(Duration(1));
             } else {
                 ShowSevereError(
-                    state, format("{}: {} Invalid {}={:.0T}", ipsc->cCurrentModuleObject, AlphArray(1), ipsc->cNumericFieldNames(1), Duration(1)));
+                    state,
+                    std::format("{}: {} Invalid {}={:.0f}", ipsc->cCurrentModuleObject, AlphArray(1), ipsc->cNumericFieldNames(1), Duration(1)));
                 ErrorsFound = true;
             }
 
@@ -5805,10 +5820,10 @@ namespace Weather {
             for (int j = 1; j <= specialDay.Duration; ++j) {
                 ++JDay;
                 if (JDay > 366) {
-                    ShowWarningError(state, format("SpecialDay={} causes index of more than 366, ignoring those beyond 366", specialDay.Name));
+                    ShowWarningError(state, std::format("SpecialDay={} causes index of more than 366, ignoring those beyond 366", specialDay.Name));
                 } else {
                     if (state.dataWeather->SpecialDayTypes(JDay) != 0 && Warn == 0) {
-                        ShowWarningError(state, format("SpecialDay={} attempted overwrite of previous set special day", specialDay.Name));
+                        ShowWarningError(state, std::format("SpecialDay={} attempted overwrite of previous set special day", specialDay.Name));
                         Warn = 1;
                     } else if (state.dataWeather->SpecialDayTypes(JDay) == 0) {
                         state.dataWeather->SpecialDayTypes(JDay) = specialDay.DayType;
@@ -5875,7 +5890,7 @@ namespace Weather {
             ErrorObjectHeader eoh{routineName, ipsc->cCurrentModuleObject, ipsc->cAlphaArgs(1)};
 
             if (NumAlphas != 2) {
-                ShowSevereError(state, format("{}: Insufficient fields, must have Start AND End Dates", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, std::format("{}: Insufficient fields, must have Start AND End Dates", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             } else { // Correct number of arguments
                 General::ProcessDateString(state,
@@ -5903,7 +5918,7 @@ namespace Weather {
                 state.dataWeather->IDFDaylightSaving = true;
             }
         } else if (NumFound > 1) {
-            ShowSevereError(state, format("{}: Too many objects in Input File, only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("{}: Too many objects in Input File, only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
     }
@@ -5967,7 +5982,7 @@ namespace Weather {
         static constexpr std::string_view routineName = "GetDesignDayData";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Constant::Units unitType;
+        Constant::Units unitType = Constant::Units::None;
 
         state.dataWeather->DesDayInput.allocate(TotDesDays); // Allocate the array to the # of DD's
         state.dataWeather->desDayMods.allocate(TotDesDays);
@@ -6127,8 +6142,8 @@ namespace Weather {
                 desDayInput.dryBulbRangeType != DesDayDryBulbRangeType::Profile) {
                 Real64 testval = desDayInput.MaxDryBulb - desDayInput.DailyDBRange;
                 if (testval < -90.0 || testval > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(state, format("{} ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(3), testval));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state, std::format("{} ({:.2f}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(3), testval));
                     ErrorsFound = true;
                 }
             }
@@ -6200,19 +6215,20 @@ namespace Weather {
 
                 if (desDayInput.dryBulbRangeType == DesDayDryBulbRangeType::Profile) {
                     if (MaxDryBulbEntered) {
-                        ShowWarningError(state, format("{}=\"{}\", data override.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                        ShowContinueError(state, format("..{}=[{:.2R}] will be overwritten.", ipsc->cNumericFieldNames(3), desDayInput.MaxDryBulb));
-                        ShowContinueError(state, format("..{}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
-                        ShowContinueError(state, format("..with max value=[{:.2R}].", testval));
+                        ShowWarningError(state, std::format("{}=\"{}\", data override.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                        ShowContinueError(state,
+                                          std::format("..{}=[{:.2f}] will be overwritten.", ipsc->cNumericFieldNames(3), desDayInput.MaxDryBulb));
+                        ShowContinueError(state, std::format("..{}=\"{}\".", ipsc->cAlphaFieldNames(3), ipsc->cAlphaArgs(3)));
+                        ShowContinueError(state, std::format("..with max value=[{:.2f}].", testval));
                     }
                     desDayInput.MaxDryBulb = testval;
                 }
 
                 testval = desDayInput.MaxDryBulb - testval;
                 if (testval < -90.0 || testval > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
                     // should this be cNumericFieldNames?
-                    ShowContinueError(state, format("{} = ({:.2R}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(4), testval));
+                    ShowContinueError(state, std::format("{} = ({:.2f}) is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(4), testval));
                     ErrorsFound = true;
                 }
             }
@@ -6231,10 +6247,10 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < -90.0 || desDayInput.HumIndValue > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
                         state,
-                        format("{} = {:.2R} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - WetBulb", desDayInput.HumIndValue));
+                        std::format("{} = {:.2f} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - WetBulb", desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6248,10 +6264,10 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < -90.0 || desDayInput.HumIndValue > 70.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
                         state,
-                        format("{} = {:.2R} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - DewPoint", desDayInput.HumIndValue));
+                        std::format("{} = {:.2f} is out of range [-90.0, 70.0]", ipsc->cAlphaFieldNames(5) + " - DewPoint", desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6266,10 +6282,11 @@ namespace Weather {
                 }
 
                 if (desDayInput.HumIndValue < 0.0 || desDayInput.HumIndValue > 0.03) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {:.2R} is out of range [0.0, 0.03]", ipsc->cAlphaFieldNames(5) + " - Humidity-Ratio", desDayInput.HumIndValue));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      std::format("{} = {:.2f} is out of range [0.0, 0.03]",
+                                                  ipsc->cAlphaFieldNames(5) + " - Humidity-Ratio",
+                                                  desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6285,10 +6302,11 @@ namespace Weather {
 
                 desDayInput.HumIndType = DesDayHumIndType::Enthalpy;
                 if (desDayInput.HumIndValue < 0.0 || desDayInput.HumIndValue > 130000.0) {
-                    ShowSevereError(state, format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
-                    ShowContinueError(
-                        state,
-                        format("{} = {.0R} is out of range [0.0, 130000.0]", ipsc->cAlphaFieldNames(5) + " - Enthalpy", desDayInput.HumIndValue));
+                    ShowSevereError(state, std::format("{}: {} = {}", routineName, ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowContinueError(state,
+                                      std::format("{} = {:.0f} is out of range [0.0, 130000.0]",
+                                                  ipsc->cAlphaFieldNames(5) + " - Enthalpy",
+                                                  desDayInput.HumIndValue));
                     ErrorsFound = true;
                 }
             } break;
@@ -6330,8 +6348,8 @@ namespace Weather {
             } break;
 
             default: {
-                ShowWarningError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                ShowContinueError(state, format("..invalid field: {}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
+                ShowWarningError(state, std::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                ShowContinueError(state, std::format("..invalid field: {}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
                 ShowContinueError(state, "WetBulb will be used. Maximum Dry Bulb will be used as WetBulb at Maximum Dry Bulb.");
                 desDayInput.HumIndType = DesDayHumIndType::WetBulb;
                 desDayInput.HumIndValue = ipsc->rNumericArgs(3);
@@ -6419,12 +6437,12 @@ namespace Weather {
                 desDayInput.HumIndType == DesDayHumIndType::WBProfMul || desDayInput.HumIndType == DesDayHumIndType::WBProfDef ||
                 desDayInput.HumIndType == DesDayHumIndType::WBProfDif) {
                 if (desDayInput.HumIndValue > desDayInput.MaxDryBulb) {
-                    ShowWarningError(state, format("{}=\"{}\", range check data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowWarningError(state, std::format("{}=\"{}\", range check data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(state,
-                                      format("..Humidity Indicator Temperature at Max Temperature={:.1R} > Max DryBulb={:.1R}",
-                                             desDayInput.HumIndValue,
-                                             desDayInput.MaxDryBulb));
-                    ShowContinueError(state, format("..{}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
+                                      std::format("..Humidity Indicator Temperature at Max Temperature={:.1f} > Max DryBulb={:.1f}",
+                                                  desDayInput.HumIndValue,
+                                                  desDayInput.MaxDryBulb));
+                    ShowContinueError(state, std::format("..{}=\"{}\".", ipsc->cAlphaFieldNames(5), ipsc->cAlphaArgs(5)));
                     ShowContinueError(state, "..Conditions for day will be set to Relative Humidity = 100%");
                     if (desDayInput.HumIndType == DesDayHumIndType::DewPoint) {
                         desDayInput.DewPointNeedsSet = true;
@@ -6539,10 +6557,11 @@ namespace Weather {
             case 10:
             case 12: {
                 if (desDayInput.DayOfMonth > 31) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
                         state,
-                        format(".. invalid field: {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                        std::format(
+                            ".. invalid field: {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
@@ -6551,23 +6570,25 @@ namespace Weather {
             case 9:
             case 11: {
                 if (desDayInput.DayOfMonth > 30) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
-                        state, format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                        state,
+                        std::format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
             case 2: {
                 if (desDayInput.DayOfMonth > 28) {
-                    ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                    ShowSevereError(state, std::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
                     ShowContinueError(
-                        state, format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
+                        state,
+                        std::format(".. invalid {}=[{}], Month=[{}].", ipsc->cNumericFieldNames(2), desDayInput.DayOfMonth, desDayInput.Month));
                     ErrorsFound = true;
                 }
             } break;
             default: {
-                ShowSevereError(state, format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
-                ShowContinueError(state, format(".. invalid {} invalid (Month) [{}].", ipsc->cNumericFieldNames(1), desDayInput.Month));
+                ShowSevereError(state, std::format("{}=\"{}\", invalid data.", ipsc->cCurrentModuleObject, desDayInput.Title));
+                ShowContinueError(state, std::format(".. invalid {} invalid (Month) [{}].", ipsc->cNumericFieldNames(1), desDayInput.Month));
                 ErrorsFound = true;
             } break;
             } // switch (desDayInput.Month)
@@ -6637,7 +6658,7 @@ namespace Weather {
         int const NumLocations = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, ipsc->cCurrentModuleObject);
 
         if (NumLocations > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -6697,7 +6718,7 @@ namespace Weather {
         static constexpr std::string_view routineName = "GetWeatherProperties";
 
         int Found;
-        int envFound;
+        int envFound = 0;
 
         auto const &ipsc = state.dataIPShortCut;
         ipsc->cCurrentModuleObject = "WeatherProperty:SkyTemperature";
@@ -6733,21 +6754,21 @@ namespace Weather {
                     }
                     if (environJ.WP_Type1 != 0) {
                         ShowSevereError(state,
-                                        format("{}: {}=\"{}\", indicated Environment Name already assigned.",
-                                               routineName,
-                                               ipsc->cCurrentModuleObject,
-                                               ipsc->cAlphaArgs(1)));
+                                        std::format("{}: {}=\"{}\", indicated Environment Name already assigned.",
+                                                    routineName,
+                                                    ipsc->cCurrentModuleObject,
+                                                    ipsc->cAlphaArgs(1)));
                         if (!environJ.Title.empty()) {
                             ShowContinueError(state,
-                                              format("...Environment=\"{}\", already using {}=\"{}\".",
-                                                     environJ.Title,
-                                                     ipsc->cCurrentModuleObject,
-                                                     state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
+                                              std::format("...Environment=\"{}\", already using {}=\"{}\".",
+                                                          environJ.Title,
+                                                          ipsc->cCurrentModuleObject,
+                                                          state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
                         } else {
                             ShowContinueError(state,
-                                              format("... Runperiod Environment, already using {}=\"{}\".",
-                                                     ipsc->cCurrentModuleObject,
-                                                     state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
+                                              std::format("... Runperiod Environment, already using {}=\"{}\".",
+                                                          ipsc->cCurrentModuleObject,
+                                                          state.dataWeather->WPSkyTemperature(environJ.WP_Type1).Name));
                         }
                         ErrorsFound = true;
                     } else {
@@ -6772,15 +6793,15 @@ namespace Weather {
                 auto &envrnFound = state.dataWeather->Environment(Found);
                 if (envrnFound.WP_Type1 != 0) {
                     ShowSevereError(state,
-                                    format("{}:{}=\"{}\", indicated Environment Name already assigned.",
-                                           routineName,
-                                           ipsc->cCurrentModuleObject,
-                                           ipsc->cAlphaArgs(1)));
+                                    std::format("{}:{}=\"{}\", indicated Environment Name already assigned.",
+                                                routineName,
+                                                ipsc->cCurrentModuleObject,
+                                                ipsc->cAlphaArgs(1)));
                     ShowContinueError(state,
-                                      format("...Environment=\"{}\", already using {}=\"{}\".",
-                                             envrnFound.Title,
-                                             ipsc->cCurrentModuleObject,
-                                             state.dataWeather->WPSkyTemperature(envrnFound.WP_Type1).Name));
+                                      std::format("...Environment=\"{}\", already using {}=\"{}\".",
+                                                  envrnFound.Title,
+                                                  ipsc->cCurrentModuleObject,
+                                                  state.dataWeather->WPSkyTemperature(envrnFound.WP_Type1).Name));
                     ErrorsFound = true;
                 } else {
                     state.dataWeather->Environment(Found).WP_Type1 = i;
@@ -6791,7 +6812,7 @@ namespace Weather {
 
             // Validate Calculation Type.
             // std::string units;
-            Constant::Units unitType;
+            Constant::Units unitType = Constant::Units::None;
             wpSkyTemp.skyTempModel = static_cast<SkyTempModel>(getEnumValue(Weather::SkyTempModelNamesUC, ipsc->cAlphaArgs(2)));
 
             switch (wpSkyTemp.skyTempModel) {
@@ -6924,15 +6945,15 @@ namespace Weather {
                     state, ipsc->cCurrentModuleObject, 1, GndAlphas, GndNumAlpha, GndProps, GndNumProp, IOStat);
 
                 if (GndNumProp < 12) {
-                    ShowSevereError(state, format("{}: Less than 12 values entered.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, std::format("{}: Less than 12 values entered.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 }
 
                 // Assign the ground reflectances to the variable
-                state.dataWeather->GroundReflectances({1, 12}) = GndProps({1, 12});
+                state.dataWeather->GroundReflectances = GndProps;
 
             } else {
-                ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             }
         }
@@ -6982,7 +7003,7 @@ namespace Weather {
                 state.dataWeather->SnowGndRefModifierForDayltg = GndProps(2);
 
             } else {
-                ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+                ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
                 ErrorsFound = true;
             }
         }
@@ -7000,7 +7021,8 @@ namespace Weather {
               "dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}");
         print(state.files.eio, "{}", " Site:GroundReflectance:Snow");
         for (int i = 1; i <= 12; ++i) {
-            print(state.files.eio, ", {:5.2F}", max(min(state.dataWeather->GroundReflectances(i) * state.dataWeather->SnowGndRefModifier, 1.0), 0.0));
+            print(
+                state.files.eio, ", {:5.2F}", std::clamp(state.dataWeather->GroundReflectances(i) * state.dataWeather->SnowGndRefModifier, 0.0, 1.0));
         }
         print(state.files.eio, "\n");
         print(state.files.eio,
@@ -7013,7 +7035,7 @@ namespace Weather {
         for (nObjs = 1; nObjs <= 12; ++nObjs) {
             print(state.files.eio,
                   ", {:5.2F}",
-                  max(min(state.dataWeather->GroundReflectances(nObjs) * state.dataWeather->SnowGndRefModifierForDayltg, 1.0), 0.0));
+                  std::clamp(state.dataWeather->GroundReflectances(nObjs) * state.dataWeather->SnowGndRefModifierForDayltg, 0.0, 1.0));
         }
         print(state.files.eio, "\n");
     }
@@ -7071,10 +7093,10 @@ namespace Weather {
 
             case WaterMainsTempCalcMethod::Correlation: {
                 if (NumNums == 0) {
-                    ShowSevereError(state, format("{}: Missing Annual Average and Maximum Difference fields.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, std::format("{}: Missing Annual Average and Maximum Difference fields.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 } else if (NumNums == 1) {
-                    ShowSevereError(state, format("{}: Missing Maximum Difference field.", ipsc->cCurrentModuleObject));
+                    ShowSevereError(state, std::format("{}: Missing Maximum Difference field.", ipsc->cCurrentModuleObject));
                     ErrorsFound = true;
                 } else {
                     state.dataWeather->WaterMainsTempsAnnualAvgAirTemp = NumArray(1);
@@ -7094,7 +7116,7 @@ namespace Weather {
             state.dataWeather->WaterMainsTempsOffset = NumArray(4);
 
         } else if (NumObjects > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
     }
@@ -7239,7 +7261,7 @@ namespace Weather {
             }
 
         } else if (NumObjects > 1) {
-            ShowSevereError(state, format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -7255,7 +7277,7 @@ namespace Weather {
               "Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal");
 
         // Formats
-        static constexpr std::string_view Format_720("Environment:Weather Station,{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R}\n");
+        static constexpr std::string_view Format_720("Environment:Weather Station,{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n");
         print(state.files.eio,
               Format_720,
               WeatherFileWindSensorHeight,
@@ -7470,7 +7492,7 @@ namespace Weather {
         std::string::size_type Pos = index(Line, ',');
         if ((Pos == std::string::npos) && !((headerType == EpwHeaderType::Comments1) || (headerType == EpwHeaderType::Comments2))) {
             ShowSevereError(state, "Invalid Header line in in.epw -- no commas");
-            ShowContinueError(state, format("Line={}", Line));
+            ShowContinueError(state, std::format("Line={}", Line));
             ShowFatalError(state, "Previous conditions cause termination.");
         }
         if (Pos != std::string::npos) {
@@ -7539,7 +7561,7 @@ namespace Weather {
                     }
                 } break;
                 default:
-                    ShowSevereError(state, format("GetEPWHeader:LOCATION, invalid numeric={}", Line.substr(0, Pos)));
+                    ShowSevereError(state, std::format("GetEPWHeader:LOCATION, invalid numeric={}", Line.substr(0, Pos)));
                     ErrorsFound = true;
                     break;
                 }
@@ -7573,8 +7595,9 @@ namespace Weather {
                     state.dataWeather->TypicalExtremePeriods(i).Title = Line.substr(0, Pos);
                     Line.erase(0, Pos + 1);
                 } else {
-                    ShowWarningError(state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={}", Line.substr(0, Pos)));
-                    ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                    ShowWarningError(state,
+                                     std::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={}", Line.substr(0, Pos)));
+                    ShowContinueError(state, std::format("...on processing Typical/Extreme period #{}", i));
                     state.dataWeather->NumEPWTypExtSets = i - 1;
                     break;
                 }
@@ -7650,10 +7673,10 @@ namespace Weather {
                     }
                 } else {
                     ShowWarningError(state,
-                                     format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={} {}",
-                                            state.dataWeather->TypicalExtremePeriods(i).Title,
-                                            Line.substr(0, Pos)));
-                    ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                                     std::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Header(WeatherFile)={} {}",
+                                                 state.dataWeather->TypicalExtremePeriods(i).Title,
+                                                 Line.substr(0, Pos)));
+                    ShowContinueError(state, std::format("...on processing Typical/Extreme period #{}", i));
                     state.dataWeather->NumEPWTypExtSets = i - 1;
                     break;
                 }
@@ -7672,8 +7695,9 @@ namespace Weather {
                         }
                     } else {
                         ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                            state,
+                            std::format("ProcessEPWHeader: Invalid Typical/Extreme Periods Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                        ShowContinueError(state, std::format("...on processing Typical/Extreme period #{}", i));
                         ErrorsFound = true;
                     }
                     Line.erase(0, Pos + 1);
@@ -7690,8 +7714,9 @@ namespace Weather {
                         }
                     } else {
                         ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...on processing Typical/Extreme period #{}", i));
+                            state,
+                            std::format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                        ShowContinueError(state, std::format("...on processing Typical/Extreme period #{}", i));
                         ErrorsFound = true;
                     }
                     Line.erase(0, Pos + 1);
@@ -7705,7 +7730,8 @@ namespace Weather {
                         }
                     } else {
                         ShowSevereError(
-                            state, format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                            state,
+                            std::format("ProcessEPWHeader: Invalid Typical/Extreme Periods End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
                         ErrorsFound = true;
                     }
                 }
@@ -7885,8 +7911,9 @@ namespace Weather {
                     } else {
                         // ErrorsFound is untouched
                         ShowContinueError(
-                            state, format("ProcessEPWHeader: Invalid Daylight Saving Period Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
-                        ShowContinueError(state, format("...invalid header={}", epwHeaders[static_cast<int>(headerType)]));
+                            state,
+                            std::format("ProcessEPWHeader: Invalid Daylight Saving Period Start Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                        ShowContinueError(state, std::format("...invalid header={}", epwHeaders[static_cast<int>(headerType)]));
                         ShowContinueError(state, "...Setting Weather File DST to false.");
                         state.dataWeather->EPWDaylightSaving = false;
                     }
@@ -7902,7 +7929,7 @@ namespace Weather {
                         } else {
                             ShowWarningError(
                                 state,
-                                format("ProcessEPWHeader: Invalid Daylight Saving Period End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                                std::format("ProcessEPWHeader: Invalid Daylight Saving Period End Date Field(WeatherFile)={}", Line.substr(0, Pos)));
                             ShowContinueError(state, "...Setting Weather File DST to false.");
                             state.dataWeather->EPWDaylightSaving = false;
                         }
@@ -7950,7 +7977,7 @@ namespace Weather {
                                 specialDay.DayType = 1;
                                 specialDay.WthrFile = true;
                             } else {
-                                ShowSevereError(state, format("Invalid SpecialDay Date Field(WeatherFile)={}", Line.substr(0, Pos)));
+                                ShowSevereError(state, std::format("Invalid SpecialDay Date Field(WeatherFile)={}", Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
                         }
@@ -8047,7 +8074,7 @@ namespace Weather {
                             dataPeriod.WeekDay = getEnumValue(Sched::dayTypeNamesUC, dataPeriod.DayOfWeek);
                             if (dataPeriod.WeekDay < 1 || dataPeriod.WeekDay > 7) {
                                 ShowSevereError(state,
-                                                fmt::format("Weather File -- Invalid Start Day of Week for Data Period #{}, Invalid day={}",
+                                                std::format("Weather File -- Invalid Start Day of Week for Data Period #{}, Invalid day={}",
                                                             CurCount,
                                                             dataPeriod.DayOfWeek));
                                 ErrorsFound = true;
@@ -8068,8 +8095,8 @@ namespace Weather {
                                 }
                             } else {
                                 ShowSevereError(state,
-                                                format("Data Periods must be of the form <DayOfYear> or <Month Day> (WeatherFile), found={}",
-                                                       Line.substr(0, Pos)));
+                                                std::format("Data Periods must be of the form <DayOfYear> or <Month Day> (WeatherFile), found={}",
+                                                            Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
                         }
@@ -8089,8 +8116,8 @@ namespace Weather {
                                 }
                             } else {
                                 ShowSevereError(state,
-                                                format("Data Periods must be of the form <DayOfYear> or <Month Day>, (WeatherFile) found={}",
-                                                       Line.substr(0, Pos)));
+                                                std::format("Data Periods must be of the form <DayOfYear> or <Month Day>, (WeatherFile) found={}",
+                                                            Line.substr(0, Pos)));
                                 ErrorsFound = true;
                             }
                         }
@@ -8147,9 +8174,10 @@ namespace Weather {
         while (true) {
             Line = state.files.inputWeatherFile.readLine();
             if (Line.eof) {
-                ShowFatalError(state,
-                               format("Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}", Header),
-                               OptionalOutputFileRef{state.files.eso});
+                ShowFatalError(
+                    state,
+                    std::format("Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}", Header),
+                    OptionalOutputFileRef{state.files.eso});
             }
             uppercase(Line.data);
             if (has(Line.data, Header)) {
@@ -8234,7 +8262,7 @@ namespace Weather {
                     ShowWarningError(state, std::string{MissString});
                     MissedHeader = true;
                 }
-                ShowMessage(state, format(msFmt, "\"" + description + "\"", value));
+                ShowMessage(state, std::format(msFmt, "\"" + description + "\"", value));
             }
         };
 
@@ -8251,7 +8279,7 @@ namespace Weather {
         missedHeaderCheck(state.dataWeather->wvarsMissedCounts.SnowDepth, "Snow Depth");
         if (state.dataWeather->wvarsMissedCounts.WeathCodes > 0) {
             ShowWarningError(state, std::string{InvString});
-            ShowMessage(state, format(ivFmt, "\"Weather Codes\" (not equal 9 digits)", state.dataWeather->wvarsMissedCounts.WeathCodes));
+            ShowMessage(state, std::format(ivFmt, "\"Weather Codes\" (not equal 9 digits)", state.dataWeather->wvarsMissedCounts.WeathCodes));
         }
         missedHeaderCheck(state.dataWeather->wvarsMissedCounts.LiquidPrecip, "Liquid Precipitation Depth");
 
@@ -8263,7 +8291,7 @@ namespace Weather {
                         ShowWarningError(state, std::string{RangeString});
                         OutOfRangeHeader = true;
                     }
-                    ShowMessage(state, EnergyPlus::format(rgFmt, description, rangeLow, rangeHigh, value));
+                    ShowMessage(state, std::format(rgFmt, description, rangeLow, rangeHigh, value));
                     if (!extraMsg.empty()) {
                         ShowMessage(state, std::string{extraMsg});
                     }
@@ -8652,7 +8680,8 @@ namespace Weather {
             if (statFileExists) {
                 auto statFile = state.files.inStatFilePath.try_open();
                 if (!statFile.good()) {
-                    ShowSevereError(state, format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", statFile.filePath));
+                    ShowSevereError(state,
+                                    std::format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
@@ -8661,27 +8690,26 @@ namespace Weather {
                 while (statFile.good()) {
                     auto lineIn = statFile.readLine();
                     if (has(lineIn.data, "Monthly Statistics for Dry Bulb temperatures")) {
-                        for (int i = 1; i <= 7; ++i) {
-                            lineIn = statFile.readLine();
+                        for (int i = 0; i < 7; ++i) {
+                            statFile.readLine();
                         }
-                        lineIn = statFile.readLine();
-                        lineAvg = lineIn.data;
+                        lineAvg = statFile.readLine().data;
                         break;
                     }
                 }
                 if (lineAvg.empty()) {
                     ShowSevereError(
                         state,
-                        format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have Monthly Statistics for Dry Bulb temperatures.",
-                               statFile.filePath));
+                        std::format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have Monthly Statistics for Dry Bulb temperatures.",
+                                    statFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
                 if (lineAvg.find("Daily Avg") == std::string::npos) {
                     ShowSevereError(state,
-                                    format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have the 'Daily Avg' line in the Monthly "
-                                           "Statistics for Dry Bulb temperatures.",
-                                           statFile.filePath));
+                                    std::format("CalcAnnualAndMonthlyDryBulbTemp: Stat file '{}' does not have the 'Daily Avg' line in the Monthly "
+                                                "Statistics for Dry Bulb temperatures.",
+                                                statFile.filePath.string()));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
@@ -8702,7 +8730,8 @@ namespace Weather {
                 auto epwFile = state.files.inputWeatherFilePath.try_open();
                 bool epwHasLeapYear(false);
                 if (!epwFile.good()) {
-                    ShowSevereError(state, format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", epwFile.filePath));
+                    ShowSevereError(state,
+                                    std::format("CalcAnnualAndMonthlyDryBulbTemp: Could not open file {} for input (read).", epwFile.filePath));
                     ShowContinueError(state, "Water Mains Temperature will be set to a fixed default value of 10.0 C.");
                     return;
                 }
@@ -8761,8 +8790,8 @@ namespace Weather {
                 this->OADryBulbWeatherDataProcessed = true;
             } else {
                 ShowSevereError(state, "CalcAnnualAndMonthlyDryBulbTemp: weather file or stat file does not exist.");
-                ShowContinueError(state, format("Weather file: {}.", state.files.inputWeatherFilePath.filePath));
-                ShowContinueError(state, format("Stat file: {}.", state.files.inStatFilePath.filePath));
+                ShowContinueError(state, std::format("Weather file: {}.", state.files.inputWeatherFilePath.filePath));
+                ShowContinueError(state, std::format("Stat file: {}.", state.files.inStatFilePath.filePath));
                 ShowContinueError(state, "Water Mains Monthly Temperature cannot be calculated using CorrelationFromWeatherFile method.");
                 ShowContinueError(state, "Instead a fixed default value of 10.0 C will be used.");
             }
@@ -8795,31 +8824,31 @@ namespace Weather {
             *eiostream << "Site Water Mains Temperature Information,";
             *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << ","
                        << state.dataWeather->waterMainsTempSched->Name << ",";
-            *eiostream << format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
-                       << format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
+            *eiostream << std::format("{:.2f}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
+                       << std::format("{:.2f}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
             *eiostream << "NA\n";
             break;
         case WaterMainsTempCalcMethod::Correlation:
             *eiostream << "Site Water Mains Temperature Information,";
             *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
-            *eiostream << format("{:.2R}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
-                       << format("{:.2R}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
+            *eiostream << std::format("{:.2f}", state.dataWeather->WaterMainsTempsAnnualAvgAirTemp) << ","
+                       << std::format("{:.2f}", state.dataWeather->WaterMainsTempsMaxDiffAirTemp) << ",";
             *eiostream << "NA\n";
             break;
         case WaterMainsTempCalcMethod::CorrelationFromWeatherFile:
             if (state.dataWeather->OADryBulbAverage.OADryBulbWeatherDataProcessed) {
                 *eiostream << "Site Water Mains Temperature Information,";
                 *eiostream << waterMainsCalcMethodNames[static_cast<int>(state.dataWeather->WaterMainsTempsMethod)] << "," << "NA" << ",";
-                *eiostream << format("{:.2R}", state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp) << ","
-                           << format("{:.2R}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << "," << "NA\n";
+                *eiostream << std::format("{:.2f}", state.dataWeather->OADryBulbAverage.AnnualAvgOADryBulbTemp) << ","
+                           << std::format("{:.2f}", state.dataWeather->OADryBulbAverage.MonthlyAvgOADryBulbTempMaxDiff) << "," << "NA\n";
             } else {
                 *eiostream << "Site Water Mains Temperature Information,";
-                *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
+                *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << std::format("{:.1f}", 10.0) << '\n';
             }
             break;
         default:
             *eiostream << "Site Water Mains Temperature Information,";
-            *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << format("{:.1R}", 10.0) << '\n';
+            *eiostream << "FixedDefault" << "," << "NA" << "," << "NA" << "," << "NA" << "," << std::format("{:.1f}", 10.0) << '\n';
             break;
         }
 

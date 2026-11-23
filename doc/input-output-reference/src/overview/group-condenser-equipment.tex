@@ -3533,23 +3533,19 @@ GroundHeatExchanger:ResponseFactors,
 
 The GroundHeatExchanger:Slinky use the g-functions to calculate the GHX temperature response, similar to the GroundHeatExchanger:Vertical model, however for this model g-functions are automatically calculated by EnergyPlus without the need of external software or data.
 
-Horizontal slinky-loop ground heat exchangers (GHXs) consist of coiled tubing, with the individual rings spread out along the direction of the trench either horizontally or vertically, as shown in \protect\hyperlink{SlinkyIOFig1}{Figure}. A schematic of a slinky GHX can be seen in \protect\hyperlink{SlinkyIOFig2}{Figure}. Compared to conventional straight tube horizontal GHXs, slinky loops have a higher tube density; hence, with the same cooling/heating loads, slinky-loop GHXs require less land area and excavation work than straight tube HGHXs.
+Horizontal slinky-loop ground heat exchangers (GHXs) consist of coiled tubing, with the individual rings spread out along the direction of the trench either horizontally or vertically, as shown in Figure~\ref{fig:slinky-ground-heat-exchanger-configurations}. A schematic of a slinky GHX can be seen in Figure~\ref{fig:schematic-of-slinky-hx}. Compared to conventional straight tube horizontal GHXs, slinky loops have a higher tube density; hence, with the same cooling/heating loads, slinky-loop GHXs require less land area and excavation work than straight tube HGHXs.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics{media/image901.png}
-\caption{slinky heat exchanger}
+\caption{Slinky Ground Heat Exchanger Configurations\protect\label{fig:slinky-ground-heat-exchanger-configurations}}
 \end{figure}
-
-Figure: Slinky Ground Heat Exchanger Configurations.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics{media/image902.png}
-\caption{slinky heat exchanger}
+\caption{Schematic of Slinky HX\protect\label{fig:schematic-of-slinky-hx}}
 \end{figure}
-
-Figure: Schematic of Slinky HX.
 
 An example GroundHeatExchanger:Slinky object is shown below.
 

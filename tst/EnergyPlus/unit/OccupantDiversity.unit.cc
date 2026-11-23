@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -473,6 +473,7 @@ TEST_F(EnergyPlusFixture, OccupantDiversityManualTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",
@@ -480,6 +481,7 @@ TEST_F(EnergyPlusFixture, OccupantDiversityManualTest)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",
@@ -1485,6 +1487,7 @@ TEST_F(EnergyPlusFixture, OccupantDiversityAutoSizeTest)
         " Space Thermostat,         !- Name",
         " Space,                    !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",
@@ -1492,6 +1495,7 @@ TEST_F(EnergyPlusFixture, OccupantDiversityAutoSizeTest)
         " Spacex10 Thermostat,      !- Name",
         " Spacex10,                 !- Zone or ZoneList Name",
         " Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        " ,                         !- Temperature Difference Between Cutout And Setpoint",
         " ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         " Space DualSPSched;        !- Control 1 Name",
         " ",

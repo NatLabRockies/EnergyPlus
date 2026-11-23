@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -136,6 +136,8 @@ protected:
             " 100,                                   ", // latent time constant
             " 300,                                   ", // latent time for removal
                                                         // to begin
+            " Yes,                                   ", // apply plf in higher
+                                                        // speeds than 1
             " Yes,                                   ", // apply latent in higher
                                                         // speeds than 1
             " EvaporativelyCooled,                   ", // condenser type

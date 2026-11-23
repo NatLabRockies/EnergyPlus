@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,7 +49,7 @@
 #define TARCOGMain_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array2D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
@@ -95,11 +95,11 @@ namespace TARCOGMain {
                   Real64 heightt,                                     // Window height
                   Real64 width,                                       // Window width
                   const Array1D<Real64> &presure,                     // Vector of gas pressures in gaps [N/m2]
-                  Array2A_int iprop,                                  // Matrix of gas codes - see mgas definition
-                  Array2A<Real64> frct,                               // Matrix of mass percentages in gap mixtures
-                  Array2A<Real64> xgcon,                              // Matrix of constants for gas conductivity calc
-                  Array2A<Real64> xgvis,                              // Matrix of constants for gas dynamic viscosity calc
-                  Array2A<Real64> xgcp,                               // Matrix of constants for gas specific heat calc at constant pressure
+                  Array2D_int const &iprop,                           // Matrix of gas codes - see mgas definition
+                  Array2D<Real64> const &frct,                        // Matrix of mass percentages in gap mixtures
+                  Array2D<Real64> const &xgcon,                       // Matrix of constants for gas conductivity calc
+                  Array2D<Real64> const &xgvis,                       // Matrix of constants for gas dynamic viscosity calc
+                  Array2D<Real64> const &xgcp,                        // Matrix of constants for gas specific heat calc at constant pressure
                   const Array1D<Real64> &xwght,                       // Vector of Molecular weights for gasses
                   const Array1D<Real64> &gama,                        // Vector of specific heat ration for low pressure calc
                   const Array1D_int &nmix,                            // Vector of number of gasses in gas mixture of each gap
@@ -170,7 +170,7 @@ namespace TARCOGMain {
                   Array1D<Real64> &ShadeGapKeffConv,           // Vector of convective keff values for areas above/below
                   Real64 SDScalar,                             // Factor of Venetian SD layer contribution to convection
                   int SHGCCalc,                                // SHGC calculation switch:
-                  int &NumOfIterations,                        // Number of iterations for reaching solution
+                  int &t_NumOfIterations,                      // Number of iterations for reaching solution
                   Real64 edgeGlCorrFac                         // Edge of glass correction factor
     );
 }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -84,7 +85,7 @@ namespace WaterUse {
     //       DATE WRITTEN   August 2006
     //       MODIFIED       Brent Griffith, plant upgrade
 
-    void SimulateWaterUse(EnergyPlusData &state, bool FirstHVACIteration)
+    void SimulateWaterUse(EnergyPlusData &state)
     {
 
         // SUBROUTINE INFORMATION:
@@ -154,7 +155,7 @@ namespace WaterUse {
             while (true) {
                 ++NumIteration;
 
-                waterConnection.CalcConnectionsFlowRates(state, FirstHVACIteration);
+                waterConnection.CalcConnectionsFlowRates(state);
                 waterConnection.CalcConnectionsDrainTemp(state);
                 waterConnection.CalcConnectionsHeatRecovery(state);
 
@@ -164,8 +165,8 @@ namespace WaterUse {
                 if (NumIteration > MaxIterations) {
                     if (!state.dataGlobal->WarmupFlag) {
                         if (waterConnection.MaxIterationsErrorIndex == 0) {
-                            ShowWarningError(state,
-                                             format("WaterUse:Connections = {}:  Heat recovery temperature did not converge", waterConnection.Name));
+                            ShowWarningError(
+                                state, std::format("WaterUse:Connections = {}:  Heat recovery temperature did not converge", waterConnection.Name));
                             ShowContinueErrorTimeStamp(state, "");
                         }
                         ShowRecurringWarningErrorAtEnd(state,
@@ -199,14 +200,12 @@ namespace WaterUse {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state, format("LocalWaterUseConnectionFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalWaterUseConnectionFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     }
 
     void WaterConnectionsType::simulate(EnergyPlusData &state,
                                         [[maybe_unused]] const PlantLocation &calledFromLocation,
-                                        bool FirstHVACIteration,
+                                        [[maybe_unused]] bool FirstHVACIteration,
                                         [[maybe_unused]] Real64 &CurLoad,
                                         [[maybe_unused]] bool RunFlag)
     {
@@ -252,7 +251,7 @@ namespace WaterUse {
         while (true) {
             ++NumIteration;
 
-            this->CalcConnectionsFlowRates(state, FirstHVACIteration);
+            this->CalcConnectionsFlowRates(state);
             this->CalcConnectionsDrainTemp(state);
             this->CalcConnectionsHeatRecovery(state);
 
@@ -262,7 +261,7 @@ namespace WaterUse {
             if (NumIteration > MaxIterations) {
                 if (!state.dataGlobal->WarmupFlag) {
                     if (this->MaxIterationsErrorIndex == 0) {
-                        ShowWarningError(state, format("WaterUse:Connections = {}:  Heat recovery temperature did not converge", this->Name));
+                        ShowWarningError(state, std::format("WaterUse:Connections = {}:  Heat recovery temperature did not converge", this->Name));
                         ShowContinueErrorTimeStamp(state, "");
                     }
                     ShowRecurringWarningErrorAtEnd(state,
@@ -319,7 +318,7 @@ namespace WaterUse {
                                                                          state.dataIPShortCut->cNumericFieldNames);
 
                 ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
-                Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataIPShortCut->cCurrentModuleObject, ErrorsFound);
+
                 thisWEq.Name = state.dataIPShortCut->cAlphaArgs(1);
 
                 thisWEq.EndUseSubcatName = state.dataIPShortCut->cAlphaArgs(2);
@@ -371,7 +370,7 @@ namespace WaterUse {
             } // WaterEquipNum
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+                ShowFatalError(state, std::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
             }
         }
 
@@ -398,37 +397,36 @@ namespace WaterUse {
 
                 ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
 
-                Util::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), state.dataIPShortCut->cCurrentModuleObject, ErrorsFound);
                 auto &waterConnection = state.dataWaterUse->WaterConnections(WaterConnNum);
                 waterConnection.Name = state.dataIPShortCut->cAlphaArgs(1);
 
                 if ((!state.dataIPShortCut->lAlphaFieldBlanks(2)) || (!state.dataIPShortCut->lAlphaFieldBlanks(3))) {
-                    waterConnection.InletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                                    state.dataIPShortCut->cAlphaArgs(2),
-                                                                                    ErrorsFound,
-                                                                                    DataLoopNode::ConnectionObjectType::WaterUseConnections,
-                                                                                    waterConnection.Name,
-                                                                                    DataLoopNode::NodeFluidType::Water,
-                                                                                    DataLoopNode::ConnectionType::Inlet,
-                                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                                    DataLoopNode::ObjectIsNotParent);
-                    waterConnection.OutletNode = NodeInputManager::GetOnlySingleNode(state,
-                                                                                     state.dataIPShortCut->cAlphaArgs(3),
-                                                                                     ErrorsFound,
-                                                                                     DataLoopNode::ConnectionObjectType::WaterUseConnections,
-                                                                                     waterConnection.Name,
-                                                                                     DataLoopNode::NodeFluidType::Water,
-                                                                                     DataLoopNode::ConnectionType::Outlet,
-                                                                                     NodeInputManager::CompFluidStream::Primary,
-                                                                                     DataLoopNode::ObjectIsNotParent);
+                    waterConnection.InletNode = Node::GetOnlySingleNode(state,
+                                                                        state.dataIPShortCut->cAlphaArgs(2),
+                                                                        ErrorsFound,
+                                                                        Node::ConnectionObjectType::WaterUseConnections,
+                                                                        waterConnection.Name,
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Inlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
+                    waterConnection.OutletNode = Node::GetOnlySingleNode(state,
+                                                                         state.dataIPShortCut->cAlphaArgs(3),
+                                                                         ErrorsFound,
+                                                                         Node::ConnectionObjectType::WaterUseConnections,
+                                                                         waterConnection.Name,
+                                                                         Node::FluidType::Water,
+                                                                         Node::ConnectionType::Outlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
 
                     // Check plant connections
-                    BranchNodeConnections::TestCompSet(state,
-                                                       state.dataIPShortCut->cCurrentModuleObject,
-                                                       waterConnection.Name,
-                                                       state.dataIPShortCut->cAlphaArgs(2),
-                                                       state.dataIPShortCut->cAlphaArgs(3),
-                                                       "DHW Nodes");
+                    Node::TestCompSet(state,
+                                      state.dataIPShortCut->cCurrentModuleObject,
+                                      waterConnection.Name,
+                                      state.dataIPShortCut->cAlphaArgs(2),
+                                      state.dataIPShortCut->cAlphaArgs(3),
+                                      "DHW Nodes");
                 } else {
                     // If no plant nodes are connected, simulate in stand-alone mode.
                     waterConnection.StandAlone = true;
@@ -471,18 +469,18 @@ namespace WaterUse {
                     waterConnection.HeatRecoveryHX =
                         static_cast<HeatRecovHX>(getEnumValue(HeatRecoverHXNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(8))));
                     if (waterConnection.HeatRecoveryHX == HeatRecovHX::Invalid) {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(8), state.dataIPShortCut->cAlphaArgs(8)));
-                        ShowContinueError(state, format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
+                        ShowSevereError(
+                            state, std::format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(8), state.dataIPShortCut->cAlphaArgs(8)));
+                        ShowContinueError(state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
                         ErrorsFound = true;
                     }
 
                     waterConnection.HeatRecoveryConfig =
                         static_cast<HeatRecovConfig>(getEnumValue(HeatRecoveryConfigNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(9))));
                     if (waterConnection.HeatRecoveryConfig == HeatRecovConfig::Invalid) {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(9), state.dataIPShortCut->cAlphaArgs(9)));
-                        ShowContinueError(state, format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
+                        ShowSevereError(
+                            state, std::format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(9), state.dataIPShortCut->cAlphaArgs(9)));
+                        ShowContinueError(state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
                         ErrorsFound = true;
                     }
                 }
@@ -495,18 +493,19 @@ namespace WaterUse {
                     int WaterEquipNum = Util::FindItemInList(state.dataIPShortCut->cAlphaArgs(AlphaNum), state.dataWaterUse->WaterEquipment);
 
                     if (WaterEquipNum == 0) {
-                        ShowSevereError(
-                            state,
-                            format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(AlphaNum), state.dataIPShortCut->cAlphaArgs(AlphaNum)));
-                        ShowContinueError(state, format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
+                        ShowSevereError(state,
+                                        std::format("Invalid {} = {}",
+                                                    state.dataIPShortCut->cAlphaFieldNames(AlphaNum),
+                                                    state.dataIPShortCut->cAlphaArgs(AlphaNum)));
+                        ShowContinueError(state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, waterConnection.Name));
                         ErrorsFound = true;
                     } else {
                         if (state.dataWaterUse->WaterEquipment(WaterEquipNum).Connections > 0) {
                             ShowSevereError(state,
-                                            format("{} = {}:  WaterUse:Equipment = {} is already referenced by another object.",
-                                                   state.dataIPShortCut->cCurrentModuleObject,
-                                                   waterConnection.Name,
-                                                   state.dataIPShortCut->cAlphaArgs(AlphaNum)));
+                                            std::format("{} = {}:  WaterUse:Equipment = {} is already referenced by another object.",
+                                                        state.dataIPShortCut->cCurrentModuleObject,
+                                                        waterConnection.Name,
+                                                        state.dataIPShortCut->cAlphaArgs(AlphaNum)));
                             ErrorsFound = true;
                         } else {
                             state.dataWaterUse->WaterEquipment(WaterEquipNum).Connections = WaterConnNum;
@@ -523,7 +522,7 @@ namespace WaterUse {
             } // WaterConnNum
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+                ShowFatalError(state, std::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
             }
 
             if (state.dataWaterUse->numWaterConnections > 0) {
@@ -1036,19 +1035,20 @@ namespace WaterUse {
                     if (this->TargetCWTempErrorCount < 2) {
                         ShowWarningError(
                             state,
-                            format("CalcEquipmentFlowRates: \"{}\" - Target water temperature is less than the cold water temperature by ({:.2R} C)",
-                                   this->Name,
-                                   TempDiff));
+                            std::format(
+                                "CalcEquipmentFlowRates: \"{}\" - Target water temperature is less than the cold water temperature by ({:.2f} C)",
+                                this->Name,
+                                TempDiff));
                         ShowContinueErrorTimeStamp(state, "");
-                        ShowContinueError(state, format("...target water temperature     = {:.2R} C", this->TargetTemp));
-                        ShowContinueError(state, format("...cold water temperature       = {:.2R} C", this->ColdTemp));
+                        ShowContinueError(state, std::format("...target water temperature     = {:.2f} C", this->TargetTemp));
+                        ShowContinueError(state, std::format("...cold water temperature       = {:.2f} C", this->ColdTemp));
                         ShowContinueError(state,
                                           "...Target water temperature should be greater than or equal to the cold water temperature. "
                                           "Verify temperature setpoints and schedules.");
                     } else {
                         ShowRecurringWarningErrorAtEnd(
                             state,
-                            format(
+                            std::format(
                                 "\"{}\" - Target water temperature should be greater than or equal to the cold water temperature error continues...",
                                 this->Name),
                             this->TargetCWTempErrIndex,
@@ -1068,20 +1068,21 @@ namespace WaterUse {
                         if (this->CWHWTempErrorCount < 2) {
                             ShowWarningError(
                                 state,
-                                format("CalcEquipmentFlowRates: \"{}\" - Hot water temperature is less than the cold water temperature by ({:.2R} C)",
-                                       this->Name,
-                                       TempDiff));
+                                std::format(
+                                    "CalcEquipmentFlowRates: \"{}\" - Hot water temperature is less than the cold water temperature by ({:.2f} C)",
+                                    this->Name,
+                                    TempDiff));
                             ShowContinueErrorTimeStamp(state, "");
-                            ShowContinueError(state, format("...hot water temperature        = {:.2R} C", this->HotTemp));
-                            ShowContinueError(state, format("...cold water temperature       = {:.2R} C", this->ColdTemp));
+                            ShowContinueError(state, std::format("...hot water temperature        = {:.2f} C", this->HotTemp));
+                            ShowContinueError(state, std::format("...cold water temperature       = {:.2f} C", this->ColdTemp));
                             ShowContinueError(state,
                                               "...Hot water temperature should be greater than or equal to the cold water temperature. "
                                               "Verify temperature setpoints and schedules.");
                         } else {
                             ShowRecurringWarningErrorAtEnd(
                                 state,
-                                format("\"{}\" - Hot water temperature should be greater than the cold water temperature error continues... ",
-                                       this->Name),
+                                std::format("\"{}\" - Hot water temperature should be greater than the cold water temperature error continues... ",
+                                            this->Name),
                                 this->CWHWTempErrIndex,
                                 TempDiff,
                                 TempDiff);
@@ -1091,21 +1092,21 @@ namespace WaterUse {
                         ++this->TargetHWTempErrorCount;
                         if (this->TargetHWTempErrorCount < 2) {
                             ShowWarningError(state,
-                                             format("CalcEquipmentFlowRates: \"{}\" - Target water temperature is greater than the hot water "
-                                                    "temperature by ({:.2R} C)",
-                                                    this->Name,
-                                                    TempDiff));
+                                             std::format("CalcEquipmentFlowRates: \"{}\" - Target water temperature is greater than the hot water "
+                                                         "temperature by ({:.2f} C)",
+                                                         this->Name,
+                                                         TempDiff));
                             ShowContinueErrorTimeStamp(state, "");
-                            ShowContinueError(state, format("...target water temperature     = {:.2R} C", this->TargetTemp));
-                            ShowContinueError(state, format("...hot water temperature        = {:.2R} C", this->HotTemp));
+                            ShowContinueError(state, std::format("...target water temperature     = {:.2f} C", this->TargetTemp));
+                            ShowContinueError(state, std::format("...hot water temperature        = {:.2f} C", this->HotTemp));
                             ShowContinueError(state,
                                               "...Target water temperature should be less than or equal to the hot water temperature. "
                                               "Verify temperature setpoints and schedules.");
                         } else {
                             ShowRecurringWarningErrorAtEnd(state,
-                                                           format("\"{}\" - Target water temperature should be less than or equal to the hot "
-                                                                  "water temperature error continues...",
-                                                                  this->Name),
+                                                           std::format("\"{}\" - Target water temperature should be less than or equal to the hot "
+                                                                       "water temperature error continues...",
+                                                                       this->Name),
                                                            this->TargetHWTempErrIndex,
                                                            TempDiff,
                                                            TempDiff);
@@ -1124,21 +1125,21 @@ namespace WaterUse {
                         TempDiff = this->ColdTemp - this->HotTemp;
                         if (this->CWHWTempErrorCount < 2) {
                             ShowWarningError(state,
-                                             format("CalcEquipmentFlowRates: \"{}\" - Hot water temperature is less than the cold water "
-                                                    "temperature by ({:.2R} C)",
-                                                    this->Name,
-                                                    TempDiff));
+                                             std::format("CalcEquipmentFlowRates: \"{}\" - Hot water temperature is less than the cold water "
+                                                         "temperature by ({:.2f} C)",
+                                                         this->Name,
+                                                         TempDiff));
                             ShowContinueErrorTimeStamp(state, "");
-                            ShowContinueError(state, format("...hot water temperature        = {:.2R} C", this->HotTemp));
-                            ShowContinueError(state, format("...cold water temperature       = {:.2R} C", this->ColdTemp));
+                            ShowContinueError(state, std::format("...hot water temperature        = {:.2f} C", this->HotTemp));
+                            ShowContinueError(state, std::format("...cold water temperature       = {:.2f} C", this->ColdTemp));
                             ShowContinueError(state,
                                               "...Hot water temperature should be greater than or equal to the cold water temperature. "
                                               "Verify temperature setpoints and schedules.");
                         } else {
                             ShowRecurringWarningErrorAtEnd(
                                 state,
-                                format("\"{}\" - Hot water temperature should be greater than the cold water temperature error continues... ",
-                                       this->Name),
+                                std::format("\"{}\" - Hot water temperature should be greater than the cold water temperature error continues... ",
+                                            this->Name),
                                 this->CWHWTempErrIndex,
                                 TempDiff,
                                 TempDiff);
@@ -1334,7 +1335,7 @@ namespace WaterUse {
         }
     }
 
-    void WaterConnectionsType::CalcConnectionsFlowRates(EnergyPlusData &state, bool FirstHVACIteration)
+    void WaterConnectionsType::CalcConnectionsFlowRates(EnergyPlusData &state)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1343,9 +1344,12 @@ namespace WaterUse {
 
         // PURPOSE OF THIS SUBROUTINE:
         // Calculate summed values for WATER USE CONNECTIONS (to prepare to request flow from plant, and for reporting).
+        // When connected to a plant loop, request the hot water flow and rescale the connection and equipment flows to the hot water the
+        // plant delivers.
 
         this->ColdMassFlowRate = 0.0;
         this->HotMassFlowRate = 0.0;
+        this->PlantMassFlowRate = 0.0;
 
         for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
             auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
@@ -1360,37 +1364,42 @@ namespace WaterUse {
 
         if (!this->StandAlone) { // Interact with the plant loop
             if (this->InletNode > 0) {
-                if (FirstHVACIteration) {
-                    // Request the mass flow rate from the demand side manager
-                    PlantUtilities::SetComponentFlowRate(state, this->HotMassFlowRate, this->InletNode, this->OutletNode, this->plantLoc);
+                // Request the mass flow rate from the demand side manager
+                Real64 const DesiredHotWaterMassFlow = this->HotMassFlowRate;
+                Real64 DeliveredHotWaterMassFlow = DesiredHotWaterMassFlow;
+                PlantUtilities::SetComponentFlowRate(state, DeliveredHotWaterMassFlow, this->InletNode, this->OutletNode, this->plantLoc);
+                this->PlantMassFlowRate = DeliveredHotWaterMassFlow;
+                // A locked loop, a SeriesActive branch, or MinAvail can deliver more than was requested, but the fixtures cannot use more hot
+                // water than their total draw
+                DeliveredHotWaterMassFlow = min(DeliveredHotWaterMassFlow, this->TotalMassFlowRate);
 
-                } else {
-                    Real64 DesiredHotWaterMassFlow = this->HotMassFlowRate;
-                    PlantUtilities::SetComponentFlowRate(state, DesiredHotWaterMassFlow, this->InletNode, this->OutletNode, this->plantLoc);
-                    // readjust if more than actual available mass flow rate determined by the demand side manager
-                    if ((this->HotMassFlowRate != DesiredHotWaterMassFlow) && (this->HotMassFlowRate > 0.0)) { // plant didn't give what was asked for
+                if (DeliveredHotWaterMassFlow != DesiredHotWaterMassFlow) { // plant didn't give what was asked for
+                    this->HotMassFlowRate = DeliveredHotWaterMassFlow;      // SetComponentFlowRate returned the flow the plant actually delivered
+                    this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
 
-                        Real64 AvailableFraction = DesiredHotWaterMassFlow / this->HotMassFlowRate;
+                    // Shift hot and cold water proportionally for all WATER USE EQUIPMENT so their sums match the connection.
+                    // A shortfall reduces each equipment's hot water by the available fraction; a surplus replaces the same fraction of each
+                    // equipment's cold water (Desired < Delivered <= Total there, so the denominator is positive).
+                    bool const plantLimited = DeliveredHotWaterMassFlow < DesiredHotWaterMassFlow;
+                    Real64 const hotFraction = plantLimited ? DeliveredHotWaterMassFlow / DesiredHotWaterMassFlow : 1.0;
+                    Real64 const coldToHotFraction =
+                        plantLimited ? 0.0
+                                     : (DeliveredHotWaterMassFlow - DesiredHotWaterMassFlow) / (this->TotalMassFlowRate - DesiredHotWaterMassFlow);
 
-                        this->ColdMassFlowRate = this->TotalMassFlowRate - this->HotMassFlowRate; // Preserve the total mass flow rate
+                    for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
+                        auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
 
-                        // Proportionally reduce hot water and increase cold water for all WATER USE EQUIPMENT
-                        for (int Loop = 1; Loop <= this->NumWaterEquipment; ++Loop) {
-                            auto &thisWEq = state.dataWaterUse->WaterEquipment(this->myWaterEquipArr(Loop));
+                        thisWEq.HotMassFlowRate = thisWEq.HotMassFlowRate * hotFraction + thisWEq.ColdMassFlowRate * coldToHotFraction;
+                        thisWEq.ColdMassFlowRate = thisWEq.TotalMassFlowRate - thisWEq.HotMassFlowRate;
 
-                            // Recalculate flow rates for water equipment within connection
-                            thisWEq.HotMassFlowRate *= AvailableFraction;
-                            thisWEq.ColdMassFlowRate = thisWEq.TotalMassFlowRate - thisWEq.HotMassFlowRate;
-
-                            // Recalculate mixed water temperature
-                            if (thisWEq.TotalMassFlowRate > 0.0) {
-                                thisWEq.MixedTemp = (thisWEq.ColdMassFlowRate * thisWEq.ColdTemp + thisWEq.HotMassFlowRate * thisWEq.HotTemp) /
-                                                    thisWEq.TotalMassFlowRate;
-                            } else {
-                                thisWEq.MixedTemp = thisWEq.TargetTemp;
-                            }
-                        } // Loop
-                    }
+                        // Recalculate mixed water temperature
+                        if (thisWEq.TotalMassFlowRate > 0.0) {
+                            thisWEq.MixedTemp =
+                                (thisWEq.ColdMassFlowRate * thisWEq.ColdTemp + thisWEq.HotMassFlowRate * thisWEq.HotTemp) / thisWEq.TotalMassFlowRate;
+                        } else {
+                            thisWEq.MixedTemp = thisWEq.TargetTemp;
+                        }
+                    } // Loop
                 }
             }
         }
@@ -1452,11 +1461,13 @@ namespace WaterUse {
             this->WasteTemp = this->DrainTemp;
 
         } else if (this->TotalMassFlowRate == 0.0) {
+            this->RecoveryMassFlowRate = 0.0;
             this->Effectiveness = 0.0;
             this->RecoveryRate = 0.0;
             this->RecoveryTemp = this->ColdSupplyTemp;
             this->ReturnTemp = this->ColdSupplyTemp;
             this->WasteTemp = this->DrainTemp;
+            this->TempError = 0.0;
 
         } else { // WaterConnections(WaterConnNum)%TotalMassFlowRate > 0.0
 
@@ -1478,32 +1489,42 @@ namespace WaterUse {
             Real64 DrainCapacityRate = Psychrometrics::CPHW(Constant::InitConvTemp) * this->DrainMassFlowRate;
             Real64 MinCapacityRate = min(DrainCapacityRate, HXCapacityRate);
 
-            switch (this->HeatRecoveryHX) {
-            case HeatRecovHX::Ideal: {
-                this->Effectiveness = 1.0;
-            } break;
-            case HeatRecovHX::CounterFlow: { // Unmixed
-                Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                Real64 NTU = this->HXUA / MinCapacityRate;
-                if (CapacityRatio == 1.0) {
-                    this->Effectiveness = NTU / (1.0 + NTU);
-                } else {
-                    Real64 ExpVal = std::exp(-NTU * (1.0 - CapacityRatio));
-                    this->Effectiveness = (1.0 - ExpVal) / (1.0 - CapacityRatio * ExpVal);
-                }
-            } break;
-            case HeatRecovHX::CrossFlow: { // Unmixed
-                Real64 CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
-                Real64 NTU = this->HXUA / MinCapacityRate;
-                this->Effectiveness = 1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
-            } break;
-            default:
-                break;
-            }
+            if (MinCapacityRate <= 0.0) {
+                // No flow on one side of the heat exchanger (e.g., no hot water flow with Plant destination), so nothing can be recovered
+                this->Effectiveness = 0.0;
+                this->RecoveryRate = 0.0;
+                this->RecoveryTemp = this->ColdSupplyTemp;
+                this->WasteTemp = this->DrainTemp;
+            } else {
+                Real64 const CapacityRatio = MinCapacityRate / max(DrainCapacityRate, HXCapacityRate);
+                Real64 const NTU = this->HXUA / MinCapacityRate;
 
-            this->RecoveryRate = this->Effectiveness * MinCapacityRate * (this->DrainTemp - this->ColdSupplyTemp);
-            this->RecoveryTemp = this->ColdSupplyTemp + this->RecoveryRate / (Psychrometrics::CPHW(Constant::InitConvTemp) * this->TotalMassFlowRate);
-            this->WasteTemp = this->DrainTemp - this->RecoveryRate / (Psychrometrics::CPHW(Constant::InitConvTemp) * this->TotalMassFlowRate);
+                switch (this->HeatRecoveryHX) {
+                case HeatRecovHX::Ideal: {
+                    this->Effectiveness = 1.0;
+                } break;
+                case HeatRecovHX::CounterFlow: { // Unmixed
+                    // Use the balanced-flow limit near CapacityRatio = 1, where round-off in the flows makes the general formula cancel badly
+                    if (std::abs(1.0 - CapacityRatio) < 1.0e-6) {
+                        this->Effectiveness = NTU / (1.0 + NTU);
+                    } else {
+                        Real64 ExpVal = std::exp(-NTU * (1.0 - CapacityRatio));
+                        this->Effectiveness = (1.0 - ExpVal) / (1.0 - CapacityRatio * ExpVal);
+                    }
+                } break;
+                case HeatRecovHX::CrossFlow: { // Unmixed
+                    this->Effectiveness =
+                        1.0 - std::exp((std::pow(NTU, 0.22) / CapacityRatio) * (std::exp(-CapacityRatio * std::pow(NTU, 0.78)) - 1.0));
+                } break;
+                default:
+                    break;
+                }
+
+                this->RecoveryRate = this->Effectiveness * MinCapacityRate * (this->DrainTemp - this->ColdSupplyTemp);
+                // Only the water passing through each side of the heat exchanger changes temperature
+                this->RecoveryTemp = this->ColdSupplyTemp + this->RecoveryRate / HXCapacityRate;
+                this->WasteTemp = this->DrainTemp - this->RecoveryRate / DrainCapacityRate;
+            }
 
             if (this->RecoveryTankNum > 0) {
                 state.dataWaterData->WaterStorage(this->RecoveryTankNum).VdotAvailSupply(this->TankSupplyID) = this->DrainVolFlowRate;
@@ -1543,12 +1564,21 @@ namespace WaterUse {
         // PURPOSE OF THIS SUBROUTINE:
         // Updates the node variables with local variables.
 
+        // A locked loop, a SeriesActive branch, or MinAvail can force more plant flow through this component than the fixtures use. The
+        // surplus bypasses the fixtures and returns at the inlet temperature, so mix it with the fixture makeup before setting the plant outlet.
+        if (this->PlantMassFlowRate > this->HotMassFlowRate) {
+            Real64 const bypassMassFlowRate = this->PlantMassFlowRate - this->HotMassFlowRate;
+            this->PlantReturnTemp = (this->HotMassFlowRate * this->ReturnTemp + bypassMassFlowRate * this->HotTemp) / this->PlantMassFlowRate;
+        } else {
+            this->PlantReturnTemp = this->ReturnTemp;
+        }
+
         if (this->InletNode > 0 && this->OutletNode > 0) {
             // Pass all variables from inlet to outlet node
             PlantUtilities::SafeCopyPlantNode(state, this->InletNode, this->OutletNode, this->plantLoc.loopNum);
 
             // Set outlet node variables that are possibly changed
-            state.dataLoopNodes->Node(this->OutletNode).Temp = this->ReturnTemp;
+            state.dataLoopNodes->Node(this->OutletNode).Temp = this->PlantReturnTemp;
             // should add enthalpy update to return?
         }
     }

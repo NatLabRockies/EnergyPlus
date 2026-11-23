@@ -1,10 +1,6 @@
 include(initialize-submodules)
 initialize_submodules()
 
-if (NOT TARGET fmt)
-    add_subdirectory(fmt)
-endif ()
-
 add_subdirectory(boost-1.88.0) #set by update-boost.py
 
 if (KIVA_EXE_BUILD OR KIVA_GROUND_PLOT)

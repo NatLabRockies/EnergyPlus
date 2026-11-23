@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -76,8 +76,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModelTest)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     EXPECT_NEAR(2.0, thisModel.interpolate(2.0, 3.0, 1.0, 3.0, 1.0), 0.0000001);
@@ -104,7 +102,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModelTest)
         tdwd.relativeHumidity = relHum_const;
         tdwd.windSpeed = windSpeed_const;
         tdwd.horizontalRadiation = solar_amp * std::sin(theta - omega) + (solar_min + solar_amp);
-        ;
         tdwd.airDensity = 1.2;
     }
 
@@ -152,8 +149,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModel_GetWeather_NoWeather)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     // No Weather file specified, so we expect it to fail
@@ -297,8 +292,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModel_GetWeather_Weather)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     // Shouldn't throw

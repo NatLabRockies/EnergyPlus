@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -177,8 +177,7 @@ public:
     int supplyInletNodeFlow_LogIndex; // loop flow rate index for vector of log objects in the logger framework
     int supplyInletNodeTemp_LogIndex; // loop return temperature index for vector of log objects in the logger framework
     // variables related to loop demand
-    int loopDemand_LogIndex; // Loop demand load index for vector of log objects in the logger framework
-    bool peakDemandAndFlowMismatch;
+    int loopDemand_LogIndex;                       // Loop demand load index for vector of log objects in the logger framework
     ZoneTimestepObject NewFoundMaxDemandTimeStamp; // result for max loop demand, as a timestamp object
 
     Real64 peakDemandReturnTemp;

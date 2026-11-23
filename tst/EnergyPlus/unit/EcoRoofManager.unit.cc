@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -86,7 +86,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     state->dataSolarShading->SurfAnisoSkyMult.allocate(SurfNum);
 
     // Test 1: SOLCOS negative
-    state->dataEnvrn->SOLCOS(3) = -1.0;
+    state->dataEnvrn->SOLCOS.z = -1.0;
     state->dataEnvrn->BeamSolarRad = 321.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.5;
     state->dataEnvrn->DifSolarRad = 124.0;
@@ -97,7 +97,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     EXPECT_NEAR(resultf1, expectedf1, 0.001);
 
     // Test 2: SOLCOS positive
-    state->dataEnvrn->SOLCOS(3) = 0.7;
+    state->dataEnvrn->SOLCOS.z = 0.7;
     state->dataEnvrn->BeamSolarRad = 400.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.6;
     state->dataEnvrn->DifSolarRad = 100.0;
@@ -108,7 +108,7 @@ TEST_F(EnergyPlusFixture, EcoRoof_CalculateEcoRoofSolarTest)
     EXPECT_NEAR(resultf1, expectedf1, 0.001);
 
     // Test 3: inverse of f1 greater than 1
-    state->dataEnvrn->SOLCOS(3) = 1.0;
+    state->dataEnvrn->SOLCOS.z = 1.0;
     state->dataEnvrn->BeamSolarRad = 1500.0;
     state->dataSolarShading->SurfAnisoSkyMult(SurfNum) = 0.0;
     state->dataEnvrn->DifSolarRad = 0.0;
@@ -214,7 +214,6 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_UpdateSoilProps)
     WaterManager::GetWaterManagerInput(*state);
     state->dataGlobal->TimeStepZoneSec = 900;
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
     state->dataEnvrn->Month = 1;
     state->dataGlobal->TimeStep = 2;
 
@@ -252,7 +251,8 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_initEcoRoofFirstTimeTest)
     state->dataSurface->Surface(surfNum).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CTF;
 
     mat->LAI = 3.21;
-    mat->AbsorpSolar = 0.72;
+    mat->AbsorpSolarOut = 0.72;
+    mat->AbsorpSolarIn = 0.72;
     thisEcoRoof->FirstEcoSurf = 0;
     thisEcoRoof->EcoRoofbeginFlag = true;
 
@@ -291,7 +291,8 @@ TEST_F(EnergyPlusFixture, EcoRoofManager_initEcoRoofTest)
     state->dataGlobal->WarmupFlag = true;
     thisEcoRoof->CalcEcoRoofMyEnvrnFlag = false;
     mat->InitMoisture = 23.0;
-    mat->AbsorpSolar = 0.72;
+    mat->AbsorpSolarOut = 0.72;
+    mat->AbsorpSolarIn = 0.72;
     thisEcoRoof->Moisture = 0.0;
     thisEcoRoof->MeanRootMoisture = 0.0;
     thisEcoRoof->Alphag = 0.0;

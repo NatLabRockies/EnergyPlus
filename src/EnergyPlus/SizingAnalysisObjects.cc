@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -539,7 +539,7 @@ void PlantCoinicidentAnalysis::ResolveDesignFlowRate(EnergyPlusData &state, int 
               "{},Normalized Change {},Specific Heat{J/kg-K},Density {kg/m3}\n");
         state.dataGlobal->sizingAnalysisEioHeaderDoneOnce = true;
     }
-    chIteration = fmt::to_string(HVACSizingIterCount);
+    chIteration = std::to_string(HVACSizingIterCount);
     if (setNewSizes) {
         chSetSizes = "Yes";
     } else {
@@ -552,7 +552,7 @@ void PlantCoinicidentAnalysis::ResolveDesignFlowRate(EnergyPlusData &state, int 
     }
 
     print(state.files.eio,
-          "Plant Coincident Sizing Algorithm,{},{},{:.7R},{:.2R},{:.7R},{},{:.6R},{:.6R},{},{:.4R},{:.6R},{:.4R},{:.4R}\n",
+          "Plant Coincident Sizing Algorithm,{},{},{:.7f},{:.2f},{:.7f},{},{:.6f},{:.6f},{},{:.4f},{:.6f},{:.4f},{:.4f}\n",
           name,
           chIteration,
           newFoundMassFlowRateTimeStamp.runningAvgDataValue,

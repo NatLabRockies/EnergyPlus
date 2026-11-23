@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,7 +49,6 @@
 #define StringUtilities_hh_INCLUDED
 
 #include <EnergyPlus/FromChars.hh>
-#include <ObjexxFCL/src/ObjexxFCL/Array1S.hh>
 #include <fast_float/fast_float.h>
 #include <sstream>
 #include <type_traits>
@@ -175,15 +174,5 @@ template <typename... Param> bool readList(std::string_view input, Param &&...pa
 }
 
 } // namespace EnergyPlus
-
-namespace ObjexxFCL {
-// since this is a slice (reference) we want to bind to temporaries
-// so we're going to allow that where the one provided by Array1S.hh does not
-template <typename T> std::istream &operator>>(std::istream &stream, Array1S<T> &&a)
-{
-    // just pass on to the `&` version of this operator>>
-    return stream >> a;
-}
-} // namespace ObjexxFCL
 
 #endif

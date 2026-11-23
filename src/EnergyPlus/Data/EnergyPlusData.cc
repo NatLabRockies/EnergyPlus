@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,10 +45,12 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <memory>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/CommonIncludes.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-
-#include <memory>
 
 namespace EnergyPlus {
 
@@ -93,6 +95,7 @@ EnergyPlusData::EnergyPlusData()
     this->dataDaylightingDevices = std::make_unique<DaylightingDevicesData>();
     this->dataDaylightingDevicesData = std::make_unique<DataDaylightingDevicesData>();
     this->dataDayltg = std::make_unique<DaylightingData>();
+    this->dataConstructionAssignments = std::make_unique<ConstructionAssignmentsData>();
     this->dataDefineEquipment = std::make_unique<DefineEquipData>();
     this->dataDemandManager = std::make_unique<DemandManagerData>();
     this->dataDesiccantDehumidifiers = std::make_unique<DesiccantDehumidifiersData>();
@@ -352,6 +355,7 @@ void EnergyPlusData::clear_state()
     this->dataDaylightingDevices->clear_state();
     this->dataDaylightingDevicesData->clear_state();
     this->dataDayltg->clear_state();
+    this->dataConstructionAssignments->clear_state();
     this->dataDefineEquipment->clear_state();
     this->dataDemandManager->clear_state();
     this->dataDesiccantDehumidifiers->clear_state();
@@ -591,6 +595,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataFluid->init_constant_state(state);
     this->dataSched->init_constant_state(state);
     this->dataCurveManager->init_constant_state(state);
+    this->dataOutRptPredefined->init_constant_state(state);
 
     this->dataAirLoop->init_constant_state(state);
     this->dataAirLoopHVACDOAS->init_constant_state(state);
@@ -630,6 +635,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataDaylightingDevices->init_constant_state(state);
     this->dataDaylightingDevicesData->init_constant_state(state);
     this->dataDayltg->init_constant_state(state);
+    this->dataConstructionAssignments->init_constant_state(state);
     this->dataDefineEquipment->init_constant_state(state);
     this->dataDemandManager->init_constant_state(state);
     this->dataDesiccantDehumidifiers->init_constant_state(state);
@@ -721,7 +727,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_constant_state(state);
     this->dataNodeInputMgr->init_constant_state(state);
     this->dataOutAirNodeMgr->init_constant_state(state);
-    this->dataOutRptPredefined->init_constant_state(state);
     this->dataOutRptTab->init_constant_state(state);
     this->dataOutdoorAirUnit->init_constant_state(state);
     this->dataOutput->init_constant_state(state);
@@ -855,6 +860,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataFluid->init_state(state);             // GetFluidPropertiesData
     this->dataSched->init_state(state);             // GetScheduleData
     this->dataCurveManager->init_state(state);      // GetCurveInput
+    this->dataOutRptPredefined->init_state(state);
 
     this->dataAirLoop->init_state(state);
     this->dataAirLoopHVACDOAS->init_state(state);
@@ -894,6 +900,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataDaylightingDevices->init_state(state);
     this->dataDaylightingDevicesData->init_state(state);
     this->dataDayltg->init_state(state);
+    this->dataConstructionAssignments->init_state(state);
     this->dataDefineEquipment->init_state(state);
     this->dataDemandManager->init_state(state);
     this->dataDesiccantDehumidifiers->init_state(state);
@@ -985,7 +992,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_state(state);
     this->dataNodeInputMgr->init_state(state);
     this->dataOutAirNodeMgr->init_state(state);
-    this->dataOutRptPredefined->init_state(state);
     this->dataOutRptTab->init_state(state);
     this->dataOutdoorAirUnit->init_state(state);
     this->dataOutput->init_state(state);

@@ -15,15 +15,11 @@ macro(CREATE_SRC_GROUPS SRC)
 endmacro()
 
 # Create test targets
-macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
+macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES)
   if(BUILD_TESTING)
 
     add_executable(${BASE_NAME}_tests ${SRC})
-    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_warnings)
-
-    if(USE_PCH)
-      target_link_libraries(${BASE_NAME}_tests PRIVATE cpp_pch_files)
-    endif()
+    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_fp_options project_warnings)
 
     if(ENABLE_GTEST_DEBUG_MODE)
       target_compile_definitions(${BASE_NAME}_tests PRIVATE ENABLE_GTEST_DEBUG_MODE)
@@ -48,9 +44,16 @@ macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
 
     target_link_libraries(${BASE_NAME}_tests PRIVATE ${ALL_DEPENDENCIES} gtest)
 
+    if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode")
+      set(_gtest_discovery_mode PRE_TEST)
+    else()
+      set(_gtest_discovery_mode POST_BUILD)
+    endif()
+
     gtest_discover_tests(${BASE_NAME}_tests
-            DISCOVERY_TIMEOUT 30
-            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DISCOVERY_MODE ${_gtest_discovery_mode}
+      DISCOVERY_TIMEOUT 30
     )
 
   endif()
@@ -65,13 +68,15 @@ endmacro()
 # ANNUAL_SIMULATION force annual simulation
 # EXPECT_FATAL Expect simulation to fail
 # PERFORMANCE Tag test as performance analysis
-# COST <integer> Cost of this simulation relative to other simulations.
+# COST <integer> Cost of this simulation in non-Debug configurations (roughly its duration in seconds).
 #                Higher cost simulations run earlier in an attempt to enhance
 #                test parallelization and reduce overall test run time.
+# DEBUG_COST <integer> Same as COST, for the Debug configuration. COST does not apply to Debug.
+# Both are maintained by scripts/dev/adjust_ctests_costs.py from measured CTestCostData.txt files.
 
 function(ADD_SIMULATION_TEST)
   set(options ANNUAL_SIMULATION DESIGN_DAY_ONLY EXPECT_FATAL PERFORMANCE)
-  set(oneValueArgs IDF_FILE EPW_FILE COST)
+  set(oneValueArgs IDF_FILE EPW_FILE COST DEBUG_COST)
   set(multiValueArgs ENERGYPLUS_FLAGS)
   # CMake Parse Arguments: will set the value of variables starting with 'ADD_SIM_TEST_', eg: 'ADD_SIM_TEST_IDF_FILE'
   cmake_parse_arguments(ADD_SIM_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -137,8 +142,14 @@ function(ADD_SIMULATION_TEST)
       -DPERF=${PERF} -DPython_EXECUTABLE=${Python_EXECUTABLE}
       -P ${PROJECT_SOURCE_DIR}/cmake/RunSimulation.cmake)
 
-  if(ADD_SIM_TEST_COST AND NOT ADD_SIM_TEST_COST STREQUAL "")
-    set_tests_properties("${TEST_CATEGORY}.${IDF_NAME}" PROPERTIES COST ${ADD_SIM_TEST_COST})
+  if(ADD_SIM_TEST_COST OR ADD_SIM_TEST_DEBUG_COST)
+    if(NOT ADD_SIM_TEST_COST)
+      set(ADD_SIM_TEST_COST 0)
+    endif()
+    if(NOT ADD_SIM_TEST_DEBUG_COST)
+      set(ADD_SIM_TEST_DEBUG_COST 0)
+    endif()
+    set_tests_properties("${TEST_CATEGORY}.${IDF_NAME}" PROPERTIES COST "$<IF:$<CONFIG:Debug>,${ADD_SIM_TEST_DEBUG_COST},${ADD_SIM_TEST_COST}>")
   endif()
 
   # Added the expect_fatal here to detect files that are expected to fatal error properly

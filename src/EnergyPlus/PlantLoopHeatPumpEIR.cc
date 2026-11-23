@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,12 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// C++ headers
+// C++ Headers
 #include <algorithm>
+#include <format>
 #include <string>
 #include <utility>
 
-// EnergyPlus headers
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/CurveManager.hh>
@@ -62,9 +63,7 @@
 #include <EnergyPlus/DataPrecisionGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EMSManager.hh>
-#include <EnergyPlus/General.hh>
 #include <EnergyPlus/NodeInputManager.hh>
-#include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
@@ -156,34 +155,41 @@ void EIRPlantLoopHeatPump::simulate(
     this->report(state);
 }
 
+int EIRPlantLoopHeatPump::getActiveLoadSideSetPointNodeNum() const
+{
+    auto const &component = *this->loadSidePlantLoc.comp;
+    if (component.CurCompLevelOpNum > 0) {
+        auto const &componentOpScheme = component.OpScheme(component.CurCompLevelOpNum);
+        auto const &equipListPtr = componentOpScheme.EquipList(1);
+        return this->loadSidePlantLoc.loop->OpScheme(componentOpScheme.OpSchemePtr)
+            .EquipList(equipListPtr.ListPtr)
+            .Comp(equipListPtr.CompPtr)
+            .SetPointNodeNum;
+    }
+    return this->setPointNodeNum;
+}
+
 Real64 EIRPlantLoopHeatPump::getLoadSideOutletSetPointTemp(EnergyPlusData &state) const
 {
+    auto const &component = *this->loadSidePlantLoc.comp;
+    int const selectedSetPointNodeNum = component.CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased
+                                            ? this->getActiveLoadSideSetPointNodeNum()
+                                            : this->loadSidePlantLoc.loop->TempSetPointNodeNum;
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
-        if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
-            // there will be a valid set-point on outlet
-            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPoint;
-        } // use plant loop overall set-point
-        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPoint;
+        return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPoint;
     }
     if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::DualSetPointDeadBand) {
-        if (this->loadSidePlantLoc.comp->CurOpSchemeType == DataPlant::OpScheme::CompSetPtBased) {
-            // there will be a valid set-point on outlet
-            if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-                return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointHi;
-            }
-            return state.dataLoopNodes->Node(this->setPointNodeNum).TempSetPointLo;
-
-        } // use plant loop overall set-point
-        if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling) {
-            return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointHi;
+        bool const isCooling = this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling ||
+                               this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling;
+        if (isCooling) {
+            return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPointHi;
         }
-        return state.dataLoopNodes->Node(this->loadSidePlantLoc.loop->TempSetPointNodeNum).TempSetPointLo;
+        return state.dataLoopNodes->Node(selectedSetPointNodeNum).TempSetPointLo;
 
     } // there's no other enums for loop demand calcs, so I don't have a reasonable unit test for these
     // lines, they simply should not be able to get here.  But a fatal is here anyway just in case,
     // and the lines are excluded from coverage.
     ShowFatalError(state, "Unsupported loop demand calculation scheme in EIR heat pump"); // LCOV_EXCL_LINE
-    return -999; // not actually returned with Fatal Error call above  // LCOV_EXCL_LINE
 }
 
 void EIRPlantLoopHeatPump::resetReportingVariables()
@@ -297,8 +303,18 @@ void EIRPlantLoopHeatPump::setOperatingFlowRatesASHP(EnergyPlusData &state, bool
         // Set flows if the heat pump is running
     } else { // the heat pump must run
         // apply min/max operating limits based on source side entering fluid temperature
-        if ((this->minSourceTempLimit > this->sourceSideInletTemp || this->maxSourceTempLimit < this->sourceSideInletTemp) &&
-            !this->heatRecoveryIsActive) {
+        // or if parallel configuration and no/very small load, the unit is turned off
+        bool tempOutOfRange = this->minSourceTempLimit > this->sourceSideInletTemp || this->maxSourceTempLimit < this->sourceSideInletTemp;
+        auto const &comp = DataPlant::CompData::getPlantComponent(state, this->loadSidePlantLoc);
+        bool loadIndicator = false;
+        if (this->sysControlType == ControlType::Setpoint) {
+            Real64 leavingSetpoint = this->getLoadSideOutletSetPointTemp(state);
+            loadIndicator = std::abs(leavingSetpoint - this->loadSideInletTemp) < HVAC::SmallTempDiff;
+        } else {
+            loadIndicator = std::abs(currentLoad) < HVAC::SmallLoad;
+        }
+        bool lowLoadCondition = loadIndicator && comp.FlowCtrl != DataBranchAirLoopPlant::ControlType::SeriesActive;
+        if (tempOutOfRange || lowLoadCondition) {
             this->loadSideMassFlowRate = 0.0;
             this->sourceSideMassFlowRate = 0.0;
             this->running = false;
@@ -447,10 +463,10 @@ void EIRPlantLoopHeatPump::doPhysicsWSHP(EnergyPlusData &state, Real64 currentLo
     // add free cooling at some point, compressor is off during free cooling, temp limits restrict free cooling range
 
     Real64 availableCapacity = this->referenceCapacity;
-    Real64 partLoadRatio = 0.0;
+    Real64 localPartLoadRatio = 0.0;
 
-    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndex, availableCapacity, partLoadRatio);
-    this->setPartLoadAndCyclingRatio(state, partLoadRatio);
+    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndex, availableCapacity, localPartLoadRatio);
+    this->setPartLoadAndCyclingRatio(state, localPartLoadRatio);
 
     // evaluate the actual current operating load side heat transfer rate
     this->calcLoadSideHeatTransfer(state, availableCapacity);
@@ -468,10 +484,10 @@ void EIRPlantLoopHeatPump::doPhysicsASHP(EnergyPlusData &state, Real64 currentLo
     // add free cooling at some point, compressor is off during free cooling, temp limits restrict free cooling range
 
     Real64 availableCapacity = this->referenceCapacity;
-    Real64 partLoadRatio = 0.0;
+    Real64 localPartLoadRatio = 0.0;
 
-    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndex, availableCapacity, partLoadRatio);
-    this->setPartLoadAndCyclingRatio(state, partLoadRatio);
+    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndex, availableCapacity, localPartLoadRatio);
+    this->setPartLoadAndCyclingRatio(state, localPartLoadRatio);
 
     // do defrost calculation if applicable
     this->doDefrost(state, availableCapacity);
@@ -492,7 +508,7 @@ void EIRPlantLoopHeatPump::doPhysicsASHP(EnergyPlusData &state, Real64 currentLo
 }
 
 void EIRPlantLoopHeatPump::calcAvailableCapacity(
-    EnergyPlusData &state, Real64 const currentLoad, int curveIndex, Real64 &availableCapacity, Real64 &partLoadRatio)
+    EnergyPlusData &state, Real64 const currentLoad, int curveIndex, Real64 &availableCapacity, Real64 &t_partLoadRatio)
 {
     // get setpoint on the load side outlet
     Real64 loadSideOutletSetpointTemp = this->getLoadSideOutletSetPointTemp(state);
@@ -523,36 +539,36 @@ void EIRPlantLoopHeatPump::calcAvailableCapacity(
         }
 
         if (availableCapacity > 0) {
-            partLoadRatio = std::clamp(std::abs(currentLoad) / availableCapacity, 0.0, 1.0);
+            t_partLoadRatio = std::clamp(std::abs(currentLoad) / availableCapacity, 0.0, 1.0);
         }
 
         if (this->minSupplyWaterTempCurveIndex > 0) {
             Real64 minWaterTemp = Curve::CurveValue(state, this->minSupplyWaterTempCurveIndex, state.dataEnvrn->OutDryBulbTemp);
             if (loadSideOutletSetpointTemp < minWaterTemp) {
-                loadSideOutletSetpointTemp = originalLoadSideOutletSPTemp + (1.0 - partLoadRatio) * (minWaterTemp - originalLoadSideOutletSPTemp);
+                loadSideOutletSetpointTemp = originalLoadSideOutletSPTemp + (1.0 - t_partLoadRatio) * (minWaterTemp - originalLoadSideOutletSPTemp);
                 this->waterTempExceeded = true;
             }
         }
         if (this->maxSupplyWaterTempCurveIndex > 0) {
             Real64 maxWaterTemp = Curve::CurveValue(state, this->maxSupplyWaterTempCurveIndex, state.dataEnvrn->OutDryBulbTemp);
             if (loadSideOutletSetpointTemp > maxWaterTemp) {
-                loadSideOutletSetpointTemp = maxWaterTemp + (1.0 - partLoadRatio) * (originalLoadSideOutletSPTemp - maxWaterTemp);
+                loadSideOutletSetpointTemp = maxWaterTemp + (1.0 - t_partLoadRatio) * (originalLoadSideOutletSPTemp - maxWaterTemp);
                 this->waterTempExceeded = true;
             }
         }
         if (this->heatRecoveryHeatPump) {
             this->calcLoadSideHeatTransfer(state, availableCapacity);
             this->calcPowerUsage(state);
-            Real64 sourceSideHeatTransfer = this->calcQsource(availableCapacity * partLoadRatio, this->powerUsage);
+            Real64 sourceSideHeatTransferLocal = this->calcQsource(availableCapacity * t_partLoadRatio, this->powerUsage);
             // check to see if source side outlet temp exceeds limit and reduce PLR if necessary
             Real64 const CpSrc = this->sourceSidePlantLoc.loop->glycol->getSpecificHeat(
                 state, this->sourceSideInletTemp, "EIRPlantLoopHeatPump::calcLoadSideHeatTransfer()");
             Real64 const sourceMCp = this->sourceSideMassFlowRate * CpSrc;
-            Real64 const tempSourceOutletTemp = this->calcSourceOutletTemp(this->sourceSideInletTemp, sourceSideHeatTransfer / sourceMCp);
+            Real64 const tempSourceOutletTemp = this->calcSourceOutletTemp(this->sourceSideInletTemp, sourceSideHeatTransferLocal / sourceMCp);
             if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRHeating && tempSourceOutletTemp < this->minSourceTempLimit) {
-                partLoadRatio *= (this->sourceSideInletTemp - this->minSourceTempLimit) / (this->sourceSideInletTemp - tempSourceOutletTemp);
+                t_partLoadRatio *= (this->sourceSideInletTemp - this->minSourceTempLimit) / (this->sourceSideInletTemp - tempSourceOutletTemp);
             } else if (tempSourceOutletTemp > this->maxSourceTempLimit) {
-                partLoadRatio *= (this->maxSourceTempLimit - this->sourceSideInletTemp) / (tempSourceOutletTemp - this->sourceSideInletTemp);
+                t_partLoadRatio *= (this->maxSourceTempLimit - this->sourceSideInletTemp) / (tempSourceOutletTemp - this->sourceSideInletTemp);
             }
         }
         if (!this->waterTempExceeded) {
@@ -588,21 +604,21 @@ Real64 EIRPlantLoopHeatPump::heatingCapacityModifierASHP(EnergyPlusData &state) 
     return 1.0;
 }
 
-void EIRPlantLoopHeatPump::setPartLoadAndCyclingRatio([[maybe_unused]] EnergyPlusData &state, Real64 &partLoadRatio)
+void EIRPlantLoopHeatPump::setPartLoadAndCyclingRatio([[maybe_unused]] EnergyPlusData &state, Real64 &t_partLoadRatio)
 {
     // Initialize cycling ratio to 1.0
-    Real64 cyclingRatio = 1.0;
+    Real64 localCyclingRatio = 1.0;
 
     // Check if part load ratio is below the minimum threshold
-    if (partLoadRatio < this->minimumPLR) {
+    if (t_partLoadRatio < this->minimumPLR) {
         // Adjust cycling ratio and set part load ratio to minimum
-        cyclingRatio = partLoadRatio / this->minimumPLR;
-        partLoadRatio = this->minimumPLR;
+        localCyclingRatio = t_partLoadRatio / this->minimumPLR;
+        t_partLoadRatio = this->minimumPLR;
     }
 
     // update class member variables
-    this->partLoadRatio = partLoadRatio;
-    this->cyclingRatio = cyclingRatio;
+    this->partLoadRatio = t_partLoadRatio;
+    this->cyclingRatio = localCyclingRatio;
     //    note that cycling ratio for the HeatPump:AirToWater is updated in the power calcPower function as it computes the speed level
 }
 
@@ -653,12 +669,12 @@ void HeatPumpAirToWater::calcPowerUsage(EnergyPlusData &state, Real64 availableC
     Real64 capacityModifierFuncTempLow = 1.0;
     Real64 capacityModifierFuncTempHigh = 1.0;
     // get speed level of the nth active heat pump
-    int speedLevel = 0;
+    int localSpeedLevel = 0;
     for (int i = 0; i < this->numSpeeds; i++) {
         capacityModifierFuncTempHigh =
-            Curve::CurveValue(state, this->capFuncTempCurveIndex[i], loadSideOutletSetpointTemp, this->sourceSideInletTemp);
+            Curve::CurveValue(state, this->capFuncTempCurveIndices[i], loadSideOutletSetpointTemp, this->sourceSideInletTemp);
         capacityHigh = this->ratedCapacity[i] * capacityModifierFuncTempHigh;
-        speedLevel = i;
+        localSpeedLevel = i;
         if (std::fabs(currentLoadNthUnit) <= capacityHigh) {
             break;
         }
@@ -668,16 +684,16 @@ void HeatPumpAirToWater::calcPowerUsage(EnergyPlusData &state, Real64 availableC
     // calculate power usage from EIR curves
     Real64 eirModifierFuncTempLow = 1.0;
     Real64 eirModifierFuncPLRLow = 1.0;
-    if (speedLevel > 0) {
+    if (localSpeedLevel > 0) {
         eirModifierFuncTempLow =
-            Curve::CurveValue(state, this->powerRatioFuncTempCurveIndex[speedLevel - 1], this->loadSideOutletTemp, this->sourceSideInletTemp);
-        eirModifierFuncPLRLow = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndex[speedLevel - 1], this->partLoadRatio);
+            Curve::CurveValue(state, this->powerRatioFuncTempCurveIndices[localSpeedLevel - 1], this->loadSideOutletTemp, this->sourceSideInletTemp);
+        eirModifierFuncPLRLow = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndices[localSpeedLevel - 1], this->partLoadRatio);
         this->eirModCurveCheck(state, eirModifierFuncTempLow);
         this->eirModFPLRCurveCheck(state, eirModifierFuncPLRLow);
     }
     Real64 eirModifierFuncTempHigh =
-        Curve::CurveValue(state, this->powerRatioFuncTempCurveIndex[speedLevel], this->loadSideOutletTemp, this->sourceSideInletTemp);
-    Real64 eirModifierFuncPLRHigh = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndex[speedLevel], this->partLoadRatio);
+        Curve::CurveValue(state, this->powerRatioFuncTempCurveIndices[localSpeedLevel], this->loadSideOutletTemp, this->sourceSideInletTemp);
+    Real64 eirModifierFuncPLRHigh = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndices[localSpeedLevel], this->partLoadRatio);
     // check curves value and resets to zero if negative
     this->eirModCurveCheck(state, eirModifierFuncTempHigh);
     this->eirModFPLRCurveCheck(state, eirModifierFuncPLRHigh);
@@ -690,26 +706,26 @@ void HeatPumpAirToWater::calcPowerUsage(EnergyPlusData &state, Real64 availableC
     }
 
     Real64 powerUsageLow =
-        (capacityLow / this->ratedCOP[speedLevel]) * (eirModifierFuncPLRLow * eirModifierFuncTempLow) * this->defrostPowerMultiplier;
+        (capacityLow / this->ratedCOP[localSpeedLevel]) * (eirModifierFuncPLRLow * eirModifierFuncTempLow) * this->defrostPowerMultiplier;
     Real64 powerUsageHigh =
-        (capacityHigh / this->ratedCOP[speedLevel]) * (eirModifierFuncPLRHigh * eirModifierFuncTempHigh) * this->defrostPowerMultiplier;
+        (capacityHigh / this->ratedCOP[localSpeedLevel]) * (eirModifierFuncPLRHigh * eirModifierFuncTempHigh) * this->defrostPowerMultiplier;
     this->powerUsage = (1 - interpRatio) * powerUsageLow + interpRatio * powerUsageHigh;
     this->powerUsage += (numHeatPumpUsed - 1) * (availableCapacityBeforeMultiplier / this->ratedCOP[this->numSpeeds - 1]) *
                         (eirModifierFuncPLRHigh * eirModifierFuncTempHigh) * this->defrostPowerMultiplier * this->cyclingRatio;
     this->numUnitUsed = numHeatPumpUsed;
-    if (speedLevel == 0) {
+    if (localSpeedLevel == 0) {
         this->speedLevel = 0;
         this->cyclingRatio = interpRatio;
         this->speedRatio = 0.0;
     } else {
         if (this->controlType == CompressorControlType::FixedSpeed) {
-            this->speedLevel = speedLevel;
+            this->speedLevel = localSpeedLevel;
             this->speedRatio = interpRatio;
             this->capFuncTempCurveValue = capacityModifierFuncTempHigh;
             this->eirFuncTempCurveValue = eirModifierFuncTempHigh;
             this->eirFuncPLRModifierValue = eirModifierFuncPLRHigh;
         } else {
-            this->speedLevel = (1 - interpRatio) * (speedLevel - 1) + interpRatio * speedLevel;
+            this->speedLevel = (1 - interpRatio) * (localSpeedLevel - 1) + interpRatio * localSpeedLevel;
             this->speedRatio = this->partLoadRatio;
             this->capFuncTempCurveValue = (1 - interpRatio) * capacityModifierFuncTempLow + interpRatio * capacityModifierFuncTempHigh;
             this->eirFuncTempCurveValue = (1 - interpRatio) * eirModifierFuncTempLow + interpRatio * eirModifierFuncTempHigh;
@@ -875,22 +891,23 @@ void EIRPlantLoopHeatPump::capModFTCurveCheck(EnergyPlusData &state, const Real6
 {
     if (capacityModifierFuncTemp < 0.0) {
         if (this->capModFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(
+                state, std::format(" Capacity Modifier curve (function of Temperatures) output is negative ({:.3f}).", capacityModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Capacity Modifier curve (function of Temperatures) output is negative ({:.3T}).", capacityModifierFuncTemp));
-            ShowContinueError(state,
-                              format(" Negative value occurs using a water temperature of {:.2T}C and an outdoor air temperature of {:.2T}C.",
-                                     loadSideOutletSetpointTemp,
-                                     this->sourceSideInletTemp));
+                              std::format(" Negative value occurs using a water temperature of {:.2f}C and an outdoor air temperature of {:.2f}C.",
+                                          loadSideOutletSetpointTemp,
+                                          this->sourceSideInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
-        ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
-                                       this->capModFTErrorIndex,
-                                       capacityModifierFuncTemp,
-                                       capacityModifierFuncTemp);
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::format("{} \"{}\": Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
+            this->capModFTErrorIndex,
+            capacityModifierFuncTemp,
+            capacityModifierFuncTemp);
         capacityModifierFuncTemp = 0.0;
     }
 }
@@ -901,22 +918,22 @@ void EIRPlantLoopHeatPump::heatRecoveryCapModFTCurveCheck(EnergyPlusData &state,
 {
     if (capacityModifierFuncTemp < 0.0) {
         if (this->heatRecCapModFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
             ShowContinueError(state,
-                              format(" Heat Recovery mode Capacity Modifier curve (function of Temperatures) output is negative ({:.3T}).",
-                                     capacityModifierFuncTemp));
+                              std::format(" Heat Recovery mode Capacity Modifier curve (function of Temperatures) output is negative ({:.3f}).",
+                                          capacityModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Negative value occurs using a load side water temperature of {:.2T}C and heat recovery entering water "
-                                     "temperature of {:.2T}C.",
-                                     loadSideOutletSetpointTemp,
-                                     this->heatRecoveryInletTemp));
+                              std::format(" Negative value occurs using a load side water temperature of {:.2f}C and heat recovery entering water "
+                                          "temperature of {:.2f}C.",
+                                          loadSideOutletSetpointTemp,
+                                          this->heatRecoveryInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(
             state,
-            format("{} \"{}\": Heat Recovery mode Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
-                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                   this->name),
+            std::format("{} \"{}\": Heat Recovery mode Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
             this->heatRecCapModFTErrorIndex,
             capacityModifierFuncTemp,
             capacityModifierFuncTemp);
@@ -928,18 +945,18 @@ void EIRPlantLoopHeatPump::eirModCurveCheck(EnergyPlusData &state, Real64 &eirMo
 {
     if (eirModifierFuncTemp < 0.0) {
         if (this->eirModFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
-            ShowContinueError(state, format(" EIR Modifier curve (function of Temperatures) output is negative ({:.3T}).", eirModifierFuncTemp));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(state, std::format(" EIR Modifier curve (function of Temperatures) output is negative ({:.3f}).", eirModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Negative value occurs using a water temperature of {:.2T}C and an outdoor air temperature of {:.2T}C.",
-                                     this->loadSideOutletTemp,
-                                     this->sourceSideInletTemp));
+                              std::format(" Negative value occurs using a water temperature of {:.2f}C and an outdoor air temperature of {:.2f}C.",
+                                          this->loadSideOutletTemp,
+                                          this->sourceSideInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": EIR Modifier curve (function of Temperatures) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
+                                       std::format("{} \"{}\": EIR Modifier curve (function of Temperatures) output is negative warning continues...",
+                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                   this->name),
                                        this->eirModFTErrorIndex,
                                        eirModifierFuncTemp,
                                        eirModifierFuncTemp);
@@ -951,22 +968,23 @@ void EIRPlantLoopHeatPump::heatRecoveryEIRModCurveCheck(EnergyPlusData &state, R
 {
     if (eirModifierFuncTemp < 0.0) {
         if (this->heatRecEIRModFTErrorIndex == 0 && heatRecoveryEIRFTempCurveIndex > 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
             ShowContinueError(
-                state, format(" Heat Recovery mode EIR Modifier curve (function of Temperatures) output is negative ({:.3T}).", eirModifierFuncTemp));
+                state,
+                std::format(" Heat Recovery mode EIR Modifier curve (function of Temperatures) output is negative ({:.3f}).", eirModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Negative value occurs using a load side water temperature of {:.2T}C and heat recovery entering water "
-                                     "temperature of {:.2T}C.",
-                                     this->loadSideOutletTemp,
-                                     this->heatRecoveryInletTemp));
+                              std::format(" Negative value occurs using a load side water temperature of {:.2f}C and heat recovery entering water "
+                                          "temperature of {:.2f}C.",
+                                          this->loadSideOutletTemp,
+                                          this->heatRecoveryInletTemp));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(
             state,
-            format("{} \"{}\": Heat Recovery mode EIR Modifier curve (function of Temperatures) output is negative warning continues...",
-                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                   this->name),
-            this->eirModFTErrorIndex,
+            std::format("{} \"{}\": Heat Recovery mode EIR Modifier curve (function of Temperatures) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
+            this->heatRecEIRModFTErrorIndex,
             eirModifierFuncTemp,
             eirModifierFuncTemp);
         eirModifierFuncTemp = 0.0;
@@ -977,15 +995,15 @@ void EIRPlantLoopHeatPump::eirModFPLRCurveCheck(EnergyPlusData &state, Real64 &e
 {
     if (eirModifierFuncPLR < 0.0) {
         if (this->eirModFPLRErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
-            ShowContinueError(state, format(" EIR Modifier curve (function of PLR) output is negative ({:.3T}).", eirModifierFuncPLR));
-            ShowContinueError(state, format(" Negative value occurs using a Part Load Ratio of {:.2T}", this->partLoadRatio));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(state, std::format(" EIR Modifier curve (function of PLR) output is negative ({:.3f}).", eirModifierFuncPLR));
+            ShowContinueError(state, std::format(" Negative value occurs using a Part Load Ratio of {:.2f}", this->partLoadRatio));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": EIR Modifier curve (function of PLR) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
+                                       std::format("{} \"{}\": EIR Modifier curve (function of PLR) output is negative warning continues...",
+                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                   this->name),
                                        this->eirModFPLRErrorIndex,
                                        eirModifierFuncPLR,
                                        eirModifierFuncPLR);
@@ -1161,7 +1179,7 @@ void HeatPumpAirToWater::reportEquipmentSummary(EnergyPlusData &state)
             } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
                 modeKeyWord = "Cooling";
             }
-            objectName = format("{} {} Component", this->name, modeKeyWord);
+            objectName = std::format("{} {} Component", this->name, modeKeyWord);
             constexpr std::array<std::string_view, static_cast<int>(ControlType::Num)> AWHPCompressorControlTypeUC = {"FIXEDSPEED", "VARIABLESPEED"};
             auto typeNameCompressor = AWHPCompressorControlTypeUC[static_cast<int>(this->controlType)];
             OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchAWHPType, objectName, typeNameCompressor);
@@ -1178,19 +1196,14 @@ void HeatPumpAirToWater::reportEquipmentSummary(EnergyPlusData &state)
                 state, state.dataOutRptPredefined->pdchAWHPDesSizeRefAirFlowRate, objectName, this->sourceSideDesignMassFlowRate);
             OutputReportPredefined::PreDefTableEntry(
                 state, state.dataOutRptPredefined->pdchAWHPDesSizeRefWaterFlowRate, objectName, this->loadSideDesignMassFlowRate);
-            OutputReportPredefined::PreDefTableEntry(
-                state,
-                state.dataOutRptPredefined->pdchAWHPPlantloopName,
-                objectName,
-                this->loadSidePlantLoc.loopNum > 0 ? state.dataPlnt->PlantLoop(this->loadSidePlantLoc.loopNum).Name : "N/A");
+            OutputReportPredefined::PreDefTableEntry(state,
+                                                     state.dataOutRptPredefined->pdchAWHPPlantloopName,
+                                                     objectName,
+                                                     this->loadSidePlantLoc.loop != nullptr ? this->loadSidePlantLoc.loop->Name : "N/A");
             OutputReportPredefined::PreDefTableEntry(state,
                                                      state.dataOutRptPredefined->pdchAWHPPlantloopBranchName,
                                                      objectName,
-                                                     this->loadSidePlantLoc.loopNum > 0 ? state.dataPlnt->PlantLoop(this->loadSidePlantLoc.loopNum)
-                                                                                              .LoopSide(this->loadSidePlantLoc.loopSideNum)
-                                                                                              .Branch(this->loadSidePlantLoc.branchNum)
-                                                                                              .Name
-                                                                                        : "N/A");
+                                                     this->loadSidePlantLoc.loop != nullptr ? this->loadSidePlantLoc.branch->Name : "N/A");
             OutputReportPredefined::PreDefTableEntry(state,
                                                      state.dataOutRptPredefined->pdchAWHPDesSizeRefWaterFlowRate,
                                                      objectName,
@@ -1246,10 +1259,10 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
         flowRateKW = "Rated Water Volume Flow Rate in Heating Mode";
         typeName = "HeatPump:AirToWater";
     }
-    std::string userCapacityKW = fmt::format("User-Specified {} [W]", capacityKW);
-    std::string designCapacityKW = fmt::format("Design Size {} [W]", capacityKW);
-    std::string userFlowKW = fmt::format("User-Specified {} [m3/s]", flowRateKW);
-    std::string designFlowKW = fmt::format("Design Size {} [m3/s]", flowRateKW);
+    std::string userCapacityKW = std::format("User-Specified {} [W]", capacityKW);
+    std::string designCapacityKW = std::format("Design Size {} [W]", capacityKW);
+    std::string userFlowKW = std::format("User-Specified {} [m3/s]", flowRateKW);
+    std::string designFlowKW = std::format("Design Size {} [m3/s]", flowRateKW);
     Real64 loadSideInitTemp =
         (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRHeating) ? Constant::HWInitConvTemp : Constant::CWInitConvTemp;
     // I guess I can assume the plant fluids are the same for HW and CW. So only the sizing type is an issue on which to use.
@@ -1371,7 +1384,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                     BaseSizer::reportSizerOutput(state, typeName, this->name, designCapacityKW, tmpCapacity);
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state, typeName, this->name, fmt::format("Initial {}", designCapacityKW), tmpCapacity);
+                    BaseSizer::reportSizerOutput(state, typeName, this->name, std::format("Initial {}", designCapacityKW), tmpCapacity);
                 }
             } else {
                 // this blocks means the capacity value was hard-sized
@@ -1380,23 +1393,18 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                     Real64 hardSizedCapacity = this->referenceCapacity;
                     if (state.dataPlnt->PlantFinalSizesOkayToReport) {
                         if (state.dataGlobal->DoPlantSizing) {
-                            BaseSizer::reportSizerOutput(state,
-                                                         typeName,
-                                                         this->name,
-                                                         fmt::format(designCapacityKW),
-                                                         tmpCapacity,
-                                                         fmt::format(userCapacityKW),
-                                                         hardSizedCapacity);
+                            BaseSizer::reportSizerOutput(
+                                state, typeName, this->name, designCapacityKW, tmpCapacity, userCapacityKW, hardSizedCapacity);
                         } else {
                             BaseSizer::reportSizerOutput(state, typeName, this->name, userCapacityKW, hardSizedCapacity);
                         }
                         // we can warn here if there is a bit mismatch between hard- and auto-sized
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpCapacity - hardSizedCapacity) / hardSizedCapacity) > state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowWarningMessage(state,
-                                                   format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
-                                ShowContinueError(state, format("User-Specified {} of {:.2R} [W]", capacityKW, hardSizedCapacity));
-                                ShowContinueError(state, format("differs from Design Size {} of {:.2R} [W]", capacityKW, tmpCapacity));
+                                ShowWarningMessage(
+                                    state, std::format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
+                                ShowContinueError(state, std::format("User-Specified {} of {:.2f} [W]", capacityKW, hardSizedCapacity));
+                                ShowContinueError(state, std::format("differs from Design Size {} of {:.2f} [W]", capacityKW, tmpCapacity));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1414,7 +1422,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                     BaseSizer::reportSizerOutput(state, typeName, this->name, designFlowKW, tmpLoadVolFlow);
                 }
                 if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                    BaseSizer::reportSizerOutput(state, typeName, this->name, fmt::format("Initial {}", designFlowKW), tmpLoadVolFlow);
+                    BaseSizer::reportSizerOutput(state, typeName, this->name, std::format("Initial {}", designFlowKW), tmpLoadVolFlow);
                 }
             } else {
                 if (this->loadSideDesignVolFlowRate > 0.0 && tmpLoadVolFlow > 0.0) {
@@ -1429,9 +1437,10 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                         if (state.dataGlobal->DisplayExtraWarnings) {
                             if ((std::abs(tmpLoadVolFlow - hardSizedLoadSideFlow) / hardSizedLoadSideFlow) >
                                 state.dataSize->AutoVsHardSizingThreshold) {
-                                ShowMessage(state, format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
-                                ShowContinueError(state, format("User-Specified {} of {:.2R} [m3/s]", flowRateKW, hardSizedLoadSideFlow));
-                                ShowContinueError(state, format("differs from Design Size {} of {:.2R} [m3/s]", flowRateKW, tmpLoadVolFlow));
+                                ShowMessage(state,
+                                            std::format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
+                                ShowContinueError(state, std::format("User-Specified {} of {:.2f} [m3/s]", flowRateKW, hardSizedLoadSideFlow));
+                                ShowContinueError(state, std::format("differs from Design Size {} of {:.2f} [m3/s]", flowRateKW, tmpLoadVolFlow));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1452,7 +1461,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                         BaseSizer::reportSizerOutput(state, typeName, this->name, designFlowKW, tmpLoadVolFlow);
                     }
                     if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state, typeName, this->name, fmt::format("Initial {} [m3/s]", designFlowKW), tmpLoadVolFlow);
+                        BaseSizer::reportSizerOutput(state, typeName, this->name, std::format("Initial {} [m3/s]", designFlowKW), tmpLoadVolFlow);
                     }
                 }
             }
@@ -1464,7 +1473,7 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
                         BaseSizer::reportSizerOutput(state, typeName, this->name, designCapacityKW, tmpCapacity);
                     }
                     if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-                        BaseSizer::reportSizerOutput(state, typeName, this->name, fmt::format("Initial {}", designCapacityKW), tmpCapacity);
+                        BaseSizer::reportSizerOutput(state, typeName, this->name, std::format("Initial {}", designCapacityKW), tmpCapacity);
                     }
                 }
             }
@@ -1473,14 +1482,14 @@ void EIRPlantLoopHeatPump::sizeLoadSide(EnergyPlusData &state)
             if ((this->loadSideDesignVolFlowRateWasAutoSized || this->referenceCapacityWasAutoSized) &&
                 state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 ShowSevereError(state, "EIRPlantLoopHeatPump::size(): Autosizing requires a loop Sizing:Plant object.");
-                ShowContinueError(state, format("Occurs in HeatPump:PlantLoop:EquationFit:Cooling object = {}", this->name));
+                ShowContinueError(state, std::format("Occurs in HeatPump:PlantLoop:EquationFit:Cooling object = {}", this->name));
                 errorsFound = true;
             }
         }
         if (!this->loadSideDesignVolFlowRateWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport) {
             std::string flowRateKW_no_v = "Load Side Flow Rate";
             BaseSizer::reportSizerOutput(
-                state, typeName, this->name, fmt::format("User-Specified {} [m3/s]", flowRateKW_no_v), this->loadSideDesignVolFlowRate);
+                state, typeName, this->name, std::format("User-Specified {} [m3/s]", flowRateKW_no_v), this->loadSideDesignVolFlowRate);
         }
         if (!this->referenceCapacityWasAutoSized && state.dataPlnt->PlantFinalSizesOkayToReport) {
             BaseSizer::reportSizerOutput(state, typeName, this->name, userCapacityKW, this->referenceCapacity);
@@ -1567,9 +1576,11 @@ void EIRPlantLoopHeatPump::sizeSrcSideWSHP(EnergyPlusData &state)
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     if ((std::abs(tmpSourceVolFlow - hardSizedSourceSideFlow) / hardSizedSourceSideFlow) >
                         state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state, format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
-                        ShowContinueError(state, format("User-Specified Source Side Volume Flow Rate of {:.2R} [m3/s]", hardSizedSourceSideFlow));
-                        ShowContinueError(state, format("differs from Design Size Source Side Volume Flow Rate of {:.2R} [m3/s]", tmpSourceVolFlow));
+                        ShowMessage(state, std::format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
+                        ShowContinueError(state,
+                                          std::format("User-Specified Source Side Volume Flow Rate of {:.2f} [m3/s]", hardSizedSourceSideFlow));
+                        ShowContinueError(state,
+                                          std::format("differs from Design Size Source Side Volume Flow Rate of {:.2f} [m3/s]", tmpSourceVolFlow));
                         ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                         ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                     }
@@ -1658,9 +1669,9 @@ void EIRPlantLoopHeatPump::sizeSrcSideASHP(EnergyPlusData &state)
         // fatal out just in case
         errorsFound = true; // LCOV_EXCL_LINE
         ShowSevereError(state,
-                        format("Invalid condenser flow rate for EIR PLHP (name={}; entered value: {}",
-                               this->name,
-                               this->sourceSideDesignVolFlowRate)); // LCOV_EXCL_LINE
+                        std::format("Invalid condenser flow rate for EIR PLHP (name={}; entered value: {}",
+                                    this->name,
+                                    this->sourceSideDesignVolFlowRate)); // LCOV_EXCL_LINE
     } else {
         // can't imagine how it would ever get to this point
         // just assume it's the same as the load side if we don't have any sizing information
@@ -1684,15 +1695,15 @@ void EIRPlantLoopHeatPump::sizeSrcSideASHP(EnergyPlusData &state)
         flowRateKW = "Rated Air Volume Flow Rate in Heating Mode";
         typeName = "HeatPump:AirToWater";
     }
-    std::string userFlowKW = fmt::format("User-Specified {} [m3/s]", flowRateKW);
-    std::string designFlowKW = fmt::format("Design Size {} [m3/s]", flowRateKW);
+    std::string userFlowKW = std::format("User-Specified {} [m3/s]", flowRateKW);
+    std::string designFlowKW = std::format("Design Size {} [m3/s]", flowRateKW);
     if (this->sourceSideDesignVolFlowRateWasAutoSized) {
         this->sourceSideDesignVolFlowRate = tmpSourceVolFlow;
         if (state.dataPlnt->PlantFinalSizesOkayToReport) {
             BaseSizer::reportSizerOutput(state, typeName, this->name, designFlowKW, tmpSourceVolFlow);
         }
         if (state.dataPlnt->PlantFirstSizesOkayToReport) {
-            BaseSizer::reportSizerOutput(state, typeName, this->name, fmt::format("Initial {}", designFlowKW), tmpSourceVolFlow);
+            BaseSizer::reportSizerOutput(state, typeName, this->name, std::format("Initial {}", designFlowKW), tmpSourceVolFlow);
         }
     } else {
         // source design flow was hard-sized
@@ -1795,11 +1806,12 @@ void EIRPlantLoopHeatPump::sizeHeatRecoveryASHP(EnergyPlusData &state)
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     if ((std::abs(tmpHeatRecoveryVolFlow - hardSizedHeatRecoveryFlow) / hardSizedHeatRecoveryFlow) >
                         state.dataSize->AutoVsHardSizingThreshold) {
-                        ShowMessage(state, format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
-                        ShowContinueError(state,
-                                          format("User-Specified Heat Recovery Side Volume Flow Rate of {:.2R} [m3/s]", hardSizedHeatRecoveryFlow));
+                        ShowMessage(state, std::format("EIRPlantLoopHeatPump::size(): Potential issue with equipment sizing for {}", this->name));
                         ShowContinueError(
-                            state, format("differs from Design Size Heat Recovery Side Volume Flow Rate of {:.2R} [m3/s]", tmpHeatRecoveryVolFlow));
+                            state, std::format("User-Specified Heat Recovery Side Volume Flow Rate of {:.2f} [m3/s]", hardSizedHeatRecoveryFlow));
+                        ShowContinueError(
+                            state,
+                            std::format("differs from Design Size Heat Recovery Side Volume Flow Rate of {:.2f} [m3/s]", tmpHeatRecoveryVolFlow));
                         ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                         ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                     }
@@ -1823,8 +1835,7 @@ PlantComponent *EIRPlantLoopHeatPump::factory(EnergyPlusData &state, DataPlant::
         }
     }
 
-    ShowFatalError(state, format("EIR Plant Loop Heat Pump factory: Error getting inputs for PLHP named: {}", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("EIR Plant Loop Heat Pump factory: Error getting inputs for PLHP named: {}", hp_name));
 }
 
 void EIRPlantLoopHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
@@ -1843,7 +1854,8 @@ void EIRPlantLoopHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
                 }
                 if (potentialCompanionName == targetCompanionName) {
                     if (thisCoilType == potentialCompanionType) {
-                        ShowSevereError(state, format("Invalid companion specification for EIR Plant Loop Heat Pump named \"{}\"", thisCoilName));
+                        ShowSevereError(state,
+                                        std::format("Invalid companion specification for EIR Plant Loop Heat Pump named \"{}\"", thisCoilName));
                         ShowContinueError(state, "For heating objects, the companion must be a cooling object, and vice-versa");
                         ShowFatalError(state, "Invalid companion object causes program termination");
                     }
@@ -1853,8 +1865,8 @@ void EIRPlantLoopHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
             }
             if (thisHP.companionHeatPumpCoil == nullptr) {
                 ShowSevereError(state, "Could not find matching companion heat pump coil.");
-                ShowContinueError(state, format("Base coil: {}", thisCoilName));
-                ShowContinueError(state, format("Looking for companion coil named: {}", targetCompanionName));
+                ShowContinueError(state, std::format("Base coil: {}", thisCoilName));
+                ShowContinueError(state, std::format("Looking for companion coil named: {}", targetCompanionName));
                 ShowFatalError(state, "Simulation aborts due to previous severe error");
             }
         }
@@ -1904,8 +1916,8 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
     bool errorsFound = false;
     for (auto const &classToInput : classesToInput) {
         auto cCurrentModuleObject = static_cast<std::string>(DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)]);
-        DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
+        Node::ConnectionObjectType objType =
+            static_cast<Node::ConnectionObjectType>(getEnumValue(Node::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
         int numPLHP = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
         if (numPLHP > 0) {
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(cCurrentModuleObject);
@@ -1955,7 +1967,7 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 std::string const capFtName = Util::makeUPPER(fields.at("capacity_modifier_function_of_temperature_curve_name").get<std::string>());
                 thisPLHP.capFuncTempCurveIndex = Curve::GetCurveIndex(state, capFtName);
                 if (thisPLHP.capFuncTempCurveIndex == 0) {
-                    ShowSevereError(state, format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, capFtName));
+                    ShowSevereError(state, std::format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, capFtName));
                     errorsFound = true;
                 }
 
@@ -1963,7 +1975,7 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                     Util::makeUPPER(fields.at("electric_input_to_output_ratio_modifier_function_of_temperature_curve_name").get<std::string>());
                 thisPLHP.powerRatioFuncTempCurveIndex = Curve::GetCurveIndex(state, eirFtName);
                 if (thisPLHP.powerRatioFuncTempCurveIndex == 0) {
-                    ShowSevereError(state, format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, eirFtName));
+                    ShowSevereError(state, std::format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, eirFtName));
                     errorsFound = true;
                 }
 
@@ -1971,7 +1983,8 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                     Util::makeUPPER(fields.at("electric_input_to_output_ratio_modifier_function_of_part_load_ratio_curve_name").get<std::string>());
                 thisPLHP.powerRatioFuncPLRCurveIndex = Curve::GetCurveIndex(state, eirFplrName);
                 if (thisPLHP.powerRatioFuncPLRCurveIndex == 0) {
-                    ShowSevereError(state, format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, eirFplrName));
+                    ShowSevereError(state,
+                                    std::format("Invalid curve name for EIR PLHP (name={}; entered curve name: {}", thisPLHP.name, eirFplrName));
                     errorsFound = true;
                 }
 
@@ -2001,10 +2014,10 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                         thisPLHP.thermosiphonTempCurveIndex =
                             Curve::GetCurveIndex(state, Util::makeUPPER(thermosiphonTempCurveName.value().get<std::string>()));
                         if (thisPLHP.thermosiphonTempCurveIndex == 0) {
-                            ShowSevereError(state, format("{} =\"{}\"", state.dataIPShortCut->cCurrentModuleObject, thisPLHP.name));
+                            ShowSevereError(state, std::format("{} =\"{}\"", state.dataIPShortCut->cCurrentModuleObject, thisPLHP.name));
                             ShowContinueError(state,
-                                              format("Invalid Thermosiphon Capacity Fraction Curve Name = {}",
-                                                     thermosiphonTempCurveName.value().get<std::string>()));
+                                              std::format("Invalid Thermosiphon Capacity Fraction Curve Name = {}",
+                                                          thermosiphonTempCurveName.value().get<std::string>()));
                             errorsFound = true;
                         }
                     }
@@ -2100,66 +2113,68 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 }
 
                 bool nodeErrorsFound = false;
-                thisPLHP.loadSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                   loadSideInletNodeName,
-                                                                                   nodeErrorsFound,
-                                                                                   objType,
-                                                                                   thisPLHP.name,
-                                                                                   DataLoopNode::NodeFluidType::Water,
-                                                                                   DataLoopNode::ConnectionType::Inlet,
-                                                                                   NodeInputManager::CompFluidStream::Primary,
-                                                                                   DataLoopNode::ObjectIsNotParent);
-                thisPLHP.loadSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                    loadSideOutletNodeName,
-                                                                                    nodeErrorsFound,
-                                                                                    objType,
-                                                                                    thisPLHP.name,
-                                                                                    DataLoopNode::NodeFluidType::Water,
-                                                                                    DataLoopNode::ConnectionType::Outlet,
-                                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                                    DataLoopNode::ObjectIsNotParent);
-                DataLoopNode::NodeFluidType condenserNodeType = DataLoopNode::NodeFluidType::Blank;
-                DataLoopNode::ConnectionType condenserNodeConnectionType_Inlet = DataLoopNode::ConnectionType::Blank;
-                DataLoopNode::ConnectionType condenserNodeConnectionType_Outlet = DataLoopNode::ConnectionType::Blank;
+                thisPLHP.loadSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                       loadSideInletNodeName,
+                                                                       nodeErrorsFound,
+                                                                       objType,
+                                                                       thisPLHP.name,
+                                                                       Node::FluidType::Water,
+                                                                       Node::ConnectionType::Inlet,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
+                thisPLHP.loadSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                        loadSideOutletNodeName,
+                                                                        nodeErrorsFound,
+                                                                        objType,
+                                                                        thisPLHP.name,
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Outlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
+                Node::FluidType condenserNodeType = Node::FluidType::Blank;
+                Node::ConnectionType condenserNodeConnectionType_Inlet = Node::ConnectionType::Blank;
+                Node::ConnectionType condenserNodeConnectionType_Outlet = Node::ConnectionType::Blank;
                 if (condenserType == "WATERSOURCE") {
                     thisPLHP.waterSource = true;
-                    condenserNodeType = DataLoopNode::NodeFluidType::Water;
-                    condenserNodeConnectionType_Inlet = DataLoopNode::ConnectionType::Inlet;
-                    condenserNodeConnectionType_Outlet = DataLoopNode::ConnectionType::Outlet;
+                    condenserNodeType = Node::FluidType::Water;
+                    condenserNodeConnectionType_Inlet = Node::ConnectionType::Inlet;
+                    condenserNodeConnectionType_Outlet = Node::ConnectionType::Outlet;
                 } else if (condenserType == "AIRSOURCE") {
                     thisPLHP.airSource = true;
-                    condenserNodeType = DataLoopNode::NodeFluidType::Air;
-                    condenserNodeConnectionType_Inlet = DataLoopNode::ConnectionType::Inlet;
-                    condenserNodeConnectionType_Outlet = DataLoopNode::ConnectionType::Outlet;
+                    condenserNodeType = Node::FluidType::Air;
+                    condenserNodeConnectionType_Inlet = Node::ConnectionType::Inlet;
+                    condenserNodeConnectionType_Outlet = Node::ConnectionType::Outlet;
                     if (sourceSideInletNodeName == sourceSideOutletNodeName) {
-                        ShowSevereError(state, format("PlantLoopHeatPump {} has the same inlet and outlet node.", thisObjectName));
-                        ShowContinueError(state, format("Node Name: {}", sourceSideInletNodeName));
+                        ShowSevereError(state, std::format("PlantLoopHeatPump {} has the same inlet and outlet node.", thisObjectName));
+                        ShowContinueError(state, std::format("Node Name: {}", sourceSideInletNodeName));
                         errorsFound = true;
                     }
                 } else {
                     // Again, this should be protected by the input processor
-                    ShowErrorMessage(
-                        state, format("Invalid heat pump condenser type (name={}; entered type: {}", thisPLHP.name, condenserType)); // LCOV_EXCL_LINE
-                    errorsFound = true;                                                                                              // LCOV_EXCL_LINE
+                    ShowErrorMessage(state,
+                                     std::format("Invalid heat pump condenser type (name={}; entered type: {}",
+                                                 thisPLHP.name,
+                                                 condenserType)); // LCOV_EXCL_LINE
+                    errorsFound = true;                           // LCOV_EXCL_LINE
                 }
-                thisPLHP.sourceSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                     sourceSideInletNodeName,
-                                                                                     nodeErrorsFound,
-                                                                                     objType,
-                                                                                     thisPLHP.name,
-                                                                                     condenserNodeType,
-                                                                                     condenserNodeConnectionType_Inlet,
-                                                                                     NodeInputManager::CompFluidStream::Secondary,
-                                                                                     DataLoopNode::ObjectIsNotParent);
-                thisPLHP.sourceSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                      sourceSideOutletNodeName,
-                                                                                      nodeErrorsFound,
-                                                                                      objType,
-                                                                                      thisPLHP.name,
-                                                                                      condenserNodeType,
-                                                                                      condenserNodeConnectionType_Outlet,
-                                                                                      NodeInputManager::CompFluidStream::Secondary,
-                                                                                      DataLoopNode::ObjectIsNotParent);
+                thisPLHP.sourceSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                         sourceSideInletNodeName,
+                                                                         nodeErrorsFound,
+                                                                         objType,
+                                                                         thisPLHP.name,
+                                                                         condenserNodeType,
+                                                                         condenserNodeConnectionType_Inlet,
+                                                                         Node::CompFluidStream::Secondary,
+                                                                         Node::ObjectIsNotParent);
+                thisPLHP.sourceSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                          sourceSideOutletNodeName,
+                                                                          nodeErrorsFound,
+                                                                          objType,
+                                                                          thisPLHP.name,
+                                                                          condenserNodeType,
+                                                                          condenserNodeConnectionType_Outlet,
+                                                                          Node::CompFluidStream::Secondary,
+                                                                          Node::ObjectIsNotParent);
 
                 // heat recovery inputs
                 std::string heatRecoveryInletNodeName;
@@ -2175,24 +2190,24 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 }
 
                 if (thisPLHP.airSource && thisPLHP.heatRecoveryAvailable) {
-                    thisPLHP.heatRecoveryNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                           heatRecoveryInletNodeName,
-                                                                                           nodeErrorsFound,
-                                                                                           objType,
-                                                                                           thisPLHP.name,
-                                                                                           DataLoopNode::NodeFluidType::Water,
-                                                                                           DataLoopNode::ConnectionType::Inlet,
-                                                                                           NodeInputManager::CompFluidStream::Tertiary,
-                                                                                           DataLoopNode::ObjectIsNotParent);
-                    thisPLHP.heatRecoveryNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                            heatRecoveryOutletNodeName,
-                                                                                            nodeErrorsFound,
-                                                                                            objType,
-                                                                                            thisPLHP.name,
-                                                                                            DataLoopNode::NodeFluidType::Water,
-                                                                                            DataLoopNode::ConnectionType::Outlet,
-                                                                                            NodeInputManager::CompFluidStream::Tertiary,
-                                                                                            DataLoopNode::ObjectIsNotParent);
+                    thisPLHP.heatRecoveryNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                               heatRecoveryInletNodeName,
+                                                                               nodeErrorsFound,
+                                                                               objType,
+                                                                               thisPLHP.name,
+                                                                               Node::FluidType::Water,
+                                                                               Node::ConnectionType::Inlet,
+                                                                               Node::CompFluidStream::Tertiary,
+                                                                               Node::ObjectIsNotParent);
+                    thisPLHP.heatRecoveryNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                                heatRecoveryOutletNodeName,
+                                                                                nodeErrorsFound,
+                                                                                objType,
+                                                                                thisPLHP.name,
+                                                                                Node::FluidType::Water,
+                                                                                Node::ConnectionType::Outlet,
+                                                                                Node::CompFluidStream::Tertiary,
+                                                                                Node::ObjectIsNotParent);
 
                     thisPLHP.heatRecoveryDesignVolFlowRate =
                         state.dataInputProcessing->inputProcessor->getRealFieldValue(fields, schemaProps, "heat_recovery_reference_flow_rate");
@@ -2215,21 +2230,20 @@ void EIRPlantLoopHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 if (nodeErrorsFound) {
                     errorsFound = true;
                 }
-                BranchNodeConnections::TestCompSet(
-                    state, cCurrentModuleObject, thisPLHP.name, loadSideInletNodeName, loadSideOutletNodeName, classToInput.nodesType);
+                Node::TestCompSet(state, cCurrentModuleObject, thisPLHP.name, loadSideInletNodeName, loadSideOutletNodeName, classToInput.nodesType);
 
                 if (thisPLHP.waterSource) {
-                    BranchNodeConnections::TestCompSet(
+                    Node::TestCompSet(
                         state, cCurrentModuleObject, thisPLHP.name, sourceSideInletNodeName, sourceSideOutletNodeName, "Condenser Water Nodes");
                 }
 
                 if (thisPLHP.airSource && thisPLHP.heatRecoveryAvailable) {
-                    BranchNodeConnections::TestCompSet(state,
-                                                       cCurrentModuleObject,
-                                                       thisPLHP.name,
-                                                       heatRecoveryInletNodeName,
-                                                       heatRecoveryOutletNodeName,
-                                                       "Heat Recovery Water Nodes");
+                    Node::TestCompSet(state,
+                                      cCurrentModuleObject,
+                                      thisPLHP.name,
+                                      heatRecoveryInletNodeName,
+                                      heatRecoveryOutletNodeName,
+                                      "Heat Recovery Water Nodes");
 
                     auto const heatRecoveryCapFTempCurveName = fields.find("heat_recovery_capacity_modifier_function_of_temperature_curve_name");
                     if (heatRecoveryCapFTempCurveName != fields.end()) {
@@ -2324,7 +2338,7 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
     // This function does all the one-time initialization
     constexpr std::string_view routineName = "EIRPlantLoopHeatPump : oneTimeInit"; // + __FUNCTION__;
 
-    if (this->oneTimeInitFlag) {
+    if (this->oneTimeInitFlagPLHP) {
         bool errFlag = false;
         std::string suffix;
         if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
@@ -2335,28 +2349,28 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
 
         // setup output variables
         SetupOutputVariable(state,
-                            format("Heat Pump Part Load Ratio{}", suffix),
+                            std::format("Heat Pump Part Load Ratio{}", suffix),
                             Constant::Units::None,
                             this->partLoadRatio,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Cycling Ratio{}", suffix),
+                            std::format("Heat Pump Cycling Ratio{}", suffix),
                             Constant::Units::None,
                             this->cyclingRatio,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Load Side Heat Transfer Rate{}", suffix),
+                            std::format("Heat Pump Load Side Heat Transfer Rate{}", suffix),
                             Constant::Units::W,
                             this->loadSideHeatTransfer,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Load Side Heat Transfer Energy{}", suffix),
+                            std::format("Heat Pump Load Side Heat Transfer Energy{}", suffix),
                             Constant::Units::J,
                             this->loadSideEnergy,
                             OutputProcessor::TimeStepType::System,
@@ -2365,49 +2379,49 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
                             Constant::eResource::EnergyTransfer,
                             OutputProcessor::Group::Plant);
         SetupOutputVariable(state,
-                            format("Heat Pump Source Side Heat Transfer Rate{}", suffix),
+                            std::format("Heat Pump Source Side Heat Transfer Rate{}", suffix),
                             Constant::Units::W,
                             this->sourceSideHeatTransfer,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Source Side Heat Transfer Energy{}", suffix),
+                            std::format("Heat Pump Source Side Heat Transfer Energy{}", suffix),
                             Constant::Units::J,
                             this->sourceSideEnergy,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Sum,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Load Side Inlet Temperature{}", suffix),
+                            std::format("Heat Pump Load Side Inlet Temperature{}", suffix),
                             Constant::Units::C,
                             this->loadSideInletTemp,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Load Side Outlet Temperature{}", suffix),
+                            std::format("Heat Pump Load Side Outlet Temperature{}", suffix),
                             Constant::Units::C,
                             this->loadSideOutletTemp,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Source Side Inlet Temperature{}", suffix),
+                            std::format("Heat Pump Source Side Inlet Temperature{}", suffix),
                             Constant::Units::C,
                             this->sourceSideInletTemp,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Source Side Outlet Temperature{}", suffix),
+                            std::format("Heat Pump Source Side Outlet Temperature{}", suffix),
                             Constant::Units::C,
                             this->sourceSideOutletTemp,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Electricity Rate{}", suffix),
+                            std::format("Heat Pump Electricity Rate{}", suffix),
                             Constant::Units::W,
                             this->powerUsage,
                             OutputProcessor::TimeStepType::System,
@@ -2416,7 +2430,7 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
         if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRCooling ||
             this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) { // energy from HeatPump:PlantLoop:EIR:Cooling object
             SetupOutputVariable(state,
-                                format("Heat Pump Electricity Energy{}", suffix),
+                                std::format("Heat Pump Electricity Energy{}", suffix),
                                 Constant::Units::J,
                                 this->powerEnergy,
                                 OutputProcessor::TimeStepType::System,
@@ -2436,7 +2450,7 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
         } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpEIRHeating ||
                    this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) { // energy from HeatPump:PlantLoop:EIR:Heating object
             SetupOutputVariable(state,
-                                format("Heat Pump Electricity Energy{}", suffix),
+                                std::format("Heat Pump Electricity Energy{}", suffix),
                                 Constant::Units::J,
                                 this->powerEnergy,
                                 OutputProcessor::TimeStepType::System,
@@ -2482,14 +2496,14 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
             }
         }
         SetupOutputVariable(state,
-                            format("Heat Pump Load Side Mass Flow Rate{}", suffix),
+                            std::format("Heat Pump Load Side Mass Flow Rate{}", suffix),
                             Constant::Units::kg_s,
                             this->loadSideMassFlowRate,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Source Side Mass Flow Rate{}", suffix),
+                            std::format("Heat Pump Source Side Mass Flow Rate{}", suffix),
                             Constant::Units::kg_s,
                             this->sourceSideMassFlowRate,
                             OutputProcessor::TimeStepType::System,
@@ -2558,18 +2572,18 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
 
         if (thisErrFlag) {
             ShowSevereError(state,
-                            format("{}: Plant topology problem for {} name = \"{}\"",
-                                   routineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                   this->name));
+                            std::format("{}: Plant topology problem for {} name = \"{}\"",
+                                        routineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                        this->name));
             ShowContinueError(state, "Could not locate component's load side connections on a plant loop");
             errFlag = true;
         } else if (this->loadSidePlantLoc.loopSideNum != DataPlant::LoopSideLocation::Supply) { // only check if !thisErrFlag
             ShowSevereError(state,
-                            format("{}: Invalid connections for {} name = \"{}\"",
-                                   routineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                   this->name));
+                            std::format("{}: Invalid connections for {} name = \"{}\"",
+                                        routineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                        this->name));
             ShowContinueError(state, "The load side connections are not on the Supply Side of a plant loop");
             errFlag = true;
         }
@@ -2581,18 +2595,18 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
 
             if (thisErrFlag) {
                 ShowSevereError(state,
-                                format("{}: Plant topology problem for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Plant topology problem for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "Could not locate component's source side connections on a plant loop");
                 errFlag = true;
             } else if (this->sourceSidePlantLoc.loopSideNum != DataPlant::LoopSideLocation::Demand) { // only check if !thisErrFlag
                 ShowSevereError(state,
-                                format("{}: Invalid connections for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Invalid connections for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "The source side connections are not on the Demand Side of a plant loop");
                 errFlag = true;
             }
@@ -2600,10 +2614,10 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
             // make sure it is not the same loop on both sides.
             if (this->loadSidePlantLoc.loopNum == this->sourceSidePlantLoc.loopNum) { // user is being too tricky, don't allow
                 ShowSevereError(state,
-                                format("{}: Invalid connections for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Invalid connections for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "The load and source sides need to be on different loops.");
                 errFlag = true;
             } else {
@@ -2618,18 +2632,18 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
 
                 if (thisErrFlag) {
                     ShowSevereError(state,
-                                    format("{}: Plant topology problem for {} name = \"{}\"",
-                                           routineName,
-                                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                           this->name));
+                                    std::format("{}: Plant topology problem for {} name = \"{}\"",
+                                                routineName,
+                                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                this->name));
                     ShowContinueError(state, "Could not locate component's heat recovery side connections on a plant loop.");
                     errFlag = true;
                 } else if (this->heatRecoveryPlantLoc.loopSideNum != DataPlant::LoopSideLocation::Demand) { // only check if !thisErrFlag
                     ShowSevereError(state,
-                                    format("{}: Invalid connections for {} name = \"{}\"",
-                                           routineName,
-                                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                           this->name));
+                                    std::format("{}: Invalid connections for {} name = \"{}\"",
+                                                routineName,
+                                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                this->name));
                     ShowContinueError(state, "The heat recovery side connections are not on the Demand Side of a plant loop.");
                     errFlag = true;
                 }
@@ -2637,10 +2651,10 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
                 // make sure it is not the same loop on both sides.
                 if (this->loadSidePlantLoc.loopNum == this->heatRecoveryPlantLoc.loopNum) { // user is being too tricky, don't allow
                     ShowSevereError(state,
-                                    format("{}: Invalid connections for {} name = \"{}\"",
-                                           routineName,
-                                           DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                           this->name));
+                                    std::format("{}: Invalid connections for {} name = \"{}\"",
+                                                routineName,
+                                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                this->name));
                     ShowContinueError(state, "The load and heat recovery sides need to be on different loops.");
                     errFlag = true;
                 } else {
@@ -2653,15 +2667,15 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
         if (this->sysControlType == ControlType::Setpoint) {
 
             // check if setpoint on outlet node
-            if ((state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPoint == DataLoopNode::SensedNodeFlagValue) &&
-                (state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPointHi == DataLoopNode::SensedNodeFlagValue)) {
+            if ((state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPoint == Node::SensedNodeFlagValue) &&
+                (state.dataLoopNodes->Node(this->loadSideNodes.outlet).TempSetPointHi == Node::SensedNodeFlagValue)) {
                 if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                     if (!this->SetpointSetToLoopErrDone) {
                         ShowWarningError(state,
-                                         format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
-                                                routineName,
-                                                DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                                this->name));
+                                         std::format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
+                                                     routineName,
+                                                     DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                     this->name));
                         ShowContinueError(state, "  A temperature setpoint is needed at the load side outlet node, use a SetpointManager");
                         ShowContinueError(state, "  The overall loop setpoint will be assumed for the Heat Pump. The simulation continues ... ");
                         this->SetpointSetToLoopErrDone = true;
@@ -2674,10 +2688,10 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
                     if (fatalError) {
                         if (!this->SetpointSetToLoopErrDone) {
                             ShowWarningError(state,
-                                             format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
-                                                    routineName,
-                                                    DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                                    this->name));
+                                             std::format("{}: Missing temperature setpoint for Setpoint Controlled {} name = \"{}\"",
+                                                         routineName,
+                                                         DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                         this->name));
                             ShowContinueError(state, "  A temperature setpoint is needed at the load side outlet node when ControlType = Setpoint");
                             ShowContinueError(state, "  use a Setpoint Manager to establish a setpoint at the outlet node ");
                             ShowContinueError(state, "  or use an EMS actuator to establish a setpoint at the outlet node ");
@@ -2695,9 +2709,9 @@ void EIRPlantLoopHeatPump::oneTimeInit(EnergyPlusData &state)
         }
 
         if (errFlag) {
-            ShowFatalError(state, format("{}: Program terminated due to previous condition(s).", routineName));
+            ShowFatalError(state, std::format("{}: Program terminated due to previous condition(s).", routineName));
         }
-        this->oneTimeInitFlag = false;
+        this->oneTimeInitFlagPLHP = false;
     }
 }
 
@@ -2707,26 +2721,23 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
         return;
     }
     EIRPlantLoopHeatPump::oneTimeInit(state);
-    std::string suffix;
     std::string mode_keyword;
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
-        suffix = " in Heating Mode";
         mode_keyword = "Heating";
     } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
-        suffix = " in Cooling Mode";
         mode_keyword = "Cooling";
     }
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating ||
         this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
         SetupOutputVariable(state,
-                            format("Heat Pump Total {} Rate", mode_keyword),
+                            std::format("Heat Pump Total {} Rate", mode_keyword),
                             Constant::Units::W,
                             this->loadSideHeatTransfer,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Number Of {} Unit On", mode_keyword),
+                            std::format("Heat Pump Number Of {} Unit On", mode_keyword),
                             Constant::Units::None,
                             this->operatingMode,
                             OutputProcessor::TimeStepType::System,
@@ -2734,35 +2745,35 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
                             this->name);
         // note this is 1-indexed
         SetupOutputVariable(state,
-                            format("Heat Pump Speed Level in {} Mode", mode_keyword),
+                            std::format("Heat Pump Speed Level in {} Mode", mode_keyword),
                             Constant::Units::None,
                             this->speedLevel,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Speed Ratio in {} Mode", mode_keyword),
+                            std::format("Heat Pump Speed Ratio in {} Mode", mode_keyword),
                             Constant::Units::None,
                             this->speedRatio,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Air Flow Rate in {} Mode", mode_keyword),
+                            std::format("Heat Pump Air Flow Rate in {} Mode", mode_keyword),
                             Constant::Units::m3_s,
                             this->sourceSideMassFlowRate,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Inlet Air Temperature in {} Mode", mode_keyword),
+                            std::format("Heat Pump Inlet Air Temperature in {} Mode", mode_keyword),
                             Constant::Units::C,
                             this->sourceSideInletTemp,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump Outlet Air Temperature in {} Mode", mode_keyword),
+                            std::format("Heat Pump Outlet Air Temperature in {} Mode", mode_keyword),
                             Constant::Units::C,
                             this->sourceSideOutletTemp,
                             OutputProcessor::TimeStepType::System,
@@ -2770,7 +2781,7 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
                             this->name);
         // fixme add these variables and compute their values
         SetupOutputVariable(state,
-                            format("Heat Pump Capacity Temperature Modifier in {} Mode", mode_keyword),
+                            std::format("Heat Pump Capacity Temperature Modifier in {} Mode", mode_keyword),
                             Constant::Units::None,
                             this->capFuncTempCurveValue,
                             OutputProcessor::TimeStepType::System,
@@ -2778,14 +2789,14 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
                             this->name);
         // fixme add these variables and compute their values
         SetupOutputVariable(state,
-                            format("Heat Pump EIR Temperature Modifier in {} Mode", mode_keyword),
+                            std::format("Heat Pump EIR Temperature Modifier in {} Mode", mode_keyword),
                             Constant::Units::None,
                             this->eirFuncTempCurveValue,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            format("Heat Pump EIR PLR Modifier in {} Mode", mode_keyword),
+                            std::format("Heat Pump EIR PLR Modifier in {} Mode", mode_keyword),
                             Constant::Units::None,
                             this->eirFuncPLRModifierValue,
                             OutputProcessor::TimeStepType::System,
@@ -2812,7 +2823,7 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
                             OutputProcessor::Group::HVAC,
                             OutputProcessor::EndUseCat::Cooling);
         SetupOutputVariable(state,
-                            format("Heat Pump {} COP", mode_keyword),
+                            std::format("Heat Pump {} COP", mode_keyword),
                             Constant::Units::None,
                             this->heatingCOP,
                             OutputProcessor::TimeStepType::System,
@@ -2820,7 +2831,7 @@ void HeatPumpAirToWater::oneTimeInit(EnergyPlusData &state)
                             this->name);
     } else if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterCooling) {
         SetupOutputVariable(state,
-                            format("Heat Pump {} COP", mode_keyword),
+                            std::format("Heat Pump {} COP", mode_keyword),
                             Constant::Units::None,
                             this->coolingCOP,
                             OutputProcessor::TimeStepType::System,
@@ -2834,6 +2845,10 @@ void HeatPumpAirToWater::sizeLoadSide(EnergyPlusData &state)
 {
     EIRPlantLoopHeatPump::sizeLoadSide(state);
     this->referenceCapacityOneUnit = this->referenceCapacity / this->heatPumpMultiplier;
+    if (this->referenceCapacityWasAutoSized) {
+        // only the highest speed can be autosized, keep it in sync with the sized value
+        this->ratedCapacity[this->numSpeeds - 1] = this->referenceCapacityOneUnit;
+    }
 }
 
 bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
@@ -2856,13 +2871,17 @@ bool EIRPlantLoopHeatPump::thermosiphonDisabled(EnergyPlusData &state)
     return true;
 }
 
-Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRPlantLoopHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     Real64 sourceInletTemp = state.dataLoopNodes->Node(this->sourceSideNodes.inlet).Temp;
     Real64 loadSideOutletSetpointTemp = this->getLoadSideOutletSetPointTemp(state);
     // evaluate capacity modifier curve and determine load side heat transfer
-    Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->capFuncTempCurveIndex, loadSideOutletSetpointTemp, sourceInletTemp);
-    return this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    Real64 capacityModifierFuncTemp =
+        (this->capFuncTempCurveIndex > 0) ? Curve::CurveValue(state, this->capFuncTempCurveIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp * heatingCapacityModifierASHP(state);
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void EIRPlantLoopHeatPump::report(EnergyPlusData &state)
@@ -2918,7 +2937,7 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
     // get setpoint on the load side outlet
     // Real64 loadSideOutletSetpointTemp = this->getLoadSideOutletSetPointTemp(state);
 
-    // Use a logic similar to that for a boilder: If the specified load is 0.0 or the boiler should not run
+    // Use a logic similar to that for a boiler: If the specified load is 0.0 or the boiler should not run
     // then we leave this subroutine. Before leaving
     // if the component control is SERIESACTIVE we set the component flow to inlet flow so that flow resolver
     // will not shut down the branch
@@ -2959,36 +2978,37 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
     if (capacityModifierFuncTemp < 0.0) {
         if (this->capModFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(
+                state, std::format(" Capacity Modifier curve (function of Temperatures) output is negative ({:.3f}).", capacityModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Capacity Modifier curve (function of Temperatures) output is negative ({:.3T}).", capacityModifierFuncTemp));
-            ShowContinueError(state,
-                              format(" Negative value occurs using a water temperature of {:.2T}C and an outdoor air temperature of {:.2T}C.",
-                                     waterTempforCurve,
-                                     oaTempforCurve));
+                              std::format(" Negative value occurs using a water temperature of {:.2f}C and an outdoor air temperature of {:.2f}C.",
+                                          waterTempforCurve,
+                                          oaTempforCurve));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
-        ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
-                                       this->capModFTErrorIndex,
-                                       capacityModifierFuncTemp,
-                                       capacityModifierFuncTemp);
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::format("{} \"{}\": Capacity Modifier curve (function of Temperatures) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
+            this->capModFTErrorIndex,
+            capacityModifierFuncTemp,
+            capacityModifierFuncTemp);
         capacityModifierFuncTemp = 0.0;
     }
 
     Real64 availableCapacity = this->referenceCapacity * capacityModifierFuncTemp;
-    Real64 partLoadRatio = 0.0;
+    Real64 localPartLoadRatio = 0.0;
     if (availableCapacity > 0) {
-        partLoadRatio = std::clamp(
+        localPartLoadRatio = std::clamp(
             std::abs(FFHPloadSideLoad) / availableCapacity, 0.0, 1.0); // max(0.0, min(std::abs(FFHPloadSideLoad) / availableCapacity, 1.0));
     }
 
     // evaluate the actual current operating load side heat transfer rate
 
-    // this->loadSideHeatTransfer = availableCapacity * partLoadRatio;
-    this->loadSideHeatTransfer = availableCapacity * partLoadRatio; // (partLoadRatio >= this->minPLR ? partLoadRatio : 0.0);
+    // this->loadSideHeatTransfer = availableCapacity * localPartLoadRatio;
+    this->loadSideHeatTransfer = availableCapacity * localPartLoadRatio; // (localPartLoadRatio >= this->minimumPLR ? localPartLoadRatio : 0.0);
 
     // calculate load side outlet conditions
     Real64 const loadMCp = this->loadSideMassFlowRate * CpLoad;
@@ -3003,26 +3023,26 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
     if (eirModifierFuncTemp < 0.0) {
         if (this->eirModFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
-            ShowContinueError(state, format(" EIR Modifier curve (function of Temperatures) output is negative ({:.3T}).", eirModifierFuncTemp));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(state, std::format(" EIR Modifier curve (function of Temperatures) output is negative ({:.3f}).", eirModifierFuncTemp));
             ShowContinueError(state,
-                              format(" Negative value occurs using a water temperature of {:.2T}C and an outdoor air temperature of {:.2T}C.",
-                                     waterTempforCurve,
-                                     oaTempforCurve));
+                              std::format(" Negative value occurs using a water temperature of {:.2f}C and an outdoor air temperature of {:.2f}C.",
+                                          waterTempforCurve,
+                                          oaTempforCurve));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": EIR Modifier curve (function of Temperatures) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
+                                       std::format("{} \"{}\": EIR Modifier curve (function of Temperatures) output is negative warning continues...",
+                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                   this->name),
                                        this->eirModFTErrorIndex,
                                        eirModifierFuncTemp,
                                        eirModifierFuncTemp);
         eirModifierFuncTemp = 0.0;
     }
 
-    Real64 miniPLR_mod = this->minPLR;
-    Real64 PLFf = max(miniPLR_mod, partLoadRatio);
+    Real64 miniPLR_mod = this->minimumPLR;
+    Real64 PLFf = max(miniPLR_mod, localPartLoadRatio);
 
     Real64 eirModifierFuncPLR = Curve::CurveValue(state, this->powerRatioFuncPLRCurveIndex, PLFf);
     // this->powerUsage = (this->loadSideHeatTransfer / this->referenceCOP) * eirModifierFuncPLR * eirModifierFuncTemp;
@@ -3030,15 +3050,15 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
     if (eirModifierFuncPLR < 0.0) {
         if (this->eirModFPLRErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
-            ShowContinueError(state, format(" EIR Modifier curve (function of PLR) output is negative ({:.3T}).", eirModifierFuncPLR));
-            ShowContinueError(state, format(" Negative value occurs using a Part Load Ratio of {:.2T}", PLFf));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(state, std::format(" EIR Modifier curve (function of PLR) output is negative ({:.3f}).", eirModifierFuncPLR));
+            ShowContinueError(state, std::format(" Negative value occurs using a Part Load Ratio of {:.2f}", PLFf));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": EIR Modifier curve (function of PLR) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
+                                       std::format("{} \"{}\": EIR Modifier curve (function of PLR) output is negative warning continues...",
+                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                   this->name),
                                        this->eirModFPLRErrorIndex,
                                        eirModifierFuncPLR,
                                        eirModifierFuncPLR);
@@ -3058,16 +3078,16 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
         if (eirDefrost < 1.0) {
             if (this->eirDefrostFTErrorIndex == 0) {
-                ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+                ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
                 ShowContinueError(state,
-                                  format(" EIR defrost Modifier curve (function of Temperature) output is less than 1.0 ({:.3T}).", eirDefrost));
-                ShowContinueError(state, format(" Negative value occurs using an outdoor air temperature of {:.2T}", oaTemp2));
+                                  std::format(" EIR defrost Modifier curve (function of Temperature) output is less than 1.0 ({:.3f}).", eirDefrost));
+                ShowContinueError(state, std::format(" Negative value occurs using an outdoor air temperature of {:.2f}", oaTemp2));
                 ShowContinueErrorTimeStamp(state, " Resetting curve output to 1.0 and continuing simulation.");
             }
             ShowRecurringWarningErrorAtEnd(state,
-                                           format("{} \"{}\": EIR Modifier curve (function of PLR) output out of range warning continues...",
-                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                                  this->name),
+                                           std::format("{} \"{}\": EIR Modifier curve (function of PLR) output out of range warning continues...",
+                                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                                       this->name),
                                            this->eirDefrostFTErrorIndex,
                                            eirDefrost,
                                            eirDefrost);
@@ -3080,8 +3100,8 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
     constexpr Real64 CRF_Slope =
         0.4167; // default curve coefficients from "Pathways to Decarbonization of Residential Heating", Fridlyand et al. (2021)
     constexpr Real64 CRF_Intercept = 0.5833;
-    if (partLoadRatio < this->minimumUnloadingRatio) {
-        Real64 CR = std::clamp(partLoadRatio / this->minimumUnloadingRatio, 0.0, 1.0);
+    if (localPartLoadRatio < this->minimumUnloadingRatio) {
+        Real64 CR = std::clamp(localPartLoadRatio / this->minimumUnloadingRatio, 0.0, 1.0);
         if (this->cycRatioCurveIndex > 0) {
             CRF = Curve::CurveValue(state, this->cycRatioCurveIndex, CR);
         } else {
@@ -3101,20 +3121,20 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
     if (eirAuxElecFuncTemp < 0.0) {
         if (this->eirAuxElecFTErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(
+                state, std::format(" Auxiliary EIR Modifier curve (function of Temperatures) output is negative ({:.3f}).", eirAuxElecFuncTemp));
             ShowContinueError(state,
-                              format(" Auxiliary EIR Modifier curve (function of Temperatures) output is negative ({:.3T}).", eirAuxElecFuncTemp));
-            ShowContinueError(state,
-                              format(" Negative value occurs using a water temperature of {:.2T}C and an outdoor air temperature of {:.2T}C.",
-                                     waterTempforCurve,
-                                     oaTempforCurve));
+                              std::format(" Negative value occurs using a water temperature of {:.2f}C and an outdoor air temperature of {:.2f}C.",
+                                          waterTempforCurve,
+                                          oaTempforCurve));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
         ShowRecurringWarningErrorAtEnd(
             state,
-            format("{} \"{}\": Auxiliary EIR Modifier curve (function of Temperatures) output is negative warning continues...",
-                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                   this->name),
+            std::format("{} \"{}\": Auxiliary EIR Modifier curve (function of Temperatures) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
             this->eirAuxElecFTErrorIndex,
             eirAuxElecFuncTemp,
             eirAuxElecFuncTemp);
@@ -3123,24 +3143,25 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
 
     Real64 eirAuxElecFuncPLR = 0.0;
     if (this->auxElecEIRFoPLRCurveIndex > 0) {
-        eirAuxElecFuncPLR = Curve::CurveValue(state, this->auxElecEIRFoPLRCurveIndex, partLoadRatio);
+        eirAuxElecFuncPLR = Curve::CurveValue(state, this->auxElecEIRFoPLRCurveIndex, localPartLoadRatio);
     }
 
     if (eirAuxElecFuncPLR < 0.0) {
         if (this->eirAuxElecFPLRErrorIndex == 0) {
-            ShowSevereMessage(state, format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
-            ShowContinueError(state,
-                              format(" Auxiliary EIR Modifier curve (function of Temperatures) output is negative ({:.3T}).", eirAuxElecFuncPLR));
-            ShowContinueError(state, format(" Negative value occurs using a Part Load Ratio of {:.2T}.", partLoadRatio));
+            ShowSevereMessage(state, std::format("{} \"{}\":", DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)], this->name));
+            ShowContinueError(
+                state, std::format(" Auxiliary EIR Modifier curve (function of Temperatures) output is negative ({:.3f}).", eirAuxElecFuncPLR));
+            ShowContinueError(state, std::format(" Negative value occurs using a Part Load Ratio of {:.2f}.", localPartLoadRatio));
             ShowContinueErrorTimeStamp(state, " Resetting curve output to zero and continuing simulation.");
         }
-        ShowRecurringWarningErrorAtEnd(state,
-                                       format("{} \"{}\": Auxiliary EIR Modifier curve (function of PLR) output is negative warning continues...",
-                                              DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                              this->name),
-                                       this->eirAuxElecFPLRErrorIndex,
-                                       eirAuxElecFuncPLR,
-                                       eirAuxElecFuncPLR);
+        ShowRecurringWarningErrorAtEnd(
+            state,
+            std::format("{} \"{}\": Auxiliary EIR Modifier curve (function of PLR) output is negative warning continues...",
+                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                        this->name),
+            this->eirAuxElecFPLRErrorIndex,
+            eirAuxElecFuncPLR,
+            eirAuxElecFuncPLR);
         eirAuxElecFuncPLR = 0.0;
     }
 
@@ -3160,8 +3181,7 @@ void EIRFuelFiredHeatPump::doPhysics(EnergyPlusData &state, Real64 currentLoad)
     // calculate source side outlet conditions
     Real64 CpSrc = 0.0;
     if (this->waterSource) {
-        auto &thisSourcePlantLoop = state.dataPlnt->PlantLoop(this->sourceSidePlantLoc.loopNum);
-        CpSrc = thisSourcePlantLoop.glycol->getSpecificHeat(state, this->sourceSideInletTemp, "PLFFHPEIR::simulate()");
+        CpSrc = this->sourceSidePlantLoc.loop->glycol->getSpecificHeat(state, this->sourceSideInletTemp, "PLFFHPEIR::simulate()");
     } else if (this->airSource) {
         CpSrc = Psychrometrics::PsyCpAirFnW(state.dataEnvrn->OutHumRat);
     }
@@ -3217,9 +3237,9 @@ void EIRFuelFiredHeatPump::sizeSrcSideASHP(EnergyPlusData &state)
         // fatal out just in case
         errorsFound = true; // LCOV_EXCL_LINE
         ShowSevereError(state,
-                        format("Invalid condenser flow rate for EIR PLHP (name={}; entered value: {}",
-                               this->name,
-                               this->sourceSideDesignVolFlowRate)); // LCOV_EXCL_LINE
+                        std::format("Invalid condenser flow rate for EIR PLHP (name={}; entered value: {}",
+                                    this->name,
+                                    this->sourceSideDesignVolFlowRate)); // LCOV_EXCL_LINE
     } else {
         // can't imagine how it would ever get to this point
         // just assume it's the same as the load side if we don't have any sizing information
@@ -3271,8 +3291,7 @@ PlantComponent *EIRFuelFiredHeatPump::factory(EnergyPlusData &state, DataPlant::
         }
     }
 
-    ShowFatalError(state, format("EIR Fuel-Fired Heat Pump factory: Error getting inputs for PLFFHP named: {}.", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("EIR Fuel-Fired Heat Pump factory: Error getting inputs for PLFFHP named: {}.", hp_name));
 }
 
 PlantComponent *HeatPumpAirToWater::factory(
@@ -3297,8 +3316,7 @@ PlantComponent *HeatPumpAirToWater::factory(
         }
     }
 
-    ShowFatalError(state, format("Air To Water Heat Pump factory: Error getting inputs for AWHP named: {}.", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("Air To Water Heat Pump factory: Error getting inputs for AWHP named: {}.", hp_name));
 }
 
 void EIRFuelFiredHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
@@ -3317,8 +3335,8 @@ void EIRFuelFiredHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
                 }
                 if (potentialCompanionName == targetCompanionName) {
                     if (thisCoilType == potentialCompanionType) {
-                        ShowSevereError(state,
-                                        format("Invalid companion specification for EIR Plant Loop Fuel-Fired Heat Pump named \"{}\"", thisCoilName));
+                        ShowSevereError(
+                            state, std::format("Invalid companion specification for EIR Plant Loop Fuel-Fired Heat Pump named \"{}\"", thisCoilName));
                         ShowContinueError(state, "For heating objects, the companion must be a cooling object, and vice-versa");
                         ShowFatalError(state, "Invalid companion object causes program termination");
                     }
@@ -3328,8 +3346,8 @@ void EIRFuelFiredHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
             }
             if (thisHP.companionHeatPumpCoil == nullptr) {
                 ShowSevereError(state, "Could not find matching companion heat pump coil.");
-                ShowContinueError(state, format("Base coil: {}", thisCoilName));
-                ShowContinueError(state, format("Looking for companion coil named: {}", targetCompanionName));
+                ShowContinueError(state, std::format("Base coil: {}", thisCoilName));
+                ShowContinueError(state, std::format("Looking for companion coil named: {}", targetCompanionName));
                 ShowFatalError(state, "Simulation aborts due to previous severe error");
             }
         }
@@ -3347,7 +3365,7 @@ void HeatPumpAirToWater::pairUpCompanionCoils(EnergyPlusData &state)
             std::string potentialCompanionName = Util::makeUPPER(potentialCompanionCoil.name);
             if (potentialCompanionName == targetCompanionName) {
                 if (thisCoilType != potentialCompanionType) {
-                    thisHP.companionHeatPumpCoil = &potentialCompanionCoil;
+                    thisHP.companionAWHPCoil = &potentialCompanionCoil;
                     break;
                 }
             }
@@ -3391,8 +3409,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
     bool errorsFound = false;
     for (auto &classToInput : classesToInput) {
         auto cCurrentModuleObject = static_cast<std::string>(DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)]);
-        DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-            getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
+        Node::ConnectionObjectType objType =
+            static_cast<Node::ConnectionObjectType>(getEnumValue(Node::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObject)));
 
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(cCurrentModuleObject);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
@@ -3426,7 +3444,7 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
             // A4
             std::string sourceSideInletNodeName = Util::makeUPPER(fields.at("air_source_node_name").get<std::string>());
             // Util::makeUPPER(fields.at("source_side_outlet_node_name").get<std::string>());
-            std::string sourceSideOutletNodeName = format("{}_SOURCE_SIDE_OUTLET_NODE", thisPLHP.name);
+            std::string sourceSideOutletNodeName = std::format("{}_SOURCE_SIDE_OUTLET_NODE", thisPLHP.name);
 
             // A5
             auto compCoilFound = fields.find(companionCoilFieldTag);
@@ -3440,8 +3458,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
             // Validate fuel type input
             static constexpr std::string_view RoutineName("processInputForEIRPLHP: ");
             if (thisPLHP.fuelType == Constant::eFuel::Invalid) {
-                ShowSevereError(state, format("{}{}=\"{}\",", RoutineName, cCurrentModuleObject, thisPLHP.name));
-                ShowContinueError(state, format("Invalid Fuel Type = {}", tempRsrStr));
+                ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, cCurrentModuleObject, thisPLHP.name));
+                ShowContinueError(state, std::format("Invalid Fuel Type = {}", tempRsrStr));
                 ShowContinueError(state, "Reset the Fuel Type to \"NaturalGas\".");
                 thisPLHP.fuelType = Constant::eFuel::NaturalGas;
                 errorsFound = true;
@@ -3523,7 +3541,7 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
 
             thisPLHP.capFuncTempCurveIndex = Curve::GetCurveIndex(state, capFtName);
             if (thisPLHP.capFuncTempCurveIndex == 0) {
-                ShowSevereError(state, format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, capFtName));
+                ShowSevereError(state, std::format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, capFtName));
                 errorsFound = true;
             }
 
@@ -3532,31 +3550,33 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 Util::makeUPPER(fields.at("fuel_energy_input_ratio_function_of_temperature_curve_name").get<std::string>());
             thisPLHP.powerRatioFuncTempCurveIndex = Curve::GetCurveIndex(state, eirFtName);
             if (thisPLHP.capFuncTempCurveIndex == 0) {
-                ShowSevereError(state, format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, eirFtName));
+                ShowSevereError(state, std::format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, eirFtName));
                 errorsFound = true;
             }
             // A13 fuel_energy_input_ratio_function_of_plr_curve_name
             std::string const &eirFplrName = Util::makeUPPER(fields.at("fuel_energy_input_ratio_function_of_plr_curve_name").get<std::string>());
             thisPLHP.powerRatioFuncPLRCurveIndex = Curve::GetCurveIndex(state, eirFplrName);
             if (thisPLHP.capFuncTempCurveIndex == 0) {
-                ShowSevereError(state, format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, eirFplrName));
+                ShowSevereError(state, std::format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {}", thisPLHP.name, eirFplrName));
                 errorsFound = true;
             }
 
             // N7 min PLR
-            auto minPLRFound = fields.find("minimum_part_load_ratio");
-            if (minPLRFound != fields.end()) {
-                thisPLHP.minPLR = minPLRFound.value().get<Real64>();
+            auto minimumPLRFound = fields.find("minimum_part_load_ratio");
+            if (minimumPLRFound != fields.end()) {
+                thisPLHP.minimumPLR = minimumPLRFound.value().get<Real64>();
             } else {
-                state.dataInputProcessing->inputProcessor->getDefaultValue(state, cCurrentModuleObject, "minimum_part_load_ratio", thisPLHP.minPLR);
+                state.dataInputProcessing->inputProcessor->getDefaultValue(
+                    state, cCurrentModuleObject, "minimum_part_load_ratio", thisPLHP.minimumPLR);
             }
 
             // N8 max PLR
             auto maxPLRFound = fields.find("maximum_part_load_ratio");
             if (maxPLRFound != fields.end()) {
-                thisPLHP.maxPLR = maxPLRFound.value().get<Real64>();
+                thisPLHP.maximumPLR = maxPLRFound.value().get<Real64>();
             } else {
-                state.dataInputProcessing->inputProcessor->getDefaultValue(state, cCurrentModuleObject, "maximum_part_load_ratio", thisPLHP.maxPLR);
+                state.dataInputProcessing->inputProcessor->getDefaultValue(
+                    state, cCurrentModuleObject, "maximum_part_load_ratio", thisPLHP.maximumPLR);
             }
 
             // A14 fuel_energy_input_ratio_defrost_adjustment_curve_name
@@ -3569,7 +3589,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                     thisPLHP.defrostEIRCurveIndex = Curve::GetCurveIndex(state, eirDefrostCurveName);
                     if (thisPLHP.defrostEIRCurveIndex == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, eirDefrostCurveName));
+                            state,
+                            std::format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, eirDefrostCurveName));
                         errorsFound = true;
                     }
                 } else {
@@ -3586,9 +3607,10 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 if (thisPLHP.defrostType == DefrostType::Invalid) {
                     thisPLHP.defrostType = DefrostType::OnDemand; // set to default
                     thisPLHP.defrostOpTimeFrac = 0.0;
-                    ShowWarningError(state, format("Invalid Defrost Control Type for EIR PLFFHP ({} name={})", cCurrentModuleObject, thisPLHP.name));
+                    ShowWarningError(state,
+                                     std::format("Invalid Defrost Control Type for EIR PLFFHP ({} name={})", cCurrentModuleObject, thisPLHP.name));
                     ShowContinueError(state,
-                                      format("The Input Variable is reset to: {}", DefrostTypeNamesUC[static_cast<int>(thisPLHP.defrostType)]));
+                                      std::format("The Input Variable is reset to: {}", DefrostTypeNamesUC[static_cast<int>(thisPLHP.defrostType)]));
                 }
             }
 
@@ -3637,8 +3659,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 std::string const cycRatioCurveName = Util::makeUPPER(crfCurveFound.value().get<std::string>());
                 thisPLHP.cycRatioCurveIndex = Curve::GetCurveIndex(state, cycRatioCurveName);
                 if (thisPLHP.cycRatioCurveIndex == 0) {
-                    ShowSevereError(state,
-                                    format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {})", thisPLHP.name, cycRatioCurveName));
+                    ShowSevereError(
+                        state, std::format("Invalid curve name for EIR PLFFHP (name={}; entered curve name: {})", thisPLHP.name, cycRatioCurveName));
                     errorsFound = true;
                 }
             } else {
@@ -3659,7 +3681,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 std::string const &auxEIRFTName = Util::makeUPPER(auxElecEIRFTCurveFound.value().get<std::string>());
                 thisPLHP.auxElecEIRFoTempCurveIndex = Curve::GetCurveIndex(state, auxEIRFTName);
                 if (thisPLHP.auxElecEIRFoTempCurveIndex == 0) {
-                    ShowSevereError(state, format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, auxEIRFTName));
+                    ShowSevereError(state,
+                                    std::format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, auxEIRFTName));
                     errorsFound = true;
                 }
             } else {
@@ -3672,7 +3695,8 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 std::string const &auxEIRFPLRName = Util::makeUPPER(auxElecEIRFPLRCurveFound.value().get<std::string>());
                 thisPLHP.auxElecEIRFoPLRCurveIndex = Curve::GetCurveIndex(state, auxEIRFPLRName);
                 if (thisPLHP.auxElecEIRFoPLRCurveIndex == 0) {
-                    ShowSevereError(state, format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, auxEIRFPLRName));
+                    ShowSevereError(state,
+                                    std::format("Invalid curve name for EIR FFHP (name={}; entered curve name: {}", thisPLHP.name, auxEIRFPLRName));
                     errorsFound = true;
                 }
             } else {
@@ -3696,57 +3720,56 @@ void EIRFuelFiredHeatPump::processInputForEIRPLHP(EnergyPlusData &state)
                 state.dataInputProcessing->inputProcessor->getDefaultValue(
                     state, cCurrentModuleObject, "minimum_unloading_ratio", thisPLHP.minimumUnloadingRatio);
             }
-            if (thisPLHP.minimumUnloadingRatio < thisPLHP.minPLR) {
+            if (thisPLHP.minimumUnloadingRatio < thisPLHP.minimumPLR) {
                 ShowSevereError(state, "EIR FFHP: the minimum unloading ratio cannot be lower than the minimum part load ratio.");
                 errorsFound = true;
             }
 
             bool nodeErrorsFound = false;
-            thisPLHP.loadSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                               loadSideInletNodeName,
-                                                                               nodeErrorsFound,
-                                                                               objType,
-                                                                               thisPLHP.name,
-                                                                               DataLoopNode::NodeFluidType::Water,
-                                                                               DataLoopNode::ConnectionType::Inlet,
-                                                                               NodeInputManager::CompFluidStream::Primary,
-                                                                               DataLoopNode::ObjectIsNotParent);
-            thisPLHP.loadSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                loadSideOutletNodeName,
-                                                                                nodeErrorsFound,
-                                                                                objType,
-                                                                                thisPLHP.name,
-                                                                                DataLoopNode::NodeFluidType::Water,
-                                                                                DataLoopNode::ConnectionType::Outlet,
-                                                                                NodeInputManager::CompFluidStream::Primary,
-                                                                                DataLoopNode::ObjectIsNotParent);
+            thisPLHP.loadSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                   loadSideInletNodeName,
+                                                                   nodeErrorsFound,
+                                                                   objType,
+                                                                   thisPLHP.name,
+                                                                   Node::FluidType::Water,
+                                                                   Node::ConnectionType::Inlet,
+                                                                   Node::CompFluidStream::Primary,
+                                                                   Node::ObjectIsNotParent);
+            thisPLHP.loadSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                    loadSideOutletNodeName,
+                                                                    nodeErrorsFound,
+                                                                    objType,
+                                                                    thisPLHP.name,
+                                                                    Node::FluidType::Water,
+                                                                    Node::ConnectionType::Outlet,
+                                                                    Node::CompFluidStream::Primary,
+                                                                    Node::ObjectIsNotParent);
 
             thisPLHP.airSource = true;    // this is always true, at least for now, for Fuel-Fired PlantLoop Heat Pump
             thisPLHP.waterSource = false; // this is always false, at least for now, for Fuel-Fired PlantLoop Heat Pump
-            thisPLHP.sourceSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                 sourceSideInletNodeName,
-                                                                                 nodeErrorsFound,
-                                                                                 objType,
-                                                                                 thisPLHP.name,
-                                                                                 DataLoopNode::NodeFluidType::Air,
-                                                                                 DataLoopNode::ConnectionType::OutsideAir,
-                                                                                 NodeInputManager::CompFluidStream::Secondary,
-                                                                                 DataLoopNode::ObjectIsNotParent);
-            thisPLHP.sourceSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                  sourceSideOutletNodeName,
-                                                                                  nodeErrorsFound,
-                                                                                  objType,
-                                                                                  thisPLHP.name,
-                                                                                  DataLoopNode::NodeFluidType::Air,
-                                                                                  DataLoopNode::ConnectionType::OutsideAir,
-                                                                                  NodeInputManager::CompFluidStream::Secondary,
-                                                                                  DataLoopNode::ObjectIsNotParent);
+            thisPLHP.sourceSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                     sourceSideInletNodeName,
+                                                                     nodeErrorsFound,
+                                                                     objType,
+                                                                     thisPLHP.name,
+                                                                     Node::FluidType::Air,
+                                                                     Node::ConnectionType::OutsideAir,
+                                                                     Node::CompFluidStream::Secondary,
+                                                                     Node::ObjectIsNotParent);
+            thisPLHP.sourceSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                      sourceSideOutletNodeName,
+                                                                      nodeErrorsFound,
+                                                                      objType,
+                                                                      thisPLHP.name,
+                                                                      Node::FluidType::Air,
+                                                                      Node::ConnectionType::OutsideAir,
+                                                                      Node::CompFluidStream::Secondary,
+                                                                      Node::ObjectIsNotParent);
 
             if (nodeErrorsFound) {
                 errorsFound = true;
             }
-            BranchNodeConnections::TestCompSet(
-                state, cCurrentModuleObject, thisPLHP.name, loadSideInletNodeName, loadSideOutletNodeName, classToInput.nodesType);
+            Node::TestCompSet(state, cCurrentModuleObject, thisPLHP.name, loadSideInletNodeName, loadSideOutletNodeName, classToInput.nodesType);
 
             // store the worker functions that generalized the heating/cooling sides
             thisPLHP.calcLoadOutletTemp = classToInput.calcLoadOutletTemp;
@@ -3816,8 +3839,8 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
             state.dataInputProcessing->inputProcessor->markObjectAsUsed(cCurrentModuleObject, thisObjectName);
             for (auto &classToInput : classesToInput) {
                 cCurrentModuleObjectSingleMode = DataPlant::PlantEquipTypeNames[static_cast<int>(classToInput.thisType)];
-                DataLoopNode::ConnectionObjectType objType = static_cast<DataLoopNode::ConnectionObjectType>(
-                    getEnumValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObjectSingleMode)));
+                Node::ConnectionObjectType objType = static_cast<Node::ConnectionObjectType>(
+                    getEnumValue(Node::ConnectionObjectTypeNamesUC, Util::makeUPPER(cCurrentModuleObjectSingleMode)));
 
                 // read shared fields
                 HeatPumpAirToWater thisAWHP;
@@ -3890,22 +3913,23 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                     modeKeyWord = "cooling";
                 }
                 // if there's no inlet node for the corresponding component, don't create this object
-                if (fields.find(format("{}_water_inlet_node_name", waterNodePrefix)) == fields.end()) {
+                if (fields.find(std::format("{}_water_inlet_node_name", waterNodePrefix)) == fields.end()) {
                     continue;
                 }
-                auto availSchedFound = fields.find(format("availability_schedule_name_{}", modeKeyWord));
+                auto availSchedFound = fields.find(std::format("availability_schedule_name_{}", modeKeyWord));
                 if (availSchedFound == fields.end()) {
                     thisAWHP.availSchedName = "";
                     thisAWHP.availSched = Sched::GetScheduleAlwaysOn(state);
                 } else {
-                    thisAWHP.availSchedName = Util::makeUPPER(fields.at(format("availability_schedule_name_{}", modeKeyWord)).get<std::string>());
+                    thisAWHP.availSchedName =
+                        Util::makeUPPER(fields.at(std::format("availability_schedule_name_{}", modeKeyWord)).get<std::string>());
                     if ((thisAWHP.availSched = Sched::GetSchedule(state, thisAWHP.availSchedName)) == nullptr) {
-                        ShowSevereItemNotFound(state, eoh, format("availability_schedule_name_{}", modeKeyWord), thisAWHP.availSchedName);
+                        ShowSevereItemNotFound(state, eoh, std::format("availability_schedule_name_{}", modeKeyWord), thisAWHP.availSchedName);
                         errorsFound = true;
                     }
                 }
 
-                auto boosterOnFound = fields.find(format("booster_mode_on_{}", modeKeyWord));
+                auto boosterOnFound = fields.find(std::format("booster_mode_on_{}", modeKeyWord));
                 thisAWHP.boosterOn = false;
                 if (boosterOnFound != fields.end()) {
                     auto boosterOnStr = boosterOnFound.value().get<std::string>();
@@ -3914,80 +3938,80 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                     }
                 }
 
-                auto const boosterMultCap = fields.find(format("booster_mode_{}_capacity_multiplier", modeKeyWord));
+                auto const boosterMultCap = fields.find(std::format("booster_mode_{}_capacity_multiplier", modeKeyWord));
                 if (boosterMultCap != fields.end()) {
                     thisAWHP.boosterMultCap = boosterMultCap.value().get<Real64>();
                 } else {
                     thisAWHP.boosterMultCap = 1.0;
                 }
-                auto const boosterMultCOP = fields.find(format("booster_mode_{}_cop_multiplier", modeKeyWord));
+                auto const boosterMultCOP = fields.find(std::format("booster_mode_{}_cop_multiplier", modeKeyWord));
                 if (boosterMultCOP != fields.end()) {
                     thisAWHP.boosterMultCOP = boosterMultCOP.value().get<Real64>();
                 } else {
                     thisAWHP.boosterMultCOP = 1.0;
                 }
-                auto sourceSideDesignInletTemp = fields.find(format("rated_inlet_air_temperature_in_{}_mode", modeKeyWord));
+                auto sourceSideDesignInletTemp = fields.find(std::format("rated_inlet_air_temperature_in_{}_mode", modeKeyWord));
                 if (sourceSideDesignInletTemp != fields.end()) {
                     thisAWHP.sourceSideDesignInletTemp = sourceSideDesignInletTemp.value().get<Real64>();
                 } else {
                     thisAWHP.sourceSideDesignInletTemp = 8.0;
                 }
                 thisAWHP.sourceSideDesignVolFlowRate = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                    fields, schemaProps, format("rated_air_flow_rate_in_{}_mode", modeKeyWord));
+                    fields, schemaProps, std::format("rated_air_flow_rate_in_{}_mode", modeKeyWord));
                 if (thisAWHP.sourceSideDesignVolFlowRate == DataSizing::AutoSize) {
                     thisAWHP.sourceSideDesignVolFlowRateWasAutoSized = true;
                 }
-                auto ratedLeavingWaterTemperature = fields.find(format("rated_leaving_water_temperature_in_{}_mode", modeKeyWord));
+                auto ratedLeavingWaterTemperature = fields.find(std::format("rated_leaving_water_temperature_in_{}_mode", modeKeyWord));
                 if (ratedLeavingWaterTemperature != fields.end()) {
                     thisAWHP.ratedLeavingWaterTemperature = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("rated_leaving_water_temperature_in_{}_mode", modeKeyWord));
+                        fields, schemaProps, std::format("rated_leaving_water_temperature_in_{}_mode", modeKeyWord));
                 } else {
                     thisAWHP.ratedLeavingWaterTemperature = 40.0;
                 }
                 thisAWHP.loadSideDesignVolFlowRate = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                    fields, schemaProps, format("rated_water_flow_rate_in_{}_mode", modeKeyWord));
+                    fields, schemaProps, std::format("rated_water_flow_rate_in_{}_mode", modeKeyWord));
                 if (thisAWHP.loadSideDesignVolFlowRate == DataSizing::AutoSize) {
                     thisAWHP.loadSideDesignVolFlowRateWasAutoSized = true;
                 }
-                auto minSourceTempLimit = fields.find(format("minimum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
+                auto minSourceTempLimit = fields.find(std::format("minimum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
                 if (minSourceTempLimit == fields.end()) {
                     thisAWHP.minSourceTempLimit = -30.0; // default value
                 } else {
                     thisAWHP.minSourceTempLimit = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("minimum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
+                        fields, schemaProps, std::format("minimum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
                 }
-                auto maxSourceTempLimit = fields.find(format("maximum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
+                auto maxSourceTempLimit = fields.find(std::format("maximum_outdoor_air_temperature_in_{}_mode", modeKeyWord));
                 if (maxSourceTempLimit != fields.end()) {
                     thisAWHP.maxSourceTempLimit = maxSourceTempLimit.value().get<Real64>();
                 } else {
                     thisAWHP.maxSourceTempLimit = 100.0; // default value
                 }
-                auto minLeavingWaterTempCurveName = fields.find(format("minimum_leaving_water_temperature_curve_name_in_{}_mode", modeKeyWord));
+                auto minLeavingWaterTempCurveName = fields.find(std::format("minimum_leaving_water_temperature_curve_name_in_{}_mode", modeKeyWord));
                 if (minLeavingWaterTempCurveName != fields.end()) {
                     thisAWHP.minSupplyWaterTempCurveIndex =
                         Curve::GetCurveIndex(state, Util::makeUPPER(minLeavingWaterTempCurveName.value().get<std::string>()));
                     if (thisAWHP.minSupplyWaterTempCurveIndex == 0) {
                         ShowSevereError(state,
-                                        format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {})",
-                                               thisAWHP.name,
-                                               minLeavingWaterTempCurveName.value().get<std::string>()));
+                                        std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {})",
+                                                    thisAWHP.name,
+                                                    minLeavingWaterTempCurveName.value().get<std::string>()));
                         errorsFound = true;
                     }
                 }
-                auto maxLeavingWaterTempCurveName = fields.find(format("maximum_leaving_water_temperature_curve_name_in_{}_mode", modeKeyWord));
+                auto maxLeavingWaterTempCurveName = fields.find(std::format("maximum_leaving_water_temperature_curve_name_in_{}_mode", modeKeyWord));
                 if (maxLeavingWaterTempCurveName != fields.end()) {
                     thisAWHP.maxSupplyWaterTempCurveIndex =
                         Curve::GetCurveIndex(state, Util::makeUPPER(maxLeavingWaterTempCurveName.value().get<std::string>()));
                     if (thisAWHP.maxSupplyWaterTempCurveIndex == 0) {
                         ShowSevereError(state,
-                                        format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {})",
-                                               thisAWHP.name,
-                                               maxLeavingWaterTempCurveName.value().get<std::string>()));
+                                        std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {})",
+                                                    thisAWHP.name,
+                                                    maxLeavingWaterTempCurveName.value().get<std::string>()));
                         errorsFound = true;
                     }
                 }
-                thisAWHP.sizingFactor =
-                    state.dataInputProcessing->inputProcessor->getRealFieldValue(fields, schemaProps, format("sizing_factor_for_{}", modeKeyWord));
+                thisAWHP.sizingFactor = state.dataInputProcessing->inputProcessor->getRealFieldValue(
+                    fields, schemaProps, std::format("sizing_factor_for_{}", modeKeyWord));
                 std::string sourceSideInletNodeName = Util::makeUPPER(fields.at("air_inlet_node_name").get<std::string>());
                 std::string sourceSideOutletNodeName = Util::makeUPPER(fields.at("air_outlet_node_name").get<std::string>());
 
@@ -4063,180 +4087,186 @@ void HeatPumpAirToWater::processInputForEIRPLHP(EnergyPlusData &state)
                 }
 
                 std::string loadSideInletNodeName =
-                    Util::makeUPPER(fields.at(format("{}_water_inlet_node_name", waterNodePrefix)).get<std::string>());
+                    Util::makeUPPER(fields.at(std::format("{}_water_inlet_node_name", waterNodePrefix)).get<std::string>());
                 std::string loadSideOutletNodeName =
-                    Util::makeUPPER(fields.at(format("{}_water_outlet_node_name", waterNodePrefix)).get<std::string>());
+                    Util::makeUPPER(fields.at(std::format("{}_water_outlet_node_name", waterNodePrefix)).get<std::string>());
 
                 bool nodeErrorsFound = false;
-                thisAWHP.loadSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                   loadSideInletNodeName,
-                                                                                   nodeErrorsFound,
-                                                                                   objType,
-                                                                                   thisAWHP.name,
-                                                                                   DataLoopNode::NodeFluidType::Water,
-                                                                                   DataLoopNode::ConnectionType::Inlet,
-                                                                                   NodeInputManager::CompFluidStream::Primary,
-                                                                                   DataLoopNode::ObjectIsNotParent);
-                thisAWHP.loadSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                    loadSideOutletNodeName,
-                                                                                    nodeErrorsFound,
-                                                                                    objType,
-                                                                                    thisAWHP.name,
-                                                                                    DataLoopNode::NodeFluidType::Water,
-                                                                                    DataLoopNode::ConnectionType::Outlet,
-                                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                                    DataLoopNode::ObjectIsNotParent);
-                thisAWHP.sourceSideNodes.inlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                     sourceSideInletNodeName,
-                                                                                     nodeErrorsFound,
-                                                                                     objType,
-                                                                                     thisAWHP.name,
-                                                                                     DataLoopNode::NodeFluidType::Air,
-                                                                                     DataLoopNode::ConnectionType::OutsideAir,
-                                                                                     NodeInputManager::CompFluidStream::Secondary,
-                                                                                     DataLoopNode::ObjectIsNotParent);
-                thisAWHP.sourceSideNodes.outlet = NodeInputManager::GetOnlySingleNode(state,
-                                                                                      sourceSideOutletNodeName,
-                                                                                      nodeErrorsFound,
-                                                                                      objType,
-                                                                                      thisAWHP.name,
-                                                                                      DataLoopNode::NodeFluidType::Air,
-                                                                                      DataLoopNode::ConnectionType::OutsideAir,
-                                                                                      NodeInputManager::CompFluidStream::Secondary,
-                                                                                      DataLoopNode::ObjectIsNotParent);
+                thisAWHP.loadSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                       loadSideInletNodeName,
+                                                                       nodeErrorsFound,
+                                                                       objType,
+                                                                       thisAWHP.name,
+                                                                       Node::FluidType::Water,
+                                                                       Node::ConnectionType::Inlet,
+                                                                       Node::CompFluidStream::Primary,
+                                                                       Node::ObjectIsNotParent);
+                thisAWHP.loadSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                        loadSideOutletNodeName,
+                                                                        nodeErrorsFound,
+                                                                        objType,
+                                                                        thisAWHP.name,
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Outlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
+                thisAWHP.sourceSideNodes.inlet = Node::GetOnlySingleNode(state,
+                                                                         sourceSideInletNodeName,
+                                                                         nodeErrorsFound,
+                                                                         objType,
+                                                                         thisAWHP.name,
+                                                                         Node::FluidType::Air,
+                                                                         Node::ConnectionType::OutsideAir,
+                                                                         Node::CompFluidStream::Secondary,
+                                                                         Node::ObjectIsNotParent);
+                thisAWHP.sourceSideNodes.outlet = Node::GetOnlySingleNode(state,
+                                                                          sourceSideOutletNodeName,
+                                                                          nodeErrorsFound,
+                                                                          objType,
+                                                                          thisAWHP.name,
+                                                                          Node::FluidType::Air,
+                                                                          Node::ConnectionType::OutsideAir,
+                                                                          Node::CompFluidStream::Secondary,
+                                                                          Node::ObjectIsNotParent);
 
                 if (nodeErrorsFound) {
                     errorsFound = true;
                 }
-                BranchNodeConnections::TestCompSet(state,
-                                                   Util::makeUPPER(cCurrentModuleObject),
-                                                   thisAWHP.name,
-                                                   loadSideInletNodeName,
-                                                   loadSideOutletNodeName,
-                                                   classToInput.nodesType);
+                Node::TestCompSet(state,
+                                  Util::makeUPPER(cCurrentModuleObject),
+                                  thisAWHP.name,
+                                  loadSideInletNodeName,
+                                  loadSideOutletNodeName,
+                                  classToInput.nodesType);
 
                 // store the worker functions that generalized the heating/cooling sides
                 thisAWHP.calcLoadOutletTemp = classToInput.calcLoadOutletTemp;
                 thisAWHP.calcQsource = classToInput.calcQsource;
                 thisAWHP.calcSourceOutletTemp = classToInput.calcSourceOutletTemp;
 
-                thisAWHP.numSpeeds =
-                    state.dataInputProcessing->inputProcessor->getRealFieldValue(fields, schemaProps, format("number_of_speeds_for_{}", modeKeyWord));
+                thisAWHP.numSpeeds = state.dataInputProcessing->inputProcessor->getRealFieldValue(
+                    fields, schemaProps, std::format("number_of_speeds_for_{}", modeKeyWord));
 
                 for (int i = 0; i < thisAWHP.numSpeeds; i++) {
-                    auto capFtFieldName = format("normalized_{}_capacity_function_of_temperature_curve_name_at_speed_{}", modeKeyWord, i + 1);
+                    auto capFtFieldName = std::format("normalized_{}_capacity_function_of_temperature_curve_name_at_speed_{}", modeKeyWord, i + 1);
                     if (fields.find(capFtFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               i + 1,
-                                               thisAWHP.name,
-                                               capFtFieldName));
+                                        std::format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    i + 1,
+                                                    thisAWHP.name,
+                                                    capFtFieldName));
                         errorsFound = true;
                     }
                     std::string const capFtName = Util::makeUPPER(fields.at(capFtFieldName).get<std::string>());
                     thisAWHP.ratedCapacity[i] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1));
-                    if (i != thisAWHP.numSpeeds - 1 && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
+                        fields, schemaProps, std::format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1));
+                    if ((i != thisAWHP.numSpeeds - 1 || thisAWHP.boosterOn) && thisAWHP.ratedCapacity[i] == DataSizing::AutoSize) {
                         ShowSevereError(state,
-                                        format("cannot autosize capacity below maximum speed (name={}, field={})",
-                                               thisAWHP.name,
-                                               format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1)));
+                                        std::format("cannot autosize capacity below maximum speed (name={}, field={})",
+                                                    thisAWHP.name,
+                                                    std::format("rated_{}_capacity_at_speed_{}", modeKeyWord, i + 1)));
                         errorsFound = true;
                     }
                     thisAWHP.ratedCOP[i] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("rated_cop_for_{}_at_speed_{}", modeKeyWord, i + 1));
-                    thisAWHP.capFuncTempCurveIndex[i] = Curve::GetCurveIndex(state, capFtName);
-                    if (thisAWHP.capFuncTempCurveIndex[i] == 0) {
+                        fields, schemaProps, std::format("rated_cop_for_{}_at_speed_{}", modeKeyWord, i + 1));
+                    thisAWHP.capFuncTempCurveIndices[i] = Curve::GetCurveIndex(state, capFtName);
+                    if (thisAWHP.capFuncTempCurveIndices[i] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, capFtName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, capFtName));
                         errorsFound = true;
                     }
-                    auto eirFtFieldName = format("{}_energy_input_ratio_function_of_temperature_curve_name_at_speed_{}", modeKeyWord, i + 1);
+                    auto eirFtFieldName = std::format("{}_energy_input_ratio_function_of_temperature_curve_name_at_speed_{}", modeKeyWord, i + 1);
                     if (fields.find(eirFtFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               i + 1,
-                                               thisAWHP.name,
-                                               eirFtFieldName));
+                                        std::format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    i + 1,
+                                                    thisAWHP.name,
+                                                    eirFtFieldName));
                         errorsFound = true;
                     }
 
                     std::string const eirFtName = Util::makeUPPER(fields.at(eirFtFieldName).get<std::string>());
-                    thisAWHP.powerRatioFuncTempCurveIndex[i] = Curve::GetCurveIndex(state, eirFtName);
-                    if (thisAWHP.powerRatioFuncTempCurveIndex[i] == 0) {
+                    thisAWHP.powerRatioFuncTempCurveIndices[i] = Curve::GetCurveIndex(state, eirFtName);
+                    if (thisAWHP.powerRatioFuncTempCurveIndices[i] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFtName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFtName));
                         errorsFound = true;
                     }
-                    auto eirFplrFieldName = format("{}_energy_input_ratio_function_of_plr_curve_name_at_speed_{}", modeKeyWord, i + 1);
+                    auto eirFplrFieldName = std::format("{}_energy_input_ratio_function_of_plr_curve_name_at_speed_{}", modeKeyWord, i + 1);
                     if (fields.find(eirFplrFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               i + 1,
-                                               thisAWHP.name,
-                                               eirFplrFieldName));
+                                        std::format("curve missing for speed {} of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    i + 1,
+                                                    thisAWHP.name,
+                                                    eirFplrFieldName));
                         errorsFound = true;
                     }
                     std::string const eirFplrName = Util::makeUPPER(fields.at(eirFplrFieldName).get<std::string>());
-                    thisAWHP.powerRatioFuncPLRCurveIndex[i] = Curve::GetCurveIndex(state, eirFplrName);
-                    if (thisAWHP.powerRatioFuncPLRCurveIndex[i] == 0) {
+                    thisAWHP.powerRatioFuncPLRCurveIndices[i] = Curve::GetCurveIndex(state, eirFplrName);
+                    if (thisAWHP.powerRatioFuncPLRCurveIndices[i] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFplrName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFplrName));
                         errorsFound = true;
                     }
                 }
                 if (thisAWHP.boosterOn) {
                     thisAWHP.numSpeeds += 1;
 
-                    auto capFtFieldName = format("normalized_{}_capacity_function_of_temperature_curve_name_in_booster_mode", modeKeyWord);
+                    auto capFtFieldName = std::format("normalized_{}_capacity_function_of_temperature_curve_name_in_booster_mode", modeKeyWord);
                     if (fields.find(capFtFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               thisAWHP.name,
-                                               capFtFieldName));
+                                        std::format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    thisAWHP.name,
+                                                    capFtFieldName));
                         errorsFound = true;
                     }
                     std::string const capFtName = Util::makeUPPER(fields.at(capFtFieldName).get<std::string>());
                     int speedLevelBooster = thisAWHP.numSpeeds - 1;
                     thisAWHP.ratedCapacity[speedLevelBooster] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("rated_{}_capacity_in_booster_mode", modeKeyWord));
+                        fields, schemaProps, std::format("rated_{}_capacity_in_booster_mode", modeKeyWord));
                     thisAWHP.ratedCOP[speedLevelBooster] = state.dataInputProcessing->inputProcessor->getRealFieldValue(
-                        fields, schemaProps, format("rated_{}_cop_in_booster_mode", modeKeyWord));
-                    thisAWHP.capFuncTempCurveIndex[speedLevelBooster] = Curve::GetCurveIndex(state, capFtName);
-                    if (thisAWHP.capFuncTempCurveIndex[speedLevelBooster] == 0) {
+                        fields, schemaProps, std::format("rated_{}_cop_in_booster_mode", modeKeyWord));
+                    thisAWHP.capFuncTempCurveIndices[speedLevelBooster] = Curve::GetCurveIndex(state, capFtName);
+                    if (thisAWHP.capFuncTempCurveIndices[speedLevelBooster] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, capFtName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, capFtName));
                         errorsFound = true;
                     }
-                    auto eirFtFieldName = format("{}_energy_input_ratio_function_of_temperature_curve_name_in_booster_mode", modeKeyWord);
+                    auto eirFtFieldName = std::format("{}_energy_input_ratio_function_of_temperature_curve_name_in_booster_mode", modeKeyWord);
                     if (fields.find(eirFtFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               thisAWHP.name,
-                                               eirFtFieldName));
+                                        std::format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    thisAWHP.name,
+                                                    eirFtFieldName));
                         errorsFound = true;
                     }
 
                     std::string const eirFtName = Util::makeUPPER(fields.at(eirFtFieldName).get<std::string>());
-                    thisAWHP.powerRatioFuncTempCurveIndex[speedLevelBooster] = Curve::GetCurveIndex(state, eirFtName);
-                    if (thisAWHP.powerRatioFuncTempCurveIndex[speedLevelBooster] == 0) {
+                    thisAWHP.powerRatioFuncTempCurveIndices[speedLevelBooster] = Curve::GetCurveIndex(state, eirFtName);
+                    if (thisAWHP.powerRatioFuncTempCurveIndices[speedLevelBooster] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFtName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFtName));
                         errorsFound = true;
                     }
-                    auto eirFplrFieldName = format("{}_energy_input_ratio_function_of_plr_curve_name_in_booster_mode", modeKeyWord);
+                    auto eirFplrFieldName = std::format("{}_energy_input_ratio_function_of_plr_curve_name_in_booster_mode", modeKeyWord);
                     if (fields.find(eirFplrFieldName) == fields.end()) {
                         ShowSevereError(state,
-                                        format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
-                                               thisAWHP.name,
-                                               eirFplrFieldName));
+                                        std::format("curve missing for booster mode of HeatPump:AirToWater (name={}; curve field name: {}",
+                                                    thisAWHP.name,
+                                                    eirFplrFieldName));
                         errorsFound = true;
                     }
                     std::string const eirFplrName = Util::makeUPPER(fields.at(eirFplrFieldName).get<std::string>());
-                    thisAWHP.powerRatioFuncPLRCurveIndex[speedLevelBooster] = Curve::GetCurveIndex(state, eirFplrName);
-                    if (thisAWHP.powerRatioFuncPLRCurveIndex[speedLevelBooster] == 0) {
+                    thisAWHP.powerRatioFuncPLRCurveIndices[speedLevelBooster] = Curve::GetCurveIndex(state, eirFplrName);
+                    if (thisAWHP.powerRatioFuncPLRCurveIndices[speedLevelBooster] == 0) {
                         ShowSevereError(
-                            state, format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFplrName));
+                            state,
+                            std::format("Invalid curve name for HeatPump:AirToWater (name={}; entered curve name: {}", thisAWHP.name, eirFplrName));
                         errorsFound = true;
                     }
                 }
@@ -4261,11 +4291,8 @@ void EIRPlantLoopHeatPump::setUpEMS(EnergyPlusData &)
 
 void HeatPumpAirToWater::setUpEMS(EnergyPlusData &state)
 {
-
-    std::string mode_keyword;
     if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
         // defrost related actuators
-        mode_keyword = "Heating";
         SetupEMSActuator(
             state, "HeatPump:AirToWater", this->name, "Defrost Flag", "[]", this->DefrosstFlagEMSOverrideOn, this->DefrosstFlagEMSOverrideValue);
         SetupEMSActuator(state,
@@ -4282,8 +4309,6 @@ void HeatPumpAirToWater::setUpEMS(EnergyPlusData &state)
                          "[C]",
                          this->LeavingTempEMSOverrideOn,
                          this->LeavingTempEMSOverrideValue);
-    } else {
-        mode_keyword = "Cooling";
     }
     SetupEMSActuator(
         state, "HeatPump:AirToWater", this->name, "Operating Mode", "[ ]", this->OperationModeEMSOverrideOn, this->OperationModeEMSOverrideValue);
@@ -4294,7 +4319,7 @@ void EIRFuelFiredHeatPump::oneTimeInit(EnergyPlusData &state)
     // This function does all the one-time initialization
     constexpr std::string_view routineName = "EIRFuelFiredHeatPump : oneTimeInit"; // + __FUNCTION__;
 
-    if (this->oneTimeInitFlag) {
+    if (this->oneTimeInitFlagPLHP) {
         bool errFlag = false;
 
         // setup output variables
@@ -4421,18 +4446,18 @@ void EIRFuelFiredHeatPump::oneTimeInit(EnergyPlusData &state)
 
         if (thisErrFlag) {
             ShowSevereError(state,
-                            format("{}: Plant topology problem for {} name = \"{}\"",
-                                   routineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                   this->name));
+                            std::format("{}: Plant topology problem for {} name = \"{}\"",
+                                        routineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                        this->name));
             ShowContinueError(state, "Could not locate component's load side connections on a plant loop");
             errFlag = true;
         } else if (this->loadSidePlantLoc.loopSideNum != DataPlant::LoopSideLocation::Supply) { // only check if !thisErrFlag
             ShowSevereError(state,
-                            format("{}: Invalid connections for {} name = \"{}\"",
-                                   routineName,
-                                   DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                   this->name));
+                            std::format("{}: Invalid connections for {} name = \"{}\"",
+                                        routineName,
+                                        DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                        this->name));
             ShowContinueError(state, "The load side connections are not on the Supply Side of a plant loop");
             errFlag = true;
         }
@@ -4444,18 +4469,18 @@ void EIRFuelFiredHeatPump::oneTimeInit(EnergyPlusData &state)
 
             if (thisErrFlag) {
                 ShowSevereError(state,
-                                format("{}: Plant topology problem for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Plant topology problem for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "Could not locate component's source side connections on a plant loop.");
                 errFlag = true;
             } else if (this->sourceSidePlantLoc.loopSideNum != DataPlant::LoopSideLocation::Demand) { // only check if !thisErrFlag
                 ShowSevereError(state,
-                                format("{}: Invalid connections for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Invalid connections for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "The source side connections are not on the Demand Side of a plant loop.");
                 errFlag = true;
             }
@@ -4463,10 +4488,10 @@ void EIRFuelFiredHeatPump::oneTimeInit(EnergyPlusData &state)
             // make sure it is not the same loop on both sides.
             if (this->loadSidePlantLoc.loopNum == this->sourceSidePlantLoc.loopNum) { // user is being too tricky, don't allow
                 ShowSevereError(state,
-                                format("{}: Invalid connections for {} name = \"{}\"",
-                                       routineName,
-                                       DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
-                                       this->name));
+                                std::format("{}: Invalid connections for {} name = \"{}\"",
+                                            routineName,
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(this->EIRHPType)],
+                                            this->name));
                 ShowContinueError(state, "The load and source sides need to be on different loops.");
                 errFlag = true;
             } else {
@@ -4478,9 +4503,9 @@ void EIRFuelFiredHeatPump::oneTimeInit(EnergyPlusData &state)
         }
 
         if (errFlag) {
-            ShowFatalError(state, format("{}: Program terminated due to previous condition(s).", routineName));
+            ShowFatalError(state, std::format("{}: Program terminated due to previous condition(s).", routineName));
         }
-        this->oneTimeInitFlag = false;
+        this->oneTimeInitFlagPLHP = false;
     }
 }
 
@@ -4499,7 +4524,7 @@ void EIRFuelFiredHeatPump::report(EnergyPlusData &state)
     state.dataLoopNodes->Node(this->sourceSideNodes.outlet).Temp = this->sourceSideOutletTemp;
 }
 
-Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
+Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad)
 {
     // Source (air) side temperature variable
     auto &thisSourceSideInletNode = state.dataLoopNodes->Node(this->sourceSideNodes.inlet);
@@ -4513,7 +4538,7 @@ Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
     Real64 waterTempforCurve = state.dataLoopNodes->Node(this->loadSideNodes.inlet).Temp;
     if (this->waterTempCurveInputVar == WaterTempCurveVar::LeavingCondenser || this->waterTempCurveInputVar == WaterTempCurveVar::LeavingEvaporator) {
         if (this->flowMode == DataPlant::FlowMode::LeavingSetpointModulated) {
-            auto &thisLoadSideOutletNode = state.dataLoopNodes->Node(this->loadSideNodes.outlet);
+            const auto &thisLoadSideOutletNode = state.dataLoopNodes->Node(this->loadSideNodes.outlet);
             if (this->loadSidePlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
                 waterTempforCurve = thisLoadSideOutletNode.TempSetPoint;
             } else {
@@ -4531,15 +4556,18 @@ Real64 EIRFuelFiredHeatPump::getDynamicMaxCapacity(EnergyPlusData &state)
 
     // evaluate capacity modifier curve and determine load side heat transfer
     Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->capFuncTempCurveIndex, waterTempforCurve, oaTempforCurve);
-    return this->referenceCapacity * capacityModifierFuncTemp;
+    Real64 maxLoad = this->referenceCapacity * capacityModifierFuncTemp;
+    minLoad = maxLoad * this->minimumPLR;
+    optLoad = maxLoad;
+    return maxLoad;
 }
 
 void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 currentLoad, OperatingModeControlOptionMultipleUnit modeCalcMethod)
 {
-    if (this->companionHeatPumpCoil == nullptr) {
+    if (this->companionAWHPCoil == nullptr) {
         this->operatingMode = 1;
         if (this->OperationModeEMSOverrideOn) {
-            auto curveIndex = this->capFuncTempCurveIndex[this->numSpeeds - 1];
+            auto curveIndex = this->capFuncTempCurveIndices[this->numSpeeds - 1];
             auto capacityModifierFuncTemp = Curve::CurveValue(state, curveIndex, this->loadSideOutletTemp, this->sourceSideInletTemp);
             auto availableCapacityOneUnit = this->referenceCapacityOneUnit * capacityModifierFuncTemp;
             this->operatingMode = ceil(fabs(currentLoad) / availableCapacityOneUnit);
@@ -4550,44 +4578,47 @@ void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 cu
             }
         }
     } else {
-        auto LoopNum = this->companionHeatPumpCoil->loadSidePlantLoc.loopNum;
-        auto LoopSideNum = this->companionHeatPumpCoil->loadSidePlantLoc.loopSideNum;
-        auto BranchNum = this->companionHeatPumpCoil->loadSidePlantLoc.branchNum;
-        auto CompNum = this->companionHeatPumpCoil->loadSidePlantLoc.compNum;
+        auto &companionCoil = *this->companionAWHPCoil;
+
+        auto LoopNum = companionCoil.loadSidePlantLoc.loopNum;
+        auto LoopSideNum = companionCoil.loadSidePlantLoc.loopSideNum;
+        auto BranchNum = companionCoil.loadSidePlantLoc.branchNum;
+        auto CompNum = companionCoil.loadSidePlantLoc.compNum;
         auto &this_loop(state.dataPlnt->PlantLoop(LoopNum));
         auto &this_loop_side(this_loop.LoopSide(LoopSideNum));
         auto &this_component = this_loop_side.Branch(BranchNum).Comp(CompNum);
         auto companionLoad = this_component.MyLoad;
-        auto curveIndex = this->capFuncTempCurveIndex[this->numSpeeds - 1];
+        auto curveIndex = this->capFuncTempCurveIndices[this->numSpeeds - 1];
         auto capacityModifierFuncTemp = Curve::CurveValue(state, curveIndex, this->loadSideOutletTemp, this->sourceSideInletTemp);
         auto availableCapacityOneUnit = this->referenceCapacityOneUnit * capacityModifierFuncTemp;
-        auto &companionCoil = this->companionHeatPumpCoil;
+
+        auto companionCurveIndex = companionCoil.capFuncTempCurveIndices[companionCoil.numSpeeds - 1];
         auto companionCapacityModifierFuncTemp =
-            Curve::CurveValue(state, curveIndex, companionCoil->loadSideOutletTemp, companionCoil->sourceSideInletTemp);
-        auto companionAvailableCapacityOneUnit = companionCoil->referenceCapacityOneUnit * companionCapacityModifierFuncTemp;
+            Curve::CurveValue(state, companionCurveIndex, companionCoil.loadSideOutletTemp, companionCoil.sourceSideInletTemp);
+        auto companionAvailableCapacityOneUnit = companionCoil.referenceCapacityOneUnit * companionCapacityModifierFuncTemp;
         if (this->OperationModeEMSOverrideOn) {
             if (this->OperationModeEMSOverrideValue > 0) {
                 this->operatingMode = min(this->heatPumpMultiplier, this->OperationModeEMSOverrideValue);
-                this->companionHeatPumpCoil->operatingMode = 0;
+                companionCoil.operatingMode = 0;
             }
         } else if (this->operatingModeControlMethod == OperatingModeControlMethod::ScheduledModes) {
             auto numUnitsOn = static_cast<int>(this->operationModeControlSche->getCurrentVal());
             if (numUnitsOn > 0) {
                 this->operatingMode = min(this->heatPumpMultiplier, numUnitsOn);
-                this->companionHeatPumpCoil->operatingMode = 0;
+                companionCoil.operatingMode = 0;
             } else {
                 this->operatingMode = 0;
-                this->companionHeatPumpCoil->operatingMode = min(this->companionHeatPumpCoil->heatPumpMultiplier, -numUnitsOn);
+                companionCoil.operatingMode = min(companionCoil.heatPumpMultiplier, -numUnitsOn);
             }
         } else {
             if (modeCalcMethod == OperatingModeControlOptionMultipleUnit::SingleMode) {
                 // all HP unit either all in heating or all in cooling mode
                 if (fabs(currentLoad) < fabs(companionLoad)) {
                     this->operatingMode = 0;
-                    this->companionHeatPumpCoil->operatingMode = ceil(fabs(companionLoad) / companionAvailableCapacityOneUnit);
+                    companionCoil.operatingMode = ceil(fabs(companionLoad) / companionAvailableCapacityOneUnit);
                 } else {
                     this->operatingMode = ceil(fabs(currentLoad) / availableCapacityOneUnit);
-                    this->companionHeatPumpCoil->operatingMode = 0;
+                    companionCoil.operatingMode = 0;
                 }
             } else {
                 Real64 coolingLoad = 0.0;
@@ -4609,8 +4640,8 @@ void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 cu
                 }
                 int numCoolingUnit = 0;
                 int numHeatingUnit = 0;
-                int numCoolingUnitNeeded = 0;
-                int numHeatingUnitNeeded = 0;
+                int numCoolingUnitNeeded;
+                int numHeatingUnitNeeded;
                 if (modeCalcMethod == OperatingModeControlOptionMultipleUnit::CoolingPriority) {
                     // prioritize satisfy cooling need
                     numCoolingUnit = int(ceil(coolingLoad / coolCapacity));
@@ -4687,20 +4718,20 @@ void HeatPumpAirToWater::calcOpMode(EnergyPlus::EnergyPlusData &state, Real64 cu
                 }
                 if (this->EIRHPType == DataPlant::PlantEquipmentType::HeatPumpAirToWaterHeating) {
                     this->operatingMode = numHeatingUnit;
-                    this->companionHeatPumpCoil->operatingMode = numCoolingUnit;
+                    companionCoil.operatingMode = numCoolingUnit;
                 } else {
                     this->operatingMode = numCoolingUnit;
-                    this->companionHeatPumpCoil->operatingMode = numHeatingUnit;
+                    companionCoil.operatingMode = numHeatingUnit;
                 }
             }
             this->operatingMode = min(this->heatPumpMultiplier, this->operatingMode);
-            companionCoil->operatingMode = min(companionCoil->heatPumpMultiplier, companionCoil->operatingMode);
-            if (this->companionHeatPumpCoil->operatingMode == 0) {
-                this->companionHeatPumpCoil->loadSideHeatTransfer = 0.0;
-                this->companionHeatPumpCoil->sourceSideHeatTransfer = 0.0;
-                this->companionHeatPumpCoil->loadSideMassFlowRate = 0.0;
-                this->companionHeatPumpCoil->sourceSideMassFlowRate = 0.0;
-                this->companionHeatPumpCoil->speedLevel = 0.0;
+            companionCoil.operatingMode = min(companionCoil.heatPumpMultiplier, companionCoil.operatingMode);
+            if (companionCoil.operatingMode == 0) {
+                companionCoil.loadSideHeatTransfer = 0.0;
+                companionCoil.sourceSideHeatTransfer = 0.0;
+                companionCoil.loadSideMassFlowRate = 0.0;
+                companionCoil.sourceSideMassFlowRate = 0.0;
+                companionCoil.speedLevel = 0.0;
             }
         }
     }
@@ -4724,10 +4755,10 @@ void HeatPumpAirToWater::doPhysics(EnergyPlusData &state, Real64 currentLoad)
         this->resetReportingVariables();
         return;
     }
-    Real64 partLoadRatio = 0.0;
+    Real64 localPartLoadRatio = 0.0;
 
     Real64 availableCapacity;
-    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndex[this->numSpeeds - 1], availableCapacity, partLoadRatio);
+    this->calcAvailableCapacity(state, currentLoad, this->capFuncTempCurveIndices[this->numSpeeds - 1], availableCapacity, localPartLoadRatio);
     if (this->waterTempExceeded) { // turn off the equipment if water temp exceeded operation limits
         this->loadSideMassFlowRate = 0.0;
         this->sourceSideMassFlowRate = 0.0;
@@ -4736,7 +4767,7 @@ void HeatPumpAirToWater::doPhysics(EnergyPlusData &state, Real64 currentLoad)
         return;
     }
     Real64 availableCapacityBeforeMultiplier = availableCapacity / this->heatPumpMultiplier;
-    this->setPartLoadAndCyclingRatio(state, partLoadRatio);
+    this->setPartLoadAndCyclingRatio(state, localPartLoadRatio);
 
     // evaluate the actual current operating load side heat transfer rate
     this->calcLoadSideHeatTransfer(state, availableCapacity, currentLoad);

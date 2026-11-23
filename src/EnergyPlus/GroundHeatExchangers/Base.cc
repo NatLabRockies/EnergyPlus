@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,6 +45,11 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <algorithm>
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataSystemVariables.hh>
@@ -146,13 +151,15 @@ void GLHEBase::calcGroundHeatExchanger(EnergyPlusData &state)
 
     // Store currentSimTime in prevTimeSteps only if a time step occurs
     if (this->prevTimeSteps(1) != this->currentSimTime) {
-        this->prevTimeSteps = eoshift(this->prevTimeSteps, -1, this->currentSimTime);
+        std::shift_right(this->prevTimeSteps.begin(), this->prevTimeSteps.end(), 1);
+        this->prevTimeSteps(1) = this->currentSimTime;
         ++this->N;
     }
 
     if (this->N != PrevN) {
         PrevN = this->N;
-        this->QnSubHr = eoshift(this->QnSubHr, -1, this->lastQnSubHr);
+        std::shift_right(this->QnSubHr.begin(), this->QnSubHr.end(), 1);
+        this->QnSubHr(1) = this->lastQnSubHr;
     }
 
     calcAggregateLoad(state);
@@ -363,10 +370,11 @@ void GLHEBase::updateGHX(EnergyPlusData &state)
         Real64 fluidDensity = state.dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getDensity(state, this->inletTemp, RoutineName);
         this->designMassFlow = this->designFlow * fluidDensity;
         ShowWarningError(state, "Check GLHE design inputs & g-functions for consistency");
-        ShowContinueError(state, format("For GroundHeatExchanger: {}GLHE delta Temp > 100C.", this->name));
+        ShowContinueError(state, std::format("For GroundHeatExchanger: {}GLHE delta Temp > 100C.", this->name));
         ShowContinueError(state, "This can be encountered in cases where the GLHE mass flow rate is either significantly");
         ShowContinueError(state, " lower than the design value, or cases where the mass flow rate rapidly changes.");
-        ShowContinueError(state, format("GLHE Current Flow Rate={:.3T}; GLHE Design Flow Rate={:.3T}", this->massFlowRate, this->designMassFlow));
+        ShowContinueError(state,
+                          std::format("GLHE Current Flow Rate={:.3f}; GLHE Design Flow Rate={:.3f}", this->massFlowRate, this->designMassFlow));
         ++this->numErrorCalls;
     }
 }
@@ -413,8 +421,10 @@ void GLHEBase::calcAggregateLoad([[maybe_unused]] const EnergyPlusData &state)
         } else {
             SumQnHr /= 0.05; // estimated small timestep
         }
-        this->QnHr = eoshift(this->QnHr, -1, SumQnHr);
-        this->LastHourN = eoshift(this->LastHourN, -1, this->N);
+        std::shift_right(this->QnHr.begin(), this->QnHr.end(), 1);
+        this->QnHr(1) = SumQnHr;
+        std::shift_right(this->LastHourN.begin(), this->LastHourN.end(), 1);
+        this->LastHourN(1) = this->N;
     }
 
     // CHECK IF A MONTH PASSES...
@@ -479,7 +489,7 @@ GLHEBase *GLHEBase::factory(EnergyPlusData &state, DataPlant::PlantEquipmentType
     }
 
     // If we didn't find it, fatal
-    ShowFatalError(state, format("Ground Heat Exchanger Factory: Error getting inputs for GHX named: {}", objectName));
+    ShowFatalError(state, std::format("Ground Heat Exchanger Factory: Error getting inputs for GHX named: {}", objectName));
 }
 
 void GLHEBase::setupOutput(EnergyPlusData &state)
@@ -541,22 +551,25 @@ Real64 GLHEBase::interpGFunc(Real64 const x_val) const
 
     auto const &x = this->myRespFactors->LNTTS;
     auto const &y = this->myRespFactors->GFNC;
-    auto const &upper_it = std::upper_bound(x.begin(), x.end(), x_val);
+    // Using raw pointers to avoid too much overhead due to safe iterators in Debug mode (`_GLIBCXX_DEBUG`)
+    auto const *x_begin = x.data();
+    auto const *x_end = x_begin + x.size();
+    auto const *upper_it = std::upper_bound(x_begin, x_end, x_val);
 
     unsigned int l_idx = 0;
     unsigned int u_idx = 0;
 
-    if (upper_it == x.begin()) {
+    if (upper_it == x_begin) {
         // Linear extrapolation beyond the lower bound
         l_idx = 0;
         u_idx = 1;
-    } else if (upper_it == x.end()) {
+    } else if (upper_it == x_end) {
         // Linear extrapolation beyond the upper bound
         u_idx = x.size() - 1;
         l_idx = u_idx - 1;
     } else {
         // In the middle of the range
-        u_idx = std::distance(x.begin(), upper_it);
+        u_idx = static_cast<unsigned int>(upper_it - x_begin);
         l_idx = u_idx - 1;
     }
 
@@ -617,8 +630,8 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
     if (state.dataGroundHeatExchanger->numVertProps > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHEVertProps::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state,
-                            format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertProps::moduleName)); // LCOV_EXCL_LINE
+            ShowSevereError(
+                state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertProps::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {
@@ -634,8 +647,9 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
     if (state.dataGroundHeatExchanger->numResponseFactors > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHEResponseFactors::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(
-                state, format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEResponseFactors::moduleName)); // LCOV_EXCL_LINE
+            ShowSevereError(state,
+                            std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0",
+                                        GLHEResponseFactors::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {
@@ -651,8 +665,8 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
     if (state.dataGroundHeatExchanger->numVertArray > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHEVertArray::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state,
-                            format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertArray::moduleName)); // LCOV_EXCL_LINE
+            ShowSevereError(
+                state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertArray::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {
@@ -668,8 +682,8 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
     if (state.dataGroundHeatExchanger->numSingleBorehole > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHEVertSingle::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state,
-                            format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertSingle::moduleName)); // LCOV_EXCL_LINE
+            ShowSevereError(
+                state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVertSingle::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {
@@ -685,7 +699,8 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
     if (state.dataGroundHeatExchanger->numVerticalGLHEs > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHEVert::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state, format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVert::moduleName)); // LCOV_EXCL_LINE
+            ShowSevereError(state,
+                            std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHEVert::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {
@@ -701,7 +716,7 @@ void GetGroundHeatExchangerInput(EnergyPlusData &state)
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(GLHESlinky::moduleName);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
             ShowSevereError(state,
-                            format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHESlinky::moduleName)); // LCOV_EXCL_LINE
+                            std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", GLHESlinky::moduleName)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto it = instancesValue.begin(); it != instancesValue.end(); ++it) {

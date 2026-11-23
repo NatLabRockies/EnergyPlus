@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -64,48 +64,6 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace SystemReports {
-
-    struct Energy
-    {
-        // Members
-        Real64 TotDemand;
-        Real64 Elec;
-        Real64 Gas;
-        Real64 Purch;
-        Real64 Other;
-
-        // Default Constructor
-        Energy() : TotDemand(0.0), Elec(0.0), Gas(0.0), Purch(0.0), Other(0.0)
-        {
-        }
-    };
-
-    struct CoilType
-    {
-        // Members
-        Energy DecreasedCC; // LoadMetByVent
-        Energy DecreasedHC; // LoadMetByVent
-        Energy IncreasedCC; // LoadIncreasedVent
-        Energy IncreasedHC; // LoadAddedByVent
-        Energy ReducedByCC; // LoadAddedByVent
-        Energy ReducedByHC; // LoadAddedByVent
-
-        // Default Constructor
-        CoilType() = default;
-    };
-
-    struct SummarizeLoads
-    {
-        // Members
-        CoilType Load;             // LoadMetByVent
-        CoilType NoLoad;           // LoadMetByVentNoLoad
-        CoilType ExcessLoad;       // LoadAddedByVentOvercool
-        CoilType PotentialSavings; // LoadAddedByVentCoolLost
-        CoilType PotentialCost;    // LoadAddedByVentHeatLost
-
-        // Default Constructor
-        SummarizeLoads() = default;
-    };
 
     struct CompTypeError
     {
@@ -327,7 +285,7 @@ namespace SystemReports {
                        int const BranchNum   // counter for zone air distribution inlets
     );
 
-    void FindDemandSideMatch(EnergyPlusData &state,
+    void FindDemandSideMatch(EnergyPlusData const &state,
                              std::string const &CompType, // Inlet node of the component to find the match of
                              std::string_view CompName,   // Outlet node of the component to find the match of
                              bool &MatchFound,            // Set to .TRUE. when a match is found
@@ -392,7 +350,6 @@ struct SystemReportsData : BaseGlobalStruct
     int MaxLoopArraySize = 100;
     int MaxCompArraySize = 500;
 
-    EPVector<SystemReports::SummarizeLoads> Vent;
     EPVector<SystemReports::ZoneVentReportVariables> ZoneVentRepVars;
     EPVector<SystemReports::SysVentReportVariables> SysVentRepVars;
     EPVector<SystemReports::SysLoadReportVariables> SysLoadRepVars;
@@ -420,7 +377,6 @@ struct SystemReportsData : BaseGlobalStruct
     int ArrayCounter_UpdateAirSysSubSubCompPtrArray = 1;
     int NumCompTypes = 0;
     Array1D<SystemReports::CompTypeError> CompTypeErrors = Array1D<SystemReports::CompTypeError>(100);
-    Array1D<SystemReports::IdentifyLoop> LoopStack;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -446,7 +402,6 @@ struct SystemReportsData : BaseGlobalStruct
         this->TotalLoopConnects = 0;
         this->MaxLoopArraySize = 100;
         this->MaxCompArraySize = 500;
-        this->Vent.deallocate();
         this->ZoneVentRepVars.deallocate();
         this->SysVentRepVars.deallocate();
         this->SysLoadRepVars.deallocate();

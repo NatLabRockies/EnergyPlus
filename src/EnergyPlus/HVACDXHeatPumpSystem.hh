@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -74,8 +74,7 @@ namespace HVACDXHeatPumpSystem {
         std::string DXHeatPumpSystemType; // Type of DXHeatingSystem
         std::string Name;                 // Name of the DXHeatingSystem
         Sched::Schedule *availSched = nullptr;
-        std::string HeatPumpCoilType;
-        int HeatPumpCoilType_Num;
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
         std::string HeatPumpCoilName;
         int HeatPumpCoilIndex;
         int DXHeatPumpCoilInletNodeNum;
@@ -85,15 +84,12 @@ namespace HVACDXHeatPumpSystem {
         // to meet the supply air set point.
         Real64 PartLoadFrac;                      // part load fraction for current time step (single speed)
         Real64 SpeedRatio;                        // current compressor speed ratio (variable speed)
-        Real64 CycRatio;                          // cycling part load ratio (variable speed)
         HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // Fan operating mode (see parameter above)
         // Warning message variables
         int DXCoilSensPLRIter;      // used in DXCoil calculations
         int DXCoilSensPLRIterIndex; // used in DXCoil calculations
         int DXCoilSensPLRFail;      // used in DXCoil calculations
         int DXCoilSensPLRFailIndex; // used in DXCoil calculations
-        // When the Dx system is a part of Outdoor Air Unit
-        Real64 OAUnitSetTemp; // set
         // variable-speed coil
         int SpeedNum; // select speed number for variable-speed coil
         // Fault model of coil SAT sensor
@@ -103,10 +99,9 @@ namespace HVACDXHeatPumpSystem {
 
         // Default Constructor
         DXHeatPumpSystemStruct()
-            : HeatPumpCoilType_Num(0), HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0), DXSystemControlNodeNum(0),
-              DesiredOutletTemp(0.0), PartLoadFrac(0.0), SpeedRatio(0.0), CycRatio(0.0), DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0),
-              DXCoilSensPLRFail(0), DXCoilSensPLRFailIndex(0), OAUnitSetTemp(0.0), SpeedNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0),
-              FaultyCoilSATOffset(0.0)
+            : HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0), DXSystemControlNodeNum(0), DesiredOutletTemp(0.0),
+              PartLoadFrac(0.0), SpeedRatio(0.0), DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0), DXCoilSensPLRFail(0), DXCoilSensPLRFailIndex(0),
+              SpeedNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0)
         {
         }
     };
@@ -175,7 +170,6 @@ struct HVACDXHeatPumpSystemData : BaseGlobalStruct
 {
 
     int NumDXHeatPumpSystems = 0; // The Number of DXHeatPumpSystems found in the Input
-    bool EconomizerFlag = false;  // holds air loop economizer status
     bool GetInputFlag = true;     // Flag to get input only once
     Array1D_bool CheckEquipName;
     Array1D<HVACDXHeatPumpSystem::DXHeatPumpSystemStruct> DXHeatPumpSystem;
@@ -209,7 +203,6 @@ struct HVACDXHeatPumpSystemData : BaseGlobalStruct
     {
         this->GetInputFlag = true;
         this->NumDXHeatPumpSystems = 0;
-        this->EconomizerFlag = false;
         this->CheckEquipName.deallocate();
         this->DXHeatPumpSystem.deallocate();
         this->QZnReq = 0.001;

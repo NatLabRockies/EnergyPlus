@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -84,7 +84,6 @@ TEST_F(EnergyPlusFixture, WaterManager_NormalAnnualPrecipitation)
 
     WaterManager::GetWaterManagerInput(*state);
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
     state->dataEnvrn->Month = 1;
     state->dataGlobal->TimeStep = 2;
     state->dataGlobal->TimeStepZoneSec = 900;
@@ -124,7 +123,6 @@ TEST_F(EnergyPlusFixture, WaterManager_UpdatePrecipitation)
     WaterManager::GetWaterManagerInput(*state);
     state->dataGlobal->TimeStepZoneSec = 900;
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
     state->dataEnvrn->Month = 1;
     state->dataGlobal->TimeStep = 2;
 
@@ -166,7 +164,6 @@ TEST_F(EnergyPlusFixture, WaterManager_ZeroAnnualPrecipitation)
     state->init_state(*state);
     WaterManager::GetWaterManagerInput(*state);
     state->dataEnvrn->Year = 2000;
-    state->dataEnvrn->EndYear = 2000;
     state->dataEnvrn->Month = 1;
     state->dataGlobal->TimeStep = 2;
     state->dataGlobal->TimeStepZoneSec = 900;

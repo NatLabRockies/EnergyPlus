@@ -182,6 +182,14 @@ repos:
     pass_filenames: true
     require_serial: true
 
+  - id: check-error-summary-increment
+    name: check DataErrorTracking ErrorSummaryType increments
+    entry: python scripts/dev/check_error_summary_increment.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: false
+
   # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook, so manual only
   # Run it with: pre-commit run --hook-stage manual check-for-enum-scope-usage --verbose --all-files
   - id: check-for-enum-scope-usage

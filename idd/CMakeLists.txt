@@ -13,7 +13,8 @@ add_custom_command(
 )
 
 add_executable(generate_embeddable_epJSON_schema embedded/generate_embeddable_epJSON_schema.cpp)
-target_link_libraries(generate_embeddable_epJSON_schema PRIVATE project_options project_fp_options project_warnings fmt::fmt)
+target_link_libraries(generate_embeddable_epJSON_schema PRIVATE nlohmann_json project_options project_fp_options project_warnings)
+target_compile_options(generate_embeddable_epJSON_schema PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:-Wno-shorten-64-to-32>)
 set_target_properties(generate_embeddable_epJSON_schema PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/scripts")
 # See https://en.cppreference.com/w/cpp/filesystem#Notes
 if ((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
@@ -61,6 +62,10 @@ install(FILES "versions/V23-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionU
 install(FILES "versions/V23-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "versions/V24-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 install(FILES "versions/V24-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V25-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V25-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V26-1-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
+install(FILES "versions/V26-2-0-Energy+.idd" DESTINATION "PreProcess/IDFVersionUpdater")
 
 # For fortran...
 set(PREVIOUS_IDD "${CMAKE_CURRENT_SOURCE_DIR}/versions/V${PREV_RELEASE_MAJOR}-${PREV_RELEASE_MINOR}-${PREV_RELEASE_PATCH}-Energy+.idd")

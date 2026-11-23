@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -510,6 +510,23 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
         "	48.8888888888889, !- Rated Outlet Air Temperature { C }",
         "	1;          !- Rated Ratio for Air and Water Convection",
 
+        " Coil:Heating:Water,",
+        "	AHU Heating coil2,                      !- Name",
+        "	,                                       !- Availability Schedule Name",
+        "	autosize,                               !- U - Factor Times Area Value { W / K }",
+        "	autosize,                               !- Maximum Water Flow Rate { m3 / s }",
+        "	AHU Heating COil HW Inlet2,             !- Water Inlet Node Name",
+        "	AHU Heating COil HW Outlet2,            !- Water Outlet Node Name",
+        "	AHU Heating Coil Outlet,                !- Air Inlet Node Name",
+        "	AHU Heating Coil Outlet2,               !- Air Outlet Node Name",
+        "	UFactorTimesAreaAndDesignWaterFlowRate, !- Performance Input Method",
+        "	autosize,                               !- Rated Capacity { W }",
+        "	82.2,                                   !- Rated Inlet Water Temperature { C }",
+        "	16.6,                                   !- Rated Inlet Air Temperature { C }",
+        "	71.1,                                   !- Rated Outlet Water Temperature { C }",
+        "	48.8888888888889,                       !- Rated Outlet Air Temperature { C }",
+        "	1;                                      !- Rated Ratio for Air and Water Convection",
+
         " Controller:WaterCoil,",
         "	AHU cooling coil controller, !- Name",
         "	TemperatureAndHumidityRatio,		!- Control Variable",
@@ -531,6 +548,17 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
         "	autosize, !- Controller Convergence Tolerance { deltaC }",
         "	autosize, !- Maximum Actuated Flow { m3 / s }",
         "	0;        !- Minimum Actuated Flow { m3 / s }",
+
+        " Controller:WaterCoil,",
+        "	AHU Heating coil2,          !- Name",
+        "	Temperature,                !- Control Variable",
+        "	Normal,                     !- Action",
+        "	Flow,                       !- Actuator Variable",
+        "	AHU Heating Coil Outlet2,   !- Sensor Node Name",
+        "	AHU Heating COil HW Inlet2, !- Actuator Node Name",
+        "	autosize,                   !- Controller Convergence Tolerance { deltaC }",
+        "	autosize,                   !- Maximum Actuated Flow { m3 / s }",
+        "	0;                          !- Minimum Actuated Flow { m3 / s }",
 
         " Fan:VariableVolume,",
         "   AHU supply fan, !- Name",
@@ -592,13 +620,15 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
         "   Main FL1 Return Outlet;!- Inlet 1 Node Name",
 
         " AirLoopHVAC:OutdoorAirSystem:EquipmentList,",
-        "   AHU System equipment,  !- Name",
+        "   AHU System equipment,    !- Name",
         " Coil:Cooling:water,        !- Component 2 Object Type",
         "   AHU cooling coil,        !- Component 2 Name",
         " Coil:Heating:Water,        !- Component 3 Object Type",
         "   AHU Heating coil,        !- Component 3 Name",
-        " OutdoorAir:Mixer,        !- Component 1 Object Type",
-        "   AHU OA Mixing Box;     !- Component 1 Name",
+        " Coil:Heating:Water,        !- Component 3 Object Type",
+        "   AHU Heating coil2,       !- Component 3 Name",
+        " OutdoorAir:Mixer,          !- Component 1 Object Type",
+        "   AHU OA Mixing Box;       !- Component 1 Name",
 
         " AirLoopHVAC:OutdoorAirSystem,",
         "   AHU OA System,             !- Name",
@@ -608,7 +638,7 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
         " OutdoorAir:Mixer,",
         "   AHU OA Mixing Box,         !- Name",
         "   AHU mixed air outlet,      !- Mixed Air Node Name",
-        "   AHU Heating Coil Outlet,   !- Outdoor Air Stream Node Name",
+        "   AHU Heating Coil Outlet2,  !- Outdoor Air Stream Node Name",
         "   AHU relief air outlet,     !- Relief Air Stream Node Name",
         "   AHU air loop inlet;        !- Return Air Stream Node Name",
 
@@ -616,9 +646,11 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
         "   AHU OA system controllers, !- Name",
         " Controller:OutdoorAir,       !- Controller 1 Object Type",
         "   AHU OA Controller,         !- Controller 1 Name",
-        " Controller:WaterCoil, !- Controller 2 Object Type",
-        "	AHU Heating coil,   !- Controller 2 Name",
-        " Controller:WaterCoil, !- Controller 1 Object Type",
+        " Controller:WaterCoil,        !- Controller 2 Object Type",
+        "	AHU Heating coil,          !- Controller 2 Name",
+        " Controller:WaterCoil,        !- Controller 2 Object Type",
+        "	AHU Heating coil2,         !- Controller 2 Name",
+        " Controller:WaterCoil,        !- Controller 1 Object Type",
         "	AHU cooling coil controller; !- Controller 1 Name",
     });
 
@@ -627,11 +659,12 @@ TEST_F(EnergyPlusFixture, GetAirPathData_ControllerLockout2)
 
     SimAirServingZones::GetAirPathData(*state);
 
-    // 2 controllers on this AHU for 2 water coils in the OA system
-    // CanBeLockedOutByEcono should be false for the heating coil controller #1 in this test
-    // CanBeLockedOutByEcono should be true for the cooling coil controller #2 in this test
+    // 3 controllers on this AHU for 3 water coils in the OA system
+    // CanBeLockedOutByEcono should be false for the heating coil controller #1 and #2 in this test
+    // CanBeLockedOutByEcono should be true for the cooling coil controller #3 in this test
     EXPECT_FALSE(state->dataAirSystemsData->PrimaryAirSystems(1).CanBeLockedOutByEcono(1));
-    EXPECT_TRUE(state->dataAirSystemsData->PrimaryAirSystems(1).CanBeLockedOutByEcono(2));
+    EXPECT_FALSE(state->dataAirSystemsData->PrimaryAirSystems(1).CanBeLockedOutByEcono(2));
+    EXPECT_TRUE(state->dataAirSystemsData->PrimaryAirSystems(1).CanBeLockedOutByEcono(3));
 }
 
 TEST_F(EnergyPlusFixture, InitAirLoops_1AirLoop2ADU)
@@ -1168,7 +1201,7 @@ TEST_F(EnergyPlusFixture, SizeAirLoopBranches_0Airflow)
     SimAirServingZones::InitAirLoops(*state, true);
     // Expect warnings about 0 airflow
     std::string error_msg = delimited_string({
-        "   ** Severe  ** SizeAirLoopBranches: AirLoopHVAC VAV SYS 1 has air flow less than 1.0000E-003 m3/s.",
+        "   ** Severe  ** SizeAirLoopBranches: AirLoopHVAC VAV SYS 1 has air flow less than 0.0010 m3/s.",
         "   **   ~~~   ** Primary air system volumetric flow rate = 0.0000 m3/s.",
         "   **   ~~~   ** Check flow rate inputs for components in this air loop and,",
         "   **   ~~~   ** if autosized, check Sizing:Zone and Sizing:System objects and related inputs.",
@@ -2009,6 +2042,7 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
         "  Zone1 Thermostat,                       !- Name",
         "  Zone1,                                  !- Zone or ZoneList Name",
         "  Zone1 Thermostat Schedule,              !- Control Type Schedule Name",
+        "  ,                                       !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,        !- Control 1 Object Type",
         "  Thermostat Setpoint Dual Setpoint 1;    !- Control 1 Name",
 
@@ -2441,6 +2475,18 @@ TEST_F(EnergyPlusFixture, AirLoop_ReturnFan_MinFlow)
     EXPECT_EQ(0, state->dataLoopNodes->Node(supplyOutletNode).MassFlowRateMin);
     EXPECT_EQ(0, state->dataLoopNodes->Node(returnFanNode).MassFlowRate);
     EXPECT_EQ(0, state->dataLoopNodes->Node(supplyOutletNode).MassFlowRate);
+}
+
+// Verify air loop simulation clears the transient global night ventilation flag on exit.
+TEST_F(EnergyPlusFixture, SimAirServingZones_ClearsNightVentFlagOnExit)
+{
+    // SimAirLoops must not leak the last air loop's night-ventilation state into later simulations.
+    bool simZoneEquipment = false;
+    state->dataHVACGlobal->NightVentOn = true;
+
+    SimAirServingZones::SimAirLoops(*state, true, simZoneEquipment);
+
+    EXPECT_FALSE(state->dataHVACGlobal->NightVentOn);
 }
 
 } // namespace EnergyPlus

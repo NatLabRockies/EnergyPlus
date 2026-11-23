@@ -103,7 +103,7 @@ A unique user-assigned name for an instance of a cooling coil performance specif
 
 \paragraph{Field: Crankcase Heater Capacity}
 
-This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (Ref. AirLoopHVAC:UnitaryHeatPump:AirToAir or PackageTerminal: HeatPump:AirToAir), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (Ref. Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
+This numeric field defines the crankcase heater capacity in Watts. When the outdoor air dry-bulb temperature is below the value specified in the input field Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation (described below), the crankcase heater is enabled during the time that the compressor is not running. If this cooling coil is used as part of an air-to-air heat pump (e.g., AirLoopHVAC:UnitarySystem or ZoneHVAC:PackagedTerminalHeatPump), the crankcase heater defined for this DX cooling coil is ignored and the crankcase heater power defined for the DX heating coil (e.g., Coil:Heating:DX:SingleSpeed) is enabled during the time that the compressor is not running for either heating or cooling. The value for this input field must be greater than or equal to 0, and the default value is 0. To simulate a DX cooling coil without a crankcase heater, enter a value of 0.
 
 \paragraph{Field: Crankcase Heater Capacity Function of Temperature Curve Name}
 
@@ -196,6 +196,10 @@ Time constant (in seconds) for the cooling coil's latent capacity to reach stead
 \paragraph{Field: Nominal Time for Condensate Removal to Begin}
 
 The nominal time (in seconds) after startup for condensate to begin leaving the coil's condensate drain line at the coil's rated airflow and temperature conditions, starting with a dry coil. Nominal time is equal to the ratio of the energy of the coil's maximum condensate holding capacity (J) to the coil's steady-state latent capacity (W). Suggested value is 1000; zero value means the latent degradation model is disabled. The default value for this field is zero. The supply air fan operating mode must be continuous (i.e., the supply air fan operating mode may be specified in other parent objects and is assumed continuous in some objects (e.g., CoilSystem:Cooling:DX) or can be scheduled in other objects (e.g., AirloopHVAC:UnitaryHeatCool), and this field as well as the previous three input fields for this object must have positive values in order to model latent capacity degradation.
+
+\paragraph{Field: Apply Part Load Fraction to Speeds Greater than 1}
+
+This field determines whether part-load impacts on coil energy use are applied when the coil is operating at speeds greater than speed 1. The allowed choices are Yes or No, with the default being No if this field is left blank. Other input fields in this object allow the user to specify a part-load fraction correlation for each speed to account for compressor start up losses (cycle on/off). For the case of a single multi-speed compressor, the part load losses may only be significant when the compressor cycles between speed 1 and off, but the losses may be extremely small when the compressor operates between speed 1 and speed 2 (or between speeds 2 and 3, etc.). In this case, the user may chose to specify NO for this input field to neglect part-load impacts on energy use at higher operating speeds. If part-load impacts on coil energy use are thought to be significant (e.g., interwined cooling coil with multiple compressors feeding individual refrigerant circuits), then the user may chose to specify YES and the part-load fraction correlations specified for speeds 2 through 4 will be applied as appropriate. The selection for this input field does not affect part-load impacts when the compressor cycles between speed 1 and off (i.e., the part-load fraction correlation for speed 1 is always applied).
 
 \paragraph{Field: Apply Latent Degradation to Speeds Greater than 1}
 
@@ -681,8 +685,16 @@ Following are the list of possible output variables from this coil model:
 \item HVAC, Average, Cooling Coil <Fuel> Rate {[}W{]}
 \item HVAC, Sum, Cooling Coil <Fuel> Energy {[}J{]}
 \item HVAC, Average, Cooling Coil Runtime Fraction {[]}
+\end{itemize}
+
+If not part of a heat pump (if part of a heat pump, crankcase heater is reported only for the heating coil):
+
+\begin{itemize}
 \item HVAC, Average, Cooling Coil Crankcase Heater Electricity Rate {[}W{]}
 \item HVAC, Sum, Cooling Coil Crankcase Heater Electricity Energy {[}J{]}
+\end{itemize}
+
+\begin{itemize}
 \item HVAC, Average, Cooling Coil Air Mass Flow Rate {[}kg/s{]}
 \item HVAC, Average, Cooling Coil Air Inlet Temperature {[}C{]}
 \item HVAC, Average, Cooling Coil Air Inlet Humidity Ratio {[}kgWater/kgDryAir{]}

@@ -109,7 +109,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/input-output-reference/src/standard-output-reports/outputcontrol-table-style.tex
     ${PROJECT_SOURCE_DIR}/input-output-reference/src/weather-data/missing-weather-file-data.tex
     ${PROJECT_SOURCE_DIR}/input-output-reference/src/weather-data/weather-data-hourly-interpolation.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of inluded images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14
@@ -317,3 +317,7 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/HW_reset.png)
 
 create_doc_target("input-output-reference" "InputOutputReference")
+
+if(BUILD_HTML_DOCS)
+  create_html_doc_target("input-output-reference" "input-output-reference")
+endif()

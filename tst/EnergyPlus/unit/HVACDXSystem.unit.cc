@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -437,7 +437,57 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_DOASDXCoilTest)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
+
+    // test control node validity with checkNodeSetPoint function
+    std::string missingSP_error = "Missing temperature setpoint for unitary system";
+    std::string coilControlNode_error = "Cooling coil control/sensor node is not the same as the cooling coil outlet node";
+    std::string expected_error = "Warning";
+    compare_err_stream_substring(expected_error, true); // clear error stream
+
+    // set temperature setpoint on the control node to not trip the checkNodeSetPoint function TempSetPoint check
+    state->dataLoopNodes->Node(2).TempSetPoint = 20.0;
+    state->dataLoopNodes->NodeID(1) = "DX Cooling Coil Air Inlet Node";
+    state->dataLoopNodes->NodeID(2) = "Heating Coil Air Inlet Node";
+
+    int constexpr AirLoopNum = 0;
+    int constexpr CoolingCoil = 0;
+    Real64 constexpr OAUCoilOutTemp = 20.0;
+    // cooling coil control node is the outlet node of the cooling coil, inlet of the heating coil, and the node that is used for setpoint control
+    thisSys->CoolCoilOutletNodeNum = 2;
+    thisSys->CoolCtrlNode = 2;
+    bool errorsFound = thisSys->checkNodeSetPoint(*state, AirLoopNum, thisSys->CoolCtrlNode, CoolingCoil, OAUCoilOutTemp);
+    EXPECT_FALSE(errorsFound);                 // no errors when TempSetPoint is set on the control node
+    EXPECT_TRUE(compare_err_stream("", true)); // no warnings when control node = cooling coil outlet node
+
+    state->dataLoopNodes->Node(2).TempSetPoint = -999.0; // reset to invalid setpoint to test error case
+    errorsFound = thisSys->checkNodeSetPoint(*state, AirLoopNum, thisSys->CoolCtrlNode, CoolingCoil, OAUCoilOutTemp);
+
+    // error when TempSetPoint is NOT set on the correct node
+    EXPECT_TRUE(errorsFound);
+
+    // check that TempSetPoint was default value
+    EXPECT_EQ(-999.0, state->dataLoopNodes->Node(thisSys->CoolCtrlNode).TempSetPoint);
+
+    // Missing set point warning text is present
+    EXPECT_TRUE(compare_err_stream_substring(missingSP_error, false));
+
+    // no warning when control node is the cooling coil outlet node
+    EXPECT_FALSE(compare_err_stream_substring(coilControlNode_error, true, false));
+
+    // change cooling coil control node to the cooling coil inlet node
+    thisSys->CoolCtrlNode = 1;
+    // use valid set point temperature to not trip Missing temperature setpoint warning
+    state->dataLoopNodes->Node(1).TempSetPoint = 20.0;
+
+    errorsFound = thisSys->checkNodeSetPoint(*state, AirLoopNum, thisSys->CoolCtrlNode, CoolingCoil, OAUCoilOutTemp);
+    EXPECT_FALSE(errorsFound); // no errors when TempSetPoint is set on the correct node
+
+    // warning when control node is not the cooling coil outlet node
+    EXPECT_TRUE(compare_err_stream_substring(coilControlNode_error, false));
+
+    // Missing set point warning text is NOT present
+    EXPECT_FALSE(compare_err_stream_substring(missingSP_error, true, false));
 }
 
 TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
@@ -580,7 +630,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;
@@ -598,7 +647,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
     EXPECT_EQ(2, thisSys->CoolCtrlNode);
 
     // set up outdoor environment
@@ -797,7 +846,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_LatentDegradation_Test)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;
@@ -928,6 +976,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    Yes,                     !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",
@@ -988,6 +1037,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
         "    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "    0,                       !- Latent Capacity Time Constant {s}",
         "    0,                       !- Nominal Time for Condensate Removal to Begin {s}",
+        "    Yes,                     !- Apply Part Load Fraction to Speeds Greater than 1",
         "    ,                        !- Apply Latent Degradation to Speeds Greater than 1",
         "    AirCooled,               !- Condenser Type",
         "    0,                       !- Nominal Evaporative Condenser Pump Power {W}",
@@ -1072,7 +1122,6 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;
@@ -1091,7 +1140,7 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
     EXPECT_EQ(thisSys->Name, "DX COOLING COIL SYSTEM");
     EXPECT_FALSE(thisSys->m_ISHundredPercentDOASDXCoil);
     EXPECT_EQ(thisSys->UnitType, "CoilSystem:Cooling:DX");
-    EXPECT_EQ(thisSys->m_CoolingCoilType_Num, HVAC::CoilDX_Cooling);
+    EXPECT_ENUM_EQ(thisSys->m_coolCoilType, HVAC::CoilType::CoolingDX);
     EXPECT_EQ(2, thisSys->CoolCtrlNode);
 
     // set up outdoor environment

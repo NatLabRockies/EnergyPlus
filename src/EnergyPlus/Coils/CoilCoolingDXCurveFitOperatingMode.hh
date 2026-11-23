@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -70,6 +70,7 @@ struct CoilCoolingDXCurveFitOperatingModeInputSpecification
     Real64 ratio_of_initial_moisture_evaporation_rate_and_steady_state_latent_capacity = 0.0;
     Real64 latent_capacity_time_constant = 0.0;
     Real64 nominal_time_for_condensate_removal_to_begin = 0.0;
+    std::string apply_part_load_fraction_to_speeds_greater_than_1;
     std::string apply_latent_degradation_to_speeds_greater_than_1;
     std::string condenser_type;
     Real64 nominal_evap_condenser_pump_power = 0.0;
@@ -91,13 +92,13 @@ struct CoilCoolingDXCurveFitOperatingMode
     explicit CoilCoolingDXCurveFitOperatingMode(EnergyPlusData &state, const std::string &name_to_find);
     Real64 getCurrentEvapCondPumpPower(int speedNum);
     void CalcOperatingMode(EnergyPlusData &state,
-                           const DataLoopNode::NodeData &inletNode,
-                           DataLoopNode::NodeData &outletNode,
+                           const Node::NodeData &inletNode,
+                           Node::NodeData &outletNode,
                            int speedNum,
                            Real64 speedRatio,
                            HVAC::FanOp const fanOp,
-                           DataLoopNode::NodeData &condInletNode,
-                           DataLoopNode::NodeData &condOutletNode,
+                           Node::NodeData &condInletNode,
+                           Node::NodeData &condOutletNode,
                            bool singleMode);
 
     std::string name;
@@ -114,6 +115,7 @@ struct CoilCoolingDXCurveFitOperatingMode
     Real64 maxCyclingRate = 0.0;
     Real64 latentTimeConst = 0.0;
     bool latentDegradationActive = false;
+    bool applyPartLoadFractionAllSpeeds = false;
     bool applyLatentDegradationAllSpeeds = false;
 
     // results from coil model at speed

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,13 +49,10 @@
 #define EPLUS_PLUGIN_MANAGER_HH
 
 // C++ Headers
-#include <iomanip>
 #include <queue>
-#include <utility>
 #include <vector>
 
 // EnergyPlus Headers
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
@@ -72,8 +69,6 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace PluginManagement {
-
-    constexpr const char *programName = "python";
 
     void registerNewCallback(const EnergyPlusData &state, EMSManager::EMSCallFrom iCalledFrom, const std::function<void(void *)> &f);
     void registerUserDefinedCallback(const EnergyPlusData &state, const std::function<void(void *)> &f, const std::string &programNameInInputFile);
@@ -103,7 +98,6 @@ namespace PluginManagement {
         void shutdown() const;
 
         // methods
-        static void reportPythonError(EnergyPlusData &state);
         bool run(EnergyPlusData &state, EMSManager::EMSCallFrom iCallingPoint) const; // calls main() on this plugin instance
 
         // plugin calling point hooks
@@ -176,7 +170,6 @@ namespace PluginManagement {
         ~PluginManager();
 
         static int numActiveCallbacks(const EnergyPlusData &state);
-        static void addToPythonPath(EnergyPlusData &state, const fs::path &includePath, bool userDefinedPath);
         static void setupOutputVariables(EnergyPlusData &state);
 
         int maxGlobalVariableIndex = -1;

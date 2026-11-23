@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -327,6 +327,7 @@ namespace DataRuntimeLanguage {
         bool CheckedOkay;              // set to true once matched to available actuator
         int ErlVariableNum;            // points to global Erl variable, matches Name
         int ActuatorVariableNum;       // points to index match in EMSActuatorAvailable structure
+        bool wasActuated = false;      // issue #10944: true once any Erl program has set this actuator
 
         // Default Constructor
         ActuatorUsedType() : CheckedOkay(false), ErlVariableNum(0), ActuatorVariableNum(0)
@@ -363,9 +364,12 @@ namespace DataRuntimeLanguage {
         int TrendVarPointer; // index to match in TrendVariable structure
         std::string Error;   // holds error message string for reporting
         bool initialized;    // true if number value has been SET (ie. has been on LHS in SET expression)
+        bool SetupInit;      // false when marked by an uninitialized-variable evaluation error so it can be treated as uninitialized later
 
         // Default Constructor
-        ErlValueType() : Type(Value::Null), Number(0.0), Variable(0), Expression(0), TrendVariable(false), TrendVarPointer(0), initialized(false)
+        ErlValueType()
+            : Type(Value::Null), Number(0.0), Variable(0), Expression(0), TrendVariable(false), TrendVarPointer(0), initialized(false),
+              SetupInit(true)
         {
         }
 
@@ -378,9 +382,10 @@ namespace DataRuntimeLanguage {
                      bool const TrendVariable,  // true if Erl variable is really a trend variable
                      int const TrendVarPointer, // index to match in TrendVariable structure
                      std::string const &Error,  // holds error message string for reporting
-                     bool const initialized)
+                     bool const initialized,
+                     bool const SetupInit)
             : Type(Type), Number(Number), String(String), Variable(Variable), Expression(Expression), TrendVariable(TrendVariable),
-              TrendVarPointer(TrendVarPointer), Error(Error), initialized(initialized)
+              TrendVarPointer(TrendVarPointer), Error(Error), initialized(initialized), SetupInit(SetupInit)
         {
         }
     };
@@ -393,10 +398,11 @@ namespace DataRuntimeLanguage {
         int StackNum;                // 0 for global Erl variables, index in ErlStack structure if local
         ErlValueType Value;          // values taken by Erl variables
         bool ReadOnly;               // true if Erl variable is read-only
+        bool IsActuator;             // true if this variable controls an EMS actuator
         bool SetByExternalInterface; // set to true if value is set by ExternalInterface
 
         // Default Constructor
-        ErlVariableType() : StackNum(0), ReadOnly(false), SetByExternalInterface(false)
+        ErlVariableType() : StackNum(0), ReadOnly(false), IsActuator(false), SetByExternalInterface(false)
         {
         }
     };
@@ -444,14 +450,6 @@ namespace DataRuntimeLanguage {
         ErlExpressionType() : Operator(ErlFunc::Invalid), NumOperands(0)
         {
         }
-    };
-
-    struct Operator
-    {
-        // Members
-        // structure for operators and functions, used to look up information about each operator or function
-        std::string_view symbol; // string representation of operator or function (for reporting)
-        int numOperands = 0;     // count of operands or function arguments.
     };
 
     static constexpr std::array<std::string_view, (int)ErlFunc::Num> ErlFuncNamesUC = {
@@ -785,6 +783,10 @@ struct RuntimeLanguageData : BaseGlobalStruct
     bool OutputEMSInternalVarsFull = false;   // how much to write out to EDD file, if true dump full combinatorial internal list
     bool OutputEMSInternalVarsSmall = false;  // how much to write out to EDD file, if true dump internal list without key names
 
+    // Set when an Erl program or Data Exchange API call writes or resets an actuator during ManageEMS. It only decides whether
+    // ManageEMS requests additional HVAC iterations at InsideHVACSystemIterationLoop.
+    bool anyActuatorWritten = false;
+
     Array2D_bool EMSConstructActuatorChecked;
     Array2D_bool EMSConstructActuatorIsOkay;
 
@@ -800,11 +802,11 @@ struct RuntimeLanguageData : BaseGlobalStruct
     Array1D<DataRuntimeLanguage::InternalVarsUsedType> EMSInternalVarsUsed;           // internal data that are used
     Array1D<DataRuntimeLanguage::EMSProgramCallManagementType> EMSProgramCallManager; // program calling managers
     DataRuntimeLanguage::ErlValueType Null = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "null" Erl variable value instance
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "null" Erl variable value instance
     DataRuntimeLanguage::ErlValueType False = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "false" Erl variable value instance
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "false" Erl variable value instance
     DataRuntimeLanguage::ErlValueType True = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "True" Erl variable value instance, gets reset
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "True" Erl variable value instance, gets reset
 
     std::map<std::tuple<std::string, std::string, std::string>, int> EMSActuatorAvailableMap;
 
@@ -851,6 +853,7 @@ struct RuntimeLanguageData : BaseGlobalStruct
         this->OutputEMSActuatorAvailSmall = false;
         this->OutputEMSInternalVarsFull = false;
         this->OutputEMSInternalVarsSmall = false;
+        this->anyActuatorWritten = false;
         this->EMSConstructActuatorChecked.deallocate();
         this->EMSConstructActuatorIsOkay.deallocate();
         this->ErlVariable.deallocate();
@@ -863,9 +866,9 @@ struct RuntimeLanguageData : BaseGlobalStruct
         this->EMSInternalVarsAvailable.deallocate();
         this->EMSInternalVarsUsed.deallocate();
         this->EMSProgramCallManager.deallocate();
-        this->Null = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
-        this->False = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
-        this->True = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
+        this->Null = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
+        this->False = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
+        this->True = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
 
         this->EMSActuatorAvailableMap.clear();
     }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -166,6 +166,8 @@ namespace HeatBalFiniteDiffManager {
         // Includes the EMS heat source
         Array1D<Real64> heatSourceEMSFluxLayerReport;
         Array1D<Real64> heatSourceEMSFluxEnergyLayerReport;
+        MaterialActuatorData enetActuator; // Sky LW radiation EMS override [W/m2]
+        Real64 enetActuatorReport = 0.0;   // Reported sky LW radiation EMS override [W/m2], zero when inactive
 
         // Default Constructor
         SurfaceDataFD() : SourceNodeNum(0), QSource(0.0), GSloopCounter(0), MaxNodeDelTemp(0.0), EnthalpyM(0.0), EnthalpyF(0.0), PhaseChangeState(0)

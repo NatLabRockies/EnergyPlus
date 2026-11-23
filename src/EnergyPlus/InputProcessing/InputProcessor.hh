@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -57,7 +57,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Array1S.fwd.hh>
 #include <ObjexxFCL/Optional.hh>
 
 #include <nlohmann/json.hpp>
@@ -82,8 +81,6 @@ class InputProcessor
 {
 public:
     using json = nlohmann::json;
-
-    json::parser_callback_t callback;
 
     InputProcessor();
 
@@ -121,7 +118,7 @@ public:
 
     int getNumSectionsFound(std::string const &SectionWord);
 
-    int getNumObjectsFound(EnergyPlusData &state, std::string_view const ObjectWord);
+    int getNumObjectsFound([[maybe_unused]] EnergyPlusData &state, std::string_view const ObjectWord);
 
     bool findDefault(std::string &default_value, json const &schema_field_obj);
 
@@ -143,10 +140,12 @@ public:
 
     const json &getJSONObjectItem(EnergyPlusData &state, std::string_view ObjType, std::string_view ObjName);
 
+    // Output arrays are filled positionally from their first element, regardless of their lower bound
+    // (e.g. an Array1D declared {0, N} receives the first field at index 0)
     void getObjectItem(EnergyPlusData &state,
                        std::string_view Object,
                        int const Number,
-                       Array1S_string Alphas,
+                       Array1D_string &Alphas,
                        int &NumAlphas,
                        Array1D<Real64> &Numbers,
                        int &NumNumbers,
@@ -182,7 +181,7 @@ public:
                              int &NumNumeric                    // How many Numeric arguments (max) this Object can have
     );
 
-    void preProcessorCheck(EnergyPlusData &state, bool &PreP_Fatal); // True if a preprocessor flags a fatal error
+    bool preProcessorCheck(EnergyPlusData &state); // Returns true if a preprocessor flags a fatal error
 
     void preScanReportingVariables(EnergyPlusData &state);
 
@@ -193,6 +192,8 @@ public:
     const json &getObjectInstances(std::string const &ObjType);
 
     bool checkForUnsupportedObjects(EnergyPlusData &state);
+
+    void warnObsoleteObjects(EnergyPlusData &state);
 
     //    void clear_state();
 private:
@@ -257,10 +258,10 @@ private:
                             json const &ep_schema_object,
                             std::string const &field,
                             json const &legacy_field_info,
-                            int &alpha_index,
-                            int &numeric_index,
+                            int &alpha_index,   // 0-index, always, for operator[]
+                            int &numeric_index, // 0-index, always, for operator[]
                             bool within_max_fields,
-                            Array1S_string Alphas,
+                            Array1D_string &Alphas,
                             int &NumAlphas,
                             Array1D<Real64> &Numbers,
                             int &NumNumbers,
@@ -287,13 +288,13 @@ private:
 
     json const &getPatternProperties(EnergyPlusData &state, json const &schema_obj);
 
-    inline std::string convertToUpper(std::string_view s)
+    inline std::string convertToUpper(std::string_view sv)
     {
         std::string s2;
-        size_t len = s.size();
+        size_t len = sv.size();
         s2.resize(len);
         for (size_t i = 0; i < len; ++i) {
-            char c = s[i];
+            char c = sv[i];
             s2[i] = ('a' <= c && c <= 'z') ? c ^ 0x20 : c; // ASCII only
         }
         s2[len] = '\0';

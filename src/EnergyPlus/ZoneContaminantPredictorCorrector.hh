@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -68,9 +68,9 @@ namespace ZoneContaminantPredictorCorrector {
                                      Real64 PriorTimeStep         // the old value for timestep length is passed for possible use in interpolating
     );
 
-    void GetZoneContaminanInputs(EnergyPlusData &state);
+    void GetZoneContaminantInputs(EnergyPlusData &state);
 
-    void GetZoneContaminanSetPoints(EnergyPlusData &state);
+    void GetZoneContaminantSetPoints(EnergyPlusData &state);
 
     void InitZoneContSetPoints(EnergyPlusData &state);
 

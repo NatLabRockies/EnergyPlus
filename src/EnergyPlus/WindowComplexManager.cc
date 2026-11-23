@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -46,13 +46,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/ArrayS.functions.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
@@ -119,7 +119,7 @@ namespace WindowComplexManager {
         int NumStates;          // Local variable for the number of states
         Array1D<Real64> Thetas; // temp array holding theta values
         Array1D_int NPhis;      // temp array holding number of phis for a given theta
-        Array1D<Real64> V(3);   // vector array
+        Vector V;               // vector
         Real64 VLen;            // Length of vector array
         int NHold;              // No. values in the Temporary array
 
@@ -308,12 +308,12 @@ namespace WindowComplexManager {
                 BaseSurf = state.dataSurface->Surface(ISurf).BaseSurf;                    // ShadowComb is organized by base surface
                 int JSurf = state.dataShadowComb->ShadowComb(BaseSurf).BackSurf(KBkSurf); // these are all proper back surfaces
                 V = state.dataSurface->Surface(JSurf).Centroid - state.dataSurface->Surface(ISurf).Centroid;
-                VLen = magnitude(V);
+                VLen = V.length();
                 // Define the unit vector from the window center to the back
-                state.dataBSDFWindow->ComplexWind(ISurf).sWinSurf(KBkSurf) = V / VLen;
+                state.dataBSDFWindow->ComplexWind(ISurf).sWinSurf(KBkSurf) = Vector3D(V.x / VLen, V.y / VLen, V.z / VLen);
                 // surface center
                 // Define the back surface cosine(incident angle)
-                state.dataBSDFWindow->ComplexWind(ISurf).sdotN(KBkSurf) = dot(V, state.dataSurface->Surface(JSurf).OutNormVec) / VLen;
+                state.dataBSDFWindow->ComplexWind(ISurf).sdotN(KBkSurf) = V.dot(state.dataSurface->Surface(JSurf).OutNormVec) / VLen;
             }
             for (int IState = 1; IState <= NumStates; ++IState) {
                 // The following assumes identical incoming and outgoing bases.  The logic will need to be
@@ -478,11 +478,8 @@ namespace WindowComplexManager {
         // PURPOSE OF THIS SUBROUTINE:
         // Check if there are new states available for complex fenestration and performs proper initialization
 
-        bool StateFound; // variable to indicate if state has been found
-        int CurrentCFSState;
-
-        StateFound = false;
-        CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState;
+        bool StateFound = false; // variable to indicate if state has been found
+        int const CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState;
 
         // Check if EMS changed construction number
         if (state.dataSurface->Surface(iSurf).Construction != state.dataSurface->SurfaceWindow(iSurf).ComplexFen.State(CurrentCFSState).Konst) {
@@ -493,7 +490,6 @@ namespace WindowComplexManager {
             for (int i = 1; i <= NumOfStates; ++i) {
                 if (state.dataSurface->Surface(iSurf).Construction == state.dataSurface->SurfaceWindow(iSurf).ComplexFen.State(i).Konst) {
                     StateFound = true;
-                    CurrentCFSState = i;
                     state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = i;
                 }
             }
@@ -504,8 +500,7 @@ namespace WindowComplexManager {
         // If new state is not found in the list of current states, then create new one, initialize and make it active
         if (!StateFound) {
             ExpandComplexState(state, iSurf, state.dataSurface->Surface(iSurf).Construction);
-            CurrentCFSState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates;
-            state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = CurrentCFSState;
+            state.dataSurface->SurfaceWindow(iSurf).ComplexFen.CurrentState = state.dataSurface->SurfaceWindow(iSurf).ComplexFen.NumStates;
         }
     }
 
@@ -609,7 +604,7 @@ namespace WindowComplexManager {
                     SunDir = state.dataBSDFWindow->SUNCOSTS(TS, Hour);
                     Theta = 0.0;
                     Phi = 0.0;
-                    if (state.dataBSDFWindow->SUNCOSTS(TS, Hour)(3) > DataEnvironment::SunIsUpValue) {
+                    if (state.dataBSDFWindow->SUNCOSTS(TS, Hour).z > DataEnvironment::SunIsUpValue) {
                         IncRay = FindInBasis(state, SunDir, RayIdentificationType::Front_Incident, iSurf, iState, complexWindowGeom.Inc, Theta, Phi);
                         complexWindowGeom.ThetaBm[lHT] = Theta;
                         complexWindowGeom.PhiBm[lHT] = Phi;
@@ -633,7 +628,7 @@ namespace WindowComplexManager {
                                 continue;
                             }
                             // skip surfaces that face away from the ground point
-                            if (dot(SunDir, state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
+                            if (SunDir.dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
                                 continue;
                             }
                             // Looking for surfaces between GndPt and sun
@@ -663,7 +658,7 @@ namespace WindowComplexManager {
             SunDir = state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay);
             Theta = 0.0;
             Phi = 0.0;
-            if (state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay)(3) > DataEnvironment::SunIsUpValue) {
+            if (state.dataBSDFWindow->SUNCOSTS(state.dataGlobal->TimeStep, state.dataGlobal->HourOfDay).z > DataEnvironment::SunIsUpValue) {
                 IncRay = FindInBasis(state, SunDir, RayIdentificationType::Front_Incident, iSurf, iState, complexWindowGeom.Inc, Theta, Phi);
                 complexWindowGeom.ThetaBm[lHT] = Theta;
                 complexWindowGeom.PhiBm[lHT] = Phi;
@@ -689,7 +684,7 @@ namespace WindowComplexManager {
                         continue;
                     }
                     // skip surfaces that face away from the ground point
-                    if (dot(SunDir, state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
+                    if (SunDir.dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector) >= 0.0) {
                         continue;
                     }
                     // Looking for surfaces between GndPt and sun
@@ -769,10 +764,14 @@ namespace WindowComplexManager {
 
         IBm = Geom.SolBmIndex(Hour, TS);
         if (IBm <= 0.0) { // Beam cannot be incident on window for this Hour, TS
-            State.WinToSurfBmTrans(Hour, TS, {1, Window.NBkSurf}) = 0.0;
+            for (int iBkSurf = 1; iBkSurf <= Window.NBkSurf; ++iBkSurf) {
+                State.WinToSurfBmTrans(Hour, TS, iBkSurf) = 0.0;
+            }
             State.WinDirHemiTrans(Hour, TS) = 0.0;
             State.WinDirSpecTrans(Hour, TS) = 0.0;
-            State.WinBmFtAbs(Hour, TS, {1, State.NLayers}) = 0.0;
+            for (int iLayer = 1; iLayer <= State.NLayers; ++iLayer) {
+                State.WinBmFtAbs(Hour, TS, iLayer) = 0.0;
+            }
         } else {
             for (int I = 1; I <= Window.NBkSurf; ++I) { // Back surface loop
                 Sum1 = 0.0;
@@ -1024,6 +1023,7 @@ namespace WindowComplexManager {
                 Thetas(1) = 0.0;                          // By convention, the first basis point is at the center (theta=0,phi=0)
                 Thetas(NThetas + 1) = 0.5 * Constant::Pi; // and there is an N+1st point (not a basis element) at Pi/2
                 NPhis(1) = 1;
+                int MaxNPhis = NPhis(1); // Max no of NPhis for any theta
                 NumElem = 1;
                 for (I = 2; I <= NThetas; ++I) {
                     Thetas(I) = state.dataConstruction->Construct(IConst).BSDFInput.BasisMat(1, I) * Constant::DegToRad;
@@ -1032,8 +1032,8 @@ namespace WindowComplexManager {
                         ShowFatalError(state, "WindowComplexManager: incorrect input, no. phis must be positive.");
                     }
                     NumElem += NPhis(I);
+                    MaxNPhis = std::max(MaxNPhis, NPhis(I));
                 }
-                int MaxNPhis = maxval(NPhis({1, NThetas}));     // Max no of NPhis for any theta
                 Basis.Phis.allocate(NThetas + 1, MaxNPhis + 1); // N+1st Phi point (not basis element) at 2Pi
                 Basis.BasisIndex.allocate(MaxNPhis, NThetas + 1);
                 Basis.Phis = 0.0;                                                            // Initialize so undefined elements will contain zero
@@ -1205,13 +1205,11 @@ namespace WindowComplexManager {
                 BasisElem.UpprTheta = UpperTheta;
                 BasisElem.dTheta = BasisElem.UpprTheta - Theta;
                 BasisElem.LwrTheta = Theta;
-                BasisElem.LwrPhi = 0.0;
                 BasisElem.UpprPhi = 2.0 * Constant::Pi;
             } else {
                 BasisElem.Theta = Theta;
                 BasisElem.Phi = Phi;
                 BasisElem.dPhi = DPhi;
-                BasisElem.LwrPhi = Phi - DPhi / 2.0;
                 BasisElem.UpprPhi = Phi + DPhi / 2.0;
                 BasisElem.LwrTheta = LowerTheta;
                 BasisElem.UpprTheta = UpperTheta;
@@ -1270,8 +1268,8 @@ namespace WindowComplexManager {
         Real64 Theta;                // Basis theta angle
         Real64 Phi;                  // Basis phi angle
         Real64 HitDsq;               // Squared distance to current hit pt
-        Real64 LeastHitDsq;          // Squared distance to closest hit pt
-        Array1D<Real64> V(3);        // vector array
+        Real64 LeastHitDsq = 0.0;    // Squared distance to closest hit pt
+        Vector V;                    // vector
         Array1D_int TmpRfSfInd;      // Temporary RefSurfIndex
         Array1D_int TmpRfRyNH;       // Temporary RefRayNHits
         Array2D_int TmpHSurfNo;      // Temporary HitSurfNo
@@ -1282,7 +1280,7 @@ namespace WindowComplexManager {
         Array2D<Real64> TmpSjdotN;   // Temporary dot prod of ray angle w bk surf norm
         Array1D_int ITemp1D;         // Temporary INT 1D array
         Array2D<Real64> Temp2D;      // Temporary real 2D array
-        Real64 TransRSurf;           // Norminal transmittance of shading surface
+        Real64 TransRSurf = 0.0;     // Norminal transmittance of shading surface
         Real64 WtSum;                // Sum for normalizing various weights
         Real64 DotProd;              // Temporary variable for manipulating dot product .dot.
 
@@ -1302,7 +1300,6 @@ namespace WindowComplexManager {
 
         // Object Data
         Vector HitPt;             // coords of hit pt (world syst)
-        Vector X;                 // position vector
         Vector VecNorm;           // outer normal vector
         Array1D<Vector> TmpGndPt; // Temporary ground intersection list
         Array2D<Vector> TempV2D;  // Temporary vector 2D array
@@ -1391,7 +1388,7 @@ namespace WindowComplexManager {
                     continue;
                 }
                 //  skip surfaces that face away from the window
-                DotProd = dot(Geom.sInc(IRay), state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector);
+                DotProd = Geom.sInc(IRay).dot(state.dataSurface->Surface(JSurf).NewellSurfaceNormalVector);
                 if (DotProd >= 0.0) {
                     continue;
                 }
@@ -1408,7 +1405,7 @@ namespace WindowComplexManager {
                     TmpHSurfNo(1, NReflSurf) = JSurf;
                     TmpHitPt(1, NReflSurf) = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid; // vector array from window ctr to hit pt
-                    LeastHitDsq = magnitude_squared(V);                     // dist^2 window ctr to hit pt
+                    LeastHitDsq = V.length_squared();                       // dist^2 window ctr to hit pt
                     TmpHSurfDSq(1, NReflSurf) = LeastHitDsq;
                     if (!state.dataSurface->Surface(JSurf).HeatTransSurf && state.dataSurface->Surface(JSurf).shadowSurfSched != nullptr) {
                         TransRSurf = 1.0; // If a shadowing surface may have a scheduled transmittance,
@@ -1418,7 +1415,7 @@ namespace WindowComplexManager {
                     }
                 } else {
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    HitDsq = magnitude_squared(V);
+                    HitDsq = V.length_squared();
                     if (HitDsq >= LeastHitDsq) {
                         if (TransRSurf > 0.0) { // forget the new hit if the closer hit is opaque
                             J = TotHits + 1;
@@ -1502,12 +1499,12 @@ namespace WindowComplexManager {
         Geom.NGnd = NGnd;
         Geom.NReflSurf = NReflSurf;
         Geom.SkyIndex.allocate(NSky);
-        Geom.SkyIndex = TmpSkyInd({1, NSky});
+        std::copy_n(TmpSkyInd.begin(), NSky, Geom.SkyIndex.begin());
         TmpSkyInd.deallocate();
         Geom.GndIndex.allocate(NGnd);
         Geom.GndPt.allocate(NGnd);
-        Geom.GndIndex = TmpGndInd({1, NGnd});
-        Geom.GndPt = TmpGndPt({1, NGnd});
+        std::copy_n(TmpGndInd.begin(), NGnd, Geom.GndIndex.begin());
+        std::copy_n(TmpGndPt.begin(), NGnd, Geom.GndPt.begin());
         TmpGndInd.deallocate();
         TmpGndPt.deallocate();
         MaxHits = maxval(TmpRfRyNH);
@@ -1516,16 +1513,22 @@ namespace WindowComplexManager {
         Geom.HitSurfNo.allocate(MaxHits, NReflSurf);
         Geom.HitSurfDSq.allocate(MaxHits, NReflSurf);
         Geom.HitPt.allocate(MaxHits, NReflSurf);
-        Geom.RefSurfIndex = TmpRfSfInd({1, NReflSurf});
-        Geom.RefRayNHits = TmpRfRyNH({1, NReflSurf});
+        std::copy_n(TmpRfSfInd.begin(), NReflSurf, Geom.RefSurfIndex.begin());
+        std::copy_n(TmpRfRyNH.begin(), NReflSurf, Geom.RefRayNHits.begin());
         Geom.HitSurfNo = 0;
         Geom.HitSurfDSq = 0.0;
         Geom.HitPt = Vector(0.0, 0.0, 0.0);
         for (I = 1; I <= NReflSurf; ++I) {
             TotHits = TmpRfRyNH(I);
-            Geom.HitSurfNo({1, TotHits}, I) = TmpHSurfNo({1, TotHits}, I);
-            Geom.HitSurfDSq({1, TotHits}, I) = TmpHSurfDSq({1, TotHits}, I);
-            Geom.HitPt({1, TotHits}, I) = TmpHitPt({1, TotHits}, I);
+            for (int i = 1; i <= TotHits; ++i) {
+                Geom.HitSurfNo(i, I) = TmpHSurfNo(i, I);
+            }
+            for (int i = 1; i <= TotHits; ++i) {
+                Geom.HitSurfDSq(i, I) = TmpHSurfDSq(i, I);
+            }
+            for (int i = 1; i <= TotHits; ++i) {
+                Geom.HitPt(i, I) = TmpHitPt(i, I);
+            }
         }
         TmpRfRyNH.deallocate();
         TmpRfSfInd.deallocate();
@@ -1548,22 +1551,26 @@ namespace WindowComplexManager {
             J = Geom.SkyIndex(I);
             Geom.SolSkyWt(I) = SkyWeight(Geom.sInc(J));
         }
-        WtSum = sum(Geom.SolSkyWt({1, NSky}));
+        WtSum = sum(Geom.SolSkyWt);
         if (WtSum > Constant::rTinyValue) {
-            Geom.SolSkyWt({1, NSky}) /= WtSum;
+            for (I = 1; I <= NSky; ++I) {
+                Geom.SolSkyWt(I) /= WtSum;
+            }
         } else {
-            Geom.SolSkyWt({1, NSky}) = 0.0;
+            Geom.SolSkyWt = 0.0;
         }
         // SkyGround Weights
         Geom.SolSkyGndWt.allocate(NGnd);
         for (I = 1; I <= NGnd; ++I) {
             Geom.SolSkyGndWt(I) = SkyGndWeight(Geom.GndPt(I));
         }
-        WtSum = sum(Geom.SolSkyGndWt({1, NGnd}));
+        WtSum = sum(Geom.SolSkyGndWt);
         if (WtSum > Constant::rTinyValue) {
-            Geom.SolSkyGndWt({1, NGnd}) /= WtSum;
+            for (I = 1; I <= NGnd; ++I) {
+                Geom.SolSkyGndWt(I) /= WtSum;
+            }
         } else {
-            Geom.SolSkyGndWt({1, NGnd}) = 0.0;
+            Geom.SolSkyGndWt = 0.0;
         }
         //  Weights for beam reflected from ground are calculated after shading
         //  interval is determined
@@ -1593,7 +1600,7 @@ namespace WindowComplexManager {
                     BSHit.HitSurf = JSurf;
                     BSHit.HitPt = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    BSHit.HitDsq = magnitude_squared(V);
+                    BSHit.HitDsq = V.length_squared();
                 } else if (BSHit.HitSurf == state.dataSurface->Surface(JSurf).BaseSurf) {
                     //  another hit, check whether this is a subsurface of a previously hit base surface
                     //  (which would be listed first in the Surface array)
@@ -1603,13 +1610,13 @@ namespace WindowComplexManager {
                     BSHit.HitSurf = JSurf;
                     BSHit.HitPt = HitPt;
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    BSHit.HitDsq = magnitude_squared(V);
+                    BSHit.HitDsq = V.length_squared();
                 } else {
                     ++TotHits;
                     // is the new hit closer than the previous one (i.e., zone not strictly convex)?
                     // if so, take the closer hit
                     V = HitPt - state.dataSurface->Surface(ISurf).Centroid;
-                    HitDsq = magnitude_squared(V);
+                    HitDsq = V.length_squared();
                     if (HitDsq < BSHit.HitDsq) {
                         BSHit.KBkSurf = KBkSurf;
                         BSHit.HitSurf = JSurf;
@@ -1627,7 +1634,7 @@ namespace WindowComplexManager {
                 ++Geom.NSurfInt(KBkSurf);
                 TmpSurfInt(Geom.NSurfInt(KBkSurf), KBkSurf) = IRay;
                 VecNorm = state.dataSurface->Surface(JSurf).OutNormVec;
-                TmpSjdotN(Geom.NSurfInt(KBkSurf), KBkSurf) = dot(Geom.sTrn(IRay), VecNorm);
+                TmpSjdotN(Geom.NSurfInt(KBkSurf), KBkSurf) = Geom.sTrn(IRay).dot(VecNorm);
             }
         } // ray loop
         //  All rays traced, now put away the results in the temporary arrays
@@ -1636,8 +1643,12 @@ namespace WindowComplexManager {
         Geom.SjdotN.allocate(MaxInt, Window.NBkSurf);
         Geom.SurfInt = 0;
         for (I = 1; I <= Window.NBkSurf; ++I) {
-            Geom.SurfInt({1, Geom.NSurfInt(I)}, I) = TmpSurfInt({1, Geom.NSurfInt(I)}, I);
-            Geom.SjdotN({1, Geom.NSurfInt(I)}, I) = TmpSjdotN({1, Geom.NSurfInt(I)}, I);
+            for (int i = 1; i <= Geom.NSurfInt(I); ++i) {
+                Geom.SurfInt(i, I) = TmpSurfInt(i, I);
+            }
+            for (int i = 1; i <= Geom.NSurfInt(I); ++i) {
+                Geom.SjdotN(i, I) = TmpSjdotN(i, I);
+            }
         }
 
         TmpSurfInt.deallocate();
@@ -2281,7 +2292,7 @@ namespace WindowComplexManager {
         Phi = 0.0;
 
         // Check if surface and vector are pointing in different directions
-        DotProd = dot(RayToFind, state.dataSurface->Surface(ISurf).NewellSurfaceNormalVector);
+        DotProd = RayToFind.dot(state.dataSurface->Surface(ISurf).NewellSurfaceNormalVector);
         if (DotProd <= 0.0) {
             RayIndex = 0;
             return RayIndex;
@@ -2309,7 +2320,7 @@ namespace WindowComplexManager {
             }
             // So here Theta > 0
             // Note the table searches always go to the limit point, which is not itself a basis element
-            IThUp = SearchAscTable(Theta, Basis.NThetas + 1, Basis.Thetas);
+            IThUp = SearchAscTable(Theta, Basis.Thetas);
             IThDn = IThUp - 1;
             // Determine which of the theta basis points is closer to the Theta value
             if (Theta <= Basis.Grid(Basis.BasisIndex(1, IThDn)).UpprTheta) {
@@ -2325,7 +2336,7 @@ namespace WindowComplexManager {
                 RayIndex = Basis.BasisIndex(1, ITheta);
                 return RayIndex;
             }
-            IPhUp = SearchAscTable(Phi, Basis.NPhis(ITheta) + 1, Basis.Phis(ITheta, _));
+            IPhUp = SearchAscTable(Phi, std::span(&Basis.Phis(ITheta, 1), Basis.NPhis(ITheta) + 1));
             IPhDn = IPhUp - 1;
             if (Phi <= Basis.Grid(Basis.BasisIndex(IPhDn, ITheta)).UpprPhi) {
                 IPhi = IPhDn;
@@ -2350,7 +2361,7 @@ namespace WindowComplexManager {
             }
             // So here Theta > 0
             // Note the table searches always go to the limit point, which is not itself a basis element
-            IThUp = SearchAscTable(Theta, Basis.NThetas + 1, Basis.Thetas);
+            IThUp = SearchAscTable(Theta, Basis.Thetas);
             IThDn = IThUp - 1;
             // Determine which of the theta basis points is closer to the Theta value
             if (Theta <= Basis.Grid(Basis.BasisIndex(1, IThDn)).UpprTheta) {
@@ -2418,12 +2429,12 @@ namespace WindowComplexManager {
 
         switch (RadType) {
         case RayIdentificationType::Front_Incident: {
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(-RdotY / Sint, -RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2433,11 +2444,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Front_Transmitted: {
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2447,12 +2458,12 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Front_Reflected: {
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2462,11 +2473,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Incident: {
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(-RdotY / Sint, -RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2 * Constant::Pi + Psi;
@@ -2476,12 +2487,12 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Transmitted: { // This is same as front reflected
-            RdotZ = dot(W6z, RayVect);
+            RdotZ = W6z.dot(RayVect);
             Cost = -RdotZ;
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2491,11 +2502,11 @@ namespace WindowComplexManager {
             break;
         }
         case RayIdentificationType::Back_Reflected: { // This is same as front transmitted
-            Cost = dot(W6z, RayVect);
+            Cost = W6z.dot(RayVect);
             Sint = std::sqrt(1.0 - pow_2(Cost));
             Theta = std::acos(Cost);
-            RdotY = dot(W6y, RayVect);
-            RdotX = dot(W6x, RayVect);
+            RdotY = W6y.dot(RayVect);
+            RdotX = W6x.dot(RayVect);
             Psi = std::atan2(RdotY / Sint, RdotX / Sint);
             if (Psi < 0.0) {
                 Phi = 2.0 * Constant::Pi + Psi;
@@ -2654,7 +2665,7 @@ namespace WindowComplexManager {
         //                 1 - ISO 15099,
         //                 2 - EN673 / ISO 10292 Declared,
         //                 3 - EN673 / ISO 10292 Design.
-        TARCOGParams::TARCOGThermalModel ThermalMod = TARCOGParams::TARCOGThermalModel::ISO15099; // Thermal model:
+        TARCOGParams::TARCOGThermalModel ThermalMod; // Thermal model:
         //                 0 - ISO15099
         //                 1 - Scaled Cavity Width (SCW)
         //                 2 - Convective Scalar Model (CSM)
@@ -2693,16 +2704,16 @@ namespace WindowComplexManager {
         Real64 HcUnshadedOut(0.0);     // Hc value at outdoor surface of an unshaded subsystem [W/m^2.K]
         Real64 HcUnshadedIn(0.0);      // Hc value at indoor surface of an unshaded subsystem [W/m^2.K]
 
-        int ZoneNum; // Zone number corresponding to SurfNum
+        int ZoneNum = 0; // Zone number corresponding to SurfNum
 
         int TotLay; // Total number of layers in a construction
         //   (sum of solid layers and gap layers)
-        int Lay;                  // Layer number
-        int IGlass;               // glass layer number (1,2,3,...)
-        int IGap;                 // Gap layer number (1,2,...)
-        int k;                    // Layer counter
-        int SurfNumAdj;           // An interzone surface's number in the adjacent zone
-        WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
+        int Lay;                                            // Layer number
+        int IGlass;                                         // glass layer number (1,2,3,...)
+        int IGap;                                           // Gap layer number (1,2,...)
+        int k;                                              // Layer counter
+        int SurfNumAdj = 0;                                 // An interzone surface's number in the adjacent zone
+        WinShadingType ShadeFlag = WinShadingType::Invalid; // Flag indicating whether shade or blind is on, and shade/blind position
         int IMix;
 
         // Real64 IncidentSolar;       // Solar incident on outside of window (W)
@@ -2747,10 +2758,9 @@ namespace WindowComplexManager {
         // Simon: locally used variables
         int ngllayer;
         int nglface;
-        int nglfacep;
         int ThermalModelNum;
-        Real64 rmir; // IR radiance of window's interior surround (W/m2)
-        Real64 outir;
+        Real64 rmir = 0.0; // IR radiance of window's interior surround (W/m2)
+        Real64 outir = 0.0;
         Real64 Ebout;
         Real64 dominantGapWidth; // store value for dominant gap width.  Used for airflow calculations
         Real64 edgeGlCorrFac;
@@ -2761,7 +2771,6 @@ namespace WindowComplexManager {
         auto &s_mat = state.dataMaterial;
         // fill local vars
 
-        CalcDeflection = TARCOGParams::DeflectionCalculation::NONE;
         CalcSHGC = 0;
 
         if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
@@ -2772,13 +2781,10 @@ namespace WindowComplexManager {
 
         ngllayer = state.dataConstruction->Construct(ConstrNum).TotGlassLayers;
         nglface = 2 * ngllayer;
-        nglfacep = nglface;
         hrin = 0.0;
         hcin = 0.0;
         hrout = 0.0;
         hcout = 0.0;
-
-        Pa = state.dataEnvrn->OutBaroPress;
 
         ThermalModelNum = state.dataConstruction->Construct(ConstrNum).BSDFInput.ThermalModel;
         standard = state.dataMaterial->WindowThermalModel(ThermalModelNum).CalculationStandard;
@@ -2954,7 +2960,7 @@ namespace WindowComplexManager {
                 auto const *matGap = dynamic_cast<Material::MaterialComplexWindowGap const *>(mat);
                 ++IGap;
                 gap(IGap) = matGap->Thickness;
-                presure(IGap) = matGap->Pressure;
+                presure(IGap + 1) = matGap->Pressure;
 
                 GapDefMax(IGap) = matGap->deflectedThickness;
 
@@ -2992,7 +2998,7 @@ namespace WindowComplexManager {
                 }
             } else {
                 ShowContinueError(state, "Illegal layer type in Construction:ComplexFenestrationState.");
-                ShowContinueError(state, "Allowed object are:");
+                ShowContinueError(state, "Allowed objects are:");
                 ShowContinueError(state, "   - WindowMaterial:Glazing");
                 ShowContinueError(state, "   - WindowMaterial:ComplexShade");
                 ShowContinueError(state, "   - WindowMaterial:Gap");
@@ -3000,6 +3006,11 @@ namespace WindowComplexManager {
             }
 
         } // End of loop over glass, gap and blind/shade layers in a window construction
+
+        // gap pressures are already set above, but we still need to set indoor/outdoor environment pressures here
+        Pa = state.dataEnvrn->OutBaroPress;
+        presure(1) = Pa;          // outdoor environment
+        presure(nlayer + 1) = Pa; // indoor environment
 
         if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
             // now calculate correct areas for multipliers
@@ -3050,8 +3061,6 @@ namespace WindowComplexManager {
             // is assumed that nothing is transmitted through
             asol(nlayer) += state.dataHeatBal->SurfQdotRadIntGainsInPerArea(SurfNum);
 
-            presure = state.dataEnvrn->OutBaroPress;
-
             // Instead of doing temperature guess get solution from previous iteration.  That should be much better than guess
             for (k = 1; k <= 2 * nlayer; ++k) {
                 theta(k) = state.dataSurface->SurfaceWindow(SurfNum).thetaFace[k];
@@ -3083,7 +3092,6 @@ namespace WindowComplexManager {
             fclr = 1.0;
             ibc(1) = 0;
             ibc(2) = 0;
-            presure = 101325.0;
             iwd = 0; // Windward wind direction
             isky = 0;
             esky = 1.0;
@@ -3213,15 +3221,16 @@ namespace WindowComplexManager {
                  edgeGlCorrFac);
 
         // process results from TARCOG
+        // cppcheck-suppress knownConditionTrueFalse -- nperr is initialized to 0 but gets modified inside TARCOG90() via reference
         if ((nperr > 0) && (nperr < 1000)) { // process error signal from tarcog
 
             ShowSevereError(state, "Window tarcog returned an error");
             tarcogErrorMessage = "message = \"" + tarcogErrorMessage + "\"";
             ShowContinueErrorTimeStamp(state, tarcogErrorMessage);
             if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
-                ShowContinueError(state, format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
+                ShowContinueError(state, std::format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
             }
-            ShowContinueError(state, format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
+            ShowContinueError(state, std::format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
             ShowFatalError(state, "halting because of error in tarcog");
         }
 
@@ -3281,7 +3290,7 @@ namespace WindowComplexManager {
                 //   IR to zone from glass when interior shade/blind is present.
                 ShadeArea = state.dataSurface->Surface(SurfNum).Area + state.dataSurface->SurfWinDividerArea(SurfNum);
                 sconsh = scon(ngllayer + 1) / thick(ngllayer + 1);
-                nglfacep = nglface + 2;
+                int const nglfacep = nglface + 2;
                 // CondHeatGainShade = ShadeArea * sconsh * (theta(nglfacep - 1) - theta(nglfacep));
                 EpsShIR1 = emis(nglface + 1);
                 EpsShIR2 = emis(nglface + 2);
@@ -3423,9 +3432,7 @@ namespace WindowComplexManager {
             // Save hcv for use in divider calc with interior or exterior shade (see CalcWinFrameAndDividerTemps)
             if (ShadeFlag == WinShadingType::IntShade) {
                 state.dataSurface->SurfWinConvCoeffWithShade(SurfNum) = 0.0;
-            }
 
-            if (ShadeFlag == WinShadingType::IntShade) {
                 auto const &surfShade = state.dataSurface->surfShades(SurfNum);
                 SurfInsideTemp = theta(2 * ngllayer + 2) - Constant::Kelvin;
 
@@ -3483,9 +3490,8 @@ namespace WindowComplexManager {
         indexNumber = counter;
     }
 
-    int SearchAscTable(Real64 const y,            // Value to be found in the table
-                       int const n,               // Number of values in the table
-                       Array1S<Real64> const ytab // Table of values, monotonic, ascending order
+    int SearchAscTable(Real64 const y,                    // Value to be found in the table
+                       std::span<const Real64> const ytab // Table of values, monotonic, ascending order
     )
     {
 
@@ -3496,8 +3502,8 @@ namespace WindowComplexManager {
         //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS FUNCTION:
-        // Given an ascending monotonic table with n entries, find  an index i
-        // such that ytab(i-1) < y <= ytab(i)
+        // Given an ascending monotonic table with n entries (n = ytab.size()), find  an index i
+        // such that ytab(i-1) < y <= ytab(i), using the 1-based indexes of the table (ytab[i-1] here)
 
         // METHODOLOGY EMPLOYED:
         // binary search
@@ -3509,8 +3515,9 @@ namespace WindowComplexManager {
         Real64 Yl; // Table value for lower end of interval
         Real64 Ym; // Table value for midpoint of interval
 
-        Yh = ytab(n);
-        Yl = ytab(1);
+        int const n = static_cast<int>(ytab.size()); // Number of values in the table
+        Yh = ytab[n - 1];
+        Yl = ytab[0];
         int Ih = n; // Index for upper end of interval
         int Il = 1; // Index for lower end of interval
         if (y < Yl) {
@@ -3527,7 +3534,7 @@ namespace WindowComplexManager {
             }
             // Midpoint index
             int Im = (Ih + Il) / 2;
-            Ym = ytab(Im);
+            Ym = ytab[Im - 1];
             if (y <= Ym) {
                 Yh = Ym;
                 Ih = Im;

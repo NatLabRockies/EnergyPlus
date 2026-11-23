@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -107,8 +107,6 @@ namespace IceThermalStorage {
         std::string Name;                     // User identifier
         std::string ITSType;                  // Ice Thermal Storage Type
         enum ITSType ITSType_Num;             // Storage Type as number (IceOnCoilInternal,IceOnCoilExternal)
-        int MapNum;                           // Number to Map structure
-        int UratePtr;                         // Charging/Discharging SchedulePtr: u value schedule
         Real64 ITSNomCap;                     // Design nominal capacity of Ice Thermal Storage [J] (user input in GJ)
         bool NomCapacityWasAutoSized = false; // Design storage capacity of Ice Thermal Storage system was autosized
         int PltInletNodeNum;                  // Node number on the inlet side of the plant
@@ -116,7 +114,6 @@ namespace IceThermalStorage {
                                               // loop topology variables
         PlantLocation plantLoc;
         Real64 DesignMassFlowRate;
-        Real64 FreezeTemp;
         bool ResetXForITSFlag;
         bool MyEnvrnFlag;
         Real64 UAIceCh;
@@ -129,8 +126,6 @@ namespace IceThermalStorage {
         Real64 ITSOutletSetPointTemp;
         Real64 ITSCoolingRate;
         Real64 ITSCoolingEnergy;
-        bool CheckEquipName;
-
         Real64 MyLoad;            // load requested by plant [W]
         Real64 Urate;             // [fraction]
         Real64 IceFracRemain;     // Fraction of ice remaining in storage [fraction]
@@ -148,11 +143,11 @@ namespace IceThermalStorage {
 
         // Default Constructor
         SimpleIceStorageData()
-            : MapNum(0), UratePtr(0), ITSNomCap(0.0), PltInletNodeNum(0), PltOutletNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), FreezeTemp(0.0),
-              ResetXForITSFlag(false), MyEnvrnFlag(true), UAIceCh(0.0), UAIceDisCh(0.0), HLoss(0.0), XCurIceFrac(0.0), ITSMassFlowRate(0.0),
-              ITSInletTemp(0.0), ITSOutletTemp(0.0), ITSOutletSetPointTemp(0.0), ITSCoolingRate(0.0), ITSCoolingEnergy(0.0), CheckEquipName(true),
-              MyLoad(0.0), Urate(0.0), IceFracRemain(0.0), ITSChargingRate(0.0), ITSChargingEnergy(0.0), ITSmdot(0.0), ITSCoolingRate_rep(0.0),
-              ITSCoolingEnergy_rep(0.0), MyPlantScanFlag(true), MyEnvrnFlag2(true)
+            : ITSNomCap(0.0), PltInletNodeNum(0), PltOutletNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), ResetXForITSFlag(false),
+              MyEnvrnFlag(true), UAIceCh(0.0), UAIceDisCh(0.0), HLoss(0.0), XCurIceFrac(0.0), ITSMassFlowRate(0.0), ITSInletTemp(0.0),
+              ITSOutletTemp(0.0), ITSOutletSetPointTemp(0.0), ITSCoolingRate(0.0), ITSCoolingEnergy(0.0), MyLoad(0.0), Urate(0.0), IceFracRemain(0.0),
+              ITSChargingRate(0.0), ITSChargingEnergy(0.0), ITSmdot(0.0), ITSCoolingRate_rep(0.0), ITSCoolingEnergy_rep(0.0), MyPlantScanFlag(true),
+              MyEnvrnFlag2(true)
         {
         }
 
@@ -203,11 +198,8 @@ namespace IceThermalStorage {
         int PlantOutNodeNum; // Plant outlet node number for ice storage unit
         PlantLocation plantLoc;
         Real64 DesignMassFlowRate;
-        int MapNum;                           // Number to Map structure
-        std::string DischargeCurveName;       // Curve name for discharging (used to find the curve index)
         int DischargeCurveNum;                // Curve index for discharging
         enum CurveVars DischargeCurveTypeNum; // Integer version of discharging curve independent variables type
-        std::string ChargeCurveName;          // Curve name for charging (used to find the curve index)
         int ChargeCurveNum;                   // Curve index for charging
         enum CurveVars ChargeCurveTypeNum;    // Integer version of charging curve independent variables type
         Real64 CurveFitTimeStep;              // Time step used to generate performance data [hours]
@@ -240,22 +232,19 @@ namespace IceThermalStorage {
         int DischargeErrorCount;          // Index for error counting routine
         int ChargeIterErrors;             // Number of max iterations exceeded errors during charging
         int ChargeErrorCount;             // Index for error counting routine
-        bool ResetXForITSFlag;
         bool MyEnvrnFlag;
-        bool CheckEquipName;
         bool MyPlantScanFlag;
         bool MyEnvrnFlag2;
         int TESSizingIndex = 0;
 
         // Default Constructor
         DetailedIceStorageData()
-            : NomCapacity(0.0), PlantInNodeNum(0), PlantOutNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), MapNum(0), DischargeCurveNum(0),
-              ChargeCurveNum(0), CurveFitTimeStep(1.0), DischargeParaElecLoad(0.0), ChargeParaElecLoad(0.0), TankLossCoeff(0.0), FreezingTemp(0.0),
-              CompLoad(0.0), IceFracChange(0.0), IceFracRemaining(1.0), IceFracOnCoil(1.0), DischargingRate(0.0), DischargingEnergy(0.0),
-              ChargingRate(0.0), ChargingEnergy(0.0), MassFlowRate(0.0), BypassMassFlowRate(0.0), TankMassFlowRate(0.0), InletTemp(0.0),
-              OutletTemp(0.0), TankOutletTemp(0.0), ParasiticElecRate(0.0), ParasiticElecEnergy(0.0), DischargeIterErrors(0), DischargeErrorCount(0),
-              ChargeIterErrors(0), ChargeErrorCount(0), ResetXForITSFlag(false), MyEnvrnFlag(true), CheckEquipName(true), MyPlantScanFlag(true),
-              MyEnvrnFlag2(true)
+            : NomCapacity(0.0), PlantInNodeNum(0), PlantOutNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), DischargeCurveNum(0), ChargeCurveNum(0),
+              CurveFitTimeStep(1.0), DischargeParaElecLoad(0.0), ChargeParaElecLoad(0.0), TankLossCoeff(0.0), FreezingTemp(0.0), CompLoad(0.0),
+              IceFracChange(0.0), IceFracRemaining(1.0), IceFracOnCoil(1.0), DischargingRate(0.0), DischargingEnergy(0.0), ChargingRate(0.0),
+              ChargingEnergy(0.0), MassFlowRate(0.0), BypassMassFlowRate(0.0), TankMassFlowRate(0.0), InletTemp(0.0), OutletTemp(0.0),
+              TankOutletTemp(0.0), ParasiticElecRate(0.0), ParasiticElecEnergy(0.0), DischargeIterErrors(0), DischargeErrorCount(0),
+              ChargeIterErrors(0), ChargeErrorCount(0), MyEnvrnFlag(true), MyPlantScanFlag(true), MyEnvrnFlag2(true)
         {
         }
 
@@ -314,7 +303,6 @@ struct IceThermalStorageData : BaseGlobalStruct
     int NumThermalStorageSizing = 0;
     int NumSimpleIceStorage = 0;
     int NumDetailedIceStorage = 0;
-    int TotalNumIceStorage = 0;
     EPVector<IceThermalStorage::ThermalStorageSizingData> ThermalStorageSizing;
     EPVector<IceThermalStorage::SimpleIceStorageData> SimpleIceStorage;
     EPVector<IceThermalStorage::DetailedIceStorageData> DetailedIceStorage;
@@ -332,7 +320,6 @@ struct IceThermalStorageData : BaseGlobalStruct
         this->getITSInput = true;
         this->NumSimpleIceStorage = 0;
         this->NumDetailedIceStorage = 0;
-        this->TotalNumIceStorage = 0;
         this->SimpleIceStorage.deallocate();
         this->DetailedIceStorage.deallocate();
     }

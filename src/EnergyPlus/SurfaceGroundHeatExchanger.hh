@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -56,6 +56,7 @@
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
@@ -263,7 +264,7 @@ namespace SurfaceGroundHeatExchanger {
     inline std::array<Real64, Construction::MaxCTFTerms>
     eoshiftArray(std::array<Real64, Construction::MaxCTFTerms> const &a, int const shift, Real64 const initialValue)
     {
-        std::array<Real64, Construction::MaxCTFTerms> o = {initialValue};
+        std::array<Real64, Construction::MaxCTFTerms> o = filled_array{initialValue};
         int const b(0 + std::max(shift, 0)), e(a.size() - 1 + std::min(shift, 0));
         for (int i = b, j = std::max(0 - shift, 0); i <= e; ++i, ++j) {
             o[j] = a[i];

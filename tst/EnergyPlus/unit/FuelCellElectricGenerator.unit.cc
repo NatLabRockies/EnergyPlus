@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -948,16 +948,17 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     auto exhaustHX = thisFC->ExhaustHX;
     EXPECT_EQ(exhaustHX.Name, thisFC->NameExhaustHX);
 
-    EXPECT_EQ("NODE 10", exhaustHX.WaterInNodeName);
     EXPECT_GT(exhaustHX.WaterInNode, 0);
+    EXPECT_EQ("NODE 10", state->dataLoopNodes->NodeID(exhaustHX.WaterInNode));
 
-    EXPECT_EQ("NODE 11", exhaustHX.WaterOutNodeName);
     EXPECT_GT(exhaustHX.WaterOutNode, 0);
+    EXPECT_EQ("NODE 11", state->dataLoopNodes->NodeID(exhaustHX.WaterOutNode));
 
     EXPECT_EQ(0.0004, exhaustHX.WaterVolumeFlowMax);
 
-    EXPECT_EQ("GENERATOR FUEL CELL EXHAUST GAS TO WATER HEAT EXCHANGER 1 EXHAUST OUTLET AIR NODE", exhaustHX.ExhaustOutNodeName);
     EXPECT_GT(exhaustHX.ExhaustOutNode, 0);
+    EXPECT_EQ("GENERATOR FUEL CELL EXHAUST GAS TO WATER HEAT EXCHANGER 1 EXHAUST OUTLET AIR NODE",
+              state->dataLoopNodes->NodeID(exhaustHX.ExhaustOutNode));
 
     EXPECT_ENUM_EQ(DataGenerators::ExhaustGasHX::Condensing, thisFC->ExhaustHX.HXmodelMode);
 
@@ -1013,6 +1014,25 @@ TEST_F(EnergyPlusFixture, FuelCellTest)
     EXPECT_TRUE(generatorController->electProdRate > 1.15 * generatorController->thermProdRate) << "Power to Heat Ratio appears too low";
     EXPECT_DOUBLE_EQ(exhaustHX.qHX, generatorController->thermProdRate);
     EXPECT_DOUBLE_EQ(generatorController->thermProdRate * 15 * 60, generatorController->thermalProd);
+
+    // The exhaust node enthalpy is based on the actual gas constituents, not moist-air psychrometrics.
+    auto &exhaustNode = state->dataLoopNodes->Node(thisFC->ExhaustHX.ExhaustOutNode);
+    thisFC->AuxilHeat.GasLibID = FuelCellElectricGenerator::GasID::Invalid;
+    thisFC->AuxilHeat.ConstitMolalFract = 0.0;
+    thisFC->AuxilHeat.GasLibID(1) = FuelCellElectricGenerator::GasID::Nitrogen;
+    thisFC->AuxilHeat.GasLibID(2) = FuelCellElectricGenerator::GasID::CarbonDioxide;
+    thisFC->AuxilHeat.GasLibID(3) = FuelCellElectricGenerator::GasID::Water;
+    thisFC->AuxilHeat.ConstitMolalFract(1) = 0.4;
+    thisFC->AuxilHeat.ConstitMolalFract(2) = 0.4;
+    thisFC->AuxilHeat.ConstitMolalFract(3) = 0.2;
+    thisFC->AuxilHeat.NdotAuxMix = 0.001;
+    thisFC->ExhaustHX.CondensateRate = 0.0;
+    thisFC->ExhaustHX.THXexh = 100.0;
+    thisFC->UpdateFuelCellGeneratorRecords(*state);
+
+    EXPECT_NEAR(0.028808, exhaustNode.MassFlowRate, 1.0e-8);
+    EXPECT_NEAR(429539.5, exhaustNode.Enthalpy, 0.1);
+    EXPECT_NEAR(0.12510414, exhaustNode.HumRat, 1.0e-8);
 }
 
 // This was marked with DISABLE_ and skipped for a long time.  I enabled it, and messed with it, but

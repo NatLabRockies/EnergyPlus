@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -61,9 +61,9 @@
 
 namespace EnergyPlus {
 
-namespace DataLoopNode {
+namespace Node {
 
-    enum class NodeFluidType
+    enum class FluidType
     {
         Invalid = -1,
         Blank, // TODO: remove, should be same as Invalid
@@ -105,11 +105,9 @@ namespace DataLoopNode {
     constexpr bool IncrementFluidStreamYes(true);
 
     // Valid Fluid Types for Nodes
-    constexpr static std::array<std::string_view, static_cast<int>(NodeFluidType::Num)> NodeFluidTypeNames = {
-        "blank", "Air", "Water", "Steam", "Electric"};
+    constexpr static std::array<std::string_view, static_cast<int>(FluidType::Num)> FluidTypeNames = {"blank", "Air", "Water", "Steam", "Electric"};
 
-    constexpr static std::array<std::string_view, static_cast<int>(NodeFluidType::Num)> NodeFluidTypeNamesUC = {
-        "BLANK", "AIR", "WATER", "STEAM", "ELECTRIC"};
+    constexpr static std::array<std::string_view, static_cast<int>(FluidType::Num)> FluidTypeNamesUC = {"BLANK", "AIR", "WATER", "STEAM", "ELECTRIC"};
 
     constexpr static std::array<std::string_view, static_cast<int>(ConnectionType::Num)> ConnectionTypeNames = {"blank",
                                                                                                                 "Inlet",
@@ -154,7 +152,7 @@ namespace DataLoopNode {
         AirLoopHVACDedicatedOutdoorAirSystem,
         AirLoopHVACExhaustSystem,
         AirLoopHVACMixer,
-        AirLoopHVACOutdoorAirsystem,
+        AirLoopHVACOutdoorAirSystem,
         AirLoopHVACReturnPath,
         AirLoopHVACReturnPlenum,
         AirLoopHVACSplitter,
@@ -274,9 +272,9 @@ namespace DataLoopNode {
         Duct,
         ElectricEquipmentITEAirCooled,
         EvaporativeCoolerDirectCelDekPad,
-        EvaporativeCoolerDirectResearchSpecial,
+        EvaporativeCoolerDirectUserEffectiveness,
         EvaporativeCoolerIndirectCelDekPad,
-        EvaporativeCoolerIndirectResearchSpecial,
+        EvaporativeCoolerIndirectUserEffectiveness,
         EvaporativeCoolerIndirectWetCoil,
         EvaporativeFluidCoolerSingleSpeed,
         EvaporativeFluidCoolerTwoSpeed,
@@ -441,7 +439,7 @@ namespace DataLoopNode {
     struct NodeData
     {
         // Members
-        NodeFluidType FluidType = NodeFluidType::Blank;      // must be one of the valid parameters
+        FluidType fluidType = FluidType::Blank;              // must be one of the valid parameters
         int FluidIndex = 0;                                  // For Fluid Properties
         Real64 Temp = 0.0;                                   // {C}
         Real64 TempMin = 0.0;                                // {C}
@@ -489,9 +487,7 @@ namespace DataLoopNode {
         Real64 EMSValueForOutAirWindDir = 0.0;   // value EMS is directing to use for outdoor air node's wind directio {degree}
         // Contaminant
         Real64 CO2 = 0.0;                  // {ppm}
-        Real64 CO2SetPoint = 0.0;          // {ppm}
         Real64 GenContam = 0.0;            // {ppm}
-        Real64 GenContamSetPoint = 0.0;    // {ppm}
         bool SPMNodeWetBulbRepReq = false; // Set to true when node has SPM which follows wetbulb
 
         // error message flag
@@ -529,7 +525,7 @@ namespace DataLoopNode {
         bool needsSetpointChecking = false;
         std::array<bool, (int)HVAC::CtrlVarType::Num> checkSetPoint = {false, false, false, false, false, false, false, false, false};
     };
-} // namespace DataLoopNode
+} // namespace Node
 
 struct LoopNodeData : BaseGlobalStruct
 {
@@ -538,11 +534,11 @@ struct LoopNodeData : BaseGlobalStruct
     int NumofSplitters = 0;
     int NumofMixers = 0;
     Array1D_string NodeID;
-    Array1D<DataLoopNode::NodeData> Node; // dim to num nodes in SimHVAC
-    DataLoopNode::NodeData DefaultNodeValues{DataLoopNode::NodeData()};
-    Array1D<DataLoopNode::MoreNodeData> MoreNodeInfo;
-    Array1D<DataLoopNode::MarkedNodeData> MarkedNode;
-    Array1D<DataLoopNode::NodeSetpointCheckData> NodeSetpointCheck;
+    Array1D<Node::NodeData> Node; // dim to num nodes in SimHVAC
+    Node::NodeData DefaultNodeValues{};
+    Array1D<Node::MoreNodeData> MoreNodeInfo;
+    Array1D<Node::MarkedNodeData> MarkedNode;
+    Array1D<Node::NodeSetpointCheckData> NodeSetpointCheck;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {

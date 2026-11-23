@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -49,7 +49,7 @@
 #define TARCOGGasses90_hh_INCLUDED
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
+#include <ObjexxFCL/Array1D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
@@ -83,7 +83,7 @@ namespace TARCOGGasses90 {
                   int &nperr,
                   std::string &ErrorMessage);
 
-    void GassesLow(Real64 tmean, Real64 mwght, Real64 pressure, Real64 gama, Real64 &cond, int &nperr, std::string &ErrorMessage);
+    void GassesLow(Real64 tmean, Real64 mwght, Real64 pressure, Real64 gama, Real64 &con, int &nperr, std::string &ErrorMessage);
 } // namespace TARCOGGasses90
 struct TARCOGGasses90Data : BaseGlobalStruct
 {

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -101,7 +101,7 @@ namespace SolarShading {
 
     void processShadowingInput(EnergyPlusData &state);
 
-    void checkScheduledSurfacePresent(EnergyPlusData &state);
+    void checkSurfaceExternalShadingSchedules(EnergyPlusData &state);
 
     void AllocateModuleArrays(EnergyPlusData &state);
 
@@ -413,7 +413,7 @@ struct SolarShadingData : BaseGlobalStruct
     int NumTooManyFigures = 0;
     int NumTooManyVertices = 0;
     int NumBaseSubSurround = 0;
-    Vector3<Real64> SUNCOS;   // Direction cosines of solar position
+    Vector3D SUNCOS;          // Direction cosines of solar position
     Real64 XShadowProjection; // X projection of a shadow (formerly called C)
     Real64 YShadowProjection; // Y projection of a shadow (formerly called S)
     Array1D<Real64> XTEMP;    // Temporary 'X' values for HC vertices of the overlap
@@ -651,7 +651,7 @@ struct SolarShadingData : BaseGlobalStruct
     // Default Constructor
     SolarShadingData()
         : cOverLapStatus(6, {"No-Overlap", "1st-Surf-within-2nd", "2nd-Surf-within-1st", "Partial-Overlap", "Too-Many-Vertices", "Too-Many-Figures"}),
-          SUNCOS(3)
+          SUNCOS()
     {
     }
 };

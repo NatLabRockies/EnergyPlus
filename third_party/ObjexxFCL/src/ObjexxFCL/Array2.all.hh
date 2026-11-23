@@ -14,6 +14,5 @@
 // Licensing is available from Objexx Engineering, Inc.:  http://objexx.com
 
 // ObjexxFCL Headers
-#include <ObjexxFCL/Array2A.hh>
 
 #endif // ObjexxFCL_Array2_all_hh_INCLUDED

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -77,10 +77,11 @@ namespace SteamCoils {
     struct SteamCoilEquipConditions
     {
         // Members
-        std::string Name;                      // Name of the SteamCoil
-        std::string SteamCoilTypeA;            // Type of SteamCoil ie. Heating or Cooling
-        int SteamCoilType;                     // Type of SteamCoil ie. Heating or Cooling
-        int SteamCoilModel;                    // Type of SteamCoil ie. Simple, Detailed, etc.
+        std::string Name; // Name of the SteamCoil
+
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+        int coilReportNum = -1;
+
         Sched::Schedule *availSched = nullptr; // operating schedule
         Real64 InletAirMassFlowRate;           // MassFlow through the SteamCoil being Simulated [kg/s]
         Real64 OutletAirMassFlowRate;          // MassFlow throught the SteamCoil being Simulated[kg/s]
@@ -136,16 +137,16 @@ namespace SteamCoils {
 
         // Default Constructor
         SteamCoilEquipConditions()
-            : SteamCoilType(0), SteamCoilModel(0), InletAirMassFlowRate(0.0), OutletAirMassFlowRate(0.0), InletAirTemp(0.0), OutletAirTemp(0.0),
-              InletAirHumRat(0.0), OutletAirHumRat(0.0), InletAirEnthalpy(0.0), OutletAirEnthalpy(0.0), TotSteamCoilLoad(0.0), SenSteamCoilLoad(0.0),
-              TotSteamHeatingCoilEnergy(0.0), TotSteamCoolingCoilEnergy(0.0), SenSteamCoolingCoilEnergy(0.0), TotSteamHeatingCoilRate(0.0),
-              LoopLoss(0.0), TotSteamCoolingCoilRate(0.0), SenSteamCoolingCoilRate(0.0), LeavingRelHum(0.0), DesiredOutletTemp(0.0),
-              DesiredOutletHumRat(0.0), InletSteamTemp(0.0), OutletSteamTemp(0.0), InletSteamMassFlowRate(0.0), OutletSteamMassFlowRate(0.0),
-              MaxSteamVolFlowRate(0.0), MaxSteamMassFlowRate(0.0), InletSteamEnthalpy(0.0), OutletWaterEnthalpy(0.0), InletSteamPress(0.0),
-              InletSteamQuality(0.0), OutletSteamQuality(0.0), DegOfSubcooling(0.0), LoopSubcoolReturn(0.0), AirInletNodeNum(0), AirOutletNodeNum(0),
-              SteamInletNodeNum(0), SteamOutletNodeNum(0), TempSetPointNodeNum(0), plantLoc{}, CoilType(DataPlant::PlantEquipmentType::Invalid),
-              OperatingCapacity(0.0), DesiccantRegenerationCoil(false), DesiccantDehumNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0),
-              FaultyCoilSATOffset(0.0), reportCoilFinalSizes(true), DesCoilCapacity(0.0), DesAirVolFlow(0.0)
+            : InletAirMassFlowRate(0.0), OutletAirMassFlowRate(0.0), InletAirTemp(0.0), OutletAirTemp(0.0), InletAirHumRat(0.0), OutletAirHumRat(0.0),
+              InletAirEnthalpy(0.0), OutletAirEnthalpy(0.0), TotSteamCoilLoad(0.0), SenSteamCoilLoad(0.0), TotSteamHeatingCoilEnergy(0.0),
+              TotSteamCoolingCoilEnergy(0.0), SenSteamCoolingCoilEnergy(0.0), TotSteamHeatingCoilRate(0.0), LoopLoss(0.0),
+              TotSteamCoolingCoilRate(0.0), SenSteamCoolingCoilRate(0.0), LeavingRelHum(0.0), DesiredOutletTemp(0.0), DesiredOutletHumRat(0.0),
+              InletSteamTemp(0.0), OutletSteamTemp(0.0), InletSteamMassFlowRate(0.0), OutletSteamMassFlowRate(0.0), MaxSteamVolFlowRate(0.0),
+              MaxSteamMassFlowRate(0.0), InletSteamEnthalpy(0.0), OutletWaterEnthalpy(0.0), InletSteamPress(0.0), InletSteamQuality(0.0),
+              OutletSteamQuality(0.0), DegOfSubcooling(0.0), LoopSubcoolReturn(0.0), AirInletNodeNum(0), AirOutletNodeNum(0), SteamInletNodeNum(0),
+              SteamOutletNodeNum(0), TempSetPointNodeNum(0), plantLoc{}, CoilType(DataPlant::PlantEquipmentType::Invalid), OperatingCapacity(0.0),
+              DesiccantRegenerationCoil(false), DesiccantDehumNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0),
+              reportCoilFinalSizes(true), DesCoilCapacity(0.0), DesAirVolFlow(0.0)
         {
         }
     };
@@ -240,9 +241,9 @@ namespace SteamCoils {
     );
 
     Real64 GetCoilCapacity([[maybe_unused]] EnergyPlusData &state,
-                           std::string const &CoilType, // must match coil types in this module
-                           std::string const &CoilName, // must match coil names for the coil type
-                           bool &ErrorsFound            // set to true if problem
+                           std::string_view const CoilType, // must match coil types in this module
+                           std::string const &CoilName,     // must match coil names for the coil type
+                           bool &ErrorsFound                // set to true if problem
     );
 
     CoilControlType GetTypeOfCoil(EnergyPlusData &state,

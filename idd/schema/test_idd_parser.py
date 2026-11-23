@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -53,6 +53,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import warnings
+
 import idd_parser
 import pytest
 
@@ -71,6 +73,7 @@ OkObject,
       \minimum 1
 
 NotBrokenObject,
+  \obsolete New=>deleted
   A1, \field Name
   N2; \field Last Field
       \maximum 10
@@ -85,6 +88,7 @@ Obj2,
             ".*": {"type": "object", "properties": {"last_field": {"type": "number", "maximum": 10.0}}}
         },
         "group": "test",
+        "obsolete": "deleted",
         "name": {"type": "string"},
         "legacy_idd": {
             "field_info": {
@@ -97,6 +101,51 @@ Obj2,
         },
         "type": "object",
     }
+
+
+@pytest.mark.parametrize("prefix", ["New=>", "new=>"])
+def test_obsolete_replacement_is_normalized(prefix):
+    assert idd_parser.handle_obsolete(f"{prefix}  Replacement:Object  ", "Old:Object") == "Replacement:Object"
+
+
+def test_obsolete_mixed_case_deleted_is_normalized_in_schema():
+    data = idd_parser.Data()
+    data.file = r"""ObsoleteObject,
+  \obsolete New=>DeleteD
+  A1; \field Name
+"""
+    with pytest.warns(SyntaxWarning, match="converted to 'deleted'"):
+        idd_parser.parse_idd(data)
+
+    schema_object = data.schema["properties"]["ObsoleteObject"]
+    assert schema_object["obsolete"] == "deleted"
+    assert "obsolete" not in schema_object["patternProperties"][".*"]
+
+
+@pytest.mark.parametrize("value", ["Deleted", "DELETED", "dElEtEd"])
+def test_obsolete_deleted_is_case_insensitive(value):
+    with pytest.warns(SyntaxWarning, match="converted to 'deleted'"):
+        assert idd_parser.handle_obsolete(f"New=>{value}", "Old:Object") == "deleted"
+
+
+def test_obsolete_deleted_canonical_case_does_not_warn():
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        assert idd_parser.handle_obsolete("New=>deleted", "Old:Object") == "deleted"
+    assert not caught
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ("New=>", "insufficient data"),
+        ("Old=>Replacement:Object", "expected 'New=>'"),
+        ("New=>   ", "expected non-empty string"),
+    ],
+)
+def test_obsolete_invalid_values(value, message):
+    with pytest.raises(ValueError, match=message):
+        idd_parser.handle_obsolete(value, "BrokenObject")
 
 
 def test_broken_idd():
@@ -222,3 +271,38 @@ BrokenObject,
   N1; \field Number 1
      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
     )
+
+
+def test_idd_type_node():
+    data = idd_parser.Data()
+    data.file = r"""
+\group test
+
+MyObject,
+  A1; \field Inlet Node Name
+      \type node
+      \required-field
+"""
+    idd_parser.parse_idd(data)
+    assert data.schema["properties"].keys() == {"MyObject"}
+    assert data.schema["properties"]["MyObject"] == {
+        "patternProperties": {
+            ".*": {
+                "type": "object",
+                "properties": {"inlet_node_name": {"type": "string", "data_type": "node"}},
+                "required": [
+                    "inlet_node_name",
+                ],
+            }
+        },
+        "group": "test",
+        "legacy_idd": {
+            "field_info": {
+                "inlet_node_name": {"field_name": "Inlet Node Name", "field_type": "a"},
+            },
+            "fields": ["inlet_node_name"],
+            "alphas": {"fields": ["inlet_node_name"]},
+            "numerics": {"fields": []},
+        },
+        "type": "object",
+    }

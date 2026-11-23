@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -51,7 +51,6 @@
 // C++ Headers
 #include <string>
 #include <unordered_set>
-#include <vector>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
@@ -59,10 +58,10 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FilledArray.hh>
 
 namespace EnergyPlus {
 
@@ -104,8 +103,10 @@ namespace ZoneTempPredictorCorrector {
         // This entire struct is re-initialized during the simulation, so no static data may be stored here (e.g. zone or space characteristics)
 
         // Zone or space air drybulb temperature conditions
-        Real64 MAT = DataHeatBalance::ZoneInitialTemp;      // Mean Air Temperature at end of zone time step [C]
-        Real64 MRT = DataHeatBalance::ZoneInitialTemp;      // Mean Radiant Temperature [C]
+        Real64 MAT = DataHeatBalance::ZoneInitialTemp; // Mean Air Temperature at end of zone time step [C]
+        Real64 MRT =
+            DataHeatBalance::ZoneInitialTemp; // Mean Radiant Temperature using the ZoneMRTCalculation definition defined by the input object [C]
+        Real64 stdMRT = DataHeatBalance::ZoneInitialTemp;   // "Standard" Mean Radiant Temperature using the standard area-emissivity weighting [C]
         Real64 ZTAV = DataHeatBalance::ZoneInitialTemp;     // Air Temperature Averaged over the zone time step (during HVAC Time Steps)
         Real64 ZT = DataHeatBalance::ZoneInitialTemp;       // Air Temperature Averaged over the system time step
         Real64 ZTAVComf = DataHeatBalance::ZoneInitialTemp; // Air Temperature Averaged used in thermal comfort models (currently Fanger model only) -
@@ -158,7 +159,6 @@ namespace ZoneTempPredictorCorrector {
         Real64 SumHmAW = 0.0;   // SUM OF ZONE AREA*Moist CONVECTION COEFF*INSIDE Humidity Ratio
         Real64 SumHmARa = 0.0;  // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air
         Real64 SumHmARaW = 0.0; // SUM OF ZONE AREA*Moist CONVECTION COEFF*Rho Air* Inside Humidity Ration
-        Real64 SumHmARaZ = 0.0;
 
         Real64 TempDepCoef = 0.0; // Temperature dependent coefficient
         Real64 TempIndCoef = 0.0; // Temperature ndependent coefficient
@@ -384,8 +384,8 @@ namespace ZoneTempPredictorCorrector {
 
 struct ZoneTempPredictorCorrectorData : BaseGlobalStruct
 {
-    std::array<int, (int)HVAC::SetptType::Num> NumTempControls = {0};
-    std::array<int, (int)HVAC::SetptType::Num> NumComfortControls = {0};
+    std::array<int, (int)HVAC::SetptType::Num> NumTempControls{};
+    std::array<int, (int)HVAC::SetptType::Num> NumComfortControls{};
 
     // Number of zone with staged controlled objects
     int NumStageCtrZone = 0;
@@ -414,7 +414,7 @@ struct ZoneTempPredictorCorrectorData : BaseGlobalStruct
     std::array<Array1D<ZoneTempPredictorCorrector::ZoneSetptScheds>, (int)HVAC::SetptType::Num> comfortSetptScheds;
     ZoneTempPredictorCorrector::AdaptiveComfortDailySetPointSchedule AdapComfortDailySetPointSchedule;
 
-    std::array<Real64, 7> AdapComfortSetPointSummerDesDay = {-1};
+    std::array<Real64, 7> AdapComfortSetPointSummerDesDay = filled_array{-1.0};
 
     bool CalcZoneAirComfortSetPointsFirstTimeFlag = true; // Flag set to make sure you get input once
     bool MyEnvrnFlag = true;

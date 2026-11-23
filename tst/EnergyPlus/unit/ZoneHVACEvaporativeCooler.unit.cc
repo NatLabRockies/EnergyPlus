@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -80,7 +80,7 @@ public:
     bool FirstHVACIteration = true;
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -136,7 +136,7 @@ protected:
         state->dataZoneEquip->ZoneEquipList(1).EquipType(1) = DataZoneEquipment::ZoneEquipType::EvaporativeCooler;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown();
     }
@@ -264,7 +264,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectCelDekPad_CyclingUnit_Sim)
     EXPECT_NEAR(HalfOfFullLoad, SensOutputProvided, 0.01);
 }
 
-TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
+TEST_F(ZoneHVACEvapCoolerUnitTest, DirectUserEffectiveness_CyclingUnit_Sim)
 {
     int ActualZoneNum = 1;
     int ZoneEquipIndex = 1;
@@ -287,8 +287,8 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "   ZoneTemperatureDeadbandOnOffCycling,  !- Cooler Unit Control Method",
         "   1.0,                          !- Throttling Range Temperature Difference {deltaC}",
         "   100.0,                        !- Cooling Load Control Threshold Heat Transfer Rate {W}",
-        "   EvaporativeCooler:Direct:ResearchSpecial,  !- First Evaporative Cooler Object Type",
-        "   Direct ResearchSpecial EvapCooler;  !- First Evaporative Cooler Object Name",
+        "   EvaporativeCooler:Direct:UserEffectiveness,  !- First Evaporative Cooler Object Type",
+        "   Direct UserEffectiveness EvapCooler;  !- First Evaporative Cooler Object Name",
 
         " Fan:OnOff,",
         "    ZoneEvapCool Supply Fan,     !- Name",
@@ -301,14 +301,14 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "    ZoneEvapCool OA Inlet,       !- Air Inlet Node Name",
         "    ZoneEvapCool Fan outlet;     !- Air Outlet Node Name",
 
-        " EvaporativeCooler:Direct:ResearchSpecial,",
-        "   Direct ResearchSpecial EvapCooler,  !- Name",
+        " EvaporativeCooler:Direct:UserEffectiveness,",
+        "   Direct UserEffectiveness EvapCooler,  !- Name",
         "    ,                            !- Availability Schedule Name",
         "    0.7,                         !- Cooler Design Effectiveness",
         "    ,                            !- Effectiveness Flow Ratio Modifier Curve Name",
         "    1.0,                         !- Primary Air Design Flow Rate {m3/s}",
         "    55,                          !- Recirculating Water Pump Power Consumption {W}",
-        "    ,                            !- Water Pump Power Sizing Factor {W/(m3/s)}",
+        "    ,                            !- Design Water Pump Power Per Unit Flow Rate {W/(m3/s)}",
         "    ,                            !- Water Pump Power Modifier Curve Name",
         "    ZoneEvapCool Fan outlet,     !- Air Inlet Node Name",
         "    ZoneEvapCool Inlet Node,     !- Air Outlet Node Name",

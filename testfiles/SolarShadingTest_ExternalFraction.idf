@@ -82,7 +82,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,26.1;
+  Version,27.1;
 
   Timestep,4;
 
@@ -669,215 +669,6 @@
     ,                        !- Pixel Counting Resolution
     ,                        !- Sky Diffuse Modeling Algorithm
     Yes;                     !- Output External Shading Calculation Results
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:EAST SIDE TREE,   !- Name
-    EAST SIDE TREE,          !- Exterior Surface Name
-    ExtShadingSch:EAST SIDE TREE,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:EAST SIDE TREE,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    2,                       !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:WEST SIDE TREE,   !- Name
-    WEST SIDE TREE,          !- Exterior Surface Name
-    ExtShadingSch:WEST SIDE TREE,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:WEST SIDE TREE,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    4,                       !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN001:WALL001:SHADE001,  !- Name
-    ZN001:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN001:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN001:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    6,                       !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN002:WALL001:SHADE001,  !- Name
-    ZN002:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN002:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN002:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    8,                       !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN003:WALL001:SHADE001,  !- Name
-    ZN003:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN003:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN003:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    10,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN004:WALL001:SHADE001,  !- Name
-    ZN004:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN004:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN004:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    12,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN005:WALL001:SHADE001,  !- Name
-    ZN005:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN005:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN005:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    14,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN006:WALL001:SHADE001,  !- Name
-    ZN006:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN006:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN006:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    16,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN007:WALL001:SHADE001,  !- Name
-    ZN007:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN007:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN007:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    18,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN008:WALL001:SHADE001,  !- Name
-    ZN008:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN008:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN008:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    20,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
-
-  SurfaceProperty:LocalEnvironment,
-    LocEnv:ZN009:WALL001:SHADE001,  !- Name
-    ZN009:WALL001:SHADE001,  !- Exterior Surface Name
-    ExtShadingSch:ZN009:WALL001:SHADE001,  !- Sunlit Fraction Schedule Name
-    ,                        !- Surrounding Surfaces Object Name
-    ;                        !- Outdoor Air Node Name
-
-  Schedule:File,
-    ExtShadingSch:ZN009:WALL001:SHADE001,  !- Name
-    Fraction,                !- Schedule Type Limits Name
-    SolarShadingTest_Shading_Data.csv,  !- File Name
-    22,                      !- Column Number
-    1,                       !- Rows to Skip at Top
-    ,                        !- Number of Hours of Data
-    ,                        !- Column Separator
-    ,                        !- Interpolate to Timestep
-    15,                      !- Minutes per Item
-    ;                        !- Adjust Schedule for Daylight Savings
 
   SurfaceProperty:LocalEnvironment,
     LocEnv:ZN001:WALL001,    !- Name
@@ -4270,6 +4061,7 @@
     ZONE 1 @ 200 601 0 T CONTROLS,  !- Name
     ZONE 1 @ 200 601 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 1 @ 200 601 0 T SETPOINTS;  !- Control 1 Name
 
@@ -4347,6 +4139,7 @@
     ZONE 2 @ 200 200 0 T CONTROLS,  !- Name
     ZONE 2 @ 200 200 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 2 @ 200 200 0 T SETPOINTS;  !- Control 1 Name
 
@@ -4424,6 +4217,7 @@
     ZONE 3 @ 200 610 0 T CONTROLS,  !- Name
     ZONE 3 @ 200 610 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 3 @ 200 610 0 T SETPOINTS;  !- Control 1 Name
 
@@ -4501,6 +4295,7 @@
     ZONE 4 @ 200 600 0 T CONTROLS,  !- Name
     ZONE 4 @ 200 600 0 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 4 @ 200 600 0 T SETPOINTS;  !- Control 1 Name
 
@@ -4578,6 +4373,7 @@
     ZONE 5 @ 200 601 1 T CONTROLS,  !- Name
     ZONE 5 @ 200 601 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 5 @ 200 601 1 T SETPOINTS;  !- Control 1 Name
 
@@ -4655,6 +4451,7 @@
     ZONE 6 @ 200 200 1 T CONTROLS,  !- Name
     ZONE 6 @ 200 200 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 6 @ 200 200 1 T SETPOINTS;  !- Control 1 Name
 
@@ -4732,6 +4529,7 @@
     ZONE 7 @ 200 610 1 T CONTROLS,  !- Name
     ZONE 7 @ 200 610 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 7 @ 200 610 1 T SETPOINTS;  !- Control 1 Name
 
@@ -4809,6 +4607,7 @@
     ZONE 8 @ 200 200 1 T CONTROLS,  !- Name
     ZONE 8 @ 200 200 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 8 @ 200 200 1 T SETPOINTS;  !- Control 1 Name
 
@@ -4886,6 +4685,7 @@
     ZONE 9 @ 200 600 1 T CONTROLS,  !- Name
     ZONE 9 @ 200 600 1 T,    !- Zone or ZoneList Name
     Zone Control Type Schedule,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     ZONE 9 @ 200 600 1 T SETPOINTS;  !- Control 1 Name
 
@@ -4950,8 +4750,6 @@
   Output:Variable,*,Zone Mean Air Temperature,hourly;
 
   Output:Variable,*,Zone Total Internal Latent Gain Energy,hourly;
-
-  Output:Variable,*,Zone Mean Radiant Temperature,hourly;
 
   Output:Variable,*,Zone Mean Radiant Temperature,hourly;
 

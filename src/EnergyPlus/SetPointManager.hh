@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -203,7 +203,6 @@ namespace SetPointManager {
     struct SPMSingleZoneReheat : SPMBase // Derived type for the Single Zone Reheat Setpoint Manager data
     {
         // Members
-        std::string ctrlZoneName; // name of the control zone (zone with main thermostat)
         int ctrlZoneNum = 0;      // number (index into Zone array) of control zone
         int zoneNodeNum = 0;      // zone node number
         int zoneInletNodeNum = 0; // inlet node number for the SZRH air
@@ -221,7 +220,6 @@ namespace SetPointManager {
     struct SPMSingleZoneTemp : SPMBase
     {
         // Members
-        std::string ctrlZoneName; // name of the control zone (zone with main thermostat)
         int ctrlZoneNum = 0;      // number (index into Zone array) of control zone
         int zoneNodeNum = 0;      // zone node number
         int zoneInletNodeNum = 0; // inlet node number for the supply air
@@ -432,7 +430,7 @@ namespace SetPointManager {
 
         // Calculation method
         void calculate(EnergyPlusData &state) override;
-        // void calculate(EnergyPlusData &state, DataLoopNode::NodeData &returnNode, DataLoopNode::NodeData &supplyNode);
+        // void calculate(EnergyPlusData &state, Node::NodeData &returnNode, Node::NodeData &supplyNode);
     };
 
     struct SPMTESScheduled : SPMBase // Derived type for Scheduled TES Setpoint Manager data

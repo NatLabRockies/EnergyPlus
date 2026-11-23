@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,20 +45,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataStringGlobals.hh>
-#include <EnergyPlus/FileSystem.hh>
-#include <EnergyPlus/InputProcessing/InputProcessor.hh>
-#include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/PluginManager.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
-
-#include <algorithm>
-#include <nlohmann/json.hpp>
-
+// Third Party Headers
 #if LINK_WITH_PYTHON
-
 #    ifdef _DEBUG
 // We don't want to try to import a debug build of Python here
 // so if we are building a Debug build of the C++ code, we need
@@ -70,36 +58,27 @@
 #    else
 #        include <Python.h>
 #    endif
+#endif
 
-#    include <fmt/format.h>
-template <> struct fmt::formatter<PyStatus>
-{
-    // parse is inherited from formatter<string_view>.
-    static constexpr auto parse(const format_parse_context &ctx) -> format_parse_context::iterator
-    {
-        return ctx.begin();
-    }
+// C++ Headers
+#include <algorithm>
+#include <format>
 
-    static auto format(const PyStatus &status, format_context &ctx) -> format_context::iterator
-    {
-        if (PyStatus_Exception(status) == 0) {
-            return ctx.out();
-        }
-        if (PyStatus_IsExit(status) != 0) {
-            return format_to(ctx.out(), "Exited with code {}", status.exitcode);
-        }
-        if (PyStatus_IsError(status) != 0) {
-            auto it = ctx.out();
-            it = format_to(it, "Fatal Python error: ");
-            if (status.func != nullptr) {
-                it = format_to(it, "{}: ", status.func);
-            }
-            it = format_to(it, "{}", status.err_msg);
-            return it;
-        }
-        return ctx.out();
-    }
-}; // namespace fmt
+#include <nlohmann/json.hpp>
+
+// EnergyPlus Headers
+#include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
+#include <EnergyPlus/DataStringGlobals.hh>
+#include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/Formatters.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/PluginManager.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
+
+#if LINK_WITH_PYTHON
+#    include <EnergyPlus/PythonHelpers.hh>
 #endif
 
 namespace EnergyPlus::PluginManagement {
@@ -129,9 +108,7 @@ void registerUserDefinedCallback(const EnergyPlusData &state, const std::functio
 void onBeginEnvironment(const EnergyPlusData &state)
 {
     // reset vars and trends -- sensors and actuators are reset by EMS
-    for (auto &v : state.dataPluginManager->globalVariableValues) {
-        v = 0;
-    }
+    std::fill(state.dataPluginManager->globalVariableValues.begin(), state.dataPluginManager->globalVariableValues.end(), 0.0);
     // reinitialize trend variables so old data are purged
     for (auto &tr : state.dataPluginManager->trends) {
         tr.reset();
@@ -194,13 +171,12 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
     if (outputVarInstances > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(sOutputVariable);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state, format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sOutputVariable)); // LCOV_EXCL_LINE
+            ShowSevereError(state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sOutputVariable)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
             auto const &fields = instance.value();
             std::string const &thisObjectName = instance.key();
-            std::string const objNameUC = Util::makeUPPER(thisObjectName);
             // no need to validate name, the JSON will validate that.
             state.dataInputProcessing->inputProcessor->markObjectAsUsed(sOutputVariable, thisObjectName);
             std::string varName = fields.at("python_plugin_variable_name").get<std::string>();
@@ -216,7 +192,7 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
             int variableHandle = EnergyPlus::PluginManagement::PluginManager::getGlobalVariableHandle(state, varName);
             if (variableHandle == -1) {
                 ShowSevereError(state, "Failed to match Python Plugin Output Variable");
-                ShowContinueError(state, format("Trying to create output instance for variable name \"{}\"", varName));
+                ShowContinueError(state, std::format("Trying to create output instance for variable name \"{}\"", varName));
                 ShowContinueError(state, "No match found, make sure variable is listed in PythonPlugin:Variables object");
                 ShowFatalError(state, "Python Plugin Output Variable problem causes program termination");
             }
@@ -272,7 +248,7 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                 // We are doing a metered type, we need to get the extra stuff
                 // Resource Type
                 if (fields.find("resource_type") == fields.end()) {
-                    ShowSevereError(state, format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
+                    ShowSevereError(state, std::format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
                     ShowContinueError(state, "The variable was marked as metered, but did not define a resource type");
                     ShowContinueError(state, "For metered variables, the resource type, group type, and end use category must be defined");
                     ShowFatalError(state, "Input error on PythonPlugin:OutputVariable causes program termination");
@@ -299,13 +275,13 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                     resource = Constant::eResource::SolarAir;
                 } else if ((resource = static_cast<Constant::eResource>(getEnumValue(Constant::eResourceNamesUC, resourceType))) ==
                            Constant::eResource::Invalid) {
-                    ShowSevereError(state, format("Invalid input for PythonPlugin:OutputVariable, unexpected Resource Type = {}", resourceType));
+                    ShowSevereError(state, std::format("Invalid input for PythonPlugin:OutputVariable, unexpected Resource Type = {}", resourceType));
                     ShowFatalError(state, "Python plugin output variable input problem causes program termination");
                 }
 
                 // Group Type
                 if (fields.find("group_type") == fields.end()) {
-                    ShowSevereError(state, format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
+                    ShowSevereError(state, std::format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
                     ShowContinueError(state, "The variable was marked as metered, but did not define a group type");
                     ShowContinueError(state, "For metered variables, the resource type, group type, and end use category must be defined");
                     ShowFatalError(state, "Input error on PythonPlugin:OutputVariable causes program termination");
@@ -313,13 +289,13 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                 std::string const groupType = EnergyPlus::Util::makeUPPER(fields.at("group_type").get<std::string>());
                 auto group = static_cast<OutputProcessor::Group>(getEnumValue(OutputProcessor::groupNamesUC, groupType));
                 if (group == OutputProcessor::Group::Invalid) {
-                    ShowSevereError(state, format("Invalid input for PythonPlugin:OutputVariable, unexpected Group Type = {}", groupType));
+                    ShowSevereError(state, std::format("Invalid input for PythonPlugin:OutputVariable, unexpected Group Type = {}", groupType));
                     ShowFatalError(state, "Python plugin output variable input problem causes program termination");
                 }
 
                 // End Use Type
                 if (fields.find("end_use_category") == fields.end()) {
-                    ShowSevereError(state, format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
+                    ShowSevereError(state, std::format("Input error on PythonPlugin:OutputVariable = {}", thisObjectName));
                     ShowContinueError(state, "The variable was marked as metered, but did not define an end-use category");
                     ShowContinueError(state, "For metered variables, the resource type, group type, and end use category must be defined");
                     ShowFatalError(state, "Input error on PythonPlugin:OutputVariable causes program termination");
@@ -328,7 +304,7 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                 auto endUseCat = static_cast<OutputProcessor::EndUseCat>(getEnumValue(OutputProcessor::endUseCatNamesUC, endUse));
 
                 if (endUseCat == OutputProcessor::EndUseCat::Invalid) {
-                    ShowSevereError(state, format("Invalid input for PythonPlugin:OutputVariable, unexpected End-use Subcategory = {}", endUse));
+                    ShowSevereError(state, std::format("Invalid input for PythonPlugin:OutputVariable, unexpected End-use Subcategory = {}", endUse));
                     ShowFatalError(state, "Python plugin output variable input problem causes program termination");
                 }
 
@@ -338,8 +314,8 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
                      endUseCat == OutputProcessor::EndUseCat::Chillers || endUseCat == OutputProcessor::EndUseCat::Boilers ||
                      endUseCat == OutputProcessor::EndUseCat::Baseboard || endUseCat == OutputProcessor::EndUseCat::HeatRecoveryForCooling ||
                      endUseCat == OutputProcessor::EndUseCat::HeatRecoveryForHeating)) {
-                    ShowWarningError(state, format("Inconsistent resource type input for PythonPlugin:OutputVariable = {}", thisObjectName));
-                    ShowContinueError(state, format("For end use subcategory = {}, resource type must be EnergyTransfer", endUse));
+                    ShowWarningError(state, std::format("Inconsistent resource type input for PythonPlugin:OutputVariable = {}", thisObjectName));
+                    ShowContinueError(state, std::format("For end use subcategory = {}, resource type must be EnergyTransfer", endUse));
                     ShowContinueError(state, "Resource type is being reset to EnergyTransfer and the simulation continues...");
                     resource = Constant::eResource::EnergyTransfer;
                 }
@@ -380,98 +356,11 @@ void PluginManager::setupOutputVariables([[maybe_unused]] EnergyPlusData &state)
 } // setupOutputVariables()
 
 #if LINK_WITH_PYTHON
-void initPython(EnergyPlusData &state, fs::path const &pathToPythonPackages)
-{
-    PyStatus status;
-
-    // first pre-config Python so that it can speak UTF-8
-    PyPreConfig preConfig;
-    // This is the other related line that caused Decent CI to start having trouble.  I'm putting it back to
-    // PyPreConfig_InitPythonConfig, even though I think it should be isolated.  Will deal with this after IO freeze.
-    PyPreConfig_InitPythonConfig(&preConfig);
-    // PyPreConfig_InitIsolatedConfig(&preConfig);
-    preConfig.utf8_mode = 1;
-    status = Py_PreInitialize(&preConfig);
-    if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not pre-initialize Python to speak UTF-8... {}", status));
-    }
-
-    PyConfig config;
-    PyConfig_InitIsolatedConfig(&config);
-    config.isolated = 1;
-
-    status = PyConfig_SetBytesString(&config, &config.program_name, PluginManagement::programName);
-    if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not initialize program_name on PyConfig... {}", status));
-    }
-
-    status = PyConfig_Read(&config);
-    if (PyStatus_Exception(status) != 0) {
-        ShowFatalError(state, fmt::format("Could not read back the PyConfig... {}", status));
-    }
-
-    // ReSharper disable once CppRedundantTypenameKeyword
-    if constexpr (std::is_same_v<typename fs::path::value_type, wchar_t>) {
-        // PyConfig_SetString copies the wide character string str into *config_str.
-        // ReSharper disable once CppDFAUnreachableCode
-        std::wstring const ws = pathToPythonPackages.generic_wstring();
-        const wchar_t *wcharPath = ws.c_str();
-
-        status = PyConfig_SetString(&config, &config.home, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
-        }
-        status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
-        }
-        config.module_search_paths_set = 1;
-        status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
-        }
-
-    } else {
-        // PyConfig_SetBytesString takes a `const char * str` and decodes str using Py_DecodeLocale() and set the result into *config_str
-        // But we want to avoid doing it three times, so we PyDecodeLocale manually
-        // Py_DecodeLocale can be called because Python has been PreInitialized.
-        wchar_t *wcharPath = Py_DecodeLocale(pathToPythonPackages.generic_string().c_str(), nullptr); // This allocates!
-
-        status = PyConfig_SetString(&config, &config.home, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set home to {:g} on PyConfig... {}", pathToPythonPackages, status));
-        }
-        status = PyConfig_SetString(&config, &config.base_prefix, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not set base_prefix to {:g} on PyConfig... {}", pathToPythonPackages, status));
-        }
-        config.module_search_paths_set = 1;
-        status = PyWideStringList_Append(&config.module_search_paths, wcharPath);
-        if (PyStatus_Exception(status) != 0) {
-            ShowFatalError(state, fmt::format("Could not add {:g} to module_search_paths on PyConfig... {}", pathToPythonPackages, status));
-        }
-
-        PyMem_RawFree(wcharPath);
-    }
-
-    // This was Py_InitializeFromConfig(&config), but was giving a seg fault when running inside
-    // another Python instance, for example as part of an API run.  Per the example here:
-    // https://docs.python.org/3/c-api/init_config.html#preinitialize-python-with-pypreconfig
-    // It looks like we don't need to initialize from config again, it should be all set up with
-    // the init calls above, so just initialize and move on.
-    // UPDATE: This worked happily for me on Linux, and also when I build locally on Windows, but not on Decent CI
-    // I suspect a difference in behavior for Python versions.  I'm going to temporarily revert this back to initialize
-    // with config and get IO freeze going, then get back to solving it.
-    // Py_Initialize();
-    Py_InitializeFromConfig(&config);
-}
-
 // GilGrabber is an RAII helper that will ensure we release the GIL (including if we end up throwing)
 struct GilGrabber
 {
-    GilGrabber()
+    GilGrabber() : gil(PyGILState_Ensure())
     {
-        gil = PyGILState_Ensure();
     }
     ~GilGrabber()
     {
@@ -500,9 +389,8 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
     } else {
         programDir = FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(FileSystem::getProgramPath()));
     }
-    fs::path const pathToPythonPackages = programDir / "python_lib";
 
-    initPython(state, pathToPythonPackages);
+    EnergyPlus::PythonHelpers::initPython(state, programDir);
 
     // Take control of the global interpreter lock, which will be released via RAII
     GilGrabber gil_grabber;
@@ -510,17 +398,10 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
     // call this once to allow us to add to, and report, sys.path later as needed
     PyRun_SimpleString("import sys"); // allows us to report sys.path later
 
-    // we also need to set an extra import path to find some dynamic library loading stuff, again make it relative to the binary
-    addToPythonPath(state, programDir / "python_lib/lib-dynload", false);
-
     // now for additional paths:
-    // we'll always want to add the program executable directory to PATH so that Python can find the installed pyenergyplus package
     // we will then optionally add the current working directory to allow Python to find scripts in the current directory
     // we will then optionally add the directory of the running IDF to allow Python to find scripts kept next to the IDF
     // we will then optionally add any additional paths the user specifies on the search paths object
-
-    // so add the executable directory here
-    addToPythonPath(state, programDir, false);
 
     // Read all the additional search paths next
     std::string const sPaths = "PythonPlugin:SearchPaths";
@@ -540,32 +421,30 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
             std::string workingDirFlagUC = "YES";
             try {
                 workingDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_current_working_directory_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (workingDirFlagUC == "YES") {
-                addToPythonPath(state, ".", false);
+                EnergyPlus::PythonHelpers::addToPythonPath(state, ".", false);
             }
             std::string inputFileDirFlagUC = "YES";
             try {
                 inputFileDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_input_file_directory_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (inputFileDirFlagUC == "YES") {
-                addToPythonPath(state, state.dataStrGlobals->inputDirPath, false);
+                EnergyPlus::PythonHelpers::addToPythonPath(state, state.dataStrGlobals->inputDirPath, false);
             }
 
             std::string epInDirFlagUC = "YES";
             try {
                 epInDirFlagUC = EnergyPlus::Util::makeUPPER(fields.at("add_epin_environment_variable_to_search_path").get<std::string>());
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // defaulted to YES
             }
             if (epInDirFlagUC == "YES") {
-                std::string epin_path; // NOLINT(misc-const-correctness)
-                get_environment_variable("epin", epin_path);
-                fs::path const epinPathObject = fs::path(epin_path);
+                fs::path const epinPathObject = fs::path(Util::getEnvVar("epin"));
                 if (epinPathObject.empty()) {
                     ShowWarningMessage(
                         state,
@@ -573,7 +452,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
                 } else {
                     fs::path const epinRootDir = FileSystem::getParentDirectoryPath(fs::path(epinPathObject));
                     if (FileSystem::pathExists(epinRootDir)) {
-                        addToPythonPath(state, epinRootDir, true);
+                        EnergyPlus::PythonHelpers::addToPythonPath(state, epinRootDir, true);
                     } else {
                         ShowWarningMessage(state,
                                            "PluginManager: Search path inputs requested adding epin variable to Python path, but epin "
@@ -586,28 +465,26 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
                 auto const &vars = fields.at("py_search_paths");
                 for (const auto &var : vars) {
                     try {
-                        addToPythonPath(state, fs::path(var.at("search_path").get<std::string>()), true);
-                    } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+                        EnergyPlus::PythonHelpers::addToPythonPath(state, fs::path(var.at("search_path").get<std::string>()), true);
+                    } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                         // empty entry
                     }
                 }
-            } catch ([[maybe_unused]] nlohmann::json::out_of_range &e) {
+            } catch ([[maybe_unused]] const nlohmann::json::out_of_range &e) {
                 // catch when no paths are passed
                 // nothing to do here
             }
         }
     } else {
         // no search path objects in the IDF, just do the default behavior: add the current working dir and the input file dir, + epin env var
-        addToPythonPath(state, ".", false);
-        addToPythonPath(state, state.dataStrGlobals->inputDirPath, false);
+        EnergyPlus::PythonHelpers::addToPythonPath(state, ".", false);
+        EnergyPlus::PythonHelpers::addToPythonPath(state, state.dataStrGlobals->inputDirPath, false);
 
-        std::string epin_path; // NOLINT(misc-const-correctness)
-        get_environment_variable("epin", epin_path);
-        fs::path const epinPathObject = fs::path(epin_path);
+        fs::path const epinPathObject = fs::path(Util::getEnvVar("epin"));
         if (!epinPathObject.empty()) {
             fs::path const epinRootDir = FileSystem::getParentDirectoryPath(fs::path(epinPathObject));
             if (FileSystem::pathExists(epinRootDir)) {
-                addToPythonPath(state, epinRootDir, true);
+                EnergyPlus::PythonHelpers::addToPythonPath(state, epinRootDir, true);
             }
         }
     }
@@ -643,7 +520,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
     if (globalVarInstances > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(sGlobals);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state, format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sGlobals)); // LCOV_EXCL_LINE
+            ShowSevereError(state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sGlobals)); // LCOV_EXCL_LINE
         }
         std::set<std::string> uniqueNames;
         auto &instancesValue = instances.value();
@@ -658,8 +535,8 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
                     this->addGlobalVariable(state, varNameToAdd);
                     uniqueNames.insert(varNameToAdd);
                 } else {
-                    ShowWarningMessage(state,
-                                       format("Found duplicate variable name in PythonPLugin:Variables objects, ignoring: \"{}\"", varNameToAdd));
+                    ShowWarningMessage(
+                        state, std::format("Found duplicate variable name in PythonPLugin:Variables objects, ignoring: \"{}\"", varNameToAdd));
                 }
             }
         }
@@ -684,7 +561,7 @@ PluginManager::PluginManager(EnergyPlusData &state) : eplusRunningViaPythonAPI(s
     if (trendInstances > 0) {
         auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find(sTrends);
         if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-            ShowSevereError(state, format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sTrends)); // LCOV_EXCL_LINE
+            ShowSevereError(state, std::format("{}: Somehow getNumObjectsFound was > 0 but epJSON.find found 0", sTrends)); // LCOV_EXCL_LINE
         }
         auto &instancesValue = instances.value();
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
@@ -727,79 +604,6 @@ PluginInstance::PluginInstance(const fs::path &_modulePath, const std::string &_
 {
 }
 
-void PluginInstance::reportPythonError([[maybe_unused]] EnergyPlusData &state)
-{
-#if LINK_WITH_PYTHON
-    PyObject *exc_type = nullptr;
-    PyObject *exc_value = nullptr;
-    PyObject *exc_tb = nullptr;
-    PyErr_Fetch(&exc_type, &exc_value, &exc_tb);
-    // Normalizing the exception is needed. Without it, our custom EnergyPlusException go through just fine
-    // but any ctypes built-in exception for eg will have wrong types
-    PyErr_NormalizeException(&exc_type, &exc_value, &exc_tb);
-    PyObject *str_exc_value = PyObject_Repr(exc_value); // Now a unicode object
-    PyObject *pyStr2 = PyUnicode_AsEncodedString(str_exc_value, "utf-8", "Error ~");
-    Py_DECREF(str_exc_value);
-    char *strExcValue = PyBytes_AsString(pyStr2); // NOLINT(hicpp-signed-bitwise)
-    Py_DECREF(pyStr2);
-    ShowContinueError(state, "Python error description follows: ");
-    ShowContinueError(state, strExcValue);
-
-    // See if we can get a full traceback.
-    // Calls into python, and does the same as capturing the exception in `e`
-    // then `print(traceback.format_exception(e.type, e.value, e.tb))`
-    PyObject *pModuleName = PyUnicode_DecodeFSDefault("traceback");
-    PyObject *pyth_module = PyImport_Import(pModuleName);
-    Py_DECREF(pModuleName);
-
-    if (pyth_module == nullptr) {
-        ShowContinueError(state, "Cannot find 'traceback' module in reportPythonError(), this is weird");
-        return;
-    }
-
-    PyObject *pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
-    Py_DECREF(pyth_module); // PyImport_Import returns a new reference, decrement it
-
-    if ((pyth_func != nullptr) || (PyCallable_Check(pyth_func) != 0)) {
-
-        PyObject *pyth_val = PyObject_CallFunction(pyth_func, "OOO", exc_type, exc_value, exc_tb);
-
-        // traceback.format_exception returns a list, so iterate on that
-        if ((pyth_val == nullptr) || !PyList_Check(pyth_val)) { // NOLINT(hicpp-signed-bitwise)
-            ShowContinueError(state, "In reportPythonError(), traceback.format_exception did not return a list.");
-            return;
-        }
-
-        Py_ssize_t numVals = PyList_Size(pyth_val);
-        if (numVals == 0) {
-            ShowContinueError(state, "No traceback available");
-            return;
-        }
-
-        ShowContinueError(state, "Python traceback follows: ");
-        ShowContinueError(state, "```");
-
-        for (Py_ssize_t itemNum = 0; itemNum < numVals; itemNum++) {
-            PyObject *item = PyList_GetItem(pyth_val, itemNum);
-            if (PyUnicode_Check(item)) { // NOLINT(hicpp-signed-bitwise) -- something inside Python code causes warning
-                std::string traceback_line = PyUnicode_AsUTF8(item);
-                if (!traceback_line.empty() && traceback_line[traceback_line.length() - 1] == '\n') {
-                    traceback_line.erase(traceback_line.length() - 1);
-                }
-                ShowContinueError(state, format(" >>> {}", traceback_line));
-            }
-            // PyList_GetItem returns a borrowed reference, do not decrement
-        }
-
-        ShowContinueError(state, "```");
-
-        // PyList_Size returns a borrowed reference, do not decrement
-        Py_DECREF(pyth_val); // PyObject_CallFunction returns new reference, decrement
-    }
-    Py_DECREF(pyth_func); // PyObject_GetAttrString returns a new reference, decrement it
-#endif
-}
-
 void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
 {
 #if LINK_WITH_PYTHON
@@ -817,17 +621,17 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
         pModuleName = PyUnicode_FromString(s.c_str()); // New reference
     }
     if (pModuleName == nullptr) {
-        ShowFatalError(state, format("Failed to convert the Module Path \"{:g}\" for import", this->modulePath));
+        ShowFatalError(state, std::format("Failed to convert the Module Path \"{:g}\" for import", this->modulePath));
     }
     this->pModule = PyImport_Import(pModuleName);
     Py_DECREF(pModuleName);
 
     if (this->pModule == nullptr) {
-        ShowSevereError(state, format("Failed to import module \"{:g}\"", this->modulePath));
-        ShowContinueError(state, format("Current sys.path={}", PluginManager::currentPythonPath()));
+        ShowSevereError(state, std::format("Failed to import module \"{:g}\"", this->modulePath));
+        ShowContinueError(state, std::format("Current sys.path={}", PluginManager::currentPythonPath()));
         // ONLY call PyErr_Print if PyErr has occurred, otherwise it will cause other problems
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be that the module could not be found, or that there was an error in importing");
         }
@@ -835,9 +639,9 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     }
     PyObject *pModuleDict = PyModule_GetDict(this->pModule);
     if (pModuleDict == nullptr) {
-        ShowSevereError(state, format("Failed to read module dictionary from module \"{:g}\"", this->modulePath));
+        ShowSevereError(state, std::format("Failed to read module dictionary from module \"{:g}\"", this->modulePath));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be that the module was empty");
         }
@@ -852,23 +656,23 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     } else {
         const char *zStr = PyUnicode_AsUTF8(pFullPath);
         std::string sHere(zStr);
-        ShowMessage(state, format("PythonPlugin: Class {} imported from: {}", className, sHere));
+        ShowMessage(state, std::format("PythonPlugin: Class {} imported from: {}", className, sHere));
     }
     PyObject *pClass = PyDict_GetItemString(pModuleDict, className.c_str());
     // Py_DECREF(pModuleDict);  // PyModule_GetDict returns a borrowed reference, DO NOT decrement
     if (pClass == nullptr) {
-        ShowSevereError(state, format(R"(Failed to get class type "{}" from module "{:g}")", className, modulePath));
+        ShowSevereError(state, std::format(R"(Failed to get class type "{}" from module "{:g}")", className, modulePath));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "It could be the class name is misspelled or missing.");
         }
         ShowFatalError(state, "Python class import error causes program termination");
     }
     if (PyCallable_Check(pClass) == 0) {
-        ShowSevereError(state, format("Got class type \"{}\", but it cannot be called/instantiated", className));
+        ShowSevereError(state, std::format("Got class type \"{}\", but it cannot be called/instantiated", className));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "Is it possible the class name is actually just a variable?");
         }
@@ -877,9 +681,9 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     this->pClassInstance = PyObject_CallObject(pClass, nullptr);
     // Py_DECREF(pClass);  // PyDict_GetItemString returns a borrowed reference, DO NOT decrement
     if (this->pClassInstance == nullptr) {
-        ShowSevereError(state, format("Something went awry calling class constructor for class \"{}\"", className));
+        ShowSevereError(state, std::format("Something went awry calling class constructor for class \"{}\"", className));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "It is possible the plugin class constructor takes extra arguments - it shouldn't.");
         }
@@ -896,9 +700,10 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     if ((detectFunction == nullptr) || (PyCallable_Check(detectFunction) == 0)) {
         ShowSevereError(
             state,
-            format(R"(Could not find or call function "{}" on class "{:g}.{}")", detectOverriddenFunctionName, this->modulePath, this->className));
+            std::format(
+                R"(Could not find or call function "{}" on class "{:g}.{}")", detectOverriddenFunctionName, this->modulePath, this->className));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "This function should be available on the base class, so this is strange.");
         }
@@ -907,23 +712,23 @@ void PluginInstance::setup([[maybe_unused]] EnergyPlusData &state)
     PyObject *pFunctionResponse = PyObject_CallFunction(detectFunction, nullptr);
     Py_DECREF(detectFunction); // PyObject_GetAttrString returns a new reference, decrement it
     if (pFunctionResponse == nullptr) {
-        ShowSevereError(state, format("Call to _detect_overridden() on {} failed!", this->stringIdentifier));
+        ShowSevereError(state, std::format("Call to _detect_overridden() on {} failed!", this->stringIdentifier));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "This is available on the base class and should not be overridden...strange.");
         }
-        ShowFatalError(state, format("Program terminates after call to _detect_overridden() on {} failed!", this->stringIdentifier));
+        ShowFatalError(state, std::format("Program terminates after call to _detect_overridden() on {} failed!", this->stringIdentifier));
     }
     if (!PyList_Check(pFunctionResponse)) { // NOLINT(hicpp-signed-bitwise)
-        ShowFatalError(state, format("Invalid return from _detect_overridden() on class \"{}\", this is weird", this->stringIdentifier));
+        ShowFatalError(state, std::format("Invalid return from _detect_overridden() on class \"{}\", this is weird", this->stringIdentifier));
     }
     Py_ssize_t numVals = PyList_Size(pFunctionResponse);
     // at this point we know which base class methods are being overridden by the derived class
     // we can loop over them and based on the name check the appropriate flag and assign the function pointer
     if (numVals == 0) {
-        ShowFatalError(state,
-                       format("Python plugin \"{}\" did not override any base class methods; must override at least one", this->stringIdentifier));
+        ShowFatalError(
+            state, std::format("Python plugin \"{}\" did not override any base class methods; must override at least one", this->stringIdentifier));
     }
     for (Py_ssize_t itemNum = 0; itemNum < numVals; itemNum++) {
         PyObject *item = PyList_GetItem(pFunctionResponse, itemNum);
@@ -1167,28 +972,28 @@ bool PluginInstance::run(EnergyPlusData &state, EMSManager::EMSCallFrom iCalledF
     Py_DECREF(pStateInstance);
     if (pFunctionResponse == nullptr) {
         std::string const functionNameAsString(functionName); // only convert to string if an error occurs
-        ShowSevereError(state, format("Call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
+        ShowSevereError(state, std::format("Call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
         if (PyErr_Occurred() != nullptr) {
-            reportPythonError(state);
+            EnergyPlus::PythonHelpers::reportPythonError(state);
         } else {
             ShowContinueError(state, "This could happen for any number of reasons, check the plugin code.");
         }
-        ShowFatalError(state, format("Program terminates after call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
+        ShowFatalError(state, std::format("Program terminates after call to {}() on {} failed!", functionNameAsString, this->stringIdentifier));
     }
     if (PyLong_Check(pFunctionResponse)) { // NOLINT(hicpp-signed-bitwise)
         long exitCode = PyLong_AsLong(pFunctionResponse);
         if (exitCode == 0) {
             // success
         } else if (exitCode == 1) {
-            ShowFatalError(state, format("Python Plugin \"{}\" returned 1 to indicate EnergyPlus should abort", this->stringIdentifier));
+            ShowFatalError(state, std::format("Python Plugin \"{}\" returned 1 to indicate EnergyPlus should abort", this->stringIdentifier));
         }
     } else {
         std::string const functionNameAsString(functionName); // only convert to string if an error occurs
         ShowFatalError(
             state,
-            format("Invalid return from {}() on class \"{}, make sure it returns an integer exit code, either zero (success) or one (failure)",
-                   functionNameAsString,
-                   this->stringIdentifier));
+            std::format("Invalid return from {}() on class \"{}, make sure it returns an integer exit code, either zero (success) or one (failure)",
+                        functionNameAsString,
+                        this->stringIdentifier));
     }
     Py_DECREF(pFunctionResponse); // PyObject_CallFunction returns new reference, decrement
     if (state.dataPluginManager->apiErrorFlag) {
@@ -1215,56 +1020,10 @@ std::vector<std::string> PluginManager::currentPythonPath()
     }
     return pathLibs;
 }
-
-void PluginManager::addToPythonPath(EnergyPlusData &state, const fs::path &includePath, bool userDefinedPath)
-{
-    if (includePath.empty()) {
-        return;
-    }
-
-    // We use generic_string / generic_wstring here, which will always use a forward slash as directory separator even on windows
-    // This doesn't handle the (very strange, IMHO) case were on unix you have backlashes (which are VALID filenames on Unix!)
-    // Could use FileSystem::makeNativePath first to convert the backslashes to forward slashes on Unix
-    PyObject *unicodeIncludePath;
-    // ReSharper disable once CppRedundantTypenameKeyword
-    if constexpr (std::is_same_v<typename fs::path::value_type, wchar_t>) {
-        // ReSharper disable once CppDFAUnreachableCode
-        const std::wstring ws = includePath.generic_wstring();
-        unicodeIncludePath = PyUnicode_FromWideChar(ws.c_str(), static_cast<Py_ssize_t>(ws.size())); // New reference
-    } else {
-        const std::string s = includePath.generic_string();
-        unicodeIncludePath = PyUnicode_FromString(s.c_str()); // New reference
-    }
-    if (unicodeIncludePath == nullptr) {
-        ShowFatalError(state, format("ERROR converting the path \"{:g}\" for addition to the sys.path in Python", includePath));
-    }
-
-    PyObject *sysPath = PySys_GetObject("path"); // Borrowed reference
-    int const ret = PyList_Insert(sysPath, 0, unicodeIncludePath);
-    Py_DECREF(unicodeIncludePath);
-
-    if (ret != 0) {
-        if (PyErr_Occurred() != nullptr) {
-            PluginInstance::reportPythonError(state);
-        }
-        ShowFatalError(state, format("ERROR adding \"{:g}\" to the sys.path in Python", includePath));
-    }
-
-    if (userDefinedPath) {
-        ShowMessage(state, format("Successfully added path \"{:g}\" to the sys.path in Python", includePath));
-    }
-
-    // PyRun_SimpleString)("print(' EPS : ' + str(sys.path))");
-}
 #else
 std::vector<std::string> PluginManager::currentPythonPath()
 {
     return {};
-}
-void PluginManager::addToPythonPath([[maybe_unused]] EnergyPlusData &state,
-                                    [[maybe_unused]] const fs::path &path,
-                                    [[maybe_unused]] bool userDefinedPath)
-{
 }
 #endif
 
@@ -1295,12 +1054,11 @@ int PluginManager::getGlobalVariableHandle(EnergyPlusData &state, const std::str
         return -1;
     }
     ShowSevereError(state, "Tried to retrieve handle for a nonexistent plugin global variable");
-    ShowContinueError(state, format("Name looked up: \"{}\", available names: ", varNameUC));
+    ShowContinueError(state, std::format("Name looked up: \"{}\", available names: ", varNameUC));
     for (auto const &gvName : gVarNames) {
-        ShowContinueError(state, format("    \"{}\"", gvName));
+        ShowContinueError(state, std::format("    \"{}\"", gvName));
     }
     ShowFatalError(state, "Plugin global variable problem causes program termination");
-    return -1; // hush the compiler warning
 }
 #else
 int PluginManager::getGlobalVariableHandle([[maybe_unused]] EnergyPlusData &state,
@@ -1316,7 +1074,7 @@ int PluginManager::getTrendVariableHandle(const EnergyPlusData &state, const std
 {
     std::string const varNameUC = Util::makeUPPER(name);
     for (size_t i = 0; i < state.dataPluginManager->trends.size(); i++) {
-        auto &thisTrend = state.dataPluginManager->trends[i];
+        const auto &thisTrend = state.dataPluginManager->trends[i];
         if (thisTrend.name == varNameUC) {
             return static_cast<int>(i);
         }
@@ -1469,11 +1227,10 @@ Real64 PluginManager::getGlobalVariableValue(EnergyPlusData &state, int handle)
     try {
         return state.dataPluginManager->globalVariableValues[handle]; // TODO: This won't be caught as an exception I think
     } catch (...) {
-        ShowSevereError(state, format("Tried to access plugin global variable value at index {}", handle));
-        ShowContinueError(state, format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
+        ShowSevereError(state, std::format("Tried to access plugin global variable value at index {}", handle));
+        ShowContinueError(state, std::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
         ShowFatalError(state, "Plugin global variable problem causes program termination");
     }
-    return 0.0;
 }
 #else
 Real64 PluginManager::getGlobalVariableValue([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int handle)
@@ -1493,8 +1250,8 @@ void PluginManager::setGlobalVariableValue(EnergyPlusData &state, int handle, Re
     try {
         state.dataPluginManager->globalVariableValues[handle] = value; // TODO: This won't be caught as an exception I think
     } catch (...) {
-        ShowSevereError(state, format("Tried to set plugin global variable value at index {}", handle));
-        ShowContinueError(state, format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
+        ShowSevereError(state, std::format("Tried to set plugin global variable value at index {}", handle));
+        ShowContinueError(state, std::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
         ShowFatalError(state, "Plugin global variable problem causes program termination");
     }
 }
@@ -1562,7 +1319,7 @@ bool PluginManager::anyUnexpectedPluginObjects(EnergyPlusData &state)
             ShowSevereMessage(state, "Found PythonPlugin objects in an IDF that is running in an API/Library workflow...this is invalid");
         }
         if (instances > 0) {
-            ShowContinueError(state, format("Invalid PythonPlugin object type: {}", objToFind));
+            ShowContinueError(state, std::format("Invalid PythonPlugin object type: {}", objToFind));
         }
     }
     return numTotalThings > 0;

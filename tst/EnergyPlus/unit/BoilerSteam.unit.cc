@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -243,10 +243,12 @@ TEST_F(EnergyPlusFixture, BoilerSteam_BoilerEfficiency)
     state->dataGlobal->BeginEnvrnFlag = true;
     thisBoiler.initialize(*state);
     thisBoiler.calculate(*state, MyLoad, RunFlag, DataBranchAirLoopPlant::ControlType::SeriesActive);
+    thisBoiler.update(*state, MyLoad, RunFlag, true);
 
     // check boiler fuel used and the resultant boiler efficiency
     EXPECT_EQ(thisBoiler.BoilerLoad, 1000000);
     EXPECT_NEAR(thisBoiler.FuelUsed, 1562498, 1.0);
     Real64 ExpectedBoilerEff = thisBoiler.BoilerLoad / thisBoiler.FuelUsed;
     EXPECT_NEAR(thisBoiler.BoilerEff, ExpectedBoilerEff, 0.01);
+    EXPECT_NEAR(thisBoiler.BoilerCOP, 0.64, 0.01);
 }

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -55,7 +55,6 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataReportingFlags.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.hh>
@@ -81,41 +80,36 @@ namespace GroundTemp {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         bool found = false;
-        int NumNums;
-        int NumAlphas;
-        int IOStat;
-
         // New shared pointer for this model object
         auto *thisModel = new FiniteDiffGroundTempsModel();
 
         GroundTemp::ModelType modelType = GroundTemp::ModelType::FiniteDiff;
 
         // Search through finite diff models here
-        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNamesUC[(int)modelType];
-        const int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
+        if (modelInstances == inputProcessor->epJSON.end()) {
+            ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        }
+        auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
-        for (int modelNum = 1; modelNum <= numCurrModels; ++modelNum) {
+        for (auto const &modelInstance : modelInstances.value().items()) {
+            auto const modelName = Util::makeUPPER(modelInstance.key());
+            auto const &modelFields = modelInstance.value();
 
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     modelNum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNums,
-                                                                     IOStat);
-
-            if (objectName == state.dataIPShortCut->cAlphaArgs(1)) {
+            if (objectName == modelName) {
                 // Read input into object here
+                inputProcessor->markObjectAsUsed(currentModuleObject, modelInstance.key());
 
                 thisModel->modelType = modelType;
-                thisModel->Name = state.dataIPShortCut->cAlphaArgs(1);
-                thisModel->baseConductivity = state.dataIPShortCut->rNumericArgs(1);
-                thisModel->baseDensity = state.dataIPShortCut->rNumericArgs(2);
-                thisModel->baseSpecificHeat = state.dataIPShortCut->rNumericArgs(3);
-                thisModel->waterContent = state.dataIPShortCut->rNumericArgs(4) / 100.0;
-                thisModel->saturatedWaterContent = state.dataIPShortCut->rNumericArgs(5) / 100.0;
-                thisModel->evapotransCoeff = state.dataIPShortCut->rNumericArgs(6);
+                thisModel->Name = modelName;
+                thisModel->baseConductivity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_thermal_conductivity");
+                thisModel->baseDensity = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_density");
+                thisModel->baseSpecificHeat = inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "soil_specific_heat");
+                thisModel->evapotransCoeff =
+                    inputProcessor->getRealFieldValue(modelFields, modelSchemaProps, "evapotranspiration_ground_cover_parameter");
 
                 found = true;
                 break;
@@ -132,7 +126,7 @@ namespace GroundTemp {
             return thisModel;
         }
 
-        ShowFatalError(state, fmt::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
 
@@ -202,7 +196,6 @@ namespace GroundTemp {
         state.dataWeather->RunPeriodInput.redimension(state.dataWeather->TotRunPers);
         state.dataWeather->Environment(state.dataWeather->NumOfEnvrn).KindOfEnvrn = Constant::KindOfSim::ReadAllWeatherData;
         state.dataWeather->RPReadAllWeatherData = true;
-        state.dataGlobal->WeathSimReq = true;
         // RunPeriod is initialized to be one year of simulation
         // RunPeriodInput(TotRunPers).monWeekDay = 0; // Why do this?
 
@@ -283,7 +276,7 @@ namespace GroundTemp {
                     airDensity_num += state.dataEnvrn->OutAirDensity;
                     relHum_num += state.dataEnvrn->OutRelHumValue;
                     windSpeed_num += state.dataEnvrn->WindSpeed;
-                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS(3), 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
+                    horizSolarRad_num += max(state.dataEnvrn->SOLCOS.z, 0.0) * state.dataEnvrn->BeamSolarRad + state.dataEnvrn->DifSolarRad;
 
                     state.dataGlobal->BeginHourFlag = false;
                     state.dataGlobal->BeginDayFlag = false;
@@ -419,9 +412,6 @@ namespace GroundTemp {
 
             // Set base properties
             thisCell.props.conductivity = baseConductivity;
-            thisCell.props.density = baseDensity;
-            thisCell.props.specificHeat = baseSpecificHeat;
-            thisCell.props.diffusivity = baseConductivity / (baseDensity * baseSpecificHeat);
         }
     }
 
@@ -782,11 +772,11 @@ namespace GroundTemp {
         for (int cell = 1; cell <= totalNumCells; ++cell) {
             auto &thisCell = cellArray(cell);
 
-            Real64 depth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
+            Real64 cellDepth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
 
             // Initialize temperatures
             if (tempModel) {
-                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, depth, 0.0); // Initialized at first day of year
+                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, cellDepth, 0.0); // Initialized at first day of year
             }
             thisCell.temperature_finalConvergence = thisCell.temperature;
             thisCell.temperature_prevIteration = thisCell.temperature;
@@ -795,9 +785,6 @@ namespace GroundTemp {
             // Set cell volume
             thisCell.volume = thisCell.thickness * thisCell.conductionArea;
         }
-
-        // Initialize freezing calculation variables
-        evaluateSoilRhoCpInit();
 
         // Initialize the groundTemps array
         groundTemps.dimension({1, state.dataWeather->NumDaysInYear}, {1, totalNumCells}, 0.0);
@@ -1071,39 +1058,6 @@ namespace GroundTemp {
 
         // TODO: The calculated rhoCP_soil is commented on this line and never used.  Curious.
         thisCell.props.rhoCp = baseDensity * baseSpecificHeat; // rhoCP_soil;
-
-        thisCell.props.specificHeat = thisCell.props.rhoCp / thisCell.props.density;
-    }
-
-    void FiniteDiffGroundTempsModel::evaluateSoilRhoCpInit()
-    {
-        // SUBROUTINE INFORMATION:
-        //       AUTHOR         Edwin Lee
-        //       DATE WRITTEN   Summer 2011
-
-        // PURPOSE OF THIS SUBROUTINE:
-        // Evaluates the soil properties
-
-        // These vary by domain now, so we must be careful to retrieve them every time
-        const Real64 Theta_liq = waterContent;
-        const Real64 Theta_sat = saturatedWaterContent;
-
-        // Assumption
-        const Real64 Theta_ice = Theta_liq;
-
-        //'Cp (freezing) calculations
-        constexpr Real64 rho_ice = 917.0;                 //'Kg / m3
-        constexpr Real64 rho_liq = 1000.0;                //'kg / m3
-        rhoCp_soil_liq_1 = 1225000.0 / (1.0 - Theta_sat); // J/m3K
-        // from( " An improved model for predicting soil thermal conductivity from water content at room temperature, Fig 4" )
-        constexpr Real64 CP_liq = 4180.0;    //'J / KgK
-        constexpr Real64 CP_ice = 2066.0;    //'J / KgK
-        constexpr Real64 Lat_fus = 334000.0; //'J / Kg
-        constexpr Real64 Cp_transient = Lat_fus / 0.4 + (0.5 * CP_ice - (CP_liq + CP_ice) / 2.0 * 0.1) / 0.4;
-        // from( " Numerical and experimental investigation of melting and freezing processes in phase change material storage" )
-        rhoCP_soil_liq = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + rho_liq * CP_liq * Theta_liq;
-        rhoCP_soil_transient = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + ((rho_liq + rho_ice) / 2.0) * Cp_transient * Theta_ice;
-        rhoCP_soil_ice = rhoCp_soil_liq_1 * (1.0 - Theta_sat) + rho_ice * CP_ice * Theta_ice; //'!J / m3K
     }
 
     //******************************************************************************

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -84,31 +84,30 @@ struct CoilCoolingDXCurveFitPerformanceInputSpecification
 struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
 {
     static constexpr std::string_view object_name = "Coil:Cooling:DX:CurveFit:Performance";
-    std::string parentName;
 
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXCurveFitPerformanceInputSpecification &input_data);
 
     void simulate(EnergyPlusData &state,
-                  const DataLoopNode::NodeData &inletNode,
-                  DataLoopNode::NodeData &outletNode,
+                  const Node::NodeData &inletNode,
+                  Node::NodeData &outletNode,
                   HVAC::CoilMode currentCoilMode,
                   int speedNum,
                   Real64 speedRatio,
                   HVAC::FanOp const fanOp,
-                  DataLoopNode::NodeData &condInletNode,
-                  DataLoopNode::NodeData &condOutletNode,
+                  Node::NodeData &condInletNode,
+                  Node::NodeData &condOutletNode,
                   bool const singleMode,
                   Real64 LoadSHR = 0.0) override;
 
     void calculate(EnergyPlusData &state,
                    CoilCoolingDXCurveFitOperatingMode &currentMode,
-                   const DataLoopNode::NodeData &inletNode,
-                   DataLoopNode::NodeData &outletNode,
+                   const Node::NodeData &inletNode,
+                   Node::NodeData &outletNode,
                    int speedNum,
                    Real64 speedRatio,
                    HVAC::FanOp const fanOp,
-                   DataLoopNode::NodeData &condInletNode,
-                   DataLoopNode::NodeData &condOutletNode,
+                   Node::NodeData &condInletNode,
+                   Node::NodeData &condOutletNode,
                    bool const singleMode);
 
     void calcStandardRatings210240(EnergyPlusData &state) override;
@@ -203,7 +202,7 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
         return static_cast<int>(normalMode.speeds.size());
     }
 
-    virtual void setToHundredPercentDOAS() override
+    void setToHundredPercentDOAS() override
     {
         for (auto &speed : normalMode.speeds) {
             speed.minRatedVolFlowPerRatedTotCap = HVAC::MinRatedVolFlowPerRatedTotCap2;
@@ -247,8 +246,6 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
 
     Real64 evapCondBasinHeatSetpoint = 0.0;
     Sched::Schedule *evapCondBasinHeatSched = nullptr;
-    bool oneTimeEIOHeaderWrite = true;
-    Real64 wasteHeatRate = 0.0;
 
     CoilCoolingDXCurveFitOperatingMode normalMode;
     CoilCoolingDXCurveFitOperatingMode alternateMode;  // enhanced dehumidifcation or Subcool mode

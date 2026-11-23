@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -112,8 +112,6 @@ namespace EvaporativeFluidCoolers {
         DataPlant::PlantEquipmentType Type = DataPlant::PlantEquipmentType::Invalid;
         std::string PerformanceInputMethod;
         PIM PerformanceInputMethod_Num = PIM::StandardDesignCapacity;
-        bool Available = true;                               // need an array of logicals--load identifiers of available equipment
-        bool ON = true;                                      // Simulate the machine at it's operating part load ratio
         Real64 DesignWaterFlowRate = 0.0;                    // Design water flow rate through the evaporative fluid cooler [m3/s]
         Real64 DesignSprayWaterFlowRate = 0.0;               // Design spray water flow rate through the evaporative fluid cooler [m3/s]
         Real64 DesWaterMassFlowRate = 0.0;                   // Design water flow rate through the evaporative fluid cooler [kg/s]
@@ -154,7 +152,6 @@ namespace EvaporativeFluidCoolers {
         Real64 HighSpeedUserSpecifiedDesignCapacity = 0.0; // User specified design capacity [W]
         Real64 LowSpeedUserSpecifiedDesignCapacity = 0.0;  // User specified design capacity for at low speed for
         // two speed fluid cooler[W]
-        Real64 Concentration = 0.0;           // fluid/glycol concentration - percent
         Fluid::GlycolProps *glycol = nullptr; // Index to Property arrays
         Real64 SizFac = 0.0;                  // sizing factor
         int WaterInletNodeNum = 0;            // Node number on the water inlet side of the evaporative fluid cooler
@@ -191,15 +188,12 @@ namespace EvaporativeFluidCoolers {
         Real64 Qactual = 0.0;           // Evaporative fluid cooler heat transfer
         Real64 FanPower = 0.0;          // Evaporative fluid cooler fan power used
         Real64 AirFlowRateRatio = 0.0;  // Ratio of air flow rate through VS evaporative fluid cooler
-        Real64 WaterUsage = 0.0;        // Evaporative fluid cooler water usage (m3/s)
         bool MyOneTimeFlag = true;
         bool MyEnvrnFlag = true;
         bool OneTimeFlagForEachEvapFluidCooler = true;
-        bool CheckEquipName = true;
         Real64 fluidCoolerInletWaterTemp = 0.0;  // Evaporative fluid cooler inlet water temperature (C)
         Real64 fluidCoolerOutletWaterTemp = 0.0; // Evaporative fluid cooler outlet water temperature (C)
         Real64 FanEnergy = 0.0;                  // Evaporative fluid cooler fan energy consumption (J)
-        Real64 WaterAmountUsed = 0.0;            // Evaporative fluid cooler make up water usage (m3)
         Real64 EvaporationVdot = 0.0;
         Real64 EvaporationVol = 0.0;
         Real64 DriftVdot = 0.0;

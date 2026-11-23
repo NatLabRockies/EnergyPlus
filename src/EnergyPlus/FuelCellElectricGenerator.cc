@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -80,6 +81,31 @@
 namespace EnergyPlus {
 
 namespace FuelCellElectricGenerator {
+
+    namespace {
+
+        Real64 gasMolarEnthalpy(DataGenerators::GasPropertyDataStruct const &gas, Real64 const fluidTemp)
+        {
+            Real64 const temperatureK = fluidTemp + Constant::Kelvin;
+
+            if (gas.ThermoMode == DataGenerators::ThermodynamicMode::NISTShomate) {
+                Real64 const shomateTemperature = temperatureK / 1000.0;
+                return gas.ShomateA * shomateTemperature + gas.ShomateB * pow_2(shomateTemperature) / 2.0 +
+                       gas.ShomateC * pow_3(shomateTemperature) / 3.0 + gas.ShomateD * pow_4(shomateTemperature) / 4.0 -
+                       gas.ShomateE / shomateTemperature + gas.ShomateF - gas.ShomateH;
+            }
+
+            if (gas.ThermoMode == DataGenerators::ThermodynamicMode::NASAPolynomial) {
+                return ((gas.NASA_A1 + gas.NASA_A2 * temperatureK / 2.0 + gas.NASA_A3 * pow_2(temperatureK) / 3.0 +
+                         gas.NASA_A4 * pow_3(temperatureK) / 4.0 + gas.NASA_A5 * pow_4(temperatureK) / 5.0 + gas.NASA_A6 / temperatureK) *
+                        DataGenerators::RinKJperMolpK * temperatureK) -
+                       gas.StdRefMolarEnthOfForm;
+            }
+
+            return 0.0;
+        }
+
+    } // namespace
 
     // MODULE INFORMATION:
     //       AUTHOR         Brent Griffith
@@ -159,9 +185,7 @@ namespace FuelCellElectricGenerator {
         }
 
         // If we didn't find it, fatal
-        ShowFatalError(state, format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     }
 
     PlantComponent *FCDataStruct::factory_exhaust(EnergyPlusData &state, std::string const &objectName)
@@ -179,9 +203,7 @@ namespace FuelCellElectricGenerator {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state, format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
     }
 
     void FCDataStruct::SimFuelCellGenerator(EnergyPlusData &state,
@@ -231,7 +253,7 @@ namespace FuelCellElectricGenerator {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (state.dataFuelCellElectGen->NumFuelCellGenerators <= 0) {
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -271,7 +293,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellPMs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellPMs <= 0) {
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -339,8 +361,8 @@ namespace FuelCellElectricGenerator {
                 fuelCell.FCPM.ZoneName = AlphArray(5);
                 fuelCell.FCPM.ZoneID = Util::FindItemInList(fuelCell.FCPM.ZoneName, state.dataHeatBal->Zone);
                 if (fuelCell.FCPM.ZoneID == 0 && !s_ipsc->lAlphaFieldBlanks(5)) {
-                    ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(5), AlphArray(5)));
-                    ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(5), AlphArray(5)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ShowContinueError(state, "Zone Name was not found ");
                     ErrorsFound = true;
                 }
@@ -364,27 +386,25 @@ namespace FuelCellElectricGenerator {
                 fuelCell.FCPM.NdotDilutionAir = NumArray(22);
                 fuelCell.FCPM.StackHeatLossToDilution = NumArray(23);
                 fuelCell.FCPM.DilutionInletNodeName = AlphArray(7);
-                fuelCell.FCPM.DilutionInletNode =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(7),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelCellPowerModule,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::Inlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
+                fuelCell.FCPM.DilutionInletNode = Node::GetOnlySingleNode(state,
+                                                                          AlphArray(7),
+                                                                          ErrorsFound,
+                                                                          Node::ConnectionObjectType::GeneratorFuelCellPowerModule,
+                                                                          AlphArray(1),
+                                                                          Node::FluidType::Air,
+                                                                          Node::ConnectionType::Inlet,
+                                                                          Node::CompFluidStream::Primary,
+                                                                          Node::ObjectIsNotParent);
                 fuelCell.FCPM.DilutionExhaustNodeName = AlphArray(8);
-                fuelCell.FCPM.DilutionExhaustNode =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(8),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelCellPowerModule,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::Outlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
+                fuelCell.FCPM.DilutionExhaustNode = Node::GetOnlySingleNode(state,
+                                                                            AlphArray(8),
+                                                                            ErrorsFound,
+                                                                            Node::ConnectionObjectType::GeneratorFuelCellPowerModule,
+                                                                            AlphArray(1),
+                                                                            Node::FluidType::Air,
+                                                                            Node::ConnectionType::Outlet,
+                                                                            Node::CompFluidStream::Primary,
+                                                                            Node::ObjectIsNotParent);
 
                 fuelCell.FCPM.PelMin = NumArray(24);
                 fuelCell.FCPM.PelMax = NumArray(25);
@@ -396,8 +416,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else { // throw warning, did not find power module input
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         } // loop over NumFuelCellPMs
@@ -414,9 +434,9 @@ namespace FuelCellElectricGenerator {
                 state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup, state.dataGenerator->FuelSupply); // Fuel Supply ID
             if (state.dataFuelCellElectGen->FuelCell(GeneratorNum).FuelSupNum == 0) {
                 ShowSevereError(state,
-                                format("Fuel Supply Name: {} not found in {}",
-                                       state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup,
-                                       state.dataFuelCellElectGen->FuelCell(GeneratorNum).Name));
+                                std::format("Fuel Supply Name: {} not found in {}",
+                                            state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup,
+                                            state.dataFuelCellElectGen->FuelCell(GeneratorNum).Name));
                 ErrorsFound = true;
             }
         }
@@ -425,7 +445,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellAirSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellAirSups <= 0) { // Autodesk:Uninit thisFuelCell was possibly uninitialized past this condition
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -454,15 +474,15 @@ namespace FuelCellElectricGenerator {
                 fuelCell.AirSup.NodeName = AlphArray(2);
 
                 // check the node connections
-                fuelCell.AirSup.SupNodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                 AlphArray(2),
-                                                                                 ErrorsFound,
-                                                                                 DataLoopNode::ConnectionObjectType::GeneratorFuelCellAirSupply,
-                                                                                 AlphArray(1),
-                                                                                 DataLoopNode::NodeFluidType::Air,
-                                                                                 DataLoopNode::ConnectionType::Inlet,
-                                                                                 NodeInputManager::CompFluidStream::Primary,
-                                                                                 DataLoopNode::ObjectIsNotParent);
+                fuelCell.AirSup.SupNodeNum = Node::GetOnlySingleNode(state,
+                                                                     AlphArray(2),
+                                                                     ErrorsFound,
+                                                                     Node::ConnectionObjectType::GeneratorFuelCellAirSupply,
+                                                                     AlphArray(1),
+                                                                     Node::FluidType::Air,
+                                                                     Node::ConnectionType::Inlet,
+                                                                     Node::CompFluidStream::Primary,
+                                                                     Node::ObjectIsNotParent);
 
                 if (s_ipsc->lAlphaFieldBlanks(3)) {
                     ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
@@ -526,8 +546,8 @@ namespace FuelCellElectricGenerator {
                     fuelCell.AirSup.NumConstituents = NumAirConstit;
 
                     if (NumAirConstit > 5) {
-                        ShowSevereError(state, format("Invalid {}={:.2R}", s_ipsc->cNumericFieldNames(4), NumArray(4)));
-                        ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                        ShowSevereError(state, std::format("Invalid {}={:.2f}", s_ipsc->cNumericFieldNames(4), NumArray(4)));
+                        ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                         ShowContinueError(state, "Fuel Cell model not set up for more than 5 air constituents");
                         ErrorsFound = true;
                     }
@@ -561,9 +581,9 @@ namespace FuelCellElectricGenerator {
                 // check for molar fractions summing to 1.0.
                 if (std::abs(sum(fuelCell.AirSup.ConstitMolalFract) - 1.0) > 0.0001) {
 
-                    ShowSevereError(state, format("{} molar fractions do not sum to 1.0", s_ipsc->cCurrentModuleObject));
-                    ShowContinueError(state, format("..Sum was={:.1R}", sum(fuelCell.AirSup.ConstitMolalFract)));
-                    ShowContinueError(state, format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("{} molar fractions do not sum to 1.0", s_ipsc->cCurrentModuleObject));
+                    ShowContinueError(state, std::format("..Sum was={:.1f}", sum(fuelCell.AirSup.ConstitMolalFract)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
 
@@ -574,8 +594,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -613,7 +633,7 @@ namespace FuelCellElectricGenerator {
         int NumFCWaterSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCWaterSups <= 0) {
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -667,27 +687,27 @@ namespace FuelCellElectricGenerator {
 
                 } else if (fuelCell.WaterSup.waterTempMode == DataGenerators::WaterTempMode::AirNode) {
                     fuelCell.WaterSup.NodeName = AlphArray(5);
-                    fuelCell.WaterSup.NodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                    AlphArray(5),
-                                                                                    ErrorsFound,
-                                                                                    DataLoopNode::ConnectionObjectType::GeneratorFuelCellWaterSupply,
-                                                                                    AlphArray(1),
-                                                                                    DataLoopNode::NodeFluidType::Air,
-                                                                                    DataLoopNode::ConnectionType::Sensor,
-                                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                                    DataLoopNode::ObjectIsNotParent);
+                    fuelCell.WaterSup.NodeNum = Node::GetOnlySingleNode(state,
+                                                                        AlphArray(5),
+                                                                        ErrorsFound,
+                                                                        Node::ConnectionObjectType::GeneratorFuelCellWaterSupply,
+                                                                        AlphArray(1),
+                                                                        Node::FluidType::Air,
+                                                                        Node::ConnectionType::Sensor,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
 
                 } else if (fuelCell.WaterSup.waterTempMode == DataGenerators::WaterTempMode::WaterNode) {
                     fuelCell.WaterSup.NodeName = AlphArray(5);
-                    fuelCell.WaterSup.NodeNum = NodeInputManager::GetOnlySingleNode(state,
-                                                                                    AlphArray(5),
-                                                                                    ErrorsFound,
-                                                                                    DataLoopNode::ConnectionObjectType::GeneratorFuelCellWaterSupply,
-                                                                                    AlphArray(1),
-                                                                                    DataLoopNode::NodeFluidType::Water,
-                                                                                    DataLoopNode::ConnectionType::Sensor,
-                                                                                    NodeInputManager::CompFluidStream::Primary,
-                                                                                    DataLoopNode::ObjectIsNotParent);
+                    fuelCell.WaterSup.NodeNum = Node::GetOnlySingleNode(state,
+                                                                        AlphArray(5),
+                                                                        ErrorsFound,
+                                                                        Node::ConnectionObjectType::GeneratorFuelCellWaterSupply,
+                                                                        AlphArray(1),
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Sensor,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
                 }
 
                 fuelCell.WaterSup.sched = Sched::GetSchedule(state, AlphArray(6));
@@ -703,8 +723,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -713,7 +733,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellAuxilHeaters = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellAuxilHeaters <= 0) {
-            ShowSevereError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -772,8 +792,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -782,8 +802,8 @@ namespace FuelCellElectricGenerator {
         s_ipsc->cCurrentModuleObject = "Generator:FuelCell:ExhaustGasToWaterHeatExchanger";
         int NumFCExhaustGasHXs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
         if (NumFCExhaustGasHXs <= 0) {
-            ShowWarningError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -810,43 +830,37 @@ namespace FuelCellElectricGenerator {
 
                 fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCExhaust;
                 fuelCell.ExhaustHX.Name = AlphArray(1);
-                fuelCell.ExhaustHX.WaterInNodeName = AlphArray(2);
-                fuelCell.ExhaustHX.WaterOutNodeName = AlphArray(3);
                 // find node ids for water path
-                fuelCell.ExhaustHX.WaterInNode =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(2),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Water,
-                                                        DataLoopNode::ConnectionType::Inlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
-                fuelCell.ExhaustHX.WaterOutNode =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(3),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Water,
-                                                        DataLoopNode::ConnectionType::Outlet,
-                                                        NodeInputManager::CompFluidStream::Primary,
-                                                        DataLoopNode::ObjectIsNotParent);
-                BranchNodeConnections::TestCompSet(
-                    state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
+                fuelCell.ExhaustHX.WaterInNode = Node::GetOnlySingleNode(state,
+                                                                         AlphArray(2),
+                                                                         ErrorsFound,
+                                                                         Node::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
+                                                                         AlphArray(1),
+                                                                         Node::FluidType::Water,
+                                                                         Node::ConnectionType::Inlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
+                fuelCell.ExhaustHX.WaterOutNode = Node::GetOnlySingleNode(state,
+                                                                          AlphArray(3),
+                                                                          ErrorsFound,
+                                                                          Node::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
+                                                                          AlphArray(1),
+                                                                          Node::FluidType::Water,
+                                                                          Node::ConnectionType::Outlet,
+                                                                          Node::CompFluidStream::Primary,
+                                                                          Node::ObjectIsNotParent);
+                Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
 
-                fuelCell.ExhaustHX.ExhaustOutNodeName = AlphArray(4);
                 fuelCell.ExhaustHX.ExhaustOutNode =
-                    NodeInputManager::GetOnlySingleNode(state,
-                                                        AlphArray(4),
-                                                        ErrorsFound,
-                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
-                                                        AlphArray(1),
-                                                        DataLoopNode::NodeFluidType::Air,
-                                                        DataLoopNode::ConnectionType::Outlet,
-                                                        NodeInputManager::CompFluidStream::Secondary,
-                                                        DataLoopNode::ObjectIsNotParent);
+                    Node::GetOnlySingleNode(state,
+                                            AlphArray(4),
+                                            ErrorsFound,
+                                            Node::ConnectionObjectType::GeneratorFuelCellExhaustGasToWaterHeatExchanger,
+                                            AlphArray(1),
+                                            Node::FluidType::Air,
+                                            Node::ConnectionType::Outlet,
+                                            Node::CompFluidStream::Secondary,
+                                            Node::ObjectIsNotParent);
 
                 fuelCell.ExhaustHX.HXmodelMode = static_cast<DataGenerators::ExhaustGasHX>(getEnumValue(exhaustGasHXNamesUC, AlphArray(5)));
                 if (fuelCell.ExhaustHX.HXmodelMode == DataGenerators::ExhaustGasHX::Invalid) {
@@ -876,8 +890,8 @@ namespace FuelCellElectricGenerator {
                 // store cooling water volume flow rate for autosizing system
                 PlantUtilities::RegisterPlantCompDesignFlow(state, fuelCell.ExhaustHX.WaterInNode, fuelCell.ExhaustHX.WaterVolumeFlowMax);
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -886,8 +900,8 @@ namespace FuelCellElectricGenerator {
         int NumFCElecStorageUnits = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCElecStorageUnits <= 0) {
-            ShowWarningError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -914,8 +928,8 @@ namespace FuelCellElectricGenerator {
                 if (Util::SameString(AlphArray(2), "SimpleEfficiencyWithConstraints")) {
                     fuelCell.ElecStorage.StorageModelMode = DataGenerators::ElectricalStorage::SimpleEffConstraints;
                 } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
-                    ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
 
@@ -933,8 +947,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -943,8 +957,8 @@ namespace FuelCellElectricGenerator {
         int NumFCPowerCondUnits = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCPowerCondUnits <= 0) {
-            ShowWarningError(state, format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, format("Fuel Cell model requires a {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires a {} object", s_ipsc->cCurrentModuleObject));
 
             ErrorsFound = true;
         }
@@ -999,8 +1013,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -1029,32 +1043,26 @@ namespace FuelCellElectricGenerator {
                     auto &fuelCell = state.dataFuelCellElectGen->FuelCell(fuelCellNum);
                     fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCStackCooler;
                     fuelCell.StackCooler.Name = AlphArray(1);
-                    fuelCell.StackCooler.WaterInNodeName = AlphArray(2);
 
-                    fuelCell.StackCooler.WaterOutNodeName = AlphArray(3);
-
-                    fuelCell.StackCooler.WaterInNode =
-                        NodeInputManager::GetOnlySingleNode(state,
-                                                            AlphArray(2),
-                                                            ErrorsFound,
-                                                            DataLoopNode::ConnectionObjectType::GeneratorFuelCellStackCooler,
-                                                            AlphArray(1),
-                                                            DataLoopNode::NodeFluidType::Water,
-                                                            DataLoopNode::ConnectionType::Inlet,
-                                                            NodeInputManager::CompFluidStream::Primary,
-                                                            DataLoopNode::ObjectIsNotParent);
-                    fuelCell.StackCooler.WaterOutNode =
-                        NodeInputManager::GetOnlySingleNode(state,
-                                                            AlphArray(3),
-                                                            ErrorsFound,
-                                                            DataLoopNode::ConnectionObjectType::GeneratorFuelCellStackCooler,
-                                                            AlphArray(1),
-                                                            DataLoopNode::NodeFluidType::Water,
-                                                            DataLoopNode::ConnectionType::Outlet,
-                                                            NodeInputManager::CompFluidStream::Primary,
-                                                            DataLoopNode::ObjectIsNotParent);
-                    BranchNodeConnections::TestCompSet(
-                        state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
+                    fuelCell.StackCooler.WaterInNode = Node::GetOnlySingleNode(state,
+                                                                               AlphArray(2),
+                                                                               ErrorsFound,
+                                                                               Node::ConnectionObjectType::GeneratorFuelCellStackCooler,
+                                                                               AlphArray(1),
+                                                                               Node::FluidType::Water,
+                                                                               Node::ConnectionType::Inlet,
+                                                                               Node::CompFluidStream::Primary,
+                                                                               Node::ObjectIsNotParent);
+                    fuelCell.StackCooler.WaterOutNode = Node::GetOnlySingleNode(state,
+                                                                                AlphArray(3),
+                                                                                ErrorsFound,
+                                                                                Node::ConnectionObjectType::GeneratorFuelCellStackCooler,
+                                                                                AlphArray(1),
+                                                                                Node::FluidType::Water,
+                                                                                Node::ConnectionType::Outlet,
+                                                                                Node::CompFluidStream::Primary,
+                                                                                Node::ObjectIsNotParent);
+                    Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
 
                     fuelCell.StackCooler.TstackNom = NumArray(1);
                     fuelCell.StackCooler.TstackActual = NumArray(2);
@@ -1062,24 +1070,12 @@ namespace FuelCellElectricGenerator {
                     fuelCell.StackCooler.r1 = NumArray(4);
                     fuelCell.StackCooler.r2 = NumArray(5);
                     fuelCell.StackCooler.r3 = NumArray(6);
-                    fuelCell.StackCooler.MdotStackCoolant = NumArray(7);
-                    fuelCell.StackCooler.UAs_cool = NumArray(8);
-                    fuelCell.StackCooler.Fs_cogen = NumArray(9);
-                    fuelCell.StackCooler.As_cogen = NumArray(10);
-                    fuelCell.StackCooler.MdotCogenNom = NumArray(11);
-                    fuelCell.StackCooler.hCogenNom = NumArray(12);
-                    fuelCell.StackCooler.ns = NumArray(13);
-                    fuelCell.StackCooler.PstackPumpEl = NumArray(14);
-                    fuelCell.StackCooler.PmpPowerLossFactor = NumArray(15);
-                    fuelCell.StackCooler.f0 = NumArray(16);
-                    fuelCell.StackCooler.f1 = NumArray(17);
-                    fuelCell.StackCooler.f1 = NumArray(18);
 
                     fuelCell.StackCooler.StackCoolerPresent = true;
 
                 } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                    ShowContinueError(state, format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             }
@@ -1640,11 +1636,6 @@ namespace FuelCellElectricGenerator {
             }
         }
 
-        // TODO deal with things when jump out if not running?
-        if (!RunFlag) {
-            return;
-        }
-
         // Note: MyLoad (input) is Pdemand (electrical Power requested)
         Real64 Pdemand = MyLoad;
         Real64 PacAncillariesTotal = 0.0;
@@ -1794,7 +1785,7 @@ namespace FuelCellElectricGenerator {
 
             if (state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss < 0.0) {
                 ShowWarningError(state,
-                                 format("problem in FuelSupply.QskinLoss {:.3R}", state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss));
+                                 std::format("problem in FuelSupply.QskinLoss {:.3f}", state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss));
                 state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss = 0.0;
             }
 
@@ -1914,7 +1905,7 @@ namespace FuelCellElectricGenerator {
             this->AirSup.QskinLoss = this->AirSup.BlowerHeatLossFactor * this->AirSup.PairCompEl;
 
             if (this->AirSup.QskinLoss < 0.0) {
-                ShowWarningError(state, format("problem in AirSup.QskinLoss {:.3R}", this->AirSup.QskinLoss));
+                ShowWarningError(state, std::format("problem in AirSup.QskinLoss {:.3f}", this->AirSup.QskinLoss));
                 this->AirSup.QskinLoss = 0.0;
             }
 
@@ -1941,7 +1932,7 @@ namespace FuelCellElectricGenerator {
             if (NdotExcessAir < 0) { // can't meet stoichiometric fuel reaction
 
                 ShowWarningError(state, "Air flow rate into fuel cell is too low for stoichiometric fuel reaction");
-                ShowContinueError(state, format("Increase air flow in GENERATOR:FC:AIR SUPPLY object:{}", this->AirSup.Name));
+                ShowContinueError(state, std::format("Increase air flow in GENERATOR:FC:AIR SUPPLY object:{}", this->AirSup.Name));
             }
 
             // figure CO2 and Water rate from products (coefs setup during one-time processing in gas phase library )
@@ -3029,7 +3020,7 @@ namespace FuelCellElectricGenerator {
 
             this->ExhaustHX.THXexh = TprodGasIn - this->ExhaustHX.qHX / (NdotGas * CpProdGasMol * 1000.0);
 
-            Real64 Cp = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getSpecificHeat(state, TwaterIn, RoutineName);
+            Real64 Cp = this->CWPlantLoc.loop->glycol->getSpecificHeat(state, TwaterIn, RoutineName);
 
             if (this->ExhaustHX.WaterMassFlowRate * Cp <= 0.0) {
                 this->ExhaustHX.WaterOutletTemp = TwaterIn;
@@ -3350,7 +3341,6 @@ namespace FuelCellElectricGenerator {
             this->AuxilHeat.NdotAuxMix = 0.0;
             this->AuxilHeat.QskinLoss = 0.0;
             this->AuxilHeat.QairIntake = 0.0;
-            this->ExhaustHX.NdotHXleaving = 0.0;
             this->ExhaustHX.WaterOutletTemp = 0.0;
             this->ExhaustHX.WaterOutletEnthalpy = 0.0;
             this->ElecStorage.LastTimeStepStateOfCharge = this->ElecStorage.StartingEnergyStored;
@@ -3365,7 +3355,7 @@ namespace FuelCellElectricGenerator {
             this->Inverter.PCUlosses = 0.0;
             this->Inverter.QairIntake = 0.0;
 
-            Real64 rho = state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).glycol->getDensity(state, DataGenerators::InitHRTemp, RoutineName);
+            Real64 rho = this->CWPlantLoc.loop->glycol->getDensity(state, DataGenerators::InitHRTemp, RoutineName);
 
             this->ExhaustHX.WaterMassFlowRateDesign = this->ExhaustHX.WaterVolumeFlowMax * rho;
             this->ExhaustHX.WaterMassFlowRate = this->ExhaustHX.WaterMassFlowRateDesign;
@@ -3530,18 +3520,10 @@ namespace FuelCellElectricGenerator {
 
         this->Report.ACPowerGen = this->ACPowerGen;                                         // electrical power produced [W]
         this->Report.ACEnergyGen = this->ACPowerGen * state.dataHVACGlobal->TimeStepSysSec; // energy produced (J)
-        this->Report.QdotExhaust = 0.0;                                                     // reporting: exhaust gas heat recovered (W)
-        this->Report.TotalHeatEnergyRec = 0.0;                                              // reporting: total heat recovered (J)
-        this->Report.ExhaustEnergyRec = 0.0;                                                // reporting: exhaust gas heat recovered (J)
 
         this->Report.HeatRecInletTemp = 0.0;  // reporting: Heat Recovery Loop Inlet Temperature (C)
         this->Report.HeatRecOutletTemp = 0.0; // reporting: Heat Recovery Loop Outlet Temperature (C)
         this->Report.HeatRecMdot = 0.0;       // reporting: Heat Recovery Loop Mass flow rate (kg/s)
-
-        this->Report.ElectEfficiency = 0.0;
-        this->Report.ThermalEfficiency = 0.0;
-        this->Report.OverallEfficiency = 0.0;
-        this->Report.ExergyEfficiency = 0.0;
 
         this->Report.TairInlet = this->AirSup.TairIntoBlower;                                       // State point 1
         this->Report.TairIntoFCPM = this->AirSup.TairIntoFCPM;                                      // State point 4
@@ -3571,8 +3553,6 @@ namespace FuelCellElectricGenerator {
 
         this->Report.FuelEnergyUseRateHHV = this->FCPM.NdotFuel * state.dataGenerator->FuelSupply(this->FuelSupNum).HHV *
                                             state.dataGenerator->FuelSupply(this->FuelSupNum).KmolPerSecToKgPerSec;
-
-        this->Report.FuelRateMdot = 0.0; // (Kg/s)
 
         this->Report.TwaterInlet = this->WaterSup.TwaterIntoCompress;
         this->Report.TwaterIntoFCPM = this->WaterSup.TwaterIntoFCPM;
@@ -3617,6 +3597,53 @@ namespace FuelCellElectricGenerator {
         this->Report.SkinLossEnergy = (this->QconvZone + this->QradZone) * state.dataHVACGlobal->TimeStepSysSec;
         this->Report.SkinLossConvect = this->QconvZone;
         this->Report.SkinLossRadiat = this->QradZone;
+
+        if (this->ExhaustHX.ExhaustOutNode > 0) {
+            Real64 dryGasMassFlowRate = 0.0;
+            Real64 waterVaporMassFlowRate = 0.0;
+            Real64 exhaustEnthalpyFlowRate = 0.0;
+            for (int constituent = 1; constituent <= isize(this->AuxilHeat.GasLibID); ++constituent) {
+                GasID const gasID = this->AuxilHeat.GasLibID(constituent);
+                if (gasID == GasID::Invalid) {
+                    continue;
+                }
+
+                Real64 molarFlowRate = this->AuxilHeat.ConstitMolalFract(constituent) * this->AuxilHeat.NdotAuxMix;
+                if (gasID == GasID::Water) {
+                    molarFlowRate = max(0.0, molarFlowRate - this->ExhaustHX.CondensateRate);
+                }
+                auto const &gas = state.dataGenerator->GasPhaseThermoChemistryData(static_cast<int>(gasID));
+                Real64 const massFlowRate = molarFlowRate * gas.MolecularWeight;
+                if (gasID == GasID::Water) {
+                    waterVaporMassFlowRate += massFlowRate;
+                } else {
+                    dryGasMassFlowRate += massFlowRate;
+                }
+
+                // Use 0 C gas species as the dry-gas enthalpy reference. For water vapor, use liquid water at 0 C as the reference so the
+                // result retains the latent heat and is consistent with the HVAC node enthalpy convention.
+                Real64 molarEnthalpy = gasMolarEnthalpy(gas, this->ExhaustHX.THXexh) - gasMolarEnthalpy(gas, 0.0); // kJ/mol
+                if (gasID == GasID::Water) {
+                    Real64 gaseousWaterEnthalpyAtReference;
+                    Real64 liquidWaterEnthalpyAtReference;
+                    FigureGaseousWaterEnthalpy(0.0, gaseousWaterEnthalpyAtReference);
+                    FigureLiquidWaterEnthalpy(0.0, liquidWaterEnthalpyAtReference);
+                    molarEnthalpy += gaseousWaterEnthalpyAtReference - liquidWaterEnthalpyAtReference;
+                }
+                exhaustEnthalpyFlowRate += molarFlowRate * molarEnthalpy * 1.0e6; // kmol/s * kJ/mol -> W
+            }
+
+            auto &exhaustNode = state.dataLoopNodes->Node(this->ExhaustHX.ExhaustOutNode);
+            exhaustNode.Temp = this->ExhaustHX.THXexh;
+            // Air-node mass flow and enthalpy use a dry-gas basis; water vapor is represented by the humidity ratio.
+            exhaustNode.MassFlowRate = dryGasMassFlowRate;
+            exhaustNode.MassFlowRateMin = 0.0;
+            exhaustNode.MassFlowRateMinAvail = 0.0;
+            exhaustNode.MassFlowRateMax = exhaustNode.MassFlowRate;
+            exhaustNode.MassFlowRateMaxAvail = exhaustNode.MassFlowRate;
+            exhaustNode.HumRat = (dryGasMassFlowRate > 0.0) ? waterVaporMassFlowRate / dryGasMassFlowRate : 0.0;
+            exhaustNode.Enthalpy = (dryGasMassFlowRate > 0.0) ? exhaustEnthalpyFlowRate / dryGasMassFlowRate : 0.0;
+        }
     }
     void FCDataStruct::oneTimeInit_new(EnergyPlusData &state)
     {

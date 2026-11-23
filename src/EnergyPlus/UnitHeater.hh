@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -57,6 +57,7 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FluidProperties.hh>
+#include <EnergyPlus/General.hh>
 
 namespace EnergyPlus {
 
@@ -64,23 +65,6 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace UnitHeater {
-
-    enum class HCoilType
-    {
-        Invalid = -1,
-        Electric,
-        Gas,
-        WaterHeatingCoil,
-        SteamCoil,
-        Num
-    };
-
-    static constexpr std::array<std::string_view, static_cast<int>(HCoilType::Num)> HCoilTypeNamesUC{
-        "COIL:HEATING:ELECTRIC",
-        "COIL:HEATING:FUEL",
-        "COIL:HEATING:WATER",
-        "COIL:HEATING:STEAM",
-    };
 
     struct UnitHeaterData
     {
@@ -102,10 +86,10 @@ namespace UnitHeater {
         std::string FanOperatesDuringNoHeating; // Indicates whether fan operates or not during no heating
         int FanOutletNode;                      // outlet node number for fan exit
         // (assumes fan is upstream of heating coil)
-        HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // mode of operation; 1=cycling fan, cycling coil, 2=continuous fan, cycling coil
-        HCoilType Type;                           // type of heating coil (water, gas, electric, etc.)
-        std::string HCoilTypeCh;                  // actual object name
-        std::string HCoilName;                    // name of heating coil
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;              // mode of operation; 1=cycling fan, cycling coil, 2=continuous fan, cycling coil
+        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid; // type of heating coil (water, gas, electric, etc.)
+        std::string HCoilTypeCh;                               // actual object name
+        std::string HCoilName;                                 // name of heating coil
         int HCoil_Index;
         DataPlant::PlantEquipmentType HeatingCoilType;
         Fluid::RefrigProps *HCoil_fluid = nullptr;
@@ -134,6 +118,8 @@ namespace UnitHeater {
         int ZonePtr;             // pointer to a zone served by a unit heater
         int HVACSizingIndex;     // index of a HVACSizing object for a unit heater
         bool FirstPass;          // detects first time through for resetting sizing data
+
+        General::SolveRootStats solveRootStats;
 
         // Default Constructor
         UnitHeaterData()

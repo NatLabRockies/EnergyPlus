@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -108,12 +108,9 @@ namespace ExteriorEnergyUse {
         Real64 DesignLevel;               // Design Consumption (Watts, except for Water Equipment)
         Real64 Power;                     // Power = DesignLevel * ScheduleValue
         Real64 CurrentUse;                // Use for this time step
-        bool ManageDemand;                // Flag to indicate whether to use demand limiting
-        Real64 DemandLimit;               // Demand limit set by demand manager [W]
 
         // Default Constructor
-        ExteriorEquipmentUsage()
-            : FuelType(Constant::eFuel::Invalid), DesignLevel(0.0), Power(0.0), CurrentUse(0.0), ManageDemand(false), DemandLimit(0.0)
+        ExteriorEquipmentUsage() : FuelType(Constant::eFuel::Invalid), DesignLevel(0.0), Power(0.0), CurrentUse(0.0)
         {
         }
     };

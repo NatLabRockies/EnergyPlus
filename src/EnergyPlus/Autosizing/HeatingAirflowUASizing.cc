@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingAirflowUASizing.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 
@@ -171,13 +172,23 @@ Real64 HeatingAirflowUASizer::size(EnergyPlusData &state, Real64 _originalValue,
             this->autoSizedValue = _originalValue;
         } else {
             if (this->curOASysNum > 0) {
-                if (this->outsideAirSys(this->curOASysNum).AirLoopDOASNum > -1) {
+                if (this->oaSysEqSizing(this->curOASysNum).AirFlow) {
+                    // Parent object sets system flow rate
+                    this->autoSizedValue = this->oaSysEqSizing(this->curOASysNum).AirVolFlow;
+                } else if (this->oaSysEqSizing(this->curOASysNum).HeatingAirFlow) {
+                    // Parent object sets heating flow rate
+                    this->autoSizedValue = this->oaSysEqSizing(this->curOASysNum).HeatingAirVolFlow;
+                } else if (this->outsideAirSys(this->curOASysNum).AirLoopDOASNum > -1) {
                     this->autoSizedValue = this->airloopDOAS[this->outsideAirSys(this->curOASysNum).AirLoopDOASNum].SizingMassFlow / this->stdRhoAir;
                 } else {
                     this->autoSizedValue = this->finalSysSizing(this->curSysNum).DesOutAirVolFlow;
                 }
             } else {
-                if (this->curDuctType == HVAC::AirDuctType::Main) {
+                if (this->unitarySysEqSizing(this->curSysNum).AirFlow) {
+                    this->autoSizedValue = this->unitarySysEqSizing(this->curSysNum).AirVolFlow;
+                } else if (this->unitarySysEqSizing(this->curSysNum).HeatingAirFlow) {
+                    this->autoSizedValue = this->unitarySysEqSizing(this->curSysNum).HeatingAirVolFlow;
+                } else if (this->curDuctType == HVAC::AirDuctType::Main) {
                     if (this->finalSysSizing(this->curSysNum).SysAirMinFlowRat > 0.0) {
                         this->autoSizedValue =
                             this->finalSysSizing(this->curSysNum).SysAirMinFlowRat * this->finalSysSizing(this->curSysNum).DesMainVolFlow;
@@ -205,9 +216,7 @@ Real64 HeatingAirflowUASizer::size(EnergyPlusData &state, Real64 _originalValue,
         this->autoSizedValue = 0.0;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "heating_coil_airflow_for_ua";
-        }
+        this->sizingString = "Heating Coil Airflow for UA [m3/s]";
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

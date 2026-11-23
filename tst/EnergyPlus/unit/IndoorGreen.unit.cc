@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -213,7 +213,6 @@ TEST_F(EnergyPlusFixture, IndoorGreen_CheckETFunction)
     Real64 SwithF = 1.0;
     state->dataIndoorGreen->indoorGreens.allocate(IndoorGreenNum);
     auto &thisindoorgreen = state->dataIndoorGreen->indoorGreens(IndoorGreenNum);
-    thisindoorgreen.ZCO2 = 400;  // ppm
     thisindoorgreen.ZPPFD = 0;   // umol/(m2s)
     thisindoorgreen.ZVPD = 2000; // Pa
     thisindoorgreen.ETRate = IndoorGreen::ETBaseFunction(*state, ZonePreTemp, ZonePreHum, thisindoorgreen.ZPPFD, thisindoorgreen.ZVPD, LAI, SwithF);

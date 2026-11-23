@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -106,7 +106,6 @@ namespace ChillerElectricASHRAE205 {
         Real64 AmbientTemp{0};
         Real64 AmbientZoneGain{0};       // Internal gain to zone from losses (W)
         Real64 AmbientZoneGainEnergy{0}; // Internal gain to zone from losses (J)
-        std::string EndUseSubcategory;   // identifier use for the end use subcategory
 
         // Default Constructor
         ASHRAE205ChillerSpecs() = default;
@@ -123,6 +122,8 @@ namespace ChillerElectricASHRAE205 {
 
         void getDesignCapacities(
             EnergyPlusData &state, const PlantLocation &calledFromLocation, Real64 &MaxLoad, Real64 &MinLoad, Real64 &OptLoad) override;
+
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad) override;
 
         void initialize(EnergyPlusData &state, bool RunFlag, Real64 MyLoad) override;
 

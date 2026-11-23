@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -100,30 +100,6 @@ namespace PVWatts {
         TILT_AZIMUTH,
         SURFACE,
         Num
-    };
-
-    struct DCPowerOutput
-    {
-        Real64 poa;  // Plane of array irradiance
-        Real64 tpoa; // Transmitted plane of array irradiance
-        Real64 pvt;  // PV Cell temperature
-        Real64 dc;   // DC power output
-    };
-
-    struct IrradianceOutput
-    {
-        Real64 solazi;
-        Real64 solzen;
-        Real64 solalt;
-        Real64 aoi;
-        Real64 stilt;
-        Real64 sazi;
-        Real64 rot;
-        Real64 btd;
-        Real64 ibeam;
-        Real64 iskydiff;
-        Real64 ignddiff;
-        int sunup;
     };
 
     class PVWattsGenerator

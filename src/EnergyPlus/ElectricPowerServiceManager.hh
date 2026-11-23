@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -171,12 +171,10 @@ private:               // data
     Real64 qdotRadZone_;
     Real64 ancillACuseRate_;
     Real64 ancillACuseEnergy_;
-    InverterModelType modelType_;           // type of inverter model used
-    Sched::Schedule *availSched_ = nullptr; // number for availability schedule.
-    ThermalLossDestination heatLossesDestination_;
+    InverterModelType modelType_;              // type of inverter model used
+    Sched::Schedule *availSched_ = nullptr;    // number for availability schedule.
     int zoneNum_;                              // destination zone for heat losses from inverter.
     Real64 zoneRadFract_;                      // radiative fraction for thermal losses to zone
-    Real64 nominalVoltage_;                    // CEC lookup table model
     std::vector<Real64> nomVoltEfficiencyARR_; // eff at 10, 20, 30, 50, 75, & 100% CEC lookup table model
     Curve::Curve *effCurve_ = nullptr;         // curve for eff as func of power
     Real64 ratedPower_;                        // rated, max continuous power output level for inverter
@@ -244,9 +242,8 @@ private: // data
     Sched::Schedule *availSched_ = nullptr; // number for availability schedule.
     ConverterModelType modelType_;          // type of inverter model used
     Curve::Curve *effCurve_ = nullptr;      // performance curve or table index
-    ThermalLossDestination heatLossesDestination_;
-    int zoneNum_;         // destination zone for heat losses from inverter.
-    Real64 zoneRadFract_; // radiative fraction for thermal losses to zone
+    int zoneNum_;                           // destination zone for heat losses from inverter.
+    Real64 zoneRadFract_;                   // radiative fraction for thermal losses to zone
     Real64 standbyPower_;
     Real64 maxPower_;
 };
@@ -365,52 +362,49 @@ private: // data
     Real64 decrementedEnergyStored_; // [J] this is the negative of StoredEnergy
     int maxRainflowArrayBounds_;
     bool myWarmUpFlag_;
-    StorageModelType storageModelMode_;            // type of model parameter, SimpleBucketStorage
-    Sched::Schedule *availSched_ = nullptr;        // availability schedule index.
-    ThermalLossDestination heatLossesDestination_; // mode for where thermal losses go
-    int zoneNum_;                                  // destination zone for heat losses from inverter.
-    Real64 zoneRadFract_;                          // radiative fraction for thermal losses to zone
-    Real64 startingEnergyStored_;                  // [J] joules inside at beginning of environment period
-    Real64 energeticEfficCharge_;                  // [ ] efficiency of charging
-    Real64 energeticEfficDischarge_;               // [ ] efficiency of discharging
-    Real64 maxPowerDraw_;                          // [W] max rate of discharge
-    Real64 maxPowerStore_;                         // [W] max rate of charge
-    Real64 maxEnergyCapacity_;                     // [J] max storage capacity
-    int parallelNum_;                              // [ ] number of battery modules in parallel
-    int seriesNum_;                                // [ ] number of battery modules in series
-    int numBattery_;                               // total number of batteries all together
-    Curve::Curve *chargeCurve_ = nullptr;          // [ ] voltage change curve for charging
-    Curve::Curve *dischargeCurve_ = nullptr;       // [ ] voltage change curve for discharging
-    int cycleBinNum_;                              // [ ] number of cycle bins
-    Real64 startingSOC_;                           // [ ] initial fractional state of charge
-    Real64 maxAhCapacity_;                         // [Ah]maximum capacity
-    Real64 availableFrac_;                         // [ ] maximum fraction of available charge capacity
-    Real64 chargeConversionRate_;                  // [1/h]change rate from bound charge energy to available charge
-    Real64 chargedOCV_;                            // [V] fully charged open circuit voltage
-    Real64 dischargedOCV_;                         // [V] fully discharged open circuit voltage
-    Real64 internalR_;                             // [ohm]internal electric resistance
-    Real64 maxDischargeI_;                         // [A] maximum discharging current
-    Real64 cutoffV_;                               // [V] cut-off voltage
-    Real64 maxChargeRate_;                         // [1/h] charge rate limit
-    bool lifeCalculation_;                         // [ ] battery life calculation: Yes or No
-    Curve::Curve *lifeCurve_ = nullptr;            // [ ] battery life curve
-    Real64 liIon_dcToDcChargingEff_;               // [ ] DC to DC Charging Efficiency (Li-ion NMC model)
-    Real64 liIon_mass_;                            // [kg] mass of battery (Li-ion NMC model)
-    Real64 liIon_surfaceArea_;                     // [m2] battery surface area (Li-ion NMC model)
-    Real64 liIon_Cp_;                              // [J/kg-K] battery specific heat capacity (Li-ion NMC model)
-    Real64 liIon_heatTransferCoef_;                // [W/m2-K] Heat Transfer Coefficient Between Battery and Ambient (Li-ion NMC model)
-    Real64 liIon_Vfull_;                           // [V] Fully charged cell voltage (Li-ion NMC model)
-    Real64 liIon_Vexp_;                            // [V] Cell Voltage at End of Exponential Zone (Li-ion NMC model)
-    Real64 liIon_Vnom_;                            // [V] Cell voltage at end of nominal zone (Li-ion NMC model)
-    Real64 liIon_Vnom_default_;                    // [V] Default nominal cell voltage (Li-ion NMC model)
-    Real64 liIon_Qfull_;                           // [A-h] Fully charged cell capacity (Li-ion NMC model)
-    Real64 liIon_Qexp_;                            // [A-h] Cell capacity at end of exponential zone (Li-ion NMC model)
-    Real64 liIon_Qnom_;                            // [A-h] Cell capacity at end of nominal zone (Li-ion NMC model)
-    Real64 liIon_C_rate_;                          // [ ] Rate at which voltage vs capacity curve input (Li-ion NMC model)
+    StorageModelType storageModelMode_;      // type of model parameter, SimpleBucketStorage
+    Sched::Schedule *availSched_ = nullptr;  // availability schedule index.
+    int zoneNum_;                            // destination zone for heat losses from inverter.
+    Real64 zoneRadFract_;                    // radiative fraction for thermal losses to zone
+    Real64 startingEnergyStored_;            // [J] joules inside at beginning of environment period
+    Real64 energeticEfficCharge_;            // [ ] efficiency of charging
+    Real64 energeticEfficDischarge_;         // [ ] efficiency of discharging
+    Real64 maxPowerDraw_;                    // [W] max rate of discharge
+    Real64 maxPowerStore_;                   // [W] max rate of charge
+    Real64 maxEnergyCapacity_;               // [J] max storage capacity
+    int parallelNum_;                        // [ ] number of battery modules in parallel
+    int seriesNum_;                          // [ ] number of battery modules in series
+    int numBattery_;                         // total number of batteries all together
+    Curve::Curve *chargeCurve_ = nullptr;    // [ ] voltage change curve for charging
+    Curve::Curve *dischargeCurve_ = nullptr; // [ ] voltage change curve for discharging
+    int cycleBinNum_;                        // [ ] number of cycle bins
+    Real64 startingSOC_;                     // [ ] initial fractional state of charge
+    Real64 maxAhCapacity_;                   // [Ah]maximum capacity
+    Real64 availableFrac_;                   // [ ] maximum fraction of available charge capacity
+    Real64 chargeConversionRate_;            // [1/h]change rate from bound charge energy to available charge
+    Real64 chargedOCV_;                      // [V] fully charged open circuit voltage
+    Real64 dischargedOCV_;                   // [V] fully discharged open circuit voltage
+    Real64 internalR_;                       // [ohm]internal electric resistance
+    Real64 maxDischargeI_;                   // [A] maximum discharging current
+    Real64 cutoffV_;                         // [V] cut-off voltage
+    Real64 maxChargeRate_;                   // [1/h] charge rate limit
+    bool lifeCalculation_;                   // [ ] battery life calculation: Yes or No
+    Curve::Curve *lifeCurve_ = nullptr;      // [ ] battery life curve
+    Real64 liIon_mass_;                      // [kg] mass of battery (Li-ion NMC model)
+    Real64 liIon_surfaceArea_;               // [m2] battery surface area (Li-ion NMC model)
+    Real64 liIon_Cp_;                        // [J/kg-K] battery specific heat capacity (Li-ion NMC model)
+    Real64 liIon_heatTransferCoef_;          // [W/m2-K] Heat Transfer Coefficient Between Battery and Ambient (Li-ion NMC model)
+    Real64 liIon_Vfull_;                     // [V] Fully charged cell voltage (Li-ion NMC model)
+    Real64 liIon_Vexp_;                      // [V] Cell Voltage at End of Exponential Zone (Li-ion NMC model)
+    Real64 liIon_Vnom_;                      // [V] Cell voltage at end of nominal zone (Li-ion NMC model)
+    Real64 liIon_Vnom_default_;              // [V] Default nominal cell voltage (Li-ion NMC model)
+    Real64 liIon_Qfull_;                     // [A-h] Fully charged cell capacity (Li-ion NMC model)
+    Real64 liIon_Qexp_;                      // [A-h] Cell capacity at end of exponential zone (Li-ion NMC model)
+    Real64 liIon_Qnom_;                      // [A-h] Cell capacity at end of nominal zone (Li-ion NMC model)
+    Real64 liIon_C_rate_;                    // [ ] Rate at which voltage vs capacity curve input (Li-ion NMC model)
     // calculated and from elsewhere vars
     Real64 thisTimeStepStateOfCharge_; // [J]
     Real64 lastTimeStepStateOfCharge_; // [J]
-    Real64 pelNeedFromStorage_;        // [W]
     Real64 pelFromStorage_;            // [W]
     Real64 pelIntoStorage_;            // [W]
     Real64 qdotConvZone_;              // [W]
@@ -722,7 +716,6 @@ private: // data
     GeneratorOpScheme genOperationScheme_; // Name of Operation Scheme
     std::string demandMeterName_;          // Name of Demand Energy Meter for "on demand" operation
     int demandMeterPtr_;                   // "pointer" to Meter for electrical Demand to meet
-    std::string generationMeterName_;      // Name of Generated Energy Meter for "on demand" operation
     bool generatorsPresent_;               // true if any generators
     bool myCoGenSetupFlag_;
     Real64 demandLimit_;                    // Demand Limit in Watts(W) which the generator will operate above

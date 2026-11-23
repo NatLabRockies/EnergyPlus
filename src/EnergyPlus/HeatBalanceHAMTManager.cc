@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <string>
 
 // ObjexxFCL Headers
@@ -57,6 +58,7 @@
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
@@ -284,14 +286,14 @@ namespace HeatBalanceHAMTManager {
             auto *mat = s_mat->materials(matNum);
 
             if (mat->group != Material::Group::Regular) {
-                ShowSevereCustom(state, eoh, format("{} = \"{}\" is not a regular material.", cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} = \"{}\" is not a regular material.", cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
 
             if (mat->ROnly) {
-                ShowWarningError(state,
-                                 format("{} {}=\"{}\" is defined as an R-only value material.", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowWarningError(
+                    state, std::format("{} {}=\"{}\" is defined as an R-only value material.", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 continue;
             }
 
@@ -333,7 +335,7 @@ namespace HeatBalanceHAMTManager {
 
             auto *mat = s_mat->materials(matNum);
             if (!mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -395,7 +397,7 @@ namespace HeatBalanceHAMTManager {
                 }
             }
             if (isoerrrise) {
-                ShowWarningError(state, format("{}: data not rising - Check material {}", cHAMTObject2, matHAMT->Name));
+                ShowWarningError(state, std::format("{}: data not rising - Check material {}", cHAMTObject2, matHAMT->Name));
                 ShowContinueError(state, "Isotherm data has been fixed, and the simulation continues.");
             }
         }
@@ -427,7 +429,7 @@ namespace HeatBalanceHAMTManager {
 
             auto *mat = s_mat->materials(matNum);
             if (!mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -474,7 +476,7 @@ namespace HeatBalanceHAMTManager {
 
             auto *mat = s_mat->materials(matNum);
             if (!mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -521,7 +523,7 @@ namespace HeatBalanceHAMTManager {
 
             auto *mat = s_mat->materials(matNum);
             if (!mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -570,7 +572,7 @@ namespace HeatBalanceHAMTManager {
 
             auto *mat = s_mat->materials(matNum);
             if (!mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
+                ShowSevereCustom(state, eoh, std::format("{} is not defined for {} = \"{}\"", cHAMTObject1, cAlphaFieldNames(1), AlphaArray(1)));
                 ErrorsFound = true;
                 continue;
             }
@@ -693,8 +695,8 @@ namespace HeatBalanceHAMTManager {
             for (int lid = 1; lid <= constr.TotLayers; ++lid) {
                 auto *mat = s_mat->materials(constr.LayerPoint(lid));
                 if (mat->ROnly) {
-                    ShowSevereError(state, format("{}Construction={} cannot contain R-only value materials.", RoutineName, constr.Name));
-                    ShowContinueError(state, format("Reference Material=\"{}\".", mat->Name));
+                    ShowSevereError(state, std::format("{}Construction={} cannot contain R-only value materials.", RoutineName, constr.Name));
+                    ShowContinueError(state, std::format("Reference Material=\"{}\".", mat->Name));
                     ++errorCount;
                     continue;
                 }
@@ -703,45 +705,49 @@ namespace HeatBalanceHAMTManager {
                 assert(matHAMT != nullptr);
 
                 if (matHAMT->nmu < 0) {
-                    ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
+                    ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
                     ShowContinueError(
                         state,
-                        format("Reference Material=\"{}\" does not have required Water Vapor Diffusion Resistance Factor (mu) data.", matHAMT->Name));
+                        std::format("Reference Material=\"{}\" does not have required Water Vapor Diffusion Resistance Factor (mu) data.",
+                                    matHAMT->Name));
                     ++errorCount;
                 }
 
                 if (matHAMT->niso < 0) {
-                    ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
-                    ShowContinueError(state, format("Reference Material=\"{}\" does not have required isotherm data.", matHAMT->Name));
+                    ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
+                    ShowContinueError(state, std::format("Reference Material=\"{}\" does not have required isotherm data.", matHAMT->Name));
                     ++errorCount;
                 }
                 if (matHAMT->nsuc < 0) {
-                    ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
+                    ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
                     ShowContinueError(
-                        state, format("Reference Material=\"{}\" does not have required liquid transport coefficient (suction) data.", mat->Name));
+                        state,
+                        std::format("Reference Material=\"{}\" does not have required liquid transport coefficient (suction) data.", mat->Name));
                     ++errorCount;
                 }
                 if (matHAMT->nred < 0) {
-                    ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
+                    ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
                     ShowContinueError(
                         state,
-                        format("Reference Material=\"{}\" does not have required liquid transport coefficient (redistribution) data.", mat->Name));
+                        std::format("Reference Material=\"{}\" does not have required liquid transport coefficient (redistribution) data.",
+                                    mat->Name));
                     ++errorCount;
                 }
                 if (matHAMT->ntc < 0) {
                     if (mat->Conductivity > 0) {
-                        ShowWarningError(state, format("{}Construction={}", RoutineName, constr.Name));
+                        ShowWarningError(state, std::format("{}Construction={}", RoutineName, constr.Name));
                         ShowContinueError(
-                            state, format("Reference Material=\"{}\" does not have thermal conductivity data. Using fixed value.", matHAMT->Name));
+                            state,
+                            std::format("Reference Material=\"{}\" does not have thermal conductivity data. Using fixed value.", matHAMT->Name));
                         matHAMT->ntc = 2;
                         matHAMT->tcwater(1) = 0.0;
                         matHAMT->tcdata(1) = matHAMT->Conductivity;
                         matHAMT->tcwater(2) = matHAMT->isodata(matHAMT->niso);
                         matHAMT->tcdata(2) = matHAMT->Conductivity;
                     } else {
-                        ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
+                        ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
                         ShowContinueError(state,
-                                          format("Reference Material=\"{}\" does not have required thermal conductivity data.", matHAMT->Name));
+                                          std::format("Reference Material=\"{}\" does not have required thermal conductivity data.", matHAMT->Name));
                         ++errorCount;
                     }
                 }
@@ -765,8 +771,8 @@ namespace HeatBalanceHAMTManager {
                     }
                     --matHAMT->divs;
                     if (matHAMT->divs < 1) {
-                        ShowSevereError(state, format("{}Construction={}", RoutineName, constr.Name));
-                        ShowContinueError(state, format("Reference Material=\"{}\" is too thin.", matHAMT->Name));
+                        ShowSevereError(state, std::format("{}Construction={}", RoutineName, constr.Name));
+                        ShowContinueError(state, std::format("Reference Material=\"{}\" is too thin.", matHAMT->Name));
                         ++errorCount;
                         break;
                     }
@@ -870,7 +876,6 @@ namespace HeatBalanceHAMTManager {
 
                     matCell.rh = mat->irh;
                     matCell.rhp1 = mat->irh;
-                    matCell.rhp2 = mat->irh;
 
                     matCell.density = mat->Density;
                     matCell.spech = mat->SpecHeat;
@@ -1038,7 +1043,7 @@ namespace HeatBalanceHAMTManager {
 
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    format("HAMT Surface Temperature Cell {}", concell),
+                                    std::format("HAMT Surface Temperature Cell {}", concell),
                                     Constant::Units::C,
                                     s_hbh->cells(cellid).temp,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1047,7 +1052,7 @@ namespace HeatBalanceHAMTManager {
             }
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    format("HAMT Surface Water Content Cell {}", concell),
+                                    std::format("HAMT Surface Water Content Cell {}", concell),
                                     Constant::Units::kg_kg,
                                     s_hbh->cells(cellid).wreport,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1056,7 +1061,7 @@ namespace HeatBalanceHAMTManager {
             }
             for (int cellid = s_hbh->Extcell(sid), concell = 1; cellid <= s_hbh->Intcell(sid); ++cellid, ++concell) {
                 SetupOutputVariable(state,
-                                    format("HAMT Surface Relative Humidity Cell {}", concell),
+                                    std::format("HAMT Surface Relative Humidity Cell {}", concell),
                                     Constant::Units::Perc,
                                     s_hbh->cells(cellid).rhp,
                                     OutputProcessor::TimeStepType::Zone,
@@ -1072,7 +1077,7 @@ namespace HeatBalanceHAMTManager {
             print(state.files.eio, Format_108);
 
             for (auto const *mat : s_mat->materials) {
-                static constexpr std::string_view Format_111("Material Nominal Resistance,{},{:.4R}\n");
+                static constexpr std::string_view Format_111("Material Nominal Resistance,{},{:.4f}\n");
                 print(state.files.eio, Format_111, mat->Name, mat->NominalR);
             }
         }
@@ -1134,7 +1139,6 @@ namespace HeatBalanceHAMTManager {
             auto &extCell = s_hbh->cells(s_hbh->Extcell(sid));
             extCell.rh = 0.0;
             extCell.rhp1 = 0.0;
-            extCell.rhp2 = 0.0;
 
             extCell.temp = 10.0;
             extCell.tempp1 = 10.0;
@@ -1143,7 +1147,6 @@ namespace HeatBalanceHAMTManager {
             auto &intCell = s_hbh->cells(s_hbh->Intcell(sid));
             intCell.rh = 0.0;
             intCell.rhp1 = 0.0;
-            intCell.rhp2 = 0.0;
 
             intCell.temp = 10.0;
             intCell.tempp1 = 10.0;
@@ -1159,7 +1162,6 @@ namespace HeatBalanceHAMTManager {
 
                 cell.rh = mat->irh;
                 cell.rhp1 = mat->irh;
-                cell.rhp2 = mat->irh;
             }
             s_hbh->MyEnvrnFlag(sid) = false;
         }
@@ -1253,14 +1255,12 @@ namespace HeatBalanceHAMTManager {
             cell.tempp1 = cell.temp;
             cell.tempp2 = cell.temp;
             cell.rhp1 = cell.rh;
-            cell.rhp2 = cell.rh;
         }
         for (int cid = s_hbh->Intcell(sid) + 1; cid <= s_hbh->lastcell(sid); ++cid) {
             auto &cell = s_hbh->cells(cid);
             cell.tempp1 = cell.temp;
             cell.tempp2 = cell.temp;
             cell.rhp1 = cell.rh;
-            cell.rhp2 = cell.rh;
         }
 
         itter = 0;
@@ -1355,7 +1355,8 @@ namespace HeatBalanceHAMTManager {
                         ++s_hbh->qvpErrCount;
                         if (s_hbh->qvpErrCount < 16) {
                             ShowWarningError(
-                                state, format("HeatAndMoistureTransfer: Large Latent Heat for Surface {}", state.dataSurface->Surface(sid).Name));
+                                state,
+                                std::format("HeatAndMoistureTransfer: Large Latent Heat for Surface {}", state.dataSurface->Surface(sid).Name));
                         } else {
                             ShowRecurringWarningErrorAtEnd(state, "HeatAndMoistureTransfer: Large Latent Heat Errors ", s_hbh->qvpErrReport);
                         }
@@ -1372,10 +1373,12 @@ namespace HeatBalanceHAMTManager {
             tempmin = minval(s_hbh->cells, &subcell::tempp1);
             if (tempmax > state.dataHeatBalSurf->MaxSurfaceTempLimit) {
                 if (!state.dataGlobal->WarmupFlag) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureHighOutOfBounds)];
                     if (state.dataSurface->SurfHighTempErrCount(sid) == 0) {
-                        ShowSevereMessage(
-                            state,
-                            format("HAMT: Temperature (high) out of bounds ({:.2R}) for surface={}", tempmax, state.dataSurface->Surface(sid).Name));
+                        ShowSevereMessage(state,
+                                          std::format("HAMT: Temperature (high) out of bounds ({:.2f}) for surface={}",
+                                                      tempmax,
+                                                      state.dataSurface->Surface(sid).Name));
                         ShowContinueErrorTimeStamp(state, "");
                     }
                     ShowRecurringWarningErrorAtEnd(state,
@@ -1391,20 +1394,23 @@ namespace HeatBalanceHAMTManager {
             }
             if (tempmax > state.dataHeatBalSurf->MaxSurfaceTempLimitBeforeFatal) {
                 if (!state.dataGlobal->WarmupFlag) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureHighOutOfBounds)];
                     ShowSevereError(state,
-                                    format("HAMT: HAMT: Temperature (high) out of bounds ( {:.2R}) for surface={}",
-                                           tempmax,
-                                           state.dataSurface->Surface(sid).Name));
+                                    std::format("HAMT: HAMT: Temperature (high) out of bounds ( {:.2f}) for surface={}",
+                                                tempmax,
+                                                state.dataSurface->Surface(sid).Name));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowFatalError(state, "Program terminates due to preceding condition.");
                 }
             }
             if (tempmin < MinSurfaceTempLimit) {
                 if (!state.dataGlobal->WarmupFlag) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureLowOutOfBounds)];
                     if (state.dataSurface->SurfHighTempErrCount(sid) == 0) {
-                        ShowSevereMessage(
-                            state,
-                            format("HAMT: Temperature (low) out of bounds ({:.2R}) for surface={}", tempmin, state.dataSurface->Surface(sid).Name));
+                        ShowSevereMessage(state,
+                                          std::format("HAMT: Temperature (low) out of bounds ({:.2f}) for surface={}",
+                                                      tempmin,
+                                                      state.dataSurface->Surface(sid).Name));
                         ShowContinueErrorTimeStamp(state, "");
                     }
                     ShowRecurringWarningErrorAtEnd(state,
@@ -1420,10 +1426,11 @@ namespace HeatBalanceHAMTManager {
             }
             if (tempmin < MinSurfaceTempLimitBeforeFatal) {
                 if (!state.dataGlobal->WarmupFlag) {
+                    ++state.dataErrTracking->ErrorSummaryCount[static_cast<size_t>(DataErrorTracking::ErrorSummaryType::TemperatureLowOutOfBounds)];
                     ShowSevereError(state,
-                                    format("HAMT: HAMT: Temperature (low) out of bounds ( {:.2R}) for surface={}",
-                                           tempmin,
-                                           state.dataSurface->Surface(sid).Name));
+                                    std::format("HAMT: HAMT: Temperature (low) out of bounds ( {:.2f}) for surface={}",
+                                                tempmin,
+                                                state.dataSurface->Surface(sid).Name));
                     ShowContinueErrorTimeStamp(state, "");
                     ShowFatalError(state, "Program terminates due to preceding condition.");
                 }
@@ -1496,7 +1503,7 @@ namespace HeatBalanceHAMTManager {
                     cell.rhp1 = (phiorsum + vporsum + (wcap * cell.rh) / s_hbh->deltat) / denominator;
                 } else {
                     ShowSevereError(state, "CalcHeatBalHAMT: denominator in calculating RH is zero.  Check material properties for accuracy.");
-                    ShowContinueError(state, format("...Problem occurs in Material=\"{}\".", s_mat->materials(cell.matid)->Name));
+                    ShowContinueError(state, std::format("...Problem occurs in Material=\"{}\".", s_mat->materials(cell.matid)->Name));
                     ShowFatalError(state, "Program terminates due to preceding condition.");
                 }
 
@@ -1522,7 +1529,6 @@ namespace HeatBalanceHAMTManager {
             for (int cid = s_hbh->firstcell(sid); cid <= s_hbh->lastcell(sid); ++cid) {
                 auto &cell = s_hbh->cells(cid);
                 cell.tempp2 = cell.tempp1;
-                cell.rhp2 = cell.rhp1;
             }
         }
 
@@ -1610,9 +1616,9 @@ namespace HeatBalanceHAMTManager {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 xxlow;
-        Real64 xxhigh;
+        Real64 xxhigh = 0.0;
         Real64 yylow;
-        Real64 yyhigh;
+        Real64 yyhigh = 0.0;
         Real64 mygrad;
 
         mygrad = 0.0;

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -249,12 +249,10 @@ TEST_F(EnergyPlusFixture, HVACStandAloneERV_Test2)
     erv.ExhaustAirVolFlow = DataSizing::AutoSize;
     erv.DesignSAFanVolFlowRate = DataSizing::AutoSize;
     erv.DesignEAFanVolFlowRate = DataSizing::AutoSize;
-    erv.DesignHXVolFlowRate = DataSizing::AutoSize;
     erv.SupplyAirFanName = state->dataFans->fans(1)->Name;
     erv.SupplyAirFanIndex = 1;
     erv.ExhaustAirFanName = state->dataFans->fans(2)->Name;
     erv.ExhaustAirFanIndex = 2;
-    erv.hxType = HVAC::HXType::AirToAir_SensAndLatent;
     erv.HeatExchangerName = "ERV Heat Exchanger";
     erv.AirVolFlowPerFloorArea = 0.01;
     erv.AirVolFlowPerOccupant = 0.0;

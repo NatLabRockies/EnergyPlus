@@ -3,7 +3,6 @@
 
 // Standard
 #include <sstream>
-#include <unordered_map>
 
 #include <btwxt/btwxt.h>
 
@@ -40,6 +39,14 @@ RegularGridInterpolatorImplementation::RegularGridInterpolatorImplementation(
     , cubic_slope_coefficients(number_of_grid_axes, std::vector<double>(2, 0.))
     , logger(logger)
 {
+    interpolation_methods.resize(number_of_grid_axes);
+    extrapolation_methods.resize(number_of_grid_axes);
+    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; ++axis_index) {
+        interpolation_methods[axis_index] =
+            to_method(this->grid_axes[axis_index].get_interpolation_method());
+        extrapolation_methods[axis_index] =
+            to_method(this->grid_axes[axis_index].get_extrapolation_method());
+    }
     set_axis_sizes();
 }
 
@@ -47,7 +54,7 @@ std::size_t RegularGridInterpolatorImplementation::add_grid_point_data_set(
     const GridPointDataSet& grid_point_data_set)
 {
     if (grid_point_data_set.data.size() != number_of_grid_points) {
-        throw BtwxtException(fmt::format("Input grid point data set (name=\"{}\") size ({}) does "
+        throw BtwxtException(std::format("Input grid point data set (name=\"{}\") size ({}) does "
                                          "not match number of grid points ({}).",
                                          grid_point_data_set.name,
                                          grid_point_data_set.data.size(),
@@ -58,8 +65,6 @@ std::size_t RegularGridInterpolatorImplementation::add_grid_point_data_set(
     number_of_grid_point_data_sets++;
     temporary_grid_point_data.resize(number_of_grid_point_data_sets);
     results.resize(number_of_grid_point_data_sets);
-    hypercube_grid_point_data.resize(hypercube.size(),
-                                     std::vector<double>(number_of_grid_point_data_sets));
     hypercube_cache.clear();
     if (target_is_set) {
         set_results();
@@ -71,30 +76,40 @@ void RegularGridInterpolatorImplementation::set_target(const std::vector<double>
 {
     if (target_in.size() != number_of_grid_axes) {
         throw BtwxtException(
-            fmt::format("Target (size={}) and grid (size={}) do not have the same dimensions.",
+            std::format("Target (size={}) and grid (size={}) do not have the same dimensions.",
                         target_in.size(),
                         number_of_grid_axes),
             *logger);
     }
-    if (target_is_set) {
-        if ((target_in == target) && (methods == get_interpolation_methods())) {
-            return;
-        }
+    if (target_is_set && target_in == target) {
+        return;
     }
     target = target_in;
     target_is_set = true;
-    set_floor_grid_point_coordinates();
-    calculate_floor_to_ceiling_fractions();
-    consolidate_methods();
-    calculate_interpolation_coefficients();
-    set_results();
+    calculate_at_target();
+}
+
+void RegularGridInterpolatorImplementation::calculate_at_target()
+{
+    try {
+        set_floor_grid_point_coordinates();
+        calculate_floor_to_ceiling_fractions();
+        consolidate_methods();
+        calculate_interpolation_coefficients();
+        set_results();
+    }
+    catch (...) {
+        // The calculation did not complete: results do not correspond to the target
+        target_is_set = false;
+        throw;
+    }
 }
 
 const std::vector<double>& RegularGridInterpolatorImplementation::get_target() const
 {
     if (!target_is_set) {
         logger->warning(
-            fmt::format("The current target was requested, but no target has been set."));
+            std::format("The current target was requested, but no target has been set."));
     }
     return target;
 }
@@ -103,21 +118,21 @@ void RegularGridInterpolatorImplementation::clear_target()
 {
     target_is_set = false;
     target = std::vector<double>(number_of_grid_axes, 0.);
-    results = std::vector<double>(number_of_grid_axes, 0.);
+    results = std::vector<double>(number_of_grid_point_data_sets, 0.);
 }
 
-std::vector<double> RegularGridInterpolatorImplementation::get_results() const
+const std::vector<double>& RegularGridInterpolatorImplementation::get_results() const
 {
     if (number_of_grid_point_data_sets == 0u) {
-        logger->warning(fmt::format("There are no grid point data sets. No results returned."));
+        logger->warning(std::format("There are no grid point data sets. No results returned."));
     }
     if (!target_is_set) {
-        logger->warning(fmt::format("Results were requested, but no target has been set."));
+        logger->warning(std::format("Results were requested, but no target has been set."));
     }
     return results;
 }
 
-std::vector<double>
+const std::vector<double>&
 RegularGridInterpolatorImplementation::get_results(const std::vector<double>& target_in)
 {
     set_target(target_in);
@@ -129,7 +144,7 @@ void RegularGridInterpolatorImplementation::normalize_grid_point_data_sets_at_ta
 {
     if (!target_is_set) {
         throw BtwxtException(
-            fmt::format("Cannot normalize grid point data sets. No target has been set."), *logger);
+            std::format("Cannot normalize grid point data sets. No target has been set."), *logger);
     }
     for (std::size_t data_set_index = 0; data_set_index < number_of_grid_point_data_sets;
          ++data_set_index) {
@@ -144,7 +159,7 @@ double RegularGridInterpolatorImplementation::normalize_grid_point_data_set_at_t
 {
     if (!target_is_set) {
         throw BtwxtException(
-            fmt::format(
+            std::format(
                 "Cannot normalize grid point data set (name=\"{}\"). No target has been set.",
                 grid_point_data_sets[data_set_index].name),
             *logger);
@@ -165,7 +180,7 @@ void RegularGridInterpolatorImplementation::normalize_grid_point_data_set(
     auto& data_set = grid_point_data_sets[data_set_index].data;
     if (scalar == 0.0) {
         throw BtwxtException(
-            fmt::format("Attempt to normalize grid point data set (name=\"{}\") by zero.",
+            std::format("Attempt to normalize grid point data set (name=\"{}\") by zero.",
                         grid_point_data_sets[data_set_index].name),
             *logger);
     }
@@ -236,39 +251,13 @@ RegularGridInterpolatorImplementation::get_grid_point_data(const std::vector<std
     return get_grid_point_data(grid_point_index);
 }
 
-std::vector<double> RegularGridInterpolatorImplementation::get_grid_point_data_relative(
+const std::vector<double>& RegularGridInterpolatorImplementation::get_grid_point_data_relative(
     const std::vector<std::size_t>& coords, const std::vector<short>& translation)
 {
     return get_grid_point_data(get_grid_point_index_relative(coords, translation));
 }
 
 // Internal getter methods
-std::vector<Method> RegularGridInterpolatorImplementation::get_interpolation_methods() const
-{
-    std::vector<Method> interpolation_methods(number_of_grid_axes);
-    static const std::unordered_map<InterpolationMethod, Method> interpolation_method_map {
-        {InterpolationMethod::linear, Method::linear}, {InterpolationMethod::cubic, Method::cubic}};
-
-    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {
-        interpolation_methods[axis_index] =
-            interpolation_method_map.at(grid_axes[axis_index].get_interpolation_method());
-    }
-    return interpolation_methods;
-}
-
-std::vector<Method> RegularGridInterpolatorImplementation::get_extrapolation_methods() const
-{
-    std::vector<Method> extrapolation_methods(number_of_grid_axes);
-    static const std::unordered_map<ExtrapolationMethod, Method> extrapolation_method_map {
-        {ExtrapolationMethod::constant, Method::constant},
-        {ExtrapolationMethod::linear, Method::linear}};
-    for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {
-        extrapolation_methods[axis_index] =
-            extrapolation_method_map.at(grid_axes[axis_index].get_extrapolation_method());
-    }
-    return extrapolation_methods;
-}
-
 std::size_t RegularGridInterpolatorImplementation::get_grid_point_index(
     const std::vector<std::size_t>& coords) const
 {
@@ -298,7 +287,7 @@ void RegularGridInterpolatorImplementation::set_axis_sizes()
         std::size_t length = grid_axes[axis_index].get_length();
         if (length == 0) {
             throw BtwxtException(
-                fmt::format("Grid axis (name=\"{}\") has zero length.", grid_axes[axis_index].name),
+                std::format("Grid axis (name=\"{}\") has zero length.", grid_axes[axis_index].name),
                 *logger);
         }
         grid_axis_lengths[axis_index] = length;
@@ -309,7 +298,7 @@ void RegularGridInterpolatorImplementation::set_axis_sizes()
 
 void RegularGridInterpolatorImplementation::set_results()
 {
-    set_hypercube_grid_point_data();
+    const auto& hypercube_grid_point_data = get_hypercube_grid_point_data();
     std::fill(results.begin(), results.end(), 0.0);
     for (std::size_t hypercube_index = 0; hypercube_index < hypercube.size(); ++hypercube_index) {
         hypercube_weights[hypercube_index] =
@@ -408,9 +397,8 @@ void RegularGridInterpolatorImplementation::consolidate_methods()
 // If outside of extrapolation limits, send a warning and perform constant extrapolation.
 {
     previous_methods = methods;
-    methods = get_interpolation_methods();
+    methods = interpolation_methods;
     if (target_is_set) {
-        auto extrapolation_methods = get_extrapolation_methods();
         constexpr std::string_view exception_format {"The target ({:.3g}) is {} the extrapolation "
                                                      "limit ({:.3g}) for grid axis (name=\"{}\")."};
         for (std::size_t axis_index = 0; axis_index < number_of_grid_axes; axis_index++) {
@@ -420,14 +408,14 @@ void RegularGridInterpolatorImplementation::consolidate_methods()
                 methods[axis_index] = extrapolation_methods[axis_index];
                 break;
             case TargetBoundsStatus::below_lower_extrapolation_limit:
-                throw BtwxtException(fmt::format(exception_format,
+                throw BtwxtException(std::format(exception_format,
                                                  target[axis_index],
                                                  "below",
                                                  get_extrapolation_limits(axis_index).first,
                                                  grid_axes[axis_index].name),
                                      *logger);
             case TargetBoundsStatus::above_upper_extrapolation_limit:
-                throw BtwxtException(fmt::format(exception_format,
+                throw BtwxtException(std::format(exception_format,
                                                  target[axis_index],
                                                  "above",
                                                  get_extrapolation_limits(axis_index).second,
@@ -448,7 +436,7 @@ void RegularGridInterpolatorImplementation::consolidate_methods()
 void RegularGridInterpolatorImplementation::set_hypercube(std::vector<Method> methods_in)
 {
     if (methods_in.size() != number_of_grid_axes) {
-        throw BtwxtException(fmt::format("Error setting hypercube. Methods vector (size={}) and "
+        throw BtwxtException(std::format("Error setting hypercube. Methods vector (size={}) and "
                                          "grid (size={}) do not have the dimensions.",
                                          methods_in.size(),
                                          number_of_grid_axes),
@@ -483,8 +471,6 @@ void RegularGridInterpolatorImplementation::set_hypercube(std::vector<Method> me
         hypercube = std::move(r);
     }
     if (hypercube.size() != previous_size) {
-        hypercube_grid_point_data.resize(hypercube.size(),
-                                         std::vector<double>(number_of_grid_point_data_sets));
         hypercube_weights.resize(hypercube.size());
     }
 }
@@ -529,19 +515,23 @@ void RegularGridInterpolatorImplementation::calculate_interpolation_coefficients
     }
 }
 
-void RegularGridInterpolatorImplementation::set_hypercube_grid_point_data()
+const std::vector<std::vector<double>>&
+RegularGridInterpolatorImplementation::get_hypercube_grid_point_data()
 {
-    if (hypercube_cache.count({floor_grid_point_index, hypercube_size_hash})) {
-        hypercube_grid_point_data =
-            hypercube_cache.at({floor_grid_point_index, hypercube_size_hash});
-        return;
+    const auto cache_key = std::make_pair(floor_grid_point_index, hypercube_size_hash);
+    if (const auto cached_hypercube = hypercube_cache.find(cache_key);
+        cached_hypercube != hypercube_cache.end()) {
+        return cached_hypercube->second;
     }
+
+    std::vector<std::vector<double>> hypercube_grid_point_data(
+        hypercube.size(), std::vector<double>(number_of_grid_point_data_sets));
     std::size_t hypercube_index = 0;
     for (const auto& v : hypercube) {
         hypercube_grid_point_data[hypercube_index] =
             get_grid_point_data_relative(floor_grid_point_coordinates, v);
         ++hypercube_index;
     }
-    hypercube_cache[{floor_grid_point_index, hypercube_size_hash}] = hypercube_grid_point_data;
+    return hypercube_cache.emplace(cache_key, std::move(hypercube_grid_point_data)).first->second;
 }
 } // namespace Btwxt

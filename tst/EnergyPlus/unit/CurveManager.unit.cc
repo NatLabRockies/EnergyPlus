@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -55,9 +55,11 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/Formatters.hh>
 #include <embedded/EmbeddedEpJSONSchema.hh>
 #include <nlohmann/json.hpp>
 
+#include <format>
 #include <stdexcept>
 
 #include "Fixtures/EnergyPlusFixture.hh"
@@ -124,7 +126,7 @@ TEST_F(EnergyPlusFixture, QuadraticCurve)
 
     double var1 = 1, var2 = 0.1, var3 = 20, var4 = 10;
     double expected_value = -3.3333 + (0.1 * 1) + (38.9 * 0.1) + (0.1 * 20) + (0.5 * 10);
-    EXPECT_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4));
+    EXPECT_DOUBLE_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4));
 }
 
 TEST_F(EnergyPlusFixture, QuintLinearCurve)
@@ -164,7 +166,7 @@ TEST_F(EnergyPlusFixture, QuintLinearCurve)
 
     double var1 = 1, var2 = 0.1, var3 = 0.5, var4 = 10, var5 = 15;
     double expected_value = -3.3333 + (0.1 * 1) + (38.9 * 0.1) + (0.1 * 0.5) + (0.5 * 10) + (1.5 * 15);
-    EXPECT_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4, var5));
+    EXPECT_DOUBLE_EQ(expected_value, Curve::CurveValue(*state, 1, var1, var2, var3, var4, var5));
 }
 
 TEST_F(EnergyPlusFixture, TableLookup)
@@ -797,7 +799,7 @@ TEST_P(InputUnitTypeIsValid, IndepentVariable)
         "  0.714,                     !- Minimum Value",
         "  1.2857,                    !- Maximum Value",
         "  ,                          !- Normalization Reference Value",
-        fmt::format("  {},             !-  Unit Type", unit_type),
+        std::format("  {},             !-  Unit Type", unit_type),
         "  ,                          !- External File Name",
         "  ,                          !- External File Column Number",
         "  ,                          !- External File Starting Row Number",
@@ -874,7 +876,7 @@ TEST_P(OutputUnitTypeIsValid, TableLookup)
         "  ,                          !- Normalization Divisor",
         "  0.8234,                    !- Minimum Output",
         "  1.1256,                    !- Maximum Output",
-        fmt::format("  {},             !- Output Unit Type", unit_type),
+        std::format("  {},             !- Output Unit Type", unit_type),
         "  ,                          !- External File Name",
         "  ,                          !- External File Column Number",
         "  ,                          !- External File Starting Row Number",
@@ -934,8 +936,8 @@ TEST_F(EnergyPlusFixture, AllPossibleUnitTypeValid)
     // As of 2024-12-18
     // in = ["", "Angle", "Dimensionless", "Distance", "MassFlow", "Power", "Pressure", "Temperature", "VolumetricFlow","VolumetricFlowPerPower"]
     // out = ["", "Capacity", "Dimensionless", "Power", "Pressure", "Temperature"]
-    EXPECT_FALSE(all_input_choices.empty()) << fmt::format("{}", all_input_choices);
-    EXPECT_FALSE(all_output_choices.empty()) << fmt::format("{}", all_output_choices);
+    EXPECT_FALSE(all_input_choices.empty()) << std::format("{}", all_input_choices);
+    EXPECT_FALSE(all_output_choices.empty()) << std::format("{}", all_output_choices);
 
     for (const auto &input_unit_type : all_input_choices) {
         EXPECT_TRUE(Curve::IsCurveInputTypeValid(input_unit_type)) << input_unit_type << " is rejected by IsCurveOutputTypeValid";

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Energy Innovation, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -107,14 +107,11 @@
 #
 # These are both pretty awful and need to be improved, and it would help if the
 # exclusions were uniform.
-
-import argparse
-
 import licensetext
 from base_hook import ROOT_DIR
 
 TOOL_NAME = "license-update"
-dryrun = False
+dryrun = True
 
 # Directories to check
 CPP_DIRS = [ROOT_DIR / "src", ROOT_DIR / "tst/EnergyPlus/"]
@@ -139,7 +136,7 @@ PYTHON_EXCLUDE_PATTERNS = [
 ]
 
 
-def write_root_license_txt(dryrun: bool) -> None:
+def write_root_license_txt() -> None:
     # Create LICENSE.txt
     licensetxt = licensetext.merge_paragraphs(CPP_CURRENT_LICENSE)
 
@@ -151,7 +148,7 @@ def write_root_license_txt(dryrun: bool) -> None:
         print("Skipping writing out LICENSE.txt")
 
 
-def replace_cpp_repo(dryrun: bool, verbose: bool) -> int:
+def replace_cpp_repo() -> int:
     replacer = licensetext.Replacer(oldtext=CPP_PREVIOUS_LICENSE, newtext=CPP_CURRENT_LICENSE, dryrun=dryrun)
 
     # Check C++ files
@@ -159,12 +156,12 @@ def replace_cpp_repo(dryrun: bool, verbose: bool) -> int:
         replacer.visit(base)
 
     print("\nC++ Summary")
-    print(replacer.summary(full_report=verbose))
+    print(replacer.summary())
 
     return len(replacer.replaced)
 
 
-def replace_python_repo(dryrun: bool, verbose: bool) -> int:
+def replace_python_repo() -> int:
     replacer = licensetext.Replacer(
         oldtext=PYTHON_PREVIOUS_LICENSE, newtext=PYTHON_CURRENT_LICENSE, extensions=["py"], dryrun=dryrun
     )
@@ -174,19 +171,14 @@ def replace_python_repo(dryrun: bool, verbose: bool) -> int:
         replacer.visit(base, exclude_patterns=PYTHON_EXCLUDE_PATTERNS)
 
     print("\nPython Summary")
-    print(replacer.summary(full_report=verbose))
+    print(replacer.summary())
 
     return len(replacer.replaced)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Update the E+ license year.")
-    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="operate verbosely")
-    parser.add_argument("--update", dest="dryrun", action="store_false", default=True, help="update the license year")
-    args = parser.parse_args()
+    write_root_license_txt()
 
-    write_root_license_txt(dryrun=args.dryrun)
-
-    full_count = replace_cpp_repo(dryrun=args.dryrun, verbose=args.verbose)
-    full_count += replace_python_repo(dryrun=args.dryrun, verbose=args.verbose)
+    full_count = replace_cpp_repo()
+    full_count += replace_python_repo()
     print("\nFull count of Replaced files: %d" % full_count)

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -294,7 +294,6 @@ namespace Construction {
         Array1D<Real64> AbsDiffFrontEQL; // Diffuse layer system front absorptance for EQL window
         Array1D<Real64> AbsDiffBackEQL;  // Diffuse layer system back absorptance for EQL window
         Real64 TransDiffFrontEQL = 0.0;  // Diffuse system front transmittance for EQL window
-        Real64 TransDiffBackEQL = 0.0;   // Diffuse system back transmittance for EQL window
         // Air boundary
         bool TypeIsAirBoundary = false;                    // true for Construction:AirBoundary
         bool TypeIsAirBoundaryMixing = false;              // true for Construction:AirBoundary with SimpleMixing for air exchange

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -85,12 +85,12 @@ struct CoilCoolingDXPerformanceBase
     Real64 wasteHeatRate = 0.0;
     Real64 recoveredEnergyRate = 0.0;
 
+    bool ReportCoolingCoilCrankcasePower = true; // logical determines if the cooling coil crankcase heater power is reported
     Real64 crankcaseHeaterCap = 0.0;
     Real64 crankcaseHeaterPower = 0.0;
     int crankcaseHeaterCapacityCurveIndex = 0;
     Real64 crankcaseHeaterElectricityConsumption = 0.0;
     Constant::eFuel compressorFuelType = Constant::eFuel::Invalid;
-    std::string compressorFuelTypeForOutput;
     Real64 compressorFuelRate = 0.0;
     Real64 compressorFuelConsumption = 0.0;
     Real64 electricityConsumption = 0.0;
@@ -117,15 +117,15 @@ struct CoilCoolingDXPerformanceBase
     }
 
     virtual void simulate(EnergyPlusData &,
-                          const DataLoopNode::NodeData &,
-                          DataLoopNode::NodeData &,
+                          const Node::NodeData &,
+                          Node::NodeData &,
                           HVAC::CoilMode,
                           // Real64 &,
                           int,
                           Real64,
                           HVAC::FanOp const,
-                          DataLoopNode::NodeData &,
-                          DataLoopNode::NodeData &,
+                          Node::NodeData &,
+                          Node::NodeData &,
                           bool const,
                           Real64 = 0.0)
     {
@@ -150,7 +150,6 @@ struct CoilCoolingDXPerformanceBase
     virtual Real64 grossRatedCoolingCOPAtMaxSpeed(EnergyPlusData &state)
     {
         ShowFatalError(state, "Gross Rated Cooling COP is not an available parameter for this coil type.");
-        return 0.0;
     }
 
     virtual const std::string_view nameAtSpeed(int)
@@ -161,13 +160,11 @@ struct CoilCoolingDXPerformanceBase
     virtual Real64 ratedAirMassFlowRateMaxSpeed(EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
     {
         ShowFatalError(state, "Rated Air Mass Flow Rate is not an available parameter for this coil type.");
-        return 0.0;
     }
 
     virtual Real64 ratedAirMassFlowRateMinSpeed(EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode = HVAC::CoilMode::Normal)
     {
         ShowFatalError(state, "Rated Air Mass Flow Rate is not an available parameter for this coil type.");
-        return 0.0;
     }
 
     virtual Real64 ratedCondAirMassFlowRateNomSpeed([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] HVAC::CoilMode const mode)
@@ -196,19 +193,16 @@ struct CoilCoolingDXPerformanceBase
     virtual Real64 currentEvapCondPumpPowerAtSpeed(EnergyPlusData &state, int)
     {
         ShowFatalError(state, "Current Evaporator Condenser Pump Power is not an available parameter for this coil type.");
-        return 0.0;
     }
 
     virtual Real64 evapCondenserEffectivenessAtSpeedIndex(EnergyPlusData &state, int)
     {
         ShowFatalError(state, "Evaporator Condenser Effectiveness is not an available parameter for this coil type.");
-        return 0.0;
     }
 
     virtual Real64 evapAirFlowFraction(EnergyPlusData &state)
     {
         ShowFatalError(state, "Evaporator Air Flow Fraction is not an available parameter for this coil type.");
-        return 0.0;
     }
 };
 

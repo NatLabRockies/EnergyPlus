@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -75,8 +75,6 @@ TEST_F(EnergyPlusFixture, Humidifiers_Sizing)
     state->init_state(*state);
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->CurSysNum = 1;
-    state->dataHumidifiers->NumElecSteamHums = 0;
-    state->dataHumidifiers->NumGasSteamHums = 1;
     state->dataHumidifiers->NumHumidifiers = 1;
 
     HumidifierData thisHum;
@@ -110,8 +108,6 @@ TEST_F(EnergyPlusFixture, Humidifiers_AutoSizing)
     state->init_state(*state);
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->CurSysNum = 1;
-    state->dataHumidifiers->NumElecSteamHums = 0;
-    state->dataHumidifiers->NumGasSteamHums = 1;
     state->dataHumidifiers->NumHumidifiers = 1;
 
     HumidifierData thisHum;
@@ -156,10 +152,8 @@ TEST_F(EnergyPlusFixture, Humidifiers_EnergyUse)
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->CurSysNum = 1;
 
-    state->dataHumidifiers->NumElecSteamHums = 0;
-    state->dataHumidifiers->NumGasSteamHums = 1;
     state->dataHumidifiers->NumHumidifiers = 1;
-    state->dataHumidifiers->Humidifier.allocate(state->dataHumidifiers->NumGasSteamHums);
+    state->dataHumidifiers->Humidifier.allocate(state->dataHumidifiers->NumHumidifiers);
     thisHum.HumType = HumidType::Gas;
     thisHum.NomCapVol = 4.00E-5;
     thisHum.NomPower = 103710.0;
@@ -267,10 +261,8 @@ TEST_F(EnergyPlusFixture, Humidifiers_ThermalEfficiency)
     state->dataSize->SysSizingRunDone = true;
     state->dataSize->CurSysNum = 1;
 
-    state->dataHumidifiers->NumElecSteamHums = 0;
-    state->dataHumidifiers->NumGasSteamHums = 1;
     state->dataHumidifiers->NumHumidifiers = 1;
-    state->dataHumidifiers->Humidifier.allocate(state->dataHumidifiers->NumGasSteamHums);
+    state->dataHumidifiers->Humidifier.allocate(state->dataHumidifiers->NumHumidifiers);
     thisHum.HumType = HumidType::Gas;
     thisHum.NomCapVol = 4.00E-5;
     thisHum.NomCap = 4.00E-2;

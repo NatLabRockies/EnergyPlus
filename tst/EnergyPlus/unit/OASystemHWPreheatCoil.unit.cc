@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -64,7 +64,6 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataAirLoop;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::HVACControllers;
 using namespace EnergyPlus::MixedAir;
 using namespace EnergyPlus::OutputProcessor;
@@ -495,6 +494,7 @@ TEST_F(EnergyPlusFixture, OASystem_HotWaterPreheatCoilScheduledOffSim)
         "    Zone 1 Thermostat,       !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Temperature Setpoints;   !- Control 1 Name",
 
@@ -1486,6 +1486,7 @@ TEST_F(EnergyPlusFixture, OASystem_HotWaterPreheatCoilScheduledOnSim)
         "    Zone 1 Thermostat,       !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Temperature Setpoints;   !- Control 1 Name",
 

@@ -1,4 +1,4 @@
-// EnergyPlus, Copyright (c) 1996-2026, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
 // National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <algorithm>
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
@@ -89,7 +93,6 @@ namespace OutAirNodeManager {
     // USE STATEMENTS:
     // Use statements for data only modules
     // Using/Aliasing
-    using namespace DataLoopNode;
     using namespace DataEnvironment;
 
     void SetOutAirNodes(EnergyPlusData &state)
@@ -128,9 +131,6 @@ namespace OutAirNodeManager {
 
         // METHODOLOGY EMPLOYED:
         // Use the Get routines from the InputProcessor module.
-
-        // Using/Aliasing
-        using namespace NodeInputManager;
 
         // Locals
         // SUBROUTINE PARAMETER DEFINITIONS:
@@ -218,22 +218,23 @@ namespace OutAirNodeManager {
                                 NumNodes,
                                 NodeNums,
                                 ErrInList,
-                                DataLoopNode::NodeFluidType::Air,
-                                DataLoopNode::ConnectionObjectType::OutdoorAirNodeList,
+                                Node::FluidType::Air,
+                                Node::ConnectionObjectType::OutdoorAirNodeList,
                                 CurrentModuleObject,
-                                DataLoopNode::ConnectionType::OutsideAir,
-                                static_cast<NodeInputManager::CompFluidStream>(NextFluidStreamNum),
-                                ObjectIsNotParent,
-                                IncrementFluidStreamYes,
+                                Node::ConnectionType::OutsideAir,
+                                static_cast<Node::CompFluidStream>(NextFluidStreamNum),
+                                Node::ObjectIsNotParent,
+                                Node::IncrementFluidStreamYes,
                                 cAlphaFields(AlphaNum));
                     NextFluidStreamNum += NumNodes;
                     if (ErrInList) {
-                        ShowContinueError(state, format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
+                        ShowContinueError(state,
+                                          std::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
                         ErrorsFound = true;
                     }
                     for (int NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
                         // Duplicates here are not a problem, just ignore
-                        if (!any_eq(TmpNums, NodeNums(NodeNum))) {
+                        if (!std::ranges::any_of(TmpNums, [&](auto const &elem) { return elem == NodeNums(NodeNum); })) {
                             ++ListSize;
                             if (ListSize > CurSize) {
                                 TmpNums.redimension(CurSize += 100, 0);
@@ -245,7 +246,7 @@ namespace OutAirNodeManager {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, std::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 
@@ -277,36 +278,36 @@ namespace OutAirNodeManager {
                             NumNodes,
                             NodeNums,
                             ErrInList,
-                            DataLoopNode::NodeFluidType::Air,
-                            DataLoopNode::ConnectionObjectType::OutdoorAirNode,
+                            Node::FluidType::Air,
+                            Node::ConnectionObjectType::OutdoorAirNode,
                             CurrentModuleObject,
-                            DataLoopNode::ConnectionType::OutsideAir,
-                            static_cast<NodeInputManager::CompFluidStream>(NextFluidStreamNum),
-                            ObjectIsNotParent,
-                            IncrementFluidStreamYes,
+                            Node::ConnectionType::OutsideAir,
+                            static_cast<Node::CompFluidStream>(NextFluidStreamNum),
+                            Node::ObjectIsNotParent,
+                            Node::IncrementFluidStreamYes,
                             cAlphaFields(1));
                 NextFluidStreamNum += NumNodes;
                 if (ErrInList) {
-                    ShowContinueError(state, format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, std::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ErrorsFound = true;
                 }
 
                 if (NumNodes > 1) {
-                    ShowSevereError(state, format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, std::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "...appears to point to a node list, not a single node.");
                     ErrorsFound = true;
                     continue;
                 }
 
-                if (!any_eq(TmpNums, NodeNums(1))) {
+                if (!std::ranges::any_of(TmpNums, [&](auto const &elem) { return elem == NodeNums(1); })) {
                     ++ListSize;
                     if (ListSize > CurSize) {
                         TmpNums.redimension(CurSize += 100, 0);
                     }
                     TmpNums(ListSize) = NodeNums(1);
                 } else { // Duplicates are a problem
-                    ShowSevereError(state, format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
-                    ShowContinueError(state, format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
+                    ShowSevereError(state, std::format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, std::format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -345,7 +346,7 @@ namespace OutAirNodeManager {
                 }
 
                 if (NumAlphas > 8) {
-                    ShowSevereError(state, format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, std::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "Object Definition indicates more than 7 Alpha Objects.");
                     ErrorsFound = true;
                     continue;
@@ -356,13 +357,14 @@ namespace OutAirNodeManager {
                 }
             }
             if (ErrorsFound) {
-                ShowFatalError(state, format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, std::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 
         if (ListSize > 0) {
             state.dataOutAirNodeMgr->NumOutsideAirNodes = ListSize;
-            state.dataOutAirNodeMgr->OutsideAirNodeList = TmpNums({1, static_cast<int>(ListSize)});
+            state.dataOutAirNodeMgr->OutsideAirNodeList.dimension(static_cast<int>(ListSize));
+            std::copy_n(TmpNums.begin(), ListSize, state.dataOutAirNodeMgr->OutsideAirNodeList.begin());
         }
     }
 
@@ -431,7 +433,7 @@ namespace OutAirNodeManager {
             SetOutAirNodes(state);
         }
 
-        if (any_eq(state.dataOutAirNodeMgr->OutsideAirNodeList, NodeNumber)) {
+        if (std::ranges::any_of(state.dataOutAirNodeMgr->OutsideAirNodeList, [&](auto const &elem) { return elem == NodeNumber; })) {
             Okay = true;
         } else {
             Okay = false;
@@ -463,9 +465,6 @@ namespace OutAirNodeManager {
         // REFERENCES:
         // na
 
-        // Using/Aliasing
-        using namespace NodeInputManager;
-
         // Locals
         // SUBROUTINE ARGUMENT DEFINITIONS:
 
@@ -490,7 +489,7 @@ namespace OutAirNodeManager {
         Okay = false;
 
         if (state.dataOutAirNodeMgr->NumOutsideAirNodes > 0) {
-            if (any_eq(state.dataOutAirNodeMgr->OutsideAirNodeList, NodeNumber)) {
+            if (std::ranges::any_of(state.dataOutAirNodeMgr->OutsideAirNodeList, [&](auto const &elem) { return elem == NodeNumber; })) {
                 Okay = true;
             } else {
                 Okay = false;
@@ -512,13 +511,13 @@ namespace OutAirNodeManager {
                             DummyNumber,
                             TmpNums,
                             errFlag,
-                            DataLoopNode::NodeFluidType::Air,
-                            DataLoopNode::ConnectionObjectType::OutdoorAirNode,
+                            Node::FluidType::Air,
+                            Node::ConnectionObjectType::OutdoorAirNode,
                             "OutdoorAir:Node",
-                            DataLoopNode::ConnectionType::OutsideAir,
-                            static_cast<NodeInputManager::CompFluidStream>(state.dataOutAirNodeMgr->NumOutsideAirNodes),
-                            ObjectIsNotParent,
-                            IncrementFluidStreamYes);
+                            Node::ConnectionType::OutsideAir,
+                            static_cast<Node::CompFluidStream>(state.dataOutAirNodeMgr->NumOutsideAirNodes),
+                            Node::ObjectIsNotParent,
+                            Node::IncrementFluidStreamYes);
                 SetOANodeValues(state, NodeNumber, false);
             }
         }
@@ -592,7 +591,8 @@ namespace OutAirNodeManager {
         }
 
         state.dataLoopNodes->Node(NodeNum).Temp = state.dataLoopNodes->Node(NodeNum).OutAirDryBulb;
-        if (state.dataLoopNodes->Node(NodeNum).IsLocalNode) {
+        if (state.dataLoopNodes->Node(NodeNum).IsLocalNode || state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirDryBulb ||
+            state.dataLoopNodes->Node(NodeNum).EMSOverrideOutAirWetBulb) {
             if (InitCall) {
                 if (state.dataLoopNodes->Node(NodeNum).OutAirWetBulb > state.dataLoopNodes->Node(NodeNum).OutAirDryBulb) {
                     state.dataLoopNodes->Node(NodeNum).OutAirWetBulb = state.dataLoopNodes->Node(NodeNum).OutAirDryBulb;

@@ -1,7 +1,7 @@
 VERSION 5.00
-Object = "{48E59290-9880-11CF-9754-00AA00C00908}#1.0#0"; "MSINET.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
+Object = "{48E59290-9880-11CF-9754-00AA00C00908}#1.0#0"; "MSINET.OCX"
 Begin VB.Form eplUI
    BorderStyle     =   1  'Fixed Single
    Caption         =   "EP-Launch"
@@ -1524,7 +1524,7 @@ Private Declare Function GetShortPathName Lib "kernel32.dll" Alias "GetShortPath
 ' The following code is from VBnet and is used for file associations
 '
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-' Copyright ï¿½1996-2007 VBnet, Randy Birch, All Rights Reserved.
+' Copyright ©1996-2007 VBnet, Randy Birch, All Rights Reserved.
 ' Some pages may also contain other copyrights by the author.
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Distribution: You can freely use this code in your own
@@ -1700,7 +1700,7 @@ Private Declare Function RegSetValueEx Lib "advapi32" Alias "RegSetValueExA" (By
       End Function
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-' Copyright ï¿½1996-2007 VBnet, Randy Birch, All Rights Reserved.
+' Copyright ©1996-2007 VBnet, Randy Birch, All Rights Reserved.
 ' Some pages may also contain other copyrights by the author.
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Distribution: You can freely use this code in your own
@@ -2131,6 +2131,7 @@ End Sub
 Private Sub queueTimer_Timer()
 Call manageSimulationQueue
 End Sub
+
 
 Private Sub viewSelectedHistory_Click()
 Call runViewSelectedFileFromHistory
@@ -4290,6 +4291,7 @@ Dim firstUse As String, t As String, X As Double
 Dim setString As String
 Dim parts() As String
 Dim wthrCount As Integer
+Dim newURL As String
 firstUse = GetSetting("EP-Launch", "Pointers", "FirstUse", "True")
 Debug.Print "FirstUse?", firstUse
 If firstUse = "True" Then
@@ -4357,7 +4359,7 @@ If firstUse = "True" Then
   'update checking
   updateLastAnchor = ""
   updateLastDate = "1/1/2008"
-  updatePageURL = "http://energyplus.net/epupdate.htm"
+  updatePageURL = "https://energyplus.net/epupdate.htm"
   updateAutoCheck = True
   Call SaveAllSettings
 Else
@@ -4526,8 +4528,13 @@ Else
   updateLastDate = GetSetting("EP-Launch", "UpdateCheck", "LastDate")
   If updateLastDate = "" Then updateLastDate = "1/1/2008"
   updatePageURL = GetSetting("EP-Launch", "UpdateCheck", "CheckURL")
-  'If updatePageURL = "" Then updatePageURL = "http://gard.com/ep/epupdate.htm"
-  If updatePageURL = "" Then updatePageURL = "http://energyplus.net/epupdate.htm"
+  newURL = "https://energyplus.net/epupdate.htm"
+  If updatePageURL = "" Then updatePageURL = newURL
+  If updatePageURL = "http://gard.com/ep/epupdate.htm" Then updatePageURL = newURL
+  If updatePageURL = "http://nrel.github.io/EnergyPlus/epupdate.htm" Then updatePageURL = newURL
+  If updatePageURL = "http://energyplus.net/epupdate.htm" Then updatePageURL = newURL
+  If updatePageURL = "http://eeredevapps1.nrel.gov/buildings/energyplus/update/epupdate.htm" Then updatePageURL = newURL
+  If updatePageURL = "http://natlabrockies.github.io/EnergyPlus/epupdate.htm" Then updatePageURL = newURL
   If Left(GetSetting("EP-Launch", "UpdateCheck", "AutoCheck"), 1) = "F" Then
     updateAutoCheck = False
   Else
@@ -6892,6 +6899,8 @@ lblCheckingUpdates.Visible = True
 'updatePageURL = "http://gard.com/ep/junk.htm"
 'updatePageURL = "http://eeredevapps1.nrel.gov/buildings/energyplus/update/epupdate.htm"
 'updatePageURL = "http://energyplus.net/epupdate.htm"
+'updatePageURL = "http://natlabrockies.github.io/EnergyPlus/epupdate.htm"
+'updatePageURL = "https://energyplus.net/epupdate.htm"
 'updateLastDate = "9/2/2009 12:47:47 AM"
 '-----------------------------------------
 
@@ -7169,7 +7178,7 @@ End Sub
 '     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 '     the specific language governing rights and limitations under the License.
 '
-'     Copyright ï¿½ 1996-2014 GARD Analytics.  All rights reserved.
+'     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '
 '     NOTICE: The U.S. Government is granted for itself and others acting on its
 '     behalf a paid-up, nonexclusive, irrevocable, worldwide license in this data to
