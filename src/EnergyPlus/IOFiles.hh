@@ -274,6 +274,9 @@ public:
         bool json = true;
         bool tabular = true;
         bool sqlite = true;
+
+        std::vector<std::string> rviKeyNames;
+        std::vector<std::string> mviKeyNames;
     };
 
     OutputControl outputControl;
