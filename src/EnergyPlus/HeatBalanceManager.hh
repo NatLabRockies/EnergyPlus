@@ -228,6 +228,8 @@ struct HeatBalanceMgrData : BaseGlobalStruct
     Array1D<HeatBalanceManager::WarmupConvergence> WarmupConvergenceValues;
     SurfaceOctreeCube surfaceOctree;
 
+    bool updateTSArraysFlag = true; // True if the TS data arrays need to be updated
+
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
@@ -274,6 +276,7 @@ struct HeatBalanceMgrData : BaseGlobalStruct
 
         WarmupConvergenceValues.clear();
         surfaceOctree = SurfaceOctreeCube();
+        updateTSArraysFlag = true;
     }
 };
 
