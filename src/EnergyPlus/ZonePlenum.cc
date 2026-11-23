@@ -714,23 +714,6 @@ void InitAirZoneReturnPlenum(EnergyPlusData &state, int const ZonePlenumNum)
             }
         }
 
-        // Check that all ADUs with leakage found a return plenum
-        for (int ADUNum = 1; ADUNum <= (int)state.dataDefineEquipment->AirDistUnit.size(); ++ADUNum) {
-            auto &thisADU(state.dataDefineEquipment->AirDistUnit(ADUNum));
-            // TODO: the first half of this IF condition was a duplicated OR, if issues around this code, might want to check the history of this line
-            if (thisADU.DownStreamLeak && (thisADU.RetPlenumNum == 0)) {
-                ShowWarningError(state,
-                                 std::format("No return plenum found for simple duct leakage for ZoneHVAC:AirDistributionUnit={} in Zone={}",
-                                             thisADU.Name,
-                                             state.dataZoneEquip->ZoneEquipConfig(thisADU.ZoneEqNum).ZoneName));
-                ShowContinueError(state, "Leakage will be ignored for this ADU.");
-                thisADU.UpStreamLeak = false;
-                thisADU.DownStreamLeak = false;
-                thisADU.UpStreamLeakFrac = 0.0;
-                thisADU.DownStreamLeakFrac = 0.0;
-            }
-        }
-
         state.dataZonePlenum->InitAirZoneReturnPlenumOneTimeFlag = false;
     }
 
@@ -1300,6 +1283,20 @@ int getReturnPlenumIndexFromInletNode(EnergyPlusData &state, int const InNodeNum
     }
 
     return thisPlenum;
+}
+
+bool zoneReturnFeedsPlenum(EnergyPlusData &state, int const zoneEqNum)
+{
+    if (zoneEqNum < 1 || zoneEqNum > (int)state.dataZoneEquip->ZoneEquipConfig.size()) {
+        return false;
+    }
+    auto const &zoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneEqNum);
+    for (int retNodeNum = 1; retNodeNum <= zoneEquipConfig.NumReturnNodes; ++retNodeNum) {
+        if (getReturnPlenumIndexFromInletNode(state, zoneEquipConfig.ReturnNode(retNodeNum)) > 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ValidateInducedNode(EnergyPlusData &state, int const InduceNodeNum, int const NumReturnNodes, Array1D<int> const &ReturnNode)
