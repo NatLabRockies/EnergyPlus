@@ -1290,6 +1290,50 @@ namespace DataPlant {
         //  equal to the inlet flow rate, according to flowlock logic.
         this->FlowLock = DataPlant::FlowLock::Locked;
         this->SimulateAllLoopSideBranches(state, ThisLoopSideFlow, FirstHVACIteration, LoopShutDownFlag);
+
+        // Supply side flow exceeds the demand side request and the demand side has no bypass
+        if (this->plantLoc.loopSideNum == DataPlant::LoopSideLocation::Supply) {
+            auto &loop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+            auto &demandSide = loop.LoopSide(DataPlant::LoopSideLocation::Demand);
+            Real64 const excessFlow = ThisLoopSideFlow - demandSide.flowRequestFinal;
+            if (!demandSide.BypassExists && loop.CommonPipeType == DataPlant::CommonPipeType::No &&
+                excessFlow > DataBranchAirLoopPlant::MassFlowTolerance) {
+                if (!demandSide.Splitter.Exists || demandSide.Splitter.TotalOutletNodes == 1) {
+                    // Series demand side: pass the forced flow as MinAvail so components see the flow they receive
+                    auto &outletNode = state.dataLoopNodes->Node(this->NodeNumOut);
+                    outletNode.MassFlowRateMinAvail = max(outletNode.MassFlowRateMinAvail, min(ThisLoopSideFlow, outletNode.MassFlowRateMaxAvail));
+                } else if (!state.dataGlobal->WarmupFlag) {
+                    // Parallel demand side branches: forced flow is not passed to the components
+                    if (demandSide.errIndex_ForcedDemandFlow == 0) {
+                        ShowWarningError(state,
+                                         std::format("{}=\"{}\": the loop flow rate is greater than the flow rate requested by the demand side "
+                                                     "components,",
+                                                     DataPlant::loopTypeNames[static_cast<int>(loop.TypeOfLoop)],
+                                                     loop.Name));
+                        ShowContinueError(state,
+                                          "and the demand side has no bypass branch, so the excess flow is forced through the demand side branches.");
+                        ShowContinueError(state,
+                                          "This typically happens when supply side equipment operates at a constant flow rate (e.g., Boiler:HotWater "
+                                          "with Boiler Flow Mode = ConstantFlow, or a pump with Pump Control Type = Continuous).");
+                        ShowContinueError(state,
+                                          "The results of the demand side components may be inaccurate (e.g., the loop demand may not match the "
+                                          "energy delivered by the demand side components). Add a bypass branch on the demand side of the loop.");
+                        ShowContinueErrorTimeStamp(state, "");
+                    }
+                    ShowRecurringWarningErrorAtEnd(state,
+                                                   std::format("{}=\"{}\": the loop flow rate is greater than the flow rate requested by the "
+                                                               "demand side components, continues...",
+                                                               DataPlant::loopTypeNames[static_cast<int>(loop.TypeOfLoop)],
+                                                               loop.Name),
+                                                   demandSide.errIndex_ForcedDemandFlow,
+                                                   excessFlow,
+                                                   excessFlow,
+                                                   _,
+                                                   "[kg/s]",
+                                                   "[kg/s]");
+                }
+            }
+        }
     }
 
     void HalfLoopData::ResolveParallelFlows(EnergyPlusData &state,

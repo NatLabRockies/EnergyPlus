@@ -12349,7 +12349,7 @@ namespace UnitarySystems {
             } else {
                 mdot = this->HeatCoilWaterFlowRatio * this->MaxHeatCoilFluidFlow;
             }
-            state.dataLoopNodes->Node(this->HeatCoilFluidInletNode).MassFlowRate = mdot;
+            PlantUtilities::SetComponentFlowRate(state, mdot, this->HeatCoilFluidInletNode, this->HeatCoilFluidOutletNodeNum, this->HeatCoilPlantLoc);
             WaterCoils::SimulateWaterCoilComponents(
                 state, CompName, FirstHVACIteration, this->m_HeatingCoilIndex, QActual, this->m_FanOpMode, PartLoadRatio);
         } break;
