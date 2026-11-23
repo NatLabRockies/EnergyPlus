@@ -446,6 +446,14 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with H, insert the rules here
 
+              CASE('HEATPUMP:AIRTOWATER')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:7)=InArgs(1:7)
+                  OutArgs(8)=' '
+                  OutArgs(9:CurArgs + 1)=InArgs(8:CurArgs)
+                  CurArgs = CurArgs + 1
+                  nodiff=.false.
+
               ! If your original object starts with I, insert the rules here
 
               ! If your original object starts with L, insert the rules here
