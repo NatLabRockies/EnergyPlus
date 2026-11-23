@@ -812,78 +812,6 @@ void Calc_ISO15099(EnergyPlusData &state,
             hin_NOSD = hint;
             hout_NOSD = houtt;
 
-            // Simon: Removed unshaded debug output for now
-            int constexpr UnshadedDebug = 0;
-            // Preserve the disabled debug output alongside the dormant unshaded calculation.
-            if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
-                print(files.DebugOutputFile, "\n");
-                print(files.DebugOutputFile, "UNSHADED RUN:\n");
-                print(files.DebugOutputFile, "\n");
-
-                WriteInputArguments(state,
-                                    files.DebugOutputFile,
-                                    files.DBGD,
-                                    tout,
-                                    tind,
-                                    trmin,
-                                    wso,
-                                    iwd,
-                                    wsi,
-                                    dir,
-                                    outir,
-                                    isky,
-                                    tsky,
-                                    esky,
-                                    fclr,
-                                    VacuumPressure,
-                                    VacuumMaxGapThickness,
-                                    ibc,
-                                    hout_NOSD,
-                                    hin_NOSD,
-                                    TARCOGGassesParams::Stdrd::ISO15099,
-                                    ThermalMod,
-                                    SDScalar,
-                                    height,
-                                    heightt,
-                                    width,
-                                    tilt,
-                                    totsol,
-                                    nlayer_NOSD,
-                                    state.dataThermalISO15099Calc->LayerType_NOSD,
-                                    state.dataThermalISO15099Calc->thick_NOSD,
-                                    state.dataThermalISO15099Calc->scon_NOSD,
-                                    asol,
-                                    state.dataThermalISO15099Calc->tir_NOSD,
-                                    state.dataThermalISO15099Calc->emis_NOSD,
-                                    state.dataThermalISO15099Calc->Atop_NOSD,
-                                    state.dataThermalISO15099Calc->Abot_NOSD,
-                                    state.dataThermalISO15099Calc->Al_NOSD,
-                                    state.dataThermalISO15099Calc->Ar_NOSD,
-                                    state.dataThermalISO15099Calc->Ah_NOSD,
-                                    state.dataThermalISO15099Calc->SlatThick_NOSD,
-                                    state.dataThermalISO15099Calc->SlatWidth_NOSD,
-                                    state.dataThermalISO15099Calc->SlatAngle_NOSD,
-                                    state.dataThermalISO15099Calc->SlatCond_NOSD,
-                                    state.dataThermalISO15099Calc->SlatSpacing_NOSD,
-                                    state.dataThermalISO15099Calc->SlatCurve_NOSD,
-                                    state.dataThermalISO15099Calc->nslice_NOSD,
-                                    state.dataThermalISO15099Calc->LaminateA_NOSD,
-                                    state.dataThermalISO15099Calc->LaminateB_NOSD,
-                                    state.dataThermalISO15099Calc->sumsol_NOSD,
-                                    state.dataThermalISO15099Calc->gap_NOSD,
-                                    state.dataThermalISO15099Calc->vvent_NOSD,
-                                    state.dataThermalISO15099Calc->tvent_NOSD,
-                                    state.dataThermalISO15099Calc->presure_NOSD,
-                                    state.dataThermalISO15099Calc->nmix_NOSD,
-                                    state.dataThermalISO15099Calc->iprop_NOSD,
-                                    state.dataThermalISO15099Calc->frct_NOSD,
-                                    xgcon,
-                                    xgvis,
-                                    xgcp,
-                                    xwght);
-
-            } // end if UnshadedDebug = 1
-
             // cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             //      This is "Unshaded, No solar radiation" pass
             // cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -987,56 +915,6 @@ void Calc_ISO15099(EnergyPlusData &state,
             ShadeHcRatioOut = ShadeHcModifiedOut / HcUnshadedOut;
             ShadeHcRatioIn = ShadeHcModifiedIn / HcUnshadedIn;
 
-            // bi...unshaded results:
-            // Preserve the disabled debug output alongside the dormant unshaded calculation.
-            if (files.WriteDebugOutput && (UnshadedDebug == 1)) {
-                WriteOutputArguments(files.DebugOutputFile,
-                                     files.DBGD,
-                                     nlayer_NOSD,
-                                     tamb,
-                                     state.dataThermalISO15099Calc->q_NOSD,
-                                     state.dataThermalISO15099Calc->qv_NOSD,
-                                     state.dataThermalISO15099Calc->qcgas_NOSD,
-                                     state.dataThermalISO15099Calc->qrgas_NOSD,
-                                     state.dataThermalISO15099Calc->theta_NOSD,
-                                     state.dataThermalISO15099Calc->vfreevent_NOSD,
-                                     state.dataThermalISO15099Calc->vvent_NOSD,
-                                     state.dataThermalISO15099Calc->Keff_NOSD,
-                                     state.dataThermalISO15099Calc->ShadeGapKeffConv_NOSD,
-                                     troom_NOSD,
-                                     ufactor_NOSD,
-                                     shgc_NOSD,
-                                     sc_NOSD,
-                                     hflux_NOSD,
-                                     shgct_NOSD,
-                                     hcin_NOSD,
-                                     hrin_NOSD,
-                                     hcout_NOSD,
-                                     hrout_NOSD,
-                                     state.dataThermalISO15099Calc->Ra_NOSD,
-                                     state.dataThermalISO15099Calc->Nu_NOSD,
-                                     state.dataThermalISO15099Calc->LayerType_NOSD,
-                                     state.dataThermalISO15099Calc->Ebf_NOSD,
-                                     state.dataThermalISO15099Calc->Ebb_NOSD,
-                                     state.dataThermalISO15099Calc->Rf_NOSD,
-                                     state.dataThermalISO15099Calc->Rb_NOSD,
-                                     ebsky,
-                                     Gout,
-                                     ebroom,
-                                     Gin,
-                                     ShadeEmisRatioIn_NOSD,
-                                     ShadeEmisRatioOut_NOSD,
-                                     ShadeHcRatioIn_NOSD,
-                                     ShadeHcRatioOut_NOSD,
-                                     hcin_NOSD,
-                                     hcout_NOSD,
-                                     state.dataThermalISO15099Calc->hcgas_NOSD,
-                                     state.dataThermalISO15099Calc->hrgas_NOSD,
-                                     AchievedErrorTolerance_NOSD,
-                                     NumOfIter_NOSD); // Autodesk:Uninit shgc_NOSD, sc_NOSD, hflux_NOSD,
-                                                      // ShadeHcRatioIn_NOSD, ShadeHcRatioOut_NOSD were
-                                                      // uninitialized
-            } // end if UnshadedDebug = 1
         } // end if NeedUnshadedRun...
 
         // bi Set T6-related quantities keff, keffc: (using non-solar pass results)
