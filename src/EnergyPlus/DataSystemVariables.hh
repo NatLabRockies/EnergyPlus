@@ -101,7 +101,6 @@ struct SystemVarsData : BaseGlobalStruct
     bool ReverseDD = false;     // TRUE if reverse design days (reordering sizingperiod:*) are to be run.
     bool FullAnnualRun = false; // TRUE if full annual simulation is to be run.
     bool DeveloperFlag = false; // TRUE if developer flag is turned on. (turns on more displays to console)
-    bool TimingFlag = false;    // TRUE if timing flag is turned on. (turns on more timing displays to console)
 
     bool SutherlandHodgman = true;                 // TRUE if SutherlandHodgman algorithm for polygon clipping is to be used.
     bool SlaterBarsky = false;                     // TRUE if SlaterBarsky algorithm for polygon clipping is to be used for vertical polygons.
@@ -132,17 +131,13 @@ struct SystemVarsData : BaseGlobalStruct
     // This update the value during the warmup added for FMI
     Timer runtimeTimer;
     std::string MinReportFrequency; // String for minimum reporting frequency
-    bool SortedIDD = true;          // after processing, use sorted IDD to obtain Defs, etc.
     bool lMinimalShadowing = false; // TRUE if Minimal is to override Solar Distribution flag
     fs::path envinputpath1;
     fs::path envinputpath2;
     bool TestAllPaths = false;
     int iEnvSetThreads = 0;
-    bool lEnvSetThreadsInput = false;
     int iepEnvSetThreads = 0;
-    bool lepSetThreadsInput = false;
     int iIDFSetThreads = 0;
-    bool lIDFSetThreadsInput = false;
     int inumActiveSims = 1;
     bool lnumActiveSims = false;
     int MaxNumberOfThreads = 1;
@@ -167,7 +162,6 @@ struct SystemVarsData : BaseGlobalStruct
         ReverseDD = false;
         FullAnnualRun = false;
         DeveloperFlag = false;
-        TimingFlag = false;
 
         firstTime = true;
 
@@ -190,15 +184,11 @@ struct SystemVarsData : BaseGlobalStruct
         UpdateDataDuringWarmupExternalInterface = false;
 
         runtimeTimer = Timer{};
-        SortedIDD = true;
         lMinimalShadowing = false;
         TestAllPaths = false;
         iEnvSetThreads = 0;
-        lEnvSetThreadsInput = false;
         iepEnvSetThreads = 0;
-        lepSetThreadsInput = false;
         iIDFSetThreads = 0;
-        lIDFSetThreadsInput = false;
         inumActiveSims = 1;
         lnumActiveSims = false;
         MaxNumberOfThreads = 1;

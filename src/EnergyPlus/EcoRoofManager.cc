@@ -247,7 +247,6 @@ namespace EcoRoofManager {
             state.dataEcoRoofMgr->Tf = state.dataEcoRoofMgr->Tfold;
 
             if (thisConstruct.CTFCross[0] > 0.01) {
-                state.dataEcoRoofMgr->QuickConductionSurf = true;
                 int spaceNum = state.dataSurface->Surface(SurfNum).spaceNum;
                 F1temp = thisConstruct.CTFCross[0] / (thisConstruct.CTFInside[0] + state.dataHeatBalSurf->SurfHConvInt(SurfNum));
                 Qsoilpart1 =
@@ -1044,7 +1043,6 @@ namespace EcoRoofManager {
             }
 
             // Using the parameters above, distribute the Root Layer moisture
-            state.dataEcoRoofMgr->TestMoisture = MeanRootMoisture;
             MeanRootMoisture +=
                 (state.dataEcoRoofMgr->TimeStepZoneSec / state.dataEcoRoofMgr->RootDepth) *
                 ((state.dataEcoRoofMgr->SoilConductivityAveTop *

@@ -489,7 +489,6 @@ namespace HVACDXHeatPumpSystem {
 
         } else { // Not Outdoor Air Unit
             ControlNode = dxhpSystem.DXSystemControlNodeNum;
-            state.dataHVACDXHeatPumpSys->EconomizerFlag = state.dataAirLoop->AirLoopControlInfo(AirLoopNum).EconoActive;
             dxhpSystem.DesiredOutletTemp = state.dataLoopNodes->Node(ControlNode).TempSetPoint;
         }
     }

@@ -500,9 +500,7 @@ struct DaylightingData : BaseGlobalStruct
     bool FirstTimeDaylFacCalc = true;
     bool VeryFirstTime = true;
     bool mapFirstTime = true;
-    bool CheckTDDs_firstTime = true;
     bool DayltgExtHorizIllum_firstTime = true; // flag for first time thru to initialize
-    bool DayltgInteriorMapIllum_FirstTimeFlag = true;
     bool ReportIllumMap_firstTime = true;
     bool SQFirstTime = true;
     bool doSkyReporting = true;
@@ -539,11 +537,11 @@ struct DaylightingData : BaseGlobalStruct
     bool MySunIsUpFlag = false;
     bool CalcDayltgCoeffsMapPointsMySunIsUpFlag = false;
     int AltSteps_last = 0;
-    std::array<Real64, DataSurfaces::AltAngStepsForSolReflCalc / 2 + 1> cos_Phi = {0.0}; // cos( Phi ) table
-    std::array<Real64, DataSurfaces::AltAngStepsForSolReflCalc / 2 + 1> sin_Phi = {0.0}; // sin( Phi ) table
+    std::array<Real64, DataSurfaces::AltAngStepsForSolReflCalc / 2 + 1> cos_Phi{}; // cos( Phi ) table
+    std::array<Real64, DataSurfaces::AltAngStepsForSolReflCalc / 2 + 1> sin_Phi{}; // sin( Phi ) table
     int AzimSteps_last = 0;
-    std::array<Real64, 2 * DataSurfaces::AzimAngStepsForSolReflCalc + 1> cos_Theta = {0.0}; // cos( Theta ) table
-    std::array<Real64, 2 * DataSurfaces::AzimAngStepsForSolReflCalc + 1> sin_Theta = {0.0}; // sin( Theta ) table
+    std::array<Real64, 2 * DataSurfaces::AzimAngStepsForSolReflCalc + 1> cos_Theta{}; // cos( Theta ) table
+    std::array<Real64, 2 * DataSurfaces::AzimAngStepsForSolReflCalc + 1> sin_Theta{}; // sin( Theta ) table
 
     std::array<Real64, Dayltg::NPH + 1> PH; // Altitude of sky element (radians)
 
@@ -581,9 +579,7 @@ struct DaylightingData : BaseGlobalStruct
         this->FirstTimeDaylFacCalc = true;
         this->VeryFirstTime = true;
         this->mapFirstTime = true;
-        this->CheckTDDs_firstTime = true;
         this->DayltgExtHorizIllum_firstTime = true;
-        this->DayltgInteriorMapIllum_FirstTimeFlag = true;
         this->ReportIllumMap_firstTime = true;
         this->SQFirstTime = true;
         this->doSkyReporting = true;
@@ -610,10 +606,10 @@ struct DaylightingData : BaseGlobalStruct
         this->CalcDayltgCoeffsMapPointsMySunIsUpFlag = false;
         this->AltSteps_last = 0;
         this->AzimSteps_last = 0;
-        this->cos_Phi = {0.0};
-        this->sin_Phi = {0.0};
-        this->cos_Theta = {0.0};
-        this->sin_Theta = {0.0};
+        this->cos_Phi.fill(0.0);
+        this->sin_Phi.fill(0.0);
+        this->cos_Theta.fill(0.0);
+        this->sin_Theta.fill(0.0);
         this->FirstTimeMaps.clear();
         this->EnvrnPrint.clear();
         this->SavedMnDy.clear();

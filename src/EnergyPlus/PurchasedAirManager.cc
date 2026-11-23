@@ -1468,7 +1468,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 state.dataSize->ZoneHeatingOnlyFan = false;
 
                 CapSizingMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).HeatingCapMethod;
-                ZoneEqSizing.CapSizingMethod = CapSizingMethod;
                 if (CapSizingMethod == HeatingDesignCapacity || CapSizingMethod == CapacityPerFloorArea ||
                     CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
                     if (CapSizingMethod == HeatingDesignCapacity) {
@@ -1605,7 +1604,6 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                 state.dataSize->DataScalableSizingON = false;
 
                 CapSizingMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingCapMethod;
-                ZoneEqSizing.CapSizingMethod = CapSizingMethod;
                 if (CapSizingMethod == CoolingDesignCapacity || CapSizingMethod == CapacityPerFloorArea ||
                     CapSizingMethod == FractionOfAutosizedCoolingCapacity) {
                     if (CapSizingMethod == CoolingDesignCapacity) {

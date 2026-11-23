@@ -67,7 +67,6 @@ namespace ElectricBaseboardRadiator {
     {
         // Members
         std::string EquipName;
-        std::string Schedule;
         Array1D_string SurfaceName;
         Array1D_int SurfacePtr;
         int ZonePtr = 0;
@@ -77,18 +76,15 @@ namespace ElectricBaseboardRadiator {
         Real64 BaseboardEfficiency = 0.0;
         Real64 AirInletTemp = 0.0;
         Real64 AirInletHumRat = 0.0;
-        Real64 AirOutletTemp = 0.0;
         Real64 ElecUseLoad = 0.0;
         Real64 ElecUseRate = 0.0;
         Real64 FracRadiant = 0.0;
         Real64 FracConvect = 0.0;
         Real64 FracDistribPerson = 0.0;
         Real64 TotPower = 0.0;
-        Real64 Power = 0.0;
         Real64 ConvPower = 0.0;
         Real64 RadPower = 0.0;
         Real64 TotEnergy = 0.0;
-        Real64 Energy = 0.0;
         Real64 ConvEnergy = 0.0;
         Real64 RadEnergy = 0.0;
         Array1D<Real64> FracDistribToSurf;

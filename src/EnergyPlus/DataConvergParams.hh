@@ -82,7 +82,8 @@ namespace DataConvergParams {
     constexpr Real64 HVACCpApprox(1004.844); // Air Cp (20C,0.0Kg/Kg) Only for energy Tolerance Calculation
     // Only used to scale the answer for a more intuitive answer for comparison
 
-    constexpr Real64 PlantFlowRateToler(0.001); // Tolerance for mass flow rate convergence (in kg/s) [~2 CFM]
+    constexpr Real64 PlantFlowRateToler(0.001);   // Tolerance for mass flow rate convergence (in kg/s) [~2 CFM]
+    constexpr Real64 PlantFlowRateRelToler(0.01); // Relative tolerance for plant loop side mass flow rate convergence (fraction of flow)
     constexpr Real64 PlantFlowRateOscillationToler(0.0000001);
     constexpr Real64 PlantFlowRateSlopeToler(0.0001); // Slope tolerance for mass flow, kg/s/iteration
 
@@ -92,9 +93,6 @@ namespace DataConvergParams {
     constexpr Real64 PlantTemperatureOscillationToler(0.000001); // tolerance for detecting duplicate temps in stack
 
     constexpr Real64 PlantEnergyToler(10.0); // Tolerance for Energy comparisons (in Watts W)
-
-    // Energy Tolerance Calculation, used to scale the answer for a more intuitive answer for comparison
-    constexpr Real64 PlantFlowFlowRateToler(0.01); // Tolerance for mass flow rate convergence (in kg/s)
 
     constexpr int ConvergLogStackDepth(10);
 
@@ -123,47 +121,47 @@ namespace DataConvergParams {
 
     struct HVACAirLoopIterationConvergenceStruct
     {
-        std::array<bool, 3> HVACMassFlowNotConverged = {false};                               // Flag to show mass flow convergence
-        std::array<Real64, ConvergLogStackDepth> HVACFlowDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACFlowSupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACFlowSupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<bool, 3> HVACHumRatNotConverged = {false};                                 // Flag to show humidity ratio convergence   or failure
-        std::array<Real64, ConvergLogStackDepth> HVACHumDemandToSupplyTolValue = {0.0};       // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACHumSupplyDeck1ToDemandTolValue = {0.0};  // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACHumSupplyDeck2ToDemandTolValue = {0.0};  // Queue of convergence "results"
-        std::array<bool, 3> HVACTempNotConverged = {false};                                   // Flag to show temperature convergence  or failure
-        std::array<Real64, ConvergLogStackDepth> HVACTempDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACTempSupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACTempSupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<bool, 3> HVACEnergyNotConverged = {false};                                 // Flag to show energy convergence   or failure
-        std::array<Real64, ConvergLogStackDepth> HVACEnergyDemandToSupplyTolValue = {0.0};    // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck1ToDemandTolValue = {0.0};    // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck2ToDemandTolValue = {0.0};    // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpyDemandToSupplyTolValue = {0.0};       // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck1ToDemandTolValue = {0.0};  // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck2ToDemandTolValue = {0.0};  // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressureDemandToSupplyTolValue = {0.0};       // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressureSupplyDeck1ToDemandTolValue = {0.0};  // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressueSupplyDeck2ToDemandTolValue = {0.0};   // Queue of convergence "results"
-        std::array<bool, 3> HVACCO2NotConverged = {false};                                         // Flag to show mass flow convergence
-        std::array<Real64, ConvergLogStackDepth> HVACCO2DemandToSupplyTolValue = {0.0};            // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck1ToDemandTolValue = {0.0};       // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck2ToDemandTolValue = {0.0};       // Queue of convergence "results"
-        std::array<bool, 3> HVACGenContamNotConverged = {false};                                   // Flag to show mass flow convergence
-        std::array<Real64, ConvergLogStackDepth> HVACGenContamDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
+        std::array<bool, 3> HVACMassFlowNotConverged = {false};                              // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> HVACFlowDemandToSupplyTolValue{};           // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACFlowSupplyDeck1ToDemandTolValue{};      // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACFlowSupplyDeck2ToDemandTolValue{};      // Queue of convergence "results"
+        std::array<bool, 3> HVACHumRatNotConverged = {false};                                // Flag to show humidity ratio convergence   or failure
+        std::array<Real64, ConvergLogStackDepth> HVACHumDemandToSupplyTolValue{};            // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACHumSupplyDeck1ToDemandTolValue{};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACHumSupplyDeck2ToDemandTolValue{};       // Queue of convergence "results"
+        std::array<bool, 3> HVACTempNotConverged = {false};                                  // Flag to show temperature convergence  or failure
+        std::array<Real64, ConvergLogStackDepth> HVACTempDemandToSupplyTolValue{};           // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACTempSupplyDeck1ToDemandTolValue{};      // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACTempSupplyDeck2ToDemandTolValue{};      // Queue of convergence "results"
+        std::array<bool, 3> HVACEnergyNotConverged = {false};                                // Flag to show energy convergence   or failure
+        std::array<Real64, ConvergLogStackDepth> HVACEnergyDemandToSupplyTolValue{};         // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck1ToDemandTolValue{};    // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck2ToDemandTolValue{};    // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpyDemandToSupplyTolValue{};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck1ToDemandTolValue{};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck2ToDemandTolValue{};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressureDemandToSupplyTolValue{};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressureSupplyDeck1ToDemandTolValue{};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressueSupplyDeck2ToDemandTolValue{};   // Queue of convergence "results"
+        std::array<bool, 3> HVACCO2NotConverged = {false};                                   // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> HVACCO2DemandToSupplyTolValue{};            // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck1ToDemandTolValue{};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck2ToDemandTolValue{};       // Queue of convergence "results"
+        std::array<bool, 3> HVACGenContamNotConverged = {false};                             // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamDemandToSupplyTolValue{};      // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck1ToDemandTolValue{}; // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck2ToDemandTolValue{}; // Queue of convergence "results"
     };
 
     struct PlantIterationConvergenceStruct
     {
         // Members
-        bool PlantMassFlowNotConverged = false;                                           // Flag to show mass flow convergence
-        std::array<Real64, ConvergLogStackDepth> PlantFlowDemandToSupplyTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> PlantFlowSupplyToDemandTolValue;         // Queue of convergence "results"
-        bool PlantTempNotConverged = false;                                               // Flag to show temperature convergence (0) or failure (1)
-        std::array<Real64, ConvergLogStackDepth> PlantTempDemandToSupplyTolValue;         // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> PlantTempSupplyToDemandTolValue;         // Queue of convergence "results"
+        bool PlantMassFlowNotConverged = false;                                     // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> PlantFlowDemandToSupplyTolValue{}; // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> PlantFlowSupplyToDemandTolValue;   // Queue of convergence "results"
+        bool PlantTempNotConverged = false;                                         // Flag to show temperature convergence (0) or failure (1)
+        std::array<Real64, ConvergLogStackDepth> PlantTempDemandToSupplyTolValue;   // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> PlantTempSupplyToDemandTolValue;   // Queue of convergence "results"
     };
 
 } // namespace DataConvergParams

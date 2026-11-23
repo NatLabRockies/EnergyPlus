@@ -194,6 +194,39 @@ TEST_F(EnergyPlusFixture, Fans_OnOff_EMSPressureRiseResetTest)
     EXPECT_DOUBLE_EQ(Result2_FanPower, fan1->totalPower); // expects zero
 }
 
+// Verify Fan:OnOff increases runtime for coil cycling losses while preserving timestep-average airflow.
+TEST_F(EnergyPlusFixture, OnOffFanObj_RuntimeIncludesPLFCorrection)
+{
+    state->init_state(*state);
+    state->dataEnvrn->StdRhoAir = 1.0;
+    state->dataHVACGlobal->TurnFansOn = true;
+    state->dataHVACGlobal->TurnFansOff = false;
+    state->dataHVACGlobal->OnOffFanPartLoadFraction = 0.8;
+
+    // Request 0.3 kg/s average airflow with a 0.8 PLF and 100 Pa pressure rise.
+    Fans::FanComponent fan;
+    fan.type = HVAC::FanType::OnOff;
+    fan.availSched = Sched::GetScheduleAlwaysOff(*state);
+    fan.maxAirFlowRate = 1.0;
+    fan.maxAirMassFlowRate = 1.0;
+    fan.inletAirMassFlowRate = 0.3;
+    fan.rhoAirStdInit = 1.0;
+    fan.deltaPress = 100.0;
+    fan.totalEff = 1.0;
+    fan.motorEff = 1.0;
+    fan.motorInAirFrac = 1.0;
+    fan.inletAirTemp = 20.0;
+    fan.inletAirHumRat = 0.008;
+    fan.inletAirEnthalpy = 40000.0;
+
+    fan.simulateOnOff(*state);
+
+    // PLF correction raises runtime from 0.3 to 0.3 / 0.8 without changing requested airflow.
+    EXPECT_DOUBLE_EQ(0.375, fan.runtimeFrac);
+    EXPECT_DOUBLE_EQ(0.3, fan.outletAirMassFlowRate);
+    EXPECT_DOUBLE_EQ(37.5, fan.totalPower);
+}
+
 TEST_F(EnergyPlusFixture, Fans_VariableVolume_EMSPressureRiseResetTest)
 {
     state->init_state(*state);

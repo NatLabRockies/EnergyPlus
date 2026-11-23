@@ -475,7 +475,6 @@ void GetIHPInput(EnergyPlusData &state)
         auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(CoilCounter);
 
         ihp.Name = AlphArray(1);
-        ihp.IHPtype = "AIRSOURCE_IHP";
 
         // AlphArray( 2 ) is the water sensor node
 

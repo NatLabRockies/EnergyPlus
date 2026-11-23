@@ -1840,7 +1840,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
 void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
 {
     demandMeterPtr_ = EnergyPlus::GetMeterIndex(state, demandMeterName_);
-    if ((demandMeterPtr_ == 0) && (genOperationScheme_ == GeneratorOpScheme::TrackMeter)) { // throw error
+    if ((demandMeterPtr_ == -1) && (genOperationScheme_ == GeneratorOpScheme::TrackMeter)) { // throw error
         ShowFatalError(
             state,
             std::format("ElectPowerLoadCenter::setupLoadCenterMeterIndices  Did not find Meter named: {} in ElectricLoadCenter:Distribution named {}",
@@ -1850,7 +1850,7 @@ void ElectPowerLoadCenter::setupLoadCenterMeterIndices(EnergyPlusData &state)
 
     if (storageScheme_ == StorageOpScheme::MeterDemandStoreExcessOnSite) {
         trackStorageOpMeterIndex_ = EnergyPlus::GetMeterIndex(state, trackSorageOpMeterName_);
-        if (trackStorageOpMeterIndex_ == 0) { //
+        if (trackStorageOpMeterIndex_ == -1) {
             ShowFatalError(
                 state,
                 std::format(
@@ -2344,9 +2344,8 @@ void GeneratorController::simGeneratorGetPowerOutput(EnergyPlusData &state,
 DCtoACInverter::DCtoACInverter(EnergyPlusData &state, std::string const &objectName)
     : aCPowerOut_(0.0), aCEnergyOut_(0.0), efficiency_(0.0), dCPowerIn_(0.0), dCEnergyIn_(0.0), conversionLossPower_(0.0), conversionLossEnergy_(0.0),
       conversionLossEnergyDecrement_(0.0), thermLossRate_(0.0), thermLossEnergy_(0.0), qdotConvZone_(0.0), qdotRadZone_(0.0), ancillACuseRate_(0.0),
-      ancillACuseEnergy_(0.0), modelType_(InverterModelType::Invalid), heatLossesDestination_(ThermalLossDestination::Invalid), zoneNum_(0),
-      zoneRadFract_(0.0), nominalVoltage_(0.0), nomVoltEfficiencyARR_(6, 0.0), ratedPower_(0.0), minPower_(0.0), maxPower_(0.0), minEfficiency_(0.0),
-      maxEfficiency_(0.0), standbyPower_(0.0)
+      ancillACuseEnergy_(0.0), modelType_(InverterModelType::Invalid), zoneNum_(0), zoneRadFract_(0.0), nomVoltEfficiencyARR_(6, 0.0),
+      ratedPower_(0.0), minPower_(0.0), maxPower_(0.0), minEfficiency_(0.0), maxEfficiency_(0.0), standbyPower_(0.0)
 {
     // initialize
     nomVoltEfficiencyARR_.resize(6, 0.0);
@@ -2415,7 +2414,6 @@ DCtoACInverter::DCtoACInverter(EnergyPlusData &state, std::string const &objectN
         if (modelType_ == InverterModelType::PVWatts) {
             availSched_ = Sched::GetScheduleAlwaysOn(state);
             zoneNum_ = 0;
-            heatLossesDestination_ = ThermalLossDestination::LostToOutside;
             zoneRadFract_ = 0;
         } else if (s_ipsc->lAlphaFieldBlanks(2)) {
             availSched_ = Sched::GetScheduleAlwaysOn(state);
@@ -2425,15 +2423,10 @@ DCtoACInverter::DCtoACInverter(EnergyPlusData &state, std::string const &objectN
                 errorsFound = true;
             }
 
-            if (s_ipsc->lAlphaFieldBlanks(3)) {
-                heatLossesDestination_ = ThermalLossDestination::LostToOutside;
-            } else if ((zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone)) == 0) {
-                heatLossesDestination_ = ThermalLossDestination::LostToOutside;
+            if (!s_ipsc->lAlphaFieldBlanks(3) && (zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone)) == 0) {
                 ShowWarningItemNotFound(
                     state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), "Inverter heat losses will not be added to a zone");
                 // continue with simulation but inverter losses not sent to a zone.
-            } else {
-                heatLossesDestination_ = ThermalLossDestination::ZoneGains;
             }
             zoneRadFract_ = s_ipsc->rNumericArgs(1);
         }
@@ -2444,7 +2437,6 @@ DCtoACInverter::DCtoACInverter(EnergyPlusData &state, std::string const &objectN
             ratedPower_ = s_ipsc->rNumericArgs(2);
             standbyPower_ = s_ipsc->rNumericArgs(3);
 
-            nominalVoltage_ = s_ipsc->rNumericArgs(4);
             nomVoltEfficiencyARR_[0] = s_ipsc->rNumericArgs(5);
             nomVoltEfficiencyARR_[1] = s_ipsc->rNumericArgs(6);
             nomVoltEfficiencyARR_[2] = s_ipsc->rNumericArgs(7);
@@ -2797,6 +2789,13 @@ void DCtoACInverter::simulate(EnergyPlusData &state, Real64 const powerIntoInver
         // now calculate Inverter based on model type
         calcEfficiency(state);
         aCPowerOut_ = efficiency_ * dCPowerIn_;
+        if (modelType_ == InverterModelType::CurveFuncOfPower) {
+            if (aCPowerOut_ < minPower_) {
+                aCPowerOut_ = 0.0;
+            } else {
+                aCPowerOut_ = min(aCPowerOut_, maxPower_);
+            }
+        }
         aCEnergyOut_ = aCPowerOut_ * (state.dataHVACGlobal->TimeStepSysSec);
 
         if (aCPowerOut_ == 0.0) {
@@ -2826,7 +2825,7 @@ void DCtoACInverter::simulate(EnergyPlusData &state, Real64 const powerIntoInver
 ACtoDCConverter::ACtoDCConverter(EnergyPlusData &state, std::string const &objectName)
     : efficiency_(0.0), aCPowerIn_(0.0), aCEnergyIn_(0.0), dCPowerOut_(0.0), dCEnergyOut_(0.0), conversionLossPower_(0.0), conversionLossEnergy_(0.0),
       conversionLossEnergyDecrement_(0.0), thermLossRate_(0.0), thermLossEnergy_(0.0), qdotConvZone_(0.0), qdotRadZone_(0.0), ancillACuseRate_(0.0),
-      ancillACuseEnergy_(0.0), modelType_(ConverterModelType::Invalid), heatLossesDestination_(ThermalLossDestination::Invalid), zoneNum_(0),
+      ancillACuseEnergy_(0.0), modelType_(ConverterModelType::Invalid), zoneNum_(0),
       zoneRadFract_(0.0), // radiative fraction for thermal losses to zone
       standbyPower_(0.0), maxPower_(0.0)
 {
@@ -2903,15 +2902,10 @@ ACtoDCConverter::ACtoDCConverter(EnergyPlusData &state, std::string const &objec
 
         standbyPower_ = s_ipsc->rNumericArgs(3);
 
-        if (s_ipsc->lAlphaFieldBlanks(5)) {
-            heatLossesDestination_ = ThermalLossDestination::LostToOutside;
-        } else if ((zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(5), state.dataHeatBal->Zone)) == 0) {
-            heatLossesDestination_ = ThermalLossDestination::LostToOutside;
+        if (!s_ipsc->lAlphaFieldBlanks(5) && (zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(5), state.dataHeatBal->Zone)) == 0) {
             ShowWarningItemNotFound(
                 state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5), "Inverter heat losses will not be added to a zone");
             // continue with simulation but inverter losses not sent to a zone.
-        } else {
-            heatLossesDestination_ = ThermalLossDestination::ZoneGains;
         }
 
         zoneRadFract_ = s_ipsc->rNumericArgs(4);
@@ -3113,17 +3107,16 @@ ElectricStorage::ElectricStorage( // main constructor
     EnergyPlusData &state,
     std::string const &objectName)
     : storedPower_(0.0), storedEnergy_(0.0), drawnPower_(0.0), drawnEnergy_(0.0), decrementedEnergyStored_(0.0), maxRainflowArrayBounds_(100),
-      myWarmUpFlag_(false), storageModelMode_(StorageModelType::Invalid), heatLossesDestination_(ThermalLossDestination::Invalid), zoneNum_(0),
-      zoneRadFract_(0.0), startingEnergyStored_(0.0), energeticEfficCharge_(0.0), energeticEfficDischarge_(0.0), maxPowerDraw_(0.0),
-      maxPowerStore_(0.0), maxEnergyCapacity_(0.0), parallelNum_(0), seriesNum_(0), numBattery_(0), cycleBinNum_(0), startingSOC_(0.0),
-      maxAhCapacity_(0.0), availableFrac_(0.0), chargeConversionRate_(0.0), chargedOCV_(0.0), dischargedOCV_(0.0), internalR_(0.0),
-      maxDischargeI_(0.0), cutoffV_(0.0), maxChargeRate_(0.0), lifeCalculation_(false), liIon_dcToDcChargingEff_(0.0), liIon_mass_(0.0),
-      liIon_surfaceArea_(0.0), liIon_Cp_(0.0), liIon_heatTransferCoef_(0.0), liIon_Vfull_(0.0), liIon_Vexp_(0.0), liIon_Vnom_(0.0),
+      myWarmUpFlag_(false), storageModelMode_(StorageModelType::Invalid), zoneNum_(0), zoneRadFract_(0.0), startingEnergyStored_(0.0),
+      energeticEfficCharge_(0.0), energeticEfficDischarge_(0.0), maxPowerDraw_(0.0), maxPowerStore_(0.0), maxEnergyCapacity_(0.0), parallelNum_(0),
+      seriesNum_(0), numBattery_(0), cycleBinNum_(0), startingSOC_(0.0), maxAhCapacity_(0.0), availableFrac_(0.0), chargeConversionRate_(0.0),
+      chargedOCV_(0.0), dischargedOCV_(0.0), internalR_(0.0), maxDischargeI_(0.0), cutoffV_(0.0), maxChargeRate_(0.0), lifeCalculation_(false),
+      liIon_mass_(0.0), liIon_surfaceArea_(0.0), liIon_Cp_(0.0), liIon_heatTransferCoef_(0.0), liIon_Vfull_(0.0), liIon_Vexp_(0.0), liIon_Vnom_(0.0),
       liIon_Vnom_default_(0.0), liIon_Qfull_(0.0), liIon_Qexp_(0.0), liIon_Qnom_(0.0), liIon_C_rate_(0.0), thisTimeStepStateOfCharge_(0.0),
-      lastTimeStepStateOfCharge_(0.0), pelNeedFromStorage_(0.0), pelFromStorage_(0.0), pelIntoStorage_(0.0), qdotConvZone_(0.0), qdotRadZone_(0.0),
-      timeElapsed_(0.0), thisTimeStepAvailable_(0.0), thisTimeStepBound_(0.0), lastTimeStepAvailable_(0.0), lastTimeStepBound_(0.0),
-      lastTwoTimeStepAvailable_(0.0), lastTwoTimeStepBound_(0.0), count0_(0), electEnergyinStorage_(0.0), thermLossRate_(0.0), thermLossEnergy_(0.0),
-      storageMode_(0), absoluteSOC_(0.0), fractionSOC_(0.0), batteryCurrent_(0.0), batteryVoltage_(0.0), batteryDamage_(0.0), batteryTemperature_(0.0)
+      lastTimeStepStateOfCharge_(0.0), pelFromStorage_(0.0), pelIntoStorage_(0.0), qdotConvZone_(0.0), qdotRadZone_(0.0), timeElapsed_(0.0),
+      thisTimeStepAvailable_(0.0), thisTimeStepBound_(0.0), lastTimeStepAvailable_(0.0), lastTimeStepBound_(0.0), lastTwoTimeStepAvailable_(0.0),
+      lastTwoTimeStepBound_(0.0), count0_(0), electEnergyinStorage_(0.0), thermLossRate_(0.0), thermLossEnergy_(0.0), storageMode_(0),
+      absoluteSOC_(0.0), fractionSOC_(0.0), batteryCurrent_(0.0), batteryVoltage_(0.0), batteryDamage_(0.0), batteryTemperature_(0.0)
 {
 
     static constexpr std::string_view routineName = "ElectricStorage constructor ";
@@ -3180,15 +3173,10 @@ ElectricStorage::ElectricStorage( // main constructor
             errorsFound = true;
         }
 
-        if (s_ipsc->lAlphaFieldBlanks(3)) {
-            heatLossesDestination_ = ThermalLossDestination::LostToOutside;
-        } else if ((zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone)) == 0) {
-            heatLossesDestination_ = ThermalLossDestination::LostToOutside;
+        if (!s_ipsc->lAlphaFieldBlanks(3) && (zoneNum_ = Util::FindItemInList(s_ipsc->cAlphaArgs(3), state.dataHeatBal->Zone)) == 0) {
             ShowWarningItemNotFound(
                 state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3), "Storage heat losses will not be added to a zone");
             // continue with simulation but storage losses not sent to a zone.
-        } else {
-            heatLossesDestination_ = ThermalLossDestination::ZoneGains;
         }
 
         zoneRadFract_ = s_ipsc->rNumericArgs(1);
@@ -3293,7 +3281,6 @@ ElectricStorage::ElectricStorage( // main constructor
             seriesNum_ = static_cast<int>(state.dataIPShortCut->rNumericArgs(2));
             parallelNum_ = static_cast<int>(state.dataIPShortCut->rNumericArgs(3));
             startingSOC_ = state.dataIPShortCut->lNumericFieldBlanks(4) ? 0.5 : state.dataIPShortCut->rNumericArgs(4);
-            liIon_dcToDcChargingEff_ = state.dataIPShortCut->lNumericFieldBlanks(5) ? 0.95 : state.dataIPShortCut->rNumericArgs(5);
             liIon_mass_ = state.dataIPShortCut->rNumericArgs(6);
             liIon_surfaceArea_ = state.dataIPShortCut->rNumericArgs(7);
             liIon_Cp_ = state.dataIPShortCut->lNumericFieldBlanks(8) ? 1500.0 : state.dataIPShortCut->rNumericArgs(8);
@@ -3631,7 +3618,6 @@ void checkChargeDischargeVoltageCurves(
 
 void ElectricStorage::reinitAtBeginEnvironment()
 {
-    pelNeedFromStorage_ = 0.0;
     pelFromStorage_ = 0.0;
     pelIntoStorage_ = 0.0;
     qdotConvZone_ = 0.0;
@@ -4934,21 +4920,33 @@ void ElectricTransformer::manageTransformers(EnergyPlusData &state, Real64 const
 
 void ElectricTransformer::setupMeterIndices(EnergyPlusData &state)
 {
+    static constexpr std::string_view routineName = "ElectricTransformer::setupMeterIndices";
+
     if (usageMode_ == TransformerUse::PowerInFromGrid) {
+        ErrorObjectHeader const eoh{routineName, "ElectricLoadCenter:Transformer", name_};
+        bool errorsFound = false;
         for (std::size_t meterNum = 0; meterNum < wiredMeterNames_.size(); ++meterNum) {
 
             wiredMeterPtrs_[meterNum] = GetMeterIndex(state, wiredMeterNames_[meterNum]);
+            if (wiredMeterPtrs_[meterNum] == -1) {
+                ShowSevereItemNotFound(state, eoh, std::format("Meter Name {}", meterNum + 1), wiredMeterNames_[meterNum]);
+                errorsFound = true;
+                continue;
+            }
 
             // Check whether the meter is an electricity meter
             // Index function is used here because some resource types are not Electricity but strings containing
             // Electricity such as ElectricityPurchased and ElectricityProduced.
             // It is not proper to have this check in GetInput routine because the meter index may have not been defined
-            auto *meter = state.dataOutputProcessor->meters[wiredMeterPtrs_[meterNum]];
+            auto const *meter = state.dataOutputProcessor->meters[wiredMeterPtrs_[meterNum]];
             if (meter->resource != Constant::eResource::Electricity && meter->resource != Constant::eResource::ElectricityPurchased &&
                 meter->resource != Constant::eResource::ElectricitySurplusSold && meter->resource != Constant::eResource::ElectricityProduced &&
                 meter->resource != Constant::eResource::ElectricityNet) {
                 ShowFatalError(state, std::format("Non-electricity meter used for {}", name_));
             }
+        }
+        if (errorsFound) {
+            ShowFatalError(state, std::format("{}: Preceding errors cause termination.", routineName));
         }
     }
 }

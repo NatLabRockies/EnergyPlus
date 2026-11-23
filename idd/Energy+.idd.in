@@ -1896,12 +1896,14 @@ Site:GroundTemperature:Undisturbed:FiniteDifference,
        \minimum 0
        \maximum 100
        \default 30
+       \note This field is retained for input compatibility but is not currently used.
   N5,  \field Soil Moisture Content Volume Fraction at Saturation
        \type real
        \units percent
        \minimum 0
        \maximum 100
        \default 50
+       \note This field is retained for input compatibility but is not currently used.
    N6; \field Evapotranspiration Ground Cover Parameter
        \type real
        \units dimensionless
@@ -39302,6 +39304,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \default 10
    A15, \field First Fuel Type
         \type choice
+        \note This field is retained for input compatibility but is not currently used by the model.
         \key None
         \key Electricity
         \key NaturalGas
@@ -39316,8 +39319,6 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key DistrictHeatingWater
         \key DistrictHeatingSteam
         \key DistrictCooling
-        \note Select the fuel type associated with field: "System Electric Power Lookup Table" in each mode.
-        \note If this field is blank, default first fuel type = Electricity.
         \default Electricity
    A16, \field Second Fuel Type
         \type choice
@@ -65515,8 +65516,7 @@ AirLoopHVAC:UnitarySystem,
        \note Enter the type of supply air fan if included in the unitary system.
        \note Fan:ConstantVolume only works with continuous fan operating mode (i.e. supply
        \note air fan operating mode schedule values greater than 0).
-       \note Specify a Fan:SystemModel or a Fan:OnOff object when the Supply Air Fan Operating Mode Schedule Name
-       \note input field above is left blank.
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, and Fan:ComponentModel support cycling and continuous fan operating modes.
        \note Specify a Fan:SystemModel or a Fan:VariableVolume when modeling VAV systems which used setpoint based control
        \note if the fan is included in the unitary system object.
        \note The ComponentModel fan type may be substituted for the ConstantVolume or VariableVolume
@@ -65535,16 +65535,15 @@ AirLoopHVAC:UnitarySystem,
   A11, \field Supply Air Fan Operating Mode Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note A fan operating mode schedule value of 0 indicates cycling fan mode (supply air
-       \note fan cycles on and off in tandem with the cooling or heating coil).
-       \note Any other schedule value indicates continuous fan mode (supply air fan operates
-       \note continuously regardless of cooling or heating coil operation). Provide a schedule
-       \note with non-zero values when high humidity control is specified.
-       \note Leaving this schedule name blank will default to constant fan mode for the
-       \note entire simulation period.
-       \note This field is not used when set point based control is used where a set point
-       \note controls the coil.
-       \note SingleZoneVAV control type is only active when constant fan operating mode is active.
+       \note A schedule value of 0 selects cycling fan operation; any other value selects continuous fan operation.
+       \note If blank, defaults to cycling for Control Type = Load or SingleZoneVAV,
+       \note and continuous for Control Type = Setpoint.
+       \note For Load or SingleZoneVAV control with a blank schedule, an internal supply fan must be
+       \note Fan:SystemModel, Fan:OnOff, Fan:VariableVolume, or Fan:ComponentModel.
+       \note For Control Type = Setpoint or Supply Fan Object Type = Fan:ConstantVolume,
+       \note any specified schedule must have values greater than 0 and less than or equal to 1.
+       \note SingleZoneVAV uses load-based control during cycling fan operation.
+       \note Use nonzero schedule values when high humidity control is specified.
   A12, \field Heating Coil Object Type
        \type choice
        \key Coil:Heating:DX:SingleSpeed
@@ -78853,6 +78852,7 @@ HeatPump:WaterToWater:ParameterEstimation:Cooling,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W
@@ -78927,6 +78927,7 @@ HeatPump:WaterToWater:ParameterEstimation:Heating,
        \type node
   N1,\field Nominal COP
        \units W/W
+       \note This field is retained for input compatibility but is not currently used by the model.
      \minimum> 0
   N2,\field Nominal Capacity
        \units W
@@ -93507,6 +93508,7 @@ Generator:InternalCombustionEngine,
   N1, \field Rated Power Output
        \units W
   A2, \field Electric Circuit Node Name
+      \note This field is retained for input compatibility but is not used by the generator model.
   N2, \field Minimum Part Load Ratio
       \minimum 0.0
       \maximum 1.0
@@ -93514,6 +93516,7 @@ Generator:InternalCombustionEngine,
       \minimum> 0.0
       \maximum 1.0
   N4, \field Optimum Part Load Ratio
+      \note This field is retained for input compatibility but is not used by the generator model.
   A3, \field Shaft Power Curve Name
        \type object-list
        \object-list UnivariateFunctions
@@ -94751,24 +94754,36 @@ Generator:FuelCell:StackCooler,
   N6,  \field Coefficient r3
   N7,  \field Stack Coolant Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N8,  \field Stack Cooler U-Factor Times Area Value
        \units W/K
+       \note This field is retained for input compatibility but is not currently used.
   N9,  \field Fs-cogen Adjustment Factor
+       \note This field is retained for input compatibility but is not currently used.
   N10, \field Stack Cogeneration Exchanger Area
        \units m2
+       \note This field is retained for input compatibility but is not currently used.
   N11, \field Stack Cogeneration Exchanger Nominal Flow Rate
        \units kg/s
+       \note This field is retained for input compatibility but is not currently used.
   N12, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient
        \units W/m2-K
+       \note This field is retained for input compatibility but is not currently used.
   N13, \field Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient Exponent
+       \note This field is retained for input compatibility but is not currently used.
   N14, \field Stack Cooler Pump Power
        \units W
+       \note This field is retained for input compatibility but is not currently used.
   N15, \field Stack Cooler Pump Heat Loss Fraction
        \minimum 0.0
        \maximum 1.0
+       \note This field is retained for input compatibility but is not currently used.
   N16, \field Stack Air Cooler Fan Coefficient f0
+       \note This field is retained for input compatibility but is not currently used.
   N17, \field Stack Air Cooler Fan Coefficient f1
+       \note This field is retained for input compatibility but is not currently used.
   N18; \field Stack Air Cooler Fan Coefficient f2
+       \note This field is retained for input compatibility but is not currently used.
 
 Generator:MicroCHP,
       \memo Small-scale combined heat and power (micro CHP) electric generator using the model
@@ -96067,10 +96082,15 @@ ElectricLoadCenter:Inverter:FunctionOfPower,
         \maximum 1.0
    N5 , \field Minimum Power Output
         \units W
+        \minimum 0
+        \default 0
    N6 , \field Maximum Power Output
         \units W
+        \required-field
+        \minimum> 0
    N7 ; \field Ancillary Power Consumed In Standby
         \units W
+        \default 0
 
 ElectricLoadCenter:Inverter:LookUpTable,
         \memo   California Energy Commission tests and publishes data on inverters
@@ -96097,6 +96117,8 @@ ElectricLoadCenter:Inverter:LookUpTable,
         \units W
    N4 , \field Nominal Voltage Input
         \units V
+        \note This field is retained for input compatibility but its numeric value is not used.
+        \note The model uses the efficiency values entered for nominal voltage directly.
    N5 , \field Efficiency at 10% Power and Nominal Voltage
         \minimum 0
         \maximum 1.0
@@ -96332,6 +96354,7 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \minimum> 0
         \maximum 1
         \default 0.95
+        \note This field is retained for input compatibility but is not currently used.
    N6,  \field Battery Mass
         \type real
         \minimum> 0
@@ -110606,7 +110629,7 @@ OutputControl:Files,
        \key No
        \default Yes
   A32, \field Output Tarcog
-       \note Not Implemented Yet
+       \note This field is retained for input compatibility but is not currently used.
        \type choice
        \key Yes
        \key No

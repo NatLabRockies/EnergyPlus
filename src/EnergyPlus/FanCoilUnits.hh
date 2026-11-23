@@ -192,8 +192,6 @@ namespace FanCoilUnits {
         Real64 MaxNoCoolHeatAirMassFlow = 0.0; // minimum air flow rate using constant fan and ASHRAE90.1 control method
         Real64 MaxCoolAirMassFlow = 0.0;       // used in ASHRAE90.1 model, same as MaxAirMassFlow
         Real64 MaxHeatAirMassFlow = 0.0;       // used in ASHRAE90.1 model, same as MaxAirMassFlow
-        Real64 LowSpeedCoolFanRatio = 0.0;     // ratio of min air flow to max air flow
-        Real64 LowSpeedHeatFanRatio = 0.0;     // ratio of min air flow to max air flow
         int CoolCoilFluidInletNode = 0;        // chilled water control node
         int CoolCoilFluidOutletNodeNum = 0;    // chilled water coil outlet plant node
         int HeatCoilFluidInletNode = 0;        // hot water control node
@@ -208,8 +206,6 @@ namespace FanCoilUnits {
         int NodeNumOfControlledZone = 0;       // node number of controlled zone
         bool ATMixerExists = false;            // True if there is an ATMixer
         int ATMixerOutNode = 0;                // outlet air node number for the air terminal mixer
-        Real64 FanPartLoadRatio = 0.0;         // ratio of air flow to max air flow to simulation modulating fan
-        Real64 HeatCoilWaterFlowRatio = 0.0;   // ratio of water flow rate to max water flow rate
         Real64 ControlZoneMassFlowFrac = 1.0;  // flow fraction of control zone (always 1 for zone equipment)
         int MaxIterIndex = 0;                  // recurring message index
         int RegulaFalsiFailedIndex = 0;        // iteration loop warning

@@ -79,27 +79,24 @@ namespace IndoorGreen {
     struct IndoorGreenParams
     {
         std::string Name;
-        std::string SurfName;
         Sched::Schedule *sched = nullptr;
         Sched::Schedule *ledSched = nullptr;
-        int LightRefPtr = 0;                               // daylight reference point number;
         int LightControlPtr = 0;                           // daylight control point number;
         Sched::Schedule *ledDaylightTargetSched = nullptr; // LED-Daylight PPFD setpoint schedule
         Real64 LeafArea = 0.0;                             // one-sided leaf area
         Real64 LEDNominalPPFD = 0.0;                       // nominal PPFD for LED grow light (PPFD)
         Real64 LEDNominalEleP = 0.0;                       // nominal power for total LED grow light (W)
         Real64 LEDRadFraction = 0.0;                       // radiant fraction of LED grow light (0-1)
-        Real64 ZCO2 = 400;
-        Real64 ZVPD = 0.0;            // vapor pressure deficit (pa)
-        Real64 ZPPFD = 0;             // PPFD
-        Real64 SensibleRate = 0.0;    // w, living wall
-        Real64 SensibleRateLED = 0.0; // w, lED
-        Real64 LatentRate = 0.0;      // w
-        Real64 ETRate = 0.0;          // kg/(m2s)
-        Real64 LambdaET = 0.0;        // J/(kg m2)
-        Real64 LEDActualPPFD = 0.0;   // LED operational PPFD
-        Real64 LEDActualEleP = 0.0;   // LED operational power (W)
-        Real64 LEDActualEleCon = 0.0; // LED operational electricity consumption (J)
+        Real64 ZVPD = 0.0;                                 // vapor pressure deficit (pa)
+        Real64 ZPPFD = 0;                                  // PPFD
+        Real64 SensibleRate = 0.0;                         // w, living wall
+        Real64 SensibleRateLED = 0.0;                      // w, lED
+        Real64 LatentRate = 0.0;                           // w
+        Real64 ETRate = 0.0;                               // kg/(m2s)
+        Real64 LambdaET = 0.0;                             // J/(kg m2)
+        Real64 LEDActualPPFD = 0.0;                        // LED operational PPFD
+        Real64 LEDActualEleP = 0.0;                        // LED operational power (W)
+        Real64 LEDActualEleCon = 0.0;                      // LED operational electricity consumption (J)
         int SurfPtr = 0;
         int ZonePtr = 0;                         // point to the zone where the indoor greenery system is located
         int SpacePtr = 0;                        // point to the space where the indoor greenery system is located

@@ -112,10 +112,6 @@ namespace HVACControllers {
         // --------------------
         int NumCalcCalls;    // Number of Calc() calls since last call to Reset()
         ControllerMode Mode; // Operational model of controller at current iteration
-        // Flag indicating whether the current controller simulation was performed from a cold start
-        // or following a speculative warm restart. Set in the ResetController() routine.
-        // Used in the CheckController() routine.
-        bool DoWarmRestartFlag;
         // Flag used to decide whether or not it is allowed to reuse the intermediate solution from
         // solving the previous controller on the air loop (COLD_START mode only) as the initial guess for
         // the current controller.
@@ -132,10 +128,7 @@ namespace HVACControllers {
         // --------------------
         Real64 MaxAvailActuated; // kg/s, The maximum actuated variable currently available.
         // Reset by simulation at each HVAC iteration
-        Real64 MaxAvailSensed;   // Sensed value at maximum available actuated variable
         Real64 MinAvailActuated; // kg/s, The minimum actuated variable currently available.
-        // Reset by simulation at each HVAC iteration
-        Real64 MinAvailSensed; // Sensed value at maximum available actuated variable
         // --------------------
         // User input min/max values for actuated variable
         // --------------------
@@ -163,11 +156,6 @@ namespace HVACControllers {
         Real64 Offset;                     // This is the tolerance or droop from the error
         HVAC::CtrlVarType HumRatCntrlType; // iCtrlVarType_HumRat=4,iCtrlVarType_MaxHumRat=5,iCtrlVarType_MinHumRat=6
         // --------------------
-        // Other controller inputs, not yet used
-        // --------------------
-        Real64 Range; // The range or hysteresis of the control limit
-        Real64 Limit; // The Limit value for a Limit Controller
-        // --------------------
         // Trace mechanism
         // --------------------
         SharedFileHandle TraceFile;
@@ -186,13 +174,13 @@ namespace HVACControllers {
         // Default Constructor
         ControllerPropsType()
             : ControllerType_Num(ControllerSimple_Type), ControlVar(CtrlVarType::NoControlVariable), ActuatorVar(CtrlVarType::NoControlVariable),
-              Action(ControllerAction::NoAction), InitFirstPass(true), NumCalcCalls(0), Mode(ControllerMode::None), DoWarmRestartFlag(false),
-              ReuseIntermediateSolutionFlag(false), ReusePreviousSolutionFlag(false), SolutionTrackers(2), MaxAvailActuated(0.0), MaxAvailSensed(0.0),
-              MinAvailActuated(0.0), MinAvailSensed(0.0), MaxVolFlowActuated(0.0), MinVolFlowActuated(0.0), MaxActuated(0.0), MinActuated(0.0),
-              ActuatedNode(0), ActuatedValue(0.0), NextActuatedValue(0.0), ActuatedNodePlantLoc{}, SensedNode(0), IsSetPointDefinedFlag(false),
-              SetPointValue(0.0), SensedValue(0.0), DeltaSensed(0.0), Offset(0.0), HumRatCntrlType(HVAC::CtrlVarType::Invalid), Range(0.0),
-              Limit(0.0), FirstTraceFlag(true), BadActionErrCount(0), BadActionErrIndex(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0),
-              FaultyCoilSATOffset(0.0), BypassControllerCalc(false), AirLoopControllerIndex(0), HumRatCtrlOverride(false)
+              Action(ControllerAction::NoAction), InitFirstPass(true), NumCalcCalls(0), Mode(ControllerMode::None),
+              ReuseIntermediateSolutionFlag(false), ReusePreviousSolutionFlag(false), SolutionTrackers(2), MaxAvailActuated(0.0),
+              MinAvailActuated(0.0), MaxVolFlowActuated(0.0), MinVolFlowActuated(0.0), MaxActuated(0.0), MinActuated(0.0), ActuatedNode(0),
+              ActuatedValue(0.0), NextActuatedValue(0.0), ActuatedNodePlantLoc{}, SensedNode(0), IsSetPointDefinedFlag(false), SetPointValue(0.0),
+              SensedValue(0.0), DeltaSensed(0.0), Offset(0.0), HumRatCntrlType(HVAC::CtrlVarType::Invalid), FirstTraceFlag(true),
+              BadActionErrCount(0), BadActionErrIndex(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0),
+              BypassControllerCalc(false), AirLoopControllerIndex(0), HumRatCtrlOverride(false)
         {
         }
     };

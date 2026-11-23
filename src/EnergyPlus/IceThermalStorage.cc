@@ -283,7 +283,6 @@ namespace IceThermalStorage {
     {
 
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag) {
-            this->ResetXForITSFlag = true;
             this->MyEnvrnFlag = false;
         }
 
@@ -772,9 +771,6 @@ namespace IceThermalStorage {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
 
-            ++state.dataIceThermalStorage->TotalNumIceStorage;
-            state.dataIceThermalStorage->SimpleIceStorage(iceNum).MapNum = state.dataIceThermalStorage->TotalNumIceStorage;
-
             // ITS name
             state.dataIceThermalStorage->SimpleIceStorage(iceNum).Name = state.dataIPShortCut->cAlphaArgs(1);
 
@@ -894,9 +890,6 @@ namespace IceThermalStorage {
 
             ErrorObjectHeader eoh{routineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
 
-            ++state.dataIceThermalStorage->TotalNumIceStorage;
-
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).MapNum = state.dataIceThermalStorage->TotalNumIceStorage;
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).Name = state.dataIPShortCut->cAlphaArgs(1); // Detailed ice storage name
 
             // Get and verify availability schedule
@@ -956,7 +949,6 @@ namespace IceThermalStorage {
                               "Chilled Water Nodes");
 
             // Obtain the Charging and Discharging Curve types and names
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveName = state.dataIPShortCut->cAlphaArgs(6);
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveNum =
                 Curve::GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(6));
             if (state.dataIceThermalStorage->DetailedIceStorage(iceNum).DischargeCurveNum <= 0) {
@@ -1007,7 +999,6 @@ namespace IceThermalStorage {
                                                  state.dataIceThermalStorage->DetailedIceStorage(iceNum).Name,              // Object Name
                                                  state.dataIPShortCut->cAlphaFieldNames(6));                                // Field Name
 
-            state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveName = state.dataIPShortCut->cAlphaArgs(8);
             state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveNum = Curve::GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(8));
             if (state.dataIceThermalStorage->DetailedIceStorage(iceNum).ChargeCurveNum <= 0) {
                 ShowSevereError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(8), state.dataIPShortCut->cAlphaArgs(8)));

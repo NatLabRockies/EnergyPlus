@@ -303,7 +303,6 @@ namespace InternalHeatGains {
         }
         state.dataHeatBal->ZoneRpt.allocate(state.dataGlobal->NumOfZones);
         state.dataHeatBal->spaceRpt.allocate(state.dataGlobal->numSpaces);
-        state.dataHeatBal->ZoneIntEEuse.allocate(state.dataGlobal->NumOfZones);
         state.dataHeatBal->RefrigCaseCredit.allocate(state.dataGlobal->NumOfZones);
 
         Array1D_bool RepVarSet;
@@ -5849,7 +5848,6 @@ namespace InternalHeatGains {
                     ++numGainInstances;
                     inputObjects(objNum).numOfSpaces = 1;
                     inputObjects(objNum).spaceListActive = false;
-                    inputObjects(objNum).spaceOrSpaceListPtr = spaceNum;
                     inputObjects(objNum).spaceNums.emplace_back(spaceNum);
                     inputObjects(objNum).names.emplace_back(inputObjects(objNum).Name);
                     continue;
@@ -5895,7 +5893,6 @@ namespace InternalHeatGains {
                         numGainInstances += numSpaces;
                         inputObjects(objNum).numOfSpaces = numSpaces;
                         inputObjects(objNum).spaceListActive = true;
-                        inputObjects(objNum).spaceOrSpaceListPtr = spaceListNum;
                         for (int const spaceNum2 : state.dataHeatBal->spaceList(spaceListNum).spaces) {
                             inputObjects(objNum).spaceNums.emplace_back(spaceNum2);
                             inputObjects(objNum).names.emplace_back(state.dataHeatBal->space(spaceNum2).Name + ' ' + inputObjects(objNum).Name);
@@ -9076,8 +9073,6 @@ namespace InternalHeatGains {
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::array<Real64, 9> C = {
             6.4611027, 0.946892, 0.0000255737, 7.139322, -0.0627909, 0.0000589271, -0.198550, 0.000940018, -0.00000149532};
-        static ZoneCatEUseData const zeroZoneCatEUse; // For initialization
-
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 ActivityLevel_WperPerson; // Units on Activity Level (Schedule)
         Real64 NumberOccupants;          // Number of occupants
@@ -9099,8 +9094,6 @@ namespace InternalHeatGains {
             e.NOFOCC = 0.0;
             e.QLTSW = 0.0;
         }
-
-        state.dataHeatBal->ZoneIntEEuse = zeroZoneCatEUse; // Set all member arrays to zeros
 
         for (auto &e : state.dataHeatBal->ZoneRpt) {
             e.CO2Rate = 0.0;

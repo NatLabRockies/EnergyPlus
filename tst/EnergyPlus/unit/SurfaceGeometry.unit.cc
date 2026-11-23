@@ -9144,7 +9144,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder)
     EXPECT_EQ(state->dataHeatBal->space(3).WindowSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Reporting (legacy) Order (zero-based)
     //  SHADING SURFACES:
@@ -10005,7 +10004,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder2)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, wallEastGable);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;
@@ -10867,7 +10865,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder3)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, wallEastGable);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, windowAtticSkylight);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, nonwindowTubularDaylightingDome1);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, nonwindowTubularDaylightingDome1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;
@@ -11633,7 +11630,6 @@ TEST_F(EnergyPlusFixture, GetSurfaceData_SurfaceOrder4)
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceFirst, 0);
     EXPECT_EQ(state->dataHeatBal->space(3).OpaqOrWinSurfaceLast, -1);
     EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeFirst, 0);
-    EXPECT_EQ(state->dataHeatBal->space(3).TDDDomeLast, -1);
 
     // Extend test to check other surface lists
     auto &HTSurfaces = state->dataSurface->AllHTSurfaceList;

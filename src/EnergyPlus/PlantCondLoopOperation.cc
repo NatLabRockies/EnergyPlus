@@ -3040,6 +3040,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
                 ++numAvail;
+                this_component.updateDynamicCapacity(state);
 
                 if (this_component.OptLoad > 0.0) {
                     ChangeInLoad = min(this_component.OptLoad, std::abs(RemLoopDemand));
@@ -3143,6 +3144,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
+                this_component.updateDynamicCapacity(state);
                 if (this_component.MaxLoad > 0.0) { // apply known limit
                     ChangeInLoad = min(this_component.MaxLoad, std::abs(RemLoopDemand));
                 } else {
@@ -3210,6 +3212,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                 if (!this_component.Available) {
                     continue;
                 }
+                this_component.updateDynamicCapacity(state);
                 if (this_component.MaxLoad > 0.0) {
                     ChangeInLoad = min(this_component.MaxLoad, UniformLoad);
                 } else {
@@ -3288,6 +3291,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
+                this_component.updateDynamicCapacity(state);
                 PlantCapacity += this_component.MaxLoad;
 
                 if (this_component.MaxLoad < SmallLoad) {
@@ -3409,6 +3413,7 @@ void DistributePlantLoad(EnergyPlusData &state,
                     continue;
                 }
 
+                this_component.updateDynamicCapacity(state);
                 PlantCapacity += this_component.MaxLoad;
 
                 if (this_component.MaxLoad < SmallLoad) {
@@ -3602,8 +3607,14 @@ void AdjustChangeInLoadByHowServed(EnergyPlusData &state,
     // Chillers
     case DataPlant::HowMet::ByNominalCapLowOutLimit: { // chillers with lower limit on outlet temperature
 
-        //- Retrieve data from the plant loop data structure
-        CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+        // A component in a modulated flow mode controls its own flow rate to hold the leaving setpoint, so it can raise
+        // its flow up to whatever the branch can deliver. Judging its capacity by the current flow, which may still be
+        // sitting at the branch pump minimum, understates it and spills load onto the next machine in the list.
+        if (this_component.ModulatedFlow) {
+            CurMassFlowRate = max(CurMassFlowRate, state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRateMaxAvail);
+        } else {
+            CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+        }
         ToutLowLimit = this_component.MinOutletTemp;
         Tinlet = state.dataLoopNodes->Node(this_component.NodeNumIn).Temp;
         CurSpecHeat = plantLoc.loop->glycol->getSpecificHeat(state, Tinlet, RoutineName);
@@ -3687,12 +3698,17 @@ void AdjustChangeInLoadByHowServed(EnergyPlusData &state,
             //- Retrieve data from the plant loop data structure
             this_component.Available = true;
             this_component.FreeCoolCntrlShutDown = false;
-            CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+
+            if (this_component.ModulatedFlow) {
+                CurMassFlowRate = max(CurMassFlowRate, state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRateMaxAvail);
+            } else {
+                CurMassFlowRate = state.dataLoopNodes->Node(this_component.NodeNumIn).MassFlowRate;
+            }
+
             ToutLowLimit = this_component.MinOutletTemp;
             Tinlet = state.dataLoopNodes->Node(this_component.NodeNumIn).Temp;
             CurSpecHeat = plantLoc.loop->glycol->getSpecificHeat(state, Tinlet, RoutineName);
             QdotTmp = CurMassFlowRate * CurSpecHeat * (Tinlet - ToutLowLimit);
-
             //        !- Don't correct if Q is zero, as this could indicate a component which this hasn't been implemented or not yet turned
             //        on
             if (CurMassFlowRate > 0.0) {
@@ -3759,7 +3775,6 @@ void FindCompSPLoad(EnergyPlusData &state,
     Real64 TempSetPt(0.0);
     Real64 CompMinLoad;
     Real64 CompMaxLoad;
-    Real64 CompOptLoad;
     int DemandNode;
     int CompPtr;
     int OpSchemePtr;
@@ -3783,9 +3798,9 @@ void FindCompSPLoad(EnergyPlusData &state,
     CompPtr = this_component.OpScheme(OpNum).EquipList(1).CompPtr;
 
     // load local variables from the data structures
+    this_component.updateDynamicCapacity(state);
+    CompMaxLoad = this_component.MaxLoad;
     CompMinLoad = this_component.MinLoad;
-    CompMaxLoad = this_component.getDynamicMaxCapacity(state);
-    CompOptLoad = this_component.OptLoad;
     DemandNode = plantLoc.loop->OpScheme(OpSchemePtr).EquipList(ListPtr).Comp(CompPtr).DemandNodeNum;
     SetPtNode = plantLoc.loop->OpScheme(OpSchemePtr).EquipList(ListPtr).Comp(CompPtr).SetPointNodeNum;
     TempIn = state.dataLoopNodes->Node(DemandNode).Temp;

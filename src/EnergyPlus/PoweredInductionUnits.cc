@@ -1447,7 +1447,6 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
 
     if (CurTermUnitSizingNum > 0) {
         TermUnitSizing(CurTermUnitSizingNum).MinPriFlowFrac = thisPIU.MinPriAirFlowFrac;
-        TermUnitSizing(CurTermUnitSizingNum).plenumIndex = thisPIU.plenumIndex;
         TermUnitSizing(CurTermUnitSizingNum).MaxHWVolFlow = thisPIU.MaxVolHotWaterFlow;
         TermUnitSizing(CurTermUnitSizingNum).MaxSTVolFlow = thisPIU.MaxVolHotSteamFlow;
         TermUnitSizing(CurTermUnitSizingNum).DesHeatingLoad = DesCoilLoad; // coil report

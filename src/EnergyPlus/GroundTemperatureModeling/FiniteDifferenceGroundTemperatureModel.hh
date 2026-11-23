@@ -69,11 +69,6 @@ namespace GroundTemp {
 
         static int constexpr maxYearsToIterate = 10;
 
-        Real64 rhoCp_soil_liq_1 = 0.0;
-        Real64 rhoCP_soil_liq = 0.0;
-        Real64 rhoCP_soil_transient = 0.0;
-        Real64 rhoCP_soil_ice = 0.0;
-
     public:
         Real64 baseConductivity = 0.0;
         Real64 baseDensity = 0.0;
@@ -81,8 +76,6 @@ namespace GroundTemp {
         int totalNumCells = 0;
         Real64 timeStepInSeconds = 0.0;
         Real64 evapotransCoeff = 0.0;
-        Real64 saturatedWaterContent = 0.0;
-        Real64 waterContent = 0.0;
         Real64 annualAveAirTemp = 0.0;
         Real64 minDailyAirTemp = 100.0;  // Set hi. Will be reset later
         Real64 maxDailyAirTemp = -100.0; // Set low. Will be reset later
@@ -96,9 +89,6 @@ namespace GroundTemp {
             struct properties
             {
                 Real64 conductivity = 0.0;
-                Real64 density = 0.0;
-                Real64 specificHeat = 0.0;
-                Real64 diffusivity = 0.0;
                 Real64 rhoCp = 0.0;
             };
 
@@ -163,8 +153,6 @@ namespace GroundTemp {
         Real64 getGroundTempAtTimeInSeconds(EnergyPlusData &state, Real64 depth, Real64 timeInSecondsOfSim) override;
 
         Real64 getGroundTempAtTimeInMonths(EnergyPlusData &state, Real64 depth, int monthOfSim) override;
-
-        void evaluateSoilRhoCpInit();
 
         void evaluateSoilRhoCpCell(int cell);
 

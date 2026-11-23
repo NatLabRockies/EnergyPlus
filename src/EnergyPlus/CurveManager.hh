@@ -152,10 +152,10 @@ namespace Curve {
         std::string contextString; // For passing to callback
 
         // input coefficients
-        std::array<Real64, 27> coeff = {0.0}; // curve coefficients
+        std::array<Real64, 27> coeff{}; // curve coefficients
         // independent variables
-        std::array<Real64, 6> inputs = {0.0}; // curve inputs
-        std::array<Limits, 6> inputLimits;    // min/max of independent variables
+        std::array<Real64, 6> inputs{};    // curve inputs
+        std::array<Limits, 6> inputLimits; // min/max of independent variables
         // dependent (output) variable
         Real64 output = 0.0; // curve output or result
         Limits outputLimits; // min/max of curve output

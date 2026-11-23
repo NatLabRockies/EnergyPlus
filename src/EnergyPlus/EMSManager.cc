@@ -420,7 +420,7 @@ namespace EMSManager {
         RuntimeLanguageProcessor::InitializeRuntimeLanguage(state);
 
         if ((state.dataGlobal->BeginEnvrnFlag) || (iCalledFrom == EMSCallFrom::ZoneSizing) || (iCalledFrom == EMSCallFrom::SystemSizing) ||
-            (iCalledFrom == EMSCallFrom::UserDefinedComponentModel)) {
+            (iCalledFrom == EMSCallFrom::UserDefinedComponentModel) || (iCalledFrom == EMSCallFrom::ComponentGetInput)) {
 
             // another pass at trying to setup input data.
             if (state.dataEMSMgr->FinishProcessingUserInput) {
@@ -827,7 +827,6 @@ namespace EMSManager {
                     } else {
                         VariableNum = RuntimeLanguageProcessor::NewEMSVariable(state, cAlphaArgs(1), 0);
                         state.dataRuntimeLang->EMSInternalVarsUsed(InternVarNum).ErlVariableNum = VariableNum;
-                        state.dataRuntimeLang->ErlVariable(VariableNum).SetByInternalVariable = true;
                     }
 
                     state.dataRuntimeLang->EMSInternalVarsUsed(InternVarNum).UniqueIDName = cAlphaArgs(2);

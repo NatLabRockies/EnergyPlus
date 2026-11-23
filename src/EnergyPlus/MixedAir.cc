@@ -1303,7 +1303,6 @@ void GetOAControllerInputs(EnergyPlusData &state)
                     continue;
                 }
                 if (Util::SameString(state.dataMixedAir->OAController(OutAirNum).Name, state.dataFaultsMgr->FaultsEconomizer(i).ControllerName)) {
-                    state.dataFaultsMgr->FaultsEconomizer(i).ControllerID = OutAirNum;
                     ++state.dataMixedAir->OAController(OutAirNum).NumFaultyEconomizer;
                 }
             }

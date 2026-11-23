@@ -188,14 +188,12 @@ namespace EvaporativeFluidCoolers {
         Real64 Qactual = 0.0;           // Evaporative fluid cooler heat transfer
         Real64 FanPower = 0.0;          // Evaporative fluid cooler fan power used
         Real64 AirFlowRateRatio = 0.0;  // Ratio of air flow rate through VS evaporative fluid cooler
-        Real64 WaterUsage = 0.0;        // Evaporative fluid cooler water usage (m3/s)
         bool MyOneTimeFlag = true;
         bool MyEnvrnFlag = true;
         bool OneTimeFlagForEachEvapFluidCooler = true;
         Real64 fluidCoolerInletWaterTemp = 0.0;  // Evaporative fluid cooler inlet water temperature (C)
         Real64 fluidCoolerOutletWaterTemp = 0.0; // Evaporative fluid cooler outlet water temperature (C)
         Real64 FanEnergy = 0.0;                  // Evaporative fluid cooler fan energy consumption (J)
-        Real64 WaterAmountUsed = 0.0;            // Evaporative fluid cooler make up water usage (m3)
         Real64 EvaporationVdot = 0.0;
         Real64 EvaporationVol = 0.0;
         Real64 DriftVdot = 0.0;
