@@ -126,3 +126,7 @@ else() # Windows
   endif()
 endif()
 target_compile_options(fortran_project_options INTERFACE -ffree-line-length-275)
+if(NOT CMAKE_Fortran_COMPILER MATCHES "ifort")
+  # With LTO, fixed-length CHARACTER slices trigger -Wstringop-overread false positives at link time
+  target_link_options(fortran_project_options INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:-Wno-stringop-overread>)
+endif()

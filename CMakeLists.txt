@@ -275,6 +275,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Products")
 include(cmake/ProjectMacros.cmake)
 include(cmake/CompilerFlags.cmake)
 
+# Link-Time Optimization: enables cross-TU inlining (e.g. Curve::CurveValue into its callers).
+option(ENABLE_LTO "Enable Link-Time Optimization (IPO)" OFF)
+mark_as_advanced(ENABLE_LTO)
+if(ENABLE_LTO)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output LANGUAGES C CXX)
+  if(NOT ipo_supported)
+    message(FATAL_ERROR "ENABLE_LTO: IPO/LTO is not supported by this compiler: ${ipo_output}")
+  endif()
+  message(STATUS "ENABLE_LTO: enabling Link-Time Optimization")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 add_subdirectory(third_party SYSTEM)
 
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/src)
@@ -332,6 +345,19 @@ if(BUILD_FORTRAN)
   include(CMakeAddFortranSubdirectory)
   # Define a top-level target `fortran_project_options`
   include(cmake/Fortran.cmake)
+  if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    include(CheckLanguage)
+    check_language(Fortran)
+    if(CMAKE_Fortran_COMPILER)
+      enable_language(Fortran)
+      include(CheckIPOSupported)
+      check_ipo_supported(RESULT ipo_supported_fortran OUTPUT ipo_output_fortran LANGUAGES Fortran)
+      if(NOT ipo_supported_fortran)
+        message(WARNING "ENABLE_LTO: IPO/LTO is not supported by the Fortran compiler, disabling it for the Fortran tools: ${ipo_output_fortran}")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+      endif()
+    endif()
+  endif()
   cmake_add_fortran_subdirectory(
     src/ExpandObjects
     PROJECT ExpandObjects

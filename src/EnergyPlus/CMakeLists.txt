@@ -904,6 +904,10 @@ else() # windows
 endif()
 target_link_libraries(energyplus PRIVATE cli11 energyplusapi project_options project_fp_options project_warnings)
 target_compile_options(energyplus PRIVATE ${ENERGYPLUS_RECORD_SWITCHES_FLAGS})
+if(NOT BUILD_STATIC_ENERGYPLUS_API)
+  # main.cc only, nothing to gain; LTO would also drop the .GCC.command.line section from -frecord-gcc-switches
+  set_target_properties(energyplus PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
+endif()
 
 set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})

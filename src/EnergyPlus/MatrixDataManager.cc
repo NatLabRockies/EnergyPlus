@@ -176,8 +176,7 @@ namespace MatrixDataManager {
             // Note With change to row-major arrays the "row" and "col" usage here is transposed
             auto &matrix(state.dataMatrixDataManager->MatData(MatNum).Mat2D);
             matrix.allocate(NumCols, NumRows); // This is standard order for a NumRows X NumCols matrix
-            Array2<Real64>::size_type l(0);
-            for (int ElementNum = 1; ElementNum <= NumElements; ++ElementNum, l += matrix.size()) {
+            for (int ElementNum = 1; ElementNum <= NumElements; ++ElementNum) {
                 int const RowIndex = (ElementNum - 1) / NumCols + 1;
                 int const ColIndex = mod((ElementNum - 1), NumCols) + 1;
                 matrix(ColIndex, RowIndex) = state.dataIPShortCut->rNumericArgs(ElementNum + 2); // Matrix is read in row-by-row

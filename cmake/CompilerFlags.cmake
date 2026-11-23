@@ -62,6 +62,9 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
               /wd4355
               /wd4996
               /wd4503) # Disables warning messages listed above
+  # With LTO only: C4723 (potential divide by zero) gives false positives during link-time code generation, e.g. after inlining a guarded
+  # division into a unit test that passes a constant 0. It must be a compile option: /GL objects carry their own warning settings into LTCG
+  target_compile_options(project_warnings INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:/wd4723>)
 
   target_compile_definitions(project_options INTERFACE NOMINMAX) # Avoid build errors due to STL/Windows min-max conflicts
   target_compile_definitions(project_options INTERFACE WIN32_LEAN_AND_MEAN) # Excludes rarely used services and headers from compilation
@@ -119,11 +122,14 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       # -mcpu=native sets both arch and tune; -march=native alone doesn't tune on AArch64 in Clang
       # (GCC 13+ maps -march=native to -mcpu=native automatically, but -mcpu=native is correct for all versions)
       message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -mcpu=native (AArch64)")
-      target_compile_options(project_options INTERFACE -mcpu=native)
+      set(native_arch_flag -mcpu=native)
     else()
       message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
-      target_compile_options(project_options INTERFACE -march=native)
+      set(native_arch_flag -march=native)
     endif()
+    target_compile_options(project_options INTERFACE ${native_arch_flag})
+    # With LTO, code generation happens at link time, so the arch flag must be passed to the link too
+    target_link_options(project_options INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:${native_arch_flag}>)
     # Enable fast-math for vectorization; keep -fno-finite-math-only so NaN/Inf remain valid.
     # -ffp-contract=off is intentionally skipped below when this option is ON.
     message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -ffast-math -fno-finite-math-only")
@@ -172,6 +178,8 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
       target_compile_options(project_warnings INTERFACE -Wno-restrict)
     endif()
+    # With LTO, middle-end warnings are emitted again at link time, where compile options don't apply
+    target_link_options(project_warnings INTERFACE $<$<BOOL:$<TARGET_PROPERTY:INTERPROCEDURAL_OPTIMIZATION>>:-Wno-aggressive-loop-optimizations>)
     if(NOT ENABLE_NATIVE_OPTIMIZATION)
       target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
     endif()
