@@ -160,15 +160,6 @@ if(BUILD_FORTRAN)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${EXPANDOBJECTS_EXE}" "${EXE_PATH}")
   endif()
 
-  list(FIND ENERGYPLUS_FLAGS_LIST -r READVARS_RESULT)
-
-  if("${READVARS_RESULT}" GREATER -1)
-    find_program(READVARS_EXE ReadVarsESO PATHS "${PRODUCT_PATH}" NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH
-                                                                  NO_CMAKE_SYSTEM_PATH NO_CMAKE_FIND_ROOT_PATH)
-    # Move to executable directory
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${READVARS_EXE}" "${EXE_PATH}")
-  endif()
-
 endif() # build fortran
 
 if(WIN32)
