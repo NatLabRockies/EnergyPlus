@@ -1437,9 +1437,9 @@ The number of strings in parallel.
 
 This field describes the initial state of charge in terms of the fraction of maximum capacity.
 
-\paragraph{Field: DC to DC Charging Efficiency}\label{liion-dc-dc-charg-eff}
+\paragraph{Field: DC to DC Roundtrip Efficiency}\label{liion-dc-dc-roundtrip-eff}
 
-This field is retained for input compatibility but is not currently used.
+This field is the DC-to-DC conversion efficiency for a complete charge and discharge cycle. The square root of this value is used as the efficiency in each direction. During charging, this one-way efficiency is the fraction of DC bus power delivered to the battery cells. During discharging, it is the fraction of cell-side power delivered to the DC bus. The remaining conversion power is reported as Electric Storage Thermal Loss Rate and, when a Zone Name is specified, is added to the zone according to the Radiative Fraction. The battery-cell model also calculates internal electrothermal losses, so the total modeled round-trip efficiency can be lower than this input.
 
 \paragraph{Field: Battery Mass}\label{liion-mass}
 
@@ -1505,7 +1505,7 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
   139,                        !- Number of Cells in Series
   25,                         !- Number of Strings in Parallel
   0.7,                        !- Initial Fractional State of Charge
-  ,                           !- DC to DC Charging Efficiency
+  ,                           !- DC to DC Roundtrip Efficiency
   342,                        !- Battery Mass
   4.26,                       !- Battery Surface Area
   ,                           !- Battery Specific Heat Capacity

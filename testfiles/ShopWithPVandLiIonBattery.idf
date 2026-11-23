@@ -5105,7 +5105,7 @@
     139,                     !- Number of Cells in Series
     25,                      !- Number of Strings in Parallel
     0.7,                     !- Initial Fractional State of Charge
-    ,                        !- DC to DC Charging Efficiency
+    ,                        !- DC to DC Roundtrip Efficiency
     342,                     !- Battery Mass {kg}
     4.26,                    !- Battery Surface Area {m2}
     ,                        !- Battery Specific Heat Capacity {J/kg-K}

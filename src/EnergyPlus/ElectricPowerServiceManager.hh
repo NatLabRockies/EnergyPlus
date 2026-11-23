@@ -285,6 +285,10 @@ public: // methods
 
     Real64 storedEnergy() const;
 
+    Real64 liIonCellChargePower() const;
+
+    Real64 thermalLossRate() const;
+
     Real64 stateOfChargeFraction() const;
 
     Real64 batteryTemperature() const;
@@ -390,6 +394,8 @@ private: // data
     Real64 maxChargeRate_;                   // [1/h] charge rate limit
     bool lifeCalculation_;                   // [ ] battery life calculation: Yes or No
     Curve::Curve *lifeCurve_ = nullptr;      // [ ] battery life curve
+    Real64 liIon_dcToDcEfficiency_;          // [ ] one-way DC-to-DC efficiency derived from round-trip input (Li-ion NMC model)
+    Real64 liIonCellChargePower_;            // [W] power accepted by the Li-ion battery cells while charging
     Real64 liIon_mass_;                      // [kg] mass of battery (Li-ion NMC model)
     Real64 liIon_surfaceArea_;               // [m2] battery surface area (Li-ion NMC model)
     Real64 liIon_Cp_;                        // [J/kg-K] battery specific heat capacity (Li-ion NMC model)
