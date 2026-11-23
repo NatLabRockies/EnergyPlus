@@ -1897,6 +1897,7 @@ struct HeatBalanceData : BaseGlobalStruct
     bool doSpaceHeatBalanceSizing = false;         // Do space heat balance during sizing
     bool doSpaceHeatBalanceSimulation = false;     // Do space heat balance during simulation
     bool doSpaceHeatBalance = false;               // Do space heat balance currently
+    bool surfaceAirImplicitCoupling = false;       // Include linearized inside-surface response in the zone air balance
     bool OverrideZoneAirSolutionAlgo = false;      // Override the zone air solution algorithm in PerformancePrecisionTradeoffs
     Real64 BuildingRotationAppendixG = 0.0;        // Building Rotation for Appendix G
     Real64 ZoneTotalExfiltrationHeatLoss = 0.0;    // Building total heat emission through zone exfiltration;

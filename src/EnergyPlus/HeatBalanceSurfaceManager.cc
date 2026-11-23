@@ -207,6 +207,10 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     // part or all of the time step.
     UpdateFinalSurfaceHeatBalance(state);
 
+    // With implicit surface-air coupling, bring the inside surface temperatures to the new zone air temperature
+    // before they enter the conduction histories and the reports.
+    UpdateImplicitSurfaceAirCoupling(state);
+
     // Before we leave the Surface Manager the thermal histories need to be updated
     if (state.dataHeatBal->AnyCTF || state.dataHeatBal->AnyEMPD) {
         UpdateThermalHistories(state); // Update the thermal histories
@@ -5496,6 +5500,99 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
 
         for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
             Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+        }
+    }
+}
+
+Real64 surfaceAirSensitivity(EnergyPlusData &state, int const SurfNum)
+{
+    // The CTF inside face heat balance of an opaque surface is
+    //   (CTFInside0 - adiabatic * CTFCross0 + hc) * Tsi = ... + hc * Tair,
+    // so with the outside face, long-wave exchange and all other terms held fixed, dTsi/dTair = hc / (that sum).
+    // The zone air heat balance can then treat Tsi(Tair) = Tsi* + S * (Tair - Tref), where Tsi* was solved with Tref,
+    // and the lag between the surface and air heat balances disappears for these surfaces (to first order in the
+    // nonlinear terms). Surfaces outside this simple CTF form keep S = 0, i.e. the legacy lagged coupling.
+    if (!state.dataHeatBal->surfaceAirImplicitCoupling) {
+        return 0.0;
+    }
+    auto const &surface = state.dataSurface->Surface(SurfNum);
+    if (!surface.HeatTransSurf || surface.Construction <= 0) {
+        return 0.0;
+    }
+    if (surface.Class == DataSurfaces::SurfaceClass::Window || surface.Class == DataSurfaces::SurfaceClass::TDD_Dome ||
+        surface.Class == DataSurfaces::SurfaceClass::TDD_Diffuser) {
+        return 0.0;
+    }
+    if (surface.HeatTransferAlgorithm != DataSurfaces::HeatTransferModel::CTF) {
+        return 0.0;
+    }
+    // Invalid (never set, e.g. user-specified convection coefficients) is treated as the mean air temperature
+    // everywhere else (getInsideAirTemperature, calcSumHAT), so it is eligible too.
+    auto const tAirRef = state.dataSurface->SurfTAirRef(SurfNum);
+    if (tAirRef != DataSurfaces::RefAirTemp::ZoneMeanAirTemp && tAirRef != DataSurfaces::RefAirTemp::Invalid) {
+        return 0.0;
+    }
+    auto const &construct = state.dataConstruction->Construct(surface.Construction);
+    if (construct.SourceSinkPresent || construct.TypeIsAirBoundary) {
+        return 0.0;
+    }
+    if (state.dataHeatBalSurf->SurfIsOperatingPool(SurfNum) != 0 || state.dataSurface->intMovInsuls(SurfNum).present) {
+        return 0.0;
+    }
+    // Use the construction's CTF terms directly: the cached SurfCTFInside0 array is filled only by the CTF-only inside
+    // heat balance (AllCTF), not by the general one.
+    //
+    // The sensitivity must match how the end-of-step correction is recorded in the CTF history, or the correction
+    // creates or destroys energy. For most surfaces the outside face is held at its solved value, so the recorded
+    // inside flux changes by -CTFInside0 * dT and S = hc / (CTFInside0 + hc). Internal mass and adiabatic partitions
+    // (ExtBoundCond == SurfNum) are solved with both faces at the same temperature (CTFInside0 - CTFCross0), and
+    // UpdateImplicitSurfaceAirCoupling records their outside face at the corrected inside temperature to match.
+    Real64 const hc = state.dataHeatBalSurf->SurfHConvInt(SurfNum);
+    bool const selfPaired = (surface.ExtBoundCond == SurfNum);
+    Real64 const denom = construct.CTFInside[0] - (selfPaired ? construct.CTFCross[0] : 0.0) + hc;
+    if (hc <= 0.0 || denom <= 0.0) {
+        return 0.0;
+    }
+    return hc / denom;
+}
+
+void UpdateImplicitSurfaceAirCoupling(EnergyPlusData &state)
+{
+    if (!state.dataHeatBal->surfaceAirImplicitCoupling) {
+        return;
+    }
+    auto &s_hbs = state.dataHeatBalSurf;
+    auto &s_hbsm = state.dataHeatBalSurfMgr;
+    for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+        for (int spaceNum : state.dataHeatBal->Zone(zoneNum).spaceIndexes) {
+            auto const &thisSpace = state.dataHeatBal->space(spaceNum);
+            Real64 const MAT = state.dataZoneTempPredictorCorrector->spaceHeatBalance(spaceNum).MAT;
+            for (int surfNum = thisSpace.OpaqOrIntMassSurfaceFirst; surfNum <= thisSpace.OpaqOrIntMassSurfaceLast; ++surfNum) {
+                Real64 const S = surfaceAirSensitivity(state, surfNum);
+                if (S <= 0.0) {
+                    continue;
+                }
+                Real64 const dT = S * (MAT - s_hbsm->RefAirTemp(surfNum));
+                s_hbs->SurfTempIn(surfNum) += dT;
+                s_hbs->SurfTempInTmp(surfNum) += dT;
+                s_hbs->SurfInsideTempHist(1)(surfNum) += dT; // TH12, the temperature the CTF history update records
+                int const extSurf = state.dataSurface->Surface(surfNum).ExtBoundCond;
+                if (extSurf == surfNum) {
+                    // Internal mass / adiabatic partition: the solve assumed both faces at the current inside temperature
+                    // (CTFInside0 - CTFCross0). The outside heat balance set the outside face to the previous step's inside
+                    // temperature; record it at the corrected inside temperature so the history matches the solve.
+                    s_hbs->SurfOutsideTempHist(1)(surfNum) = s_hbs->SurfInsideTempHist(1)(surfNum);
+                    s_hbs->SurfTempOut(surfNum) = s_hbs->SurfOutsideTempHist(1)(surfNum);
+                } else if (extSurf > 0) {
+                    // Interzone partner: its outside face is this inside face, as set in the inside heat balance iteration
+                    s_hbs->SurfOutsideTempHist(1)(extSurf) = s_hbs->SurfInsideTempHist(1)(surfNum);
+                    s_hbs->SurfTempOut(extSurf) = s_hbs->SurfOutsideTempHist(1)(extSurf);
+                    s_hbs->SurfTempOutHist(extSurf) = s_hbs->SurfTempOut(extSurf);
+                }
+                s_hbsm->RefAirTemp(surfNum) = MAT;
+                state.dataHeatBal->SurfTempEffBulkAir(surfNum) = MAT;
+                s_hbs->SurfQdotConvInPerArea(surfNum) = -s_hbs->SurfHConvInt(surfNum) * (s_hbs->SurfTempInTmp(surfNum) - MAT);
+            }
         }
     }
 }
