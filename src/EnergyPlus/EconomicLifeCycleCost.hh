@@ -336,7 +336,6 @@ namespace EconomicLifeCycleCost {
     {
         // Members
         std::string name;         // Name
-        std::string lineItem;     // Line Item
         CostCategory category;    // Category
         Real64 cost;              // Cost
         StartCosts startOfCosts;  // Start of Costs

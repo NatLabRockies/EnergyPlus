@@ -17104,6 +17104,470 @@ TEST_F(ZoneUnitarySysTest, UnitarySystemModel_FlowPerCoolingCapacityTest)
     EXPECT_NEAR(thisSys->m_MaxNoCoolHeatAirVolFlow, userspecifiedFlowPerCoolingCapacityValue * thisSys->m_DesignCoolingCapacity, 0.0000001);
 }
 
+// Verify blank-schedule defaults and compare airflow and power for cycling and continuous operation
+// with Fan:VariableVolume and Fan:ComponentModel on separate unitary systems.
+TEST_F(ZoneUnitarySysTest, UnitarySystemModel_VariableVolumeAndComponentModelFanOperatingMode)
+{
+    std::string_view constexpr idf_objects = R"IDF(
+  AirLoopHVAC:UnitarySystem,
+    Unitary System VAV,         !- Name
+    Load,                       !- Control Type
+    EAST ZONE,                  !- Controlling Zone or Thermostat Location
+    None,                       !- Dehumidification Control Type
+    ,                           !- Availability Schedule Name
+    Node 29,                    !- Air Inlet Node Name
+    Node 30,                    !- Air Outlet Node Name
+    Fan:VariableVolume,         !- Supply Fan Object Type
+    VAV Supply Fan,             !- Supply Fan Name
+    BlowThrough,                !- Fan Placement
+    ,                           !- Supply Air Fan Operating Mode Schedule Name
+    Coil:Heating:Water,         !- Heating Coil Object Type
+    VAV Water Heating Coil,     !- Heating Coil Name
+    1,                          !- DX Heating Coil Sizing Ratio
+    ,                           !- Cooling Coil Object Type
+    ,                           !- Cooling Coil Name
+    No,                         !- Use DOAS DX Cooling Coil
+    7.0,                        !- Minimum Supply Air Temperature
+    SensibleOnlyLoadControl,    !- Latent Load Control
+    ,                           !- Supplemental Heating Coil Object Type
+    ,                           !- Supplemental Heating Coil Name
+    None,                       !- Cooling Supply Air Flow Rate Method
+    ,                           !- Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Floor Area
+    ,                           !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- Heating Supply Air Flow Rate Method
+    1.5,                        !- Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Floor Area
+    ,                           !- Heating Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- No Load Supply Air Flow Rate Method
+    0.5,                        !- No Load Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Floor Area
+    ,                           !- No Load Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- No Load Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation
+    ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+    40;                         !- Maximum Supply Air Temperature
+
+  Fan:VariableVolume,
+    VAV Supply Fan,             !- Name
+    ,                           !- Availability Schedule Name
+    0.7,                        !- Fan Total Efficiency
+    600,                        !- Pressure Rise
+    1.5,                        !- Maximum Flow Rate
+    Fraction,                   !- Fan Power Minimum Flow Rate Input Method
+    0,                          !- Fan Power Minimum Flow Fraction
+    ,                           !- Fan Power Minimum Air Flow Rate
+    0.9,                        !- Motor Efficiency
+    1,                          !- Motor In Airstream Fraction
+    0,                          !- Fan Power Coefficient 1
+    0,                          !- Fan Power Coefficient 2
+    0,                          !- Fan Power Coefficient 3
+    1,                          !- Fan Power Coefficient 4
+    0,                          !- Fan Power Coefficient 5
+    Node 29,                    !- Air Inlet Node Name
+    VAV Heating Coil Outlet;    !- Air Outlet Node Name
+
+  Coil:Heating:Water,
+    VAV Water Heating Coil,     !- Name
+    ,                           !- Availability Schedule Name
+    Autosize,                   !- U-Factor Times Area Value
+    Autosize,                   !- Maximum Water Flow Rate
+    Node 31,                    !- Water Inlet Node Name
+    Node 32,                    !- Water Outlet Node Name
+    VAV Heating Coil Outlet,    !- Air Inlet Node Name
+    Node 30;                    !- Air Outlet Node Name
+
+  AirLoopHVAC:UnitarySystem,
+    Unitary System Component Model,       !- Name
+    Load,                       !- Control Type
+    EAST ZONE,                  !- Controlling Zone or Thermostat Location
+    None,                       !- Dehumidification Control Type
+    ,                           !- Availability Schedule Name
+    Node 39,                    !- Air Inlet Node Name
+    Node 40,                    !- Air Outlet Node Name
+    Fan:ComponentModel,         !- Supply Fan Object Type
+    ComponentModel Supply Fan,  !- Supply Fan Name
+    BlowThrough,                !- Fan Placement
+    ,                           !- Supply Air Fan Operating Mode Schedule Name
+    Coil:Heating:Water,         !- Heating Coil Object Type
+    ComponentModel Heating Coil, !- Heating Coil Name
+    1,                          !- DX Heating Coil Sizing Ratio
+    ,                           !- Cooling Coil Object Type
+    ,                           !- Cooling Coil Name
+    No,                         !- Use DOAS DX Cooling Coil
+    7.0,                        !- Minimum Supply Air Temperature
+    SensibleOnlyLoadControl,    !- Latent Load Control
+    ,                           !- Supplemental Heating Coil Object Type
+    ,                           !- Supplemental Heating Coil Name
+    None,                       !- Cooling Supply Air Flow Rate Method
+    ,                           !- Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Floor Area
+    ,                           !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- Heating Supply Air Flow Rate Method
+    1.5,                        !- Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Floor Area
+    ,                           !- Heating Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- No Load Supply Air Flow Rate Method
+    0.5,                        !- No Load Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Floor Area
+    ,                           !- No Load Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- No Load Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation
+    ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+    40;                         !- Maximum Supply Air Temperature
+
+  Fan:ComponentModel,
+    ComponentModel Supply Fan,  !- Name
+    Node 39,                    !- Air Inlet Node Name
+    ComponentModel Heating Coil Outlet, !- Air Outlet Node Name
+    ,                           !- Availability Schedule Name
+    1.5,                        !- Maximum Flow Rate
+    0,                          !- Minimum Flow Rate
+    1.0,                        !- Fan Sizing Factor
+    0.3048,                     !- Fan Wheel Diameter
+    0.0873,                     !- Fan Outlet Area
+    0.514,                      !- Maximum Fan Static Efficiency
+    9.76,                       !- Euler Number at Maximum Fan Static Efficiency
+    0.1603,                     !- Maximum Dimensionless Fan Airflow
+    1.0,                        !- Motor Fan Pulley Ratio
+    1.0,                        !- Belt Maximum Torque
+    1.0,                        !- Belt Sizing Factor
+    0.167,                      !- Belt Fractional Torque Transition
+    1800,                       !- Motor Maximum Speed
+    1000,                       !- Maximum Motor Output Power
+    1.0,                        !- Motor Sizing Factor
+    1.0,                        !- Motor In Airstream Fraction
+    Power,                      !- VFD Efficiency Type
+    1000,                       !- Maximum VFD Output Power
+    1.0,                        !- VFD Sizing Factor
+    Fan Pressure Rise,          !- Fan Pressure Rise Curve Name
+    Duct Static Pressure Reset, !- Duct Static Pressure Reset Curve Name
+    Fan Efficiency Curve,       !- Normalized Fan Static Efficiency Curve Name-Non-Stall Region
+    Fan Efficiency Curve,       !- Normalized Fan Static Efficiency Curve Name-Stall Region
+    Fan Dimensionless Flow Curve, !- Normalized Dimensionless Airflow Curve Name-Non-Stall Region
+    Fan Dimensionless Flow Curve, !- Normalized Dimensionless Airflow Curve Name-Stall Region
+    ,                           !- Maximum Belt Efficiency Curve Name
+    ,                           !- Normalized Belt Efficiency Curve Name - Region 1
+    ,                           !- Normalized Belt Efficiency Curve Name - Region 2
+    ,                           !- Normalized Belt Efficiency Curve Name - Region 3
+    ,                           !- Maximum Motor Efficiency Curve Name
+    ,                           !- Normalized Motor Efficiency Curve Name
+    ;                           !- VFD Efficiency Curve Name
+
+  Coil:Heating:Water,
+    ComponentModel Heating Coil, !- Name
+    ,                           !- Availability Schedule Name
+    Autosize,                   !- U-Factor Times Area Value
+    Autosize,                   !- Maximum Water Flow Rate
+    Node 41,                    !- Water Inlet Node Name
+    Node 42,                    !- Water Outlet Node Name
+    ComponentModel Heating Coil Outlet, !- Air Inlet Node Name
+    Node 40;                    !- Air Outlet Node Name
+
+  ScheduleTypeLimits,
+    Fraction,                   !- Name
+    0,                          !- Lower Limit Value
+    1,                          !- Upper Limit Value
+    Continuous;                 !- Numeric Type
+
+  Schedule:Constant,
+    Cycling Fan Mode,           !- Name
+    Fraction,                   !- Schedule Type Limits Name
+    0;                          !- Hourly Value
+
+  Curve:FanPressureRise,
+    Fan Pressure Rise,
+    1446.7583,
+    0,
+    0,
+    1,
+    0,
+    100,
+    62.5,
+    300,
+    0,
+    5000;
+
+  Curve:Linear,
+    Duct Static Pressure Reset,
+    248.84,
+    0,
+    0,
+    100,
+    62.5,
+    248.84;
+
+  Curve:ExponentialSkewNormal,
+    Fan Efficiency Curve,
+    0.072613,
+    0.833213,
+    0,
+    0.013911,
+    -4,
+    5,
+    0.1,
+    1;
+
+  Curve:Sigmoid,
+    Fan Dimensionless Flow Curve,
+    0,
+    1.001423,
+    0.123935,
+    -0.476026,
+    1,
+    -4,
+    5,
+    0.05,
+    1;
+)IDF";
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool const zoneEquipment = true;
+    UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, "UNITARY SYSTEM VAV", zoneEquipment, 0);
+    UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, "UNITARY SYSTEM COMPONENT MODEL", zoneEquipment, 0);
+    auto &unitarySystems = state->dataUnitarySystems->unitarySys;
+    ASSERT_EQ(2u, unitarySystems.size());
+    auto &zoneEquipConfig = state->dataZoneEquip->ZoneEquipConfig(1);
+    zoneEquipConfig.NumInletNodes = static_cast<int>(unitarySystems.size());
+    zoneEquipConfig.InletNode.dimension(zoneEquipConfig.NumInletNodes);
+    zoneEquipConfig.NumExhaustNodes = static_cast<int>(unitarySystems.size());
+    zoneEquipConfig.ExhaustNode.dimension(zoneEquipConfig.NumExhaustNodes);
+    for (size_t systemIndex = 0; systemIndex < unitarySystems.size(); ++systemIndex) {
+        int const zoneNodeIndex = static_cast<int>(systemIndex + 1);
+        zoneEquipConfig.InletNode(zoneNodeIndex) = unitarySystems[systemIndex].AirOutNode;
+        zoneEquipConfig.ExhaustNode(zoneNodeIndex) = unitarySystems[systemIndex].AirInNode;
+    }
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+
+    for (auto &thisSys : unitarySystems) {
+        bool const isComponentModel = thisSys.Name == "UNITARY SYSTEM COMPONENT MODEL";
+        EXPECT_TRUE(isComponentModel || thisSys.Name == "UNITARY SYSTEM VAV");
+        HVAC::FanType const expectedFanType = isComponentModel ? HVAC::FanType::ComponentModel : HVAC::FanType::VAV;
+        SCOPED_TRACE(thisSys.Name);
+
+        for (std::string_view const controlType : {"Load", "SingleZoneVAV", "Setpoint"}) {
+            SCOPED_TRACE(controlType);
+            thisSys.input_specs.control_type = controlType;
+            thisSys.input_specs.supply_air_fan_operating_mode_schedule_name = "";
+            thisSys.m_fanOpModeSched = nullptr;
+            thisSys.m_FanOpMode = controlType == "Setpoint" ? HVAC::FanOp::Cycling : HVAC::FanOp::Continuous;
+            bool errorsFound = false;
+            thisSys.processInputSpec(*state, thisSys.input_specs, 0, errorsFound, zoneEquipment, 0);
+
+            EXPECT_FALSE(errorsFound);
+            EXPECT_TRUE(compare_err_stream(""));
+            EXPECT_ENUM_EQ(expectedFanType, thisSys.m_FanType);
+            EXPECT_EQ(nullptr, thisSys.m_fanOpModeSched);
+            HVAC::FanOp const expectedFanOp = controlType == "Setpoint" ? HVAC::FanOp::Continuous : HVAC::FanOp::Cycling;
+            EXPECT_ENUM_EQ(expectedFanOp, thisSys.m_FanOpMode);
+        }
+
+        if (isComponentModel) {
+            thisSys.input_specs.control_type = "Load";
+            thisSys.input_specs.supply_air_fan_operating_mode_schedule_name = "CYCLING FAN MODE";
+            thisSys.m_fanOpModeSched = nullptr;
+            thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
+            bool errorsFound = false;
+            thisSys.processInputSpec(*state, thisSys.input_specs, 0, errorsFound, zoneEquipment, 0);
+            EXPECT_FALSE(errorsFound);
+            EXPECT_TRUE(compare_err_stream(""));
+            EXPECT_ENUM_EQ(expectedFanType, thisSys.m_FanType);
+            ASSERT_NE(nullptr, thisSys.m_fanOpModeSched);
+            EXPECT_EQ(0.0, thisSys.m_fanOpModeSched->getCurrentVal());
+        }
+
+        thisSys.input_specs.control_type = "Load";
+        thisSys.input_specs.supply_air_fan_operating_mode_schedule_name = "";
+        thisSys.m_fanOpModeSched = nullptr;
+        thisSys.m_FanOpMode = HVAC::FanOp::Continuous;
+        bool errorsFound = false;
+        thisSys.processInputSpec(*state, thisSys.input_specs, 0, errorsFound, zoneEquipment, 0);
+        ASSERT_FALSE(errorsFound);
+        EXPECT_TRUE(compare_err_stream(""));
+        EXPECT_ENUM_EQ(HVAC::FanOp::Cycling, thisSys.m_FanOpMode);
+
+        auto *fan = state->dataFans->fans(thisSys.m_FanIndex);
+        fan->sizingFlag = false;
+        fan->envrnFlag = false;
+        fan->rhoAirStdInit = 1.2;
+        fan->maxAirMassFlowRate = 1.8;
+        state->dataLoopNodes->Node(fan->outletNodeNum).MassFlowRateMax = 1.8;
+
+        state->dataUnitarySystems->HeatingLoad = true;
+        thisSys.m_AirFlowControl = UnitarySys::UseCompFlow::Off;
+        thisSys.MaxHeatAirMassFlow = 1.5;
+        thisSys.MaxNoCoolHeatAirMassFlow = 0.5;
+        thisSys.m_HeatingFanSpeedRatio = 1.0;
+        thisSys.m_NoLoadAirFlowRateRatio = 1.0;
+
+        struct FanResults
+        {
+            Real64 averageMassFlow;
+            Real64 fanMassFlow;
+            Real64 power;
+        };
+        auto simulateFanAtMode = [&](HVAC::FanOp fanOpMode) {
+            thisSys.m_FanOpMode = fanOpMode;
+            Real64 onOffAirFlowRatio = 0.0;
+            thisSys.setOnOffMassFlowRate(*state, onOffAirFlowRatio, 0.5);
+            Real64 const averageMassFlow = state->dataLoopNodes->Node(thisSys.AirInNode).MassFlowRate;
+            state->dataLoopNodes->Node(fan->inletNodeNum).MassFlowRate = averageMassFlow;
+            fan->simulate(*state, true);
+            return FanResults{averageMassFlow, fan->outletAirMassFlowRate, fan->totalPower};
+        };
+
+        FanResults const cycling = simulateFanAtMode(HVAC::FanOp::Cycling);
+        FanResults const continuous = simulateFanAtMode(HVAC::FanOp::Continuous);
+        EXPECT_NEAR(0.75, cycling.averageMassFlow, 1e-9);
+        EXPECT_NEAR(1.0, continuous.averageMassFlow, 1e-9);
+        EXPECT_NEAR(cycling.averageMassFlow, cycling.fanMassFlow, 1e-9);
+        EXPECT_NEAR(continuous.averageMassFlow, continuous.fanMassFlow, 1e-9);
+        EXPECT_GT(cycling.power, 0.0);
+        EXPECT_GT(continuous.power, cycling.power);
+    }
+}
+
+// Verify Fan:ConstantVolume accepts only continuous operation: blank schedules are valid only for Setpoint,
+// and schedules containing zero are rejected for all control types.
+TEST_F(ZoneUnitarySysTest, UnitarySystemModel_ConstantVolumeFanRequiresContinuousOperation)
+{
+    std::string_view constexpr idf_objects = R"IDF(
+  AirLoopHVAC:UnitarySystem,
+    Unitary System Model,       !- Name
+    Load,                       !- Control Type
+    EAST ZONE,                  !- Controlling Zone or Thermostat Location
+    None,                       !- Dehumidification Control Type
+    ,                           !- Availability Schedule Name
+    Node 29,                    !- Air Inlet Node Name
+    Node 30,                    !- Air Outlet Node Name
+    Fan:ConstantVolume,         !- Supply Fan Object Type
+    Supply Fan,                 !- Supply Fan Name
+    DrawThrough,                !- Fan Placement
+    ,                           !- Supply Air Fan Operating Mode Schedule Name
+    Coil:Heating:Water,         !- Heating Coil Object Type
+    Water Heating Coil,         !- Heating Coil Name
+    1,                          !- DX Heating Coil Sizing Ratio
+    ,                           !- Cooling Coil Object Type
+    ,                           !- Cooling Coil Name
+    No,                         !- Use DOAS DX Cooling Coil
+    7.0,                        !- Minimum Supply Air Temperature
+    SensibleOnlyLoadControl,    !- Latent Load Control
+    ,                           !- Supplemental Heating Coil Object Type
+    ,                           !- Supplemental Heating Coil Name
+    None,                       !- Cooling Supply Air Flow Rate Method
+    ,                           !- Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Floor Area
+    ,                           !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- Cooling Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- Heating Supply Air Flow Rate Method
+    1.5,                        !- Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Floor Area
+    ,                           !- Heating Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- Heating Supply Air Flow Rate Per Unit of Capacity
+    SupplyAirFlowRate,          !- No Load Supply Air Flow Rate Method
+    0.5,                        !- No Load Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Floor Area
+    ,                           !- No Load Fraction of Autosized Cooling Supply Air Flow Rate
+    ,                           !- No Load Fraction of Autosized Heating Supply Air Flow Rate
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation
+    ,                           !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation
+    ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+    40;                         !- Maximum Supply Air Temperature
+
+  Fan:ConstantVolume,
+    Supply Fan,                 !- Name
+    ,                           !- Availability Schedule Name
+    0.7,                        !- Fan Total Efficiency
+    600,                        !- Pressure Rise
+    1.5,                        !- Maximum Flow Rate
+    0.9,                        !- Motor Efficiency
+    1,                          !- Motor In Airstream Fraction
+    Heating Coil Outlet,        !- Air Inlet Node Name
+    Node 30;                    !- Air Outlet Node Name
+
+  Coil:Heating:Water,
+    Water Heating Coil,         !- Name
+    ,                           !- Availability Schedule Name
+    Autosize,                   !- U-Factor Times Area Value
+    Autosize,                   !- Maximum Water Flow Rate
+    Node 31,                    !- Water Inlet Node Name
+    Node 32,                    !- Water Outlet Node Name
+    Node 29,                    !- Air Inlet Node Name
+    Heating Coil Outlet;        !- Air Outlet Node Name
+
+  ScheduleTypeLimits,
+    Fraction,                   !- Name
+    0,                          !- Lower Limit Value
+    1,                          !- Upper Limit Value
+    Continuous;                 !- Numeric Type
+
+  Schedule:Constant,
+    Cycling Fan Mode,           !- Name
+    Fraction,                   !- Schedule Type Limits Name
+    0;                          !- Hourly Value
+
+  Schedule:Constant,
+    Continuous Fan Mode,        !- Name
+    Fraction,                   !- Schedule Type Limits Name
+    1;                          !- Hourly Value
+
+  Schedule:Compact,
+    Mixed Fan Mode,             !- Name
+    Fraction,                   !- Schedule Type Limits Name
+    Through: 12/31,             !- Field 1
+    For: AllDays,               !- Field 2
+    Until: 12:00,               !- Field 3
+    0,                          !- Field 4
+    Until: 24:00,               !- Field 5
+    1;                          !- Field 6
+)IDF";
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool const zoneEquipment = true;
+    std::string const compName = "UNITARY SYSTEM MODEL";
+    UnitarySys::factory(*state, HVAC::UnitarySysType::Unitary_AnyCoilType, compName, zoneEquipment, 0);
+    auto &thisSys = state->dataUnitarySystems->unitarySys[0];
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+
+    for (std::string_view const controlType : {"Load", "SingleZoneVAV", "Setpoint"}) {
+        SCOPED_TRACE(controlType);
+        thisSys.input_specs.control_type = controlType;
+
+        for (std::string_view const scheduleName : {"", "CYCLING FAN MODE", "MIXED FAN MODE", "CONTINUOUS FAN MODE"}) {
+            SCOPED_TRACE(scheduleName);
+            thisSys.input_specs.supply_air_fan_operating_mode_schedule_name = scheduleName;
+            thisSys.m_fanOpModeSched = nullptr;
+            thisSys.m_FanOpMode = HVAC::FanOp::Cycling;
+            bool errorsFound = false;
+            thisSys.processInputSpec(*state, thisSys.input_specs, 0, errorsFound, zoneEquipment, 0);
+
+            EXPECT_ENUM_EQ(HVAC::FanType::Constant, thisSys.m_FanType);
+            if (scheduleName == "CONTINUOUS FAN MODE" || (scheduleName.empty() && controlType == "Setpoint")) {
+                EXPECT_FALSE(errorsFound);
+                EXPECT_TRUE(compare_err_stream(""));
+                EXPECT_ENUM_EQ(HVAC::FanOp::Continuous, thisSys.m_FanOpMode);
+            } else {
+                EXPECT_TRUE(errorsFound);
+                if (scheduleName.empty()) {
+                    EXPECT_TRUE(compare_err_stream_substring("when Supply Air Fan Operating Mode Schedule Name is blank."));
+                } else {
+                    EXPECT_TRUE(compare_err_stream_substring("schedule contains values that are <= 0 and/or > 1"));
+                }
+            }
+        }
+    }
+}
+
 TEST_F(ZoneUnitarySysTest, UnitarySystemModel_getUnitarySystemInputDataTest)
 {
 

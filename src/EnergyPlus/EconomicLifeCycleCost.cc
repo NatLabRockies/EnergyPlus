@@ -1112,7 +1112,6 @@ void ExpressAsCashFlows(EnergyPlusData &state)
         ++elcc->numNonrecurringCost;
         int vIndex = elcc->numNonrecurringCost - 1; // note: vectors go from 0 to size minus one not 1 to size
         elcc->NonrecurringCost[vIndex].name = "Total of ComponentCost:*";
-        elcc->NonrecurringCost[vIndex].lineItem = "";
         elcc->NonrecurringCost[vIndex].category = CostCategory::Construction;
         elcc->NonrecurringCost[vIndex].cost = state.dataCostEstimateManager->CurntBldg.GrandTotal;
         elcc->NonrecurringCost[vIndex].startOfCosts = StartCosts::BasePeriod;

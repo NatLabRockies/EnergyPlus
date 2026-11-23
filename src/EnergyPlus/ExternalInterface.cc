@@ -1333,29 +1333,6 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
 
         for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
             auto &fmu = state.dataExternalInterface->FMU(i);
-            int j = 1;
-            for (int k = 1; k <= NumFMUInputVariables; ++k) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         k,
-                                                                         state.dataIPShortCut->cAlphaArgs,
-                                                                         NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         _,
-                                                                         _,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (Util::SameString(state.dataIPShortCut->cAlphaArgs(3), fmu.Name)) {
-                    fmu.TotNumOutputVariablesSchedule = j;
-                    ++j;
-                }
-            }
-        }
-
-        for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
-            auto &fmu = state.dataExternalInterface->FMU(i);
             for (int j = 1; j <= fmu.NumInstances; ++j) {
                 auto &fmuInst = fmu.Instance(j);
                 fmuInst.fmuOutputVariableSchedule.allocate(NumFMUInputVariables);
@@ -1378,7 +1355,6 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
                         Util::SameString(state.dataIPShortCut->cAlphaArgs(4), fmuInst.Name)) {
                         fmuInst.fmuOutputVariableSchedule(k).Name = state.dataIPShortCut->cAlphaArgs(5);
                         fmuInst.eplusInputVariableSchedule(k).Name = state.dataIPShortCut->cAlphaArgs(1);
-                        fmuInst.eplusInputVariableSchedule(k).InitialValue = state.dataIPShortCut->rNumericArgs(1);
 
                         // get the value reference by using the FMU name and the variable name.
 
@@ -1439,29 +1415,6 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
         // corresponding input variables in EnergyPlus -- variable).
         cCurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Variable";
         NumFMUInputVariables = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-
-        for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
-            auto &fmu = state.dataExternalInterface->FMU(i);
-            int j = 1;
-            for (int k = 1; k <= NumFMUInputVariables; ++k) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         k,
-                                                                         state.dataIPShortCut->cAlphaArgs,
-                                                                         NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         _,
-                                                                         _,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (Util::SameString(state.dataIPShortCut->cAlphaArgs(2), fmu.Name)) {
-                    fmu.TotNumOutputVariablesVariable = j;
-                    ++j;
-                }
-            }
-        }
 
         for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
             auto &fmu = state.dataExternalInterface->FMU(i);
@@ -1546,29 +1499,6 @@ void InitExternalInterfaceFMUImport(EnergyPlusData &state)
         // corresponding input variables in EnergyPlus -- actuator).
         cCurrentModuleObject = "ExternalInterface:FunctionalMockupUnitImport:To:Actuator";
         NumFMUInputVariables = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-
-        for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
-            auto &fmu = state.dataExternalInterface->FMU(i);
-            int j = 1;
-            for (int k = 1; k <= NumFMUInputVariables; ++k) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         k,
-                                                                         state.dataIPShortCut->cAlphaArgs,
-                                                                         NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
-                                                                         NumNumbers,
-                                                                         IOStatus,
-                                                                         _,
-                                                                         _,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (Util::SameString(state.dataIPShortCut->cAlphaArgs(5), fmu.Name)) {
-                    fmu.TotNumOutputVariablesActuator = j;
-                    ++j;
-                }
-            }
-        }
 
         for (int i = 1; i <= state.dataExternalInterface->NumFMUObjects; ++i) {
             auto &fmu = state.dataExternalInterface->FMU(i);

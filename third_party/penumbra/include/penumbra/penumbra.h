@@ -17,7 +17,7 @@
 
 namespace Penumbra {
 
-enum class VendorType { unknown, nvidia, amd, intel, vmware, mesa };
+enum class VendorType { unknown, nvidia, amd, intel, vmware, mesa, apple };
 
 class PenumbraImplementation;
 

@@ -1230,15 +1230,12 @@ void SetupCommonPipes(EnergyPlusData &state)
         // reference to easily lookup the first item once
         auto &thisPlantLoop = state.dataPlnt->PlantLoop(CurLoopNum);
         auto &thisCommonPipe = state.dataHVACInterfaceMgr->PlantCommonPipe(CurLoopNum);
-        auto const &first_demand_component_type = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type;
         auto const &first_supply_component_type = thisPlantLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1).Type;
 
         switch (thisPlantLoop.CommonPipeType) {
         case DataPlant::CommonPipeType::No:
-            thisCommonPipe.CommonPipeType = DataPlant::CommonPipeType::No;
             break;
         case DataPlant::CommonPipeType::Single: // Uncontrolled ('single') common pipe
-            thisCommonPipe.CommonPipeType = DataPlant::CommonPipeType::Single;
             SetupOutputVariable(state,
                                 "Plant Common Pipe Mass Flow Rate",
                                 Constant::Units::kg_s,
@@ -1270,7 +1267,6 @@ void SetupCommonPipes(EnergyPlusData &state)
             }
             break;
         case DataPlant::CommonPipeType::TwoWay: // Controlled ('two-way') common pipe
-            thisCommonPipe.CommonPipeType = DataPlant::CommonPipeType::TwoWay;
             SetupOutputVariable(state,
                                 "Plant Common Pipe Primary Mass Flow Rate",
                                 Constant::Units::kg_s,
@@ -1310,12 +1306,6 @@ void SetupCommonPipes(EnergyPlusData &state)
                 ShowContinueError(state, std::format("Occurs on plant loop name = {}", thisPlantLoop.Name));
                 ShowContinueError(state, "The common pipe model does not support varying the flow rate on the primary/supply side");
                 ShowContinueError(state, "The primary/supply side will operate as if constant speed, and the simulation continues");
-            }
-            // check type of pump on demand side inlet
-            if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
-                thisCommonPipe.DemandSideInletPumpType = FlowType::Constant;
-            } else if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
-                thisCommonPipe.DemandSideInletPumpType = FlowType::Variable;
             }
             break;
         default:

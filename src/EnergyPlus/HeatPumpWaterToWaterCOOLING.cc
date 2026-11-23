@@ -214,12 +214,6 @@ void GetGshpInput(EnergyPlusData &state)
 
         thisGSHP.WWHPPlantTypeOfNum = DataPlant::PlantEquipmentType::HPWaterPECooling;
 
-        thisGSHP.COP = NumArray(1);
-        if (NumArray(1) == 0.0) {
-            ShowSevereError(state, std::format("{}:COP = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
-            ErrorsFound = true;
-        }
-
         // zero values for NumArray 0 - 6 checked in input - idd
 
         thisGSHP.NomCap = NumArray(2);
@@ -355,7 +349,6 @@ void GetGshpInput(EnergyPlusData &state)
         thisGSHP.SourceSideWaterOutletTemp = 0.0;
         thisGSHP.SourceSideWaterMassFlowRate = 0.0;
         thisGSHP.LoadSideWaterMassFlowRate = 0.0;
-        thisGSHP.IsOn = false;
         thisGSHP.MustRun = true;
 
         if ((thisGSHP.refrig = Fluid::GetRefrig(state, GSHPRefrigerant)) == nullptr) {
@@ -488,7 +481,6 @@ void GshpPeCoolingSpecs::initialize(EnergyPlusData &state)
         this->SourceSideWaterOutletTemp = 0.0;
         this->SourceSideWaterMassFlowRate = 0.0;
         this->LoadSideWaterMassFlowRate = 0.0;
-        this->IsOn = false;
         this->MustRun = true;
 
         this->beginEnvironFlag = false;
@@ -512,8 +504,6 @@ void GshpPeCoolingSpecs::initialize(EnergyPlusData &state)
     // Init more variables
 
     // On every call
-    this->Running = 0;
-
     this->MustRun = true; // Reset MustRun Flag to TRUE
 
     this->LoadSideWaterMassFlowRate = 0.0;   // Load Side mass flow rate, water side
@@ -575,10 +565,8 @@ void GshpPeCoolingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
 
     if (MyLoad < 0.0) {
         this->MustRun = true;
-        this->IsOn = true;
     } else {
         this->MustRun = false;
-        this->IsOn = false;
     }
 
     //*******Set flow based on "flowlock" and "run" flags**********
@@ -821,7 +809,6 @@ LOOPSourceEnth_exit:;
 
     this->LoadSideWaterOutletTemp = this->LoadSideWaterInletTemp - this->QLoad / (this->LoadSideWaterMassFlowRate * CpLoadSide); // Chilled water
     this->SourceSideWaterOutletTemp = this->SourceSideWaterInletTemp + this->QSource / (this->SourceSideWaterMassFlowRate * CpSourceSide);
-    this->Running = 1;
 }
 
 void GshpPeCoolingSpecs::update(EnergyPlusData &state)

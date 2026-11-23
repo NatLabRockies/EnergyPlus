@@ -217,12 +217,6 @@ void GetGshpInput(EnergyPlusData &state)
 
         thisGSHP.WWHPPlantType = DataPlant::PlantEquipmentType::HPWaterPEHeating;
 
-        thisGSHP.COP = NumArray(1);
-        if (NumArray(1) == 0.0) {
-            ShowSevereError(state, std::format("{}:COP = 0.0, Heatpump={}", ModuleCompName, thisGSHP.Name));
-            ErrorsFound = true;
-        }
-
         // zero values for NumArray 3 - 6 checked in input - idd
         thisGSHP.NomCap = NumArray(2);
 
@@ -479,7 +473,6 @@ void GshpPeHeatingSpecs::initialize(EnergyPlusData &state)
         this->SourceSideWaterOutletTemp = 0.0;
         this->SourceSideWaterMassFlowRate = 0.0;
         this->LoadSideWaterMassFlowRate = 0.0;
-        this->IsOn = false;
         this->MustRun = true;
 
         this->beginEnvironFlag = false;
@@ -503,7 +496,6 @@ void GshpPeHeatingSpecs::initialize(EnergyPlusData &state)
     }
 
     // On every call
-    this->Running = 0;
     this->MustRun = true;                    // Reset MustRun Flag to TRUE
     this->LoadSideWaterMassFlowRate = 0.0;   // Load Side mass flow rate, water side
     this->SourceSideWaterMassFlowRate = 0.0; // Source Side mass flow rate, water side
@@ -543,10 +535,8 @@ void GshpPeHeatingSpecs::calculate(EnergyPlusData &state, Real64 &MyLoad)
 
     if (MyLoad > 0.0) {
         this->MustRun = true;
-        this->IsOn = true;
     } else {
         this->MustRun = false;
-        this->IsOn = false;
     }
     this->LoadSideWaterInletTemp = state.dataLoopNodes->Node(this->LoadSideInletNodeNum).Temp;
     this->SourceSideWaterInletTemp = state.dataLoopNodes->Node(this->SourceSideInletNodeNum).Temp;
@@ -768,7 +758,6 @@ LOOPLoadEnth_exit:;
     this->LoadSideWaterOutletTemp = this->LoadSideWaterInletTemp + this->QLoad / (this->LoadSideWaterMassFlowRate * CpLoadSide);
     this->SourceSideWaterOutletTemp = this->SourceSideWaterInletTemp - this->QSource / (this->SourceSideWaterMassFlowRate * CpSourceSide);
     // REPORT VAR
-    this->Running = 1;
 }
 
 void GshpPeHeatingSpecs::update(EnergyPlusData &state)

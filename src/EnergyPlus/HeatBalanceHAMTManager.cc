@@ -876,7 +876,6 @@ namespace HeatBalanceHAMTManager {
 
                     matCell.rh = mat->irh;
                     matCell.rhp1 = mat->irh;
-                    matCell.rhp2 = mat->irh;
 
                     matCell.density = mat->Density;
                     matCell.spech = mat->SpecHeat;
@@ -1140,7 +1139,6 @@ namespace HeatBalanceHAMTManager {
             auto &extCell = s_hbh->cells(s_hbh->Extcell(sid));
             extCell.rh = 0.0;
             extCell.rhp1 = 0.0;
-            extCell.rhp2 = 0.0;
 
             extCell.temp = 10.0;
             extCell.tempp1 = 10.0;
@@ -1149,7 +1147,6 @@ namespace HeatBalanceHAMTManager {
             auto &intCell = s_hbh->cells(s_hbh->Intcell(sid));
             intCell.rh = 0.0;
             intCell.rhp1 = 0.0;
-            intCell.rhp2 = 0.0;
 
             intCell.temp = 10.0;
             intCell.tempp1 = 10.0;
@@ -1165,7 +1162,6 @@ namespace HeatBalanceHAMTManager {
 
                 cell.rh = mat->irh;
                 cell.rhp1 = mat->irh;
-                cell.rhp2 = mat->irh;
             }
             s_hbh->MyEnvrnFlag(sid) = false;
         }
@@ -1259,14 +1255,12 @@ namespace HeatBalanceHAMTManager {
             cell.tempp1 = cell.temp;
             cell.tempp2 = cell.temp;
             cell.rhp1 = cell.rh;
-            cell.rhp2 = cell.rh;
         }
         for (int cid = s_hbh->Intcell(sid) + 1; cid <= s_hbh->lastcell(sid); ++cid) {
             auto &cell = s_hbh->cells(cid);
             cell.tempp1 = cell.temp;
             cell.tempp2 = cell.temp;
             cell.rhp1 = cell.rh;
-            cell.rhp2 = cell.rh;
         }
 
         itter = 0;
@@ -1535,7 +1529,6 @@ namespace HeatBalanceHAMTManager {
             for (int cid = s_hbh->firstcell(sid); cid <= s_hbh->lastcell(sid); ++cid) {
                 auto &cell = s_hbh->cells(cid);
                 cell.tempp2 = cell.tempp1;
-                cell.rhp2 = cell.rhp1;
             }
         }
 

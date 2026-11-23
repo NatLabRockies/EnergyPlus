@@ -75,7 +75,6 @@ namespace HVACStandAloneERV {
         Sched::Schedule *availSched = nullptr;         // availability schedule
         std::string HeatExchangerName;                 // name of the heat exchanger within the ERV unit
         int HeatExchangerIndex;                        // Pointer to heat exchanger
-        HVAC::HXType hxType = HVAC::HXType::Invalid;   // Parameter equivalent of HX object type
         int SupplyAirInletNode;                        // supply air inlet node for the stand alone ERV
         int SupplyAirOutletNode;                       // supply air outlet node for the stand alone ERV
         std::string SupplyAirFanName;                  // fan name in the supply air stream of the ERV
@@ -92,19 +91,16 @@ namespace HVACStandAloneERV {
         Real64 ExhaustAirVolFlow;                      // volumetric flow rate through the exhaust side of the ERV
         std::string ControllerName;                    // name of the controller for the stand alone ERV
         bool ControllerNameDefined;                    // controller for the stand alone ERV is defined
-        int ControlledZoneNum;                         // index to controlled zone for stand alone ERV
         int ControllerIndex;                           // Pointer for updates by routines this module calls.
         Real64 MaxSupAirMassFlow;                      // air mass flow rate through the supply side of the ERV
         Real64 MaxExhAirMassFlow;                      // air mass flow rate through the exhaust side of the ERV
         Real64 HighRHOAFlowRatio;                      // ratio of outside air flow to max outside air flow
         Real64 DesignSAFanVolFlowRate;                 // SA fan volumetric flow rate
         Real64 DesignEAFanVolFlowRate;                 // EA fan volumetric flow rate
-        Real64 DesignHXVolFlowRate;                    // HX (heat exchanger) volumetric flow rate
         Real64 DesignSAFanMassFlowRate;                // SA fan mass flow rate
         Real64 DesignEAFanMassFlowRate;                // EA fan mass flow rate
         Real64 AirVolFlowPerFloorArea;                 // Air flow rate per unit floor area, used for autosizing
         Real64 AirVolFlowPerOccupant;                  // Air flow rate per occupant, used for autosizing
-        Sched::Schedule *economizerOASched = nullptr;  // schedule to modify outdoor air
         bool FlowError;                                // used for one-time warning message for flow imbalance (Init)
         Avail::Status availStatus = Avail::Status::NoAction;
         std::string AvailManagerListName; // Name of an availability manager list object
@@ -129,12 +125,12 @@ namespace HVACStandAloneERV {
         StandAloneERVData()
             : HeatExchangerIndex(0), SupplyAirInletNode(0), SupplyAirOutletNode(0), SupplyAirFanIndex(0), supplyAirFanType(HVAC::FanType::Invalid),
               ExhaustAirInletNode(0), ExhaustAirOutletNode(0), ExhaustAirFanIndex(0), exhaustAirFanType(HVAC::FanType::Invalid),
-              SupplyAirVolFlow(0.0), ExhaustAirVolFlow(0.0), ControllerNameDefined(false), ControlledZoneNum(0), ControllerIndex(0),
-              MaxSupAirMassFlow(0.0), MaxExhAirMassFlow(0.0), HighRHOAFlowRatio(1.0), DesignSAFanVolFlowRate(0.0), DesignEAFanVolFlowRate(0.0),
-              DesignHXVolFlowRate(0.0), DesignSAFanMassFlowRate(0.0), DesignEAFanMassFlowRate(0.0), AirVolFlowPerFloorArea(0.0),
-              AirVolFlowPerOccupant(0.0), FlowError(true), ElecUseRate(0.0), ElecUseEnergy(0.0), SensCoolingEnergy(0.0), SensCoolingRate(0.0),
-              LatCoolingEnergy(0.0), LatCoolingRate(0.0), TotCoolingEnergy(0.0), TotCoolingRate(0.0), SensHeatingEnergy(0.0), SensHeatingRate(0.0),
-              LatHeatingEnergy(0.0), LatHeatingRate(0.0), TotHeatingEnergy(0.0), TotHeatingRate(0.0), FirstPass(true)
+              SupplyAirVolFlow(0.0), ExhaustAirVolFlow(0.0), ControllerNameDefined(false), ControllerIndex(0), MaxSupAirMassFlow(0.0),
+              MaxExhAirMassFlow(0.0), HighRHOAFlowRatio(1.0), DesignSAFanVolFlowRate(0.0), DesignEAFanVolFlowRate(0.0), DesignSAFanMassFlowRate(0.0),
+              DesignEAFanMassFlowRate(0.0), AirVolFlowPerFloorArea(0.0), AirVolFlowPerOccupant(0.0), FlowError(true), ElecUseRate(0.0),
+              ElecUseEnergy(0.0), SensCoolingEnergy(0.0), SensCoolingRate(0.0), LatCoolingEnergy(0.0), LatCoolingRate(0.0), TotCoolingEnergy(0.0),
+              TotCoolingRate(0.0), SensHeatingEnergy(0.0), SensHeatingRate(0.0), LatHeatingEnergy(0.0), LatHeatingRate(0.0), TotHeatingEnergy(0.0),
+              TotHeatingRate(0.0), FirstPass(true)
         {
         }
     };

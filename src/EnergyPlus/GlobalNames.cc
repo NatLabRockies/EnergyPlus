@@ -158,7 +158,6 @@ void VerifyUniqueChillerName(
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->ChillerNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
-        state.dataGlobalNames->NumChillers = static_cast<int>(state.dataGlobalNames->ChillerNames.size());
     }
 }
 
@@ -186,7 +185,6 @@ void VerifyUniqueBaseboardName(EnergyPlusData &state,
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->BaseboardNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
-        state.dataGlobalNames->NumBaseboards = static_cast<int>(state.dataGlobalNames->BaseboardNames.size());
     }
 }
 
@@ -211,7 +209,6 @@ void VerifyUniqueBoilerName(
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->BoilerNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
-        state.dataGlobalNames->NumBoilers = static_cast<int>(state.dataGlobalNames->BoilerNames.size());
     }
 }
 
@@ -243,7 +240,6 @@ void VerifyUniqueCoilName(
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->CoilNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
-        state.dataGlobalNames->NumCoils = static_cast<int>(state.dataGlobalNames->CoilNames.size());
     }
 }
 
@@ -257,7 +253,6 @@ void VerifyUniqueADUName(
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->aDUNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
-        state.dataGlobalNames->numAirDistUnits = static_cast<int>(state.dataGlobalNames->aDUNames.size());
     }
 }
 

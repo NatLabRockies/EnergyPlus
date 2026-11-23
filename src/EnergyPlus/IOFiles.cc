@@ -439,9 +439,6 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             { // "output_screen"
                 screen = boolean_choice(find_input(fields, "output_screen"));
             }
-            { // "output_tarcog"
-                tarcog = boolean_choice(find_input(fields, "output_tarcog"));
-            }
             { // "output_extshd"
                 extshd = boolean_choice(find_input(fields, "output_extshd"));
             }

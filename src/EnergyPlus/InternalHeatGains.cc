@@ -5593,7 +5593,6 @@ namespace InternalHeatGains {
                     ++numGainInstances;
                     inputObjects(objNum).numOfSpaces = 1;
                     inputObjects(objNum).spaceListActive = false;
-                    inputObjects(objNum).spaceOrSpaceListPtr = spaceNum;
                     inputObjects(objNum).spaceNums.emplace_back(spaceNum);
                     inputObjects(objNum).names.emplace_back(inputObjects(objNum).Name);
                     continue;
@@ -5639,7 +5638,6 @@ namespace InternalHeatGains {
                         numGainInstances += numSpaces;
                         inputObjects(objNum).numOfSpaces = numSpaces;
                         inputObjects(objNum).spaceListActive = true;
-                        inputObjects(objNum).spaceOrSpaceListPtr = spaceListNum;
                         for (int const spaceNum2 : state.dataHeatBal->spaceList(spaceListNum).spaces) {
                             inputObjects(objNum).spaceNums.emplace_back(spaceNum2);
                             inputObjects(objNum).names.emplace_back(state.dataHeatBal->space(spaceNum2).Name + ' ' + inputObjects(objNum).Name);

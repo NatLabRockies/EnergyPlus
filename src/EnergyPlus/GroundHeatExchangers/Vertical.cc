@@ -104,9 +104,6 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                                                   Node::ConnectionType::Outlet,
                                                   Node::CompFluidStream::Primary,
                                                   Node::ObjectIsNotParent);
-    this->available = true;
-    this->on = true;
-
     Node::TestCompSet(state, moduleName, objName, inletNodeName, outletNodeName, "Condenser Water Nodes");
 
     this->designFlow = j["design_flow_rate"].get<Real64>();

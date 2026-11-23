@@ -424,9 +424,6 @@ TEST_F(EnergyPlusFixture, ExhaustSystemInputTest)
 
     EXPECT_EQ(state->dataZoneEquip->ExhaustAirSystem(1).ZoneMixerIndex, 1);
     EXPECT_EQ(state->dataZoneEquip->ExhaustAirSystem(2).ZoneMixerIndex, 2);
-
-    EXPECT_EQ(state->dataZoneEquip->ExhaustAirSystem(1).CentralFanName, "CENTRALEXHAUSTFAN1");
-    EXPECT_EQ(state->dataZoneEquip->ExhaustAirSystem(2).CentralFanName, "CENTRALEXHAUSTFAN2");
 }
 
 TEST_F(EnergyPlusFixture, ZoneExhaustCtrl_CheckSupplyNode_Test)

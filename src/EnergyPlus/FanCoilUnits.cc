@@ -661,7 +661,7 @@ namespace FanCoilUnits {
                                                 fanCoil.Name));
                 }
                 // check that the air terminal mixer secondary air inlet node is the fan coil outlet node
-                if (fanCoil.AirOutNode != state.dataFanCoilUnits->ATMixerSecNode) {
+                if (fanCoil.AirOutNode != fanCoil.ATMixerSecNode) {
                     ShowSevereError(
                         state,
                         std::format("{} = \"{}\". Fan coil unit air outlet node name must be the same as the air terminal mixer secondary air "
@@ -2698,8 +2698,6 @@ namespace FanCoilUnits {
                 fanCoil.MaxNoCoolHeatAirMassFlow = MinSAMassFlowRate;
                 fanCoil.MaxCoolAirMassFlow = MaxSAMassFlowRate;
                 fanCoil.MaxHeatAirMassFlow = MaxSAMassFlowRate;
-                fanCoil.LowSpeedCoolFanRatio = MinSAMassFlowRate / MaxSAMassFlowRate;
-                fanCoil.LowSpeedHeatFanRatio = MinSAMassFlowRate / MaxSAMassFlowRate;
 
                 Calc4PipeFanCoil(state,
                                  FanCoilNum,
@@ -2755,7 +2753,6 @@ namespace FanCoilUnits {
                 if ((state.dataFanCoilUnits->CoolingLoad && QUnitOutNoHC < QZnReq) ||
                     (state.dataFanCoilUnits->HeatingLoad && QUnitOutNoHC > QZnReq)) {
                     PLR = 0.0;
-                    fanCoil.FanPartLoadRatio = 0.0; // set SZVAV model variable
                     state.dataLoopNodes->Node(InletNode).MassFlowRate =
                         MinSAMassFlowRate; // = min air flow rate + ((max-min) air flow rate * FanPartLoadRatio)
                     mdot = 0.0;

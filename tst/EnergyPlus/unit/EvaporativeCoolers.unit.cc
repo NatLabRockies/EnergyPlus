@@ -88,13 +88,12 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
     OperatingMode OperatingMode(EvaporativeCoolers::OperatingMode::None);
     Real64 AirMassFlowSec(0.0);
     Real64 constexpr EDBTSec(20.0);
-    Real64 constexpr EWBTSec(15.0);
     Real64 constexpr EHumRatSec(0.0085);
     Real64 QHXTotal(0.0);
     Real64 QHXLatent(0.0);
 
     // make the call for zero secondary air flow rate
-    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for evap cooler set off
     EXPECT_DOUBLE_EQ(EvapCond(EvapCoolNum).SecOutletEnthalpy, EvapCond(EvapCoolNum).SecInletEnthalpy);
@@ -106,7 +105,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
     QHXTotal = 10206.410750000941;
 
     // make the call for dry operating mode
-    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for dry operating condition
     EXPECT_NEAR(25.0, EvapCond(EvapCoolNum).SecOutletTemp, 0.000001);
@@ -118,7 +117,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
     QHXTotal = 10206.410750000941;
 
     // make the call for wet operating condition
-    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for wet operating condition
     EXPECT_DOUBLE_EQ(20.0, EvapCond(EvapCoolNum).SecOutletTemp);
@@ -340,14 +339,12 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
     OperatingMode OperatingMode(EvaporativeCoolers::OperatingMode::None);
     Real64 AirMassFlowSec(0.0);
     Real64 constexpr EDBTSec(20.0);
-    Real64 constexpr EWBTSec(15.0);
     Real64 constexpr EHumRatSec(0.0085);
     Real64 QHXTotal(0.0);
     Real64 QHXLatent(0.0);
 
     // make the call for zero secondary air flow rate
-    EvaporativeCoolers::CalcSecondaryAirOutletCondition(
-        *state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    EvaporativeCoolers::CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for evap cooler set off
     EXPECT_DOUBLE_EQ(EvapCond(EvapCoolNum).SecOutletEnthalpy, EvapCond(EvapCoolNum).SecInletEnthalpy);
@@ -359,8 +356,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
     QHXTotal = 10206.410750000941;
 
     // make the call for dry operating mode
-    EvaporativeCoolers::CalcSecondaryAirOutletCondition(
-        *state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    EvaporativeCoolers::CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for dry operating condition
     EXPECT_NEAR(25.0, EvapCond(EvapCoolNum).SecOutletTemp, 0.000001);
@@ -372,8 +368,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
     QHXTotal = 10206.410750000941;
 
     // make the call for wet operating condition
-    EvaporativeCoolers::CalcSecondaryAirOutletCondition(
-        *state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
+    EvaporativeCoolers::CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
     // check outputs for wet operating condition
     EXPECT_DOUBLE_EQ(20.0, EvapCond(EvapCoolNum).SecOutletTemp);
@@ -793,7 +788,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
         PsyTwbFnTdbWPb(*state, EvapCond(EvapCoolNum).InletTemp, EvapCond(EvapCoolNum).InletHumRat, state->dataEnvrn->OutBaroPress);
     thisEvapCooler.SecInletTemp = thisEvapCooler.InletTemp;
     thisEvapCooler.SecInletHumRat = thisEvapCooler.InletHumRat;
-    thisEvapCooler.SecInletWetBulbTemp = thisEvapCooler.InletWetBulbTemp;
+    Real64 const secInletWetBulbTemp = thisEvapCooler.InletWetBulbTemp;
     // set up arguments
     Real64 constexpr TdbOutSysWetMin(22.0);
     Real64 constexpr TdbOutSysDryMin(25.5);
@@ -803,7 +798,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
 
     // determine operating mode
     OperatingMode Result_WetFullOperatingMode = EvaporativeCoolers::IndirectUserEffectivenessEvapCoolerOperatingMode(
-        *state, EvapCoolNum, thisEvapCooler.SecInletTemp, thisEvapCooler.SecInletWetBulbTemp, TdbOutSysWetMin, TdbOutSysDryMin);
+        *state, EvapCoolNum, thisEvapCooler.SecInletTemp, secInletWetBulbTemp, TdbOutSysWetMin, TdbOutSysDryMin);
     // check operating mode
     EXPECT_ENUM_EQ(Result_WetFullOperatingMode, EvaporativeCoolers::OperatingMode::WetFull);
     // get outlet temperature in full wet operating mode
@@ -812,7 +807,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
                                                             Result_WetFullOperatingMode,
                                                             thisEvapCooler.SecInletMassFlowRate,
                                                             thisEvapCooler.SecInletTemp,
-                                                            thisEvapCooler.SecInletWetBulbTemp,
+                                                            secInletWetBulbTemp,
                                                             thisEvapCooler.SecInletHumRat);
     // test outlet temperature in full wet operating mode
     EXPECT_NEAR(22.036, thisEvapCooler.OutletTemp, 0.001);

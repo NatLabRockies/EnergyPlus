@@ -946,7 +946,6 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -1144,7 +1143,6 @@ namespace Furnaces {
                     errFlag = false;
                     HeatingCoilOutletNode =
                         WaterCoils::GetCoilOutletNode(state, HVAC::coilTypeNames[(int)thisFurnace.heatCoilType], HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -1205,7 +1203,6 @@ namespace Furnaces {
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
                     HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -1499,7 +1496,6 @@ namespace Furnaces {
                 //             Determine if system is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -1699,7 +1695,6 @@ namespace Furnaces {
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
                     HeatingCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -1761,7 +1756,6 @@ namespace Furnaces {
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
                     HeatingCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.HeatingCoilIndex, HeatingCoilName, errFlag);
-                    thisFurnace.HWCoilAirOutletNode = HeatingCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -2160,7 +2154,6 @@ namespace Furnaces {
                         // Get the ReHeat Coil Outlet Node
                         errFlag = false;
                         ReheatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirOutletNode = ReheatCoilOutletNode;
                         if (errFlag) {
                             ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                             ErrorsFound = true;
@@ -2223,7 +2216,6 @@ namespace Furnaces {
                         // Get the Heating Coil Outlet Node
                         errFlag = false;
                         ReheatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, ReheatingCoilName, errFlag);
-                        thisFurnace.SuppCoilAirOutletNode = ReheatCoilOutletNode;
                         if (errFlag) {
                             ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                             ErrorsFound = true;
@@ -2811,7 +2803,6 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -3197,7 +3188,6 @@ namespace Furnaces {
                     // Get the ReHeat Coil Outlet Node
                     errFlag = false;
                     SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, "Coil:Heating:Water", SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -3258,7 +3248,6 @@ namespace Furnaces {
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
                     SupHeatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -3743,7 +3732,6 @@ namespace Furnaces {
                 //             Determine if furnace is on air loop served by the thermostat location specified
                 for (int zoneInNode = 1; zoneInNode <= state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).NumInletNodes; ++zoneInNode) {
                     int AirLoopNumber = state.dataZoneEquip->ZoneEquipConfig(ControlledZoneNum).InletNodeAirLoopNum(zoneInNode);
-                    thisFurnace.airloopNum = AirLoopNumber;
                     if (AirLoopNumber > 0) {
                         for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNumber).NumBranches; ++BranchNum) {
                             for (int CompNum = 1;
@@ -4020,7 +4008,6 @@ namespace Furnaces {
                     // Get the ReHeat Coil Outlet Node
                     errFlag = false;
                     SupHeatCoilOutletNode = WaterCoils::GetCoilOutletNode(state, Alphas(12), SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -4082,7 +4069,6 @@ namespace Furnaces {
                     // Get the Heating Coil Outlet Node
                     errFlag = false;
                     SupHeatCoilOutletNode = SteamCoils::GetCoilAirOutletNode(state, thisFurnace.SuppHeatCoilIndex, SuppHeatCoilName, errFlag);
-                    thisFurnace.SuppCoilAirOutletNode = SupHeatCoilOutletNode;
                     if (errFlag) {
                         ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, thisFurnace.Name));
                         ErrorsFound = true;
@@ -10051,8 +10037,6 @@ namespace Furnaces {
                 PartLoadFrac = 1.0;
                 SpeedRatio = 1.0;
                 thisFurnace.CompPartLoadRatio = PartLoadFrac;
-                thisFurnace.CompSpeedRatio = SpeedRatio;
-                thisFurnace.CompSpeedNum = SpeedNum;
                 return;
             }
         } else if (QZnReq < -HVAC::SmallLoad) {
@@ -10060,8 +10044,6 @@ namespace Furnaces {
                 PartLoadFrac = 1.0;
                 SpeedRatio = 1.0;
                 thisFurnace.CompPartLoadRatio = PartLoadFrac;
-                thisFurnace.CompSpeedRatio = SpeedRatio;
-                thisFurnace.CompSpeedNum = SpeedNum;
                 return;
             }
         } else {
@@ -10328,8 +10310,6 @@ namespace Furnaces {
 
         // prepare module level output
         thisFurnace.CompPartLoadRatio = PartLoadFrac;
-        thisFurnace.CompSpeedRatio = SpeedRatio;
-        thisFurnace.CompSpeedNum = SpeedNum;
         thisFurnace.CoolingCoilLatentDemand = std::abs(QLatReq);
 
         if (thisFurnace.fanOp == HVAC::FanOp::Continuous) {

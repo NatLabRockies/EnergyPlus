@@ -413,7 +413,7 @@ namespace Window {
     {
         int numGases = 0;
         std::array<Material::Gas, Material::maxMixGases> gases = {Material::Gas()};
-        std::array<Real64, Material::maxMixGases> gasFracts = {0.0};
+        std::array<Real64, Material::maxMixGases> gasFracts{};
         Real64 width = 0.0;
     };
 
@@ -480,19 +480,18 @@ struct WindowManagerData : BaseGlobalStruct
     Real64 Rmir = 0.0;                                                                  // IR radiance of window's interior surround (W/m2)
     Real64 Rtot = 0.0;                                                                  // Total thermal resistance of window (m2-K/W)
     std::array<Window::WindowGap, Window::maxGlassLayers> gaps = {Window::WindowGap()}; // Gas thermal conductivity coefficients for each gap
-    std::array<Real64, Window::maxGlassLayers> thick = {0.0};                           // Glass layer thickness (m)
-    std::array<Real64, Window::maxGlassLayers> scon = {0.0};                            // Glass layer conductance--conductivity/thickness (W/m2-K)
+    std::array<Real64, Window::maxGlassLayers> thick{};                                 // Glass layer thickness (m)
+    std::array<Real64, Window::maxGlassLayers> scon{};                                  // Glass layer conductance--conductivity/thickness (W/m2-K)
 
-    std::array<Real64, 2 * Window::maxGlassLayers> tir = {0.0};  // Front and back IR transmittance for each glass layer
-    std::array<Real64, 2 * Window::maxGlassLayers> emis = {0.0}; // Front and back IR emissivity for each glass layer
-    std::array<Real64, 2 * Window::maxGlassLayers> rir = {0.0};  // Front and back IR reflectance for each glass layer
-                                                                 //  (program calculates from tir and emis)
-    std::array<Real64, 2 * Window::maxGlassLayers> AbsRadGlassFace = {
-        0.0};                                                          // Solar radiation and IR radiation from internal gains absorbed by glass face
-    std::array<Real64, 2 * Window::maxGlassLayers> thetas = {0.0};     // Glass surface temperatures (K)
-    std::array<Real64, 2 * Window::maxGlassLayers> thetasPrev = {0.0}; // Previous-iteration glass surface temperatures (K)
+    std::array<Real64, 2 * Window::maxGlassLayers> tir{};             // Front and back IR transmittance for each glass layer
+    std::array<Real64, 2 * Window::maxGlassLayers> emis{};            // Front and back IR emissivity for each glass layer
+    std::array<Real64, 2 * Window::maxGlassLayers> rir{};             // Front and back IR reflectance for each glass layer
+                                                                      //  (program calculates from tir and emis)
+    std::array<Real64, 2 * Window::maxGlassLayers> AbsRadGlassFace{}; // Solar radiation and IR radiation from internal gains absorbed by glass face
+    std::array<Real64, 2 * Window::maxGlassLayers> thetas{};          // Glass surface temperatures (K)
+    std::array<Real64, 2 * Window::maxGlassLayers> thetasPrev{};      // Previous-iteration glass surface temperatures (K)
 
-    std::array<Real64, Window::maxGlassLayers> hrgap = {0.0}; // Radiative gap conductance
+    std::array<Real64, Window::maxGlassLayers> hrgap{}; // Radiative gap conductance
 
     Real64 A23P = 0.0; // Intermediate variables in glass face
     Real64 A32P = 0.0;
@@ -538,16 +537,16 @@ struct WindowManagerData : BaseGlobalStruct
         this->Outir = 0.0;
         this->Rmir = 0.0;
         this->Rtot = 0.0;
-        this->gaps = {Window::WindowGap()};
-        this->thick = {0.0};
-        this->scon = {0.0};
-        this->tir = {0.0};
-        this->emis = {0.0};
-        this->rir = {0.0};
-        this->AbsRadGlassFace = {0.0};
-        this->thetas = {0.0};
-        this->thetasPrev = {0.0};
-        this->hrgap = {0.0};
+        this->gaps.fill(Window::WindowGap());
+        this->thick.fill(0.0);
+        this->scon.fill(0.0);
+        this->tir.fill(0.0);
+        this->emis.fill(0.0);
+        this->rir.fill(0.0);
+        this->AbsRadGlassFace.fill(0.0);
+        this->thetas.fill(0.0);
+        this->thetasPrev.fill(0.0);
+        this->hrgap.fill(0.0);
         this->A23P = 0.0;
         this->A32P = 0.0;
         this->A45P = 0.0;

@@ -534,27 +534,27 @@ namespace DataHeatBalance {
         bool CrossedColdThresh;
         bool CrossedHeatThresh;
 
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccuHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccupiedHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccuHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccupiedHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneLowSETHours = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHighSETHours = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneColdHourOfSafetyBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatHourOfSafetyBins = {0.0};
-        std::array<Real64, numColumnUnmetDegreeHourTbl> ZoneUnmetDegreeHourBins = {0.0};
-        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccuHourBins = {0.0};
-        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccuHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccupiedHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccuHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccupiedHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneLowSETHours{};
+        std::array<Real64, numColumnThermalTbl> ZoneHighSETHours{};
+        std::array<Real64, numColumnThermalTbl> ZoneColdHourOfSafetyBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatHourOfSafetyBins{};
+        std::array<Real64, numColumnUnmetDegreeHourTbl> ZoneUnmetDegreeHourBins{};
+        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccuHourBins{};
+        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccupiedHourBins{};
 
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelHourBins = {0.0};
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccuHourBins = {0.0};
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelHourBins{};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccuHourBins{};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccupiedHourBins{};
 
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelHourBins = {0.0};
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccuHourBins = {0.0};
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelHourBins{};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccuHourBins{};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccupiedHourBins{};
 
         // Default Constructor
         ZoneResilience()
