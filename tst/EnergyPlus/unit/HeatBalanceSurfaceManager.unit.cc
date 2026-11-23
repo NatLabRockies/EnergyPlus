@@ -1915,8 +1915,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyLocalEnv)
     EXPECT_EQ(20.0, state->dataLoopNodes->Node(1).OutAirWetBulb);
     EXPECT_EQ(1.5, state->dataLoopNodes->Node(1).OutAirWindSpeed);
     EXPECT_EQ(90.0, state->dataLoopNodes->Node(1).OutAirWindDir);
-    EXPECT_NEAR(0.012611481326656135, state->dataLoopNodes->Node(1).HumRat, 0.000000000000001);
-    EXPECT_NEAR(57247.660939392081, state->dataLoopNodes->Node(1).Enthalpy, 0.000000001);
+    EXPECT_NEAR(0.0126114813, state->dataLoopNodes->Node(1).HumRat, 1.0e-10);
+    EXPECT_NEAR(57247.6609, state->dataLoopNodes->Node(1).Enthalpy, 1.0e-4);
 
     InitSurfaceHeatBalance(*state);
 

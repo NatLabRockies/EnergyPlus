@@ -1553,7 +1553,7 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(24).Operand(3).Type, Value::Number); // argument was passed to EMS function
     index = 24 + offset;
     EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name, "VAR24");
-    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 64177.426349195, 0.00000001); // HFnTdbRhPb 30.0 0.5 101325.0 =
+    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 64177.4263, 1.0e-4); // HFnTdbRhPb 30.0 0.5 101325.0 =
 
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(25).Operator, ErlFunc::TdbFnHW);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(25).NumOperands, 2);
@@ -1675,7 +1675,7 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
     index = 38 + offset;
     EXPECT_EQ(state->dataRuntimeLang->ErlVariable(index).Name,
               "VAR38"); // http://www.sugartech.co.za/psychro/ 30 C db, 100% rh = 42.46019 mbar = 4246.019 Pa
-    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 4246.030243592, 0.00000001); // PsatFnTemp 30.0 =
+    EXPECT_NEAR(state->dataRuntimeLang->ErlVariable(index).Value.Number, 4246.03024, 1.0e-5); // PsatFnTemp 30.0 =
 
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(39).Operator, ErlFunc::TsatFnHPb);
     EXPECT_EQ(state->dataRuntimeLang->ErlExpression(39).NumOperands, 2);

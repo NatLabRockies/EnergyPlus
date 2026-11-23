@@ -62,12 +62,12 @@ namespace EnergyPlus {
 
 #ifdef EP_nocache_Psychrometrics
 #    undef EP_cache_PsyTwbFnTdbWPb
-#    undef EP_cache_PsyPsatFnTemp
+#    undef EP_interp_PsyPsatFnTemp
 #    undef EP_cache_PsyTsatFnPb
 #    undef EP_cache_PsyTsatFnHPb
 #else
 #    define EP_cache_PsyTwbFnTdbWPb
-#    define EP_cache_PsyPsatFnTemp
+#    define EP_interp_PsyPsatFnTemp
 #    define EP_cache_PsyTsatFnPb
 #    define EP_cache_PsyTsatFnHPb
 #endif
@@ -119,9 +119,6 @@ namespace Psychrometrics {
 
 #ifdef EP_cache_PsyTwbFnTdbWPb
         state.dataPsychCache->cached_Twb.fill(cached_twb_t());
-#endif
-#ifdef EP_cache_PsyPsatFnTemp
-        state.dataPsychCache->cached_Psat.fill(cached_psat_t());
 #endif
 #ifdef EP_cache_PsyTsatFnPb
         state.dataPsychCache->cached_Tsat.fill(cached_tsat_h_pb());
@@ -627,7 +624,7 @@ namespace Psychrometrics {
     }
 #endif
 
-#ifdef EP_cache_PsyPsatFnTemp
+#ifdef EP_interp_PsyPsatFnTemp
 
     Real64 PsyPsatFnTemp_raw([[maybe_unused]] EnergyPlusData &state,
                              Real64 const T,                                    // dry-bulb temperature {C}
