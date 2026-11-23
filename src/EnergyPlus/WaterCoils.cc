@@ -2793,7 +2793,7 @@ void CalcSimpleHeatingCoil(EnergyPlusData &state,
     Real64 E1;
     Real64 E2;
     Real64 Effec;
-    Real64 Cp;
+    Real64 Cp = 0.0;
 
     auto &waterCoil = state.dataWaterCoils->WaterCoil(CoilNum);
     UA = waterCoil.UACoilVariable;
