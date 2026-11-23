@@ -8457,6 +8457,8 @@ TEST_F(EnergyPlusFixture, UnitarySystemModel_CalcUnitaryHeatingSystem)
     thisSys.m_HeatingCoilName = state->dataWaterCoils->WaterCoil(1).Name;
     thisSys.HeatCoilFluidInletNode = state->dataWaterCoils->WaterCoil(1).WaterInletNodeNum;
     thisSys.HeatCoilFluidOutletNodeNum = state->dataWaterCoils->WaterCoil(1).WaterOutletNodeNum;
+    thisSys.HeatCoilPlantLoc = state->dataWaterCoils->WaterCoil(1).WaterPlantLoc;
+    PlantUtilities::InitComponentNodes(*state, 0.0, HotWaterMassFlowRate, thisSys.HeatCoilFluidInletNode, thisSys.HeatCoilFluidOutletNodeNum);
     state->dataGlobal->DoingSizing = true;
     state->dataWaterCoils->WaterCoil(1).TotWaterHeatingCoilRate = 0.0;
 

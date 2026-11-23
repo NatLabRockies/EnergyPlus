@@ -1610,11 +1610,8 @@ void SetupPumpMinMaxFlows(EnergyPlusData &state, int const LoopNum, int const Pu
     PumpMassFlowRateMax = min(InletNodeMax, PumpOverridableMaxLimit * PumpSchedFraction);
 
     // Check for conflicts (MaxAvail < MinAvail)
-    if (PumpMassFlowRateMin > PumpMassFlowRateMax) { // the demand side wants to operate outside of the pump range
-        // shut the pump (and the loop) down
-        PumpMassFlowRateMin = 0.0;
-        PumpMassFlowRateMax = 0.0;
-        // Let the user know that his input file is overconstrained
+    if (PumpMassFlowRateMin > PumpMassFlowRateMax) { // the demand side cannot accept the pump's minimum flow
+        PumpMassFlowRateMin = PumpMassFlowRateMax;
     }
 
     switch (thisPump.pumpType) {

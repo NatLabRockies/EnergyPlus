@@ -2793,7 +2793,7 @@ void CalcSimpleHeatingCoil(EnergyPlusData &state,
     Real64 E1;
     Real64 E2;
     Real64 Effec;
-    Real64 Cp;
+    Real64 Cp = 0.0;
 
     auto &waterCoil = state.dataWaterCoils->WaterCoil(CoilNum);
     UA = waterCoil.UACoilVariable;
@@ -2873,6 +2873,12 @@ void CalcSimpleHeatingCoil(EnergyPlusData &state,
 
     if (fanOp == HVAC::FanOp::Cycling) {
         HeatingCoilLoad *= PartLoadRatio;
+    }
+
+    // Water outlet state based on the actual water flow rate through the coil
+    if (HeatingCoilLoad != 0.0 && waterCoil.InletWaterMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
+        TempWaterOut = TempWaterIn - HeatingCoilLoad / (Cp * waterCoil.InletWaterMassFlowRate);
+        waterCoil.OutletWaterEnthalpy = waterCoil.InletWaterEnthalpy - HeatingCoilLoad / waterCoil.InletWaterMassFlowRate;
     }
 
     // Set the outlet conditions

@@ -67,6 +67,7 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 
 // EnergyPlus Headers
+#include <EnergyPlus/Boilers.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -88,8 +89,10 @@
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/Pumps.hh>
 #include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/SizingManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterCoils.hh>
@@ -1751,4 +1754,261 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     EXPECT_EQ(state->dataWaterCoils->WaterCoil(2).DesAirVolFlowRate, 0.5);
     // Expect final design water flow rate to equal the user-specified water flow rate from the ZoneHVAC:FourPipeFanCoil object
     EXPECT_EQ(state->dataWaterCoils->WaterCoil(2).MaxWaterVolFlowRate, 0.0002);
+}
+
+namespace {
+// Single zone with a cycling fan AirLoopHVAC:UnitarySystem and a Coil:Heating:Water served by a plant loop with a ConstantFlow
+// boiler and no demand side bypass (the coil is the only demand side component)
+std::string hotWaterLoopWithoutDemandBypassIdf(bool const continuousPump)
+{
+    std::vector<std::string_view> lines = {
+        "  Timestep,6;",
+        "  Building,Building,0,Suburbs,0.04,0.4,FullInteriorAndExterior,25,6;",
+        "  GlobalGeometryRules,UpperLeftCorner,Counterclockwise,World;",
+        "  SimulationControl,No,No,No,Yes,No;",
+        "  Site:Location,Rochester,43.90,-92.50,-6.00,398.00;",
+        "  SizingPeriod:DesignDay,",
+        "    Rochester Htg 99.6% Condns DB,  !- Name",
+        "    1,                       !- Month",
+        "    21,                      !- Day of Month",
+        "    WinterDesignDay,         !- Day Type",
+        "    -26.2,                   !- Maximum Dry-Bulb Temperature {C}",
+        "    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}",
+        "    DefaultMultipliers,      !- Dry-Bulb Temperature Range Modifier Type",
+        "    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name",
+        "    Wetbulb,                 !- Humidity Condition Type",
+        "    -26.2,                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}",
+        "    ,                        !- Humidity Condition Day Schedule Name",
+        "    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}",
+        "    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}",
+        "    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}",
+        "    96634.,                  !- Barometric Pressure {Pa}",
+        "    5.7,                     !- Wind Speed {m/s}",
+        "    310,                     !- Wind Direction {deg}",
+        "    No,                      !- Rain Indicator",
+        "    No,                      !- Snow Indicator",
+        "    No,                      !- Daylight Saving Time Indicator",
+        "    ASHRAEClearSky,          !- Solar Model Indicator",
+        "    ,                        !- Beam Solar Day Schedule Name",
+        "    ,                        !- Diffuse Solar Day Schedule Name",
+        "    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}",
+        "    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}",
+        "    0.00;                    !- Sky Clearness",
+        "  ScheduleTypeLimits,Any Number;",
+        "  Schedule:Constant,always_avail,Any Number,1;",
+        "  Schedule:Constant,fan_cycle,Any Number,0;",
+        "  Schedule:Constant,zone_control_type,Any Number,4;",
+        "  Schedule:Constant,heating_setpoint,Any Number,21;",
+        "  Schedule:Constant,cooling_setpoint,Any Number,26;",
+        "  Schedule:Constant,hw_loop_setpoint,Any Number,51.7;",
+        "  Material:NoMass,Insulation,MediumRough,2.0;",
+        "  Construction,Envelope,Insulation;",
+        "  Zone,Zone1;",
+        "  BuildingSurface:Detailed,Floor,Floor,Envelope,Zone1,,Adiabatic,,NoSun,NoWind,,4,",
+        "    10,0,0, 0,0,0, 0,10,0, 10,10,0;",
+        "  BuildingSurface:Detailed,Roof,Roof,Envelope,Zone1,,Outdoors,,SunExposed,WindExposed,,4,",
+        "    0,10,3, 0,0,3, 10,0,3, 10,10,3;",
+        "  BuildingSurface:Detailed,Wall South,Wall,Envelope,Zone1,,Outdoors,,SunExposed,WindExposed,,4,",
+        "    0,0,3, 0,0,0, 10,0,0, 10,0,3;",
+        "  BuildingSurface:Detailed,Wall East,Wall,Envelope,Zone1,,Outdoors,,SunExposed,WindExposed,,4,",
+        "    10,0,3, 10,0,0, 10,10,0, 10,10,3;",
+        "  BuildingSurface:Detailed,Wall North,Wall,Envelope,Zone1,,Outdoors,,SunExposed,WindExposed,,4,",
+        "    10,10,3, 10,10,0, 0,10,0, 0,10,3;",
+        "  BuildingSurface:Detailed,Wall West,Wall,Envelope,Zone1,,Outdoors,,SunExposed,WindExposed,,4,",
+        "    0,10,3, 0,10,0, 0,0,0, 0,0,3;",
+        "  ZoneControl:Thermostat,Zone1 Thermostat,Zone1,zone_control_type,,ThermostatSetpoint:DualSetpoint,Zone1 Setpoints;",
+        "  ThermostatSetpoint:DualSetpoint,Zone1 Setpoints,heating_setpoint,cooling_setpoint;",
+        "  ZoneHVAC:EquipmentConnections,Zone1,Zone1 Equipment,Zone1 Inlet Node,,Zone1 Air Node,Zone1 Outlet Node;",
+        "  ZoneHVAC:EquipmentList,Zone1 Equipment,SequentialLoad,ZoneHVAC:AirDistributionUnit,Zone1 ADU,1,1,,;",
+        "  ZoneHVAC:AirDistributionUnit,Zone1 ADU,Zone1 Inlet Node,AirTerminal:SingleDuct:ConstantVolume:NoReheat,Zone1 Terminal;",
+        "  AirTerminal:SingleDuct:ConstantVolume:NoReheat,Zone1 Terminal,always_avail,Zone1 Terminal Inlet Node,Zone1 Inlet Node,0.326847;",
+        "  AirLoopHVAC:SupplyPath,Supply Path,Zone Equipment Inlet Node,AirLoopHVAC:ZoneSplitter,Zone Splitter;",
+        "  AirLoopHVAC:ZoneSplitter,Zone Splitter,Zone Equipment Inlet Node,Zone1 Terminal Inlet Node;",
+        "  AirLoopHVAC:ReturnPath,Return Path,Return Air Mixer Outlet,AirLoopHVAC:ZoneMixer,Zone Mixer;",
+        "  AirLoopHVAC:ZoneMixer,Zone Mixer,Return Air Mixer Outlet,Zone1 Outlet Node;",
+        "  AirLoopHVAC,Air Loop,,,0.326847,Air Loop Branches,,Air Loop Inlet Node,Return Air Mixer Outlet,Zone Equipment Inlet Node,Air Loop Outlet "
+        "Node;",
+        "  BranchList,Air Loop Branches,Air Loop Main Branch;",
+        "  Branch,Air Loop Main Branch,,AirLoopHVAC:UnitarySystem,Unitary,Air Loop Inlet Node,Air Loop Outlet Node;",
+        "  AirLoopHVAC:UnitarySystem,",
+        "    Unitary,                 !- Name",
+        "    Load,                    !- Control Type",
+        "    Zone1,                   !- Controlling Zone or Thermostat Location",
+        "    None,                    !- Dehumidification Control Type",
+        "    always_avail,            !- Availability Schedule Name",
+        "    Air Loop Inlet Node,     !- Air Inlet Node Name",
+        "    Air Loop Outlet Node,    !- Air Outlet Node Name",
+        "    Fan:SystemModel,         !- Supply Fan Object Type",
+        "    Supply Fan,              !- Supply Fan Name",
+        "    BlowThrough,             !- Fan Placement",
+        "    fan_cycle,               !- Supply Air Fan Operating Mode Schedule Name",
+        "    Coil:Heating:Water,      !- Heating Coil Object Type",
+        "    HW Coil,                 !- Heating Coil Name",
+        "    ,                        !- DX Heating Coil Sizing Ratio",
+        "    ,                        !- Cooling Coil Object Type",
+        "    ,                        !- Cooling Coil Name",
+        "    ,                        !- Use DOAS DX Cooling Coil",
+        "    ,                        !- Minimum Supply Air Temperature {C}",
+        "    ,                        !- Latent Load Control",
+        "    ,                        !- Supplemental Heating Coil Object Type",
+        "    ,                        !- Supplemental Heating Coil Name",
+        "    None,                    !- Cooling Supply Air Flow Rate Method",
+        "    ,                        !- Cooling Supply Air Flow Rate {m3/s}",
+        "    ,                        !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}",
+        "    ,                        !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate",
+        "    ,                        !- Cooling Supply Air Flow Rate Per Unit of Capacity {m3/s-W}",
+        "    SupplyAirFlowRate,       !- Heating Supply Air Flow Rate Method",
+        "    0.326847,                !- Heating Supply Air Flow Rate {m3/s}",
+        "    ,                        !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}",
+        "    ,                        !- Heating Fraction of Autosized Heating Supply Air Flow Rate",
+        "    ,                        !- Heating Supply Air Flow Rate Per Unit of Capacity {m3/s-W}",
+        "    SupplyAirFlowRate,       !- No Load Supply Air Flow Rate Method",
+        "    0,                       !- No Load Supply Air Flow Rate {m3/s}",
+        "    ,                        !- No Load Supply Air Flow Rate Per Floor Area {m3/s-m2}",
+        "    ,                        !- No Load Fraction of Autosized Cooling Supply Air Flow Rate",
+        "    ,                        !- No Load Fraction of Autosized Heating Supply Air Flow Rate",
+        "    ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation {m3/s-W}",
+        "    ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation {m3/s-W}",
+        "    ,                        !- No Load Supply Air Flow Rate Control Set To Low Speed",
+        "    50;                      !- Maximum Supply Air Temperature {C}",
+        "  Fan:SystemModel,Supply Fan,always_avail,Air Loop Inlet Node,HW Coil Air Inlet "
+        "Node,0.326847,Discrete,1,500,0.85,1,200,PowerPerFlow,805.1744,;",
+        "  Coil:Heating:Water,",
+        "    HW Coil,                 !- Name",
+        "    always_avail,            !- Availability Schedule Name",
+        "    1478.48,                 !- U-Factor Times Area Value {W/K}",
+        "    0.000129127,             !- Maximum Water Flow Rate {m3/s}",
+        "    HW Coil Water Inlet Node,   !- Water Inlet Node Name",
+        "    HW Coil Water Outlet Node,  !- Water Outlet Node Name",
+        "    HW Coil Air Inlet Node,  !- Air Inlet Node Name",
+        "    Air Loop Outlet Node,    !- Air Outlet Node Name",
+        "    UFactorTimesAreaAndDesignWaterFlowRate;  !- Performance Input Method",
+        "  PlantLoop,",
+        "    HW Loop,                 !- Name",
+        "    Water,                   !- Fluid Type",
+        "    ,                        !- User Defined Fluid Type",
+        "    HW Loop Operation,       !- Plant Equipment Operation Scheme Name",
+        "    HW Supply Outlet Node,   !- Loop Temperature Setpoint Node Name",
+        "    100,                     !- Maximum Loop Temperature {C}",
+        "    0,                       !- Minimum Loop Temperature {C}",
+        "    0.000129127,             !- Maximum Loop Flow Rate {m3/s}",
+        "    0,                       !- Minimum Loop Flow Rate {m3/s}",
+        "    autocalculate,           !- Plant Loop Volume {m3}",
+        "    HW Supply Inlet Node,    !- Plant Side Inlet Node Name",
+        "    HW Supply Outlet Node,   !- Plant Side Outlet Node Name",
+        "    HW Supply Branches,      !- Plant Side Branch List Name",
+        "    HW Supply Connectors,    !- Plant Side Connector List Name",
+        "    HW Demand Inlet Node,    !- Demand Side Inlet Node Name",
+        "    HW Demand Outlet Node,   !- Demand Side Outlet Node Name",
+        "    HW Demand Branches,      !- Demand Side Branch List Name",
+        "    HW Demand Connectors,    !- Demand Side Connector List Name",
+        "    SequentialLoad;          !- Load Distribution Scheme",
+        "  SetpointManager:Scheduled,HW Loop Setpoint Manager,Temperature,hw_loop_setpoint,HW Supply Outlet Node;",
+        "  PlantEquipmentOperationSchemes,HW Loop Operation,PlantEquipmentOperation:HeatingLoad,HW Heating Operation,always_avail;",
+        "  PlantEquipmentOperation:HeatingLoad,HW Heating Operation,0,1E+15,HW Equipment;",
+        "  PlantEquipmentList,HW Equipment,Boiler:HotWater,Boiler;",
+        "  BranchList,HW Supply Branches,HW Pump Branch,HW Boiler Branch,HW Supply Bypass Branch,HW Supply Outlet Branch;",
+        "  ConnectorList,HW Supply Connectors,Connector:Splitter,HW Supply Splitter,Connector:Mixer,HW Supply Mixer;",
+        "  Connector:Splitter,HW Supply Splitter,HW Pump Branch,HW Boiler Branch,HW Supply Bypass Branch;",
+        "  Connector:Mixer,HW Supply Mixer,HW Supply Outlet Branch,HW Boiler Branch,HW Supply Bypass Branch;",
+        "  Branch,HW Pump Branch,,Pump:VariableSpeed,HW Pump,HW Supply Inlet Node,HW Pump Outlet Node;",
+        "  Branch,HW Boiler Branch,,Boiler:HotWater,Boiler,HW Boiler Inlet Node,HW Boiler Outlet Node;",
+        "  Branch,HW Supply Bypass Branch,,Pipe:Adiabatic,HW Supply Bypass Pipe,HW Supply Bypass Inlet Node,HW Supply Bypass Outlet Node;",
+        "  Branch,HW Supply Outlet Branch,,Pipe:Adiabatic,HW Supply Outlet Pipe,HW Supply Outlet Pipe Inlet Node,HW Supply Outlet Node;",
+        "  Pipe:Adiabatic,HW Supply Bypass Pipe,HW Supply Bypass Inlet Node,HW Supply Bypass Outlet Node;",
+        "  Pipe:Adiabatic,HW Supply Outlet Pipe,HW Supply Outlet Pipe Inlet Node,HW Supply Outlet Node;",
+        "  BranchList,HW Demand Branches,HW Demand Inlet Branch,HW Coil Branch,HW Demand Outlet Branch;",
+        "  ConnectorList,HW Demand Connectors,Connector:Splitter,HW Demand Splitter,Connector:Mixer,HW Demand Mixer;",
+        "  Connector:Splitter,HW Demand Splitter,HW Demand Inlet Branch,HW Coil Branch;",
+        "  Connector:Mixer,HW Demand Mixer,HW Demand Outlet Branch,HW Coil Branch;",
+        "  Branch,HW Demand Inlet Branch,,Pipe:Adiabatic,HW Demand Inlet Pipe,HW Demand Inlet Node,HW Demand Inlet Pipe Outlet Node;",
+        "  Branch,HW Coil Branch,,Coil:Heating:Water,HW Coil,HW Coil Water Inlet Node,HW Coil Water Outlet Node;",
+        "  Branch,HW Demand Outlet Branch,,Pipe:Adiabatic,HW Demand Outlet Pipe,HW Demand Outlet Pipe Inlet Node,HW Demand Outlet Node;",
+        "  Pipe:Adiabatic,HW Demand Inlet Pipe,HW Demand Inlet Node,HW Demand Inlet Pipe Outlet Node;",
+        "  Pipe:Adiabatic,HW Demand Outlet Pipe,HW Demand Outlet Pipe Inlet Node,HW Demand Outlet Node;",
+        "  Boiler:HotWater,",
+        "    Boiler,                  !- Name",
+        "    NaturalGas,              !- Fuel Type",
+        "    10569.2,                 !- Nominal Capacity {W}",
+        "    1,                       !- Nominal Thermal Efficiency",
+        "    ,                        !- Efficiency Curve Temperature Evaluation Variable",
+        "    ,                        !- Normalized Boiler Efficiency Curve Name",
+        "    0.000129127,             !- Design Water Flow Rate {m3/s}",
+        "    ,                        !- Minimum Part Load Ratio",
+        "    1,                       !- Maximum Part Load Ratio",
+        "    1,                       !- Optimum Part Load Ratio",
+        "    HW Boiler Inlet Node,    !- Boiler Water Inlet Node Name",
+        "    HW Boiler Outlet Node,   !- Boiler Water Outlet Node Name",
+        "    99.9,                    !- Water Outlet Upper Temperature Limit {C}",
+        "    ConstantFlow;            !- Boiler Flow Mode",
+        "  Pump:VariableSpeed,",
+        "    HW Pump,                 !- Name",
+        "    HW Supply Inlet Node,    !- Inlet Node Name",
+        "    HW Pump Outlet Node,     !- Outlet Node Name",
+        "    0.000129127,             !- Design Maximum Flow Rate {m3/s}",
+        "    179352,                  !- Design Pump Head {Pa}",
+        "    33,                      !- Design Power Consumption {W}",
+        "    0.9,                     !- Motor Efficiency",
+        "    0,                       !- Fraction of Motor Inefficiencies to Fluid Stream",
+        "    0,                       !- Coefficient 1 of the Part Load Performance Curve",
+        "    1,                       !- Coefficient 2 of the Part Load Performance Curve",
+        "    0,                       !- Coefficient 3 of the Part Load Performance Curve",
+        "    0,                       !- Coefficient 4 of the Part Load Performance Curve",
+    };
+    if (continuousPump) {
+        lines.insert(lines.end(),
+                     {
+                         "    autosize,                !- Design Minimum Flow Rate {m3/s}",
+                         "    Continuous,              !- Pump Control Type",
+                         "    ,,,,,,,,,,,              !- Pump Flow Rate Schedule Name to Skin Loss Radiative Fraction",
+                         "    PowerPerFlowPerPressure, !- Design Power Sizing Method",
+                         "    348701.1,                !- Design Electric Power per Unit Flow Rate {W/(m3/s)}",
+                         "    1.282051282,             !- Design Shaft Power per Unit Flow Rate per Unit Head {W/((m3/s)-Pa)}",
+                         "    1;                       !- Design Minimum Flow Rate Fraction",
+                     });
+    } else {
+        lines.insert(lines.end(),
+                     {
+                         "    0,                       !- Design Minimum Flow Rate {m3/s}",
+                         "    Intermittent;            !- Pump Control Type",
+                     });
+    }
+    std::string idf;
+    for (auto const &line : lines) {
+        idf += std::string(line) + "\n";
+    }
+    return idf;
+}
+
+void checkHotWaterCoilEnergyBalance(EnergyPlus::EnergyPlusData &state)
+{
+    auto const &coil = state.dataWaterCoils->WaterCoil(1);
+    auto const &boiler = state.dataBoilers->Boiler[0];
+    Real64 const coilWaterFlow = state.dataLoopNodes->Node(coil.WaterInletNodeNum).MassFlowRate;
+    Real64 const cp = coil.WaterPlantLoc.loop->glycol->getSpecificHeat(state, coil.InletWaterTemp, "checkHotWaterCoilEnergyBalance");
+    Real64 const coilWaterSideRate = coilWaterFlow * cp * (coil.InletWaterTemp - coil.OutletWaterTemp);
+
+    // the coil is cycling and the loop flow is forced by the boiler (or pump): the coil receives the loop flow
+    EXPECT_GT(coil.TotWaterHeatingCoilRate, 1000.0);
+    EXPECT_NEAR(boiler.DesMassFlowRate, coilWaterFlow, 1.0e-6);
+    // heat removed from the water matches the heat delivered to the air and the heat provided by the boiler
+    EXPECT_NEAR(coil.TotWaterHeatingCoilRate, coilWaterSideRate, 0.005 * coil.TotWaterHeatingCoilRate);
+    EXPECT_NEAR(coil.TotWaterHeatingCoilRate, boiler.BoilerLoad, 0.02 * coil.TotWaterHeatingCoilRate);
+}
+} // namespace
+
+TEST_F(EnergyPlusFixture, WaterCoils_CyclingHeatingCoil_ConstantFlowBoilerWithoutDemandBypass)
+{
+    ASSERT_TRUE(process_idf(hotWaterLoopWithoutDemandBypassIdf(false)));
+    SimulationManager::ManageSimulation(*state);
+    checkHotWaterCoilEnergyBalance(*state);
+}
+
+TEST_F(EnergyPlusFixture, WaterCoils_CyclingHeatingCoil_ContinuousPumpWithoutDemandBypass)
+{
+    // pump minimum flow rate (5.05 C density) exceeds the coil maximum flow rate set by the unitary system (60 C density)
+    ASSERT_TRUE(process_idf(hotWaterLoopWithoutDemandBypassIdf(true)));
+    SimulationManager::ManageSimulation(*state);
+    EXPECT_GT(state->dataLoopNodes->Node(state->dataPumps->PumpEquip(1).OutletNodeNum).MassFlowRate, 0.0);
+    checkHotWaterCoilEnergyBalance(*state);
 }

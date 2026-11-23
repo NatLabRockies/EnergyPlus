@@ -117,6 +117,7 @@ namespace DataPlant {
         int errIndex_LoadWasntDist;
         int errCount_LoadRemains;
         int errIndex_LoadRemains;
+        int errIndex_ForcedDemandFlow = 0;
         Real64 LoopSideInlet_TankTemp;
         Real64 LoopSideInlet_MdotCpDeltaT;
         Real64 LoopSideInlet_McpDTdt;
