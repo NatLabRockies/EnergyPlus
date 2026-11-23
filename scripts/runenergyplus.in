@@ -264,6 +264,7 @@ rm -f  eplusout.svg
 rm -f  eplusout.shd
 rm -f  eplusout.wrl
 rm -f  eplusshading.csv
+rm -f  eplusshading_diffuse.csv
 
 rm -f  eplusout.json
 rm -f  eplusout_detailed_zone.json
@@ -846,6 +847,9 @@ if [ -f audit.out ]; then
 fi
 if [ -f eplusshading.csv ]; then
   mv eplusshading.csv "${OUT_P}/${ARG1}Shading.csv"
+fi
+if [ -f eplusshading_diffuse.csv ]; then
+  mv eplusshading_diffuse.csv "${OUT_P}/${ARG1}ShadingDiffuse.csv"
 fi
 
 # move FMU generated output files to output folder -- FMI

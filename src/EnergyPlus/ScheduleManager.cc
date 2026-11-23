@@ -632,6 +632,10 @@ namespace Sched {
                 ShowFatalError(state, "Program terminates due to previous condition.");
             }
 
+            // Retain the resolved path so that SolarShading can locate the companion file of
+            // externally-computed diffuse shading ratios.
+            s_sched->ShadingSunlitFracFilePath = state.files.TempFullFilePath.filePath;
+
             if (state.dataEnvrn->CurrentYearIsLeapYear) {
                 rowLimitCount = 366 * Constant::iHoursInDay * s_glob->TimeStepsInHour;
             } else {
