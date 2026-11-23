@@ -2217,8 +2217,10 @@ namespace Weather {
         }
         if (state.dataWeather->UseSnowValues) {
             state.dataEnvrn->IsSnow = today.IsSnow;
+            state.dataEnvrn->SnowDepth = today.SnowDepth / 100.0;
         } else {
             state.dataEnvrn->IsSnow = false;
+            state.dataEnvrn->SnowDepth = 0.0;
         }
 
         if (state.dataEnvrn->IsSnow) {
@@ -2949,6 +2951,7 @@ namespace Weather {
                     tomorrow.WindSpeed = WindSpeed;
                     tomorrow.WindDir = WindDir;
                     tomorrow.LiquidPrecip = LiquidPrecip;
+                    tomorrow.SnowDepth = SnowDepth;
                     tomorrow.TotalSkyCover = TotalSkyCover;
                     tomorrow.OpaqueSkyCover = OpaqueSkyCover;
 
@@ -3116,6 +3119,7 @@ namespace Weather {
                     tomorrowTs.LiquidPrecip /= double(state.dataGlobal->TimeStepsInHour);
                     tomorrowTs.IsRain = tomorrowTs.LiquidPrecip >= state.dataWeather->IsRainThreshold; // Wthr%IsRain
                     tomorrowTs.IsSnow = wvarsH.IsSnow;
+                    tomorrowTs.SnowDepth = wvarsH.SnowDepth;
                 } // End of TS Loop
 
                 state.dataWeather->wvarsLastHr = wvarsHr(hour);
