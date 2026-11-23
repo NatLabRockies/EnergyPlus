@@ -49,6 +49,7 @@
 #ifdef DEBUG_ARITHM_MSVC
 #    include <cfloat>
 #endif
+#include <cmath>
 #include <format>
 #include <memory>
 #include <vector>
@@ -3111,7 +3112,7 @@ ElectricStorage::ElectricStorage( // main constructor
       energeticEfficCharge_(0.0), energeticEfficDischarge_(0.0), maxPowerDraw_(0.0), maxPowerStore_(0.0), maxEnergyCapacity_(0.0), parallelNum_(0),
       seriesNum_(0), numBattery_(0), cycleBinNum_(0), startingSOC_(0.0), maxAhCapacity_(0.0), availableFrac_(0.0), chargeConversionRate_(0.0),
       chargedOCV_(0.0), dischargedOCV_(0.0), internalR_(0.0), maxDischargeI_(0.0), cutoffV_(0.0), maxChargeRate_(0.0), lifeCalculation_(false),
-      liIon_dcToDcChargingEff_(0.0), liIonCellChargePower_(0.0), liIon_mass_(0.0), liIon_surfaceArea_(0.0), liIon_Cp_(0.0),
+      liIon_dcToDcEfficiency_(0.0), liIonCellChargePower_(0.0), liIon_mass_(0.0), liIon_surfaceArea_(0.0), liIon_Cp_(0.0),
       liIon_heatTransferCoef_(0.0), liIon_Vfull_(0.0), liIon_Vexp_(0.0), liIon_Vnom_(0.0), liIon_Vnom_default_(0.0), liIon_Qfull_(0.0),
       liIon_Qexp_(0.0), liIon_Qnom_(0.0), liIon_C_rate_(0.0), thisTimeStepStateOfCharge_(0.0), lastTimeStepStateOfCharge_(0.0), pelFromStorage_(0.0),
       pelIntoStorage_(0.0), qdotConvZone_(0.0), qdotRadZone_(0.0), timeElapsed_(0.0), thisTimeStepAvailable_(0.0), thisTimeStepBound_(0.0),
@@ -3282,8 +3283,8 @@ ElectricStorage::ElectricStorage( // main constructor
             seriesNum_ = static_cast<int>(state.dataIPShortCut->rNumericArgs(2));
             parallelNum_ = static_cast<int>(state.dataIPShortCut->rNumericArgs(3));
             startingSOC_ = state.dataIPShortCut->lNumericFieldBlanks(4) ? 0.5 : state.dataIPShortCut->rNumericArgs(4);
-            liIon_dcToDcChargingEff_ = checkUserEfficiencyInput(
-                state, state.dataIPShortCut->lNumericFieldBlanks(5) ? 0.95 : state.dataIPShortCut->rNumericArgs(5), true, name_, errorsFound);
+            Real64 const dcToDcRoundtripEfficiency = checkUserEfficiencyInput(state, state.dataIPShortCut->rNumericArgs(5), true, name_, errorsFound);
+            liIon_dcToDcEfficiency_ = std::sqrt(dcToDcRoundtripEfficiency);
             liIon_mass_ = state.dataIPShortCut->rNumericArgs(6);
             liIon_surfaceArea_ = state.dataIPShortCut->rNumericArgs(7);
             liIon_Cp_ = state.dataIPShortCut->lNumericFieldBlanks(8) ? 1500.0 : state.dataIPShortCut->rNumericArgs(8);
@@ -4159,9 +4160,9 @@ void ElectricStorage::simulateLiIonNmcBatteryModel(EnergyPlusData &state,
     // E+ power/energy outputs are positive
     double power{0.0}; // Using double instead of Real64 because SSC is expecting a double
     if (charging) {
-        power = -powerCharge * liIon_dcToDcChargingEff_;
+        power = -powerCharge * liIon_dcToDcEfficiency_;
     } else if (discharging) {
-        power = powerDischarge;
+        power = powerDischarge / liIon_dcToDcEfficiency_;
     }
     power *= 0.001; // Convert to kW
     ssc_battery_->runPower(power);
@@ -4169,19 +4170,21 @@ void ElectricStorage::simulateLiIonNmcBatteryModel(EnergyPlusData &state,
     // Store outputs
     const battery_state &battState2{ssc_battery_->get_state()};
     liIonCellChargePower_ = 0.0;
-    Real64 dcToDcChargingLoss = 0.0;
+    Real64 dcToDcConversionLoss = 0.0;
     if (battState2.P < 0.0) { // negative for charging
         storageMode_ = 2;
         liIonCellChargePower_ = fabs(battState2.P) * 1000.0; // kW -> W
-        powerCharge = liIonCellChargePower_ / liIon_dcToDcChargingEff_;
-        dcToDcChargingLoss = powerCharge - liIonCellChargePower_;
+        powerCharge = liIonCellChargePower_ / liIon_dcToDcEfficiency_;
+        dcToDcConversionLoss = powerCharge - liIonCellChargePower_;
         powerDischarge = 0.0;
         charging = true;
         discharging = false;
     } else if (battState2.P > 0.0) { // positive for discharging
         storageMode_ = 1;
         powerCharge = 0.0;
-        powerDischarge = fabs(battState2.P) * 1000.0; // kW -> W
+        Real64 const liIonCellDischargePower = fabs(battState2.P) * 1000.0; // kW -> W
+        powerDischarge = liIonCellDischargePower * liIon_dcToDcEfficiency_;
+        dcToDcConversionLoss = liIonCellDischargePower - powerDischarge;
         charging = false;
         discharging = true;
     } else {
@@ -4201,7 +4204,7 @@ void ElectricStorage::simulateLiIonNmcBatteryModel(EnergyPlusData &state,
     drawnPower_ = powerDischarge;
     drawnEnergy_ = drawnPower_ * state.dataHVACGlobal->TimeStepSysSec;
     decrementedEnergyStored_ = -storedEnergy_;
-    thermLossRate_ = battState2.thermal->heat_dissipated * 1000.0 + dcToDcChargingLoss; // kW -> W plus DC-to-DC conversion loss
+    thermLossRate_ = battState2.thermal->heat_dissipated * 1000.0 + dcToDcConversionLoss; // kW -> W plus DC-to-DC conversion loss
     thermLossEnergy_ = thermLossRate_ * state.dataHVACGlobal->TimeStepSysSec;
     batteryTemperature_ = battState2.thermal->T_batt;
 

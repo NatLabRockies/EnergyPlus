@@ -96183,13 +96183,14 @@ ElectricLoadCenter:Storage:LiIonNMCBattery,
         \default 0.5
         \note The state of charge is evaluated based on the
         \note maximum capacity defined in the next field.
-   N5,  \field DC to DC Charging Efficiency
+   N5,  \field DC to DC Roundtrip Efficiency
         \type real
         \minimum> 0
         \maximum 1
         \default 0.95
-        \note Fraction of DC bus charging power delivered to the battery cells.
-        \note The remaining power is reported as electrical storage thermal loss.
+        \note DC-to-DC conversion efficiency for a complete charge and discharge cycle.
+        \note The square root of this value is applied to both charging and discharging.
+        \note Conversion losses are reported as electrical storage thermal loss.
    N6,  \field Battery Mass
         \type real
         \minimum> 0
