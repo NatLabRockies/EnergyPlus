@@ -66,7 +66,6 @@ namespace GroundHeatExchangers {
         static constexpr auto moduleName = "GroundHeatExchanger:ResponseFactors";
         std::string name;                                        // Name
         unsigned int numBoreholes = 0;                           // Number of boreholes
-        int numGFuncPairs = 0;                                   // Number of g-function pairs
         Real64 gRefRatio = 0.0;                                  // Reference ratio of g-function set
         Real64 maxSimYears = 0.0;                                // Maximum length of simulation in years
         std::vector<Real64> time;                                // response time in seconds

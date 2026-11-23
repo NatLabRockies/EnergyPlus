@@ -2800,13 +2800,11 @@ namespace EvaporativeFluidCoolers {
             this->FanPower = 0.0;
             this->FanEnergy = 0.0;
             this->AirFlowRateRatio = 0.0;
-            this->WaterAmountUsed = 0.0;
             this->BypassFraction = 0.0;
         } else {
             this->fluidCoolerInletWaterTemp = state.dataLoopNodes->Node(this->WaterInletNode).Temp;
             this->fluidCoolerOutletWaterTemp = this->OutletWaterTemp;
             this->FanEnergy = this->FanPower * ReportingConstant;
-            this->WaterAmountUsed = this->WaterUsage * ReportingConstant;
         }
     }
 

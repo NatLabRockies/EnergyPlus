@@ -81,7 +81,6 @@ GLHEResponseFactors::GLHEResponseFactors(EnergyPlusData &state, std::string cons
         this->LNTTS.push_back(var.at("g_function_ln_t_ts_value").get<Real64>());
         this->GFNC.push_back(var.at("g_function_g_value").get<Real64>());
     }
-    this->numGFuncPairs = static_cast<int>(this->LNTTS.size());
 }
 
 std::shared_ptr<GLHEResponseFactors> GetResponseFactor(EnergyPlusData &state, std::string const &objectName)

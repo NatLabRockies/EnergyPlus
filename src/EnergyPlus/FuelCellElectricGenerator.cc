@@ -82,6 +82,31 @@ namespace EnergyPlus {
 
 namespace FuelCellElectricGenerator {
 
+    namespace {
+
+        Real64 gasMolarEnthalpy(DataGenerators::GasPropertyDataStruct const &gas, Real64 const fluidTemp)
+        {
+            Real64 const temperatureK = fluidTemp + Constant::Kelvin;
+
+            if (gas.ThermoMode == DataGenerators::ThermodynamicMode::NISTShomate) {
+                Real64 const shomateTemperature = temperatureK / 1000.0;
+                return gas.ShomateA * shomateTemperature + gas.ShomateB * pow_2(shomateTemperature) / 2.0 +
+                       gas.ShomateC * pow_3(shomateTemperature) / 3.0 + gas.ShomateD * pow_4(shomateTemperature) / 4.0 -
+                       gas.ShomateE / shomateTemperature + gas.ShomateF - gas.ShomateH;
+            }
+
+            if (gas.ThermoMode == DataGenerators::ThermodynamicMode::NASAPolynomial) {
+                return ((gas.NASA_A1 + gas.NASA_A2 * temperatureK / 2.0 + gas.NASA_A3 * pow_2(temperatureK) / 3.0 +
+                         gas.NASA_A4 * pow_3(temperatureK) / 4.0 + gas.NASA_A5 * pow_4(temperatureK) / 5.0 + gas.NASA_A6 / temperatureK) *
+                        DataGenerators::RinKJperMolpK * temperatureK) -
+                       gas.StdRefMolarEnthOfForm;
+            }
+
+            return 0.0;
+        }
+
+    } // namespace
+
     // MODULE INFORMATION:
     //       AUTHOR         Brent Griffith
     //       DATE WRITTEN   August. 2005
@@ -805,8 +830,6 @@ namespace FuelCellElectricGenerator {
 
                 fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCExhaust;
                 fuelCell.ExhaustHX.Name = AlphArray(1);
-                fuelCell.ExhaustHX.WaterInNodeName = AlphArray(2);
-                fuelCell.ExhaustHX.WaterOutNodeName = AlphArray(3);
                 // find node ids for water path
                 fuelCell.ExhaustHX.WaterInNode = Node::GetOnlySingleNode(state,
                                                                          AlphArray(2),
@@ -828,7 +851,6 @@ namespace FuelCellElectricGenerator {
                                                                           Node::ObjectIsNotParent);
                 Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(2), AlphArray(3), "Heat Recovery Nodes");
 
-                fuelCell.ExhaustHX.ExhaustOutNodeName = AlphArray(4);
                 fuelCell.ExhaustHX.ExhaustOutNode =
                     Node::GetOnlySingleNode(state,
                                             AlphArray(4),
@@ -1021,9 +1043,6 @@ namespace FuelCellElectricGenerator {
                     auto &fuelCell = state.dataFuelCellElectGen->FuelCell(fuelCellNum);
                     fuelCell.Type = DataPlant::PlantEquipmentType::Generator_FCStackCooler;
                     fuelCell.StackCooler.Name = AlphArray(1);
-                    fuelCell.StackCooler.WaterInNodeName = AlphArray(2);
-
-                    fuelCell.StackCooler.WaterOutNodeName = AlphArray(3);
 
                     fuelCell.StackCooler.WaterInNode = Node::GetOnlySingleNode(state,
                                                                                AlphArray(2),
@@ -1051,18 +1070,6 @@ namespace FuelCellElectricGenerator {
                     fuelCell.StackCooler.r1 = NumArray(4);
                     fuelCell.StackCooler.r2 = NumArray(5);
                     fuelCell.StackCooler.r3 = NumArray(6);
-                    fuelCell.StackCooler.MdotStackCoolant = NumArray(7);
-                    fuelCell.StackCooler.UAs_cool = NumArray(8);
-                    fuelCell.StackCooler.Fs_cogen = NumArray(9);
-                    fuelCell.StackCooler.As_cogen = NumArray(10);
-                    fuelCell.StackCooler.MdotCogenNom = NumArray(11);
-                    fuelCell.StackCooler.hCogenNom = NumArray(12);
-                    fuelCell.StackCooler.ns = NumArray(13);
-                    fuelCell.StackCooler.PstackPumpEl = NumArray(14);
-                    fuelCell.StackCooler.PmpPowerLossFactor = NumArray(15);
-                    fuelCell.StackCooler.f0 = NumArray(16);
-                    fuelCell.StackCooler.f1 = NumArray(17);
-                    fuelCell.StackCooler.f1 = NumArray(18);
 
                     fuelCell.StackCooler.StackCoolerPresent = true;
 
@@ -3334,7 +3341,6 @@ namespace FuelCellElectricGenerator {
             this->AuxilHeat.NdotAuxMix = 0.0;
             this->AuxilHeat.QskinLoss = 0.0;
             this->AuxilHeat.QairIntake = 0.0;
-            this->ExhaustHX.NdotHXleaving = 0.0;
             this->ExhaustHX.WaterOutletTemp = 0.0;
             this->ExhaustHX.WaterOutletEnthalpy = 0.0;
             this->ElecStorage.LastTimeStepStateOfCharge = this->ElecStorage.StartingEnergyStored;
@@ -3514,18 +3520,10 @@ namespace FuelCellElectricGenerator {
 
         this->Report.ACPowerGen = this->ACPowerGen;                                         // electrical power produced [W]
         this->Report.ACEnergyGen = this->ACPowerGen * state.dataHVACGlobal->TimeStepSysSec; // energy produced (J)
-        this->Report.QdotExhaust = 0.0;                                                     // reporting: exhaust gas heat recovered (W)
-        this->Report.TotalHeatEnergyRec = 0.0;                                              // reporting: total heat recovered (J)
-        this->Report.ExhaustEnergyRec = 0.0;                                                // reporting: exhaust gas heat recovered (J)
 
         this->Report.HeatRecInletTemp = 0.0;  // reporting: Heat Recovery Loop Inlet Temperature (C)
         this->Report.HeatRecOutletTemp = 0.0; // reporting: Heat Recovery Loop Outlet Temperature (C)
         this->Report.HeatRecMdot = 0.0;       // reporting: Heat Recovery Loop Mass flow rate (kg/s)
-
-        this->Report.ElectEfficiency = 0.0;
-        this->Report.ThermalEfficiency = 0.0;
-        this->Report.OverallEfficiency = 0.0;
-        this->Report.ExergyEfficiency = 0.0;
 
         this->Report.TairInlet = this->AirSup.TairIntoBlower;                                       // State point 1
         this->Report.TairIntoFCPM = this->AirSup.TairIntoFCPM;                                      // State point 4
@@ -3555,8 +3553,6 @@ namespace FuelCellElectricGenerator {
 
         this->Report.FuelEnergyUseRateHHV = this->FCPM.NdotFuel * state.dataGenerator->FuelSupply(this->FuelSupNum).HHV *
                                             state.dataGenerator->FuelSupply(this->FuelSupNum).KmolPerSecToKgPerSec;
-
-        this->Report.FuelRateMdot = 0.0; // (Kg/s)
 
         this->Report.TwaterInlet = this->WaterSup.TwaterIntoCompress;
         this->Report.TwaterIntoFCPM = this->WaterSup.TwaterIntoFCPM;
@@ -3601,6 +3597,53 @@ namespace FuelCellElectricGenerator {
         this->Report.SkinLossEnergy = (this->QconvZone + this->QradZone) * state.dataHVACGlobal->TimeStepSysSec;
         this->Report.SkinLossConvect = this->QconvZone;
         this->Report.SkinLossRadiat = this->QradZone;
+
+        if (this->ExhaustHX.ExhaustOutNode > 0) {
+            Real64 dryGasMassFlowRate = 0.0;
+            Real64 waterVaporMassFlowRate = 0.0;
+            Real64 exhaustEnthalpyFlowRate = 0.0;
+            for (int constituent = 1; constituent <= isize(this->AuxilHeat.GasLibID); ++constituent) {
+                GasID const gasID = this->AuxilHeat.GasLibID(constituent);
+                if (gasID == GasID::Invalid) {
+                    continue;
+                }
+
+                Real64 molarFlowRate = this->AuxilHeat.ConstitMolalFract(constituent) * this->AuxilHeat.NdotAuxMix;
+                if (gasID == GasID::Water) {
+                    molarFlowRate = max(0.0, molarFlowRate - this->ExhaustHX.CondensateRate);
+                }
+                auto const &gas = state.dataGenerator->GasPhaseThermoChemistryData(static_cast<int>(gasID));
+                Real64 const massFlowRate = molarFlowRate * gas.MolecularWeight;
+                if (gasID == GasID::Water) {
+                    waterVaporMassFlowRate += massFlowRate;
+                } else {
+                    dryGasMassFlowRate += massFlowRate;
+                }
+
+                // Use 0 C gas species as the dry-gas enthalpy reference. For water vapor, use liquid water at 0 C as the reference so the
+                // result retains the latent heat and is consistent with the HVAC node enthalpy convention.
+                Real64 molarEnthalpy = gasMolarEnthalpy(gas, this->ExhaustHX.THXexh) - gasMolarEnthalpy(gas, 0.0); // kJ/mol
+                if (gasID == GasID::Water) {
+                    Real64 gaseousWaterEnthalpyAtReference;
+                    Real64 liquidWaterEnthalpyAtReference;
+                    FigureGaseousWaterEnthalpy(0.0, gaseousWaterEnthalpyAtReference);
+                    FigureLiquidWaterEnthalpy(0.0, liquidWaterEnthalpyAtReference);
+                    molarEnthalpy += gaseousWaterEnthalpyAtReference - liquidWaterEnthalpyAtReference;
+                }
+                exhaustEnthalpyFlowRate += molarFlowRate * molarEnthalpy * 1.0e6; // kmol/s * kJ/mol -> W
+            }
+
+            auto &exhaustNode = state.dataLoopNodes->Node(this->ExhaustHX.ExhaustOutNode);
+            exhaustNode.Temp = this->ExhaustHX.THXexh;
+            // Air-node mass flow and enthalpy use a dry-gas basis; water vapor is represented by the humidity ratio.
+            exhaustNode.MassFlowRate = dryGasMassFlowRate;
+            exhaustNode.MassFlowRateMin = 0.0;
+            exhaustNode.MassFlowRateMinAvail = 0.0;
+            exhaustNode.MassFlowRateMax = exhaustNode.MassFlowRate;
+            exhaustNode.MassFlowRateMaxAvail = exhaustNode.MassFlowRate;
+            exhaustNode.HumRat = (dryGasMassFlowRate > 0.0) ? waterVaporMassFlowRate / dryGasMassFlowRate : 0.0;
+            exhaustNode.Enthalpy = (dryGasMassFlowRate > 0.0) ? exhaustEnthalpyFlowRate / dryGasMassFlowRate : 0.0;
+        }
     }
     void FCDataStruct::oneTimeInit_new(EnergyPlusData &state)
     {

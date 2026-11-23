@@ -428,7 +428,6 @@ namespace Fans {
         Real64 elecPowerPerFlowRate = 0.0;                    // scaling factor for PowerPerFlow method
         Real64 elecPowerPerFlowRatePerPressure = 0.0;         // scaling factor for PowerPerFlowPerPressure
         Real64 nightVentPressureDelta = 0.0;                  // fan pressure rise during night ventilation mode
-        Real64 nightVentFlowFraction = 0.0;                   // fan's flow fraction during night ventilation mode, not used
         Real64 zoneRadFract = 0.0;                            // thermal radiation split for motor losses
         Real64 qdotConvZone = 0.0;                            // fan power lost to surrounding zone by convection to air (W)
         Real64 qdotRadZone = 0.0;                             // fan power lost to surrounding zone by radiation to zone surfaces(W)

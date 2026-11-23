@@ -1,15 +1,10 @@
 /* Copyright (c) 2017 Big Ladder Software LLC. All rights reserved.
  * See the LICENSE file for additional terms and conditions. */
 
-#ifndef NDEBUG
-#ifdef __unix__
-#include <cfenv>
-#endif
-#endif
-
 // Penumbra
 #include <penumbra/logging.h>
 #include "context.h"
+#include "fp-exception-guard.h"
 
 namespace Penumbra {
 
@@ -57,6 +52,10 @@ static void glfw_error_callback(int, const char *description) {
 }
 
 Context::Context(GLint size_in, Courierr::Courierr *logger_in) : size(size_in), logger(logger_in) {
+  // GLFW/windowing-system/driver initialization may raise FP exceptions; mask any traps the host
+  // enabled (e.g., Cocoa on macOS arm64 raises FE_INVALID during glfwInit)
+  FloatingPointExceptionGuard fp_guard;
+
 
   glfw_logger = logger;
   glfwSetErrorCallback(glfw_error_callback);
@@ -71,18 +70,7 @@ Context::Context(GLint size_in, Courierr::Courierr *logger_in) : size(size_in), 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-#ifndef NDEBUG
-#ifdef __unix__
-  // Temporarily Disable floating point exceptions
-  fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   window = glfwCreateWindow(1, 1, "Penumbra", nullptr, nullptr);
-#ifndef NDEBUG
-#ifdef __unix__
-  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   glfwMakeContextCurrent(window);
   if (!window) {
     throw PenumbraException(
@@ -212,6 +200,9 @@ Context::Context(GLint size_in, Courierr::Courierr *logger_in) : size(size_in), 
 }
 
 Context::~Context() {
+  // Tear-down calls into the GL driver as well as GLFW/the windowing system; mask the host's
+  // floating point traps for all of it, not just glfwTerminate()
+  FloatingPointExceptionGuard fp_guard;
   glDeleteQueries(static_cast<GLsizei>(queries.size()), queries.data());
   glDeleteFramebuffersEXT(1, &framebuffer_object);
   glDeleteRenderbuffersEXT(1, &renderbuffer_object);
@@ -418,44 +409,25 @@ void Context::set_camera_mvp() {
 }
 
 void Context::draw_model() {
+  FloatingPointExceptionGuard fp_guard;
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-#ifndef NDEBUG
-#ifdef __unix__
-  // Temporarily Disable floating point exceptions
-  fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glDepthFunc(GL_LESS);
   model.draw_all();
   glDepthFunc(GL_EQUAL);
-#ifndef NDEBUG
-#ifdef __unix__
-  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
 }
 
 void Context::draw_except(const std::vector<SurfaceBuffer> &hidden_surfaces) {
+  FloatingPointExceptionGuard fp_guard;
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-#ifndef NDEBUG
-#ifdef __unix__
-  // Temporarily Disable floating point exceptions
-  fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
   glClear(GL_DEPTH_BUFFER_BIT);
   glDepthFunc(GL_LESS);
   model.draw_except(hidden_surfaces);
   glDepthFunc(GL_EQUAL);
-#ifndef NDEBUG
-#ifdef __unix__
-  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
-#endif
 }
 
 void Context::show_rendering(const unsigned int surface_index, mat4x4 sun_view) {
+  FloatingPointExceptionGuard fp_guard;
   glfwSetWindowSize(window, size, size);
   glfwShowWindow(window);
 
@@ -481,6 +453,7 @@ void Context::show_rendering(const unsigned int surface_index, mat4x4 sun_view) 
 
 void Context::show_interior_rendering(const std::vector<unsigned int> &hidden_surface_indices,
                                       const unsigned interior_surface_index, mat4x4 sun_view) {
+  FloatingPointExceptionGuard fp_guard;
   glfwSetWindowSize(window, size, size);
   glfwShowWindow(window);
 

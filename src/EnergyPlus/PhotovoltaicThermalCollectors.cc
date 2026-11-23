@@ -1413,9 +1413,9 @@ namespace PhotovoltaicThermalCollectors {
         constexpr Real64 rf(0.75);                                            // relaxation factor
         constexpr Real64 degc_to_kelvin(273.15);                              // conversion constant degC to Kelvin
         Real64 ebal1, ebal2, ebal3;                                           // energy balances on 3 surfaces
-        std::array<Real64, 9> jj = {0.0};                                     // 3x3 array for coefficient matrix
-        std::array<Real64, 3> f = {0.0};                                      // 3 element array for constant term
-        std::array<Real64, 3> y = {0.0};                                      // solution array for tpvg,tpv, and t1
+        std::array<Real64, 9> jj{};                                           // 3x3 array for coefficient matrix
+        std::array<Real64, 3> f{};                                            // 3 element array for constant term
+        std::array<Real64, 3> y{};                                            // solution array for tpvg,tpv, and t1
         int m(3);                                                             // parameter for number of unknowns
         int i;                                                                // index
         int iter(0);                                                          // iteration counter

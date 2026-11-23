@@ -134,10 +134,6 @@ namespace EconomicTariff {
         Num
     };
 
-    // For AssignVariablePt
-    int constexpr varIsArgument(1); // if used as a value or on right side of expression
-    int constexpr varIsAssigned(2); // if variable is assigned to or on left side of expression
-
     // For ComputeSteps
     // All are negative because all variables are positive
     enum class Op
@@ -290,9 +286,7 @@ namespace EconomicTariff {
         int index;              // pointer to item in specific array
         Array1D<Real64> values; // values
         // the following items are not part of the object description
-        bool isArgument; // flag if the variable is ever used as an argument (value needed)
-        bool isAssigned; // flag if the variable is ever assigned to
-        int specific;    // the specific type of variable - see enumerated lists
+        int specific; // the specific type of variable - see enumerated lists
         // the following items are used in determinging the dependency relationship of variables
         // and consist of an operator and a list of variables.
         int cntMeDependOn;         // count of items in depend this line depends upon
@@ -307,8 +301,8 @@ namespace EconomicTariff {
 
         // Default Constructor
         EconVarType()
-            : tariffIndx(0), kindOfObj(ObjType::Invalid), index(0), values(NumMonths, 0.0), isArgument(false), isAssigned(false), specific(0),
-              cntMeDependOn(0), firstOperand(0), lastOperand(0), activeNow(false), isEvaluated(false), isReported(false)
+            : tariffIndx(0), kindOfObj(ObjType::Invalid), index(0), values(NumMonths, 0.0), specific(0), cntMeDependOn(0), firstOperand(0),
+              lastOperand(0), activeNow(false), isEvaluated(false), isReported(false)
         {
         }
     };
@@ -340,15 +334,13 @@ namespace EconomicTariff {
         std::string groupName;                   // name of the group
         BuySell buyOrSell;                       // enumerated choice index of the buy or sell options
         // index to the first and last category variables
-        int firstCategory; // first category referenced
-        int lastCategory;  // last category referenced
         // pointers to econ variables for categories
         std::array<int, (int)Cat::Num> cats;
         // index to the first and last native variables (energies and demands from the simulation)
         int firstNative;
         int lastNative;
         // native variables (based on energy and demands from the simulation)
-        std::array<int, (int)Native::Num> natives = {0};
+        std::array<int, (int)Native::Num> natives{};
         // arrays for holding gathered values
         Array1D<std::array<Real64, (int)Period::Num>> gatherEnergy;
         Array1D<std::array<Real64, (int)Period::Num>> gatherDemand;
@@ -372,11 +364,11 @@ namespace EconomicTariff {
         // Default Constructor
         TariffType()
             : reportMeterIndx(0), convChoice(EconConv::USERDEF), energyConv(0.0), demandConv(0.0), demandWindow(DemandWindow::Invalid),
-              demWinTime(0.0), monthChgVal(0.0), monthChgPt(0), minMonthChgVal(0.0), minMonthChgPt(0), firstCategory(0), lastCategory(0),
-              firstNative(0), lastNative(0), gatherEnergy(NumMonths, {0.0, 0.0, 0.0, 0.0}), gatherDemand(NumMonths, {0.0, 0.0, 0.0, 0.0}),
-              collectTime(0.0), collectEnergy(0.0), RTPcost(NumMonths, 0.0), RTPaboveBaseCost(NumMonths, 0.0), RTPbelowBaseCost(NumMonths, 0.0),
-              RTPaboveBaseEnergy(NumMonths, 0.0), RTPbelowBaseEnergy(NumMonths, 0.0), seasonForMonth(NumMonths, Season::Invalid), isQualified(false),
-              ptDisqualifier(0), isSelected(false), totalAnnualCost(0.0), totalAnnualEnergy(0.0)
+              demWinTime(0.0), monthChgVal(0.0), monthChgPt(0), minMonthChgVal(0.0), minMonthChgPt(0), firstNative(0), lastNative(0),
+              gatherEnergy(NumMonths, {0.0, 0.0, 0.0, 0.0}), gatherDemand(NumMonths, {0.0, 0.0, 0.0, 0.0}), collectTime(0.0), collectEnergy(0.0),
+              RTPcost(NumMonths, 0.0), RTPaboveBaseCost(NumMonths, 0.0), RTPbelowBaseCost(NumMonths, 0.0), RTPaboveBaseEnergy(NumMonths, 0.0),
+              RTPbelowBaseEnergy(NumMonths, 0.0), seasonForMonth(NumMonths, Season::Invalid), isQualified(false), ptDisqualifier(0),
+              isSelected(false), totalAnnualCost(0.0), totalAnnualEnergy(0.0)
         {
         }
     };
@@ -546,7 +538,6 @@ namespace EconomicTariff {
     int AssignVariablePt(EnergyPlusData &state,
                          std::string_view const stringIn,
                          bool const flagIfNotNumeric,
-                         int const useOfVar,
                          int const varSpecific,
                          ObjType const econObjKind,
                          int const objIndex,

@@ -291,29 +291,29 @@ namespace CondenserLoopTowers {
         Real64 coolingTowerRange = 0.0;
 
         // From VSTower struct - for Variable speed towers only
-        std::array<Real64, 35> Coeff = {0.0}; // - model coefficients
-        bool FoundModelCoeff = false;         // - TRUE if model is calibratable
-        Real64 MinInletAirWBTemp = 0.0;       // - model limit for min inlet air WB temp
-        Real64 MaxInletAirWBTemp = 0.0;       // - model limit for max inlet air WB temp
-        Real64 MinRangeTemp = 0.0;            // - model limit for min range temp
-        Real64 MaxRangeTemp = 0.0;            // - model limit for max range temp
-        Real64 MinApproachTemp = 0.0;         // - model limit for min approach temp
-        Real64 MaxApproachTemp = 0.0;         // - model limit for max approach temp
-        Real64 MinWaterFlowRatio = 0.0;       // - model limit for min water flow rate ratio
-        Real64 MaxWaterFlowRatio = 0.0;       // - model limit for max water flow rate ratio
-        Real64 MaxLiquidToGasRatio = 0.0;     // - model limit for max liquid to gas ratio
-        int VSErrorCountFlowFrac = 0;         // - counter if water flow rate ratio limits are exceeded
-        int VSErrorCountWFRR = 0;             // - counter if water flow rate ratio limits are exceeded
-        int VSErrorCountIAWB = 0;             // - counter if inlet air wet-bulb temperature limits are exceeded
-        int VSErrorCountTR = 0;               // - counter if tower range temperature limits are exceeded
-        int VSErrorCountTRCalc = 0;           // - counter if tower range temperature could not be calculated
-        int VSErrorCountTA = 0;               // - counter if tower approach temperature limits are exceeded
-        int ErrIndexWFRR = 0;                 // - index to recurring error structure for water flow rate ratio
-        int ErrIndexIAWB = 0;                 // - index to recurring error structure for inlet air WB
-        int ErrIndexTR = 0;                   // - index to recurring error structure for tower range
-        int ErrIndexTRCalc = 0;               // - index to recurring error structure for tower range
-        int ErrIndexTA = 0;                   // - index to recurring error structure for tower approach
-        int ErrIndexLG = 0;                   // - index to recurring error structure for tower liquid/gas ratio
+        std::array<Real64, 35> Coeff{};   // - model coefficients
+        bool FoundModelCoeff = false;     // - TRUE if model is calibratable
+        Real64 MinInletAirWBTemp = 0.0;   // - model limit for min inlet air WB temp
+        Real64 MaxInletAirWBTemp = 0.0;   // - model limit for max inlet air WB temp
+        Real64 MinRangeTemp = 0.0;        // - model limit for min range temp
+        Real64 MaxRangeTemp = 0.0;        // - model limit for max range temp
+        Real64 MinApproachTemp = 0.0;     // - model limit for min approach temp
+        Real64 MaxApproachTemp = 0.0;     // - model limit for max approach temp
+        Real64 MinWaterFlowRatio = 0.0;   // - model limit for min water flow rate ratio
+        Real64 MaxWaterFlowRatio = 0.0;   // - model limit for max water flow rate ratio
+        Real64 MaxLiquidToGasRatio = 0.0; // - model limit for max liquid to gas ratio
+        int VSErrorCountFlowFrac = 0;     // - counter if water flow rate ratio limits are exceeded
+        int VSErrorCountWFRR = 0;         // - counter if water flow rate ratio limits are exceeded
+        int VSErrorCountIAWB = 0;         // - counter if inlet air wet-bulb temperature limits are exceeded
+        int VSErrorCountTR = 0;           // - counter if tower range temperature limits are exceeded
+        int VSErrorCountTRCalc = 0;       // - counter if tower range temperature could not be calculated
+        int VSErrorCountTA = 0;           // - counter if tower approach temperature limits are exceeded
+        int ErrIndexWFRR = 0;             // - index to recurring error structure for water flow rate ratio
+        int ErrIndexIAWB = 0;             // - index to recurring error structure for inlet air WB
+        int ErrIndexTR = 0;               // - index to recurring error structure for tower range
+        int ErrIndexTRCalc = 0;           // - index to recurring error structure for tower range
+        int ErrIndexTA = 0;               // - index to recurring error structure for tower approach
+        int ErrIndexLG = 0;               // - index to recurring error structure for tower liquid/gas ratio
         //- Tr = Range temperature
         std::string TrBuffer1; // - buffer to print Tr warning messages on following time step
         std::string TrBuffer2; // - buffer to print Tr warning messages on following time step

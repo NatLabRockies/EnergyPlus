@@ -90,7 +90,7 @@ namespace BoilerSteam {
         Real64 SizFac = 0.0;                                 // sizing factor
         int BoilerInletNodeNum = 0;                          // Node number at the boiler inlet
         int BoilerOutletNodeNum = 0;                         // Node number at the boiler outlet
-        std::array<Real64, 3> FullLoadCoef = {0.0};          // Coefficients of the fuel consumption/part load ratio curve
+        std::array<Real64, 3> FullLoadCoef{};                // Coefficients of the fuel consumption/part load ratio curve
         PlantLocation plantLoc;
         int PressErrIndex = 0;               // index pointer for recurring errors
         Fluid::RefrigProps *fluid = nullptr; // Steam fluid properties

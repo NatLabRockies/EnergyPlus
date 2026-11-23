@@ -270,7 +270,6 @@ public:
         bool sci = true;
         bool wrl = true;
         bool screen = true;
-        bool tarcog = true;
         bool extshd = true;
         bool json = true;
         bool tabular = true;

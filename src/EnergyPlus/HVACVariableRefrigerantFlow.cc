@@ -2296,10 +2296,7 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
         // Get Water System tank connections
         // A37, \field Supply Water Storage Tank Name
         thisVrfSys.EvapWaterSupplyName = cAlphaArgs(37);
-        if (lAlphaFieldBlanks(37)) {
-            thisVrfSys.EvapWaterSupplyMode = EvapWaterSupply::FromMains;
-        } else {
-            thisVrfSys.EvapWaterSupplyMode = EvapWaterSupply::FromTank;
+        if (!lAlphaFieldBlanks(37)) {
             SetupTankDemandComponent(state,
                                      thisVrfSys.Name,
                                      cCurrentModuleObject,
@@ -4277,8 +4274,6 @@ void GetVRFInputData(EnergyPlusData &state, bool &ErrorsFound)
 
         auto &vrfTU = state.dataHVACVarRefFlow->VRFTU(VRFTUNum);
         if (!lAlphaFieldBlanks(20) && !lAlphaFieldBlanks(21)) {
-            vrfTU.DesignSpecMultispeedHPType = cAlphaArgs(20);
-            vrfTU.DesignSpecMultispeedHPName = cAlphaArgs(21);
             vrfTU.DesignSpecMSHPIndex = UnitarySystems::getDesignSpecMSHPIndex(state, cAlphaArgs(21));
             auto const &designSpecFan = state.dataUnitarySystems->designSpecMSHP[vrfTU.DesignSpecMSHPIndex];
             if (vrfTU.coolCoilType == HVAC::CoilType::CoolingVRF) {
@@ -6237,12 +6232,10 @@ void InitVRF(EnergyPlusData &state, int const VRFTUNum, int const ZoneNum, bool 
         if (state.dataHVACVarRefFlow->LastModeHeating(VRFCond) && state.dataHVACVarRefFlow->CoolingLoad(VRFCond)) {
             state.dataHVACVarRefFlow->LastModeCooling(VRFCond) = true;
             state.dataHVACVarRefFlow->LastModeHeating(VRFCond) = false;
-            //        SwitchedMode(VRFCond)    = .TRUE.
         }
         if (state.dataHVACVarRefFlow->LastModeCooling(VRFCond) && state.dataHVACVarRefFlow->HeatingLoad(VRFCond)) {
             state.dataHVACVarRefFlow->LastModeHeating(VRFCond) = true;
             state.dataHVACVarRefFlow->LastModeCooling(VRFCond) = false;
-            //        SwitchedMode(VRFCond)    = .TRUE.
         }
     } // IF(ALL(TerminalUnitList(VRFTU(VRFTUNum)%TUListIndex)%IsSimulated))THEN
 
@@ -8129,6 +8122,9 @@ void SizeVRF(EnergyPlusData &state, int const VRFTUNum)
             EqSizing.OAVolFlow = 0.0;
         }
 
+        // The terminal-unit ratio takes precedence over the condenser ratio, matching the input-field documentation.
+        state.dataSize->DataHeatSizeRatio =
+            vrfTU.HeatingCapacitySizeRatio > 1.0 ? vrfTU.HeatingCapacitySizeRatio : state.dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacitySizeRatio;
         Real64 SuppHeatCoilLoad = 0.0;
         // simulate the TU to size the coils
         if (state.dataHVACVarRefFlow->VRF(VRFCond).VRFAlgorithmType == AlgorithmType::FluidTCtrl) {
@@ -8894,7 +8890,6 @@ void VRFTerminalUnitEquipment::ControlVRFToLoad(EnergyPlusData &state,
                 Real64 Win = thisSuppHeatCoilAirInletNode.HumRat;
                 Real64 CpAirIn = Psychrometrics::PsyCpAirFnW(Win);
                 SuppHeatCoilLoad = mDot * CpAirIn * (this->suppTempSetPoint - Tin);
-                this->SuppHeatingCoilLoad = SuppHeatCoilLoad;
             } else {
                 SuppHeatCoilLoad = 0.0;
             }
@@ -11026,7 +11021,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
         (this->HeatRecoveryUsed && !HRHeatRequestFlag && HRCoolRequestFlag)) {
 
         this->OperatingMode = ModeCoolingOnly;
-        this->VRFOperationSimPath = 10;
 
         // Initialization of VRF-FluidTCtrl Model
         Q_c_TU_PL = TU_CoolingLoad;
@@ -11243,7 +11237,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
                (this->HeatRecoveryUsed && !HRCoolRequestFlag && HRHeatRequestFlag)) {
 
         this->OperatingMode = ModeHeatingOnly;
-        this->VRFOperationSimPath = 60;
 
         // Initialization of VRF-FluidTCtrl Model
         Q_h_TU_PL = TU_HeatingLoad;
@@ -11696,7 +11689,6 @@ void VRFCondenserEquipment::CalcVRFCondenser_FluidTCtrl(EnergyPlusData &state, c
     } else {
 
         this->OperatingMode = 0;
-        this->VRFOperationSimPath = 0;
 
         this->Ncomp = 0.0;
         this->CompActSpeed = 0.0;
@@ -12251,7 +12243,6 @@ void VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl(EnergyPlusData &state,
                 Real64 Win = thisSuppHeatCoilAirInletNode.HumRat;
                 Real64 CpAirIn = Psychrometrics::PsyCpAirFnW(Win);
                 SuppHeatCoilLoad = mDot * CpAirIn * (this->suppTempSetPoint - Tin);
-                this->SuppHeatingCoilLoad = SuppHeatCoilLoad;
                 if (this->DesignSuppHeatingCapacity > 0.0) {
                     this->SuppHeatPartLoadRatio = min(1.0, SuppHeatCoilLoad / this->DesignSuppHeatingCapacity);
                 }
@@ -12272,7 +12263,6 @@ void VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl(EnergyPlusData &state,
                             SuppHeatCoilLoad = max(0.0, LoadToHeatingSP - FullOutput);
                         }
                     }
-                    this->SuppHeatingCoilLoad = SuppHeatCoilLoad;
                     if (this->DesignSuppHeatingCapacity > 0.0) {
                         this->SuppHeatPartLoadRatio = min(1.0, SuppHeatCoilLoad / this->DesignSuppHeatingCapacity);
                     }
@@ -14449,8 +14439,6 @@ void VRFCondenserEquipment::VRFHR_OU_HR_Mode(EnergyPlusData &state,
                 HRMode = 2;
             }
         }
-
-        this->VRFOperationSimPath = HRMode * 10 + HRMode_sub;
     }
 
     // **Simulate outdoor unit and compressor performance, including

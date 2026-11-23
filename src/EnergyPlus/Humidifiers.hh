@@ -90,7 +90,6 @@ namespace Humidifiers {
         // Members
         std::string Name;                      // unique name of component
         HumidType HumType;                     // Pointer to Humidifier in list of humidifiers
-        int EquipIndex;                        // Pointer to Humidifier in list of humidifiers
         Sched::Schedule *availSched = nullptr; // availability schedule
         Real64 NomCapVol;                      // nominal capacity [m3/s of water]
         Real64 NomCap;                         // nominal capacity [kg/s of water]
@@ -126,7 +125,6 @@ namespace Humidifiers {
         Real64 StarvedSupplyVol;
         int TankSupplyID; // index pointer to WaterStorage supply arrays.
         bool MySizeFlag;
-        bool MyEnvrnFlag;
         bool MySetPointCheckFlag;
         // report variables for gas humidifier
         Real64 ThermalEff;       // current actual thermal efficiency gas humidifier [-]
@@ -137,13 +135,13 @@ namespace Humidifiers {
 
         // Default Constructor
         HumidifierData()
-            : HumType(HumidType::Invalid), EquipIndex(0), NomCapVol(0.0), NomCap(0.0), NomPower(0.0), ThermalEffRated(1.0), CurMakeupWaterTemp(0.0),
+            : HumType(HumidType::Invalid), NomCapVol(0.0), NomCap(0.0), NomPower(0.0), ThermalEffRated(1.0), CurMakeupWaterTemp(0.0),
               EfficiencyCurvePtr(0), InletWaterTempOption(InletWaterTemp::Invalid), FanPower(0.0), StandbyPower(0.0), AirInNode(0), AirOutNode(0),
               AirInTemp(0.0), AirInHumRat(0.0), AirInEnthalpy(0.0), AirInMassFlowRate(0.0), AirOutTemp(0.0), AirOutHumRat(0.0), AirOutEnthalpy(0.0),
               AirOutMassFlowRate(0.0), HumRatSet(0.0), WaterAdd(0.0), ElecUseEnergy(0.0), ElecUseRate(0.0), WaterCons(0.0), WaterConsRate(0.0),
               SuppliedByWaterSystem(false), WaterTankID(0), WaterTankDemandARRID(0), TankSupplyVdot(0.0), TankSupplyVol(0.0), StarvedSupplyVdot(0.0),
-              StarvedSupplyVol(0.0), TankSupplyID(0), MySizeFlag(true), MyEnvrnFlag(true), MySetPointCheckFlag(true), ThermalEff(0.0),
-              GasUseRate(0.0), GasUseEnergy(0.0), AuxElecUseRate(0.0), AuxElecUseEnergy(0.0)
+              StarvedSupplyVol(0.0), TankSupplyID(0), MySizeFlag(true), MySetPointCheckFlag(true), ThermalEff(0.0), GasUseRate(0.0),
+              GasUseEnergy(0.0), AuxElecUseRate(0.0), AuxElecUseEnergy(0.0)
         {
         }
 
@@ -184,9 +182,7 @@ namespace Humidifiers {
 
 struct HumidifiersData : BaseGlobalStruct
 {
-    int NumHumidifiers = 0;   // number of humidifiers of all types
-    int NumElecSteamHums = 0; // number of electric steam humidifiers
-    int NumGasSteamHums = 0;  // number of electric steam humidifiers
+    int NumHumidifiers = 0; // number of humidifiers of all types
     Array1D_bool CheckEquipName;
     bool GetInputFlag = true; // moved up from a static function variable
 
@@ -205,8 +201,6 @@ struct HumidifiersData : BaseGlobalStruct
     void clear_state() override
     {
         this->NumHumidifiers = 0;
-        this->NumElecSteamHums = 0;
-        this->NumGasSteamHums = 0;
         this->CheckEquipName.clear();
         this->GetInputFlag = true;
         this->Humidifier.clear();

@@ -1746,7 +1746,6 @@ TEST_F(EnergyPlusFixture, UnitaryBypassVAV_ParentElectricityRateTest)
 
     // initialize priority control
     BypassVAV.PriorityControl = HVACUnitaryBypassVAV::PriorityCtrlMode::HeatingPriority;
-    BypassVAV.AirFlowControl = HVACUnitaryBypassVAV::AirFlowCtrlMode::UseCompressorOnFlow;
     BypassVAV.changeOverTimer = -1.0;
     state->dataGlobal->DayOfSim = 15;
     state->dataGlobal->HourOfDay = 6;

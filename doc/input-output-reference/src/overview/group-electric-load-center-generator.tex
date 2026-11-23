@@ -688,7 +688,7 @@ This field contains a maximum bound on the inverter efficiency. This value will 
 
 This field contains a lower limit on the AC power produced by the inverter. If the resulting power output would be below this level, then the inverter is assumed to not produce any power and is in standby mode. All DC power input is lost (unless it is going into storage).
 
-\paragraph{Field: Maximum Power}\label{field-maximum-power}
+\paragraph{Field: Maximum Power Output}\label{field-maximum-power-output}
 
 This field contains an upper limit on the AC power produced by the inverter. If the resulting power output would be above this level, then the power produced is capped at this level with the rest of input power converted to losses (unless it is going into storage).
 
@@ -747,7 +747,7 @@ This field contains the night tare loss in watts. This is modeled as ancillary p
 
 \paragraph{Field: Nominal Voltage Input}\label{field-nominal-voltage-input}
 
-This field contains the nominal DC input voltage in volts. This is Vnom in the Go Solar test summaries.
+This field contains the nominal DC input voltage in volts. This is Vnom in the Go Solar test summaries. The field is retained for input compatibility, but its numeric value is not used because the model directly uses the efficiency values entered for nominal voltage.
 
 \paragraph{Field: Efficiency at 10\% Power and Nominal Voltage}\label{field-efficiency-at-10-power-and-nominal-voltage}
 
@@ -1615,7 +1615,7 @@ The design nominal capacity of the generator in Watts {[}W{]}.
 
 \paragraph{Field: Electric Circuit Node Name}\label{field-electric-circuit-node-name}
 
-This named node contains where the electric power is put in the program simulation for use by the electric equipment in the Load Center.
+\textbf{This field is currently unused.} It is retained for input compatibility; the generator model does not route electric power through this node.
 
 \paragraph{Field: Minimum Part Load Ratio}\label{field-minimum-part-load-ratio}
 
@@ -1627,7 +1627,7 @@ This field contains the maximum allowed operating fraction of full load. The inp
 
 \paragraph{Field: Optimum Part Load Ratio}\label{field-optimum-part-load-ratio}
 
-This alpha field contains the optimal operating fraction of full load. This is the part load ratio that gives the optimal production of electric power with the least amount of fuel usage.
+\textbf{This numeric field is currently unused.} It is retained for input compatibility.
 
 \paragraph{Field: Shaft Power Curve Name}\label{field-shaft-power-curve-name}
 
@@ -3663,15 +3663,15 @@ This field contains the coefficient r\(_{3}\) in the equation above.
 
 \subsubsection{Field: Stack Coolant Flow Rate}\label{field-stack-coolant-flow-rate}
 
-The stack cooler is assumed to have a closed water circulation loop that is used to extract heat from the stack and move it to a cogeneration heat exchanger and/or an air cooler. This field is used to enter the mass flow rate of coolant in this loop in kg/s.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Cooler U-Factor Times Area Value}\label{field-stack-cooler-u-factor-times-area-value}
 
-This is the heat transfer coefficient between the stack and the coolant in W/K.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Fs-cogen Adjustment Factor}\label{field-fs-cogen-adjustment-factor}
 
-This field provides the value for an adjustment factor, \({F_{s - cogen}}\) , used in the following relation for the cogeneration heat transfer coefficient, \({\left( {UA} \right)_{s - cogen}}\) :
+This field is retained for input compatibility but is not currently used. It was intended to provide an adjustment factor, \({F_{s - cogen}}\), for the cogeneration heat transfer coefficient:
 
 \begin{equation}
 {\left( {UA} \right)_{s - cogen}} = {\left[ {\frac{1}{{{{\left( {hA} \right)}_{s - cogen}}}} + {F_{s - cogen}}} \right]^{ - 1}}
@@ -3679,11 +3679,11 @@ This field provides the value for an adjustment factor, \({F_{s - cogen}}\) , us
 
 \subsubsection{Field: Stack Cogeneration Exchanger Area}\label{field-stack-cogeneration-exchanger-area}
 
-This field provides the value for the cogeneration heat exchanger area, \({A_{s - cogen}}\) in m2.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Cogeneration Exchanger Nominal Flow Rate}\label{field-stack-cogeneration-exchanger-nominal-flow-rate}
 
-This field provides the value in kg/s for \(\dot N_{s - cogen}^0\) in the following relation for the cogeneration heat exchanger convection coefficient, \({h_{s - cogen}}\) :
+This field is retained for input compatibility but is not currently used. It was intended to provide the nominal flow rate in the following relation for the cogeneration heat exchanger convection coefficient:
 
 \begin{equation}
 {h_{s - cogen}} = h_{s - cogen}^0 \cdot {\left( {\frac{{{{\dot N}_{s - cogen}}}}{{\dot N_{s - cogen}^0}}} \right)^{{n_s}}}
@@ -3691,23 +3691,23 @@ This field provides the value in kg/s for \(\dot N_{s - cogen}^0\) in the follow
 
 \subsubsection{Field: Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient}\label{field-stack-cogeneration-exchanger-nominal-heat-transfer-coefficient}
 
-This field provides the value for \(h_{s - cogen}^0\) in the relation above for the cogeneration heat exchanger convection coefficient, \({h_{s - cogen}}\) in W/m2-K.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Cogeneration Exchanger Nominal Heat Transfer Coefficient Exponent}\label{field-stack-cogeneration-exchanger-nominal-heat-transfer-coefficient-exponent}
 
-This field provides the value for \({n_s}\) is the relation above for the cogeneration heat exchanger convection coefficient, \({h_{s - cogen}}\) .
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Cooler Pump Power}\label{field-stack-cooler-pump-power}
 
-This field is the power used by the stack cooler's circulating pump in Watts. It is a constant power draw whenever the stack cooler is active.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Cooler Pump Heat Loss Fraction}\label{field-stack-cooler-pump-heat-loss}
 
-This field is the fraction of the pump power consumption that is lost to the surround zone.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Air Cooler Fan Coefficient f0}\label{field-stack-air-cooler-fan-coefficient-f0}
 
-This field and the next two are used to define coefficients for the following relation for the power used by the air-cooler's fan to dump excess heat into the surrounding zone:
+This field and the next two are retained for input compatibility but are not currently used. They were intended to define coefficients for the following relation for air-cooler fan power:
 
 \begin{equation}
 {P_{s - air - el}} = {f_0} + {f_1} \cdot {q_{s - air}} + {f_2} \cdot q_{s - air}^2
@@ -3715,11 +3715,11 @@ This field and the next two are used to define coefficients for the following re
 
 \subsubsection{Field: Stack Air Cooler Fan Coefficient f1}\label{field-stack-air-cooler-fan-coefficient-f1}
 
-This field provides a value for the coefficient \emph{f\(_{1}\)} in the relation above.
+This field is retained for input compatibility but is not currently used.
 
 \subsubsection{Field: Stack Air Cooler Fan Coefficient f2}\label{field-stack-air-cooler-fan-coefficient-f2}
 
-This field provides a value for the coefficient \emph{f\(_{2}\)} in the relation above.
+This field is retained for input compatibility but is not currently used.
 
 \subsection{Generator:FuelCell:AirSupply}\label{generatorfuelcellairsupply}
 

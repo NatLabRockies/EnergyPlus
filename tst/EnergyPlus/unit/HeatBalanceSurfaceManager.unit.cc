@@ -3115,6 +3115,18 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     EXPECT_NE(sourceHistoryBeforePV, state->dataHeatBalSurf->SurfQsrcHist(1, 1));
     EXPECT_NE(surfaceTemperatureBeforePV, state->dataHeatBalSurf->SurfTempOut(1));
 
+    // A radiant HVAC trial calculation may leave a non-zero value in the surface heat balance even when the final
+    // system-timestep average is zero. The source change to zero must trigger a final surface heat balance pass.
+    state->dataSurface->allGetsRadiantHeatSurfaceList = {1};
+    state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(1) = 100.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).HTRadSys = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).HWBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).SteamBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).ElecBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).CoolingPanel = 0.0;
+    UpdateFinalSurfaceHeatBalance(*state);
+    EXPECT_DOUBLE_EQ(0.0, state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(1));
+
     // A source change that isn't yet converged leaves a request for the next zone time step's
     // final surface heat balance update rather than looping within this call.
     state->dataPhotovoltaic->PVarray.allocate(1);
