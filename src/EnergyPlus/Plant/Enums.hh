@@ -216,6 +216,7 @@ enum class PlantEquipmentType
     HeatPumpAirToWaterHeating,
     HeatPumpAirToWater,
     PurchSteam,
+    CoilCoolingITEColdPlate,
     Num
 };
 // Adding a new item to the PlantEquipmentType enum (above) requires similar changes to
@@ -255,11 +256,12 @@ enum class FlowMode
     NotModulated,
     LeavingSetpointModulated,
     VariableSpeedPump,
+    Variable,
     Num
 };
 
 constexpr std::array<std::string_view, static_cast<int>(FlowMode::Num)> FlowModeNamesUC{
-    "CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED", "VARIABLESPEEDPUMPING"};
+    "CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED", "VARIABLESPEEDPUMPING", "VARIABLEFLOW"};
 
 enum class CondenserFlowControl
 {
