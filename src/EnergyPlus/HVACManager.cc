@@ -80,7 +80,6 @@
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACManager.hh>
 #include <EnergyPlus/HVACSizingSimulationManager.hh>
-#include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/IceThermalStorage.hh>
 #include <EnergyPlus/IndoorGreen.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
@@ -879,6 +878,42 @@ void SimHVAC(EnergyPlusData &state)
 
     // then iterate among all systems after first HVAC iteration is over
 
+    auto simulatePlantThenNonPlantWithFlowLocked = [&]() {
+        // Resolve the current component requests with plant flow unlocked.
+        state.dataHVACGlobal->SimAirLoopsFlag = false;
+        state.dataHVACGlobal->SimZoneEquipmentFlag = false;
+        state.dataHVACGlobal->SimNonZoneEquipmentFlag = false;
+        state.dataHVACGlobal->SimPlantLoopsFlag = true;
+        state.dataHVACGlobal->SimElecCircuitsFlag = false;
+        SimSelectedEquipment(state,
+                             state.dataHVACGlobal->SimAirLoopsFlag,
+                             state.dataHVACGlobal->SimZoneEquipmentFlag,
+                             state.dataHVACGlobal->SimNonZoneEquipmentFlag,
+                             state.dataHVACGlobal->SimPlantLoopsFlag,
+                             state.dataHVACGlobal->SimElecCircuitsFlag,
+                             FirstHVACIteration,
+                             SimWithPlantFlowUnlocked);
+
+        // Re-simulate the flow consumers with the plant-resolved flow held fixed. This updates their
+        // outlet state and re-evaluates the air and zone convergence flags using the delivered flow.
+        state.dataHVACGlobal->SimAirLoopsFlag = true;
+        state.dataHVACGlobal->SimZoneEquipmentFlag = true;
+        state.dataHVACGlobal->SimNonZoneEquipmentFlag = true;
+        state.dataHVACGlobal->SimPlantLoopsFlag = false;
+        state.dataHVACGlobal->SimElecCircuitsFlag = true;
+        SimSelectedEquipment(state,
+                             state.dataHVACGlobal->SimAirLoopsFlag,
+                             state.dataHVACGlobal->SimZoneEquipmentFlag,
+                             state.dataHVACGlobal->SimNonZoneEquipmentFlag,
+                             state.dataHVACGlobal->SimPlantLoopsFlag,
+                             state.dataHVACGlobal->SimElecCircuitsFlag,
+                             FirstHVACIteration,
+                             SimWithPlantFlowLocked);
+    };
+
+    bool reconcileWAHPPlantFlow = state.dataGlobal->AnyPlantInModel && PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(state);
+    bool WAHPFlowReconciliationPerformed = false;
+
     // Main iteration loop for HVAC.  If any of the simulation flags are
     // true, then specific components must be resimulated.
     while ((state.dataHVACGlobal->SimAirLoopsFlag || state.dataHVACGlobal->SimZoneEquipmentFlag || state.dataHVACGlobal->SimNonZoneEquipmentFlag ||
@@ -891,15 +926,29 @@ void SimHVAC(EnergyPlusData &state)
 
         EMSManager::ManageEMS(state, EMSManager::EMSCallFrom::HVACIterationLoop, anyEMSRan, ObjexxFCL::Optional_int_const()); // calling point id
 
-        // Manages the various component simulations
-        SimSelectedEquipment(state,
-                             state.dataHVACGlobal->SimAirLoopsFlag,
-                             state.dataHVACGlobal->SimZoneEquipmentFlag,
-                             state.dataHVACGlobal->SimNonZoneEquipmentFlag,
-                             state.dataHVACGlobal->SimPlantLoopsFlag,
-                             state.dataHVACGlobal->SimElecCircuitsFlag,
-                             FirstHVACIteration,
-                             SimWithPlantFlowUnlocked);
+        if (reconcileWAHPPlantFlow) {
+            // Once the plant has limited a WAHP request, keep subsequent non-plant simulations flow locked
+            // for this system timestep. Returning to the normal unlocked sequence would recreate the same
+            // request/delivery limit cycle. The normal HVAC iteration limit bounds these reconciliation passes.
+            simulatePlantThenNonPlantWithFlowLocked();
+            WAHPFlowReconciliationPerformed = true;
+        } else {
+            // Manages the various component simulations
+            SimSelectedEquipment(state,
+                                 state.dataHVACGlobal->SimAirLoopsFlag,
+                                 state.dataHVACGlobal->SimZoneEquipmentFlag,
+                                 state.dataHVACGlobal->SimNonZoneEquipmentFlag,
+                                 state.dataHVACGlobal->SimPlantLoopsFlag,
+                                 state.dataHVACGlobal->SimElecCircuitsFlag,
+                                 FirstHVACIteration,
+                                 SimWithPlantFlowUnlocked);
+
+            if (state.dataGlobal->AnyPlantInModel && PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(state)) {
+                reconcileWAHPPlantFlow = true;
+                // Guarantee another outer iteration even if the unlocked simulation cleared every manager flag.
+                state.dataHVACGlobal->SimPlantLoopsFlag = true;
+            }
+        }
 
         // Eventually, when all of the flags are set to false, the
         // simulation has converged for this system time step.
@@ -919,65 +968,14 @@ void SimHVAC(EnergyPlusData &state)
         }
     }
     if (state.dataGlobal->AnyPlantInModel) {
-        if (PlantUtilities::AnyPlantSplitterMixerLacksContinuity(state) || PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(state)) {
-            // rerun systems in a "Final flow lock/last iteration" mode
-            // now call for one second to last plant simulation
-            state.dataHVACGlobal->SimAirLoopsFlag = false;
-            state.dataHVACGlobal->SimZoneEquipmentFlag = false;
-            state.dataHVACGlobal->SimNonZoneEquipmentFlag = false;
-            state.dataHVACGlobal->SimPlantLoopsFlag = true;
-            state.dataHVACGlobal->SimElecCircuitsFlag = false;
-            SimSelectedEquipment(state,
-                                 state.dataHVACGlobal->SimAirLoopsFlag,
-                                 state.dataHVACGlobal->SimZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimNonZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimPlantLoopsFlag,
-                                 state.dataHVACGlobal->SimElecCircuitsFlag,
-                                 FirstHVACIteration,
-                                 SimWithPlantFlowUnlocked);
-            // now call for all non-plant simulation, but with plant flow lock on
-            state.dataHVACGlobal->SimAirLoopsFlag = true;
-            state.dataHVACGlobal->SimZoneEquipmentFlag = true;
-            state.dataHVACGlobal->SimNonZoneEquipmentFlag = true;
-            state.dataHVACGlobal->SimPlantLoopsFlag = false;
-            state.dataHVACGlobal->SimElecCircuitsFlag = true;
-            SimSelectedEquipment(state,
-                                 state.dataHVACGlobal->SimAirLoopsFlag,
-                                 state.dataHVACGlobal->SimZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimNonZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimPlantLoopsFlag,
-                                 state.dataHVACGlobal->SimElecCircuitsFlag,
-                                 FirstHVACIteration,
-                                 SimWithPlantFlowLocked);
+        bool const finalFlowLockPassNeeded = PlantUtilities::AnyPlantSplitterMixerLacksContinuity(state) ||
+                                             (!WAHPFlowReconciliationPerformed && PlantUtilities::AnyWaterToAirHeatPumpPlantFlowRequestUnmet(state));
+        if (finalFlowLockPassNeeded) {
+            // Retain the two final reconciliation pairs as a fallback for splitter/mixer discontinuity and
+            // for an unmet WAHP request first detected after the last permitted main-loop iteration.
+            simulatePlantThenNonPlantWithFlowLocked();
             UpdateZoneInletConvergenceLog(state);
-            // now call for a last plant simulation
-            state.dataHVACGlobal->SimAirLoopsFlag = false;
-            state.dataHVACGlobal->SimZoneEquipmentFlag = false;
-            state.dataHVACGlobal->SimNonZoneEquipmentFlag = false;
-            state.dataHVACGlobal->SimPlantLoopsFlag = true;
-            state.dataHVACGlobal->SimElecCircuitsFlag = false;
-            SimSelectedEquipment(state,
-                                 state.dataHVACGlobal->SimAirLoopsFlag,
-                                 state.dataHVACGlobal->SimZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimNonZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimPlantLoopsFlag,
-                                 state.dataHVACGlobal->SimElecCircuitsFlag,
-                                 FirstHVACIteration,
-                                 SimWithPlantFlowUnlocked);
-            // now call for a last all non-plant simulation, but with plant flow lock on
-            state.dataHVACGlobal->SimAirLoopsFlag = true;
-            state.dataHVACGlobal->SimZoneEquipmentFlag = true;
-            state.dataHVACGlobal->SimNonZoneEquipmentFlag = true;
-            state.dataHVACGlobal->SimPlantLoopsFlag = false;
-            state.dataHVACGlobal->SimElecCircuitsFlag = true;
-            SimSelectedEquipment(state,
-                                 state.dataHVACGlobal->SimAirLoopsFlag,
-                                 state.dataHVACGlobal->SimZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimNonZoneEquipmentFlag,
-                                 state.dataHVACGlobal->SimPlantLoopsFlag,
-                                 state.dataHVACGlobal->SimElecCircuitsFlag,
-                                 FirstHVACIteration,
-                                 SimWithPlantFlowLocked);
+            simulatePlantThenNonPlantWithFlowLocked();
             UpdateZoneInletConvergenceLog(state);
         }
     }
