@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2025, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -55,7 +55,7 @@
 
 
 import os
-from subprocess import check_call, CalledProcessError, STDOUT
+from subprocess import STDOUT, CalledProcessError, check_call
 
 from ep_testing.tests.base import BaseTest
 
@@ -63,25 +63,25 @@ from ep_testing.tests.base import BaseTest
 class HVACDiagram(BaseTest):
 
     def name(self):
-        return 'Test running 5ZoneAirCooled.idf, then HVACDiagram and make sure the SVG is created'
+        return "Test running 5ZoneAirCooled.idf, then HVACDiagram and make sure the SVG is created"
 
     def run(self, install_root: str, verbose: bool, kwargs: dict):
-        idf_path = os.path.join(install_root, 'ExampleFiles', '5ZoneAirCooled.idf')
-        print('* Running test class "%s" on file "%s"... ' % (self.__class__.__name__, '5ZoneAirCooled.idf'), end='')
-        eplus_binary = os.path.join(install_root, 'energyplus')
-        dev_null = open(os.devnull, 'w')
+        idf_path = os.path.join(install_root, "ExampleFiles", "5ZoneAirCooled.idf")
+        print('* Running test class "%s" on file "%s"... ' % (self.__class__.__name__, "5ZoneAirCooled.idf"), end="")
+        eplus_binary = os.path.join(install_root, "energyplus")
+        dev_null = open(os.devnull, "w")
         try:
-            check_call([eplus_binary, '-D', idf_path], stdout=dev_null, stderr=STDOUT)
-            print(' [E+ FINISHED] ', end='')
+            check_call([eplus_binary, "-D", idf_path], stdout=dev_null, stderr=STDOUT)
+            print(" [E+ FINISHED] ", end="")
         except CalledProcessError:
-            raise Exception('EnergyPlus failed!') from None
-        hvac_diagram_binary = os.path.join(install_root, 'PostProcess', 'HVAC-Diagram')
+            raise Exception("EnergyPlus failed!") from None
+        hvac_diagram_binary = os.path.join(install_root, "PostProcess", "HVAC-Diagram")
         try:
             check_call([hvac_diagram_binary], stdout=dev_null, stderr=STDOUT)
-            print(' [HVAC DIAGRAM FINISHED] ', end='')
+            print(" [HVAC DIAGRAM FINISHED] ", end="")
         except CalledProcessError:
-            raise Exception('Transition failed!') from None
-        if os.path.exists('eplusout.svg'):
-            print(' [SVG FILE EXISTS] [DONE]!')
+            raise Exception("Transition failed!") from None
+        if os.path.exists("eplusout.svg"):
+            print(" [SVG FILE EXISTS] [DONE]!")
         else:
-            raise Exception('SVG Did not exist!')
+            raise Exception("SVG Did not exist!")
