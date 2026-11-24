@@ -4,12 +4,6 @@
 // Standard
 #include <memory>
 
-#ifndef NDEBUG
-#ifdef __unix__
-#include <cfenv>
-#endif
-#endif
-
 // Penumbra
 #include "penumbra-implementation.h"
 

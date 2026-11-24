@@ -137,7 +137,6 @@ namespace IndoorGreen {
                                 s_ipsc->cNumericFieldNames);
             ErrorObjectHeader eoh{RoutineName, cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
             ig.Name = s_ipsc->cAlphaArgs(1);
-            ig.SurfName = s_ipsc->cAlphaArgs(2);
             ig.SurfPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataSurface->Surface);
             if (ig.SurfPtr <= 0) {
                 ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
@@ -199,9 +198,6 @@ namespace IndoorGreen {
                 }
             } break;
             case LightingMethod::Daylighting: {
-                ig.LightRefPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(7),
-                                                      state.dataDayltg->DaylRefPt,
-                                                      &EnergyPlus::Dayltg::RefPointData::Name); // Field: Daylighting Reference Point Name
                 ig.LightControlPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(7),
                                                           state.dataDayltg->daylightControl,
                                                           &EnergyPlus::Dayltg::DaylightingControl::Name); // Field: Daylighting Control Name
@@ -212,9 +208,6 @@ namespace IndoorGreen {
                 }
             } break;
             case LightingMethod::LEDDaylighting: {
-                ig.LightRefPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(7),
-                                                      state.dataDayltg->DaylRefPt,
-                                                      &EnergyPlus::Dayltg::RefPointData::Name); // Field: Daylighting Reference Point Name
                 ig.LightControlPtr = Util::FindItemInList(s_ipsc->cAlphaArgs(7),
                                                           state.dataDayltg->daylightControl,
                                                           &EnergyPlus::Dayltg::DaylightingControl::Name); // Field: Daylighting Control Name
@@ -396,7 +389,6 @@ namespace IndoorGreen {
             ig.SensibleRate = 0.0;
             ig.SensibleRateLED = 0.0;
             ig.LatentRate = 0.0;
-            ig.ZCO2 = 400;
             ig.ZPPFD = 0;
         }
     }

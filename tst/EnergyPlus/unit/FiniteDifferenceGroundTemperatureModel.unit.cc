@@ -76,8 +76,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModelTest)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     EXPECT_NEAR(2.0, thisModel.interpolate(2.0, 3.0, 1.0, 3.0, 1.0), 0.0000001);
@@ -151,8 +149,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModel_GetWeather_NoWeather)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     // No Weather file specified, so we expect it to fail
@@ -296,8 +292,6 @@ TEST_F(EnergyPlusFixture, FiniteDiffGroundTempModel_GetWeather_Weather)
     thisModel.baseConductivity = 1.08;
     thisModel.baseDensity = 962.0;
     thisModel.baseSpecificHeat = 2576.0;
-    thisModel.waterContent = 30.0 / 100.0;
-    thisModel.saturatedWaterContent = 50.0 / 100.0;
     thisModel.evapotransCoeff = 0.408;
 
     // Shouldn't throw

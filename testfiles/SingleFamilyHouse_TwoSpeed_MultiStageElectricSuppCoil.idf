@@ -1540,6 +1540,7 @@
     Zone Thermostat,         !- Name
     LIVING ZONE,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    2.0,                     !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Setpoints,               !- Control 1 Name
     ,                        !- Control 2 Object Type
@@ -1547,8 +1548,7 @@
     ,                        !- Control 3 Object Type
     ,                        !- Control 3 Name
     ,                        !- Control 4 Object Type
-    ,                        !- Control 4 Name
-    2.0;                     !- Temperature Difference Between Cutout And Setpoint {deltaC}
+    ;                        !- Control 4 Name
 
   ThermostatSetpoint:DualSetpoint,
     Setpoints,               !- Name

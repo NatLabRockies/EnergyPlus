@@ -475,14 +475,14 @@ class DataExchange:
             variable_name = variable_name.encode("utf-8")
         elif not isinstance(variable_name, bytes):
             raise EnergyPlusException(
-                "`request_variable` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`request_variable` expects `variable_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_name)
             )
         if isinstance(variable_key, str):
             variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
-                "`request_variable` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`request_variable` expects `variable_key` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_key)
             )
         self.api.requestVariable(state, variable_name, variable_key)
@@ -499,6 +499,10 @@ class DataExchange:
         Note also that the arguments passed in here can be either strings or bytes, as this wrapper handles conversion
         as needed.
 
+        A variable is only available if it was requested for this simulation, either with an Output:Variable object
+        in the input file or with a call to `request_variable` before the run starts.  If it was not requested, this
+        function returns -1 even though the variable name and key are valid.
+
         :param state: An active EnergyPlus "state" that is returned from a call to `api.state_manager.new_state()`.
         :param variable_name: The name of the variable to retrieve, e.g. "Site Outdoor Air DryBulb Temperature", or
                               "Fan Air Mass Flow Rate"
@@ -509,14 +513,14 @@ class DataExchange:
             variable_name = variable_name.encode("utf-8")
         elif not isinstance(variable_name, bytes):
             raise EnergyPlusException(
-                "`get_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_variable_handle` expects `variable_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_name)
             )
         if isinstance(variable_key, str):
             variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
-                "`get_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_variable_handle` expects `variable_key` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_key)
             )
         return self.api.getVariableHandle(state, variable_name, variable_key)
@@ -535,14 +539,14 @@ class DataExchange:
         :param meter_name: The name of the variable to retrieve, e.g. "Electricity:Facility", or "Fans:Electricity"
         :return: An integer ID for this meter, or -1 if one could not be found.
         """
-        meter_name = meter_name.upper()
         if isinstance(meter_name, str):
             meter_name = meter_name.encode("utf-8")
         elif not isinstance(meter_name, bytes):
             raise EnergyPlusException(
-                "`get_meter_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_meter_handle` expects `meter_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(meter_name)
             )
+        meter_name = meter_name.upper()
         return self.api.getMeterHandle(state, meter_name)
 
     def get_actuator_handle(
@@ -578,14 +582,14 @@ class DataExchange:
             control_type = control_type.encode("utf-8")
         elif not isinstance(control_type, bytes):
             raise EnergyPlusException(
-                "`get_actuator_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_actuator_handle` expects `control_type` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(control_type)
             )
         if isinstance(actuator_key, str):
             actuator_key = actuator_key.encode("utf-8")
         elif not isinstance(actuator_key, bytes):
             raise EnergyPlusException(
-                "`get_actuator_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_actuator_handle` expects `actuator_key` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(actuator_key)
             )
         return self.api.getActuatorHandle(state, component_type, control_type, actuator_key)
@@ -707,14 +711,14 @@ class DataExchange:
             variable_type = variable_type.encode("utf-8")
         elif not isinstance(variable_type, bytes):
             raise EnergyPlusException(
-                "`get_internal_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_internal_variable_handle` expects `variable_type` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_type)
             )
         if isinstance(variable_key, str):
             variable_key = variable_key.encode("utf-8")
         elif not isinstance(variable_key, bytes):
             raise EnergyPlusException(
-                "`get_internal_variable_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_internal_variable_handle` expects `variable_key` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(variable_key)
             )
         return self.api.getInternalVariableHandle(state, variable_type, variable_key)
@@ -758,7 +762,7 @@ class DataExchange:
             var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
-                "`get_construction_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_construction_handle` expects `var_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(var_name)
             )
         return self.api.getConstructionHandle(state, var_name)
@@ -789,7 +793,7 @@ class DataExchange:
             var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
-                "`get_ems_global_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_ems_global_handle` expects `var_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(var_name)
             )
         return self.api.getEMSGlobalVariableHandle(state, var_name)
@@ -829,9 +833,7 @@ class DataExchange:
         :param value: Floating point value to assign to the EMS global variable
         """
         if not is_number(handle):
-            raise EnergyPlusException(
-                "`set_ems_global_value` expects `variable_handle` as an `int`, not " "'{}'".format(handle)
-            )
+            raise EnergyPlusException("`set_ems_global_value` expects `handle` as an `int`, not " "'{}'".format(handle))
         if not is_number(value):
             raise EnergyPlusException("`set_ems_global_value` expects `value` as a `float`, not " "'{}'".format(value))
         self.api.setEMSGlobalVariableValue(state, handle, value)
@@ -863,7 +865,7 @@ class DataExchange:
             var_name = var_name.encode("utf-8")
         elif not isinstance(var_name, bytes):
             raise EnergyPlusException(
-                "`get_global_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_global_handle` expects `var_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(var_name)
             )
         return self.api.getPluginGlobalVariableHandle(state, var_name)
@@ -905,13 +907,11 @@ class DataExchange:
         :param value: Floating point value to assign to the global variable
         """
         if not self.running_as_python_plugin:
-            raise EnergyPlusException("set_global_handle is only available as part of a Python Plugin workflow")
+            raise EnergyPlusException("set_global_value is only available as part of a Python Plugin workflow")
         if not is_number(handle):
-            raise EnergyPlusException(
-                "`set_global_value` expects `variable_handle` as an `int`, not " "'{}'".format(handle)
-            )
+            raise EnergyPlusException("`set_global_value` expects `handle` as an `int`, not " "'{}'".format(handle))
         if not is_number(value):
-            raise EnergyPlusException("`get_global_value` expects `value` as a `float`, not " "'{}'".format(value))
+            raise EnergyPlusException("`set_global_value` expects `value` as a `float`, not " "'{}'".format(value))
         self.api.setPluginGlobalVariableValue(state, handle, value)
 
     def get_trend_handle(self, state: c_void_p, trend_var_name: Union[str, bytes]) -> int:
@@ -940,7 +940,7 @@ class DataExchange:
             trend_var_name = trend_var_name.encode("utf-8")
         elif not isinstance(trend_var_name, bytes):
             raise EnergyPlusException(
-                "`get_trend_handle` expects `component_type` as a `str` or UTF-8 encoded `bytes`, not "
+                "`get_trend_handle` expects `trend_var_name` as a `str` or UTF-8 encoded `bytes`, not "
                 "'{}'".format(trend_var_name)
             )
         return self.api.getPluginTrendVariableHandle(state, trend_var_name)

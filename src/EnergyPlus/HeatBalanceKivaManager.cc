@@ -1147,6 +1147,8 @@ Real64 KivaManager::getDeepGroundDepth(Kiva::Foundation fnd)
 
 void KivaManager::initKivaInstances(EnergyPlusData &state)
 {
+    lastCalculationDay = lastCalculationHour = lastCalculationTimeStep = -1;
+
     // initialize temperatures at the beginning of run environment
     for (auto &kv : kivaInstances) {
         // Start with steady-state solution
@@ -1157,6 +1159,12 @@ void KivaManager::initKivaInstances(EnergyPlusData &state)
 
 void KivaManager::calcKivaInstances(EnergyPlusData &state)
 {
+    // Radiant equipment can repeat the surface heat balance without advancing simulation time.
+    if (lastCalculationDay == state.dataGlobal->DayOfSim && lastCalculationHour == state.dataGlobal->HourOfDay &&
+        lastCalculationTimeStep == state.dataGlobal->TimeStep) {
+        return;
+    }
+
     // calculate heat transfer through ground
     for (auto &kv : kivaInstances) {
         kv.setBoundaryConditions(state);
@@ -1170,6 +1178,9 @@ void KivaManager::calcKivaInstances(EnergyPlusData &state)
     }
 
     calcKivaSurfaceResults(state);
+    lastCalculationDay = state.dataGlobal->DayOfSim;
+    lastCalculationHour = state.dataGlobal->HourOfDay;
+    lastCalculationTimeStep = state.dataGlobal->TimeStep;
 }
 
 #ifdef GROUND_PLOT

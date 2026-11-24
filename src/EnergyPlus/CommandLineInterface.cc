@@ -474,7 +474,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
         std::string pszSuffix;
         std::string meterSuffix;
         std::string sqliteSuffix;
-        std::string adsSuffix;
         std::string screenSuffix;
         std::string shdSuffix;
 
@@ -493,7 +492,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 pszSuffix = "psz";
                 meterSuffix = "mtr";
                 sqliteSuffix = "sqlite";
-                adsSuffix = "ADS";
                 screenSuffix = "screen";
                 shdSuffix = "shading";
 
@@ -508,7 +506,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 pszSuffix = "-psz";
                 meterSuffix = "-meter";
                 sqliteSuffix = "-sqlite";
-                adsSuffix = "-ads";
                 screenSuffix = "-screen";
                 shdSuffix = "-shading";
 
@@ -523,7 +520,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 pszSuffix = "Psz";
                 meterSuffix = "Meter";
                 sqliteSuffix = "Sqlite";
-                adsSuffix = "Ads";
                 screenSuffix = "Screen";
                 shdSuffix = "Shading";
             }
@@ -578,9 +574,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
         state.files.rdd.filePath = composePath(normalSuffix + ".rdd");
         state.dataStrGlobals->outputShdFilePath = composePath(normalSuffix + ".shd");
         state.files.dfs.filePath = composePath(normalSuffix + ".dfs");
-        state.dataStrGlobals->outputGLHEFilePath = composePath(normalSuffix + ".glhe");
         state.files.edd.filePath = composePath(normalSuffix + ".edd");
-        state.dataStrGlobals->outputIperrFilePath = composePath(normalSuffix + ".iperr");
         state.files.sln.filePath = composePath(normalSuffix + ".sln");
         state.files.sci.filePath = composePath(normalSuffix + ".sci");
         state.files.wrl.filePath = composePath(normalSuffix + ".wrl");
@@ -607,7 +601,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
         state.files.outputPszCsvFilePath = composePath(pszSuffix + ".csv");
         state.files.outputPszTabFilePath = composePath(pszSuffix + ".tab");
         state.files.outputPszTxtFilePath = composePath(pszSuffix + ".txt");
-        state.dataStrGlobals->outputAdsFilePath = composePath(adsSuffix + ".out");
         state.files.shade.filePath = composePath(shdSuffix + ".csv");
         if (suffixType == "L") {
             // out/sqlite.err
@@ -620,7 +613,6 @@ state.dataStrGlobals->inputFilePath='{:g}',
         state.files.screenCsv.filePath = composePath(screenSuffix + ".csv");
         // TODO, why are these relative paths?
         state.files.delightIn.filePath = "eplusout.delightin";
-        state.dataStrGlobals->outputDelightOutFilePath = "eplusout.delightout";
 
         // TODO: why is this relative?
         state.files.iniFile.filePath = "Energy+.ini";

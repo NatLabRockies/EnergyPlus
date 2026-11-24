@@ -4456,6 +4456,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
         "    SPACE1-1 Thermostat,     !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -4463,6 +4464,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
         "    SPACE2-1 Thermostat,     !- Name",
         "    SPACE2-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -4470,6 +4472,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
         "    SPACE3-1 Thermostat,     !- Name",
         "    SPACE3-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -4477,6 +4480,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
         "    SPACE4-1 Thermostat,     !- Name",
         "    SPACE4-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 
@@ -4484,6 +4488,7 @@ TEST_F(EnergyPlusFixture, MixedAir_MiscGetsPart2)
         "    SPACE5-1 Thermostat,     !- Name",
         "    SPACE5-1,                !- Zone or ZoneList Name",
         "    HVACTemplate-Always 4,   !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    All Zones Dual SP Control;  !- Control 1 Name",
 

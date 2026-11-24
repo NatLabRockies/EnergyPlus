@@ -195,8 +195,7 @@ void InitZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
     if (!state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).Initialized) {
         state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).Initialize(ZoneNum);
     }
-    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedLoadToHeatingSetpoint = 0;
-    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedLoadToCoolingSetpoint = 0;
+    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedSensibleLoadToSetpoint = 0;
     state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedHumidificationMass = 0;
     state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedHumidificationLoad = 0;
     state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).RequestedHumidificationEnergy = 0;
@@ -228,9 +227,7 @@ void InitZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
     if (!state.dataHybridUnitaryAC->ZoneEquipmentListChecked && state.dataZoneEquip->ZoneEquipInputsFilled) {
         state.dataHybridUnitaryAC->ZoneEquipmentListChecked = true;
         for (int Loop = 1; Loop <= state.dataHybridUnitaryAC->NumZoneHybridEvap; ++Loop) {
-            if (CheckZoneEquipmentList(state, "ZoneHVAC:HybridUnitaryHVAC", state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(Loop).Name)) {
-                state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(Loop).ZoneNodeNum = state.dataZoneEquip->ZoneEquipConfig(ZoneNum).ZoneNode;
-            } else {
+            if (!CheckZoneEquipmentList(state, "ZoneHVAC:HybridUnitaryHVAC", state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(Loop).Name)) {
                 ShowSevereError(
                     state,
                     std::format("InitZoneHybridUnitaryAirConditioners: ZoneHVAC:HybridUnitaryHVAC = {}, is not on any ZoneHVAC:EquipmentList. "
@@ -310,8 +307,6 @@ void InitZoneHybridUnitaryAirConditioners(EnergyPlusData &state,
         state.dataLoopNodes->Node(state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecondaryInletNode).HumRat;
     state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecOutletEnthalpy =
         state.dataLoopNodes->Node(state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecondaryInletNode).Enthalpy;
-    state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecOutletPressure =
-        state.dataLoopNodes->Node(state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecondaryInletNode).Press;
     state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecOutletRH =
         PsyRhFnTdbWPb(state,
                       state.dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(UnitNum).SecInletTemp,
@@ -578,9 +573,6 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
             TestCompSet(state, cCurrentModuleObject, Alphas(1), Alphas(9), Alphas(11), "Hybrid Evap Air Zone Nodes");
             TestCompSet(state, cCurrentModuleObject, Alphas(1), Alphas(10), Alphas(12), "Hybrid Evap Air Zone Secondary Nodes");
 
-            // N1, \field System Maximum Supply AirFlow Rate
-            hybridUnitaryAC.SystemMaximumSupplyAirFlowRate = Numbers(1);
-
             // N2, \field External Static Pressure at System Maximum Supply Air Flow Rate
 
             // In each time step, the result for system power, fan power, gas use, water user, or supply airflow rate will be determined as :
@@ -622,8 +614,7 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
                 // The original code never checks if this field is empty, but adding this check leads to a unit test failure.
                 // ShowSevereEmptyField(state, eoh, cAlphaFields(15));
                 // ErrorsFound = true;
-            } else if ((hybridUnitaryAC.firstFuel = static_cast<Constant::eFuel>(
-                            getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(Alphas(15))))) == Constant::eFuel::Invalid) {
+            } else if (static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, Util::makeUPPER(Alphas(15)))) == Constant::eFuel::Invalid) {
                 ShowSevereInvalidKey(state, eoh, cAlphaFields(15), Alphas(15));
                 ErrorsFound = true;
             }
@@ -659,8 +650,6 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
                     ShowSevereError(state, std::format("{}: {} = {} invalid data", routineName, cCurrentModuleObject, Alphas(1)));
                     ShowContinueError(state, std::format("Invalid-not found {}=\"{}\".", cAlphaFields(19), Alphas(19)));
                     ErrorsFound = true;
-                } else {
-                    hybridUnitaryAC.OutdoorAir = true;
                 }
             }
 
@@ -894,7 +883,7 @@ void GetInputZoneHybridUnitaryAirConditioners(EnergyPlusData &state, bool &Error
         SetupOutputVariable(state,
                             "Zone Hybrid Unitary HVAC Predicted Sensible Load to Setpoint Heat Transfer Rate",
                             Constant::Units::W,
-                            hybridUnitaryAC.RequestedLoadToCoolingSetpoint,
+                            hybridUnitaryAC.RequestedSensibleLoadToSetpoint,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             hybridUnitaryAC.Name);

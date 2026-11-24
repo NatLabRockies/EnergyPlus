@@ -162,16 +162,16 @@ namespace DataAirSystems {
         AirLoopMixerData Mixer;            // Data for mixer (if any)
         Array1D_bool ControlConverged;     // Convergence Parameter for controllers
         int NumOutletBranches = 0;
-        std::array<int, 3> OutletBranchNum = {0}; // airloop branch numbers of system outlets (not the actual branch index)
+        std::array<int, 3> OutletBranchNum{}; // airloop branch numbers of system outlets (not the actual branch index)
         int NumInletBranches = 0;
-        std::array<int, 3> InletBranchNum = {0}; // branch number of system inlets
-        bool CentralHeatCoilExists = true;       // true if there are central heating coils
-        bool CentralCoolCoilExists = true;       // true if there are central cooling coils
-        bool OASysExists = false;                // true if there is an Outside Air Sys
-        bool isAllOA = false;                    // true if there is no return path and the main branch inlet is an outdoor air node
-        int OASysInletNodeNum = 0;               // node number of return air inlet to OA sys
-        int OASysOutletNodeNum = 0;              // node number of mixed air outlet of OA sys
-        int OAMixOAInNodeNum = 0;                // node number of the OA stream inlet to the
+        std::array<int, 3> InletBranchNum{}; // branch number of system inlets
+        bool CentralHeatCoilExists = true;   // true if there are central heating coils
+        bool CentralCoolCoilExists = true;   // true if there are central cooling coils
+        bool OASysExists = false;            // true if there is an Outside Air Sys
+        bool isAllOA = false;                // true if there is no return path and the main branch inlet is an outdoor air node
+        int OASysInletNodeNum = 0;           // node number of return air inlet to OA sys
+        int OASysOutletNodeNum = 0;          // node number of mixed air outlet of OA sys
+        int OAMixOAInNodeNum = 0;            // node number of the OA stream inlet to the
         // OA mixer component.
         bool RABExists = false;                            // true if there is a RAB
         int RABMixInNode = 0;                              // node num of RAB mixer inlet

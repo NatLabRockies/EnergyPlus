@@ -714,16 +714,11 @@ void ResetController(EnergyPlusData &state, int const ControlNum, bool const DoW
 
     // MinAvailActuated and MaxAvailActuated set in InitController()
     controllerProps.MinAvailActuated = 0.0;
-    controllerProps.MinAvailSensed = 0.0;
     controllerProps.MaxAvailActuated = 0.0;
-    controllerProps.MaxAvailSensed = 0.0;
 
     // Restart from previous solution if speculative warm restart flag set
     // Keep same mode and next actuated value unchanged from last controller simulation.
-    if (DoWarmRestartFlag) {
-        controllerProps.DoWarmRestartFlag = true;
-    } else {
-        controllerProps.DoWarmRestartFlag = false;
+    if (!DoWarmRestartFlag) {
         // If no speculative warm restart then reset stored mode and actucated value
         controllerProps.Mode = ControllerMode::None;
         controllerProps.NextActuatedValue = 0.0;

@@ -116,7 +116,6 @@ namespace DXCoils {
         //          RatedCoolCap, RatedSHR and RatedCOP do not include the thermal or electrical
         //          effects due to the supply air fan
         Array1D<Real64> RatedTotCap;                      // Gross total cooling capacity at rated conditions [watts]
-        Real64 HeatSizeRatio;                             // heat pump heating to cooling sizing ratio when autosized
         Array1D_bool RatedTotCapEMSOverrideOn;            // if true, then EMS is calling to override rated total capacity
         Array1D<Real64> RatedTotCapEMSOverrideValue;      // value to use for EMS override
         bool FrostHeatingCapacityMultiplierEMSOverrideOn; // if true, then EMS is calling to override multiplier for heating capacity when system is
@@ -230,7 +229,6 @@ namespace DXCoils {
         Real64 HeatingCoilRuntimeFraction;                // Run time fraction of the DX heating unit
         StandardRatings::DefrostStrat DefrostStrategy;    // defrost strategy; 1=reverse-cycle, 2=resistive
         StandardRatings::HPdefrostControl DefrostControl; // defrost control; 1=timed, 2=on-demand
-        int EIRFPLR;                                      // index of energy input ratio vs part-load ratio curve
         int DefrostEIRFT;                                 // index of defrost mode total cooling capacity for reverse cycle heat pump
         int RegionNum;                                    // Region number for calculating HSPF of single speed DX heating coil
         Real64 MinOATCompressor;                          // Minimum OAT for heat pump compressor operation
@@ -241,13 +239,9 @@ namespace DXCoils {
         Real64 MaxOATDefrost;                    // Maximum OAT for defrost operation
         Real64 DefrostTime;                      // Defrost time period in hours
         Real64 DefrostCapacity;                  // Resistive defrost to nominal capacity (at 21.11C/8.33C) ratio
-        Real64 HPCompressorRuntime;              // keep track of compressor runtime
-        Real64 HPCompressorRuntimeLast;          // keep track of last time step compressor runtime (if simulation downshifts)
-        Real64 TimeLeftToDefrost;                // keep track of time left to defrost heat pump
         Real64 DefrostPower;                     // power used during defrost
         Real64 DefrostConsumption;               // energy used during defrost
         HVAC::OATType HeatingPerformanceOATType; // Heating performance curve OAT type (1-wetbulb, 2-drybulb)
-        bool HPCoilIsInCoilSystemHeatingDX;
         bool OATempCompressorOnOffBlank;
         // end of variables used in heat pump heating coils only
         // start of variables for DX cooling coil latent degradation model
@@ -390,19 +384,14 @@ namespace DXCoils {
         Real64 FuelConsumed = 0.0; // Energy consumed, in addition to electricity [J]
         Real64 MSFuelWasteHeat;    // Total waste heat [J]
         bool MSHPHeatRecActive;    // True when entered Heat Rec Vol Flow Rate > 0
-        int MSHPDesignSpecIndex;   // index to MSHPDesignSpecification object used for variable speed coils
         // End of multispeed DX coil input
         // VRF system variables used for sizing
-        bool CoolingCoilPresent;         // FALSE if coil not present
-        bool HeatingCoilPresent;         // FALSE if coil not present
         bool ISHundredPercentDOASDXCoil; // FALSE if coil is regular dx coil
         Array1D_int SHRFTemp;            // index of sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
-        int SHRFTempErrorIndex; // Used for warning messages when output of SHRFTemp is negative
-        Array1D_int SHRFFlow;   // index of sensible heat ratio modifier curve
+        Array1D_int SHRFFlow; // index of sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
-        int SHRFFlowErrorIndex; // Used for warning messages when output of SHRFFlow is negative
-        int SHRFTemp2;          // index of sensible heat ratio modifier curve
+        int SHRFTemp2; // index of sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int SHRFFlow2; // index of sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
@@ -435,7 +424,6 @@ namespace DXCoils {
         Real64 MSCycRatio;                             // current cycling ratio of multspeed HP
 
         // The following members are for VRF Coils (FluidTCtrl Model)
-        int VRFIUPtr;              // index to the VRF Indoor Unit where the coil is placed
         int VRFOUPtr;              // index to the VRF Outdoor Unit that the coil serves
         Real64 EvaporatingTemp;    // indoor unit evaporating temperature [C]
         Real64 CondensingTemp;     // indoor unit condensing temperature [C]
@@ -459,7 +447,7 @@ namespace DXCoils {
 
         // Default Constructor
         DXCoilData()
-            : RatedTotCap(MaxModes, 0.0), HeatSizeRatio(1.0), RatedTotCapEMSOverrideOn(MaxModes, false), RatedTotCapEMSOverrideValue(MaxModes, 0.0),
+            : RatedTotCap(MaxModes, 0.0), RatedTotCapEMSOverrideOn(MaxModes, false), RatedTotCapEMSOverrideValue(MaxModes, 0.0),
               FrostHeatingCapacityMultiplierEMSOverrideOn(false), FrostHeatingCapacityMultiplierEMSOverrideValue(0.0),
               FrostHeatingInputPowerMultiplierEMSOverrideOn(false), FrostHeatingInputPowerMultiplierEMSOverrideValue(0.0), RatedSHR(MaxModes, 0.0),
               RatedSHREMSOverrideOn(MaxModes, false), RatedSHREMSOverrideValue(MaxModes, 0.0), RatedCOP(MaxModes, 0.0),
@@ -481,10 +469,9 @@ namespace DXCoils {
               TotalCoolingEnergyRate(0.0), SensCoolingEnergyRate(0.0), LatCoolingEnergyRate(0.0), ElecCoolingConsumption(0.0), ElecCoolingPower(0.0),
               CoolingCoilRuntimeFraction(0.0), TotalHeatingEnergy(0.0), TotalHeatingEnergyRate(0.0), ElecHeatingConsumption(0.0),
               ElecHeatingPower(0.0), HeatingCoilRuntimeFraction(0.0), DefrostStrategy(StandardRatings::DefrostStrat::Invalid),
-              DefrostControl(StandardRatings::HPdefrostControl::Invalid), EIRFPLR(0), DefrostEIRFT(0), RegionNum(0), MinOATCompressor(0.0),
-              OATempCompressorOn(0.0), MaxOATCompressor(0.0), MaxOATDefrost(0.0), DefrostTime(0.0), DefrostCapacity(0.0), HPCompressorRuntime(0.0),
-              HPCompressorRuntimeLast(0.0), TimeLeftToDefrost(0.0), DefrostPower(0.0), DefrostConsumption(0.0),
-              HeatingPerformanceOATType(HVAC::OATType::DryBulb), HPCoilIsInCoilSystemHeatingDX(false), OATempCompressorOnOffBlank(false),
+              DefrostControl(StandardRatings::HPdefrostControl::Invalid), DefrostEIRFT(0), RegionNum(0), MinOATCompressor(0.0),
+              OATempCompressorOn(0.0), MaxOATCompressor(0.0), MaxOATDefrost(0.0), DefrostTime(0.0), DefrostCapacity(0.0), DefrostPower(0.0),
+              DefrostConsumption(0.0), HeatingPerformanceOATType(HVAC::OATType::DryBulb), OATempCompressorOnOffBlank(false),
               Twet_Rated(MaxModes, 0.0), Gamma_Rated(MaxModes, 0.0), MaxONOFFCyclesperHour(MaxModes, 0.0), LatentCapacityTimeConstant(MaxModes, 0.0),
               CondenserType(MaxModes, DataHeatBalance::RefrigCondenserType::Air), ReportEvapCondVars(false), EvapCondEffect(MaxModes, 0.0),
               CondInletTemp(0.0), EvapCondAirFlow(MaxModes, 0.0), EvapCondPumpElecNomPower(MaxModes, 0.0), EvapCondPumpElecPower(0.0),
@@ -500,16 +487,15 @@ namespace DXCoils {
               PrintLowAmbMessage(false), PrintHighAmbMessage(false), EvapWaterSupplyMode(EvapWaterSupply::FromMains), EvapWaterSupTankID(0),
               EvapWaterTankDemandARRID(0), CondensateCollectMode(CondensateCollectAction::Discard), CondensateTankID(0), CondensateTankSupplyARRID(0),
               CondensateVdot(0.0), CondensateVol(0.0), CurrentEndTimeLast(0.0), TimeStepSysLast(0.0), FuelType(Constant::eFuel::Invalid),
-              NumOfSpeeds(0), PLRImpact(false), LatentImpact(false), MSFuelWasteHeat(0.0), MSHPHeatRecActive(false), MSHPDesignSpecIndex(0),
-              CoolingCoilPresent(true), HeatingCoilPresent(true), ISHundredPercentDOASDXCoil(false), SHRFTemp(MaxModes, 0), SHRFTempErrorIndex(0),
-              SHRFFlow(MaxModes, 0), SHRFFlowErrorIndex(0), SHRFTemp2(0), SHRFFlow2(0), UserSHRCurveExists(false), ASHRAE127StdRprt(false),
-              SecZonePtr(0), SecCoilSHRFT(0), SecCoilSHRFF(0), SecCoilAirFlow(0.0), SecCoilAirFlowScalingFactor(1.0), SecCoilRatedSHR(1.0),
-              SecCoilSHR(1.0), EvapInletWetBulb(0.0), SecCoilSensibleHeatGainRate(0.0), SecCoilTotalHeatRemovalRate(0.0),
+              NumOfSpeeds(0), PLRImpact(false), LatentImpact(false), MSFuelWasteHeat(0.0), MSHPHeatRecActive(false),
+              ISHundredPercentDOASDXCoil(false), SHRFTemp(MaxModes, 0), SHRFFlow(MaxModes, 0), SHRFTemp2(0), SHRFFlow2(0), UserSHRCurveExists(false),
+              ASHRAE127StdRprt(false), SecZonePtr(0), SecCoilSHRFT(0), SecCoilSHRFF(0), SecCoilAirFlow(0.0), SecCoilAirFlowScalingFactor(1.0),
+              SecCoilRatedSHR(1.0), SecCoilSHR(1.0), EvapInletWetBulb(0.0), SecCoilSensibleHeatGainRate(0.0), SecCoilTotalHeatRemovalRate(0.0),
               SecCoilSensibleHeatRemovalRate(0.0), SecCoilLatentHeatRemovalRate(0.0), IsSecondaryDXCoilInZone(false), IsDXCoilInZone(false),
-              CompressorPartLoadRatio(0.0), MSSpeedNumLS(1), MSSpeedNumHS(2), MSSpeedRatio(0.0), MSCycRatio(0.0), VRFIUPtr(0), VRFOUPtr(0),
-              EvaporatingTemp(4.0), CondensingTemp(40.0), C1Te(0.0), C2Te(0.0), C3Te(0.0), C1Tc(0.0), C2Tc(0.0), C3Tc(0.0), SH(0.0), SC(0.0),
-              ActualSH(0.0), ActualSC(0.0), RateBFVRFIUEvap(0.0592), RateBFVRFIUCond(0.1360), CAPFTErrIndex(0), EIRFTErrIndex(0),
-              reportCoilFinalSizes(true), capModFacTotal(0.0), AirLoopNum(0)
+              CompressorPartLoadRatio(0.0), MSSpeedNumLS(1), MSSpeedNumHS(2), MSSpeedRatio(0.0), MSCycRatio(0.0), VRFOUPtr(0), EvaporatingTemp(4.0),
+              CondensingTemp(40.0), C1Te(0.0), C2Te(0.0), C3Te(0.0), C1Tc(0.0), C2Tc(0.0), C3Tc(0.0), SH(0.0), SC(0.0), ActualSH(0.0), ActualSC(0.0),
+              RateBFVRFIUEvap(0.0592), RateBFVRFIUCond(0.1360), CAPFTErrIndex(0), EIRFTErrIndex(0), reportCoilFinalSizes(true), capModFacTotal(0.0),
+              AirLoopNum(0)
         {
         }
     };
@@ -828,9 +814,6 @@ namespace DXCoils {
         ObjexxFCL::Optional<Real64> DefrostFraction = _,
         ObjexxFCL::Optional<Real64> DefrostCapacity = _,
         ObjexxFCL::Optional<Real64> MaxOATDefrost = _,
-        ObjexxFCL::Optional_bool CoolingCoilPresent = _,
-        ObjexxFCL::Optional_bool HeatingCoilPresent = _,
-        ObjexxFCL::Optional<Real64> HeatSizeRatio = _,
         ObjexxFCL::Optional<Real64> TotCap = _,
         ObjexxFCL::Optional_int SupplyFanIndex = _,
         ObjexxFCL::Optional_string SupplyFanName = _,

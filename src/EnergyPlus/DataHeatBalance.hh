@@ -277,6 +277,7 @@ namespace DataHeatBalance {
         AirTerminalUserDefined,
         PackagedTESCoilTank,
         ElectricEquipmentITEAirCooled,
+        ElectricEquipmentITELiquidCooled,
         SecCoolingDXCoilSingleSpeed,
         SecHeatingDXCoilSingleSpeed,
         SecCoolingDXCoilTwoSpeed,
@@ -362,6 +363,7 @@ namespace DataHeatBalance {
         "AIRTERMINAL:SINGLEDUCT:USERDEFINED",
         "COIL:COOLING:DX:SINGLESPEED:THERMALSTORAGE",
         "ELECTRICEQUIPMENT:ITE:AIRCOOLED",
+        "ELECTRICEQUIPMENT:ITE:LIQUIDCOOLED",
         "COIL:COOLING:DX:SINGLESPEED",
         "COIL:HEATING:DX:SINGLESPEED",
         "COIL:COOLING:DX:TWOSPEED",
@@ -422,6 +424,7 @@ namespace DataHeatBalance {
         "AirTerminal:SingleDuct:UserDefined",
         "Coil:Cooling:DX:SingleSpeed:ThermalStorage",
         "ElectricEquipment:ITE:AirCooled",
+        "ElectricEquipment:ITE:LiquidCooled",
         "Coil:Cooling:DX:SingleSpeed",
         "Coil:Heating:DX:SingleSpeed",
         "Coil:Cooling:DX:TwoSpeed",
@@ -468,7 +471,6 @@ namespace DataHeatBalance {
         EPVector<std::string> tags;                            // Optional tags for reporting
         EPVector<int> surfaces;                                // Pointers to surfaces in this space
         bool hasFloor = false;                                 // Has "Floor" surface
-        Real64 fracZoneFloorArea = 0.0;                        // fraction of total floor area for all spaces in zone
         Real64 fracZoneVolume = 0.0;                           // fraction of total volume for all spaces in zone
         Real64 extWindowArea = 0.0;                            // Exterior Window Area for space
         Real64 totalSurfArea = 0.0;                            // Total surface area for space
@@ -505,7 +507,6 @@ namespace DataHeatBalance {
         int OpaqOrWinSurfaceFirst = 0;     // First opaque (including IntMass) or window (non TDD Dome) Surface in space
         int OpaqOrWinSurfaceLast = -1;     // Last  opaque (including IntMass) or window (non TDD Dome) Surface in space
         int TDDDomeFirst = 0;              // First TDD Dome Surface in space
-        int TDDDomeLast = -1;              // Last  TDD Dome Surface in space
 
         Real64 sumHATsurf(EnergyPlusData &state);
     };
@@ -539,27 +540,27 @@ namespace DataHeatBalance {
         bool CrossedColdThresh;
         bool CrossedHeatThresh;
 
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccuHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccupiedHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccuHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccupiedHourBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneLowSETHours = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHighSETHours = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneColdHourOfSafetyBins = {0.0};
-        std::array<Real64, numColumnThermalTbl> ZoneHeatHourOfSafetyBins = {0.0};
-        std::array<Real64, numColumnUnmetDegreeHourTbl> ZoneUnmetDegreeHourBins = {0.0};
-        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccuHourBins = {0.0};
-        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccuHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatIndexOccupiedHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccuHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHumidexOccupiedHourBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneLowSETHours{};
+        std::array<Real64, numColumnThermalTbl> ZoneHighSETHours{};
+        std::array<Real64, numColumnThermalTbl> ZoneColdHourOfSafetyBins{};
+        std::array<Real64, numColumnThermalTbl> ZoneHeatHourOfSafetyBins{};
+        std::array<Real64, numColumnUnmetDegreeHourTbl> ZoneUnmetDegreeHourBins{};
+        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccuHourBins{};
+        std::array<Real64, numColumnDiscomfortWtExceedHourTbl> ZoneDiscomfortWtExceedOccupiedHourBins{};
 
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelHourBins = {0.0};
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccuHourBins = {0.0};
-        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelHourBins{};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccuHourBins{};
+        std::array<Real64, numColumnCO2Tbl> ZoneCO2LevelOccupiedHourBins{};
 
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelHourBins = {0.0};
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccuHourBins = {0.0};
-        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccupiedHourBins = {0.0};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelHourBins{};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccuHourBins{};
+        std::array<Real64, numColumnVisualTbl> ZoneLightingLevelOccupiedHourBins{};
 
         // Default Constructor
         ZoneResilience()
@@ -600,10 +601,8 @@ namespace DataHeatBalance {
         Real64 geometricCeilingArea = 0.0;        // Ceiling area area including air boundary surfaces
         bool ceilingHeightEntered = false;        // True is user input ceiling height
         bool HasFloor = false;                    // Has "Floor" surface
-        bool HasRoof = false;                     // Has "Roof" or "Ceiling" Surface
         bool HasWindow = false;                   // Window(s) present in this zone
         Real64 ExtWindowArea = 0.0;               // Exterior Window Area for Zone
-        Real64 ExtWindowArea_Multiplied = 0.0;    // Exterior Window Area for Zone with multipliers
         Real64 ExtGrossWallArea_Multiplied = 0.0; // Exterior Wall Area for Zone (Gross) with multipliers
         Real64 ExtNetWallArea = 0.0;              // Exterior Wall Area for Zone (Net)
         Real64 TotalSurfArea = 0.0;               // Total surface area for Zone
@@ -701,7 +700,6 @@ namespace DataHeatBalance {
         Real64 MCPIHM = 0.0;                                // Calculated mass flow rate by hybrid model
         Real64 InfilOAAirChangeRateHM = 0.0;                // Calculated infiltration air change per hour by hybrid model
         Real64 NumOccHM = 0.0;                              // Inversely solved people count
-        Real64 delta_T = 0.0;                               // Indoor and outdoor temperature
 
         bool zoneOAQuadratureSum = false; // True when zone OA balance method is Quadrature
         int zoneOABalanceIndex = 0;       // Index to ZoneAirBalance for this zone, if any
@@ -956,12 +954,9 @@ namespace DataHeatBalance {
         Real64 TbaffleLast; // Old value for modeled surface temperature for baffle [C]
         Real64 HrPlen;      // Modeled radiation coef for OSCM [W/m2-C]
         Real64 HcPlen;      // Modeled Convection coef for OSCM [W/m2-C]
-        Real64 MdotVent;    // air mass flow exchanging with ambient when passive.
         Real64 Tilt;        // Tilt from area weighted average of underlying surfaces
-        Real64 Azimuth;     // Azimuth from area weighted average of underlying surfaces
         Real64 QdotSource;  // Source/sink term
         // reporting data
-        Real64 Isc;              // total incident solar on baffle [W]
         Real64 PassiveACH;       // air changes per hour when passive [1/hr]
         Real64 PassiveMdotVent;  // Total Nat Vent air change rate  [kg/s]
         Real64 PassiveMdotWind;  // Nat Vent air change rate from Wind-driven [kg/s]
@@ -971,8 +966,8 @@ namespace DataHeatBalance {
         ExtVentedCavityStruct()
             : OSCMPtr(0), Porosity(0.0), LWEmitt(0.0), SolAbsorp(0.0), BaffleRoughness(Material::SurfaceRoughness::VeryRough), PlenGapThick(0.0),
               NumSurfs(0), HdeltaNPL(0.0), AreaRatio(0.0), Cv(0.0), Cd(0.0), ActualArea(0.0), ProjArea(0.0), Centroid(0.0, 0.0, 0.0), TAirCav(0.0),
-              Tbaffle(0.0), TairLast(20.0), TbaffleLast(20.0), HrPlen(0.0), HcPlen(0.0), MdotVent(0.0), Tilt(0.0), Azimuth(0.0), QdotSource(0.0),
-              Isc(0.0), PassiveACH(0.0), PassiveMdotVent(0.0), PassiveMdotWind(0.0), PassiveMdotTherm(0.0)
+              Tbaffle(0.0), TairLast(20.0), TbaffleLast(20.0), HrPlen(0.0), HcPlen(0.0), Tilt(0.0), QdotSource(0.0), PassiveACH(0.0),
+              PassiveMdotVent(0.0), PassiveMdotWind(0.0), PassiveMdotTherm(0.0)
         {
         }
     };
@@ -1007,7 +1002,8 @@ namespace DataHeatBalance {
 
     enum class PERptVars
     {
-        CPU = 0,       // ITE CPU Electric Power/Energy
+        Invalid = -1,
+        CPU,           // ITE CPU Electric Power/Energy
         Fan,           // ITE Fan Electric Power/Energy
         UPS,           // ITE UPS Electric Power/Energy
         CPUAtDesign,   // ITE CPU Electric Power/Energy at Design Inlet Conditions
@@ -1015,6 +1011,29 @@ namespace DataHeatBalance {
         UPSGainToZone, // ITE UPS Heat Gain to Zone Power(Rate)/Energy - convective gain
         ConGainToZone, // ITE Total Heat Gain to Zone Power(Rate)/Energy - convective gain - includes heat gain from UPS, plus CPU and Fans if
                        // room air model not used
+        Num
+    };
+
+    // Liquid-cooled ITE Equipment cooling coil type (Cooling Coil N Object Type field)
+    enum class ITECoolingCoilType
+    {
+        Invalid = -1,
+        ColdPlate,
+        UserDefined,
+        Num
+    };
+    static constexpr std::array<std::string_view, static_cast<int>(ITECoolingCoilType::Num)> ITECoolingCoilTypeNamesUC = {
+        "COIL:COOLING:ITE:COLDPLATE", "COIL:COOLING:ITE:USERDEFINED"};
+
+    enum class LiquidITERptVars
+    {
+        Invalid = -1,
+        CPU,            // ITE CPU Electric Power/Energy
+        Fan,            // ITE Fan Electric Power/Energy
+        TotalElectric,  // ITE Total Electric Power/Energy
+        TotalHeatGen,   // ITE Liquid Cooled Total Heat Generation Power(Rate)/Energy
+        LiquidHeatGain, // ITE Liquid Cooled Heat Transfer to Liquid Loop Power(Rate)/Energy
+        AirHeatGain,    // ITE Liquid Cooled Air Heat Gain to Zone Power(Rate)/Energy - convective gain
         Num
     };
 
@@ -1082,6 +1101,41 @@ namespace DataHeatBalance {
         Real64 DewpointTBelowDeltaT = 0.0; // ITE Air Inlet Dewpoint Temperature Difference Below Operating Range [deltaC]
         Real64 RHAboveDeltaRH = 0.0;       // ITE Air Inlet Relative Humidity Difference Above Operating Range [%]
         Real64 RHBelowDeltaRH = 0.0;       // ITE Air Inlet Relative Humidity Difference Below Operating Range [%]
+    };
+
+    // One entry in the extensible cooling coil list of ElectricEquipment:ITE:LiquidCooled
+    struct ITELiquidCoolingCoilSpec
+    {
+        ITECoolingCoilType CoilType = ITECoolingCoilType::Invalid; // Cooling Coil Object Type
+        std::string CoilName;                                      // Cooling Coil Name
+        Real64 LoadFraction = 0.0;                                 // Cooling Coil Load Fraction (static)
+        Sched::Schedule *LoadFractionSched = nullptr;              // Cooling Coil Load Fraction Schedule Name
+    };
+
+    struct ITEquipDataLiquidCooled // Liquid-Cooled IT Equipment
+    {
+        // Members
+        std::string Name;                             // EQUIPMENT object name
+        int ZonePtr = 0;                              // Which zone internal gain is in
+        int spaceIndex = 0;                           // Space index for this equipment instance
+        Sched::Schedule *availSched = nullptr;        // Availability schedule
+        Sched::Schedule *computeLoadSched = nullptr;  // Compute Load Schedule (0.0-1.0 total rack loading fraction)
+        Real64 DesignTotalPower = 0.0;                // Design Power Input [W]
+        Real64 Multiplier = 1.0;                      // Scales power and heat to represent multiple identical racks
+        Real64 DesignFanPowerInputFraction = 0.0;     // Fraction of design power input that is for auxiliary fans
+        int PowerModifierCurve = 0;                   // Index for power modifier function of compute loading (x) and zone air temperature (y) curve
+        Real64 LiquidHeatCaptureFractionDesign = 0.8; // Design (nominal) fraction of total heat generation captured by the liquid loop
+        Sched::Schedule *liquidHeatCaptureFracSched = nullptr; // Optional schedule multiplying the design liquid heat capture fraction
+
+        std::vector<ITELiquidCoolingCoilSpec> CoolingCoils;
+        std::string EndUseSubcategoryCPU; // User defined name for the end use category for the CPU
+        std::string EndUseSubcategoryFan; // User defined name for the end use category for the Fans
+
+        // Report variables
+        std::array<Real64, (int)LiquidITERptVars::Num> PowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> EnergyRpt{};
+        Real64 LiquidHeatCaptureFraction = 0.0; // Current achieved liquid heat capture fraction []
+        int LoadFractionSumWarnIndex = 0;       // Recurring warning index for scheduled Load Fractions summing above 1.0
     };
 
     struct BBHeatData
@@ -1216,7 +1270,6 @@ namespace DataHeatBalance {
     {
         // Members
         std::string Name;                            // Object name
-        std::string ZoneName;                        // Zone name
         int ZonePtr = 0;                             // Zone number
         AirBalance BalanceMethod = AirBalance::None; // Air Balance Method
         Real64 InducedAirRate = 0.0;                 // Induced Outdoor Air Due to Duct Leakage Unbalance [m3/s]
@@ -1360,20 +1413,6 @@ namespace DataHeatBalance {
         int numberOfDevices = 0;
         int maxNumberOfDevices = 0;
         Array1D<GenericComponentZoneIntGainStruct> device;
-    };
-
-    struct ZoneCatEUseData
-    {
-        // Members
-        Array1D<Real64> EEConvected; // Category (0 to 25) Energy Convected from Electric Equipment
-        Array1D<Real64> EERadiated;  // Category (0 to 25) Energy Radiated from Electric Equipment
-        Array1D<Real64> EELost;      // Category (0 to 25) Energy from Electric Equipment (lost)
-        Array1D<Real64> EELatent;    // Category (0 to 25) Latent Energy from Electric Equipment
-
-        // Default Constructor
-        ZoneCatEUseData() : EEConvected({0, 25}, 0.0), EERadiated({0, 25}, 0.0), EELost({0, 25}, 0.0), EELatent({0, 25}, 0.0)
-        {
-        }
     };
 
     struct RefrigCaseCreditData
@@ -1754,6 +1793,10 @@ namespace DataHeatBalance {
         Real64 ITEqTimeAboveRH = 0.0;          // Zone ITE Air Inlet Relative Humidity Above Operating Range Time [hr]
         Real64 ITEqTimeBelowRH = 0.0;          // Zone ITE Air Inlet Relative Humidity Below Operating Range Time [hr]
         Real64 ITEAdjReturnTemp = 0.0;         // Zone ITE Adjusted Return Air Temperature
+        // Liquid-Cooled IT Equipment
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEPowerRpt{};
+        std::array<Real64, (int)LiquidITERptVars::Num> LiquidITEEnergyRpt{};
+        Real64 LiquidITEHeatCaptureFraction = 0.0; // Zone/space achieved ITE Liquid Cooled Heat Capture Fraction []
         // Overall Zone Variables
         Real64 TotRadiantGain = 0.0;
         Real64 TotVisHeatGain = 0.0;
@@ -1815,7 +1858,6 @@ namespace DataHeatBalance {
     public:
         void allocate(int const numHours, int const numTimeSteps, int const maxBkSurf, int const numSurfaces)
         {
-            m_numHours = numHours;
             m_numTimeSteps = numTimeSteps;
             m_maxBkSurf = maxBkSurf;
             m_numSurfaces = numSurfaces;
@@ -1825,7 +1867,7 @@ namespace DataHeatBalance {
         void deallocate()
         {
             m_data = std::vector<WinBackSurfOverlap>(); // move-assign an empty vector to release the memory ({} would keep the capacity)
-            m_numHours = m_numTimeSteps = m_maxBkSurf = m_numSurfaces = 0;
+            m_numTimeSteps = m_maxBkSurf = m_numSurfaces = 0;
         }
 
         // Reset all entries
@@ -1853,16 +1895,16 @@ namespace DataHeatBalance {
     private:
         std::size_t index(int const hour, int const timeStep, int const iBack, int const surfNum) const
         {
-            assert((1 <= hour) && (hour <= m_numHours));
+            assert(1 <= hour);
             assert((1 <= timeStep) && (timeStep <= m_numTimeSteps));
             assert((1 <= iBack) && (iBack <= m_maxBkSurf));
             assert((1 <= surfNum) && (surfNum <= m_numSurfaces));
+            assert(static_cast<std::size_t>(hour) <= m_data.size() / (static_cast<std::size_t>(m_numTimeSteps) * m_numSurfaces * m_maxBkSurf));
             return ((static_cast<std::size_t>(hour - 1) * m_numTimeSteps + (timeStep - 1)) * m_numSurfaces + (surfNum - 1)) * m_maxBkSurf +
                    (iBack - 1);
         }
 
         std::vector<WinBackSurfOverlap> m_data;
-        int m_numHours = 0;
         int m_numTimeSteps = 0;
         int m_maxBkSurf = 0;
         int m_numSurfaces = 0;
@@ -1931,26 +1973,27 @@ struct HeatBalanceData : BaseGlobalStruct
     Real64 SysTotalHVACReliefHeatLoss = 0.0;       // Building total heat emission through HVAC system relief air;
     Real64 SysTotalHVACRejectHeatLoss = 0.0;       // Building total heat emission through HVAC system heat rejection;
     // END SiteData
-    int NumOfZoneLists = 0;    // Total number of zone lists
-    int NumOfZoneGroups = 0;   // Total number of zone groups
-    int TotPeople = 0;         // Total People instances after expansion to spaces
-    int totZoneMRT = 0;        // Total ZoneMRTCalculation instances
-    int TotLights = 0;         // Total Lights instances after expansion to spaces
-    int TotElecEquip = 0;      // Total Electric Equipment instances after expansion to spaces
-    int TotGasEquip = 0;       // Total Gas Equipment instances after expansion to spaces
-    int TotOthEquip = 0;       // Total Other Equipment instances after expansion to spaces
-    int TotHWEquip = 0;        // Total Hot Water Equipment instances after expansion to spaces
-    int TotStmEquip = 0;       // Total Steam Equipment instances after expansion to spaces
-    int TotITEquip = 0;        // Total IT Equipment instances after expansion to spaces
-    int TotInfiltration = 0;   // Total Infiltration (all types) instances after expansion to spaces
-    int TotVentilation = 0;    // Total Ventilation (all types) instances after expansion to spaces
-    int TotMixing = 0;         // Total Mixing Statementsn instances after expansion to spaces
-    int TotCrossMixing = 0;    // Total Cross Mixing Statementsn instances after expansion to spaces
-    int TotRefDoorMixing = 0;  // Total RefrigerationDoor Mixing Statements in input
-    int TotBBHeat = 0;         // Total BBHeat Statements instances after expansion to spaces
-    int TotConstructs = 0;     // Total number of unique constructions in this simulation
-    int TotZoneAirBalance = 0; // Total Zone Air Balance Statements in input
-    int TotFrameDivider = 0;   // Total number of window frame/divider objects
+    int NumOfZoneLists = 0;          // Total number of zone lists
+    int NumOfZoneGroups = 0;         // Total number of zone groups
+    int TotPeople = 0;               // Total People instances after expansion to spaces
+    int totZoneMRT = 0;              // Total ZoneMRTCalculation instances
+    int TotLights = 0;               // Total Lights instances after expansion to spaces
+    int TotElecEquip = 0;            // Total Electric Equipment instances after expansion to spaces
+    int TotGasEquip = 0;             // Total Gas Equipment instances after expansion to spaces
+    int TotOthEquip = 0;             // Total Other Equipment instances after expansion to spaces
+    int TotHWEquip = 0;              // Total Hot Water Equipment instances after expansion to spaces
+    int TotStmEquip = 0;             // Total Steam Equipment instances after expansion to spaces
+    int TotITEquip = 0;              // Total IT Equipment instances after expansion to spaces
+    int TotITELiquidCooledEquip = 0; // Total Liquid-Cooled IT Equipment instances after expansion to spaces
+    int TotInfiltration = 0;         // Total Infiltration (all types) instances after expansion to spaces
+    int TotVentilation = 0;          // Total Ventilation (all types) instances after expansion to spaces
+    int TotMixing = 0;               // Total Mixing Statementsn instances after expansion to spaces
+    int TotCrossMixing = 0;          // Total Cross Mixing Statementsn instances after expansion to spaces
+    int TotRefDoorMixing = 0;        // Total RefrigerationDoor Mixing Statements in input
+    int TotBBHeat = 0;               // Total BBHeat Statements instances after expansion to spaces
+    int TotConstructs = 0;           // Total number of unique constructions in this simulation
+    int TotZoneAirBalance = 0;       // Total Zone Air Balance Statements in input
+    int TotFrameDivider = 0;         // Total number of window frame/divider objects
     bool AirFlowFlag = false;
     int TotCO2Gen = 0;                       // Total CO2 source and sink statements in input
     bool CalcWindowRevealReflection = false; // True if window reveal reflection is to be calculated for at least one exterior window
@@ -2101,6 +2144,7 @@ struct HeatBalanceData : BaseGlobalStruct
     EPVector<DataHeatBalance::ZoneEquipData> ZoneHWEq;
     EPVector<DataHeatBalance::ZoneEquipData> ZoneSteamEq;
     EPVector<DataHeatBalance::ITEquipData> ZoneITEq;
+    EPVector<DataHeatBalance::ITEquipDataLiquidCooled> ZoneITELiquidCooled;
     EPVector<DataHeatBalance::BBHeatData> ZoneBBHeat;
     EPVector<DataHeatBalance::InfiltrationData> Infiltration;
     EPVector<DataHeatBalance::VentilationData> Ventilation;
@@ -2109,7 +2153,6 @@ struct HeatBalanceData : BaseGlobalStruct
     EPVector<DataHeatBalance::MixingData> CrossMixing;
     EPVector<DataHeatBalance::AirBoundaryMixingSpecs> airBoundaryMixing;
     EPVector<DataHeatBalance::MixingData> RefDoorMixing;
-    EPVector<DataHeatBalance::ZoneCatEUseData> ZoneIntEEuse;
     EPVector<DataHeatBalance::RefrigCaseCreditData> RefrigCaseCredit;
     EPVector<DataHeatBalance::HeatReclaimDataBase> HeatReclaimRefrigeratedRack;
     EPVector<DataHeatBalance::HeatReclaimRefrigCondenserData> HeatReclaimRefrigCondenser;

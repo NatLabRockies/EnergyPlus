@@ -66,11 +66,9 @@ namespace ExhaustAirSystemManager {
         // Members
         std::string Name;
 
-        Sched::Schedule *availSched = nullptr;
         std::string ZoneMixerName;
         int ZoneMixerIndex = 0;
         HVAC::FanType centralFanType = HVAC::FanType::Invalid;
-        std::string CentralFanName;
         int CentralFanIndex = 0;
 
         bool SizingFlag = true;

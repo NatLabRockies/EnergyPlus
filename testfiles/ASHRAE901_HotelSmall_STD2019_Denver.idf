@@ -19814,6 +19814,7 @@
     101 Thermostat,          !- Name
     GuestRoom101,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19821,6 +19822,7 @@
     102 Thermostat,          !- Name
     GuestRoom102,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19828,6 +19830,7 @@
     103 Thermostat,          !- Name
     GuestRoom103,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19835,6 +19838,7 @@
     104 Thermostat,          !- Name
     GuestRoom104,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19842,6 +19846,7 @@
     105 Thermostat,          !- Name
     GuestRoom105,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19849,6 +19854,7 @@
     201 Thermostat,          !- Name
     GuestRoom201,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19856,6 +19862,7 @@
     202_205 Thermostat,      !- Name
     GuestRoom202_205,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19863,6 +19870,7 @@
     206_208 Thermostat,      !- Name
     GuestRoom206_208,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19870,6 +19878,7 @@
     209_212 Thermostat,      !- Name
     GuestRoom209_212,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19877,6 +19886,7 @@
     213 Thermostat,          !- Name
     GuestRoom213,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19884,6 +19894,7 @@
     214 Thermostat,          !- Name
     GuestRoom214,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19891,6 +19902,7 @@
     215_218 Thermostat,      !- Name
     GuestRoom215_218,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19898,6 +19910,7 @@
     219 Thermostat,          !- Name
     GuestRoom219,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19905,6 +19918,7 @@
     220_223 Thermostat,      !- Name
     GuestRoom220_223,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19912,6 +19926,7 @@
     224 Thermostat,          !- Name
     GuestRoom224,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19919,6 +19934,7 @@
     301 Thermostat,          !- Name
     GuestRoom301,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19926,6 +19942,7 @@
     302_305 Thermostat,      !- Name
     GuestRoom302_305,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19933,6 +19950,7 @@
     306_308 Thermostat,      !- Name
     GuestRoom306_308,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19940,6 +19958,7 @@
     309_312 Thermostat,      !- Name
     GuestRoom309_312,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19947,6 +19966,7 @@
     313 Thermostat,          !- Name
     GuestRoom313,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19954,6 +19974,7 @@
     314 Thermostat,          !- Name
     GuestRoom314,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19961,6 +19982,7 @@
     315_318 Thermostat,      !- Name
     GuestRoom315_318,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19968,6 +19990,7 @@
     319 Thermostat,          !- Name
     GuestRoom319,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19975,6 +19998,7 @@
     320_323 Thermostat,      !- Name
     GuestRoom320_323,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19982,6 +20006,7 @@
     324 Thermostat,          !- Name
     GuestRoom324,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19989,6 +20014,7 @@
     401 Thermostat,          !- Name
     GuestRoom401,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -19996,6 +20022,7 @@
     402_405 Thermostat,      !- Name
     GuestRoom402_405,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20003,6 +20030,7 @@
     406_408 Thermostat,      !- Name
     GuestRoom406_408,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20010,6 +20038,7 @@
     409_412 Thermostat,      !- Name
     GuestRoom409_412,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     N OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20017,6 +20046,7 @@
     413 Thermostat,          !- Name
     GuestRoom413,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20024,6 +20054,7 @@
     414 Thermostat,          !- Name
     GuestRoom414,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     VacGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20031,6 +20062,7 @@
     415_418 Thermostat,      !- Name
     GuestRoom415_418,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20038,6 +20070,7 @@
     419 Thermostat,          !- Name
     GuestRoom419,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20045,6 +20078,7 @@
     420_423 Thermostat,      !- Name
     GuestRoom420_423,        !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20052,6 +20086,7 @@
     424 Thermostat,          !- Name
     GuestRoom424,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     S OccGuestRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20059,6 +20094,7 @@
     RearStairsFlr1 Thermostat,  !- Name
     RearStairsFlr1,          !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20066,6 +20102,7 @@
     FrontLoungeFlr1 Thermostat,  !- Name
     FrontLoungeFlr1,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20073,6 +20110,7 @@
     RestRoomFlr1 Thermostat, !- Name
     RestRoomFlr1,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20080,6 +20118,7 @@
     MeetingRoomFlr1 Thermostat,  !- Name
     MeetingRoomFlr1,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     MeetingRoom Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20087,6 +20126,7 @@
     MechanicalRoomFlr1 Thermostat,  !- Name
     MechanicalRoomFlr1,      !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20094,6 +20134,7 @@
     EmployeeLoungeFlr1 Thermostat,  !- Name
     EmployeeLoungeFlr1,      !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20101,6 +20142,7 @@
     ExerciseCenterFlr1 Thermostat,  !- Name
     ExerciseCenterFlr1,      !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20108,6 +20150,7 @@
     FrontOfficeFlr1 Thermostat,  !- Name
     FrontOfficeFlr1,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20115,6 +20158,7 @@
     FrontStairsFlr1 Thermostat,  !- Name
     FrontStairsFlr1,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20122,6 +20166,7 @@
     RearStairsFlr2 Thermostat,  !- Name
     RearStairsFlr2,          !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20129,6 +20174,7 @@
     FrontStairsFlr2 Thermostat,  !- Name
     FrontStairsFlr2,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20136,6 +20182,7 @@
     RearStairsFlr3 Thermostat,  !- Name
     RearStairsFlr3,          !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20143,6 +20190,7 @@
     FrontStairsFlr3 Thermostat,  !- Name
     FrontStairsFlr3,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20150,6 +20198,7 @@
     RearStairsFlr4 Thermostat,  !- Name
     RearStairsFlr4,          !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20157,6 +20206,7 @@
     FrontStairsFlr4 Thermostat,  !- Name
     FrontStairsFlr4,         !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 1,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type
     SemiHeated_HtgSP;        !- Control 1 Name
 
@@ -20164,6 +20214,7 @@
     CorridorFlr1 Thermostat, !- Name
     CorridorFlr1,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20171,6 +20222,7 @@
     CorridorFlr2 Thermostat, !- Name
     CorridorFlr2,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20178,6 +20230,7 @@
     CorridorFlr3 Thermostat, !- Name
     CorridorFlr3,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 
@@ -20185,6 +20238,7 @@
     CorridorFlr4 Thermostat, !- Name
     CorridorFlr4,            !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     CommonArea Thermostat Dual SP Control;  !- Control 1 Name
 

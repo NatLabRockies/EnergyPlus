@@ -134,6 +134,7 @@ namespace EIRPlantLoopHeatPumps {
         bool referenceCapacityWasAutoSized = false;
         Real64 referenceCOP = 0.0;
         Real64 minimumPLR = 0.0;
+        Real64 maximumPLR = 0.0;
         Real64 partLoadRatio = 0.0;
         Real64 cyclingRatio = 0.0;
         Real64 minSourceTempLimit = -999.0;
@@ -289,7 +290,7 @@ namespace EIRPlantLoopHeatPumps {
 
         virtual void report(EnergyPlusData &state);
 
-        void sizeLoadSide(EnergyPlusData &state);
+        virtual void sizeLoadSide(EnergyPlusData &state);
 
         void sizeSrcSideWSHP(EnergyPlusData &state);
 
@@ -310,6 +311,8 @@ namespace EIRPlantLoopHeatPumps {
         void eirModFPLRCurveCheck(EnergyPlusData &state, Real64 &eirModFPLR);
 
         void heatRecoveryEIRModCurveCheck(EnergyPlusData &state, Real64 &eirModFTemp);
+
+        int getActiveLoadSideSetPointNodeNum() const;
 
         Real64 getLoadSideOutletSetPointTemp(EnergyPlusData &state) const;
 
@@ -343,7 +346,7 @@ namespace EIRPlantLoopHeatPumps {
 
         bool thermosiphonDisabled(EnergyPlusData &state);
 
-        Real64 getDynamicMaxCapacity(EnergyPlusData &state) override;
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad) override;
     };
 
     struct EIRFuelFiredHeatPump : public EIRPlantLoopHeatPump
@@ -392,11 +395,6 @@ namespace EIRPlantLoopHeatPumps {
         Real64 desTempLift = 11.1;
         OATempCurveVar oaTempCurveInputVar = OATempCurveVar::DryBulb;
         WaterTempCurveVar waterTempCurveInputVar = WaterTempCurveVar::EnteringCondenser;
-        // int capFuncTempCurveIndex = 0;
-        // int powerRatioFuncTempCurveIndex = 0;
-        //  int powerRatioFuncPLRCurveIndex = 0;
-        Real64 minPLR = 0.1;
-        Real64 maxPLR = 1.0;
 
         int defrostEIRCurveIndex = 0;
         DefrostType defrostType = DefrostType::OnDemand;
@@ -430,7 +428,7 @@ namespace EIRPlantLoopHeatPumps {
         static void processInputForEIRPLHP(EnergyPlusData &state);
         void oneTimeInit(EnergyPlusData &state) override;
         void report(EnergyPlusData &state) override;
-        Real64 getDynamicMaxCapacity(EnergyPlusData &state) override;
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state, Real64 &minLoad, Real64 &optLoad) override;
 
         // New or specialized functions for derived struct
         virtual ~EIRFuelFiredHeatPump() = default;
@@ -548,7 +546,7 @@ namespace EIRPlantLoopHeatPumps {
                                        int const inletNodeNum = 0,
                                        int const outletNodeNum = 0);
         static void processInputForEIRPLHP(EnergyPlusData &state);
-        void sizeLoadSide(EnergyPlusData &state);
+        void sizeLoadSide(EnergyPlusData &state) override;
     }; // HeatPumpAirToWater
 } // namespace EIRPlantLoopHeatPumps
 

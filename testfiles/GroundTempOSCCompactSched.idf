@@ -674,6 +674,7 @@
     OSCTest-Thermostat,      !- Name
     OSCTest,                 !- Zone or ZoneList Name
     OSCTest-Control Sched,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:SingleCooling,  !- Control 1 Object Type
     OSCTest-Cooling Setpoint with SB,  !- Control 1 Name
     ThermostatSetpoint:SingleHeating,  !- Control 2 Object Type

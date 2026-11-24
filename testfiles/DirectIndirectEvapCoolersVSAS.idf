@@ -3240,6 +3240,7 @@
     units_gr_lf Thermostat,  !- Name
     units_gr_lf,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     units_gr_lf DualSPSched; !- Control 1 Name
 
@@ -3804,6 +3805,7 @@
     units_gr_rt Thermostat,  !- Name
     units_gr_rt,             !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     units_gr_rt DualSPSched; !- Control 1 Name
 
@@ -4193,6 +4195,7 @@
     unit_s_g Thermostat,     !- Name
     unit_s_g,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     unit_s_g DualSPSched;    !- Control 1 Name
 
@@ -4582,6 +4585,7 @@
     unit_n_g Thermostat,     !- Name
     unit_n_g,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     unit_n_g DualSPSched;    !- Control 1 Name
 

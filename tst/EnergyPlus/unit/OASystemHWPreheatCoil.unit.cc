@@ -494,6 +494,7 @@ TEST_F(EnergyPlusFixture, OASystem_HotWaterPreheatCoilScheduledOffSim)
         "    Zone 1 Thermostat,       !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Temperature Setpoints;   !- Control 1 Name",
 
@@ -1485,6 +1486,7 @@ TEST_F(EnergyPlusFixture, OASystem_HotWaterPreheatCoilScheduledOnSim)
         "    Zone 1 Thermostat,       !- Name",
         "    SPACE1-1,                !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Temperature Setpoints;   !- Control 1 Name",
 

@@ -3941,6 +3941,7 @@
     LGstore1 Thermostat,     !- Name
     LGstore1,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     LGstore1 DualSPSched;    !- Control 1 Name
 
@@ -3948,6 +3949,7 @@
     LGstore2 Thermostat,     !- Name
     LGstore2,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     LGstore2 DualSPSched;    !- Control 1 Name
 
@@ -3955,6 +3957,7 @@
     SMstore1 Thermostat,     !- Name
     SMstore1,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore1 DualSPSched;    !- Control 1 Name
 
@@ -3962,6 +3965,7 @@
     SMstore2 Thermostat,     !- Name
     SMstore2,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore2 DualSPSched;    !- Control 1 Name
 
@@ -3969,6 +3973,7 @@
     SMstore3 Thermostat,     !- Name
     SMstore3,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore3 DualSPSched;    !- Control 1 Name
 
@@ -3976,6 +3981,7 @@
     SMstore4 Thermostat,     !- Name
     SMstore4,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore4 DualSPSched;    !- Control 1 Name
 
@@ -3983,6 +3989,7 @@
     SMstore5 Thermostat,     !- Name
     SMstore5,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore5 DualSPSched;    !- Control 1 Name
 
@@ -3990,6 +3997,7 @@
     SMstore6 Thermostat,     !- Name
     SMstore6,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore6 DualSPSched;    !- Control 1 Name
 
@@ -3997,6 +4005,7 @@
     SMstore7 Thermostat,     !- Name
     SMstore7,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore7 DualSPSched;    !- Control 1 Name
 
@@ -4004,6 +4013,7 @@
     SMstore8 Thermostat,     !- Name
     SMstore8,                !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     SMstore8 DualSPSched;    !- Control 1 Name
 

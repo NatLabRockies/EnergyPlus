@@ -1834,6 +1834,7 @@
     SPACE5-1 Thermostat,     !- Name
     SPACE5-1,                !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -1953,6 +1954,7 @@
     SPACE1-1 Thermostat,     !- Name
     SPACE1-1,                !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2086,6 +2088,7 @@
     SPACE2-1 Thermostat,     !- Name
     SPACE2-1,                !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2219,6 +2222,7 @@
     SPACE3-1 Thermostat,     !- Name
     SPACE3-1,                !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 
@@ -2352,6 +2356,7 @@
     SPACE4-1 Thermostat,     !- Name
     SPACE4-1,                !- Zone or ZoneList Name
     COMPACT HVAC-ALWAYS 4,   !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     All Zones Dual SP Control;  !- Control 1 Name
 

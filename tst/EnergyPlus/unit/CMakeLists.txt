@@ -129,6 +129,7 @@ set(test_src
     Fans.unit.cc
     FaultsManager.unit.cc
     FileSystem.unit.cc
+    FilledArray.unit.cc
     FiniteDifferenceGroundTemperatureModel.unit.cc
     FluidCoolers.unit.cc
     FluidProperties.unit.cc

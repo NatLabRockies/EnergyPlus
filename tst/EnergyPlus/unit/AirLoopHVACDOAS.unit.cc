@@ -2554,6 +2554,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -2561,6 +2562,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_1 Thermostat,  !- Name",
         "    Perimeter_ZN_1,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_1 DualSPSched;  !- Control 1 Name",
 
@@ -2568,6 +2570,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_2 Thermostat,  !- Name",
         "    Perimeter_ZN_2,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_2 DualSPSched;  !- Control 1 Name",
 
@@ -2575,6 +2578,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_3 Thermostat,  !- Name",
         "    Perimeter_ZN_3,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_3 DualSPSched;  !- Control 1 Name",
 
@@ -2582,6 +2586,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOASTest)
         "    Perimeter_ZN_4 Thermostat,  !- Name",
         "    Perimeter_ZN_4,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_4 DualSPSched;  !- Control 1 Name",
 
@@ -6961,6 +6966,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -6968,6 +6974,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_1 Thermostat,  !- Name",
         "    Perimeter_ZN_1,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_1 DualSPSched;  !- Control 1 Name",
 
@@ -6975,6 +6982,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_2 Thermostat,  !- Name",
         "    Perimeter_ZN_2,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_2 DualSPSched;  !- Control 1 Name",
 
@@ -6982,6 +6990,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_3 Thermostat,  !- Name",
         "    Perimeter_ZN_3,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_3 DualSPSched;  !- Control 1 Name",
 
@@ -6989,6 +6998,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_ReportVariableResetTest)
         "    Perimeter_ZN_4 Thermostat,  !- Name",
         "    Perimeter_ZN_4,          !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Perimeter_ZN_4 DualSPSched;  !- Control 1 Name",
 
@@ -9506,6 +9516,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 
@@ -11075,6 +11086,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
         "    Core_ZN Thermostat,      !- Name",
         "    Core_ZN,                 !- Zone or ZoneList Name",
         "    Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Core_ZN DualSPSched;     !- Control 1 Name",
 

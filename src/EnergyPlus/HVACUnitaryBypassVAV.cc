@@ -767,16 +767,6 @@ namespace HVACUnitaryBypassVAV {
                     ErrorsFound = true;
                 }
 
-                //     Check supply air fan operating mode for cycling fan, if NOT cycling fan set AirFlowControl
-                if (!cbvav.fanOpModeSched->checkMinMaxVals(state, Clusive::In, 0.0, Clusive::In, 0.0)) { // Autodesk:Note Range is 0 to 0?
-                    //       set air flow control mode,
-                    //       UseCompressorOnFlow  = operate at last cooling or heating air flow requested when compressor is off
-                    //       UseCompressorOffFlow = operate at value specified by user (no input for this object type, UseCompONFlow)
-                    //       AirFlowControl only valid if fan opmode = HVAC::FanOp::Continuous
-                    cbvav.AirFlowControl =
-                        (cbvav.MaxNoCoolHeatAirVolFlow == 0.0) ? AirFlowCtrlMode::UseCompressorOnFlow : AirFlowCtrlMode::UseCompressorOffFlow;
-                }
-
             } else {
                 if (!lAlphaBlanks(13)) {
                     ShowWarningError(state, std::format("{}: {}", CurrentModuleObject, cbvav.Name));
@@ -787,11 +777,6 @@ namespace HVACUnitaryBypassVAV {
                                     Alphas(13)));
                 }
                 cbvav.fanOp = HVAC::FanOp::Continuous;
-                if (cbvav.MaxNoCoolHeatAirVolFlow == 0.0) {
-                    cbvav.AirFlowControl = AirFlowCtrlMode::UseCompressorOnFlow;
-                } else {
-                    cbvav.AirFlowControl = AirFlowCtrlMode::UseCompressorOffFlow;
-                }
             }
 
             //   Check FanVolFlow, must be >= CBVAV flow
@@ -811,7 +796,7 @@ namespace HVACUnitaryBypassVAV {
                 }
             }
             //   only check that OA flow when compressor is OFF is >= SA flow when compressor is OFF when both are not autosized and
-            //   that MaxNoCoolHeatAirVolFlow is /= 0 (trigger to use compressor ON flow, see AirFlowControl variable initialization above)
+            //   that MaxNoCoolHeatAirVolFlow is /= 0
             if (cbvav.NoCoolHeatOutAirVolFlow > cbvav.MaxNoCoolHeatAirVolFlow && cbvav.NoCoolHeatOutAirVolFlow != DataSizing::AutoSize &&
                 cbvav.MaxNoCoolHeatAirVolFlow != DataSizing::AutoSize && cbvav.MaxNoCoolHeatAirVolFlow != 0.0) {
                 ShowWarningError(state, std::format("{}: {} cannot be greater than {}", CurrentModuleObject, cNumericFields(6), cNumericFields(3)));
@@ -1645,21 +1630,6 @@ namespace HVACUnitaryBypassVAV {
                 state.dataHVACUnitaryBypassVAV->OACompOnMassFlow = cBVAV.NoCoolHeatOutAirMassFlow * OutsideAirMultiplier;
             }
 
-            if (cBVAV.AirFlowControl == AirFlowCtrlMode::UseCompressorOnFlow) {
-                if (cBVAV.LastMode == HeatingMode) {
-                    state.dataHVACUnitaryBypassVAV->CompOffMassFlow = cBVAV.MaxHeatAirMassFlow;
-                    state.dataHVACUnitaryBypassVAV->CompOffFlowRatio = cBVAV.HeatingSpeedRatio;
-                    state.dataHVACUnitaryBypassVAV->OACompOffMassFlow = cBVAV.HeatOutAirMassFlow * OutsideAirMultiplier;
-                } else {
-                    state.dataHVACUnitaryBypassVAV->CompOffMassFlow = cBVAV.MaxCoolAirMassFlow;
-                    state.dataHVACUnitaryBypassVAV->CompOffFlowRatio = cBVAV.CoolingSpeedRatio;
-                    state.dataHVACUnitaryBypassVAV->OACompOffMassFlow = cBVAV.CoolOutAirMassFlow * OutsideAirMultiplier;
-                }
-            } else {
-                state.dataHVACUnitaryBypassVAV->CompOffMassFlow = cBVAV.MaxNoCoolHeatAirMassFlow;
-                state.dataHVACUnitaryBypassVAV->CompOffFlowRatio = cBVAV.NoHeatCoolSpeedRatio;
-                state.dataHVACUnitaryBypassVAV->OACompOffMassFlow = cBVAV.NoCoolHeatOutAirMassFlow * OutsideAirMultiplier;
-            }
         } else {
             // cycling fan mode
             if (cBVAV.HeatCoolMode == HeatingMode) {
@@ -1675,9 +1645,6 @@ namespace HVACUnitaryBypassVAV {
                 state.dataHVACUnitaryBypassVAV->CompOnFlowRatio = cBVAV.CoolingSpeedRatio;
                 state.dataHVACUnitaryBypassVAV->OACompOnMassFlow = cBVAV.CoolOutAirMassFlow * OutsideAirMultiplier;
             }
-            state.dataHVACUnitaryBypassVAV->CompOffMassFlow = 0.0;
-            state.dataHVACUnitaryBypassVAV->CompOffFlowRatio = 0.0;
-            state.dataHVACUnitaryBypassVAV->OACompOffMassFlow = 0.0;
         }
 
         // Check for correct control node at outlet of unit
@@ -1786,8 +1753,6 @@ namespace HVACUnitaryBypassVAV {
 
                 //     simulate water coil to find operating capacity
                 WaterCoils::SimulateWaterCoilComponents(state, cBVAV.HeatCoilName, FirstHVACIteration, cBVAV.HeatCoilIndex, QCoilActual);
-                cBVAV.DesignSuppHeatingCapacity = QCoilActual;
-
             } // from IF(MSHeatPump(MSHeatPumpNum)%SuppHeatCoilType == HVAC::Coil_HeatingWater) THEN
 
             if (cBVAV.heatCoilType == HVAC::CoilType::HeatingSteam) {
@@ -1804,8 +1769,6 @@ namespace HVACUnitaryBypassVAV {
                                                         cBVAV.HeatCoilIndex,
                                                         1.0,
                                                         QCoilActual); // QCoilReq, simulate any load > 0 to get max capacity of steam coil
-                cBVAV.DesignSuppHeatingCapacity = QCoilActual;
-
             } // from IF(cBVAV%HeatCoilType == HVAC::Coil_HeatingSteam) THEN
         } // from IF( FirstHVACIteration ) THEN
 
@@ -2607,7 +2570,6 @@ namespace HVACUnitaryBypassVAV {
 
                     // Get full load result
                     HVAC::CoilMode DehumidMode = HVAC::CoilMode::Normal; // Dehumidification mode (0=normal, 1=enhanced)
-                    cBVAV.DehumidificationMode = DehumidMode;
                     DXCoils::SimDXCoilMultiMode(state,
                                                 cBVAV.DXCoolCoilName,
                                                 HVAC::CompressorOp::On,
@@ -2695,7 +2657,6 @@ namespace HVACUnitaryBypassVAV {
                         // Get full load result
                         PartLoadFrac = 1.0;
                         DehumidMode = HVAC::CoilMode::Enhanced;
-                        cBVAV.DehumidificationMode = DehumidMode;
                         DXCoils::SimDXCoilMultiMode(state,
                                                     cBVAV.DXCoolCoilName,
                                                     HVAC::CompressorOp::On,
@@ -2790,7 +2751,6 @@ namespace HVACUnitaryBypassVAV {
                         // Get full load result
                         PartLoadFrac = 1.0;
                         DehumidMode = HVAC::CoilMode::Normal;
-                        cBVAV.DehumidificationMode = DehumidMode;
                         DXCoils::SimDXCoilMultiMode(state,
                                                     cBVAV.DXCoolCoilName,
                                                     HVAC::CompressorOp::On,

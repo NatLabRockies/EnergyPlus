@@ -847,6 +847,7 @@ void ExhaustAbsorberSpecs::oneTimeInit_new(EnergyPlusData &state)
     if (errFlag) {
         ShowFatalError(state, "InitExhaustAbsorber: Program terminated due to previous condition(s).");
     }
+    this->CWPlantLoc.comp->ModulatedFlow = true;
 
     PlantUtilities::ScanPlantLoopsForObject(
         state, this->Name, DataPlant::PlantEquipmentType::Chiller_ExhFiredAbsorption, this->HWPlantLoc, errFlag, _, _, _, this->HeatReturnNodeNum, _);

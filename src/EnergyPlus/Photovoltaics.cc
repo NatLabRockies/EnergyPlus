@@ -1492,18 +1492,12 @@ namespace Photovoltaics {
         PA = IA * VA;
 
         // Place local variables into the reporting structure
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayCurrent = IA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoltage = VA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower = PA;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayEfficiency = ETA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayEfficiency = ETA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).Report.CellTemp = CellTempC;
         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTempK = CellTemp;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayIsc = ISCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayIsc = ISCA;
-        state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayVoc = VOCA;
         state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink = PA;
     }

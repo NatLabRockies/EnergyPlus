@@ -642,6 +642,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_1x)
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -1113,6 +1114,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_10x)
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -1557,6 +1559,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_NonCoincident1)
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -2055,6 +2058,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_NonCoincident2)
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -2541,6 +2545,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_NonAir_1x_NoLatent
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -3005,6 +3010,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_NonAir_10x_NoLaten
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -3469,6 +3475,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_NonAir_10x_NoLaten
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 
@@ -3894,6 +3901,7 @@ TEST_F(EnergyPlusFixture, SizingManager_ZoneSizing_Coincident_NonAir_10x_Latent_
         "    Zone 1 Thermostat,       !- Name",
         "    Zone 1,                  !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "    Dual Setpoint with SB;   !- Control 1 Name",
 

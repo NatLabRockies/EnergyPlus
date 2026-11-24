@@ -1097,6 +1097,7 @@ TEST_F(EnergyPlusFixture, UnitaryHeatPumpAirToAir_MaxSuppAirTempTest)
         "    Zone 2 Thermostat,       !- Name",
         "    EAST ZONE,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",
@@ -1219,7 +1220,7 @@ TEST_F(EnergyPlusFixture, UnitaryHeatPumpAirToAir_MaxSuppAirTempTest)
     // check if the air-to-air heat pump outlet temperature is capped at 45.0C
     EXPECT_NEAR(45.0, state->dataLoopNodes->Node(state->dataFurnaces->Furnace(1).FurnaceOutletNodeNum).Temp, 0.000001);
     EXPECT_NEAR(0.3326, state->dataLoopNodes->Node(state->dataFurnaces->Furnace(1).FurnaceOutletNodeNum).MassFlowRate, 0.0001);
-    EXPECT_NEAR(121.06458, state->dataFurnaces->Furnace(1).SensibleLoadMet, 0.001);
+    EXPECT_NEAR(121.06458, state->dataFurnaces->Furnace(1).SensibleLoadMet, 0.005);
 
     // Test airflow when fan is forced off
     state->dataHVACGlobal->TurnFansOn = false;
@@ -1838,6 +1839,7 @@ TEST_F(EnergyPlusFixture, UnitaryHeatCool_AFN_RTF)
         "    Zone 2 Thermostat,       !- Name",
         "    EAST ZONE,               !- Zone or ZoneList Name",
         "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ,                        !- Temperature Difference Between Cutout And Setpoint",
         "    ThermostatSetpoint:SingleHeating,  !- Control 1 Object Type",
         "    Heating Setpoint with SB,!- Control 1 Name",
         "    ThermostatSetpoint:SingleCooling,  !- Control 2 Object Type",

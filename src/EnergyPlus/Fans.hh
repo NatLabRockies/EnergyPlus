@@ -317,13 +317,11 @@ namespace Fans {
     struct NightVentPerfData
     {
         // Members
-        std::string FanName;             // Name of the fan that will use this data
-        Real64 FanEff = 0.0;             // Fan total efficiency; motor and mechanical
-        Real64 DeltaPress = 0.0;         // Delta Pressure Across the Fan [N/m2]
-        Real64 MaxAirFlowRate = 0.0;     // Max Specified Volume Flow Rate of Fan [m3/s]
-        Real64 MaxAirMassFlowRate = 0.0; // Max flow rate of fan in kg/sec
-        Real64 MotEff = 0.0;             // Fan motor efficiency
-        Real64 MotInAirFrac = 0.0;       // Fraction of motor heat entering air stream
+        std::string FanName;       // Name of the fan that will use this data
+        Real64 FanEff = 0.0;       // Fan total efficiency; motor and mechanical
+        Real64 DeltaPress = 0.0;   // Delta Pressure Across the Fan [N/m2]
+        Real64 MotEff = 0.0;       // Fan motor efficiency
+        Real64 MotInAirFrac = 0.0; // Fraction of motor heat entering air stream
     };
 
     void GetFanInput(EnergyPlusData &state);
@@ -430,7 +428,6 @@ namespace Fans {
         Real64 elecPowerPerFlowRate = 0.0;                    // scaling factor for PowerPerFlow method
         Real64 elecPowerPerFlowRatePerPressure = 0.0;         // scaling factor for PowerPerFlowPerPressure
         Real64 nightVentPressureDelta = 0.0;                  // fan pressure rise during night ventilation mode
-        Real64 nightVentFlowFraction = 0.0;                   // fan's flow fraction during night ventilation mode, not used
         Real64 zoneRadFract = 0.0;                            // thermal radiation split for motor losses
         Real64 qdotConvZone = 0.0;                            // fan power lost to surrounding zone by convection to air (W)
         Real64 qdotRadZone = 0.0;                             // fan power lost to surrounding zone by radiation to zone surfaces(W)

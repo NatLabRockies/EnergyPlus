@@ -80,7 +80,6 @@ namespace HVACCooledBeam {
         // input data
         std::string Name;                      // name of unit
         std::string UnitType;                  // type of unit = AirTerminal:SingleDuct:ConstantVolume:CooledBeam
-        int UnitType_Num;                      // index to type of unit = 1 (there's only 1 type so far)
         std::string CBTypeString;              // type of cooled beam: active | passive
         CooledBeamType CBType;                 // index to type of cooled beam
         Sched::Schedule *availSched = nullptr; // availability schedule
@@ -112,7 +111,6 @@ namespace HVACCooledBeam {
         Real64 TWOut;               // current outlet water temperature [C]
         Real64 EnthWaterOut;        // current outlet water enthalpy [J/kg]
         Real64 BeamFlow;            // supply air flow per beam [m3/s]
-        Real64 CoolWaterMassFlow;   // chilled water mass flow rate [kg/s]
         Real64 BeamCoolingEnergy;   // Cooled beam cooling energy of all beams in the zone [J]
         Real64 BeamCoolingRate;     // Cooled beam cooling rate of all beams in the zone [W]
         Real64 SupAirCoolingEnergy; // Total cooling energy from supply air [J]
@@ -120,26 +118,22 @@ namespace HVACCooledBeam {
         Real64 SupAirHeatingEnergy; // Total cooling energy from supply air [J]
         Real64 SupAirHeatingRate;   // Total cooling rate from supply air [W]
         PlantLocation CWPlantLoc;   // cooling water plant loop component index
-        int CBLoadReSimIndex;
-        int CBMassFlowReSimIndex;
-        int CBWaterOutletTempReSimIndex;
-        int CtrlZoneNum;           // control zone index
-        int ctrlZoneInNodeIndex;   // which controlled zone inlet node number corresponds with this unit
-        int AirLoopNum;            // air loop index that terminal is attached to
-        Real64 OutdoorAirFlowRate; // zone outdoor air volume flow rate
+        int CtrlZoneNum;            // control zone index
+        int ctrlZoneInNodeIndex;    // which controlled zone inlet node number corresponds with this unit
+        int AirLoopNum;             // air loop index that terminal is attached to
+        Real64 OutdoorAirFlowRate;  // zone outdoor air volume flow rate
         bool MyEnvrnFlag;
         bool MySizeFlag;
         bool PlantLoopScanFlag;
 
         // Default Constructor
         CoolBeamData()
-            : UnitType_Num(0), CBType(CooledBeamType::Invalid), MaxAirVolFlow(0.0), MaxAirMassFlow(0.0), MaxCoolWaterVolFlow(0.0),
-              MaxCoolWaterMassFlow(0.0), AirInNode(0), AirOutNode(0), CWInNode(0), CWOutNode(0), ADUNum(0), NumBeams(0.0), BeamLength(0.0),
-              DesInletWaterTemp(0.0), DesOutletWaterTemp(0.0), CoilArea(0.0), a(0.0), n1(0.0), n2(0.0), n3(0.0), a0(0.0), K1(0.0), n(0.0), Kin(0.0),
-              InDiam(0.0), TWIn(0.0), TWOut(0.0), EnthWaterOut(0.0), BeamFlow(0.0), CoolWaterMassFlow(0.0), BeamCoolingEnergy(0.0),
-              BeamCoolingRate(0.0), SupAirCoolingEnergy(0.0), SupAirCoolingRate(0.0), SupAirHeatingEnergy(0.0), SupAirHeatingRate(0.0), CWPlantLoc{},
-              CBLoadReSimIndex(0), CBMassFlowReSimIndex(0), CBWaterOutletTempReSimIndex(0), CtrlZoneNum(0), ctrlZoneInNodeIndex(0), AirLoopNum(0),
-              OutdoorAirFlowRate(0.0), MyEnvrnFlag(true), MySizeFlag(true), PlantLoopScanFlag(true)
+            : CBType(CooledBeamType::Invalid), MaxAirVolFlow(0.0), MaxAirMassFlow(0.0), MaxCoolWaterVolFlow(0.0), MaxCoolWaterMassFlow(0.0),
+              AirInNode(0), AirOutNode(0), CWInNode(0), CWOutNode(0), ADUNum(0), NumBeams(0.0), BeamLength(0.0), DesInletWaterTemp(0.0),
+              DesOutletWaterTemp(0.0), CoilArea(0.0), a(0.0), n1(0.0), n2(0.0), n3(0.0), a0(0.0), K1(0.0), n(0.0), Kin(0.0), InDiam(0.0), TWIn(0.0),
+              TWOut(0.0), EnthWaterOut(0.0), BeamFlow(0.0), BeamCoolingEnergy(0.0), BeamCoolingRate(0.0), SupAirCoolingEnergy(0.0),
+              SupAirCoolingRate(0.0), SupAirHeatingEnergy(0.0), SupAirHeatingRate(0.0), CWPlantLoc{}, CtrlZoneNum(0), ctrlZoneInNodeIndex(0),
+              AirLoopNum(0), OutdoorAirFlowRate(0.0), MyEnvrnFlag(true), MySizeFlag(true), PlantLoopScanFlag(true)
         {
         }
 

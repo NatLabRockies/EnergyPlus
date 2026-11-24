@@ -431,6 +431,17 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
 
               ! If your original object starts with F, insert the rules here
 
+                CASE('FANPERFORMANCE:NIGHTVENTILATION')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  IF (TRIM(InArgs(4)) /= Blank) THEN
+                    CALL ShowWarningError('For FanPerformance:NightVentilation="'//TRIM(InArgs(1))// &
+                        '", Maximum Flow Rate was removed; input value "'//TRIM(InArgs(4))//'" was discarded.',Auditf)
+                  ENDIF
+                  OutArgs(1:3)=InArgs(1:3)
+                  OutArgs(4:CurArgs - 1)=InArgs(5:CurArgs)
+                  CurArgs = CurArgs - 1
+                  nodiff=.false.
+
               ! If your original object starts with G, insert the rules here
 
               ! If your original object starts with H, insert the rules here
@@ -460,6 +471,19 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
               ! If your original object starts with W, insert the rules here
 
               ! If your original object starts with Z, insert the rules here
+
+              CASE('ZONECONTROL:THERMOSTAT')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  OutArgs(1:3)=InArgs(1:3)
+                  IF (CurArgs .EQ. 12) THEN
+                    OutArgs(4)=InArgs(CurArgs)
+                    OutArgs(5:CurArgs)=InArgs(4:CurArgs - 1)
+                  ELSE
+                    OutArgs(4)=' '
+                    OutArgs(5:CurArgs + 1)=InArgs(4:CurArgs)
+                    CurArgs = CurArgs + 1
+                  ENDIF
+                  nodiff=.false.
 
               CASE('ZONEHVAC:EVAPORATIVECOOLERUNIT')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)

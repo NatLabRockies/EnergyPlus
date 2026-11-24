@@ -177,8 +177,6 @@ namespace OutdoorAirUnit {
             }
         }
 
-        state.dataSize->ZoneEqOutdoorAirUnit = true;
-
         if (state.dataGlobal->ZoneSizingCalc || state.dataGlobal->SysSizingCalc) {
             return;
         }
@@ -188,8 +186,6 @@ namespace OutdoorAirUnit {
         CalcOutdoorAirUnit(state, OAUnitNum, ZoneNum, FirstHVACIteration, PowerMet, LatOutputProvided);
 
         ReportOutdoorAirUnit(state, OAUnitNum);
-
-        state.dataSize->ZoneEqOutdoorAirUnit = false;
     }
 
     void GetOutdoorAirUnitInputs(EnergyPlusData &state)

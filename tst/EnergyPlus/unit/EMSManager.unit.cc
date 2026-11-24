@@ -215,6 +215,44 @@ TEST_F(EnergyPlusFixture, CheckActuatorInit)
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlVariable(1).Value.Type, DataRuntimeLanguage::Value::Null);
 }
 
+TEST_F(EnergyPlusFixture, ComponentGetInputProcessesNewEMSActuator)
+{
+    std::string const idf_objects = delimited_string({
+        "EnergyManagementSystem:Actuator,",
+        "  TestSizingActuator,             !- Name",
+        "  Test Component,                 !- Actuated Component Unique Name",
+        "  Test Component Type,            !- Actuated Component Type",
+        "  Autosized Test Value;           !- Actuated Component Control Type",
+
+        "EnergyManagementSystem:ProgramCallingManager,",
+        "  Test Sizing Manager,            !- Name",
+        "  AfterComponentInputReadIn,      !- EnergyPlus Model Calling Point",
+        "  SetTestSizingValue;             !- Program Name 1",
+
+        "EnergyManagementSystem:Program,",
+        "  SetTestSizingValue,             !- Name",
+        "  SET TestSizingActuator = 1234.0;",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool actuatorOn = false;
+    Real64 actuatorValue = 0.0;
+    SetupEMSActuator(*state, "Test Component Type", "Test Component", "Autosized Test Value", "[W]", actuatorOn, actuatorValue);
+
+    // Component input processing occurs during sizing, before the final SetupSimulation EMS pass.
+    state->dataGlobal->DoingSizing = true;
+    bool anyEMSRan = false;
+    ManageEMS(*state, EMSCallFrom::ComponentGetInput, anyEMSRan, ObjexxFCL::Optional_int_const());
+
+    ASSERT_EQ(1, state->dataRuntimeLang->numActuatorsUsed);
+    EXPECT_TRUE(state->dataRuntimeLang->EMSActuatorUsed(1).CheckedOkay);
+    EXPECT_TRUE(anyEMSRan);
+    EXPECT_TRUE(actuatorOn);
+    EXPECT_DOUBLE_EQ(1234.0, actuatorValue);
+}
+
 TEST_F(EnergyPlusFixture, SupervisoryControl_PlantComponent_SetActuatedBranchFlowRate)
 {
     // test EMS actuator for Plant Component
@@ -799,10 +837,9 @@ TEST_F(EnergyPlusFixture, Debug_EMSLogic)
     EXPECT_NEAR(state->dataLoopNodes->Node(1).TempSetPoint, 1.0, 0.0000001);
 }
 
-TEST_F(EnergyPlusFixture, TestAnyRanArgument)
+TEST_F(EnergyPlusFixture, ReadOnlyErlProgramDoesNotCountAsRanAtHVACIterationLoop)
 {
-    // small test to demonstrate new boolean argument.
-    // shows a simple way to setup sensor on a node, need to call SetupNodeVarsForReporting()
+    // Reading a sensor and writing a local Erl variable must not request extra HVAC iterations. An executed actuator SET must request them.
 
     std::string const idf_objects = delimited_string({
 
@@ -813,6 +850,12 @@ TEST_F(EnergyPlusFixture, TestAnyRanArgument)
         "Test node,",
         "System Node Mass Flow Rate;",
 
+        "EnergyManagementSystem:Actuator,",
+        "TempSetpoint,          !- Name",
+        "Test node,             !- Actuated Component Unique Name",
+        "System Node Setpoint,  !- Actuated Component Type",
+        "Temperature Setpoint;  !- Actuated Component Control Type",
+
         "EnergyManagementSystem:ProgramCallingManager,",
         "Test inside HVAC system iteration Loop,",
         "InsideHVACSystemIterationLoop,",
@@ -820,7 +863,10 @@ TEST_F(EnergyPlusFixture, TestAnyRanArgument)
 
         "EnergyManagementSystem:Program,",
         "Test_InsideHVACSystemIterationLoop,",
-        "set dumm1 = Node_mdot;",
+        "set dumm1 = Node_mdot,",
+        "if Node_mdot > 0,",
+        "  set TempSetpoint = 20.0,",
+        "endif;",
 
     });
 
@@ -841,7 +887,12 @@ TEST_F(EnergyPlusFixture, TestAnyRanArgument)
     EXPECT_FALSE(anyRan);
 
     EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan, ObjexxFCL::Optional_int_const());
+    EXPECT_FALSE(anyRan);
+
+    state->dataLoopNodes->Node(1).MassFlowRate = 1.0;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan, ObjexxFCL::Optional_int_const());
     EXPECT_TRUE(anyRan);
+    EXPECT_DOUBLE_EQ(20.0, state->dataLoopNodes->Node(1).TempSetPoint);
 }
 
 TEST_F(EnergyPlusFixture, TestUnInitializedEMSVariable1)
@@ -1294,7 +1345,7 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
 
     bool anyRan;
     EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::HVACIterationLoop, anyRan, ObjexxFCL::Optional_int_const());
-    EXPECT_TRUE(anyRan);
+    EXPECT_FALSE(anyRan);
 
     for (int i = 1; i <= 6; ++i) {
         state->dataRuntimeLang->TrendVariable(i).TrendValARR(1) = 1.1; // initialize history for trend variables
@@ -1307,7 +1358,7 @@ TEST_F(EnergyPlusFixture, EMSManager_TestFuntionCall)
                           EMSManager::EMSCallFrom::HVACIterationLoop,
                           anyRan,
                           ObjexxFCL::Optional_int_const()); // process trend functions again using above data
-    EXPECT_TRUE(anyRan);
+    EXPECT_FALSE(anyRan);
 
     int offset = 28; // first 27 values in ErlExpression() are constant and built-in variables
     EXPECT_ENUM_EQ(state->dataRuntimeLang->ErlExpression(1).Operator, ErlFunc::Round);

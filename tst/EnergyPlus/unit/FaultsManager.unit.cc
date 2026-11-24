@@ -114,8 +114,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_FaultFoulingAirFilters_CheckFaultyAirFil
     state->dataFans->fanMap.insert_or_assign(fan1->Name, state->dataFans->fans.size());
 
     auto &fault1 = state->dataFaultsMgr->FaultsFouledAirFilters(1);
-    fault1.fanName = "FAN_1";
-    fault1.fanNum = Fans::GetFanIndex(*state, fault1.fanName);
+    fault1.fanNum = Fans::GetFanIndex(*state, "FAN_1");
     fault1.fanCurveNum = 1;
 
     auto *fan2 = new Fans::FanComponent;
@@ -128,8 +127,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_FaultFoulingAirFilters_CheckFaultyAirFil
     state->dataFans->fanMap.insert_or_assign(fan2->Name, state->dataFans->fans.size());
 
     auto &fault2 = state->dataFaultsMgr->FaultsFouledAirFilters(2);
-    fault2.fanName = "FAN_2";
-    fault2.fanNum = Fans::GetFanIndex(*state, fault2.fanName);
+    fault2.fanNum = Fans::GetFanIndex(*state, "FAN_2");
     fault2.fanCurveNum = 1;
 
     // Run and Check
@@ -455,7 +453,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_FaultChillerSWTSensor_CalFaultChillerSWT
     FaultyChillerSWTOffset = 0;
     FaultChiller.CalFaultChillerSWT(FlagVariableFlow, FaultyChillerSWTOffset, Cp, EvapInletTemp, EvapOutletTemp_1, EvapMassFlowRate_1, QEvaporator_1);
     EXPECT_EQ(1, EvapOutletTemp_1 / EvapOutletTemp);
-    EXPECT_EQ(1, QEvaporator_1 / QEvaporator);
+    EXPECT_DOUBLE_EQ(1, QEvaporator_1 / QEvaporator);
 
     // 2) offset is 2C
     Real64 EvapOutletTemp_2 = EvapOutletTemp;     // Chiller evaporator outlet water temperature
@@ -880,9 +878,6 @@ TEST_F(EnergyPlusFixture, FaultsManager_FoulingCoil_AssignmentAndCalc)
         EXPECT_NEAR(6.64, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.0001);
         EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::CoilWaterSimpleHeating, state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType);
 
-        EXPECT_EQ(CoilNum, state->dataFaultsMgr->FouledCoils(FaultIndex).FouledCoilNum);
-        EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::CoilWaterSimpleHeating, state->dataFaultsMgr->FouledCoils(FaultIndex).FouledCoilType);
-
         EXPECT_TRUE(state->dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingFlag);
         EXPECT_EQ(FaultIndex, state->dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingIndex);
 
@@ -906,9 +901,6 @@ TEST_F(EnergyPlusFixture, FaultsManager_FoulingCoil_AssignmentAndCalc)
         int FaultIndex = 2;
         EXPECT_EQ("AHU CHW COOLING COIL", state->dataWaterCoils->WaterCoil(CoilNum).Name);
         EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::CoilWaterCooling, state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType);
-
-        EXPECT_EQ(CoilNum, state->dataFaultsMgr->FouledCoils(FaultIndex).FouledCoilNum);
-        EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::CoilWaterCooling, state->dataFaultsMgr->FouledCoils(FaultIndex).FouledCoilType);
 
         EXPECT_TRUE(state->dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingFlag);
         EXPECT_EQ(FaultIndex, state->dataWaterCoils->WaterCoil(CoilNum).FaultyCoilFoulingIndex);

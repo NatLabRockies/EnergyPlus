@@ -77,6 +77,7 @@ namespace MixerComponent {
         Real64 OutletMassFlowRateMaxAvail; // [kg/Sec]
         Real64 OutletMassFlowRateMinAvail; // [kg/Sec]
         bool InitFlag;
+        bool InletFlowFracResetAtBeginEnv;
         int NumInletNodes;
         Array1D_int InletNode;
         Array1D<Real64> InletMassFlowRate;
@@ -86,11 +87,12 @@ namespace MixerComponent {
         Array1D<Real64> InletHumRat;
         Array1D<Real64> InletEnthalpy;
         Array1D<Real64> InletPressure;
+        Array1D<Real64> InletFlowFraction;
 
         // Default Constructor
         MixerConditions()
             : OutletTemp(0.0), OutletHumRat(0.0), OutletEnthalpy(0.0), OutletPressure(0.0), OutletNode(0), OutletMassFlowRate(0.0),
-              OutletMassFlowRateMaxAvail(0.0), OutletMassFlowRateMinAvail(0.0), InitFlag(false), NumInletNodes(0)
+              OutletMassFlowRateMaxAvail(0.0), OutletMassFlowRateMinAvail(0.0), InitFlag(false), InletFlowFracResetAtBeginEnv(true), NumInletNodes(0)
         {
         }
     };

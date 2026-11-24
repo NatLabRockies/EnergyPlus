@@ -336,8 +336,6 @@ namespace RoomAir {
                 ErrorsFound = true;
             }
 
-            airPatternZoneInfo.ZoneID = ZoneNum;
-
             //   figure number of surfaces for this zone
             airPatternZoneInfo.totNumSurfs = 0;
             for (int spaceNum : state.dataHeatBal->Zone(ZoneNum).spaceIndexes) {
@@ -578,7 +576,6 @@ namespace RoomAir {
                     ErrorsFound = true;
                 }
             }
-            roomAirPattern.MapPatrn.NumSurfs = NumPairs;
         }
 
         if (state.dataErrTracking->TotalRoomAirPatternTooLow > 0) {
@@ -1328,11 +1325,8 @@ namespace RoomAir {
             }
 
             auto &roomAFNZoneInfo = state.dataRoomAir->AFNZoneInfo(ZoneNum);
-            roomAFNZoneInfo.ZoneID = ZoneNum;
             roomAFNZoneInfo.IsUsed = true;
             roomAFNZoneInfo.Name = ipsc->cAlphaArgs(1);
-            roomAFNZoneInfo.ZoneName = ipsc->cAlphaArgs(2); // Zone Name
-
             roomAFNZoneInfo.NumOfAirNodes = (NumAlphas - 3);
 
             if (roomAFNZoneInfo.NumOfAirNodes > 0) {
@@ -1403,8 +1397,6 @@ namespace RoomAir {
             }
             if (!ipsc->lAlphaFieldBlanks(4)) {
                 roomAFNZoneNode.NodeIntGainsListName = ipsc->cAlphaArgs(4);
-            } else {
-                roomAFNZoneNode.HasIntGainsAssigned = false;
             }
             if (!ipsc->lAlphaFieldBlanks(5)) {
                 roomAFNZoneNode.NodeHVACListName = ipsc->cAlphaArgs(5);
@@ -1557,7 +1549,6 @@ namespace RoomAir {
                 roomAFNZoneNode.IntGainsDeviceIndices.allocate(maxNumGains);
                 roomAFNZoneNode.intGainsDeviceSpaces.allocate(maxNumGains);
                 roomAFNZoneNode.IntGainsFractions.allocate(maxNumGains);
-                roomAFNZoneNode.HasIntGainsAssigned = true;
                 int numGainsFound = 0;
                 for (int gainsLoop = 1; gainsLoop <= numInputGains; ++gainsLoop) {
                     auto &intGain = roomAFNZoneNode.IntGain(gainsLoop);

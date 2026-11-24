@@ -82,9 +82,7 @@ namespace HVACInterfaceManager {
     struct CommonPipeData
     {
         // Members
-        DataPlant::CommonPipeType CommonPipeType = DataPlant::CommonPipeType::No; // type of common pipe used if any
         FlowType SupplySideInletPumpType = FlowType::Invalid;
-        FlowType DemandSideInletPumpType = FlowType::Invalid;
         // Following report variables are used in uncontrolled common pipe
         int FlowDir = 0;   // Direction in which flow is in Common Pipe
         Real64 Flow = 0.0; // Flow in the Common Pipe

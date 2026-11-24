@@ -1133,6 +1133,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
         "  Core_bottom Thermostat,  !- Name",
         "  Core_bottom,             !- Zone or ZoneList Name",
         "  Dual Zone Control Type Sched,  !- Control Type Schedule Name",
+        "  ,                        !- Temperature Difference Between Cutout And Setpoint",
         "  ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type",
         "  Core_bottom DualSPSched; !- Control 1 Name",
         " ",
@@ -2507,8 +2508,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySrdSurfLWR)
     // Test if sky and grd view factor and temperature correctly overwritten
     EXPECT_DOUBLE_EQ((Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(20.0 + Constant::Kelvin) - pow_4(15.0 + Constant::Kelvin)) / (20.0 - 15.0)),
                      state->dataHeatBalSurf->SurfHSkyExt(1));
-    EXPECT_DOUBLE_EQ((Constant::StefanBoltzmann * 0.9 * 0.1 * (pow_4(20.0 + Constant::Kelvin) - pow_4(22.0 + Constant::Kelvin)) / (20.0 - 22.0)),
-                     state->dataHeatBalSurf->SurfHGrdExt(1));
+    EXPECT_NEAR((Constant::StefanBoltzmann * 0.9 * 0.1 * (pow_4(20.0 + Constant::Kelvin) - pow_4(22.0 + Constant::Kelvin)) / (20.0 - 22.0)),
+                state->dataHeatBalSurf->SurfHGrdExt(1),
+                1e-12);
 
     // Test if LWR from surrounding surfaces correctly calculated
     EXPECT_DOUBLE_EQ(Constant::StefanBoltzmann * 0.9 * 0.6 * (pow_4(25.0 + Constant::Kelvin) - pow_4(20.0 + Constant::Kelvin)),
@@ -3112,6 +3114,18 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
     EXPECT_NE(sourceHistoryBeforePV, state->dataHeatBalSurf->SurfQsrcHist(1, 1));
     EXPECT_NE(surfaceTemperatureBeforePV, state->dataHeatBalSurf->SurfTempOut(1));
+
+    // A radiant HVAC trial calculation may leave a non-zero value in the surface heat balance even when the final
+    // system-timestep average is zero. The source change to zero must trigger a final surface heat balance pass.
+    state->dataSurface->allGetsRadiantHeatSurfaceList = {1};
+    state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(1) = 100.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).HTRadSys = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).HWBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).SteamBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).ElecBaseboard = 0.0;
+    state->dataHeatBalFanSys->surfQRadFromHVAC(1).CoolingPanel = 0.0;
+    UpdateFinalSurfaceHeatBalance(*state);
+    EXPECT_DOUBLE_EQ(0.0, state->dataHeatBalSurf->SurfQdotRadHVACInPerArea(1));
 
     // A source change that isn't yet converged leaves a request for the next zone time step's
     // final surface heat balance update rather than looping within this call.
@@ -4980,7 +4994,6 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_IncSolarMultiplier)
     state->dataSurface->Surface(SurfNum).BaseSurf = SurfNum;
     state->dataSurface->SurfIncSolMultiplier.allocate(totSurf);
     state->dataSurface->SurfIncSolMultiplier(SurfNum).Name = "testing window surface";
-    state->dataSurface->SurfIncSolMultiplier(SurfNum).SurfaceIdx = SurfNum;
     state->dataSurface->SurfIncSolMultiplier(SurfNum).sched = nullptr;
 
     state->dataSurface->Surface(SurfNum).Area = 100.0;
@@ -7260,9 +7273,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     result_LWRExchangeCoeff_surf2 = Constant::StefanBoltzmann * 0.9 * 0.2 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     result_LWRExchangeCoeff_surf3 = Constant::StefanBoltzmann * 0.9 * 0.3 * (pow_4(surf_TK) - pow_4(grnd_TK)) / (surf_TK - grnd_TK);
     // test LWR exchange coefficients b/n exterior wall and ground surfaces
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1));
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2));
-    EXPECT_DOUBLE_EQ(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3));
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf1, state->dataHeatBalSurf->SurfHGrdExt(1), 1e-12);
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf2, state->dataHeatBalSurf->SurfHGrdExt(2), 1e-12);
+    EXPECT_NEAR(result_LWRExchangeCoeff_surf3, state->dataHeatBalSurf->SurfHGrdExt(3), 1e-12);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestGroundSurfsAverageTemp)

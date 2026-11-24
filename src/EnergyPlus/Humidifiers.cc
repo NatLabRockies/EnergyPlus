@@ -238,14 +238,12 @@ namespace Humidifiers {
 
         // Update Nums in state and make local convenience copies
         CurrentModuleObject = "Humidifier:Steam:Electric";
-        int NumElecSteamHums = state.dataHumidifiers->NumElecSteamHums =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
+        int NumElecSteamHums = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
         state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
         MaxNums = NumNumbers;
         MaxAlphas = NumAlphas;
         CurrentModuleObject = "Humidifier:Steam:Gas";
-        int NumGasSteamHums = state.dataHumidifiers->NumGasSteamHums =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
+        int NumGasSteamHums = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, CurrentModuleObject);
         int NumHumidifiers = state.dataHumidifiers->NumHumidifiers = NumElecSteamHums + NumGasSteamHums;
         state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, TotalArgs, NumAlphas, NumNumbers);
         MaxNums = max(MaxNums, NumNumbers);
@@ -647,10 +645,6 @@ namespace Humidifiers {
                 }
             }
             MySetPointCheckFlag = false;
-        }
-
-        if (!state.dataGlobal->BeginEnvrnFlag) {
-            MyEnvrnFlag = true;
         }
 
         // do these initializations every HVAC time step

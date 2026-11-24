@@ -92,7 +92,6 @@ namespace InternalHeatGains {
         // Members
         std::string Name;
         bool ZoneListActive = false;
-        int spaceOrSpaceListPtr = 0;
         int numOfSpaces = 0;
         int spaceStartPtr = 0;
         bool spaceListActive = false;
@@ -227,6 +226,10 @@ namespace InternalHeatGains {
     void CheckReturnAirHeatGain(EnergyPlusData &state);
 
     void CalcZoneITEq(EnergyPlusData &state);
+
+    void CalcZoneITEqLiquidCooled(EnergyPlusData &state);
+
+    Real64 GetITEColdPlateDesignLoadPerPlate(EnergyPlusData &state, std::string const &coilName);
 
     void ReportInternalHeatGains(EnergyPlusData &state);
 

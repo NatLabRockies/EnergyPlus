@@ -725,7 +725,6 @@ void GshpSpecs::InitWatertoWaterHP(EnergyPlusData &state,
         this->reportSourceSideMassFlowRate = 0.0;
         this->reportSourceSideInletTemp = 0.0;
         this->reportSourceSideOutletTemp = 0.0;
-        this->IsOn = false;
         this->MustRun = true;
 
         if (this->WWHPType == DataPlant::PlantEquipmentType::HPWaterEFHeating) {
@@ -758,13 +757,10 @@ void GshpSpecs::InitWatertoWaterHP(EnergyPlusData &state,
 
     if (MyLoad > 0.0 && GSHPTypeNum == DataPlant::PlantEquipmentType::HPWaterEFHeating) {
         this->MustRun = true;
-        this->IsOn = true;
     } else if (MyLoad < 0.0 && GSHPTypeNum == DataPlant::PlantEquipmentType::HPWaterEFCooling) {
         this->MustRun = true;
-        this->IsOn = true;
     } else {
         this->MustRun = false;
-        this->IsOn = false;
     }
 
     //*******Set flow based on "flowlock" and "run" flags**********

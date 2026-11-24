@@ -142,13 +142,19 @@ where
 
 \emph{V}~ = Local wind speed {[}m/s{]}
 
-If the user specifies ``Autocalculate'' for the Opening Effectiveness input field, the opening effectiveness is calculated for each simulation time step based on the angle between the actual wind direction and the Effective Angle (a user-defined input) using the following equation:
+If the user specifies ``Autocalculate'' for the Opening Effectiveness input field, the opening effectiveness is calculated for each simulation time step based on the angle between the actual wind direction and the Effective Angle (a user-defined input). The angle between the two directions is taken between 0 and 180 degrees:
 
 \begin{equation}
-{C_w} = 0.55 - \frac{{\left| {EffectiveAngle - WindDirection} \right|}}{{180}}*0.25
+\Delta\theta = 180 - \left| {\left| {WindDirection - EffectiveAngle} \right| - 180} \right|
 \end{equation}
 
-The difference \textbar{}EffectiveAngle -- WindDirection\textbar{} should be between 0 and 180 degrees. If the difference \textbar{}EffectivAngle -- WindDirection\textbar{} is greater than 180, the difference is reset to be minus 180 degrees. This equation is a linear interpolation using the values recommended by the 2009 ASHRAE Handbook of Fundamentals (page 16.13): 0.5 to 0.6 for perpendicular winds and 0.25 to 0.35 for diagonal winds.
+The opening effectiveness is then
+
+\begin{equation}
+{C_w} = \left\{ \begin{array}{ll} 0.55 - 0.25\,\frac{{\Delta\theta}}{{45}}, & \Delta\theta \le 90 \\ 0, & \Delta\theta > 90 \end{array}\right.
+\end{equation}
+
+This is a linear interpolation using the values recommended by the 2009 ASHRAE Handbook of Fundamentals (page 16.13): 0.5 to 0.6 for perpendicular winds and 0.25 to 0.35 for diagonal winds, that is 0.55 for wind blowing straight onto the opening ($\Delta\theta$ = 0) and 0.3 for diagonal wind ($\Delta\theta$ = 45 degrees). The same slope is continued to 0.05 for wind parallel to the opening ($\Delta\theta$ = 90 degrees). For wind from the other side of the building ($\Delta\theta$ greater than 90 degrees) the opening effectiveness is zero.
 
 The equation used for calculating the ventilation rate due to stack effect is given by Equation 38 in Chapter 16 of the 2009 ASHRAE Handbook of Fundamentals:
 

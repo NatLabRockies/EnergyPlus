@@ -272,7 +272,6 @@ namespace HVACCooledBeam {
 
             CoolBeam(CBNum).Name = Alphas(1);
             CoolBeam(CBNum).UnitType = CurrentModuleObject;
-            CoolBeam(CBNum).UnitType_Num = 1;
             CoolBeam(CBNum).CBTypeString = Alphas(3);
             if (Util::SameString(CoolBeam(CBNum).CBTypeString, "Passive")) {
                 CoolBeam(CBNum).CBType = CooledBeamType::Passive;
@@ -974,7 +973,6 @@ namespace HVACCooledBeam {
         } else {
             coolBeam.SupAirHeatingRate = QSup;
         }
-        coolBeam.CoolWaterMassFlow = state.dataLoopNodes->Node(ControlNode).MassFlowRate;
         coolBeam.TWOut = TWOut;
         coolBeam.EnthWaterOut = state.dataLoopNodes->Node(ControlNode).Enthalpy + coolBeam.BeamCoolingRate;
         //  Node(ControlNode)%MassFlowRate = CWFlow

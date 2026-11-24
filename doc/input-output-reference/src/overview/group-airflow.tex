@@ -865,7 +865,7 @@ This field is the name of the schedule (ref: Schedule) which modifies the Openin
 
 \paragraph{Field: Opening Effectiveness}\label{field-opening-effectiveness}
 
-This field is the opening effectiveness (C\(_{w}\)). The value must be between 0.0 and 1.0 or the value can be autocalculated. If a real value is input, that constant value will be used in the calculations. Otherwise, this field can be left blank (default = Autocalculate) or the user can input \textbf{Autocalculate.} Based on recommended values provided in Chapter 16 of the 2009 ASHRAE Handbook of Fundamentals, C\(_{w}\) = 0.55 for perpendicular winds and C\(_{w}\) = 0.3 for diagonal winds. For Autocalculate, any angles between perpendicular and diagonal are linearly interpolated between 0.3 and 0.55 by the model.
+This field is the opening effectiveness (C\(_{w}\)). The value must be between 0.0 and 1.0 or the value can be autocalculated. If a real value is input, that constant value will be used in the calculations. Otherwise, this field can be left blank (default = Autocalculate) or the user can input \textbf{Autocalculate.} Based on recommended values provided in Chapter 16 of the 2009 ASHRAE Handbook of Fundamentals, C\(_{w}\) = 0.55 for perpendicular winds and C\(_{w}\) = 0.3 for diagonal winds. For Autocalculate, C\(_{w}\) is interpolated linearly in the angle between the wind direction and the Effective Angle: 0.55 at 0 degrees and 0.3 at 45 degrees. The same slope continues to 0.05 at 90 degrees (wind parallel to the opening), and C\(_{w}\) is 0 when the angle is greater than 90 degrees (wind from the other side). See the Engineering Reference for the equation.
 
 \paragraph{Field: Effective Angle}\label{field-effective-angle}
 

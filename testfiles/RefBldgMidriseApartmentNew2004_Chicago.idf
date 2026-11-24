@@ -9383,6 +9383,7 @@
     G Corridor Thermostat,   !- Name
     G Corridor,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G Corridor DualSPSched;  !- Control 1 Name
 
@@ -9390,6 +9391,7 @@
     G N1 Apartment Thermostat,  !- Name
     G N1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G N1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9397,6 +9399,7 @@
     G N2 Apartment Thermostat,  !- Name
     G N2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G N2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9404,6 +9407,7 @@
     G NE Apartment Thermostat,  !- Name
     G NE Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G NE Apartment DualSPSched;  !- Control 1 Name
 
@@ -9411,6 +9415,7 @@
     G NW Apartment Thermostat,  !- Name
     G NW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G NW Apartment DualSPSched;  !- Control 1 Name
 
@@ -9418,6 +9423,7 @@
     G S1 Apartment Thermostat,  !- Name
     G S1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G S1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9425,6 +9431,7 @@
     G S2 Apartment Thermostat,  !- Name
     G S2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G S2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9432,6 +9439,7 @@
     G SW Apartment Thermostat,  !- Name
     G SW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     G SW Apartment DualSPSched;  !- Control 1 Name
 
@@ -9439,6 +9447,7 @@
     M Corridor Thermostat,   !- Name
     M Corridor,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M Corridor DualSPSched;  !- Control 1 Name
 
@@ -9446,6 +9455,7 @@
     M N1 Apartment Thermostat,  !- Name
     M N1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M N1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9453,6 +9463,7 @@
     M N2 Apartment Thermostat,  !- Name
     M N2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M N2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9460,6 +9471,7 @@
     M NE Apartment Thermostat,  !- Name
     M NE Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M NE Apartment DualSPSched;  !- Control 1 Name
 
@@ -9467,6 +9479,7 @@
     M NW Apartment Thermostat,  !- Name
     M NW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M NW Apartment DualSPSched;  !- Control 1 Name
 
@@ -9474,6 +9487,7 @@
     M S1 Apartment Thermostat,  !- Name
     M S1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M S1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9481,6 +9495,7 @@
     M S2 Apartment Thermostat,  !- Name
     M S2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M S2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9488,6 +9503,7 @@
     M SE Apartment Thermostat,  !- Name
     M SE Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M SE Apartment DualSPSched;  !- Control 1 Name
 
@@ -9495,6 +9511,7 @@
     M SW Apartment Thermostat,  !- Name
     M SW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     M SW Apartment DualSPSched;  !- Control 1 Name
 
@@ -9502,6 +9519,7 @@
     Office Thermostat,       !- Name
     Office,                  !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     Office DualSPSched;      !- Control 1 Name
 
@@ -9509,6 +9527,7 @@
     T Corridor Thermostat,   !- Name
     T Corridor,              !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T Corridor DualSPSched;  !- Control 1 Name
 
@@ -9516,6 +9535,7 @@
     T N1 Apartment Thermostat,  !- Name
     T N1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T N1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9523,6 +9543,7 @@
     T N2 Apartment Thermostat,  !- Name
     T N2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T N2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9530,6 +9551,7 @@
     T NE Apartment Thermostat,  !- Name
     T NE Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T NE Apartment DualSPSched;  !- Control 1 Name
 
@@ -9537,6 +9559,7 @@
     T NW Apartment Thermostat,  !- Name
     T NW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T NW Apartment DualSPSched;  !- Control 1 Name
 
@@ -9544,6 +9567,7 @@
     T S1 Apartment Thermostat,  !- Name
     T S1 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T S1 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9551,6 +9575,7 @@
     T S2 Apartment Thermostat,  !- Name
     T S2 Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T S2 Apartment DualSPSched;  !- Control 1 Name
 
@@ -9558,6 +9583,7 @@
     T SE Apartment Thermostat,  !- Name
     T SE Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T SE Apartment DualSPSched;  !- Control 1 Name
 
@@ -9565,6 +9591,7 @@
     T SW Apartment Thermostat,  !- Name
     T SW Apartment,          !- Zone or ZoneList Name
     Dual Zone Control Type Sched,  !- Control Type Schedule Name
+    ,                        !- Temperature Difference Between Cutout And Setpoint {deltaC}
     ThermostatSetpoint:DualSetpoint,  !- Control 1 Object Type
     T SW Apartment DualSPSched;  !- Control 1 Name
 

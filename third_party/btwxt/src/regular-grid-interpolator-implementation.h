@@ -19,6 +19,16 @@ namespace Btwxt {
 
 enum class Method { undefined, constant, linear, cubic };
 
+inline Method to_method(InterpolationMethod method)
+{
+    return method == InterpolationMethod::cubic ? Method::cubic : Method::linear;
+}
+
+inline Method to_method(ExtrapolationMethod method)
+{
+    return method == ExtrapolationMethod::linear ? Method::linear : Method::constant;
+}
+
 class RegularGridInterpolatorImplementation {
   public:
     RegularGridInterpolatorImplementation() = default;
@@ -36,20 +46,50 @@ class RegularGridInterpolatorImplementation {
     void set_axis_interpolation_method(std::size_t axis_index, InterpolationMethod method)
     {
         check_axis_index(axis_index, "set axis interpolation method");
+        if (grid_axes[axis_index].get_interpolation_method() == method) {
+            return; // Unchanged: avoid recalculating (e.g. libtk205 sets methods before every lookup)
+        }
         grid_axes[axis_index].set_interpolation_method(method);
+        // The axis may override the request (e.g. cubic is reset to linear on a one-value axis)
+        const Method effective_method = to_method(grid_axes[axis_index].get_interpolation_method());
+        if (effective_method == interpolation_methods[axis_index]) {
+            return;
+        }
+        interpolation_methods[axis_index] = effective_method;
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     void set_axis_extrapolation_method(const std::size_t axis_index, ExtrapolationMethod method)
     {
         check_axis_index(axis_index, "set axis extrapolation method");
+        if (grid_axes[axis_index].get_extrapolation_method() == method) {
+            return; // Unchanged: avoid recalculating
+        }
         grid_axes[axis_index].set_extrapolation_method(method);
+        // The axis may override the request (e.g. linear is reset to constant on a one-value axis)
+        const Method effective_method = to_method(grid_axes[axis_index].get_extrapolation_method());
+        if (effective_method == extrapolation_methods[axis_index]) {
+            return;
+        }
+        extrapolation_methods[axis_index] = effective_method;
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     void set_axis_extrapolation_limits(const std::size_t axis_index,
                                        const std::pair<double, double>& limits)
     {
         check_axis_index(axis_index, "set axis extrapolation limits");
+        if (grid_axes[axis_index].get_extrapolation_limits() == limits) {
+            return; // Unchanged: avoid recalculating
+        }
         grid_axes[axis_index].set_extrapolation_limits(limits);
+        if (target_is_set) {
+            calculate_at_target();
+        }
     }
 
     // Public methods (mirrored)
@@ -59,9 +99,9 @@ class RegularGridInterpolatorImplementation {
 
     void clear_target();
 
-    [[nodiscard]] std::vector<double> get_results() const;
+    [[nodiscard]] const std::vector<double>& get_results() const;
 
-    std::vector<double> get_results(const std::vector<double>& target);
+    const std::vector<double>& get_results(const std::vector<double>& target);
 
     void normalize_grid_point_data_sets_at_target(double scalar = 1.0);
 
@@ -149,12 +189,19 @@ class RegularGridInterpolatorImplementation {
     const std::vector<double>& get_grid_point_data(const std::vector<std::size_t>& coordinates);
     const std::vector<double>& get_grid_point_data(std::size_t grid_point_index);
 
-    std::vector<double> get_grid_point_data_relative(const std::vector<std::size_t>& coordinates,
-                                                     const std::vector<short>& translation);
+    const std::vector<double>&
+    get_grid_point_data_relative(const std::vector<std::size_t>& coordinates,
+                                 const std::vector<short>& translation);
 
-    [[nodiscard]] std::vector<Method> get_interpolation_methods() const;
+    [[nodiscard]] const std::vector<Method>& get_interpolation_methods() const
+    {
+        return interpolation_methods;
+    }
 
-    [[nodiscard]] std::vector<Method> get_extrapolation_methods() const;
+    [[nodiscard]] const std::vector<Method>& get_extrapolation_methods() const
+    {
+        return extrapolation_methods;
+    }
 
     [[nodiscard]] std::size_t
     get_grid_point_index(const std::vector<std::size_t>& coordinates) const;
@@ -188,7 +235,9 @@ class RegularGridInterpolatorImplementation {
                                                     // is between its floor and ceiling axis values
     std::vector<TargetBoundsStatus>
         target_bounds_status; // for each axis, for deciding interpolation vs. extrapolation;
-    std::vector<Method> methods;
+    std::vector<Method> interpolation_methods; // Per-axis methods as set on the grid axes
+    std::vector<Method> extrapolation_methods; // Per-axis methods as set on the grid axes
+    std::vector<Method> methods; // Per-axis methods used at the current target
     std::vector<Method> previous_methods;
     std::vector<std::vector<short>> hypercube; // A minimal set of indices near the target needed to
                                                // perform interpolation calculations.
@@ -201,7 +250,6 @@ class RegularGridInterpolatorImplementation {
     std::vector<std::vector<double>> interpolation_coefficients;
     std::vector<std::vector<double>> cubic_slope_coefficients;
 
-    std::vector<std::vector<double>> hypercube_grid_point_data;
     std::vector<double> hypercube_weights;
 
     std::map<std::pair<std::size_t, std::size_t>, std::vector<std::vector<double>>> hypercube_cache;
@@ -216,6 +264,8 @@ class RegularGridInterpolatorImplementation {
 
     void set_axis_sizes();
 
+    void calculate_at_target();
+
     void calculate_floor_to_ceiling_fractions();
 
     void consolidate_methods();
@@ -224,7 +274,7 @@ class RegularGridInterpolatorImplementation {
 
     void set_hypercube(std::vector<Method> methods);
 
-    void set_hypercube_grid_point_data();
+    const std::vector<std::vector<double>>& get_hypercube_grid_point_data();
 
     void set_results();
 
