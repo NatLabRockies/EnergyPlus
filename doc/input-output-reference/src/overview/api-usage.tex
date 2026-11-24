@@ -2,7 +2,7 @@
 \section{Using EnergyPlus as a Library}\label{sec:api-usage}
 
 This section is specifically related to calling EnergyPlus as a function from other clients, including C programs and Python scripts.
-For information on using Python Plugins (Python EMS), see section~\ref{group-plugins}.
+For information on using Python Plugins (Python EMS), see section~\ref{group-python-plugins}.
 
 Since its birth, interacting with EnergyPlus has been essentially limited to creating an input file and calling on the EnergyPlus binary to run and produce results.
 For a long time, there has been a very small API made available to allow limited access to running a simulation from a client by calling a function, however, it was never widely publicized, and had significant issues.
@@ -212,7 +212,7 @@ In Python, the argv variable will have the filename as the first item in the lis
 
 The ``Data Exchange`` API allows for users to interact with simulation data.
 There are some functions in this API that are suitable only for Python Plugin workflows, and they will not be discussed here.
-For more information on using that workflow, see section~\ref{group-plugins}.
+For more information on using that workflow, see section~\ref{group-python-plugins}.
 For this API, five areas are available: variables, meters, ``internal'' variables, simulation parameters, and actuators.
 They are described in a language-agnostic sense first, then actual examples are provided in C and Python below.
 \begin{description}
