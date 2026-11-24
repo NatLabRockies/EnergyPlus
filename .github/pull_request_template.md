@@ -28,6 +28,7 @@ Pull request overview
    - [ ] Update ..\scripts\RunEPlus.bat
    - [ ] Update ..\src\EPLaunch\ MainModule.bas, epl-ui.frm, and epl.vbp (VersionComments)
    - [ ] Update ..\.github\workflows\energyplus.py
+- [ ] Disclose the use of any assistive tools
 
 ### Reviewer
 
@@ -43,3 +44,6 @@ Pull request overview
  - [ ] Check any new function arguments for performance impacts
  - [ ] Verify IDF naming conventions and styles, memos and notes and defaults
  - [ ] If new idf included, locally check the err file and other outputs
+
+### Authorship Disclosure
+If any assistive tools (coding agents, etc.) have been used to draft this pull request, please disclose them here. Failure to disclose may lead the rejection of the contribution.

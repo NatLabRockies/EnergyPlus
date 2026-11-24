@@ -54,6 +54,24 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: human_written
+    attributes:
+      label: Was this issue entirely human-written?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: textarea
+    id: authorship_disclosure
+    attributes:
+      label: Authorship Disclosure
+      description: If you answered "No" to "Was this issue entirely human-written?", describe any tools used in drafting this issue. Otherwise, enter "None".
+    validations:
+      required: true
+
   - type: input
     id: uh_helpdesk_link
     attributes:
