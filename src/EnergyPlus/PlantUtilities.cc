@@ -62,6 +62,7 @@
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Pumps.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -508,6 +509,40 @@ bool AnyPlantSplitterMixerLacksContinuity(EnergyPlusData &state)
                 Real64 const AbsDifference = std::abs(state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate - SumOutletFlow);
                 if (AbsDifference > DataPlant::CriteriaDelta_MassFlowRate) {
                     return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool AnyWaterToAirHeatPumpPlantFlowRequestUnmet(EnergyPlusData &state)
+{
+    // Water-to-air heat pump coils are simulated outside the plant loop. If the plant reduces the requested branch flow, the coil must be
+    // simulated again with plant flow locked so that its outlet state is based on the delivered flow. This includes zero delivered flow so that
+    // the coil shuts down and resets its outlet state and reported heat transfer.
+    for (int loopNum = 1; loopNum <= state.dataPlnt->TotNumLoops; ++loopNum) {
+        for (DataPlant::LoopSideLocation loopSide : DataPlant::LoopSideKeys) {
+            for (auto const &branch : state.dataPlnt->PlantLoop(loopNum).LoopSide(loopSide).Branch) {
+                for (auto const &comp : branch.Comp) {
+                    if (comp.compPtr != &state.dataPlantMgr->dummyPlantComponent) {
+                        continue;
+                    }
+                    switch (comp.Type) {
+                    case DataPlant::PlantEquipmentType::CoilWAHPHeatingEquationFit:
+                    case DataPlant::PlantEquipmentType::CoilWAHPCoolingEquationFit:
+                    case DataPlant::PlantEquipmentType::CoilWAHPHeatingParamEst:
+                    case DataPlant::PlantEquipmentType::CoilWAHPCoolingParamEst:
+                    case DataPlant::PlantEquipmentType::CoilVSWAHPHeatingEquationFit:
+                    case DataPlant::PlantEquipmentType::CoilVSWAHPCoolingEquationFit:
+                        break;
+                    default:
+                        continue;
+                    }
+                    auto const &inletNode = state.dataLoopNodes->Node(comp.NodeNumIn);
+                    if (inletNode.MassFlowRateRequest - inletNode.MassFlowRate > DataPlant::CriteriaDelta_MassFlowRate) {
+                        return true;
+                    }
                 }
             }
         }
