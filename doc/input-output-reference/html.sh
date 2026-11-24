@@ -14,6 +14,7 @@ pandoc --to=chunkedhtml \
   --standalone=true \
   --table-of-contents=true \
   --split-level=2 \
+  --chunk-template=%i.html \
   --output=chunked \
   --variable=home-url:../index.html \
   --template "$ASSETS/template_chunked.html" \

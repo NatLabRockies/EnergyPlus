@@ -50,6 +50,7 @@ execute_process(
           --standalone
           --table-of-contents
           --split-level=2
+          --chunk-template=%i.html
           --metadata=doc-class:${OUTNAME}
           --variable=home-url:${HTML_DOCS_HOME_URL}
           --output=${HTML_OUT_DIR}
