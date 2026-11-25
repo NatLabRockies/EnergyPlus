@@ -72,29 +72,28 @@
               <li class="nav-item">
                 <a class="nav-link" href="$home-url$">Home</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://github.com/NatLabRockies/EnergyPlus">GitHub</a>
-              </li>
-            $if(top.url)$
-              <li class="nav-item">
-                <a class="nav-link" href="$top.url$" accesskey="t" rel="top" title="$top.title$"><i class="bi bi-house-door"></i></a>
-              </li>
-            $endif$
-            $if(up.url)$
-              <li class="nav-item">
-                <a class="nav-link" href="$up.url$" accesskey="u" rel="up" title="$up.title$"><i class="bi bi-arrow-up"></i></a>
-              </li>
-            $endif$
-            $if(previous.url)$
-              <li class="nav-item">
-                <a class="nav-link" href="$previous.url$" accesskey="p" rel="previous" title="$previous.title$"><i class="bi bi-chevron-left"></i></a>
-              </li>
-            $endif$
-            $if(next.url)$
-              <li class="nav-item">
-                <a class="nav-link" href="$next.url$" accesskey="n" rel="next" title="$next.title$"><i class="bi bi-chevron-right"></i></a>
-              </li>
-            $endif$
+            </ul>
+
+            <!-- Previous/next page: right-aligned so they stay put whatever the breadcrumb length -->
+            <ul class="navbar-nav flex-row mb-2 mb-lg-0 me-lg-1">
+              $if(previous.url)$
+                <li class="nav-item">
+                  <a class="nav-link" href="$previous.url$" accesskey="p" rel="previous" title="$previous.title$"><i class="bi bi-chevron-left"></i></a>
+                </li>
+              $else$
+                <li class="nav-item">
+                  <span class="nav-link disabled" aria-disabled="true"><i class="bi bi-chevron-left"></i></span>
+                </li>
+              $endif$
+              $if(next.url)$
+                <li class="nav-item">
+                  <a class="nav-link" href="$next.url$" accesskey="n" rel="next" title="$next.title$"><i class="bi bi-chevron-right"></i></a>
+                </li>
+              $else$
+                <li class="nav-item">
+                  <span class="nav-link disabled" aria-disabled="true"><i class="bi bi-chevron-right"></i></span>
+                </li>
+              $endif$
             </ul>
 
             <!-- Search -->
@@ -103,6 +102,16 @@
               <span class="d-none d-lg-inline me-3">Search</span>
               <kbd class="d-none d-lg-inline ms-auto opacity-75">Ctrl K</kbd>
             </button>
+
+            <!-- External links, set apart from the documentation navigation -->
+            <div class="vr d-none d-lg-block mx-2 text-white"></div>
+            <ul class="navbar-nav mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" href="https://github.com/NatLabRockies/EnergyPlus" target="_blank" rel="noopener" title="EnergyPlus on GitHub (opens in a new tab)">
+                  <i class="bi bi-github me-1"></i>GitHub<i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                </a>
+              </li>
+            </ul>
 
           </div>
         </div>

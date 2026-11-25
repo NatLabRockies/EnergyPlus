@@ -64,7 +64,7 @@ by an equivalent LaTeX label) and identifiers containing whitespace.
 This script operates on the completed manual so it can resolve destinations
 across every generated chunk without guessing Pandoc's output filenames. It
 also adds subsection links to chapter landing pages, including chunks whose
-source would otherwise contain only a heading.
+source would otherwise contain only a heading, and a breadcrumb trail to every page.
 """
 
 from __future__ import annotations
@@ -136,6 +136,96 @@ def add_chapter_contents(html_directory: Path, contents: dict[Path, str]) -> int
     return contents_added
 
 
+# The template's "Home" navbar item, replaced by the breadcrumb trail
+HOME_ITEM_RE = re.compile(r'<li class="nav-item">\s*<a class="nav-link" href="([^"]*)">Home</a>\s*</li>')
+GUIDES_URL = "../index.html"
+# Shorter breadcrumb labels for long guide titles, keyed by the guide's output directory name.
+# The full title is kept in the tooltip.
+GUIDE_SHORT_TITLES = {
+    "external-interfaces-application-guide": "External Interfaces",
+    "input-output-reference": "I/O Reference",
+    "interface-developer": "Interface Developers",
+    "module-developer": "Module Developers",
+    "plant-application-guide": "Plant Applications",
+}
+
+
+def page_ancestors(sitemap: dict) -> dict[str, list[dict]]:
+    """Map each page file name to the chain of sitemap sections from the guide index down to that page."""
+    ancestors: dict[str, list[dict]] = {}
+
+    def walk(node: dict, chain: list[dict]) -> None:
+        section = node.get("section", {})
+        chain = chain + [section]
+        page = urlsplit(section.get("path", "")).path
+        # The first section seen for a page is the page's own heading; deeper ones are anchors within it
+        if page and page not in ancestors:
+            ancestors[page] = chain
+        for subsection in node.get("subsections", []):
+            walk(subsection, chain)
+
+    walk(sitemap, [])
+    return ancestors
+
+
+def add_breadcrumbs(html_directory: Path, contents: dict[Path, str]) -> int:
+    sitemap_path = html_directory / "sitemap.json"
+    if not sitemap_path.exists():
+        return 0
+
+    ancestors = page_ancestors(json.loads(sitemap_path.read_text(encoding="utf-8")))
+    added = 0
+    for path, source in contents.items():
+        chain = ancestors.get(path.name)
+        if not chain or 'aria-label="breadcrumb"' in source:
+            continue
+
+        home = HOME_ITEM_RE.search(source)
+        if not home:
+            continue
+
+        # (url, label, title, always_visible): on narrow screens only the guide and the current page are shown
+        items = [(home.group(1), "Home", "Home", False)]
+        # Locally the home link is the guides index itself, so only add it when it differs
+        if os.path.normpath(home.group(1)) != os.path.normpath(GUIDES_URL):
+            items.append((GUIDES_URL, "Guides", "Guides", False))
+        for depth, section in enumerate(chain):
+            url = urlsplit(section.get("path", "")).path
+            title = section.get("title", "")
+            label = GUIDE_SHORT_TITLES.get(html_directory.resolve().name, title) if depth == 0 else title
+            items.append((url, label, title, depth == 0 or depth == len(chain) - 1))
+
+        lines = []
+        for index, (url, label, title, always_visible) in enumerate(items):
+            label = html.escape(label)
+            title = html.escape(title)
+            classes = "breadcrumb-item" if always_visible else "breadcrumb-item d-none d-lg-flex"
+            if url == "index.html":
+                classes += " breadcrumb-guide"
+            if index == len(items) - 1:
+                # The current page links back to its own top
+                lines.append(
+                    f'<li class="{classes} active"><a href="#" aria-current="page" title="Back to top: {title}">{label}</a></li>'
+                )
+            else:
+                lines.append(
+                    f'<li class="{classes}"><a href="{html.escape(url, quote=True)}" title="{title}">{label}</a></li>'
+                )
+        breadcrumb = (
+            '<li class="nav-item d-flex align-items-center breadcrumb-nav-item">\n'
+            '                <nav aria-label="breadcrumb">\n'
+            '                  <ol class="breadcrumb mb-0">\n'
+            + "\n".join(f"                    {line}" for line in lines)
+            + "\n                  </ol>\n"
+            "                </nav>\n"
+            "              </li>"
+        )
+        contents[path] = source[: home.start()] + breadcrumb + source[home.end() :]
+        added += 1
+
+    return added
+
+
 def normalized_identifier(identifier: str) -> str:
     return re.sub(r"\s+", "-", identifier.strip())
 
@@ -156,6 +246,7 @@ def main() -> int:
     contents = {path: path.read_text(encoding="utf-8") for path in files}
 
     chapter_contents_added = add_chapter_contents(args.html_directory, contents)
+    breadcrumbs_added = add_breadcrumbs(args.html_directory, contents)
 
     identifier_renames: dict[str, str] = {}
     for source in contents.values():
@@ -236,6 +327,7 @@ def main() -> int:
     print(
         "Chunked HTML cleanup: "
         f"added contents to {chapter_contents_added} chapter pages, "
+        f"breadcrumbs to {breadcrumbs_added} pages, "
         f"normalized {ids_normalized} identifiers, "
         f"removed {duplicates_removed} duplicate identifiers, "
         f"and repaired {links_repaired} cross-chunk links"
