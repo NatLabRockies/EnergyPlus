@@ -9,7 +9,7 @@ At this point, a lot of EMS scripts are what would be called ``plugins'' in most
 As of version 9.3 of EnergyPlus, a new way to write these plugins, in the Python programming language was made available.
 
 Note: This functionality relies on some aspects of the EnergyPlus API for making calls into EnergyPlus when these plugins are running.
-A majority of the API is described in section~\ref{sec:api-usage}, and it is highly recommended that that section be read first, as this section will only focus on the differences, and additions.
+A majority of the API is described in section~\ref{api-usage}, and it is highly recommended that that section be read first, as this section will only focus on the differences, and additions.
 One point should be made perfectly clear.
 There are two Python-related ways of interacting with EnergyPlus.
 We can call these ``modes'', with each clarified here:
@@ -45,7 +45,7 @@ The user will then create a derived class that inherits this base class, and wri
 A minimal plugin does not actually have to interact with EnergyPlus.
 It is expected that essentially every plugin will at least read data from sensors or meters, or write data using actuators, but it is not necessary.
 Just like when calling EnergyPlus as a library, when operating in plugin mode, this data is accessed through the same API methods.
-To learn how to interact with the simulation API, see the API usage section:~\ref{sec:api-usage}.
+To learn how to interact with the simulation API, see the API usage section:~\ref{api-usage}.
 Consider this minimal plugin:
 
 \begin{lstlisting}
@@ -67,7 +67,7 @@ This skeleton captures the use of a plugin to do nothing, but still shows some i
 \textbf{NOTE!}  The functional form of the plugin methods changed due to an API change between versions 9.3 and 9.4.
 Any plugin files created using 9.3 will need to add a second argument to the methods.
 This same argument will need to be passed into any EnergyPlus API methods called during the plugin.
-Much more information can be found in the API usage section:~\ref{sec:api-usage}.
+Much more information can be found in the API usage section:~\ref{api-usage}.
 
 Several notes can be taken from this list.
 The name of the function matters, as it determines when the function will be called.
