@@ -138,7 +138,6 @@ def add_chapter_contents(html_directory: Path, contents: dict[Path, str]) -> int
 
 # The template's "Home" navbar item, replaced by the breadcrumb trail
 HOME_ITEM_RE = re.compile(r'<li class="nav-item">\s*<a class="nav-link" href="([^"]*)">Home</a>\s*</li>')
-GUIDES_URL = "../index.html"
 # Shorter breadcrumb labels for long guide titles, keyed by the guide's output directory name.
 # The full title is kept in the tooltip.
 GUIDE_SHORT_TITLES = {
@@ -186,9 +185,6 @@ def add_breadcrumbs(html_directory: Path, contents: dict[Path, str]) -> int:
 
         # (url, label, title, always_visible): on narrow screens only the guide and the current page are shown
         items = [(home.group(1), "Home", "Home", False)]
-        # Locally the home link is the guides index itself, so only add it when it differs
-        if os.path.normpath(home.group(1)) != os.path.normpath(GUIDES_URL):
-            items.append((GUIDES_URL, "Guides", "Guides", False))
         for depth, section in enumerate(chain):
             url = urlsplit(section.get("path", "")).path
             title = section.get("title", "")
