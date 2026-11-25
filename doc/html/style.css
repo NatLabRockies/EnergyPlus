@@ -349,3 +349,52 @@ table {
 	display: none;
     }
 }
+
+/* Breadcrumb trail in the navbar (added by fix_chunked_html.py) */
+.navbar .navbar-nav,
+.navbar .breadcrumb-nav-item,
+.navbar .breadcrumb {
+    min-width: 0;
+}
+
+.navbar .breadcrumb {
+    flex-wrap: nowrap;
+    --bs-breadcrumb-divider-color: rgba(var(--navbar-font-color), 0.6);
+    --bs-breadcrumb-item-active-color: rgba(var(--navbar-font-color), 1);
+    --bs-breadcrumb-divider: "›";
+}
+
+/* On narrow screens Home/Guides are hidden, so the guide is the first visible crumb */
+@media (max-width: 991.98px) {
+    .navbar .breadcrumb-guide::before {
+        content: none;
+    }
+}
+
+.navbar .breadcrumb-item > a {
+    display: inline-block;
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.navbar .breadcrumb-item > a {
+    color: rgba(var(--navbar-font-color), 0.85);
+    text-decoration: none;
+}
+
+.navbar .breadcrumb-item.active > a {
+    color: rgba(var(--navbar-font-color), 1);
+}
+
+.navbar .breadcrumb-item > a:hover {
+    color: rgba(var(--navbar-font-color), 1);
+    text-decoration: underline;
+}
+
+/* Placeholder for a missing previous/next page, so the arrows never shift */
+.navbar .nav-link.disabled {
+    color: rgba(var(--navbar-font-color), 0.35);
+}

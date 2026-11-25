@@ -48,6 +48,7 @@ macro( CREATE_HTML_DOC_TARGET SOURCE_FILENAME OUTPUT_DIRNAME )
             ${PROJECT_SOURCE_DIR}/html/bootstrap-tables.lua
             ${PROJECT_SOURCE_DIR}/html/numbered-cross-references.lua
             ${PROJECT_SOURCE_DIR}/html/object-index.lua
+            ${PROJECT_SOURCE_DIR}/html/title-page.lua
             ${PROJECT_SOURCE_DIR}/html/template_chunked.html
             ${PROJECT_SOURCE_DIR}/html/header.html
             ${PROJECT_SOURCE_DIR}/html/footer.html
