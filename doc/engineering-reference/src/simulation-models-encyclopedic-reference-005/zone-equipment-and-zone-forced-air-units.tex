@@ -2832,13 +2832,13 @@ The fan flow rate is either constant or variable depending on if the user input 
 The exhaust fan model is similar to, but simpler than, the models used for air system fans.~ The electric power calculation is simplified and uses a constant overall efficiency.
 
 \begin{equation}
-{\dot Q_{fan}} = \frac{{\dot m{\mathrm{}}\Delta P}}{{{e_{tot}}{\rho_{air}}}}
+{\dot Q_{fan}} = \frac{\dot m \Delta P}{e_{tot} \rho_{air}}
 \end{equation}
 
 All or a portion of the fan power is added to the air stream and the remainder is directed either outdoors or to a zone.~ The portion of the total fan power that is always added to the airstream is the mass flow rate of the air multiplied by the pressure rise divided by the air density.
 
 \begin{equation}
-{\dot Q_{fluid}} = \frac{{\dot m{\mathrm{}}\Delta P}}{{\rho_{air}}}}
+{\dot Q_{fluid}} = \frac{\dot m \Delta P}{\rho_{air}}
 \end{equation}
 
 The difference between the total fan power (Q,fan) and the power added to the airstream (Q,fluid) can either be directed outdoors or to a zone based on a user specified motor in airstream fraction. The motor in airstream fraction is constant and must be between 0 and 1 (default).
