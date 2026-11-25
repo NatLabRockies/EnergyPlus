@@ -24,6 +24,7 @@ pandoc --to=chunkedhtml \
   --include-after-body "$ASSETS/footer.html" \
   --lua-filter="$ASSETS/bootstrap-tables.lua" \
   --lua-filter="$ASSETS/object-index.lua" \
+  --lua-filter="$ASSETS/title-page.lua" \
   input-output-reference.tex
 
 # Build the search index from page, group, object, and field headings in the sitemap.

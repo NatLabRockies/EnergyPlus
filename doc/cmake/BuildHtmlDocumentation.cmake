@@ -61,6 +61,7 @@ execute_process(
           --lua-filter=${HTML_ASSETS_DIR}/bootstrap-tables.lua
           --lua-filter=${HTML_ASSETS_DIR}/numbered-cross-references.lua
           ${OBJECT_INDEX_FILTER}
+          --lua-filter=${HTML_ASSETS_DIR}/title-page.lua
           ${INNAME}.tex
   RESULT_VARIABLE ERRCODE
   COMMAND_ECHO ${COMMAND_ECHO_MODE}
